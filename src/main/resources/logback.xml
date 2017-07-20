@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds">
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="database" class="ch.qos.logback.classic.db.DBAppender">
+        <connectionSource class="ch.qos.logback.core.db.DataSourceConnectionSource">
+            <dataSource class="com.alibaba.druid.pool.DruidDataSource">
+                <driverClassName>com.mysql.cj.jdbc.Driver</driverClassName>
+                <url><![CDATA[jdbc:mysql://localhost:3306/hua-neng?serverTimezone=GMT%2B8&useSSL=true]]></url>
+                <username>root</username>
+                <password>root</password>
+            </dataSource>
+        </connectionSource>
+    </appender>
+
+    <appender name="async" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>512</queueSize>
+        <appender-ref ref="database"></appender-ref>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="console"></appender-ref>
+        <appender-ref ref="async"></appender-ref>
+    </root>
+</configuration>

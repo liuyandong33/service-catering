@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <settings>
+        <!-- 打印查询语句 -->
+        <setting name="logImpl" value="STDOUT_LOGGING"></setting>
+        <!--自定映射-->
+        <setting name="mapUnderscoreToCamelCase" value="true"></setting>
+        <setting name="callSettersOnNulls" value="true"></setting>
+    </settings>
+    <!--<typeAliases>-->
+        <!--<package name="erp.chain.domain"/>-->
+    <!--</typeAliases>-->
+    <!--<mappers>-->
+        <!--<package name="erp.chain.mapper"></package>-->
+        <!--&lt;!&ndash;<mapper resource="classpath:mapper/*Mapper.xml"/>&ndash;&gt;-->
+    <!--</mappers>-->
+</configuration>
