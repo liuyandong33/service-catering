@@ -19,14 +19,12 @@ apply plugin: "war"
 repositories {
     mavenLocal()
     maven {url "http://maven.aliyun.com/nexus/content/groups/public"}
+    maven {url "/Users/liuyandong/repositories/releases/"}
 }
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
-//    compile("org.springframework.boot:spring-boot-starter-security")
     compile("org.springframework.security:spring-security-taglibs:4.2.2.RELEASE")
-//    compile("org.springframework.security.oauth:spring-security-oauth2:2.0.7.RELEASE")
-//    compile("org.springframework.boot:spring-boot-starter-data-jpa")
     compile("org.springframework.boot:spring-boot-starter-actuator")
     compile("org.mybatis.spring.boot:mybatis-spring-boot-starter:1.3.0")
     compile("com.alibaba:druid:1.0.29")
@@ -38,15 +36,9 @@ dependencies {
     compile("com.google.code.gson:gson:2.8.0")
     compile("commons-codec:commons-codec:1.10")
     compile("org.springframework:spring-context-support")
-
-//    compile("org.slf4j:slf4j-log4j12:1.7.25")
     compile("redis.clients:jedis:2.9.0")
-
-//    compile("org.xerial:sqlite-jdbc:3.16.1")
-
     compile("org.quartz-scheduler:quartz:2.2.1")
-//    compile("org.quartz-scheduler:quartz-jobs:2.3.0")
-
     compile("org.apache.poi:poi-ooxml:3.16")
     compile("dom4j:dom4j:1.6.1")
+    compile("build.dream:saas-common:0.1.0")
 }
