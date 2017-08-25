@@ -41,11 +41,6 @@ public class DemoService {
             rows = "20";
         }
 
-        int pageNumber = Integer.valueOf(page);
-        int pageSize = Integer.valueOf(rows);
-
-        int start = (pageNumber - 1) * pageSize + 1;
-        int end = start + pageSize - 1;
-        return tenantMapper.findAll(start, end);
+        return tenantMapper.findAll(Integer.valueOf(page), Integer.valueOf(rows));
     }
 }

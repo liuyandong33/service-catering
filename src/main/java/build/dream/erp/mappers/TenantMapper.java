@@ -9,5 +9,5 @@ import java.util.List;
 @Mapper
 public interface TenantMapper {
     int insert(Tenant tenant);
-    List<build.dream.erp.domains.Tenant> findAll(@Param("start") int start, @Param("end") int end);
+    List<build.dream.erp.domains.Tenant> findAll(@Param("pageNumber") int pageNumber, @Param("pageSize") int pageSize);
 }

@@ -9,6 +9,8 @@
         <include refid="paginationHeader"></include>
         SELECT tenant.*, ROWNUM as row_num FROM tenant
         <include refid="paginationFooter"></include>
+        <!--SELECT * FROM tenant
+        <include refid="mysqlPaginationFooter"></include>-->
     </select>
 
     <select id="countAll" resultType="java.lang.Long">
@@ -20,6 +22,13 @@
     </sql>
 
     <sql id="paginationFooter">
+        <bind name="start" value="(pageNumber - 1) * pageSize + 1"></bind>
+        <bind name="end" value="start + pageSize - 1"></bind>
         ) WHERE row_num &gt;= #{start} AND row_num &lt;= #{end}
+    </sql>
+
+    <sql id="mysqlPaginationFooter">
+        <bind name="offset" value="(pageNumber - 1) * pageSize"></bind>
+        LIMIT #{offset}, #{pageSize}
     </sql>
 </mapper>
