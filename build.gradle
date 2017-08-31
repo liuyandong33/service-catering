@@ -37,11 +37,12 @@ dependencies {
     compile("com.google.code.gson:gson:2.8.0")
     compile("commons-codec:commons-codec:1.10")
 //    compile("org.springframework:spring-context-support")
-//    compile("redis.clients:jedis:2.9.0")
+    compile("redis.clients:jedis:2.9.0")
 //    compile("org.quartz-scheduler:quartz:2.2.1")
 //    compile("org.apache.poi:poi-ooxml:3.16")
 //    compile("dom4j:dom4j:1.6.1")
 //    compile("build.dream:saas-common:0.1.0")
     compile("org.apache.commons:commons-collections4:4.1")
     compile fileTree(include: ["*.jar"], dir: "libs")
+    compile("net.sf.json-lib:json-lib:2.4:jdk15")
 }
