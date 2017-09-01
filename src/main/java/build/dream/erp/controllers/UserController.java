@@ -1,6 +1,7 @@
 package build.dream.erp.controllers;
 
 import build.dream.common.api.ApiRest;
+import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
