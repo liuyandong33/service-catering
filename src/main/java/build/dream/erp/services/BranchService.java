@@ -5,6 +5,7 @@ import build.dream.common.erp.domains.Branch;
 import build.dream.common.utils.SerialNumberGenerator;
 import build.dream.erp.constants.Constants;
 import build.dream.erp.mappers.BranchMapper;
+import build.dream.erp.mappers.DataDefinitionMapper;
 import build.dream.erp.mappers.SequenceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,8 @@ public class BranchService {
     private BranchMapper branchMapper;
     @Autowired
     private SequenceMapper sequenceMapper;
+    @Autowired
+    private DataDefinitionMapper dataDefinitionMapper;
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest initializeBranch(BigInteger userId, BigInteger tenantId, String tenantCode) {
@@ -31,6 +34,9 @@ public class BranchService {
         branch.setTenantId(tenantId);
         branchMapper.insert(branch);
         branchMapper.insertMergeUserBranch(userId, tenantId, branch.getId());
+        dataDefinitionMapper.createTableWithTemplate("goods_" + tenantCode, Constants.GOODS_TABLE_TEMPLATE);
+        dataDefinitionMapper.createTableWithTemplate("sale_" + tenantCode, Constants.SALE_TABLE_TEMPLATE);
+
         ApiRest apiRest = new ApiRest();
         apiRest.setData(branch);
         apiRest.setClassName(Branch.class.getName());
