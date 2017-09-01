@@ -2,7 +2,6 @@ package build.dream.erp.services;
 
 import build.dream.common.api.ApiRest;
 import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.ProxyUtils;
 import build.dream.erp.constants.Constants;
 import org.apache.commons.lang.Validate;
@@ -21,13 +20,13 @@ public class UserService {
         Map<String, String> obtainUserInfoRequestParameters = new HashMap<String, String>();
         obtainUserInfoRequestParameters.put("loginName", loginName);
         String obtainUserInfoResult = ProxyUtils.doGetWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "user", "obtainUserInfo", obtainUserInfoRequestParameters);
-        ApiRest obtainUserInfoApiRest = GsonUtils.fromJson(obtainUserInfoResult, ApiRest.class);
+        ApiRest obtainUserInfoApiRest = ApiRest.fromJson(obtainUserInfoResult);
         Validate.isTrue(obtainUserInfoApiRest.isSuccessful(), obtainUserInfoApiRest.getError());
         Map<String, Object> obtainUserInfoApiRestData = (Map<String, Object>) obtainUserInfoApiRest.getData();
         Map<String, Object> userInfo = (Map<String, Object>) obtainUserInfoApiRestData.get("userInfo");
         Map<String, Object> tenantInfo = (Map<String, Object>) obtainUserInfoApiRestData.get("tenantInfo");
-        BigInteger userId = ApplicationHandler.getBigIntegerFromMap(userInfo, "id");
-        BigInteger tenantId = ApplicationHandler.getBigIntegerFromMap(tenantInfo, "id");
+        BigInteger userId = ApplicationHandler.obtainBigIntegerFromMap(userInfo, "id");
+        BigInteger tenantId = ApplicationHandler.obtainBigIntegerFromMap(tenantInfo, "id");
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("userInfo", userInfo);
