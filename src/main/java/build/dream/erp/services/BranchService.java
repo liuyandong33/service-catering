@@ -55,7 +55,7 @@ public class BranchService {
     public ApiRest listBranches(Map<String, String> parameters) {
         String tenantId = parameters.get("tenantId");
         Validate.notNull(tenantId, "参数(tenantId)不能为空！");
-        PagedSearchModel pagedSearchModel = new PagedSearchModel();
+        PagedSearchModel pagedSearchModel = new PagedSearchModel(true);
         pagedSearchModel.addSearchCondition("tenant_id", "=", BigInteger.valueOf(Long.valueOf(tenantId)));
         String name = parameters.get("name");
         if (StringUtils.isNotBlank(name)) {
@@ -71,6 +71,7 @@ public class BranchService {
         }
         pagedSearchModel.setOffsetAndMaxResults(Integer.valueOf(page), Integer.valueOf(rows));
         List<Branch> branches = branchMapper.findAll(pagedSearchModel);
+        long total = branchMapper.countBranches(pagedSearchModel);
         ApiRest apiRest = new ApiRest(branches, "查询门店列表成功！");
         return apiRest;
     }
@@ -82,7 +83,7 @@ public class BranchService {
 
         String branchId = parameters.get("branchId");
         Validate.notNull(branchId, "参数(branchId)不能为空！");
-        SearchModel searchModel = new SearchModel();
+        SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("id", "=", BigInteger.valueOf(Long.valueOf(branchId)));
         searchModel.addSearchCondition("tenant_id", "=", BigInteger.valueOf(Long.valueOf(tenantId)));
         Branch branch =  branchMapper.find(searchModel);

@@ -27,10 +27,14 @@
         INSERT INTO merge_user_branch(user_id, tenant_id, branch_id) VALUES (#{userId}, #{tenantId}, #{branchId})
     </insert>
 
-    <select id="findAll" parameterType="build.dream.common.utils.PagedSearchModel" resultType="build.dream.common.erp.domains.Branch">
-        SELECT * FROM branch <include refid="pagedSearchConditionSql"></include>
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.Branch">
+        SELECT * FROM branch <include refid="searchConditionSql"></include> <include refid="paginationSql"></include>
     </select>
-    
+
+    <select id="countBranches" parameterType="build.dream.common.utils.SearchModel" resultType="java.lang.Long">
+        SELECT COUNT(1) FROM branch <include refid="searchConditionSql"></include>
+    </select>
+
     <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.Branch">
         SELECT * FROM branch <include refid="searchConditionSql"></include>
     </select>
@@ -38,17 +42,21 @@
     <sql id="searchConditionSql">
         WHERE
         <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
-            ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
+            <choose>
+                <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
+                    ${searchCondition.columnName} ${searchCondition.operationSymbol}
+                    <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </when>
+                <otherwise>
+                    ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
+                </otherwise>
+            </choose>
         </foreach>
-        AND deleted = 0
     </sql>
 
-    <sql id="pagedSearchConditionSql">
-        WHERE
-        <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
-            ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
-        </foreach>
-        AND deleted = 0
+    <sql id="paginationSql">
         LIMIT #{offset}, #{maxResults}
     </sql>
 
@@ -60,5 +68,13 @@
         WHERE branch.tenant_id = #{tenantId}
         AND merge_user_branch.user_id = #{userId}
         AND branch.deleted = 0
+    </select>
+
+    <select id="findAllUserIds" parameterType="build.dream.common.utils.SearchModel" resultType="java.math.BigInteger">
+        SELECT user_id FROM merge_user_branch <include refid="searchConditionSql"></include> <include refid="paginationSql"></include>
+    </select>
+
+    <select id="countUsers" parameterType="build.dream.common.utils.SearchModel" resultType="java.lang.Long">
+        SELECT COUNT(1) FROM merge_user_branch <include refid="searchConditionSql"></include>
     </select>
 </mapper>
