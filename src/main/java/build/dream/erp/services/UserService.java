@@ -3,6 +3,7 @@ package build.dream.erp.services;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.domains.Branch;
 import build.dream.common.utils.ApplicationHandler;
+import build.dream.common.utils.ConfigurationUtils;
 import build.dream.common.utils.PagedSearchModel;
 import build.dream.common.utils.ProxyUtils;
 import build.dream.erp.constants.Constants;
@@ -37,11 +38,15 @@ public class UserService {
         BigInteger userId = ApplicationHandler.obtainBigIntegerFromMap(user, "id");
         BigInteger tenantId = ApplicationHandler.obtainBigIntegerFromMap(tenant, "id");
         Branch branch = branchMapper.findByUserIdAndTenantId(tenantId, userId);
+        String posApiServiceDomain = ConfigurationUtils.getConfiguration(Constants.SERVICE_NAME_APPAPI);
+        String appApiServiceDomain = ConfigurationUtils.getConfiguration(Constants.SERVICE_NAME_APPAPI);
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("user", user);
         data.put("tenant", tenant);
         data.put("branch", branch);
+        data.put("posApiServiceDomain", posApiServiceDomain);
+        data.put("appApiServiceDomain", appApiServiceDomain);
         ApiRest apiRest = new ApiRest();
         apiRest.setData(data);
         apiRest.setMessage("获取用户信息成功！");
