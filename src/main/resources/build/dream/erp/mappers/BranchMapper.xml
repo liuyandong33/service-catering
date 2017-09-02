@@ -26,4 +26,39 @@
     <insert id="insertMergeUserBranch">
         INSERT INTO merge_user_branch(user_id, tenant_id, branch_id) VALUES (#{userId}, #{tenantId}, #{branchId})
     </insert>
+
+    <select id="findAll" parameterType="build.dream.common.utils.PagedSearchModel" resultType="build.dream.common.erp.domains.Branch">
+        SELECT * FROM branch <include refid="pagedSearchConditionSql"></include>
+    </select>
+    
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.Branch">
+        SELECT * FROM branch <include refid="searchConditionSql"></include>
+    </select>
+
+    <sql id="searchConditionSql">
+        WHERE
+        <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
+            ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
+        </foreach>
+        AND deleted = 0
+    </sql>
+
+    <sql id="pagedSearchConditionSql">
+        WHERE
+        <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
+            ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
+        </foreach>
+        AND deleted = 0
+        LIMIT #{offset}, #{maxResults}
+    </sql>
+
+    <select id="findByUserIdAndTenantId" resultType="build.dream.common.erp.domains.Branch">
+        SELECT
+        branch.*
+        FROM branch
+        INNER JOIN merge_user_branch ON branch.id = merge_user_branch.branch_id AND branch.tenant_id = merge_user_branch.tenant_id
+        WHERE branch.tenant_id = #{tenantId}
+        AND merge_user_branch.user_id = #{userId}
+        AND branch.deleted = 0
+    </select>
 </mapper>

@@ -39,9 +39,35 @@ public class BranchController extends BasicController {
             apiRest = branchService.initializeBranch(BigInteger.valueOf(Long.valueOf(userId)), BigInteger.valueOf(Long.valueOf(tenantId)), tenantCode);
         } catch (Exception e) {
             LogUtils.error("初始化门店失败", controllerSimpleName, "initializeBranch", e, requestParameters);
-            apiRest = new ApiRest();
-            apiRest.setError(e.getMessage());
-            apiRest.setSuccessful(false);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/listBranches")
+    @ResponseBody
+    public String listBranches() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            apiRest = branchService.listBranches(requestParameters);
+        } catch (Exception e) {
+            LogUtils.error("查询门店列表失败", controllerSimpleName, "listBranches", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/findBranchInfo")
+    @ResponseBody
+    public String findBranchInfo() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            apiRest = branchService.findBranchInfo(requestParameters);
+        } catch (Exception e) {
+            LogUtils.error("查询门店失败", controllerSimpleName, "listBranches", e, requestParameters);
+            apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
     }

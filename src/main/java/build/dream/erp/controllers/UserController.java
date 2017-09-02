@@ -37,4 +37,20 @@ public class UserController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    @RequestMapping(value = "/listUsers")
+    @ResponseBody
+    public String listUsers() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            apiRest = userService.listUsers(requestParameters);
+        } catch (Exception e) {
+            LogUtils.error("查询员工列表失败", controllerSimpleName, "listUsers", e.getClass().getSimpleName(), e.getMessage(), requestParameters);
+            apiRest = new ApiRest();
+            apiRest.setError(e.getMessage());
+            apiRest.setSuccessful(false);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }
