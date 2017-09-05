@@ -8,6 +8,7 @@ import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.SystemPartitionUtils;
 import build.dream.erp.constants.Constants;
 import build.dream.erp.mappers.BranchMapper;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,5 +54,10 @@ public class ElemeService {
         }
         ApiRest apiRest = new ApiRest(data, "生成授权链接成功！");
         return apiRest;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest saveElemeOrder(BigInteger shopId, JSONObject message, Integer type) {
+        return new ApiRest();
     }
 }

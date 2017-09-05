@@ -11,4 +11,5 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String ELEME_APP_SECRET = "eleme.app.secret";
     public static final String ELEME_URL = "eleme.url";
     public static final String ELEME_TENANT_AUTHORIZE_URL_FORMAT = "%s?response_type=%s&client_id=%s&redirect_uri=%s&state=%s&scope=%s";
+    public static final String ELEME_ORDER_CALLBACK_SUCCESS_RETURN_VALUE = "{\"message\":\"ok\"}";
 }

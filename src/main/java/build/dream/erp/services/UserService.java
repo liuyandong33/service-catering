@@ -2,10 +2,7 @@ package build.dream.erp.services;
 
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.domains.Branch;
-import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.ConfigurationUtils;
-import build.dream.common.utils.PagedSearchModel;
-import build.dream.common.utils.ProxyUtils;
+import build.dream.common.utils.*;
 import build.dream.erp.constants.Constants;
 import build.dream.erp.mappers.BranchMapper;
 import org.apache.commons.lang.StringUtils;
@@ -40,6 +37,7 @@ public class UserService {
         Branch branch = branchMapper.findByUserIdAndTenantId(tenantId, userId);
         String posApiServiceDomain = ConfigurationUtils.getConfiguration(Constants.SERVICE_NAME_APPAPI);
         String appApiServiceDomain = ConfigurationUtils.getConfiguration(Constants.SERVICE_NAME_APPAPI);
+        CacheUtils.hdel(Constants.CLIENT_INFO_KEY_PREFIX + ApplicationHandler.obtainStringFromMap(user, "loginName"), "changed");
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("user", user);
