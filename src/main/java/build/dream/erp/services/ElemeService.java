@@ -2,10 +2,7 @@ package build.dream.erp.services;
 
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.domains.Branch;
-import build.dream.common.utils.ConfigurationUtils;
-import build.dream.common.utils.ProxyUtils;
-import build.dream.common.utils.SearchModel;
-import build.dream.common.utils.SystemPartitionUtils;
+import build.dream.common.utils.*;
 import build.dream.erp.constants.Constants;
 import build.dream.erp.mappers.BranchMapper;
 import net.sf.json.JSONObject;
@@ -57,7 +54,22 @@ public class ElemeService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest saveElemeOrder(BigInteger shopId, JSONObject message, Integer type) {
+    public ApiRest saveElemeOrder(BigInteger shopId, JSONObject message, Integer type) throws IOException {
+        SearchModel branchSearchModel = new SearchModel(true);
+        branchSearchModel.addSearchCondition("shopId", Constants.SQL_OPERATION_SYMBOL_EQUALS, shopId);
+        Branch branch = branchMapper.find(branchSearchModel);
+        Validate.notNull(branch, "shopId为" + shopId + "的门店不存在！");
+        // 开始保存饿了么订单
+
+
+
+
+        String elemeOrderMessageChannel = ConfigurationUtils.getConfiguration(Constants.ELEME_ORDER_MESSAGE_CHANNEL);
+        JSONObject messageJsonObject = new JSONObject();
+        messageJsonObject.put("tenantIdAndBranchId", branch.getTenantId() + "_" + branch.getId());
+        messageJsonObject.put("type", type);
+        messageJsonObject.put("orderId", 100);
+        QueueUtils.publish(elemeOrderMessageChannel, messageJsonObject.toString());
         return new ApiRest();
     }
 }
