@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="build.dream.erp.mappers.DietOrderMapper">
+    <insert id="insert" parameterType="build.dream.common.erp.domains.DietOrder" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO diet_order(order_number, tenant_id, branch_id,
+        order_type, order_status, pay_status,
+        refund_status, total_amount, discount_amount,
+        payable_amount, paid_amount, paid_type,
+        remark, delivery_address, delivery_longitude,
+        delivery_latitude, deliver_time, active_time,
+        deliver_fee, telephone_number, day_serial_number,
+        consignee, create_user_id, last_update_user_id,
+        last_update_remark)
+        VALUES(#{orderNumber}, #{tenantId}, #{branchId},
+        #{orderType}, #{orderStatus}, #{payStatus},
+        #{refundStatus}, #{totalAmount}, #{discountAmount},
+        #{payableAmount}, #{paidAmount}, #{paidType},
+        #{remark}, #{deliveryAddress}, #{deliveryLongitude},
+        #{deliveryLatitude}, #{deliverTime}, #{activeTime},
+        #{deliverFee}, #{telephoneNumber}, #{daySerialNumber},
+        #{consignee}, #{createUserId}, #{lastUpdateUserId},
+        #{lastUpdateRemark})
+    </insert>
+
+    <update id="update" parameterType="build.dream.common.erp.domains.DietOrder">
+        UPDATE diet_order
+        SET order_number = #{orderNumber},
+            tenant_id = #{tenantId},
+            branch_id = #{branchId},
+            order_type = #{orderType},
+            order_status = #{orderStatus},
+            pay_status = #{payStatus},
+            refund_status = #{refundStatus},
+            total_amount = #{totalAmount},
+            discount_amount = #{discountAmount},
+            payable_amount = #{payableAmount},
+            paid_amount = #{paidAmount},
+            paid_type = #{paidType},
+            remark = #{remark},
+            delivery_address = #{deliveryAddress},
+            delivery_longitude = #{deliveryLongitude},
+            delivery_latitude = #{deliveryLatitude},
+            deliver_time = #{deliverTime},
+            active_time = #{activeTime},
+            deliver_fee = #{deliverFee},
+            telephone_number = #{telephoneNumber},
+            day_serial_number = #{daySerialNumber},
+            consignee = #{consignee},
+            create_user_id = #{createUserId},
+            last_update_user_id = #{lastUpdateUserId},
+            last_update_remark = #{lastUpdateRemark},
+            deleted = #{deleted}
+        WHERE id = #{id}
+    </update>
+
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.Branch">
+        SELECT * FROM diet_order <include refid="searchConditionSql"></include> <include refid="paginationSql"></include>
+    </select>
+
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.Branch">
+        SELECT * FROM diet_order <include refid="searchConditionSql"></include>
+    </select>
+
+    <sql id="searchConditionSql">
+        WHERE
+        <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
+            <choose>
+                <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
+                    ${searchCondition.columnName} ${searchCondition.operationSymbol}
+                    <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </when>
+                <otherwise>
+                    ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
+                </otherwise>
+            </choose>
+        </foreach>
+    </sql>
+
+    <sql id="paginationSql">
+        LIMIT #{offset}, #{maxResults}
+    </sql>
+</mapper>

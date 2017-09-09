@@ -63,6 +63,18 @@ public class ElemeController extends BasicController {
                 case 10:
                     apiRest = elemeService.saveElemeOrder(shopId, message, type);
                     break;
+                case 12:
+                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, message, type);
+                    break;
+                case 14:
+                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, message, type);
+                    break;
+                case 15:
+                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, message, type);
+                    break;
+                case 17:
+                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, message, type);
+                    break;
             }
             Validate.isTrue(apiRest.isSuccessful(), apiRest.getError());
             returnValue = Constants.ELEME_ORDER_CALLBACK_SUCCESS_RETURN_VALUE;

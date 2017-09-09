@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="build.dream.erp.mappers.ElemeGroupMapper">
+    <insert id="insert" parameterType="build.dream.common.erp.domains.ElemeGroup" useGeneratedKeys="true" keyProperty="id">
+        INSERT eleme_group(eleme_order_id, order_id, name,
+        type, create_user_id, last_update_user_id,
+        last_update_remark)
+        VALUES (#{elemeOrderId}, #{orderId}, #{name},
+        #{type}, #{createUserId}, #{lastUpdateUserId},
+        #{lastUpdateRemark})
+    </insert>
+
+    <update id="update" parameterType="build.dream.common.erp.domains.ElemeGroup">
+        UPDATE eleme_group
+        SET eleme_order_id = #{elemeOrderId},
+            order_id = #{orderId},
+            name = #{name},
+            type = #{type},
+            last_update_user_id = #{lastUpdateUserId},
+            last_update_remark = #{lastUpdateRemark},
+            deleted = #{deleted
+        WHERE id = #{id}
+    </update>
+    
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ElemeGroup">
+        SELECT * FROM eleme_group <include refid="searchConditionSql"></include>
+    </select>
+
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ElemeGroup">
+        SELECT * FROM eleme_group <include refid="searchConditionSql"></include>
+    </select>
+
+    <sql id="searchConditionSql">
+        WHERE
+        <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
+            <choose>
+                <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
+                    ${searchCondition.columnName} ${searchCondition.operationSymbol}
+                    <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </when>
+                <otherwise>
+                    ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
+                </otherwise>
+            </choose>
+        </foreach>
+    </sql>
+</mapper>

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="build.dream.erp.mappers.ElemeOrderMapper">
+    <insert id="insert" parameterType="build.dream.common.erp.domains.ElemeOrder" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO eleme_order(address, created_at, active_at,
+        deliver_fee, vip_delivery_fee_discount, deliver_time,
+        description, invoice, book,
+        online_paid, order_id, phone_list,
+        shop_id, open_id, shop_name,
+        day_sn, status, refund_status,
+        user_id, total_price, original_price,
+        consignee, delivery_geo, delivery_poi_address,
+        invoiced, income, service_rate,
+        service_fee, hongbao, package_fee,
+        activity_total, shop_part, eleme_part,
+        downgraded, secret_phone_expire_time, invoice_type,
+        taxpayer_id, create_user_id, last_update_user_id,
+        last_update_remark)
+        VALUES (#{address}, #{createdAt}, #{activeAt},
+        #{deliverFee}, #{vipDeliveryFeeDiscount}, #{deliverTime},
+        #{description}, #{invoice}, #{book},
+        #{onlinePaid}, #{orderId}, #{phoneList},
+        #{shopId}, #{openId}, #{shopName},
+        #{daySn}, #{status}, #{refundStatus},
+        #{userId}, #{totalPrice}, #{originalPrice},
+        #{consignee}, #{deliveryGeo}, #{deliveryPoiAddress},
+        #{invoiced}, #{income}, #{serviceRate},
+        #{serviceFee}, #{hongbao}, #{packageFee},
+        #{activityTotal}, #{shopPart}, #{elemePart},
+        #{downgraded}, #{secretPhoneExpireTime}, #{invoiceType},
+        #{taxpayerId}, #{createUserId}, #{lastUpdateUserId},
+        #{lastUpdateRemark})
+    </insert>
+
+    <update id="update" parameterType="build.dream.common.erp.domains.ElemeOrder">
+        UPDATE eleme_order
+        SET address = #{address},
+            created_at = #{createdAt},
+            active_at = #{activeAt},
+            deliver_fee = #{deliverFee},
+            vip_delivery_fee_discount = #{vipDeliveryFeeDiscount},
+            deliver_time = #{deliverTime},
+            description = #{description},
+            invoice = #{invoice},
+            book = #{book},
+            online_paid = #{onlinePaid},
+            order_id = #{orderId},
+            phone_list = #{phoneList},
+            shop_id = #{shopId},
+            open_id = #{openId},
+            shop_name = #{shopName},
+            day_sn = #{daySn},
+            status = #{status},
+            refund_status = #{refundStatus},
+            user_id = #{userId},
+            total_price = #{totalPrice},
+            original_price = #{originalPrice},
+            consignee = #{consignee},
+            delivery_geo = #{deliveryGeo},
+            delivery_poi_address = #{deliveryPoiAddress},
+            invoiced = #{invoiced},
+            income = #{income},
+            service_rate = #{serviceRate},
+            service_fee = #{serviceFee},
+            hongbao = #{hongbao},
+            package_fee = #{packageFee},
+            activity_total = #{activityTotal},
+            shop_part = #{shopPart},
+            eleme_part = #{elemePart},
+            downgraded = #{downgraded},
+            secret_phone_expire_time = #{secretPhoneExpireTime},
+            invoice_type = #{invoiceType},
+            taxpayer_id = #{taxpayerId},
+            last_update_user_id = #{lastUpdateUserId},
+            last_update_remark = #{lastUpdateRemark},
+            deleted = #{deleted}
+        WHERE id = #{id}
+    </update>
+    
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ElemeOrder">
+        SELECT * FROM eleme_order <include refid="searchConditionSql"></include>
+    </select>
+
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ElemeOrder">
+        SELECT * FROM eleme_order <include refid="searchConditionSql"></include>
+    </select>
+
+    <select id="findAllPaged" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ElemeOrder">
+        SELECT * FROM eleme_order <include refid="searchConditionSql"></include> <include refid="paginationSql"></include>
+    </select>
+
+    <sql id="searchConditionSql">
+        WHERE
+        <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
+            <choose>
+                <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
+                    ${searchCondition.columnName} ${searchCondition.operationSymbol}
+                    <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </when>
+                <otherwise>
+                    ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
+                </otherwise>
+            </choose>
+        </foreach>
+    </sql>
+
+    <sql id="paginationSql">
+        LIMIT #{offset}, #{maxResults}
+    </sql>
+</mapper>
