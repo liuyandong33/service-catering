@@ -108,6 +108,8 @@ public class ElemeService {
                 elemeOrder.setLastUpdateRemark("饿了么系统推送新订单，保存订单！");
                 elemeOrderMapper.insert(elemeOrder);
 
+                List<ElemeItem> elemeItems = new ArrayList<ElemeItem>();
+
                 int elemeGroupJsonArraySize = elemeGroupJsonArray.size();
                 for (int index = 0; index < elemeGroupJsonArraySize; index++) {
                     JSONObject elemeGroupJsonObject = elemeGroupJsonArray.getJSONObject(index);
@@ -122,7 +124,6 @@ public class ElemeService {
                     elemeGroupMapper.insert(elemeGroup);
                     JSONArray elemeItemJsonArray = elemeGroupJsonObject.optJSONArray("items");
                     int elemeItemJsonArraySize = elemeItemJsonArray.size();
-                    List<ElemeItem> elemeItems = new ArrayList<ElemeItem>();
                     for (int elemeItemJsonArrayIndex = 0; elemeItemJsonArrayIndex < elemeItemJsonArraySize; elemeItemJsonArrayIndex++) {
                         JSONObject elemeItemJsonObject = elemeItemJsonArray.optJSONObject(elemeItemJsonArrayIndex);
                         ElemeItem elemeItem = new ElemeItem();
@@ -214,8 +215,23 @@ public class ElemeService {
                 dietOrder.setTotalAmount(elemeOrder.getOriginalPrice());
 //                dietOrder.setDiscountAmount();
                 dietOrder.setRemark(elemeOrder.getDescription());
-                dietOrder.setDeliveryAddress(elemeOrder.getAddress());
-                //TODO 上次写到这里
+                String deliveryGeo = elemeOrder.getDeliveryGeo();
+                String[] deliveryLatitudeAndDeliveryLongitude = deliveryGeo.split(",");
+
+                dietOrder.setDeliveryAddress(elemeOrder.getDeliveryPoiAddress());
+                dietOrder.setDeliveryLatitude(deliveryLatitudeAndDeliveryLongitude[0]);
+                dietOrder.setDeliveryLongitude(deliveryLatitudeAndDeliveryLongitude[1]);
+                dietOrder.setDeliverTime(elemeOrder.getDeliverTime());
+                dietOrder.setActiveTime(elemeOrder.getActiveAt());
+                dietOrder.setTelephoneNumber(elemeOrder.getPhoneList());
+                dietOrder.setConsignee(elemeOrder.getConsignee());
+                dietOrder.setCreateUserId(userId);
+                dietOrder.setLastUpdateUserId(userId);
+                dietOrder.setLastUpdateRemark("饿了么系统推送新订单，创建订单！");
+                dietOrderMapper.insert(dietOrder);
+                for (ElemeItem elemeItem : elemeItems) {
+
+                }
 
                 Long publishReturnValue = publishElemeOrderMessage(branch.getTenantId(), branch.getId(), dietOrder.getId(), type);
                 Validate.notNull(publishReturnValue, "发布饿了么新订单消息失败");
