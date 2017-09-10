@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="build.dream.erp.mappers.ElemeReminderMessageMapper">
+    <insert id="insert" parameterType="build.dream.common.erp.domains.ElemeReminderMessage" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO eleme_reminder_message(eleme_order_id, order_id, eleme_reminder_id,
+        user_id, shop_id, update_time,
+        tenant_id, branch_id, create_user_id,
+        last_update_user_id, last_update_remark)
+        VALUES(#{elemeOrderId}, #{orderId}, #{elemeReminderId},
+        #{userId}, #{shopId}, #{updateTime},
+        #{tenantId}, #{branchId}, #{createUserId},
+        #{lastUpdateUserId}, #{lastUpdateRemark})
+    </insert>
+
+    <update id="update" parameterType="build.dream.common.erp.domains.ElemeReminderMessage">
+        UPDATE eleme_reminder_message
+        SET eleme_order_id = #{elemeOrderId},
+            order_id = #{orderId},
+            eleme_reminder_id = #{elemeReminderId},
+            user_id = #{userId},
+            shop_id = #{shopId},
+            update_time = #{updateTime},
+            tenant_id = #{tenantId},
+            branch_id = #{branchId},
+            create_user_id = #{createUserId},
+            last_update_user_id = #{lastUpdateUserId},
+            last_update_remark = #{lastUpdateRemark},
+            deleted = #{deleted}
+        WHERE id = #{id}
+    </update>
+</mapper>

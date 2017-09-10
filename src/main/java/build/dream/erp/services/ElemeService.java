@@ -1,6 +1,7 @@
 package build.dream.erp.services;
 
 import build.dream.common.api.ApiRest;
+import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.constants.ElemeOrderConstants;
 import build.dream.common.erp.domains.*;
 import build.dream.common.utils.*;
@@ -17,10 +18,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URLEncoder;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class ElemeService {
@@ -42,6 +40,8 @@ public class ElemeService {
     private ElemeRefundOrderMessageMapper elemeRefundOrderMessageMapper;
     @Autowired
     private DietOrderMapper dietOrderMapper;
+    @Autowired
+    private ElemeReminderMessageMapper elemeReminderMessageMapper;
 
     @Transactional(readOnly = true)
     public ApiRest tenantAuthorize(BigInteger tenantId, BigInteger branchId) throws IOException {
@@ -87,6 +87,11 @@ public class ElemeService {
                 apiRest.setSuccessful(true);
             } else {
                 CacheUtils.expire(key, 30 * 60);
+                SearchModel branchSearchModel = new SearchModel(true);
+                branchSearchModel.addSearchCondition("shopId", Constants.SQL_OPERATION_SYMBOL_EQUALS, shopId);
+                Branch branch = branchMapper.find(branchSearchModel);
+                Validate.notNull(branch, "shopId为" + shopId + "的门店不存在！");
+                // 开始保存饿了么订单
                 JSONArray phoneList = message.optJSONArray("phoneList");
                 message.remove("phoneList");
 
@@ -117,6 +122,7 @@ public class ElemeService {
                     elemeGroupMapper.insert(elemeGroup);
                     JSONArray elemeItemJsonArray = elemeGroupJsonObject.optJSONArray("items");
                     int elemeItemJsonArraySize = elemeItemJsonArray.size();
+                    List<ElemeItem> elemeItems = new ArrayList<ElemeItem>();
                     for (int elemeItemJsonArrayIndex = 0; elemeItemJsonArrayIndex < elemeItemJsonArraySize; elemeItemJsonArrayIndex++) {
                         JSONObject elemeItemJsonObject = elemeItemJsonArray.optJSONObject(elemeItemJsonArrayIndex);
                         ElemeItem elemeItem = new ElemeItem();
@@ -138,6 +144,7 @@ public class ElemeService {
                         elemeItem.setLastUpdateUserId(userId);
                         elemeItem.setLastUpdateRemark("饿了么系统推送新订单，保存菜品属性！");
                         elemeItemMapper.insert(elemeItem);
+                        elemeItems.add(elemeItem);
 
                         JSONArray elemeItemAttributeJsonArray = elemeItemJsonObject.optJSONArray("attributes");
                         if (elemeItemAttributeJsonArray != null) {
@@ -189,21 +196,29 @@ public class ElemeService {
                     }
                 }
 
-                /*SearchModel branchSearchModel = new SearchModel(true);
-                branchSearchModel.addSearchCondition("shopId", Constants.SQL_OPERATION_SYMBOL_EQUALS, shopId);
-                Branch branch = branchMapper.find(branchSearchModel);
-                Validate.notNull(branch, "shopId为" + shopId + "的门店不存在！");
-                // 开始保存饿了么订单
+                DietOrder dietOrder = new DietOrder();
+                dietOrder.setOrderNumber("E" + elemeOrder.getOrderId());
+                dietOrder.setTenantId(branch.getTenantId());
+                dietOrder.setBranchId(branch.getId());
+                dietOrder.setOrderType(DietOrderConstants.ORDER_TYPE_ELEME_ORDER);
+                dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_UNPROCESSED);
+                if (elemeOrder.isOnlinePaid()) {
+                    dietOrder.setPayStatus(DietOrderConstants.PAY_STATUS_PAID);
+                    dietOrder.setPaidType(DietOrderConstants.PAID_TYPE_ELEME_ON_LINE_PAID);
+                    dietOrder.setPaidAmount(elemeOrder.getTotalPrice());
+                } else {
+                    dietOrder.setPayStatus(DietOrderConstants.PAY_STATUS_UNPAID);
+                    dietOrder.setPaidAmount(BigDecimal.ZERO);
+                }
+                dietOrder.setRefundStatus(formatElemeOrderRefundStatus(elemeOrder.getRefundStatus()));
+                dietOrder.setTotalAmount(elemeOrder.getOriginalPrice());
+//                dietOrder.setDiscountAmount();
+                dietOrder.setRemark(elemeOrder.getDescription());
+                dietOrder.setDeliveryAddress(elemeOrder.getAddress());
+                //TODO 上次写到这里
 
-
-
-
-                String elemeOrderMessageChannel = ConfigurationUtils.getConfiguration(Constants.ELEME_ORDER_MESSAGE_CHANNEL);
-                JSONObject messageJsonObject = new JSONObject();
-                messageJsonObject.put("tenantIdAndBranchId", branch.getTenantId() + "_" + branch.getId());
-                messageJsonObject.put("type", type);
-                messageJsonObject.put("orderId", 100);
-                QueueUtils.publish(elemeOrderMessageChannel, messageJsonObject.toString());*/
+                Long publishReturnValue = publishElemeOrderMessage(branch.getTenantId(), branch.getId(), dietOrder.getId(), type);
+                Validate.notNull(publishReturnValue, "发布饿了么新订单消息失败");
 
                 apiRest = new ApiRest();
                 apiRest.setMessage("保存订单成功！");
@@ -253,21 +268,7 @@ public class ElemeService {
                 DietOrder dietOrder = dietOrderMapper.find(dietOrderSearchModel);
                 Validate.notNull(dietOrder, "订单不存在！");
 
-                int dietOrderRefundStatus = 0;
-                if (ElemeOrderConstants.REFUND_STATUS_NO_REFUND.equals(refundStatus)) {
-                    dietOrderRefundStatus = 1;
-                } else if (ElemeOrderConstants.REFUND_STATUS_APPLIED.equals(refundStatus)) {
-                    dietOrderRefundStatus = 2;
-                } else if (ElemeOrderConstants.REFUND_STATUS_REJECTED.equals(refundStatus)) {
-                    dietOrderRefundStatus = 3;
-                } else if (ElemeOrderConstants.REFUND_STATUS_ARBITRATING.equals(refundStatus)) {
-                    dietOrderRefundStatus = 2;
-                } else if (ElemeOrderConstants.REFUND_STATUS_FAILED.equals(refundStatus)) {
-                    dietOrderRefundStatus = 4;
-                } else if (ElemeOrderConstants.REFUND_STATUS_SUCCESSFUL.equals(refundStatus)) {
-                    dietOrderRefundStatus = 5;
-                }
-                dietOrder.setRefundStatus(dietOrderRefundStatus);
+                dietOrder.setRefundStatus(formatElemeOrderRefundStatus(refundStatus));
                 dietOrder.setLastUpdateUserId(userId);
                 dietOrder.setLastUpdateRemark("处理饿了么系统退单消息回调！");
                 dietOrderMapper.update(dietOrder);
@@ -288,8 +289,11 @@ public class ElemeService {
                 elemeRefundOrderMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么退单信息！");
                 elemeRefundOrderMessageMapper.insert(elemeRefundOrderMessage);
 
+                Long publishReturnValue = publishElemeOrderMessage(dietOrder.getTenantId(), dietOrder.getBranchId(), dietOrder.getId(), type);
+                Validate.notNull(publishReturnValue, "发布饿了么订单退单消息失败！");
+
                 apiRest = new ApiRest();
-                apiRest.setMessage("处理饿了么系统退单回调成功！");
+                apiRest.setMessage("处理饿了么系统退单消息成功！");
                 apiRest.setSuccessful(true);
             }
         } catch (Exception e) {
@@ -297,6 +301,103 @@ public class ElemeService {
             throw e;
         }
         return apiRest;
+    }
+
+    /**
+     * 处理饿了么催单消息
+     * @param shopId：饿了么店铺ID
+     * @param message：消息内容
+     * @param type：消息类型
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest handleElemeReminderMessage(BigInteger shopId, JSONObject message, Integer type) throws IOException {
+        ApiRest apiRest = null;
+        String orderId = message.optString("id");
+        String key = "_eleme_order_callback_" + orderId + "_" + type;
+        try {
+            Long returnValue = CacheUtils.setnx(key, key);
+            if (returnValue == 0) {
+                apiRest = new ApiRest();
+                apiRest.setMessage("处理催单消息成功！");
+                apiRest.setSuccessful(true);
+            } else {
+                SearchModel elemeOrderSearchModel = new SearchModel(true);
+                elemeOrderSearchModel.addSearchCondition("eleme_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
+                ElemeOrder elemeOrder = elemeOrderMapper.find(elemeOrderSearchModel);
+                Validate.notNull(elemeOrder, "饿了么订单不存在！");
+
+                SearchModel dietOrderSearchModel = new SearchModel(true);
+                dietOrderSearchModel.addSearchCondition("order_number", Constants.SQL_OPERATION_SYMBOL_EQUALS, "E" + orderId);
+                DietOrder dietOrder = dietOrderMapper.find(dietOrderSearchModel);
+                Validate.notNull(dietOrder, "订单不存在！");
+
+                ElemeReminderMessage elemeReminderMessage = new ElemeReminderMessage();
+                elemeReminderMessage.setElemeOrderId(elemeOrder.getId());
+                elemeReminderMessage.setOrderId(orderId);
+                elemeReminderMessage.setElemeReminderId(BigInteger.valueOf(message.optLong("remindId")));
+                elemeReminderMessage.setUserId(BigInteger.valueOf(message.getLong("userId")));
+                elemeReminderMessage.setShopId(shopId);
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(message.getLong("updateTime") * 1000);
+                elemeReminderMessage.setUpdateTime(calendar.getTime());
+                elemeReminderMessage.setTenantId(dietOrder.getTenantId());
+                elemeReminderMessage.setBranchId(dietOrder.getBranchId());
+
+                BigInteger userId = CommonUtils.getServiceSystemUserId();
+                elemeReminderMessage.setCreateUserId(userId);
+                elemeReminderMessage.setLastUpdateUserId(userId);
+                elemeReminderMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么催单信息！");
+                elemeReminderMessageMapper.insert(elemeReminderMessage);
+
+                Long publishReturnValue = publishElemeOrderMessage(dietOrder.getTenantId(), dietOrder.getBranchId(), dietOrder.getId(), type);
+                Validate.notNull(publishReturnValue, "发布饿了么订单催单消息失败！");
+
+                apiRest = new ApiRest();
+                apiRest.setMessage("处理饿了么系统催单消息成功！");
+                apiRest.setSuccessful(true);
+            }
+        } catch (Exception e) {
+            CacheUtils.del(key);
+            throw e;
+        }
+        return apiRest;
+    }
+
+    /**
+     * 发布饿了么订单消息
+     * @param tenantId：商户ID
+     * @param branchId：门店ID
+     * @param dietOrderId：订单ID
+     * @param type：消息类型
+     * @return
+     */
+    private Long publishElemeOrderMessage(BigInteger tenantId, BigInteger branchId, BigInteger dietOrderId, Integer type) throws IOException {
+        String elemeOrderMessageChannel = ConfigurationUtils.getConfiguration(Constants.ELEME_ORDER_MESSAGE_CHANNEL);
+        JSONObject messageJsonObject = new JSONObject();
+        messageJsonObject.put("tenantIdAndBranchId", tenantId + "_" + branchId);
+        messageJsonObject.put("type", type);
+        messageJsonObject.put("dietOrderId", dietOrderId);
+        Long publishReturnValue = QueueUtils.publish(elemeOrderMessageChannel, messageJsonObject.toString());
+        return publishReturnValue;
+    }
+
+    private Integer formatElemeOrderRefundStatus(String elemeOrderRefundStatus) {
+        int dietOrderRefundStatus = 0;
+        if (ElemeOrderConstants.REFUND_STATUS_NO_REFUND.equals(elemeOrderRefundStatus)) {
+            dietOrderRefundStatus = 1;
+        } else if (ElemeOrderConstants.REFUND_STATUS_APPLIED.equals(elemeOrderRefundStatus)) {
+            dietOrderRefundStatus = 2;
+        } else if (ElemeOrderConstants.REFUND_STATUS_REJECTED.equals(elemeOrderRefundStatus)) {
+            dietOrderRefundStatus = 3;
+        } else if (ElemeOrderConstants.REFUND_STATUS_ARBITRATING.equals(elemeOrderRefundStatus)) {
+            dietOrderRefundStatus = 2;
+        } else if (ElemeOrderConstants.REFUND_STATUS_FAILED.equals(elemeOrderRefundStatus)) {
+            dietOrderRefundStatus = 4;
+        } else if (ElemeOrderConstants.REFUND_STATUS_SUCCESSFUL.equals(elemeOrderRefundStatus)) {
+            dietOrderRefundStatus = 5;
+        }
+        return dietOrderRefundStatus;
     }
 
     private static Map<Integer, String> elemeActivityCategoryIdMeaningMap = null;
