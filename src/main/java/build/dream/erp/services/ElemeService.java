@@ -57,7 +57,8 @@ public class ElemeService {
         String checkIsAuthorizeResult = ProxyUtils.doGetWithRequestParameters(Constants.SERVICE_NAME_OUT, "eleme", "checkIsAuthorize", checkIsAuthorizeRequestParameters);
         ApiRest checkIsAuthorizeApiRest = ApiRest.fromJson(checkIsAuthorizeResult);
         Validate.isTrue(checkIsAuthorizeApiRest.isSuccessful(), checkIsAuthorizeApiRest.getError());
-        boolean isAuthorize = (boolean) checkIsAuthorizeApiRest.getData();
+        Map<String, Object> checkIsAuthorizeApiRestData = (Map<String, Object>) checkIsAuthorizeApiRest.getData();
+        boolean isAuthorize = (boolean) checkIsAuthorizeApiRestData.get("isAuthorize");
 
         String data = null;
         if (isAuthorize) {
@@ -66,9 +67,10 @@ public class ElemeService {
         } else {
             String elemeUrl = ConfigurationUtils.getConfiguration(Constants.ELEME_URL);
             String elemeAppKey = ConfigurationUtils.getConfiguration(Constants.ELEME_APP_KEY);
+            String tenantType = checkIsAuthorizeApiRestData.get("tenantType").toString();
 
             String outServiceOutsideServiceDomain = SystemPartitionUtils.getOutsideServiceDomain(Constants.SERVICE_NAME_OUT);
-            data = String.format(Constants.ELEME_TENANT_AUTHORIZE_URL_FORMAT, elemeUrl + "/" + "authorize", "code", elemeAppKey, URLEncoder.encode(outServiceOutsideServiceDomain + "/eleme/tenantAuthorizeCallback", Constants.CHARSET_UTF_8), tenantId + "Z" + branchId, "all");
+            data = String.format(Constants.ELEME_TENANT_AUTHORIZE_URL_FORMAT, elemeUrl + "/" + "authorize", "code", elemeAppKey, URLEncoder.encode(outServiceOutsideServiceDomain + "/eleme/tenantAuthorizeCallback", Constants.CHARSET_UTF_8), tenantType + "Z" + tenantId + "Z" + branch.getType() + "Z" + branchId, "all");
         }
         ApiRest apiRest = new ApiRest(data, "生成授权链接成功！");
         return apiRest;

@@ -36,14 +36,14 @@ public class ToolController extends BasicController {
             String tableName = NamingStrategyUtils.camelCaseToUnderscore(domainClassSimpleName.substring(0, 1).toLowerCase() + domainClassSimpleName.substring(1));
             insertSql.append(tableName);
             insertSql.append("(");
-            int index = 1;
-            for (Field field : fields) {
-                String fieldName = field.getName();
+            int length = fields.length;
+            for (int index = 0; index < length; index++) {
+                String fieldName = fields[index].getName();
                 if ("id".equals(fieldName) || "createTime".equals(fieldName) || "lastUpdateTime".equals(fieldName) || "deleted".equals(fieldName)) {
                     continue;
                 }
                 insertSql.append(NamingStrategyUtils.camelCaseToUnderscore(fieldName)).append(", ");
-                if (index % 3 == 0) {
+                if ((index + 1) % 3 == 0 && (index + 1) != length) {
                     insertSql.append("<br>");
                 }
                 index++;
@@ -54,14 +54,13 @@ public class ToolController extends BasicController {
             insertSql.append("<br>");
             insertSql.append("VALUES(");
 
-            index = 1;
-            for (Field field : fields) {
-                String fieldName = field.getName();
+            for (int index = 0; index < length; index++) {
+                String fieldName = fields[index].getName();
                 if ("id".equals(fieldName) || "createTime".equals(fieldName) || "lastUpdateTime".equals(fieldName) || "deleted".equals(fieldName)) {
                     continue;
                 }
                 insertSql.append("#{").append(fieldName).append("}, ");
-                if (index % 3 == 0) {
+                if ((index + 1) % 3 == 0 && (index + 1) != length) {
                     insertSql.append("<br>");
                 }
                 index++;
