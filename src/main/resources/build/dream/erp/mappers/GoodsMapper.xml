@@ -23,21 +23,21 @@
         WHERE id = #{id}
     </update>
 
-    <select id="findAll" resultType="build.dream.common.erp.domains.Goods">
-        SELECT * FROM ${goodsTableName} <include refid="searchConditionSql"></include>
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.Goods">
+        SELECT * FROM goods <include refid="searchConditionSql"></include>
     </select>
 
-    <select id="findAllPaged" resultType="build.dream.common.erp.domains.Goods">
-        SELECT * FROM ${goodsTableName} <include refid="searchConditionSql"></include> <include refid="paginationSql"></include>
+    <select id="findAllPaged" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.Goods">
+        SELECT * FROM goods <include refid="searchConditionSql"></include> <include refid="paginationSql"></include>
     </select>
 
-    <select id="find" resultType="build.dream.common.erp.domains.Goods">
-        SELECT * FROM ${goodsTableName} <include refid="searchConditionSql"></include>
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.Goods">
+        SELECT * FROM goods <include refid="searchConditionSql"></include>
     </select>
 
     <sql id="searchConditionSql">
         WHERE
-        <foreach collection="searchModel.searchConditions" index="index" item="searchCondition" separator=" AND ">
+        <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
             <choose>
                 <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
                     ${searchCondition.columnName} ${searchCondition.operationSymbol}
@@ -53,6 +53,6 @@
     </sql>
 
     <sql id="paginationSql">
-        LIMIT #{searchModel.offset}, #{searchModel.maxResults}
+        LIMIT #{offset}, #{maxResults}
     </sql>
 </mapper>

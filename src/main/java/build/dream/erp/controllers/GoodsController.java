@@ -26,10 +26,25 @@ public class GoodsController extends BasicController {
         ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
-            ValidateUtils.notNull(requestParameters, "tenantId", "branchId", "tenantCode");
+            ValidateUtils.notNull(requestParameters, "tenantId", "branchId");
             apiRest = goodsService.listGoodses(requestParameters);
         } catch (Exception e) {
             LogUtils.error("查询菜品失败", controllerSimpleName, "listGoodses", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/saveGoods")
+    @ResponseBody
+    public String saveGoods() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            ValidateUtils.notNull(requestParameters, "tenantId", "branchId", "tenantCode", "goodsInfo", "userId");
+            apiRest = goodsService.saveGoods(requestParameters);
+        } catch (Exception e) {
+            LogUtils.error("保存菜品失败", controllerSimpleName, "saveGoods", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);

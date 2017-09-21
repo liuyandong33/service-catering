@@ -12,6 +12,6 @@ public interface GoodsSpecificationMapper {
     long insert(GoodsSpecification goodsSpecification);
     long update(GoodsSpecification goodsSpecification);
     GoodsSpecification find(SearchModel searchModel);
-    List<GoodsSpecification> findAll(@Param("goodsSpecificationTableName") String goodsSpecificationTableName, @Param("searchModel") SearchModel searchModel);
-    List<GoodsSpecification> findAllPaged(@Param("goodsSpecificationTableName") String goodsSpecificationTableName, @Param("searchModel") SearchModel searchModel);
+    List<GoodsSpecification> findAll(SearchModel searchModel);
+    List<GoodsSpecification> findAllPaged(SearchModel searchModel);
 }

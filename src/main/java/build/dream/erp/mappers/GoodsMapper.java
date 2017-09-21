@@ -11,7 +11,7 @@ import java.util.List;
 public interface GoodsMapper {
     long insert(Goods goods);
     long update(Goods goods);
-    Goods find(@Param("goodsTableName") String goodsTableName, @Param("searchModel") SearchModel searchModel);
-    List<Goods> findAll(@Param("goodsTableName") String goodsTableName, @Param("searchModel") SearchModel searchModel);
-    List<Goods> findAllPaged(@Param("goodsTableName") String goodsTableName, @Param("searchModel") SearchModel searchModel);
+    Goods find(SearchModel searchModel);
+    List<Goods> findAll(SearchModel searchModel);
+    List<Goods> findAllPaged(SearchModel searchModel);
 }

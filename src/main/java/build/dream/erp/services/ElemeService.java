@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class ElemeService {
@@ -82,13 +83,13 @@ public class ElemeService {
         String orderId = message.optString("id");
         String key = "_eleme_order_callback_" + orderId + "_" + type;
         try {
-            Long returnValue = CacheUtils.setnx(key, key);
-            if (returnValue == 0) {
+            Boolean returnValue = CacheUtils.setnx(key, key);
+            if (returnValue) {
                 apiRest = new ApiRest();
                 apiRest.setMessage("保存订单成功！");
                 apiRest.setSuccessful(true);
             } else {
-                CacheUtils.expire(key, 30 * 60);
+                CacheUtils.expire(key, 30 * 60, TimeUnit.SECONDS);
                 SearchModel branchSearchModel = new SearchModel(true);
                 branchSearchModel.addSearchCondition("shopId", Constants.SQL_OPERATION_SYMBOL_EQUALS, shopId);
                 Branch branch = branchMapper.find(branchSearchModel);
@@ -235,15 +236,14 @@ public class ElemeService {
 
                 }
 
-                Long publishReturnValue = publishElemeOrderMessage(branch.getTenantId(), branch.getId(), dietOrder.getId(), type);
-                Validate.notNull(publishReturnValue, "发布饿了么新订单消息失败");
+                publishElemeOrderMessage(branch.getTenantId(), branch.getId(), dietOrder.getId(), type);
 
                 apiRest = new ApiRest();
                 apiRest.setMessage("保存订单成功！");
                 apiRest.setSuccessful(true);
             }
         } catch (Exception e) {
-            CacheUtils.del(key);
+            CacheUtils.delete(key);
             throw e;
         }
         return apiRest;
@@ -262,8 +262,8 @@ public class ElemeService {
         String orderId = message.optString("id");
         String key = "_eleme_order_callback_" + orderId + "_" + type;
         try {
-            Long returnValue = CacheUtils.setnx(key, key);
-            if (returnValue == 0) {
+            Boolean returnValue = CacheUtils.setnx(key, key);
+            if (returnValue) {
                 apiRest = new ApiRest();
                 apiRest.setMessage("处理退单消息成功！");
                 apiRest.setSuccessful(true);
@@ -307,15 +307,14 @@ public class ElemeService {
                 elemeRefundOrderMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么退单信息！");
                 elemeRefundOrderMessageMapper.insert(elemeRefundOrderMessage);
 
-                Long publishReturnValue = publishElemeOrderMessage(dietOrder.getTenantId(), dietOrder.getBranchId(), dietOrder.getId(), type);
-                Validate.notNull(publishReturnValue, "发布饿了么订单退单消息失败！");
+                publishElemeOrderMessage(dietOrder.getTenantId(), dietOrder.getBranchId(), dietOrder.getId(), type);
 
                 apiRest = new ApiRest();
                 apiRest.setMessage("处理饿了么系统退单消息成功！");
                 apiRest.setSuccessful(true);
             }
         } catch (Exception e) {
-            CacheUtils.del(key);
+            CacheUtils.delete(key);
             throw e;
         }
         return apiRest;
@@ -334,8 +333,8 @@ public class ElemeService {
         String orderId = message.optString("id");
         String key = "_eleme_order_callback_" + orderId + "_" + type;
         try {
-            Long returnValue = CacheUtils.setnx(key, key);
-            if (returnValue == 0) {
+            Boolean returnValue = CacheUtils.setnx(key, key);
+            if (returnValue) {
                 apiRest = new ApiRest();
                 apiRest.setMessage("处理催单消息成功！");
                 apiRest.setSuccessful(true);
@@ -368,15 +367,14 @@ public class ElemeService {
                 elemeReminderMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么催单信息！");
                 elemeReminderMessageMapper.insert(elemeReminderMessage);
 
-                Long publishReturnValue = publishElemeOrderMessage(dietOrder.getTenantId(), dietOrder.getBranchId(), dietOrder.getId(), type);
-                Validate.notNull(publishReturnValue, "发布饿了么订单催单消息失败！");
+                publishElemeOrderMessage(dietOrder.getTenantId(), dietOrder.getBranchId(), dietOrder.getId(), type);
 
                 apiRest = new ApiRest();
                 apiRest.setMessage("处理饿了么系统催单消息成功！");
                 apiRest.setSuccessful(true);
             }
         } catch (Exception e) {
-            CacheUtils.del(key);
+            CacheUtils.delete(key);
             throw e;
         }
         return apiRest;
@@ -390,14 +388,13 @@ public class ElemeService {
      * @param type：消息类型
      * @return
      */
-    private Long publishElemeOrderMessage(BigInteger tenantId, BigInteger branchId, BigInteger dietOrderId, Integer type) throws IOException {
+    private void publishElemeOrderMessage(BigInteger tenantId, BigInteger branchId, BigInteger dietOrderId, Integer type) throws IOException {
         String elemeOrderMessageChannel = ConfigurationUtils.getConfiguration(Constants.ELEME_ORDER_MESSAGE_CHANNEL);
         JSONObject messageJsonObject = new JSONObject();
         messageJsonObject.put("tenantIdAndBranchId", tenantId + "_" + branchId);
         messageJsonObject.put("type", type);
         messageJsonObject.put("dietOrderId", dietOrderId);
-        Long publishReturnValue = QueueUtils.publish(elemeOrderMessageChannel, messageJsonObject.toString());
-        return publishReturnValue;
+        QueueUtils.convertAndSend(elemeOrderMessageChannel, messageJsonObject.toString());
     }
 
     private Integer formatElemeOrderRefundStatus(String elemeOrderRefundStatus) {
