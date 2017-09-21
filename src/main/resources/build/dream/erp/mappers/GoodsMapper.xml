@@ -24,15 +24,15 @@
     </update>
 
     <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.Goods">
-        SELECT * FROM goods <include refid="searchConditionSql"></include>
+        SELECT ${selectColumns} FROM goods <include refid="searchConditionSql"></include>
     </select>
 
     <select id="findAllPaged" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.Goods">
-        SELECT * FROM goods <include refid="searchConditionSql"></include> <include refid="paginationSql"></include>
+        SELECT ${selectColumns} FROM goods <include refid="searchConditionSql"></include> <include refid="paginationSql"></include>
     </select>
 
     <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.Goods">
-        SELECT * FROM goods <include refid="searchConditionSql"></include>
+        SELECT ${selectColumns} FROM goods <include refid="searchConditionSql"></include>
     </select>
 
     <sql id="searchConditionSql">
