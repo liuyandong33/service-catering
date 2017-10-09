@@ -2,16 +2,21 @@ package build.dream.erp.controllers;
 
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
+import build.dream.common.erp.domains.GoodsFlavorGroup;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
 import build.dream.common.utils.ValidateUtils;
+import build.dream.erp.models.goods.GoodsFlavorGroupModel;
+import build.dream.erp.models.goods.SaveGoodsModel;
 import build.dream.erp.services.GoodsService;
+import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -41,8 +46,13 @@ public class GoodsController extends BasicController {
         ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
-            ValidateUtils.notNull(requestParameters, "tenantId", "branchId", "tenantCode", "goodsInfo", "userId");
-            apiRest = goodsService.saveGoods(requestParameters);
+            SaveGoodsModel saveGoodsModel = ApplicationHandler.instantiateObject(SaveGoodsModel.class, requestParameters);
+            String goodsFlavorGroup = requestParameters.get("goodsFlavorGroup");
+            Validate.notNull(goodsFlavorGroup);
+
+            List<GoodsFlavorGroupModel> goodsFlavorGroupModels = GsonUtils.jsonToList(goodsFlavorGroup, GoodsFlavorGroupModel.class);
+            saveGoodsModel.setGoodsFlavorGroupModels(goodsFlavorGroupModels);
+            apiRest = goodsService.saveGoods(saveGoodsModel);
         } catch (Exception e) {
             LogUtils.error("保存菜品失败", controllerSimpleName, "saveGoods", e, requestParameters);
             apiRest = new ApiRest(e);

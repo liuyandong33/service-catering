@@ -12,8 +12,10 @@ import build.dream.erp.mappers.GoodsFlavorGroupMapper;
 import build.dream.erp.mappers.GoodsFlavorMapper;
 import build.dream.erp.mappers.GoodsMapper;
 import build.dream.erp.mappers.GoodsSpecificationMapper;
+import build.dream.erp.models.goods.GoodsFlavorGroupModel;
+import build.dream.erp.models.goods.GoodsFlavorModel;
+import build.dream.erp.models.goods.SaveGoodsModel;
 import build.dream.erp.utils.BeanUtils;
-import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,29 +131,24 @@ public class GoodsService {
     }
 
     @Transactional
-    public ApiRest saveGoods(Map<String, String> parameters) {
-        BigInteger tenantId = BigInteger.valueOf(Long.valueOf(parameters.get("tenantId")));
-        BigInteger branchId = BigInteger.valueOf(Long.valueOf(parameters.get("branchId")));
-        BigInteger userId = BigInteger.valueOf(Long.valueOf(parameters.get("userId")));
-        String tenantCode = parameters.get("tenantCode");
-        String goodsInfo = parameters.get("goodsInfo");
-        JSONObject goodsInfoJsonObject = JSONObject.fromObject(goodsInfo);
-        String name = goodsInfoJsonObject.optString("name");
-        Validate.notNull(name, "菜品名称不能为空！");
+    public ApiRest saveGoods(SaveGoodsModel saveGoodsModel) {
+        BigInteger tenantId = saveGoodsModel.getTenantId();
+        BigInteger branchId = saveGoodsModel.getBranchId();
+        BigInteger userId = saveGoodsModel.getUserId();
+        String tenantCode = saveGoodsModel.getTenantCode();
 
-        if (goodsInfoJsonObject.has("id")) {
-            BigInteger goodsId = BigInteger.valueOf(goodsInfoJsonObject.optLong("id"));
+        if (saveGoodsModel.getId() != null) {
             SearchModel goodsSearchModel = new SearchModel(true);
-            goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, goodsId);
+            goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getId());
             Goods goods = goodsMapper.find(goodsSearchModel);
             Validate.notNull(goods, "产品不存在！");
 
-            goods.setName(name);
+            goods.setName(saveGoodsModel.getName());
             goods.setLastUpdateRemark("修改产品信息！");
             goodsMapper.update(goods);
         } else {
             Goods goods = new Goods();
-            goods.setName(name);
+            goods.setName(saveGoodsModel.getName());
             goods.setTenantId(tenantId);
             goods.setTenantCode(tenantCode);
             goods.setBranchId(branchId);
@@ -159,6 +156,40 @@ public class GoodsService {
             goods.setLastUpdateUserId(userId);
             goods.setLastUpdateRemark("新增产品信息！");
             goodsMapper.insert(goods);
+
+            Map<Integer, GoodsFlavorGroup> goodsFlavorGroupMap = new HashMap<Integer, GoodsFlavorGroup>();
+            Map<GoodsFlavor, Integer> goodsFlavorMap = new HashMap<GoodsFlavor, Integer>();
+            for (GoodsFlavorGroupModel goodsFlavorGroupModel : saveGoodsModel.getGoodsFlavorGroupModels()) {
+                GoodsFlavorGroup goodsFlavorGroup = new GoodsFlavorGroup();
+                goodsFlavorGroup.setGoodsId(goods.getId());
+                goodsFlavorGroup.setName(goodsFlavorGroupModel.getName());
+                goodsFlavorGroup.setTenantId(tenantId);
+                goodsFlavorGroup.setBranchId(branchId);
+                goodsFlavorGroup.setTenantCode(tenantCode);
+                goodsFlavorGroup.setLastUpdateRemark("新增菜品口味组！");
+
+                goodsFlavorGroupMap.put(goodsFlavorGroup.hashCode(), goodsFlavorGroup);
+
+                for (GoodsFlavorModel goodsFlavorModel : goodsFlavorGroupModel.getGoodsFlavorModels()) {
+                    GoodsFlavor goodsFlavor = new GoodsFlavor();
+                    goodsFlavor.setName(goodsFlavorModel.getName());
+                    goodsFlavor.setPrice(goodsFlavorModel.getPrice());
+                    goodsFlavor.setTenantId(tenantId);
+                    goodsFlavor.setTenantCode(tenantCode);
+                    goodsFlavor.setBranchId(branchId);
+                    goodsFlavor.setCreateUserId(userId);
+                    goodsFlavor.setLastUpdateUserId(userId);
+                    goodsFlavor.setLastUpdateRemark("新增菜品口味！");
+                    goodsFlavorMap.put(goodsFlavor, goodsFlavorGroup.hashCode());
+                }
+            }
+
+            for (Map.Entry<GoodsFlavor, Integer> entry : goodsFlavorMap.entrySet()) {
+                entry.getKey().setGoodsFlavorGroupId(goodsFlavorGroupMap.get(entry.getValue()).getId());
+            }
+
+            goodsFlavorGroupMapper.insertAll(goodsFlavorGroupMap.values());
+            goodsFlavorMapper.insertAll(goodsFlavorMap.keySet());
         }
         return null;
     }
