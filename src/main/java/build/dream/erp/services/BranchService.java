@@ -77,17 +77,17 @@ public class BranchService {
     }
 
     @Transactional(readOnly = true)
-    public ApiRest findBranchInfo(Map<String, String> parameters) {
-        String tenantId = parameters.get("tenantId");
-        Validate.notNull(tenantId, "参数(tenantId)不能为空！");
-
-        String branchId = parameters.get("branchId");
-        Validate.notNull(branchId, "参数(branchId)不能为空！");
+    public ApiRest findBranchInfo(BigInteger tenantId, BigInteger branchId) {
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("id", "=", BigInteger.valueOf(Long.valueOf(branchId)));
-        searchModel.addSearchCondition("tenant_id", "=", BigInteger.valueOf(Long.valueOf(tenantId)));
+        searchModel.addSearchCondition("id", "=", tenantId);
+        searchModel.addSearchCondition("tenant_id", "=", branchId);
         Branch branch =  branchMapper.find(searchModel);
-        ApiRest apiRest = new ApiRest(branch, "查询门店列表成功！");
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setData(branch);
+        apiRest.setClassName(Branch.class.getName());
+        apiRest.setMessage("查询门店列表成功！");
+        apiRest.setSuccessful(true);
         return apiRest;
     }
 }

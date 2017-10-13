@@ -55,7 +55,7 @@ public class ElemeService {
         checkIsAuthorizeRequestParameters.put("tenantId", tenantId.toString());
         checkIsAuthorizeRequestParameters.put("branchId", branchId.toString());
         checkIsAuthorizeRequestParameters.put("branchType", branch.getType().toString());
-        String checkIsAuthorizeResult = ProxyUtils.doGetWithRequestParameters(Constants.SERVICE_NAME_OUT, "eleme", "checkIsAuthorize", checkIsAuthorizeRequestParameters);
+        String checkIsAuthorizeResult = ProxyUtils.doGetOriginalWithRequestParameters(Constants.SERVICE_NAME_OUT, "eleme", "checkIsAuthorize", checkIsAuthorizeRequestParameters);
         ApiRest checkIsAuthorizeApiRest = ApiRest.fromJson(checkIsAuthorizeResult);
         Validate.isTrue(checkIsAuthorizeApiRest.isSuccessful(), checkIsAuthorizeApiRest.getError());
         Map<String, Object> checkIsAuthorizeApiRestData = (Map<String, Object>) checkIsAuthorizeApiRest.getData();

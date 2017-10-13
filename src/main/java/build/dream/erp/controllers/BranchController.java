@@ -7,6 +7,7 @@ import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
 import build.dream.erp.services.BranchService;
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,13 +59,18 @@ public class BranchController extends BasicController {
         return GsonUtils.toJson(apiRest);
     }
 
-    @RequestMapping(value = "/findBranchInfo")
+    @RequestMapping(value = "/findBranchInfoById")
     @ResponseBody
-    public String findBranchInfo() {
+    public String findBranchInfoById() {
         ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
-            apiRest = branchService.findBranchInfo(requestParameters);
+            String tenantId = requestParameters.get("tenantId");
+            Validate.notNull(tenantId, ApplicationHandler.obtainParameterErrorMessage("tenantId"));
+
+            String branchId = requestParameters.get("branchId");
+            Validate.notNull(branchId, ApplicationHandler.obtainParameterErrorMessage("branchId"));
+            apiRest = branchService.findBranchInfo(NumberUtils.createBigInteger(tenantId), NumberUtils.createBigInteger(branchId));
         } catch (Exception e) {
             LogUtils.error("查询门店失败", controllerSimpleName, "listBranches", e, requestParameters);
             apiRest = new ApiRest(e);
