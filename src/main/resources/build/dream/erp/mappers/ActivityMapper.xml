@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="build.dream.erp.mappers.ActivityMapper">
+    <resultMap id="activityBuyGive" type="build.dream.common.erp.domains.ActivityBuyGive"></resultMap>
+    <resultMap id="activityFullReduction" type="build.dream.common.erp.domains.ActivityFullReduction"></resultMap>
+
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.Activity">
+        SELECT * FROM activity <include refid="searchConditionSql"></include>
+    </select>
+
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.Activity">
+        SELECT * FROM activity <include refid="searchConditionSql"></include>
+    </select>
+
+    <sql id="searchConditionSql">
+        WHERE
+        <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
+            <choose>
+                <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
+                    ${searchCondition.columnName} ${searchCondition.operationSymbol}
+                    <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </when>
+                <otherwise>
+                    ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
+                </otherwise>
+            </choose>
+        </foreach>
+    </sql>
+
+    <select id="findAllActivities" statementType="CALLABLE" resultMap="activityBuyGive, activityFullReduction">
+        {call proc_find_all_activities()}
+    </select>
+</mapper>
