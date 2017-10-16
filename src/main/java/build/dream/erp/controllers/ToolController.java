@@ -46,7 +46,6 @@ public class ToolController extends BasicController {
                 if ((index + 1) % 3 == 0 && (index + 1) != length) {
                     insertSql.append("<br>");
                 }
-                index++;
             }
             insertSql.deleteCharAt(insertSql.length() - 1);
             insertSql.deleteCharAt(insertSql.length() - 1);
@@ -63,7 +62,6 @@ public class ToolController extends BasicController {
                 if ((index + 1) % 3 == 0 && (index + 1) != length) {
                     insertSql.append("<br>");
                 }
-                index++;
             }
             insertSql.deleteCharAt(insertSql.length() - 1);
             insertSql.deleteCharAt(insertSql.length() - 1);

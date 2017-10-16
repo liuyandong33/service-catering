@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.erp.mappers.GoodsMapper">
     <insert id="insert" parameterType="build.dream.common.erp.domains.Goods" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO goods_${tenantCode}(name, tenant_id, tenant_code,
+        INSERT INTO goods(name, tenant_id, tenant_code,
         branch_id, create_user_id, last_update_user_id,
         last_update_remark)
         VALUES(#{name}, #{tenantId}, #{tenantCode},
@@ -11,7 +11,7 @@
     </insert>
 
     <update id="update" parameterType="build.dream.common.erp.domains.Goods">
-        UPDATE goods_${tenantCode}
+        UPDATE goods
         SET name = #{name},
             tenant_id = #{tenantId},
             tenant_code = #{tenantCode},

@@ -39,6 +39,7 @@ public class DietOrderService {
     @Autowired
     private SequenceMapper sequenceMapper;
 
+    @Transactional(rollbackFor = Exception.class)
     public ApiRest saveDietOrder(SaveDietOrderModel saveDietOrderModel) {
         List<SaveDietOrderModel.DietOrderModel> dietOrderModels = saveDietOrderModel.getDietOrderModels();
         List<BigInteger> goodsIds = new ArrayList<BigInteger>();
@@ -74,7 +75,7 @@ public class DietOrderService {
         goodsFlavorSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveDietOrderModel.getTenantId());
         goodsFlavorSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveDietOrderModel.getBranchId());
         goodsFlavorSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsFlavorIds);
-        List<GoodsFlavor> goodsFlavors = goodsFlavorMapper.findAll(goodsSearchModel);
+        List<GoodsFlavor> goodsFlavors = goodsFlavorMapper.findAll(goodsFlavorSearchModel);
         Map<BigInteger, GoodsFlavor> goodsFlavorMap = new HashMap<BigInteger, GoodsFlavor>();
         for (GoodsFlavor goodsFlavor : goodsFlavors) {
             goodsFlavorMap.put(goodsFlavor.getId(), goodsFlavor);
@@ -82,7 +83,7 @@ public class DietOrderService {
 
         DietOrder dietOrder = new DietOrder();
         String prefix = null;
-        Integer orderType = dietOrder.getOrderType();
+        Integer orderType = saveDietOrderModel.getOrderType();
         if (orderType == DietOrderConstants.ORDER_TYPE_SCAN_CODE_ORDER) {
             prefix = "SO";
         } else if (orderType == DietOrderConstants.ORDER_TYPE_ELEME_ORDER) {
@@ -128,11 +129,13 @@ public class DietOrderService {
 
             BigDecimal goodsFlavorsTotalAmount = BigDecimal.ZERO;
             List<GoodsFlavor> goodsFlavorList = new ArrayList<GoodsFlavor>();
+            BigDecimal dietOrderDetailPayableAmount = goodsSpecification.getPrice();
             for (BigInteger goodsFlavorId : dietOrderModel.getGoodsFlavorIds()) {
                 GoodsFlavor goodsFlavor = goodsFlavorMap.get(goodsFlavorId);
                 Validate.notNull(goodsFlavor, "菜品口味不存在！");
                 if (goodsFlavor.getPrice() != null) {
                     goodsFlavorsTotalAmount.add(goodsFlavor.getPrice());
+                    dietOrderDetailPayableAmount.add(goodsFlavor.getPrice());
                 }
                 goodsFlavorList.add(goodsFlavor);
             }
@@ -144,6 +147,8 @@ public class DietOrderService {
             dietOrderDetail.setGoodsFlavorIds(StringUtils.join(dietOrderModel.getGoodsFlavorIds(), ","));
             dietOrderDetail.setPrice(goodsSpecification.getPrice().add(goodsFlavorsTotalAmount));
             dietOrderDetail.setAmount(dietOrderModel.getAmount());
+            dietOrderDetail.setDiscountAmount(BigDecimal.ZERO);
+            dietOrderDetail.setPayableAmount(dietOrderDetailPayableAmount);
             dietOrderDetail.setCreateUserId(saveDietOrderModel.getUserId());
             dietOrderDetail.setLastUpdateUserId(saveDietOrderModel.getUserId());
             dietOrderDetail.setLastUpdateRemark("保存订单明细！");
