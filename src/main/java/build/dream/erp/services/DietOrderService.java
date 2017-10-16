@@ -1,15 +1,14 @@
 package build.dream.erp.services;
 
 import build.dream.common.api.ApiRest;
+import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.domains.*;
 import build.dream.common.utils.*;
 import build.dream.erp.constants.Constants;
-import build.dream.erp.mappers.DietOrderMapper;
-import build.dream.erp.mappers.GoodsFlavorMapper;
-import build.dream.erp.mappers.GoodsMapper;
-import build.dream.erp.mappers.GoodsSpecificationMapper;
+import build.dream.erp.mappers.*;
 import build.dream.erp.models.dietorder.DoPayModel;
 import build.dream.erp.models.dietorder.SaveDietOrderModel;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -29,11 +29,15 @@ public class DietOrderService {
     @Autowired
     private DietOrderMapper dietOrderMapper;
     @Autowired
+    private DietOrderDetailMapper dietOrderDetailMapper;
+    @Autowired
     private GoodsMapper goodsMapper;
     @Autowired
     private GoodsSpecificationMapper goodsSpecificationMapper;
     @Autowired
     private GoodsFlavorMapper goodsFlavorMapper;
+    @Autowired
+    private SequenceMapper sequenceMapper;
 
     public ApiRest saveDietOrder(SaveDietOrderModel saveDietOrderModel) {
         List<SaveDietOrderModel.DietOrderModel> dietOrderModels = saveDietOrderModel.getDietOrderModels();
@@ -77,6 +81,42 @@ public class DietOrderService {
         }
 
         DietOrder dietOrder = new DietOrder();
+        String prefix = null;
+        Integer orderType = dietOrder.getOrderType();
+        if (orderType == DietOrderConstants.ORDER_TYPE_SCAN_CODE_ORDER) {
+            prefix = "SO";
+        } else if (orderType == DietOrderConstants.ORDER_TYPE_ELEME_ORDER) {
+            prefix = "EO";
+        } else if (orderType == DietOrderConstants.ORDER_TYPE_MEI_TUAN_ORDER) {
+            prefix = "MO";
+        } else if (orderType == DietOrderConstants.ORDER_TYPE_WEI_XIN_ORDER) {
+            prefix = "WO";
+        }
+        Integer daySerialNumber = sequenceMapper.nextValue(SerialNumberGenerator.generatorTodaySequenceName(saveDietOrderModel.getTenantId(), saveDietOrderModel.getBranchId(), "DO"));
+        dietOrder.setOrderNumber(SerialNumberGenerator.nextOrderNumber(prefix, 6, daySerialNumber));
+        dietOrder.setTenantId(saveDietOrderModel.getTenantId());
+        dietOrder.setBranchId(saveDietOrderModel.getBranchId());
+        dietOrder.setOrderType(orderType);
+        dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_PENDING);
+        dietOrder.setPayStatus(DietOrderConstants.PAY_STATUS_UNPAID);
+        dietOrder.setRefundStatus(DietOrderConstants.REFUND_STATUS_NO_REFUND);
+        dietOrder.setPaidAmount(BigDecimal.ZERO);
+        dietOrder.setRemark(saveDietOrderModel.getRemark());
+        dietOrder.setDeliveryAddress(saveDietOrderModel.getDeliveryAddress());
+        dietOrder.setDeliveryLongitude(saveDietOrderModel.getDeliveryLongitude());
+        dietOrder.setDeliveryLatitude(saveDietOrderModel.getDeliveryLatitude());
+        dietOrder.setTelephoneNumber(saveDietOrderModel.getTelephoneNumber());
+        dietOrder.setDaySerialNumber(daySerialNumber.toString());
+        dietOrder.setConsignee(saveDietOrderModel.getConsignee());
+        dietOrder.setCreateUserId(saveDietOrderModel.getUserId());
+        dietOrder.setLastUpdateUserId(saveDietOrderModel.getUserId());
+        dietOrder.setLastUpdateRemark("保存订单！");
+        dietOrderMapper.insert(dietOrder);
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        BigDecimal payableAmount = BigDecimal.ZERO;
+
+        List<Map<String, Object>> dietOrderDetailList = new ArrayList<Map<String, Object>>();
         for (SaveDietOrderModel.DietOrderModel dietOrderModel : dietOrderModels) {
             Goods goods = goodsMap.get(dietOrderModel.getGoodsId());
             Validate.notNull(goods, "菜品不存在！");
@@ -84,15 +124,50 @@ public class DietOrderService {
             GoodsSpecification goodsSpecification = goodsSpecificationMap.get(dietOrderModel.getGoodsSpecificationId());
             Validate.notNull(goodsSpecification, "菜品规格不存在！");
 
+            totalAmount.add(goodsSpecification.getPrice().multiply(NumberUtils.createBigDecimal(dietOrderModel.getAmount().toString())));
+
+            BigDecimal goodsFlavorsTotalAmount = BigDecimal.ZERO;
             List<GoodsFlavor> goodsFlavorList = new ArrayList<GoodsFlavor>();
             for (BigInteger goodsFlavorId : dietOrderModel.getGoodsFlavorIds()) {
                 GoodsFlavor goodsFlavor = goodsFlavorMap.get(goodsFlavorId);
                 Validate.notNull(goodsFlavor, "菜品口味不存在！");
+                if (goodsFlavor.getPrice() != null) {
+                    goodsFlavorsTotalAmount.add(goodsFlavor.getPrice());
+                }
                 goodsFlavorList.add(goodsFlavor);
             }
+            totalAmount.add(goodsFlavorsTotalAmount);
             DietOrderDetail dietOrderDetail = new DietOrderDetail();
+            dietOrderDetail.setDietOrderId(dietOrder.getId());
+            dietOrderDetail.setGoodsId(goods.getId());
+            dietOrderDetail.setGoodsSpecificationId(goodsSpecification.getId());
+            dietOrderDetail.setGoodsFlavorIds(StringUtils.join(dietOrderModel.getGoodsFlavorIds(), ","));
+            dietOrderDetail.setPrice(goodsSpecification.getPrice().add(goodsFlavorsTotalAmount));
+            dietOrderDetail.setAmount(dietOrderModel.getAmount());
+            dietOrderDetail.setCreateUserId(saveDietOrderModel.getUserId());
+            dietOrderDetail.setLastUpdateUserId(saveDietOrderModel.getUserId());
+            dietOrderDetail.setLastUpdateRemark("保存订单明细！");
+            dietOrderDetailMapper.insert(dietOrderDetail);
+
+            Map<String, Object> dietOrderDetailMap = BeanUtils.beanToMap(dietOrderDetail);
+            dietOrderDetailMap.put("goods", goods);
+            dietOrderDetailMap.put("goodsSpecification", goodsSpecification);
+            dietOrderDetailMap.put("goodsFlavors", goodsFlavorList);
+            dietOrderDetailList.add(dietOrderDetailMap);
         }
-        return null;
+        dietOrder.setTotalAmount(totalAmount);
+        dietOrder.setDiscountAmount(discountAmount);
+        dietOrder.setPayableAmount(payableAmount);
+        dietOrderMapper.update(dietOrder);
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("dietOrder", dietOrder);
+        data.put("dietOrderDetails", dietOrderDetailList);
+        ApiRest apiRest = new ApiRest();
+        apiRest.setData(data);
+        apiRest.setMessage("保存订单成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
     }
 
     @Transactional(readOnly = true)

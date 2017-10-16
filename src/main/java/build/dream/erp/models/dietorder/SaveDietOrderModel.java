@@ -6,7 +6,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.Validate;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Date;
 import java.util.List;
 
 public class SaveDietOrderModel extends BasicModel {
@@ -18,6 +20,16 @@ public class SaveDietOrderModel extends BasicModel {
 
     @NotNull
     private BigInteger userId;
+
+    @NotNull
+    private Integer orderType;
+
+    private String remark;
+    private String deliveryAddress;
+    private String deliveryLongitude;
+    private String deliveryLatitude;
+    private String telephoneNumber;
+    private String consignee;
 
     private List<DietOrderModel> dietOrderModels;
 
@@ -43,6 +55,62 @@ public class SaveDietOrderModel extends BasicModel {
 
     public void setUserId(BigInteger userId) {
         this.userId = userId;
+    }
+
+    public Integer getOrderType() {
+        return orderType;
+    }
+
+    public void setOrderType(Integer orderType) {
+        this.orderType = orderType;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    public String getDeliveryAddress() {
+        return deliveryAddress;
+    }
+
+    public void setDeliveryAddress(String deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
+    }
+
+    public String getDeliveryLongitude() {
+        return deliveryLongitude;
+    }
+
+    public void setDeliveryLongitude(String deliveryLongitude) {
+        this.deliveryLongitude = deliveryLongitude;
+    }
+
+    public String getDeliveryLatitude() {
+        return deliveryLatitude;
+    }
+
+    public void setDeliveryLatitude(String deliveryLatitude) {
+        this.deliveryLatitude = deliveryLatitude;
+    }
+
+    public String getTelephoneNumber() {
+        return telephoneNumber;
+    }
+
+    public void setTelephoneNumber(String telephoneNumber) {
+        this.telephoneNumber = telephoneNumber;
+    }
+
+    public String getConsignee() {
+        return consignee;
+    }
+
+    public void setConsignee(String consignee) {
+        this.consignee = consignee;
     }
 
     public List<DietOrderModel> getDietOrderModels() {
