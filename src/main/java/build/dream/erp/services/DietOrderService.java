@@ -49,9 +49,9 @@ public class DietOrderService {
             ApplicationHandler.notBlankAndPut(doPayRequestParameters, "spbillCreateIp", doPayModel.getSpbillCreateIp(), ApplicationHandler.obtainParameterErrorMessage("spbillCreateIp"));
             doPayRequestParameters.put("notifyUrl", SystemPartitionUtils.getServiceDomain(partitionCode, serviceName) + "/dietOrder/weiXinPayCallback");
             if (paidScene == Constants.PAID_SCENE_WEI_XIN_PUBLIC_ACCOUNT) {
-                doPayRequestParameters.put("tradeType", "MWEB");
-            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_H5) {
                 doPayRequestParameters.put("tradeType", "JSAPI");
+            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_H5) {
+                doPayRequestParameters.put("tradeType", "MWEB");
                 ApplicationHandler.notBlankAndPut(doPayRequestParameters, "openid", doPayModel.getOpenId(), ApplicationHandler.obtainParameterErrorMessage("openId"));
             } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_APP) {
                 doPayRequestParameters.put("tradeType", "APP");
@@ -60,17 +60,14 @@ public class DietOrderService {
             controllerName = "alipay";
             doPayRequestParameters.put("subject", "订单支付！");
             doPayRequestParameters.put("outTradeNo", dietOrder.getOrderNumber());
-            doPayRequestParameters.put("productCode", "");
             ApplicationHandler.notBlankAndPut(doPayRequestParameters, "productCode", doPayModel.getProductCode(), ApplicationHandler.obtainParameterErrorMessage("productCode"));
-
-            DecimalFormat decimalFormat = new DecimalFormat("0.00");
-            doPayRequestParameters.put("totalAmount", decimalFormat.format(dietOrder.getPayableAmount()));
+            doPayRequestParameters.put("totalAmount", new DecimalFormat("0.00").format(dietOrder.getPayableAmount()));
             if (paidScene == Constants.PAID_SCENE_ALIPAY_MOBILE_WEBSITE) {
                 actionName = "alipayTradeWapPay";
             } else if (paidScene == Constants.PAID_SCENE_ALIPAY_PC_WEBSITE) {
                 actionName = "alipayTradePagePay";
             } else if (paidScene == Constants.PAID_SCENE_ALIPAY_APP) {
-
+                actionName = "alipayTradeAppPay";
             }
         }
         ApiRest doPayApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, controllerName, actionName, doPayRequestParameters);
