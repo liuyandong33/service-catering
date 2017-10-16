@@ -53,11 +53,11 @@
         WHERE id = #{id}
     </update>
 
-    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.Branch">
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.DietOrder">
         SELECT * FROM diet_order <include refid="searchConditionSql"></include> <include refid="paginationSql"></include>
     </select>
 
-    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.Branch">
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.DietOrder">
         SELECT * FROM diet_order <include refid="searchConditionSql"></include>
     </select>
 

@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -31,19 +33,29 @@ public class ToolController extends BasicController {
 
             Class<?> domainClass = Class.forName(domainClassName);
             Field[] fields = domainClass.getDeclaredFields();
+            List<Field> fieldList = new ArrayList<Field>();
+            for (Field field : fields) {
+                String fieldName = field.getName();
+                if ("id".equals(fieldName) || "createTime".equals(fieldName) || "lastUpdateTime".equals(fieldName) || "deleted".equals(fieldName)) {
+                    continue;
+                }
+                fieldList.add(field);
+            }
             StringBuffer insertSql = new StringBuffer("INSERT INTO ");
             String domainClassSimpleName = domainClass.getSimpleName();
             String tableName = NamingStrategyUtils.camelCaseToUnderscore(domainClassSimpleName.substring(0, 1).toLowerCase() + domainClassSimpleName.substring(1));
             insertSql.append(tableName);
             insertSql.append("(");
-            int length = fields.length;
-            for (int index = 0; index < length; index++) {
-                String fieldName = fields[index].getName();
+            int size = fieldList.size();
+            int count = 0;
+            for (int index = 0; index < size; index++) {
+                String fieldName = fieldList.get(index).getName();
                 if ("id".equals(fieldName) || "createTime".equals(fieldName) || "lastUpdateTime".equals(fieldName) || "deleted".equals(fieldName)) {
                     continue;
                 }
+                count = count + 1;
                 insertSql.append(NamingStrategyUtils.camelCaseToUnderscore(fieldName)).append(", ");
-                if ((index + 1) % 3 == 0 && (index + 1) != length) {
+                if (count % 3 == 0 && count != size) {
                     insertSql.append("<br>");
                 }
             }
@@ -53,13 +65,12 @@ public class ToolController extends BasicController {
             insertSql.append("<br>");
             insertSql.append("VALUES(");
 
-            for (int index = 0; index < length; index++) {
-                String fieldName = fields[index].getName();
-                if ("id".equals(fieldName) || "createTime".equals(fieldName) || "lastUpdateTime".equals(fieldName) || "deleted".equals(fieldName)) {
-                    continue;
-                }
+            count = 0;
+            for (int index = 0; index < size; index++) {
+                String fieldName = fieldList.get(index).getName();
+                count = count + 1;
                 insertSql.append("#{").append(fieldName).append("}, ");
-                if ((index + 1) % 3 == 0 && (index + 1) != length) {
+                if (count % 3 == 0 && count != size) {
                     insertSql.append("<br>");
                 }
             }

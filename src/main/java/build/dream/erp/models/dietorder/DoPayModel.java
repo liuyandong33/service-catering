@@ -22,7 +22,11 @@ public class DoPayModel extends BasicModel {
     private Integer paidScene;
     private String spbillCreateIp;
     private String openId;
+    private String subOpenId;
     private String productCode;
+
+    @NotNull
+    private String userId;
 
     public BigInteger getTenantId() {
         return tenantId;
@@ -80,11 +84,27 @@ public class DoPayModel extends BasicModel {
         this.openId = openId;
     }
 
+    public String getSubOpenId() {
+        return subOpenId;
+    }
+
+    public void setSubOpenId(String subOpenId) {
+        this.subOpenId = subOpenId;
+    }
+
     public String getProductCode() {
         return productCode;
     }
 
     public void setProductCode(String productCode) {
         this.productCode = productCode;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

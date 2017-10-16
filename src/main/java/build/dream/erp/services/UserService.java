@@ -5,6 +5,7 @@ import build.dream.common.erp.domains.Branch;
 import build.dream.common.utils.*;
 import build.dream.erp.constants.Constants;
 import build.dream.erp.mappers.BranchMapper;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,18 +27,18 @@ public class UserService {
     public ApiRest obtainUserInfo(String loginName) throws IOException {
         Map<String, String> obtainUserInfoRequestParameters = new HashMap<String, String>();
         obtainUserInfoRequestParameters.put("loginName", loginName);
-        String obtainUserInfoResult = ProxyUtils.doGetWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "user", "obtainUserInfo", obtainUserInfoRequestParameters);
+        String obtainUserInfoResult = ProxyUtils.doGetOriginalWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "user", "obtainUserInfo", obtainUserInfoRequestParameters);
         ApiRest obtainUserInfoApiRest = ApiRest.fromJson(obtainUserInfoResult);
         Validate.isTrue(obtainUserInfoApiRest.isSuccessful(), obtainUserInfoApiRest.getError());
         Map<String, Object> obtainUserInfoApiRestData = (Map<String, Object>) obtainUserInfoApiRest.getData();
         Map<String, Object> user = (Map<String, Object>) obtainUserInfoApiRestData.get("user");
         Map<String, Object> tenant = (Map<String, Object>) obtainUserInfoApiRestData.get("tenant");
-        BigInteger userId = ApplicationHandler.obtainBigIntegerFromMap(user, "id");
-        BigInteger tenantId = ApplicationHandler.obtainBigIntegerFromMap(tenant, "id");
+        BigInteger userId = BigInteger.valueOf(MapUtils.getLongValue(user, "id"));
+        BigInteger tenantId = BigInteger.valueOf(MapUtils.getLongValue(tenant, "id"));
         Branch branch = branchMapper.findByUserIdAndTenantId(tenantId, userId);
         String posApiServiceDomain = ConfigurationUtils.getConfiguration(Constants.SERVICE_NAME_APPAPI);
         String appApiServiceDomain = ConfigurationUtils.getConfiguration(Constants.SERVICE_NAME_APPAPI);
-        CacheUtils.hdel(Constants.CLIENT_INFO_KEY_PREFIX + ApplicationHandler.obtainStringFromMap(user, "loginName"), "changed");
+        CacheUtils.hdel(Constants.CLIENT_INFO_KEY_PREFIX + MapUtils.getString(user, "loginName"), "changed");
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("user", user);
@@ -75,7 +76,7 @@ public class UserService {
         List<BigInteger> userIds = branchMapper.findAllUserIds(pagedSearchModel);
         Map<String, String> findAllUsersRequestParameters = new HashMap<String, String>();
         findAllUsersRequestParameters.put("userIds", StringUtils.join(userIds, ","));
-        String findAllUsersResult = ProxyUtils.doGetWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "user", "findAllUsers", findAllUsersRequestParameters);
+        String findAllUsersResult = ProxyUtils.doGetOriginalWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "user", "findAllUsers", findAllUsersRequestParameters);
         ApiRest findAllUsersApiRest = ApiRest.fromJson(findAllUsersResult);
         Validate.isTrue(findAllUsersApiRest.isSuccessful(), findAllUsersApiRest.getError());
 

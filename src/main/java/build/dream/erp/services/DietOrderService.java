@@ -201,13 +201,21 @@ public class DietOrderService {
             doPayRequestParameters.put("totalFee", String.valueOf(dietOrder.getPayableAmount().multiply(NumberUtils.createBigDecimal("100")).intValue()));
             ApplicationHandler.notBlankAndPut(doPayRequestParameters, "spbillCreateIp", doPayModel.getSpbillCreateIp(), ApplicationHandler.obtainParameterErrorMessage("spbillCreateIp"));
             doPayRequestParameters.put("notifyUrl", SystemPartitionUtils.getServiceDomain(partitionCode, serviceName) + "/dietOrder/weiXinPayCallback");
+            doPayRequestParameters.put("userId", doPayModel.getUserId());
             if (paidScene == Constants.PAID_SCENE_WEI_XIN_PUBLIC_ACCOUNT) {
-                doPayRequestParameters.put("tradeType", "JSAPI");
+                doPayRequestParameters.put("tradeType", Constants.WEI_XIN_PAY_TRADE_TYPE_JSAPI);
+                ApplicationHandler.notBlankAndPut(doPayRequestParameters, "openId", doPayModel.getOpenId(), ApplicationHandler.obtainParameterErrorMessage("openId"));
+                ApplicationHandler.ifNotBlankPut(doPayRequestParameters, "subOpenId", doPayModel.getSubOpenId());
             } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_H5) {
-                doPayRequestParameters.put("tradeType", "MWEB");
-                ApplicationHandler.notBlankAndPut(doPayRequestParameters, "openid", doPayModel.getOpenId(), ApplicationHandler.obtainParameterErrorMessage("openId"));
+                doPayRequestParameters.put("tradeType", Constants.WEI_XIN_PAY_TRADE_TYPE_MWEB);
+                ApplicationHandler.ifNotBlankPut(doPayRequestParameters, "openId", doPayModel.getOpenId());
+                ApplicationHandler.ifNotBlankPut(doPayRequestParameters, "subOpenId", doPayModel.getSubOpenId());
             } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_APP) {
-                doPayRequestParameters.put("tradeType", "APP");
+                doPayRequestParameters.put("tradeType", Constants.WEI_XIN_PAY_TRADE_TYPE_APP);
+            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_NATIVE) {
+                doPayRequestParameters.put("tradeType", Constants.WEI_XIN_PAY_TRADE_TYPE_NATIVE);
+                ApplicationHandler.ifNotBlankPut(doPayRequestParameters, "openId", doPayModel.getOpenId());
+                ApplicationHandler.ifNotBlankPut(doPayRequestParameters, "subOpenId", doPayModel.getSubOpenId());
             }
         } else if (paidType == Constants.PAID_TYPE_ALIPAY) {
             controllerName = "alipay";
