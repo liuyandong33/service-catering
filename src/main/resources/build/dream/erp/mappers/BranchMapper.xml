@@ -10,6 +10,14 @@
         #{lastUpdateUserId})
     </insert>
 
+    <insert id="insertAll" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO branch(code, name, type, status, tenant_id, create_user_id, last_update_user_id)
+        VALUES
+        <foreach collection="list" index="index" item="branch" separator=",">
+            (#{branch.code}, #{branch.name}, #{branch.type}, #{branch.status}, #{branch.tenantId}, #{branch.createUserId}, #{branch.lastUpdateUserId})
+        </foreach>
+    </insert>
+
     <update id="update" parameterType="build.dream.common.erp.domains.Branch">
         UPDATE branch
         SET code = #{code},
@@ -76,5 +84,9 @@
 
     <select id="countUsers" parameterType="build.dream.common.utils.SearchModel" resultType="java.lang.Long">
         SELECT COUNT(1) FROM merge_user_branch <include refid="searchConditionSql"></include>
+    </select>
+
+    <select id="findAllBranchInfos" resultType="build.dream.common.utils.UnderscoreToCamelCaseMap">
+        SELECT id, code, name, type, status, tenant_id FROM branch WHERE deleted = 0;
     </select>
 </mapper>

@@ -7,10 +7,12 @@ import org.apache.ibatis.annotations.Param;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface BranchMapper {
     long insert(Branch branch);
+    long insertAll(List<Branch> branches);
     long update(Branch branch);
     long insertMergeUserBranch(@Param("userId") BigInteger userId, @Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId);
     List<Branch> findAll(SearchModel searchModel);
@@ -19,4 +21,5 @@ public interface BranchMapper {
     List<BigInteger> findAllUserIds(SearchModel searchModel);
     long countUsers(SearchModel searchModel);
     long countBranches(SearchModel searchModel);
+    List<Map<String, Object>> findAllBranchInfos();
 }

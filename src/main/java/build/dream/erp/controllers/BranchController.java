@@ -77,4 +77,34 @@ public class BranchController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    @RequestMapping(value = "/insertTestData")
+    @ResponseBody
+    public String insertTestData() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            apiRest = branchService.insertTestData();
+        } catch (Exception e) {
+            LogUtils.error("插入测试数据失败", controllerSimpleName, "insertTestData", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/findAllBranchInfos")
+    @ResponseBody
+    public String findAllBranchInfos() {
+        long start = System.currentTimeMillis();
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            apiRest = branchService.findAllBranchInfos();
+        } catch (Exception e) {
+            LogUtils.error("查询门店失败", controllerSimpleName, "findAllBranchInfos", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        System.out.println(System.currentTimeMillis() - start);
+        return GsonUtils.toJson(apiRest);
+    }
 }
