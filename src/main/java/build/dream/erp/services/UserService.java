@@ -87,4 +87,17 @@ public class UserService {
         ApiRest apiRest = new ApiRest(data, "查询员工列表成功！");
         return apiRest;
     }
+
+    public ApiRest findAllAppAuthorities(String userId) throws IOException {
+        Map<String, String> findAllAppAuthoritiesRequestParameters = new HashMap<String, String>();
+        findAllAppAuthoritiesRequestParameters.put("userId", userId);
+        ApiRest findAllAppAuthoritiesApiRest = ProxyUtils.doGetWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "user", "findAllAppAuthorities", findAllAppAuthoritiesRequestParameters);
+        Validate.isTrue(findAllAppAuthoritiesApiRest.isSuccessful(), findAllAppAuthoritiesApiRest.getError());
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setData(findAllAppAuthoritiesApiRest.getData());
+        apiRest.setMessage("查询APP权限成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
+    }
 }

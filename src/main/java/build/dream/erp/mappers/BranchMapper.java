@@ -22,4 +22,5 @@ public interface BranchMapper {
     long countUsers(SearchModel searchModel);
     long countBranches(SearchModel searchModel);
     List<Map<String, Object>> findAllBranchInfos();
+    Branch findBranchInfo(@Param("tenantId") BigInteger tenantId, @Param("userId") BigInteger userId);
 }

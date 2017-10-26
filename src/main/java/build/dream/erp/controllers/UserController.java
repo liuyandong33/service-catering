@@ -53,4 +53,22 @@ public class UserController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    @RequestMapping(value = "/findAllAppAuthorities")
+    @ResponseBody
+    public String findAllAppAuthorities() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            String userId = requestParameters.get("userId");
+            Validate.notNull(userId, ApplicationHandler.obtainParameterErrorMessage("userId"));
+            apiRest = userService.findAllAppAuthorities(userId);
+        } catch (Exception e) {
+            LogUtils.error("查询APP权限失败", controllerSimpleName, "findAllAppAuthorities", e.getClass().getSimpleName(), e.getMessage(), requestParameters);
+            apiRest = new ApiRest();
+            apiRest.setError(e.getMessage());
+            apiRest.setSuccessful(false);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }

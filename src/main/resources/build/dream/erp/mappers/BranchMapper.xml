@@ -89,4 +89,13 @@
     <select id="findAllBranchInfos" resultType="build.dream.common.utils.UnderscoreToCamelCaseMap">
         SELECT id, code, name, type, status, tenant_id FROM branch WHERE deleted = 0;
     </select>
+    
+    <select id="findBranchInfo" resultType="build.dream.common.erp.domains.Branch">
+        SELECT
+        branch.*
+        FROM merge_user_branch
+        INNER JOIN branch ON branch.id = merge_user_branch.branch_id AND branch.deleted = 0
+        WHERE merge_user_branch.tenant_id = #{tenantId}
+        AND merge_user_branch.user_id = #{userId}
+    </select>
 </mapper>

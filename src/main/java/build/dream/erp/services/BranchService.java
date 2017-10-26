@@ -79,7 +79,7 @@ public class BranchService {
     }
 
     @Transactional(readOnly = true)
-    public ApiRest findBranchInfo(BigInteger tenantId, BigInteger branchId) {
+    public ApiRest findBranchInfoById(BigInteger tenantId, BigInteger branchId) {
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("id", "=", tenantId);
         searchModel.addSearchCondition("tenant_id", "=", branchId);
@@ -93,34 +93,23 @@ public class BranchService {
         return apiRest;
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public ApiRest insertTestData() {
-        List<Branch> branches = new ArrayList<Branch>();
-        for (int index = 0; index < 100000; index++) {
-            Branch branch = new Branch();
-            branch.setCode(index + "");
-            branch.setName("门店_" + index);
-            branch.setType(1);
-            branch.setStatus(1);
-            branch.setTenantId(NumberUtils.createBigInteger(index + ""));
-            branch.setCreateUserId(BigInteger.ONE);
-            branch.setLastUpdateUserId(BigInteger.ONE);
-            branch.setLastUpdateRemark("插入测试数据！");
-            branches.add(branch);
-        }
-        branchMapper.insertAll(branches);
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("插入测试数据成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
-    }
-
     @Transactional(readOnly = true)
     public ApiRest findAllBranchInfos() {
         List<Map<String, Object>> branchInfos = branchMapper.findAllBranchInfos();
         ApiRest apiRest = new ApiRest();
         apiRest.setData(branchInfos);
         apiRest.setMessage("查询门店信息成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
+    }
+
+    @Transactional(readOnly = true)
+    public ApiRest findBranchInfo(BigInteger tenantId, BigInteger userId) {
+        Branch branch = branchMapper.findBranchInfo(tenantId, userId);
+        ApiRest apiRest = new ApiRest();
+        apiRest.setData(branch);
+        apiRest.setMessage("查询门店信息成功！");
+        apiRest.setClassName(Branch.class.getName());
         apiRest.setSuccessful(true);
         return apiRest;
     }
