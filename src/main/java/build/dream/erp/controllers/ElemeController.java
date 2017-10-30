@@ -225,4 +225,136 @@ public class ElemeController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    @RequestMapping(value = "/createCategoryWithChildren")
+    @ResponseBody
+    public String createCategoryWithChildren() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            String tenantId = requestParameters.get("tenantId");
+            Validate.notNull(tenantId, "参数(tenantId)不能为空！");
+
+            String branchId = requestParameters.get("branchId");
+            Validate.notNull(branchId, "参数(branchId)不能为空！");
+
+            String categoryId = requestParameters.get("categoryId");
+            Validate.notNull(categoryId, ApplicationHandler.obtainParameterErrorMessage("categoryId"));
+
+            BigInteger bigIntegerTenantId = NumberUtils.createBigInteger(tenantId);
+            BigInteger bigIntegerBranchId = NumberUtils.createBigInteger(branchId);
+            BigInteger bigIntegerCategoryId = NumberUtils.createBigInteger(categoryId);
+
+            Branch branch = elemeService.findBranchInfo(bigIntegerTenantId, bigIntegerBranchId);
+            GoodsCategory goodsCategory = elemeService.findGoodsCategoryInfo(bigIntegerTenantId, bigIntegerBranchId, bigIntegerCategoryId);
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("shopId", 150898569);
+            params.put("name", goodsCategory.getName());
+            params.put("parentId", goodsCategory.getParentId());
+            params.put("description", goodsCategory.getDescription());
+            apiRest = ElemeUtils.callElemeSystem("1", tenantId, branch.getType().toString(), branchId, "eleme.product.category.createCategoryWithChildren", params);
+        } catch (Exception e) {
+            LogUtils.error("添加商品分类失败", controllerSimpleName, "createCategoryWithChildren", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/updateCategory")
+    @ResponseBody
+    public String updateCategory() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            String tenantId = requestParameters.get("tenantId");
+            Validate.notNull(tenantId, "参数(tenantId)不能为空！");
+
+            String branchId = requestParameters.get("branchId");
+            Validate.notNull(branchId, "参数(branchId)不能为空！");
+
+            String categoryId = requestParameters.get("categoryId");
+            Validate.notNull(categoryId, ApplicationHandler.obtainParameterErrorMessage("categoryId"));
+
+            BigInteger bigIntegerTenantId = NumberUtils.createBigInteger(tenantId);
+            BigInteger bigIntegerBranchId = NumberUtils.createBigInteger(branchId);
+            BigInteger bigIntegerCategoryId = NumberUtils.createBigInteger(categoryId);
+
+            Branch branch = elemeService.findBranchInfo(bigIntegerTenantId, bigIntegerBranchId);
+            GoodsCategory goodsCategory = elemeService.findGoodsCategoryInfo(bigIntegerTenantId, bigIntegerBranchId, bigIntegerCategoryId);
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("categoryId", goodsCategory.getId());
+            params.put("name", goodsCategory.getName());
+            params.put("description", goodsCategory.getDescription());
+            apiRest = ElemeUtils.callElemeSystem("1", tenantId, branch.getType().toString(), branchId, "eleme.product.category.updateCategory", params);
+        } catch (Exception e) {
+            LogUtils.error("更新商品分类失败", controllerSimpleName, "updateCategory", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/updateCategoryWithChildren")
+    @ResponseBody
+    public String updateCategoryWithChildren() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            String tenantId = requestParameters.get("tenantId");
+            Validate.notNull(tenantId, "参数(tenantId)不能为空！");
+
+            String branchId = requestParameters.get("branchId");
+            Validate.notNull(branchId, "参数(branchId)不能为空！");
+
+            String categoryId = requestParameters.get("categoryId");
+            Validate.notNull(categoryId, ApplicationHandler.obtainParameterErrorMessage("categoryId"));
+
+            BigInteger bigIntegerTenantId = NumberUtils.createBigInteger(tenantId);
+            BigInteger bigIntegerBranchId = NumberUtils.createBigInteger(branchId);
+            BigInteger bigIntegerCategoryId = NumberUtils.createBigInteger(categoryId);
+
+            Branch branch = elemeService.findBranchInfo(bigIntegerTenantId, bigIntegerBranchId);
+            GoodsCategory goodsCategory = elemeService.findGoodsCategoryInfo(bigIntegerTenantId, bigIntegerBranchId, bigIntegerCategoryId);
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("categoryId", goodsCategory.getId());
+            params.put("name", goodsCategory.getName());
+            params.put("parentId", goodsCategory.getParentId());
+            params.put("description", goodsCategory.getDescription());
+            apiRest = ElemeUtils.callElemeSystem("1", tenantId, branch.getType().toString(), branchId, "eleme.product.category.updateCategoryWithChildren", params);
+        } catch (Exception e) {
+            LogUtils.error("更新商品分类失败", controllerSimpleName, "updateCategoryWithChildren", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/removeCategory")
+    @ResponseBody
+    public String removeCategory() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            String tenantId = requestParameters.get("tenantId");
+            Validate.notNull(tenantId, "参数(tenantId)不能为空！");
+
+            String branchId = requestParameters.get("branchId");
+            Validate.notNull(branchId, "参数(branchId)不能为空！");
+
+            String categoryId = requestParameters.get("categoryId");
+            Validate.notNull(categoryId, ApplicationHandler.obtainParameterErrorMessage("categoryId"));
+
+            BigInteger bigIntegerTenantId = NumberUtils.createBigInteger(tenantId);
+            BigInteger bigIntegerBranchId = NumberUtils.createBigInteger(branchId);
+            BigInteger bigIntegerCategoryId = NumberUtils.createBigInteger(categoryId);
+
+            Branch branch = elemeService.findBranchInfo(bigIntegerTenantId, bigIntegerBranchId);
+            GoodsCategory goodsCategory = elemeService.findGoodsCategoryInfo(bigIntegerTenantId, bigIntegerBranchId, bigIntegerCategoryId);
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("categoryId", goodsCategory.getId());
+            apiRest = ElemeUtils.callElemeSystem("1", tenantId, branch.getType().toString(), branchId, "eleme.product.category.removeCategory", params);
+        } catch (Exception e) {
+            LogUtils.error("删除商品分类失败", controllerSimpleName, "removeCategory", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }
