@@ -43,6 +43,8 @@ public class ElemeService {
     private DietOrderMapper dietOrderMapper;
     @Autowired
     private ElemeReminderMessageMapper elemeReminderMessageMapper;
+    @Autowired
+    private GoodsCategoryMapper goodsCategoryMapper;
 
     @Transactional(readOnly = true)
     public ApiRest tenantAuthorize(BigInteger tenantId, BigInteger branchId) throws IOException {
@@ -388,6 +390,17 @@ public class ElemeService {
         Branch branch = branchMapper.find(searchModel);
         Validate.notNull(branch, "门店不存在！");
         return branch;
+    }
+
+    @Transactional(readOnly = true)
+    public GoodsCategory findGoodsCategoryInfo(BigInteger tenantId, BigInteger branchId, BigInteger categoryId) {
+        SearchModel searchModel = new SearchModel();
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_IN, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_IN, branchId);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, categoryId);
+        GoodsCategory goodsCategory = goodsCategoryMapper.find(searchModel);
+        Validate.notNull(goodsCategory, "分类信息不存在！");
+        return goodsCategory;
     }
 
     /**

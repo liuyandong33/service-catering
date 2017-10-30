@@ -3,6 +3,7 @@ package build.dream.erp.controllers;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.erp.domains.Branch;
+import build.dream.common.erp.domains.GoodsCategory;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
@@ -12,6 +13,7 @@ import build.dream.erp.services.ElemeService;
 import build.dream.erp.utils.ElemeUtils;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -206,11 +208,16 @@ public class ElemeController extends BasicController {
             String categoryId = requestParameters.get("categoryId");
             Validate.notNull(categoryId, ApplicationHandler.obtainParameterErrorMessage("categoryId"));
 
-            Branch branch = elemeService.findBranchInfo(BigInteger.valueOf(Long.valueOf(tenantId)), BigInteger.valueOf(Long.valueOf(branchId)));
+            BigInteger bigIntegerTenantId = NumberUtils.createBigInteger(tenantId);
+            BigInteger bigIntegerBranchId = NumberUtils.createBigInteger(branchId);
+            BigInteger bigIntegerCategoryId = NumberUtils.createBigInteger(categoryId);
+
+            Branch branch = elemeService.findBranchInfo(bigIntegerTenantId, bigIntegerBranchId);
+            GoodsCategory goodsCategory = elemeService.findGoodsCategoryInfo(bigIntegerTenantId, bigIntegerBranchId, bigIntegerCategoryId);
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("shopId", 150898569);
-            params.put("name", "afafaf");
-            params.put("description", "description");
+            params.put("name", goodsCategory.getName());
+            params.put("description", goodsCategory.getDescription());
             apiRest = ElemeUtils.callElemeSystem("1", tenantId, branch.getType().toString(), branchId, "eleme.product.category.createCategory", params);
         } catch (Exception e) {
             LogUtils.error("添加商品分类失败", controllerSimpleName, "createCategory", e, requestParameters);
