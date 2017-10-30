@@ -58,12 +58,12 @@ public class ElemeController extends BasicController {
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
             String orderCallbackRequestBody = requestParameters.get("orderCallbackRequestBody");
-            orderCallbackRequestBody = "{\"requestId\": \"100000021764401594\",\"type\": 10,\"appId\": 22954133,\"message\": \"{\\\"id\\\":\\\"1200897812792015983\\\",\\\"orderId\\\":\\\"1200897812792015983\\\",\\\"address\\\":\\\"上海市普陀区金沙江路丹巴路119号-NAPOS\\\",\\\"createdAt\\\":\\\"2017-03-06T12:28:50\\\",\\\"activeAt\\\":\\\"2017-03-06T12:28:50\\\",\\\"deliverFee\\\":0.0,\\\"deliverTime\\\":null,\\\"description\\\":\\\"爱吃辣多点辣\\\",\\\"groups\\\":[{\\\"name\\\":\\\"1号篮子\\\",\\\"type\\\":\\\"normal\\\",\\\"items\\\":[{\\\"id\\\":260,\\\"skuId\\\":-1,\\\"name\\\":\\\"红烧肉[重辣]\\\",\\\"categoryId\\\":1,\\\"price\\\":4.0,\\\"quantity\\\":1,\\\"total\\\":4.0,\\\"additions\\\":[]}]},{\\\"name\\\":\\\"2号篮子\\\",\\\"type\\\":\\\"normal\\\",\\\"items\\\":[{\\\"id\\\":262,\\\"skuId\\\":-1,\\\"name\\\":\\\"狮子头\\\",\\\"categoryId\\\":1,\\\"price\\\":5.0,\\\"quantity\\\":1,\\\"total\\\":5.0,\\\"additions\\\":[]}]},{\\\"name\\\":\\\"3号篮子\\\",\\\"type\\\":\\\"normal\\\",\\\"items\\\":[{\\\"id\\\":261,\\\"skuId\\\":-1,\\\"name\\\":\\\"奶茶[去冰+半塘]\\\",\\\"categoryId\\\":1,\\\"price\\\":3.0,\\\"quantity\\\":2,\\\"total\\\":6.0,\\\"additions\\\":[]}]}],\\\"invoice\\\":\\\"上海市拉拉队有限公司\\\",\\\"book\\\":false,\\\"onlinePaid\\\":true,\\\"railwayAddress\\\":null,\\\"phoneList\\\":[\\\"13456789012\\\"],\\\"shopId\\\":720032,\\\"shopName\\\":\\\"测试餐厅001\\\",\\\"daySn\\\":7,\\\"status\\\":\\\"unprocessed\\\",\\\"refundStatus\\\":\\\"noRefund\\\",\\\"userId\\\":13524069,\\\"totalPrice\\\":20.0,\\\"originalPrice\\\":0.0,\\\"consignee\\\":\\\"饿了么 先生\\\",\\\"deliveryGeo\\\":\\\"121.3836479187,31.2299251556\\\",\\\"deliveryPoiAddress\\\":\\\"上海市普陀区金沙江路丹巴路119号-NAPOS\\\",\\\"invoiced\\\":true,\\\"income\\\":0.0,\\\"serviceRate\\\":0.0,\\\"serviceFee\\\":0.0,\\\"hongbao\\\":0.0,\\\"packageFee\\\":0.0,\\\"activityTotal\\\":0.0,\\\"shopPart\\\":0.0,\\\"elemePart\\\":0.0,\\\"downgraded\\\":true,\\\"vipDeliveryFeeDiscount\\\":0.0}\",\"shopId\": 720032,\"timestamp\": 1488774535366,\"signature\": \"2461328351094CA5853415FD25E36E95\",\"userId\": 98587250597500702}";
+            orderCallbackRequestBody = "{\"requestId\":\"200007211657667333\",\"type\":10,\"appId\":65929831,\"message\":\"{\\\"id\\\":\\\"3014728511382982849\\\",\\\"orderId\\\":\\\"3014728511382982849\\\",\\\"address\\\":\\\"南昌大学共青学院-学生公寓一栋111\\\",\\\"createdAt\\\":\\\"2017-10-30T20:08:07\\\",\\\"activeAt\\\":\\\"2017-10-30T20:08:07\\\",\\\"deliverFee\\\":3.0,\\\"deliverTime\\\":null,\\\"description\\\":\\\"\\\",\\\"groups\\\":[{\\\"name\\\":\\\"1号篮子\\\",\\\"type\\\":\\\"normal\\\",\\\"items\\\":[{\\\"id\\\":1298577560,\\\"skuId\\\":200000100943422213,\\\"name\\\":\\\"台湾烤肠\\\",\\\"categoryId\\\":1,\\\"price\\\":5.0,\\\"quantity\\\":2,\\\"total\\\":10.0,\\\"additions\\\":[],\\\"newSpecs\\\":[],\\\"attributes\\\":[],\\\"extendCode\\\":\\\"\\\",\\\"barCode\\\":\\\"\\\",\\\"weight\\\":1.0,\\\"userPrice\\\":0.0,\\\"shopPrice\\\":0.0,\\\"vfoodId\\\":1290927110},{\\\"id\\\":1288279667,\\\"skuId\\\":200000090398379781,\\\"name\\\":\\\"烧仙草奶茶-大杯热\\\",\\\"categoryId\\\":1,\\\"price\\\":14.0,\\\"quantity\\\":1,\\\"total\\\":14.0,\\\"additions\\\":[],\\\"newSpecs\\\":[],\\\"attributes\\\":[],\\\"extendCode\\\":\\\"\\\",\\\"barCode\\\":\\\"\\\",\\\"weight\\\":1.0,\\\"userPrice\\\":0.0,\\\"shopPrice\\\":0.0,\\\"vfoodId\\\":671477772}]}],\\\"invoice\\\":null,\\\"book\\\":false,\\\"onlinePaid\\\":true,\\\"railwayAddress\\\":null,\\\"phoneList\\\":[\\\"15079241539\\\"],\\\"shopId\\\":156898280,\\\"shopName\\\":\\\"Honey cup哈尼卡布\\\",\\\"daySn\\\":6,\\\"status\\\":\\\"unprocessed\\\",\\\"refundStatus\\\":\\\"noRefund\\\",\\\"userId\\\":201506988,\\\"totalPrice\\\":17.0,\\\"originalPrice\\\":27.0,\\\"consignee\\\":\\\"马成鹏(先生)\\\",\\\"deliveryGeo\\\":\\\"115.80731995,29.22636934\\\",\\\"deliveryPoiAddress\\\":\\\"南昌大学共青学院-学生公寓一栋111\\\",\\\"invoiced\\\":false,\\\"income\\\":13.6,\\\"serviceRate\\\":0.15,\\\"serviceFee\\\":-2.4,\\\"hongbao\\\":0.0,\\\"packageFee\\\":0.0,\\\"activityTotal\\\":-10.0,\\\"shopPart\\\":-8.0,\\\"elemePart\\\":-2.0,\\\"downgraded\\\":false,\\\"vipDeliveryFeeDiscount\\\":0.0,\\\"openId\\\":\\\"3028Z73140\\\",\\\"secretPhoneExpireTime\\\":null,\\\"orderActivities\\\":[{\\\"categoryId\\\":12,\\\"name\\\":\\\"在线支付立减优惠\\\",\\\"amount\\\":-10.0,\\\"elemePart\\\":0.0,\\\"restaurantPart\\\":0.0,\\\"id\\\":141587914}],\\\"invoiceType\\\":null,\\\"taxpayerId\\\":\\\"\\\",\\\"coldBoxFee\\\":0.0}\",\"shopId\":156898280,\"timestamp\":1509365287868,\"signature\":\"0A1D9E427F0AE7008BA8728E93E30162\",\"userId\":283166468248413847}";
             Validate.notNull(orderCallbackRequestBody, "参数(orderCallbackRequestBody)不能为空！");
 
             JSONObject orderCallbackJsonObject = JSONObject.fromObject(orderCallbackRequestBody);
             BigInteger shopId = BigInteger.valueOf(orderCallbackJsonObject.getLong("shopId"));
-            JSONObject message = orderCallbackJsonObject.getJSONObject("message");
+            String message = orderCallbackJsonObject.getString("message");
             Integer type = orderCallbackJsonObject.getInt("type");
 
             ApiRest apiRest = null;
@@ -72,16 +72,16 @@ public class ElemeController extends BasicController {
                     apiRest = elemeService.saveElemeOrder(shopId, message, type);
                     break;
                 case 12:
-                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, message, type);
+                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, null, type);
                     break;
                 case 14:
-                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, message, type);
+                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, null, type);
                     break;
                 case 15:
-                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, message, type);
+                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, null, type);
                     break;
                 case 17:
-                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, message, type);
+                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, null, type);
                     break;
             }
             Validate.isTrue(apiRest.isSuccessful(), apiRest.getError());
