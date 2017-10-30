@@ -81,14 +81,14 @@ public class BranchService {
     @Transactional(readOnly = true)
     public ApiRest findBranchInfoById(BigInteger tenantId, BigInteger branchId) {
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("id", "=", tenantId);
-        searchModel.addSearchCondition("tenant_id", "=", branchId);
+        searchModel.addSearchCondition("id", "=", branchId);
+        searchModel.addSearchCondition("tenant_id", "=", tenantId);
         Branch branch =  branchMapper.find(searchModel);
 
         ApiRest apiRest = new ApiRest();
         apiRest.setData(branch);
         apiRest.setClassName(Branch.class.getName());
-        apiRest.setMessage("查询门店列表成功！");
+        apiRest.setMessage("查询门店信息成功！");
         apiRest.setSuccessful(true);
         return apiRest;
     }

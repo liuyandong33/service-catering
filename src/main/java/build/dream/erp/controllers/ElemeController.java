@@ -2,11 +2,14 @@ package build.dream.erp.controllers;
 
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
+import build.dream.common.erp.domains.Branch;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
 import build.dream.erp.constants.Constants;
+import build.dream.erp.services.BranchService;
 import build.dream.erp.services.ElemeService;
+import build.dream.erp.utils.ElemeUtils;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.Map;
 
 @Controller
@@ -22,6 +26,8 @@ import java.util.Map;
 public class ElemeController extends BasicController {
     @Autowired
     private ElemeService elemeService;
+    @Autowired
+    private BranchService branchService;
 
     @RequestMapping(value = "/tenantAuthorize")
     @ResponseBody
@@ -83,5 +89,133 @@ public class ElemeController extends BasicController {
             returnValue = e.getMessage();
         }
         return returnValue;
+    }
+
+    @RequestMapping(value = "/uploadImage")
+    @ResponseBody
+    public String uploadImage() {
+        return null;
+    }
+
+    @RequestMapping(value = "/uploadImageWithRemoteUrl ")
+    @ResponseBody
+    public String uploadImageWithRemoteUrl() {
+        return null;
+    }
+
+    @RequestMapping(value = "/getUploadedUrl")
+    @ResponseBody
+    public String getUploadedUrl() {
+        return null;
+    }
+
+    @RequestMapping(value = "/getShopCategories")
+    @ResponseBody
+    public String getShopCategories() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            String tenantId = requestParameters.get("tenantId");
+            Validate.notNull(tenantId, "参数(tenantId)不能为空！");
+
+            String branchId = requestParameters.get("branchId");
+            Validate.notNull(branchId, "参数(branchId)不能为空！");
+
+            Branch branch = elemeService.findBranchInfo(BigInteger.valueOf(Long.valueOf(tenantId)), BigInteger.valueOf(Long.valueOf(branchId)));
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("shopId", 150898569);
+            apiRest = ElemeUtils.callElemeSystem("1", tenantId.toString(), branch.getType().toString(), branchId.toString(), "eleme.product.category.getShopCategories", params);
+        } catch (Exception e) {
+            LogUtils.error("查询店铺商品分类失败", controllerSimpleName, "getShopCategories", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/getShopCategoriesWithChildren")
+    @ResponseBody
+    public String getShopCategoriesWithChildren() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            String tenantId = requestParameters.get("tenantId");
+            Validate.notNull(tenantId, "参数(tenantId)不能为空！");
+
+            String branchId = requestParameters.get("branchId");
+            Validate.notNull(branchId, "参数(branchId)不能为空！");
+
+            Branch branch = elemeService.findBranchInfo(BigInteger.valueOf(Long.valueOf(tenantId)), BigInteger.valueOf(Long.valueOf(branchId)));
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("shopId", 150898569);
+            apiRest = ElemeUtils.callElemeSystem("1", tenantId, branch.getType().toString(), branchId, "eleme.product.category.getShopCategoriesWithChildren", params);
+        } catch (Exception e) {
+            LogUtils.error("查询店铺商品分类失败", controllerSimpleName, "getShopCategoriesWithChildren", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/getCategory")
+    @ResponseBody
+    public String getCategory() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            String tenantId = requestParameters.get("tenantId");
+            Validate.notNull(tenantId, "参数(tenantId)不能为空！");
+
+            String branchId = requestParameters.get("branchId");
+            Validate.notNull(branchId, "参数(branchId)不能为空！");
+        } catch (Exception e) {
+            LogUtils.error("查询商品分类详情失败", controllerSimpleName, "getCategory", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/getCategoryWithChildren")
+    @ResponseBody
+    public String getCategoryWithChildren() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            String tenantId = requestParameters.get("tenantId");
+            Validate.notNull(tenantId, "参数(tenantId)不能为空！");
+
+            String branchId = requestParameters.get("branchId");
+            Validate.notNull(branchId, "参数(branchId)不能为空！");
+        } catch (Exception e) {
+            LogUtils.error("查询商品分类详情失败", controllerSimpleName, "getCategoryWithChildren", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/createCategory")
+    @ResponseBody
+    public String createCategory() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            String tenantId = requestParameters.get("tenantId");
+            Validate.notNull(tenantId, "参数(tenantId)不能为空！");
+
+            String branchId = requestParameters.get("branchId");
+            Validate.notNull(branchId, "参数(branchId)不能为空！");
+
+            String categoryId = requestParameters.get("categoryId");
+            Validate.notNull(categoryId, ApplicationHandler.obtainParameterErrorMessage("categoryId"));
+
+            Branch branch = elemeService.findBranchInfo(BigInteger.valueOf(Long.valueOf(tenantId)), BigInteger.valueOf(Long.valueOf(branchId)));
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("shopId", 150898569);
+            params.put("name", "afafaf");
+            params.put("description", "description");
+            apiRest = ElemeUtils.callElemeSystem("1", tenantId, branch.getType().toString(), branchId, "eleme.product.category.createCategory", params);
+        } catch (Exception e) {
+            LogUtils.error("添加商品分类失败", controllerSimpleName, "createCategory", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
     }
 }

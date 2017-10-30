@@ -66,7 +66,7 @@ public class ElemeService {
             String serviceName = ConfigurationUtils.getConfiguration(Constants.SERVICE_NAME);
             data = SystemPartitionUtils.getOutsideServiceDomain(serviceName) + "/eleme/bindingRestaurant?tenantId=" + tenantId + "&branchId=" + branchId;
         } else {
-            String elemeUrl = ConfigurationUtils.getConfiguration(Constants.ELEME_URL);
+            String elemeUrl = ConfigurationUtils.getConfiguration(Constants.ELEME_SERVICE_URL);
             String elemeAppKey = ConfigurationUtils.getConfiguration(Constants.ELEME_APP_KEY);
             String tenantType = checkIsAuthorizeApiRestData.get("tenantType").toString();
 
@@ -378,6 +378,16 @@ public class ElemeService {
             throw e;
         }
         return apiRest;
+    }
+
+    @Transactional(readOnly = true)
+    public Branch findBranchInfo(BigInteger tenantId, BigInteger branchId) {
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_IN, tenantId);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        Branch branch = branchMapper.find(searchModel);
+        Validate.notNull(branch, "门店不存在！");
+        return branch;
     }
 
     /**
