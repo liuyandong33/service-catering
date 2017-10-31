@@ -2,23 +2,21 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.erp.mappers.ElemeGroupMapper">
     <insert id="insert" parameterType="build.dream.common.erp.domains.ElemeGroup" useGeneratedKeys="true" keyProperty="id">
-        INSERT eleme_group(eleme_order_id, order_id, name,
-        type, create_user_id, last_update_user_id,
-        last_update_remark)
-        VALUES (#{elemeOrderId}, #{orderId}, #{name},
-        #{type}, #{createUserId}, #{lastUpdateUserId},
-        #{lastUpdateRemark})
+        INSERT INTO eleme_group(eleme_order_id, name, type,
+        create_user_id, last_update_user_id, last_update_remark)
+        VALUES(#{elemeOrderId}, #{name}, #{type},
+        #{createUserId}, #{lastUpdateUserId}, #{lastUpdateRemark})
     </insert>
 
     <update id="update" parameterType="build.dream.common.erp.domains.ElemeGroup">
         UPDATE eleme_group
         SET eleme_order_id = #{elemeOrderId},
-            order_id = #{orderId},
             name = #{name},
             type = #{type},
+            create_user_id = #{createUserId},
             last_update_user_id = #{lastUpdateUserId},
             last_update_remark = #{lastUpdateRemark},
-            deleted = #{deleted
+            deleted = #{deleted}
         WHERE id = #{id}
     </update>
     

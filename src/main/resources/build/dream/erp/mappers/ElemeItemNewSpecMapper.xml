@@ -4,7 +4,7 @@
     <insert id="insert" parameterType="build.dream.common.erp.domains.ElemeItemNewSpec" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO eleme_item_new_spec(eleme_item_id, name, value,
         create_user_id, last_update_user_id, last_update_remark)
-        VALUES (#{elemeItemId}, #{name}, #{value},
+        VALUES(#{elemeItemId}, #{name}, #{value},
         #{createUserId}, #{lastUpdateUserId}, #{lastUpdateRemark})
     </insert>
 
@@ -13,9 +13,10 @@
         SET eleme_item_id = #{elemeItemId},
             name = #{name},
             value = #{value},
+            create_user_id = #{createUserId},
             last_update_user_id = #{lastUpdateUserId},
             last_update_remark = #{lastUpdateRemark},
-            deleted = #{deleted
+            deleted = #{deleted}
         WHERE id = #{id}
     </update>
     

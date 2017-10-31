@@ -3,6 +3,7 @@ package build.dream.erp.controllers;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.erp.domains.Branch;
+import build.dream.common.erp.domains.ElemeOrder;
 import build.dream.common.erp.domains.GoodsCategory;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
@@ -353,6 +354,38 @@ public class ElemeController extends BasicController {
             apiRest = ElemeUtils.callElemeSystem("1", tenantId, branch.getType().toString(), branchId, "eleme.product.category.removeCategory", params);
         } catch (Exception e) {
             LogUtils.error("删除商品分类失败", controllerSimpleName, "removeCategory", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/confirmOrderLite")
+    @ResponseBody
+    public String confirmOrderLite() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            String tenantId = requestParameters.get("tenantId");
+            Validate.notNull(tenantId, "参数(tenantId)不能为空！");
+
+            String branchId = requestParameters.get("branchId");
+            Validate.notNull(branchId, "参数(branchId)不能为空！");
+
+            String elemeOrderId = requestParameters.get("elemeOrderId");
+            Validate.notNull(elemeOrderId, "参数(elemeOrderId)不能为空！");
+
+            BigInteger bigIntegerTenantId = NumberUtils.createBigInteger(tenantId);
+            BigInteger bigIntegerBranchId = NumberUtils.createBigInteger(branchId);
+            BigInteger bigIntegerElemeOrderId = NumberUtils.createBigInteger(elemeOrderId);
+
+            Branch branch = elemeService.findBranchInfo(bigIntegerTenantId, bigIntegerBranchId);
+            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(bigIntegerTenantId, bigIntegerBranchId, bigIntegerElemeOrderId);
+
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("orderId", elemeOrder.getOrderId());
+            apiRest = ElemeUtils.callElemeSystem("1", tenantId, branch.getType().toString(), branchId, "eleme.order.confirmOrderLite", params);
+        } catch (Exception e) {
+            LogUtils.error("确认订单失败", controllerSimpleName, "removeCategory", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);

@@ -80,10 +80,10 @@ public class ElemeService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest saveElemeOrder(BigInteger shopId, String messageStr, Integer type) throws IOException {
+    public ApiRest saveElemeOrder(BigInteger shopId, String message, Integer type) throws IOException {
         ApiRest apiRest = null;
-        JSONObject message = JSONObject.fromObject(messageStr);
-        String orderId = message.optString("id");
+        JSONObject messageJsonObject = JSONObject.fromObject(message);
+        String orderId = messageJsonObject.optString("id");
         String key = "_eleme_order_callback_" + orderId + "_" + type;
         try {
             Boolean returnValue = CacheUtils.setnx(key, key);
@@ -98,18 +98,20 @@ public class ElemeService {
                 Branch branch = branchMapper.find(branchSearchModel);
                 Validate.notNull(branch, "shopId为" + shopId + "的门店不存在！");
                 // 开始保存饿了么订单
-                JSONArray phoneList = message.optJSONArray("phoneList");
-                message.remove("phoneList");
+                JSONArray phoneList = messageJsonObject.optJSONArray("phoneList");
+                messageJsonObject.remove("phoneList");
 
-                JSONArray elemeGroupJsonArray = message.optJSONArray("groups");
-                message.remove("groups");
+                JSONArray elemeGroupJsonArray = messageJsonObject.optJSONArray("groups");
+                messageJsonObject.remove("groups");
 
-                JSONArray orderActivityJsonArray = message.optJSONArray("orderActivities");
-                message.remove("orderActivities");
+                JSONArray orderActivityJsonArray = messageJsonObject.optJSONArray("orderActivities");
+                messageJsonObject.remove("orderActivities");
 
                 BigInteger userId = CommonUtils.getServiceSystemUserId();
                 userId = BigInteger.ONE;
-                ElemeOrder elemeOrder = GsonUtils.fromJson(message.toString(), ElemeOrder.class, "yyyy-MM-dd'T'HH:mm:ss");
+                ElemeOrder elemeOrder = GsonUtils.fromJson(messageJsonObject.toString(), ElemeOrder.class, "yyyy-MM-dd'T'HH:mm:ss");
+                elemeOrder.setTenantId(branch.getTenantId());
+                elemeOrder.setBranchId(branch.getId());
                 elemeOrder.setCreateUserId(userId);
                 elemeOrder.setLastUpdateUserId(userId);
                 elemeOrder.setLastUpdateRemark("饿了么系统推送新订单，保存订单！");
@@ -121,7 +123,7 @@ public class ElemeService {
                 for (int index = 0; index < elemeGroupJsonArraySize; index++) {
                     JSONObject elemeGroupJsonObject = elemeGroupJsonArray.getJSONObject(index);
                     ElemeGroup elemeGroup = new ElemeGroup();
-                    elemeGroup.setOrderId(orderId);
+                    elemeGroup.setElemeOrderId(elemeOrder.getId());
                     elemeGroup.setName(elemeGroupJsonObject.optString("name"));
                     elemeGroup.setType(elemeGroupJsonObject.optString("type"));
                     elemeGroup.setCreateUserId(userId);
@@ -228,9 +230,10 @@ public class ElemeService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleElemeRefundOrderMessage(BigInteger shopId, JSONObject message, Integer type) throws IOException {
+    public ApiRest handleElemeRefundOrderMessage(BigInteger shopId, String message, Integer type) throws IOException {
         ApiRest apiRest = null;
-        String orderId = message.optString("id");
+        JSONObject messageJsonObject = JSONObject.fromObject(message);
+        String orderId = messageJsonObject.optString("id");
         String key = "_eleme_order_callback_" + orderId + "_" + type;
         try {
             Boolean returnValue = CacheUtils.setnx(key, key);
@@ -240,11 +243,11 @@ public class ElemeService {
                 apiRest.setSuccessful(true);
             } else {
                 SearchModel elemeOrderSearchModel = new SearchModel(true);
-                elemeOrderSearchModel.addSearchCondition("eleme_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
+                elemeOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
                 ElemeOrder elemeOrder = elemeOrderMapper.find(elemeOrderSearchModel);
                 Validate.notNull(elemeOrder, "饿了么订单不存在！");
 
-                String refundStatus = message.optString("refundStatus");
+                String refundStatus = messageJsonObject.optString("refundStatus");
                 elemeOrder.setRefundStatus(refundStatus);
 
                 BigInteger userId = CommonUtils.getServiceSystemUserId();
@@ -252,33 +255,23 @@ public class ElemeService {
                 elemeOrder.setLastUpdateRemark("处理饿了么系统退单消息回调！");
                 elemeOrderMapper.update(elemeOrder);
 
-                SearchModel dietOrderSearchModel = new SearchModel(true);
-                dietOrderSearchModel.addSearchCondition("order_number", Constants.SQL_OPERATION_SYMBOL_EQUALS, "E" + orderId);
-                DietOrder dietOrder = dietOrderMapper.find(dietOrderSearchModel);
-                Validate.notNull(dietOrder, "订单不存在！");
-
-                dietOrder.setRefundStatus(formatElemeOrderRefundStatus(refundStatus));
-                dietOrder.setLastUpdateUserId(userId);
-                dietOrder.setLastUpdateRemark("处理饿了么系统退单消息回调！");
-                dietOrderMapper.update(dietOrder);
-
                 ElemeRefundOrderMessage elemeRefundOrderMessage = new ElemeRefundOrderMessage();
                 elemeRefundOrderMessage.setElemeOrderId(elemeOrder.getId());
                 elemeRefundOrderMessage.setOrderId(elemeOrder.getOrderId());
-                elemeRefundOrderMessage.setRefundStatus(message.optString("refundStatus"));
-                elemeRefundOrderMessage.setReason(message.optString("reason"));
+                elemeRefundOrderMessage.setRefundStatus(messageJsonObject.optString("refundStatus"));
+                elemeRefundOrderMessage.setReason(messageJsonObject.optString("reason"));
                 elemeRefundOrderMessage.setShopId(shopId);
                 Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(message.getLong("updateTime") * 1000);
+                calendar.setTimeInMillis(messageJsonObject.getLong("updateTime") * 1000);
                 elemeRefundOrderMessage.setUpdateTime(calendar.getTime());
-                elemeRefundOrderMessage.setTenantId(dietOrder.getTenantId());
-                elemeRefundOrderMessage.setBranchId(dietOrder.getBranchId());
+                elemeRefundOrderMessage.setTenantId(elemeOrder.getTenantId());
+                elemeRefundOrderMessage.setBranchId(elemeOrder.getBranchId());
                 elemeRefundOrderMessage.setCreateUserId(userId);
                 elemeRefundOrderMessage.setLastUpdateUserId(userId);
                 elemeRefundOrderMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么退单信息！");
                 elemeRefundOrderMessageMapper.insert(elemeRefundOrderMessage);
 
-                publishElemeOrderMessage(dietOrder.getTenantId(), dietOrder.getBranchId(), dietOrder.getId(), type);
+                publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type);
 
                 apiRest = new ApiRest();
                 apiRest.setMessage("处理饿了么系统退单消息成功！");
@@ -299,9 +292,10 @@ public class ElemeService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleElemeReminderMessage(BigInteger shopId, JSONObject message, Integer type) throws IOException {
+    public ApiRest handleElemeReminderMessage(BigInteger shopId, String message, Integer type) throws IOException {
         ApiRest apiRest = null;
-        String orderId = message.optString("id");
+        JSONObject messageJsonObject = JSONObject.fromObject(message);
+        String orderId = messageJsonObject.optString("id");
         String key = "_eleme_order_callback_" + orderId + "_" + type;
         try {
             Boolean returnValue = CacheUtils.setnx(key, key);
@@ -311,26 +305,21 @@ public class ElemeService {
                 apiRest.setSuccessful(true);
             } else {
                 SearchModel elemeOrderSearchModel = new SearchModel(true);
-                elemeOrderSearchModel.addSearchCondition("eleme_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
+                elemeOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
                 ElemeOrder elemeOrder = elemeOrderMapper.find(elemeOrderSearchModel);
                 Validate.notNull(elemeOrder, "饿了么订单不存在！");
-
-                SearchModel dietOrderSearchModel = new SearchModel(true);
-                dietOrderSearchModel.addSearchCondition("order_number", Constants.SQL_OPERATION_SYMBOL_EQUALS, "E" + orderId);
-                DietOrder dietOrder = dietOrderMapper.find(dietOrderSearchModel);
-                Validate.notNull(dietOrder, "订单不存在！");
 
                 ElemeReminderMessage elemeReminderMessage = new ElemeReminderMessage();
                 elemeReminderMessage.setElemeOrderId(elemeOrder.getId());
                 elemeReminderMessage.setOrderId(orderId);
-                elemeReminderMessage.setElemeReminderId(BigInteger.valueOf(message.optLong("remindId")));
-                elemeReminderMessage.setUserId(BigInteger.valueOf(message.getLong("userId")));
+                elemeReminderMessage.setElemeReminderId(BigInteger.valueOf(messageJsonObject.optLong("remindId")));
+                elemeReminderMessage.setUserId(BigInteger.valueOf(messageJsonObject.getLong("userId")));
                 elemeReminderMessage.setShopId(shopId);
                 Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(message.getLong("updateTime") * 1000);
+                calendar.setTimeInMillis(messageJsonObject.getLong("updateTime") * 1000);
                 elemeReminderMessage.setUpdateTime(calendar.getTime());
-                elemeReminderMessage.setTenantId(dietOrder.getTenantId());
-                elemeReminderMessage.setBranchId(dietOrder.getBranchId());
+                elemeReminderMessage.setTenantId(elemeOrder.getTenantId());
+                elemeReminderMessage.setBranchId(elemeOrder.getBranchId());
 
                 BigInteger userId = CommonUtils.getServiceSystemUserId();
                 elemeReminderMessage.setCreateUserId(userId);
@@ -338,7 +327,7 @@ public class ElemeService {
                 elemeReminderMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么催单信息！");
                 elemeReminderMessageMapper.insert(elemeReminderMessage);
 
-                publishElemeOrderMessage(dietOrder.getTenantId(), dietOrder.getBranchId(), dietOrder.getId(), type);
+                publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type);
 
                 apiRest = new ApiRest();
                 apiRest.setMessage("处理饿了么系统催单消息成功！");
@@ -372,39 +361,31 @@ public class ElemeService {
         return goodsCategory;
     }
 
+    public ElemeOrder findElemeOrderInfo(BigInteger tenantId, BigInteger branchId, BigInteger elemeOrderId) {
+        SearchModel searchModel = new SearchModel();
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_IN, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_IN, branchId);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, elemeOrderId);
+        ElemeOrder elemeOrder = elemeOrderMapper.find(searchModel);
+        Validate.notNull(elemeOrder, "订单不存在！");
+        return elemeOrder;
+    }
+
     /**
      * 发布饿了么订单消息
      * @param tenantId：商户ID
      * @param branchId：门店ID
-     * @param dietOrderId：订单ID
+     * @param elemeOrderId：订单ID
      * @param type：消息类型
      * @return
      */
-    private void publishElemeOrderMessage(BigInteger tenantId, BigInteger branchId, BigInteger dietOrderId, Integer type) throws IOException {
+    private void publishElemeOrderMessage(BigInteger tenantId, BigInteger branchId, BigInteger elemeOrderId, Integer type) throws IOException {
         String elemeOrderMessageChannel = ConfigurationUtils.getConfiguration(Constants.ELEME_ORDER_MESSAGE_CHANNEL);
         JSONObject messageJsonObject = new JSONObject();
         messageJsonObject.put("tenantIdAndBranchId", tenantId + "_" + branchId);
         messageJsonObject.put("type", type);
-        messageJsonObject.put("dietOrderId", dietOrderId);
+        messageJsonObject.put("dietOrderId", elemeOrderId);
         QueueUtils.convertAndSend(elemeOrderMessageChannel, messageJsonObject.toString());
-    }
-
-    private Integer formatElemeOrderRefundStatus(String elemeOrderRefundStatus) {
-        int dietOrderRefundStatus = 0;
-        if (ElemeOrderConstants.REFUND_STATUS_NO_REFUND.equals(elemeOrderRefundStatus)) {
-            dietOrderRefundStatus = 1;
-        } else if (ElemeOrderConstants.REFUND_STATUS_APPLIED.equals(elemeOrderRefundStatus)) {
-            dietOrderRefundStatus = 2;
-        } else if (ElemeOrderConstants.REFUND_STATUS_REJECTED.equals(elemeOrderRefundStatus)) {
-            dietOrderRefundStatus = 3;
-        } else if (ElemeOrderConstants.REFUND_STATUS_ARBITRATING.equals(elemeOrderRefundStatus)) {
-            dietOrderRefundStatus = 2;
-        } else if (ElemeOrderConstants.REFUND_STATUS_FAILED.equals(elemeOrderRefundStatus)) {
-            dietOrderRefundStatus = 4;
-        } else if (ElemeOrderConstants.REFUND_STATUS_SUCCESSFUL.equals(elemeOrderRefundStatus)) {
-            dietOrderRefundStatus = 5;
-        }
-        return dietOrderRefundStatus;
     }
 
     private static Map<Integer, String> elemeActivityCategoryIdMeaningMap = null;

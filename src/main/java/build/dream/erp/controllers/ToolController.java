@@ -2,6 +2,7 @@ package build.dream.erp.controllers;
 
 import build.dream.common.annotations.SQLType;
 import build.dream.common.api.ApiRest;
+import build.dream.common.basic.BasicDomain;
 import build.dream.common.constants.SQLConstants;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
@@ -41,6 +42,18 @@ public class ToolController extends BasicController {
                 }
                 fieldList.add(field);
             }
+
+            if (domainClass.getSuperclass() == BasicDomain.class) {
+                Field[] superclassFields = BasicDomain.class.getDeclaredFields();
+                for (Field field : superclassFields) {
+                    String fieldName = field.getName();
+                    if ("id".equals(fieldName) || "createTime".equals(fieldName) || "lastUpdateTime".equals(fieldName) || "deleted".equals(fieldName)) {
+                        continue;
+                    }
+                    fieldList.add(field);
+                }
+            }
+
             StringBuffer insertSql = new StringBuffer("INSERT INTO ");
             String domainClassSimpleName = domainClass.getSimpleName();
             String tableName = NamingStrategyUtils.camelCaseToUnderscore(domainClassSimpleName.substring(0, 1).toLowerCase() + domainClassSimpleName.substring(1));
@@ -50,9 +63,6 @@ public class ToolController extends BasicController {
             int count = 0;
             for (int index = 0; index < size; index++) {
                 String fieldName = fieldList.get(index).getName();
-                if ("id".equals(fieldName) || "createTime".equals(fieldName) || "lastUpdateTime".equals(fieldName) || "deleted".equals(fieldName)) {
-                    continue;
-                }
                 count = count + 1;
                 insertSql.append(NamingStrategyUtils.camelCaseToUnderscore(fieldName)).append(", ");
                 if (count % 3 == 0 && count != size) {
@@ -97,13 +107,26 @@ public class ToolController extends BasicController {
 
             Class<?> domainClass = Class.forName(domainClassName);
             Field[] fields = domainClass.getDeclaredFields();
+
+            List<Field> fieldList = new ArrayList<Field>();
+            for (Field field : fields) {
+                fieldList.add(field);
+            }
+
+            if (domainClass.getSuperclass() == BasicDomain.class) {
+                Field[] superclassFields = BasicDomain.class.getDeclaredFields();
+                for (Field field : superclassFields) {
+                    fieldList.add(field);
+                }
+            }
+
             StringBuffer updateSql = new StringBuffer("UPDATE ");
             String domainClassSimpleName = domainClass.getSimpleName();
             String tableName = NamingStrategyUtils.camelCaseToUnderscore(domainClassSimpleName.substring(0, 1).toLowerCase() + domainClassSimpleName.substring(1));
             updateSql.append(tableName);
             updateSql.append("<br>SET ");
 
-            for (Field field : fields) {
+            for (Field field : fieldList) {
                 String fieldName = field.getName();
                 if ("id".equals(fieldName) || "createTime".equals(fieldName) || "lastUpdateTime".equals(fieldName)) {
                     continue;

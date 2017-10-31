@@ -3,15 +3,17 @@
 <mapper namespace="build.dream.erp.mappers.ElemeItemMapper">
     <insert id="insert" parameterType="build.dream.common.erp.domains.ElemeItem" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO eleme_item(eleme_group_id, eleme_item_id, sku_id,
-        category_id, price, quantity,
-        total, extend_code, bar_code,
-        weight, create_user_id, last_update_user_id,
-        last_update_remark)
-        VALUES (#{elemeGroupId}, #{elemeItemId}, #{skuId},
-        #{categoryId}, #{price}, #{quantity},
-        #{total}, #{extendCode}, #{barCode},
-        #{weight}, #{createUserId}, #{lastUpdateUserId},
-        #{lastUpdateRemark})
+        name, category_id, price,
+        quantity, total, extend_code,
+        bar_code, weight, user_price,
+        shop_price, vfood_id, create_user_id,
+        last_update_user_id, last_update_remark)
+        VALUES(#{elemeGroupId}, #{elemeItemId}, #{skuId},
+        #{name}, #{categoryId}, #{price},
+        #{quantity}, #{total}, #{extendCode},
+        #{barCode}, #{weight}, #{userPrice},
+        #{shopPrice}, #{vfoodId}, #{createUserId},
+        #{lastUpdateUserId}, #{lastUpdateRemark})
     </insert>
 
     <update id="update" parameterType="build.dream.common.erp.domains.ElemeItem">
@@ -19,6 +21,7 @@
         SET eleme_group_id = #{elemeGroupId},
             eleme_item_id = #{elemeItemId},
             sku_id = #{skuId},
+            name = #{name},
             category_id = #{categoryId},
             price = #{price},
             quantity = #{quantity},
@@ -26,9 +29,13 @@
             extend_code = #{extendCode},
             bar_code = #{barCode},
             weight = #{weight},
+            user_price = #{userPrice},
+            shop_price = #{shopPrice},
+            vfood_id = #{vfoodId},
+            create_user_id = #{createUserId},
             last_update_user_id = #{lastUpdateUserId},
             last_update_remark = #{lastUpdateRemark},
-            deleted = #{deleted
+            deleted = #{deleted}
         WHERE id = #{id}
     </update>
     
