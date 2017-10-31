@@ -73,16 +73,16 @@ public class ElemeController extends BasicController {
                     apiRest = elemeService.saveElemeOrder(shopId, message, type);
                     break;
                 case 12:
-                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, null, type);
+                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, message, type);
                     break;
                 case 14:
-                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, null, type);
+                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, message, type);
                     break;
                 case 15:
-                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, null, type);
+                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, message, type);
                     break;
                 case 17:
-                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, null, type);
+                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, message, type);
                     break;
             }
             Validate.isTrue(apiRest.isSuccessful(), apiRest.getError());
@@ -126,7 +126,7 @@ public class ElemeController extends BasicController {
 
             Branch branch = elemeService.findBranchInfo(BigInteger.valueOf(Long.valueOf(tenantId)), BigInteger.valueOf(Long.valueOf(branchId)));
             Map<String, Object> params = new HashMap<String, Object>();
-            params.put("shopId", 150898569);
+            params.put("shopId", branch.getShopId());
             apiRest = ElemeUtils.callElemeSystem("1", tenantId.toString(), branch.getType().toString(), branchId.toString(), "eleme.product.category.getShopCategories", params);
         } catch (Exception e) {
             LogUtils.error("查询店铺商品分类失败", controllerSimpleName, "getShopCategories", e, requestParameters);
@@ -149,7 +149,7 @@ public class ElemeController extends BasicController {
 
             Branch branch = elemeService.findBranchInfo(BigInteger.valueOf(Long.valueOf(tenantId)), BigInteger.valueOf(Long.valueOf(branchId)));
             Map<String, Object> params = new HashMap<String, Object>();
-            params.put("shopId", 150898569);
+            params.put("shopId", branch.getShopId());
             apiRest = ElemeUtils.callElemeSystem("1", tenantId, branch.getType().toString(), branchId, "eleme.product.category.getShopCategoriesWithChildren", params);
         } catch (Exception e) {
             LogUtils.error("查询店铺商品分类失败", controllerSimpleName, "getShopCategoriesWithChildren", e, requestParameters);
@@ -216,7 +216,7 @@ public class ElemeController extends BasicController {
             Branch branch = elemeService.findBranchInfo(bigIntegerTenantId, bigIntegerBranchId);
             GoodsCategory goodsCategory = elemeService.findGoodsCategoryInfo(bigIntegerTenantId, bigIntegerBranchId, bigIntegerCategoryId);
             Map<String, Object> params = new HashMap<String, Object>();
-            params.put("shopId", 150898569);
+            params.put("shopId", branch.getShopId());
             params.put("name", goodsCategory.getName());
             params.put("description", goodsCategory.getDescription());
             apiRest = ElemeUtils.callElemeSystem("1", tenantId, branch.getType().toString(), branchId, "eleme.product.category.createCategory", params);
@@ -249,7 +249,7 @@ public class ElemeController extends BasicController {
             Branch branch = elemeService.findBranchInfo(bigIntegerTenantId, bigIntegerBranchId);
             GoodsCategory goodsCategory = elemeService.findGoodsCategoryInfo(bigIntegerTenantId, bigIntegerBranchId, bigIntegerCategoryId);
             Map<String, Object> params = new HashMap<String, Object>();
-            params.put("shopId", 150898569);
+            params.put("shopId", branch.getShopId());
             params.put("name", goodsCategory.getName());
             params.put("parentId", goodsCategory.getParentId());
             params.put("description", goodsCategory.getDescription());
