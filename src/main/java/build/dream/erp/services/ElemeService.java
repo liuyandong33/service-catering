@@ -326,8 +326,9 @@ public class ElemeService {
                 elemeReminderMessage.setLastUpdateUserId(userId);
                 elemeReminderMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么催单信息！");
                 elemeReminderMessageMapper.insert(elemeReminderMessage);
-
-                publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type);
+                if (type == 45) {
+                    publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type);
+                }
 
                 apiRest = new ApiRest();
                 apiRest.setMessage("处理催单消息成功！");

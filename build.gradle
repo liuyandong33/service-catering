@@ -42,5 +42,5 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-data-redis")
     compile fileTree(include: ["*.jar"], dir: "libs")
     compile("net.sf.json-lib:json-lib:2.4:jdk15")
-    compile("me.ele.openapi:eleme-openapi-sdk:1.5.15")
+    compile("me.ele.openapi:eleme-openapi-sdk:1.6.18")
 }
