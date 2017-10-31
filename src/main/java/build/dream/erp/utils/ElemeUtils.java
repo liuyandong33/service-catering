@@ -91,4 +91,15 @@ public class ElemeUtils {
         callElemeSystemRequestParameters.put("requestBody", requestBody);
         return ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "eleme", "callElemeSystem", callElemeSystemRequestParameters);
     }
+
+    public static boolean checkSignature(JSONObject orderCallbackJsonObject, String appSecret) {
+        Map<String, Object> map = new TreeMap<String, Object>(orderCallbackJsonObject);
+        String signature = map.remove("signature").toString();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            stringBuilder.append(entry.getKey()).append("=").append(entry.getValue());
+        }
+        stringBuilder.append(appSecret);
+        return DigestUtils.md5Hex(stringBuilder.toString()).toUpperCase().equals(signature);
+    }
 }

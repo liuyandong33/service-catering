@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="build.dream.erp.mappers.ElemeOrderStateChangeMessageMapper">
+    <insert id="insert" parameterType="build.dream.common.erp.domains.ElemeOrderStateChangeMessage">
+        INSERT INTO eleme_order_state_change_message(eleme_order_id, order_id, state,
+        role, shop_id, update_time,
+        tenant_id, branch_id, create_user_id,
+        last_update_user_id, last_update_remark)
+        VALUES(#{elemeOrderId}, #{orderId}, #{state},
+        #{role}, #{shopId}, #{updateTime},
+        #{tenantId}, #{branchId}, #{createUserId},
+        #{lastUpdateUserId}, #{lastUpdateRemark})
+    </insert>
+</mapper>

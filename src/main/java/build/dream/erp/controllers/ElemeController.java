@@ -6,14 +6,18 @@ import build.dream.common.erp.domains.Branch;
 import build.dream.common.erp.domains.ElemeOrder;
 import build.dream.common.erp.domains.GoodsCategory;
 import build.dream.common.utils.ApplicationHandler;
+import build.dream.common.utils.ConfigurationUtils;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
 import build.dream.erp.constants.Constants;
+import build.dream.erp.models.eleme.AgreeRefundLiteModel;
 import build.dream.erp.models.eleme.CancelOrderLiteModel;
+import build.dream.erp.models.eleme.DisagreeRefundLiteModel;
 import build.dream.erp.services.BranchService;
 import build.dream.erp.services.ElemeService;
 import build.dream.erp.utils.ElemeUtils;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +32,10 @@ import java.util.Map;
 @Controller
 @RequestMapping(value = "/eleme")
 public class ElemeController extends BasicController {
+    private static final int[] ELEME_ORDER_STATE_CHANGE_MESSAGE_TYPES = {12, 14, 15, 17, 18};
+    private static final int[] ELEME_REFUND_ORDER_MESSAGE_TYPES = {20, 21, 22, 23, 24, 25, 26, 30, 31, 32, 33, 34, 35, 36};
+    private static final int[] ELEME_DELIVERY_ORDER_STATE_CHANGE_MESSAGE_TYPES = {51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76};
+    private static final int[] ELEME_SHOP_STATE_CHANGE_MESSAGE_TYPES = {91, 92, 100};
     @Autowired
     private ElemeService elemeService;
     @Autowired
@@ -64,27 +72,23 @@ public class ElemeController extends BasicController {
             Validate.notNull(orderCallbackRequestBody, "参数(orderCallbackRequestBody)不能为空！");
 
             JSONObject orderCallbackJsonObject = JSONObject.fromObject(orderCallbackRequestBody);
+            Validate.isTrue(ElemeUtils.checkSignature(orderCallbackJsonObject, ConfigurationUtils.getConfiguration(Constants.ELEME_APP_SECRET)), "签名校验未通过！");
+
             BigInteger shopId = BigInteger.valueOf(orderCallbackJsonObject.getLong("shopId"));
             String message = orderCallbackJsonObject.getString("message");
             Integer type = orderCallbackJsonObject.getInt("type");
 
             ApiRest apiRest = null;
-            switch (type) {
-                case 10:
-                    apiRest = elemeService.saveElemeOrder(shopId, message, type);
-                    break;
-                case 12:
-                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, message, type);
-                    break;
-                case 14:
-                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, message, type);
-                    break;
-                case 15:
-                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, message, type);
-                    break;
-                case 17:
-                    apiRest = elemeService.handleElemeRefundOrderMessage(shopId, message, type);
-                    break;
+            if (type == 10) {
+                apiRest = elemeService.saveElemeOrder(shopId, message, type);
+            } else if (ArrayUtils.contains(ELEME_ORDER_STATE_CHANGE_MESSAGE_TYPES, type)) {
+                apiRest = elemeService.handleElemeOrderStateChangeMessage(shopId, message, type);
+            } else if (ArrayUtils.contains(ELEME_REFUND_ORDER_MESSAGE_TYPES, type)) {
+                apiRest = elemeService.handleElemeRefundOrderMessage(shopId, message, type);
+            } else if (ArrayUtils.contains(ELEME_DELIVERY_ORDER_STATE_CHANGE_MESSAGE_TYPES, type)) {
+                apiRest = elemeService.handleElemeDeliveryOrderStateChangeMessage(shopId, message, type);
+            } else if (ArrayUtils.contains(ELEME_SHOP_STATE_CHANGE_MESSAGE_TYPES, type)) {
+                apiRest = elemeService.handleElemeShopStateChangeMessage(shopId, message, type);
             }
             Validate.isTrue(apiRest.isSuccessful(), apiRest.getError());
             returnValue = Constants.ELEME_ORDER_CALLBACK_SUCCESS_RETURN_VALUE;
@@ -409,6 +413,50 @@ public class ElemeController extends BasicController {
             apiRest = ElemeUtils.callElemeSystem("1", cancelOrderLiteModel.getTenantId().toString(), branch.getType().toString(), branch.getId().toString(), "eleme.order.cancelOrderLite", params);
         } catch (Exception e) {
             LogUtils.error("取消订单失败", controllerSimpleName, "cancelOrderLite", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/agreeRefundLite")
+    @ResponseBody
+    public String agreeRefundLite() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            AgreeRefundLiteModel agreeRefundLiteModel = ApplicationHandler.instantiateObject(AgreeRefundLiteModel.class, requestParameters);
+            agreeRefundLiteModel.validateAndThrow();
+
+            Branch branch = elemeService.findBranchInfo(agreeRefundLiteModel.getTenantId(), agreeRefundLiteModel.getBranchId());
+            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(agreeRefundLiteModel.getTenantId(), agreeRefundLiteModel.getBranchId(), agreeRefundLiteModel.getElemeOrderId());
+
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("orderId", elemeOrder.getOrderId());
+            apiRest = ElemeUtils.callElemeSystem("1", agreeRefundLiteModel.getTenantId().toString(), branch.getType().toString(), branch.getId().toString(), "eleme.order.agreeRefundLite", params);
+        } catch (Exception e) {
+            LogUtils.error("同意退单/同意取消单失败", controllerSimpleName, "agreeRefundLite", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/disagreeRefundLite")
+    @ResponseBody
+    public String disagreeRefundLite() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            DisagreeRefundLiteModel disagreeRefundLiteModel = ApplicationHandler.instantiateObject(DisagreeRefundLiteModel.class, requestParameters);
+            disagreeRefundLiteModel.validateAndThrow();
+
+            Branch branch = elemeService.findBranchInfo(disagreeRefundLiteModel.getTenantId(), disagreeRefundLiteModel.getBranchId());
+            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(disagreeRefundLiteModel.getTenantId(), disagreeRefundLiteModel.getBranchId(), disagreeRefundLiteModel.getElemeOrderId());
+
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("orderId", elemeOrder.getOrderId());
+            apiRest = ElemeUtils.callElemeSystem("1", disagreeRefundLiteModel.getTenantId().toString(), branch.getType().toString(), branch.getId().toString(), "eleme.order.disagreeRefundLite", params);
+        } catch (Exception e) {
+            LogUtils.error("不同意退单/不同意取消单失败", controllerSimpleName, "disagreeRefundLite", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
