@@ -9,6 +9,7 @@ import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
 import build.dream.erp.constants.Constants;
+import build.dream.erp.models.eleme.CancelOrderLiteModel;
 import build.dream.erp.services.BranchService;
 import build.dream.erp.services.ElemeService;
 import build.dream.erp.utils.ElemeUtils;
@@ -385,7 +386,29 @@ public class ElemeController extends BasicController {
             params.put("orderId", elemeOrder.getOrderId());
             apiRest = ElemeUtils.callElemeSystem("1", tenantId, branch.getType().toString(), branchId, "eleme.order.confirmOrderLite", params);
         } catch (Exception e) {
-            LogUtils.error("确认订单失败", controllerSimpleName, "removeCategory", e, requestParameters);
+            LogUtils.error("确认订单失败", controllerSimpleName, "confirmOrderLite", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/cancelOrderLite")
+    @ResponseBody
+    public String cancelOrderLite() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            CancelOrderLiteModel cancelOrderLiteModel = ApplicationHandler.instantiateObject(CancelOrderLiteModel.class, requestParameters);
+            cancelOrderLiteModel.validateAndThrow();
+
+            Branch branch = elemeService.findBranchInfo(cancelOrderLiteModel.getTenantId(), cancelOrderLiteModel.getBranchId());
+            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(cancelOrderLiteModel.getTenantId(), cancelOrderLiteModel.getBranchId(), cancelOrderLiteModel.getElemeOrderId());
+
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("orderId", elemeOrder.getOrderId());
+            apiRest = ElemeUtils.callElemeSystem("1", cancelOrderLiteModel.getTenantId().toString(), branch.getType().toString(), branch.getId().toString(), "eleme.order.cancelOrderLite", params);
+        } catch (Exception e) {
+            LogUtils.error("取消订单失败", controllerSimpleName, "cancelOrderLite", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
