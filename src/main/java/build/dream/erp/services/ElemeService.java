@@ -111,7 +111,9 @@ public class ElemeService {
                 userId = BigInteger.ONE;
                 ElemeOrder elemeOrder = GsonUtils.fromJson(messageJsonObject.toString(), ElemeOrder.class, "yyyy-MM-dd'T'HH:mm:ss");
                 elemeOrder.setTenantId(branch.getTenantId());
+                elemeOrder.setTenantCode(branch.getTenantCode());
                 elemeOrder.setBranchId(branch.getId());
+                elemeOrder.setBranchCode(branch.getCode());
                 elemeOrder.setCreateUserId(userId);
                 elemeOrder.setLastUpdateUserId(userId);
                 elemeOrder.setLastUpdateRemark("饿了么系统推送新订单，保存订单！");
@@ -209,7 +211,7 @@ public class ElemeService {
                         elemeActivityMapper.insert(elemeActivity);
                     }
                 }
-                publishElemeOrderMessage(branch.getTenantId(), branch.getId(), elemeOrder.getId(), type);
+                publishElemeOrderMessage(branch.getTenantCode(), branch.getCode(), elemeOrder.getId(), type);
 
                 apiRest = new ApiRest();
                 apiRest.setMessage("保存订单成功！");
@@ -271,7 +273,7 @@ public class ElemeService {
                 elemeRefundOrderMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么退单信息！");
                 elemeRefundOrderMessageMapper.insert(elemeRefundOrderMessage);
 
-                publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type);
+                publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type);
 
                 apiRest = new ApiRest();
                 apiRest.setMessage("处理退单消息成功！");
@@ -327,7 +329,7 @@ public class ElemeService {
                 elemeReminderMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么催单信息！");
                 elemeReminderMessageMapper.insert(elemeReminderMessage);
                 if (type == 45) {
-                    publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type);
+                    publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type);
                 }
 
                 apiRest = new ApiRest();
@@ -383,7 +385,7 @@ public class ElemeService {
                 elemeOrderStateChangeMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么订单变更消息！");
 
                 elemeOrderStateChangeMessageMapper.insert(elemeOrderStateChangeMessage);
-                publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type);
+                publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type);
 
                 apiRest = new ApiRest();
                 apiRest.setMessage("处理订单状态变更消息成功！");
@@ -437,18 +439,18 @@ public class ElemeService {
 
     /**
      * 发布饿了么订单消息
-     * @param tenantId：商户ID
-     * @param branchId：门店ID
+     * @param tenantCode：商户编码
+     * @param branchCode：门店编码
      * @param elemeOrderId：订单ID
      * @param type：消息类型
      * @return
      */
-    private void publishElemeOrderMessage(BigInteger tenantId, BigInteger branchId, BigInteger elemeOrderId, Integer type) throws IOException {
+    private void publishElemeOrderMessage(String tenantCode, String branchCode, BigInteger elemeOrderId, Integer type) throws IOException {
         String elemeOrderMessageChannel = ConfigurationUtils.getConfiguration(Constants.ELEME_ORDER_MESSAGE_CHANNEL);
         JSONObject messageJsonObject = new JSONObject();
-        messageJsonObject.put("tenantIdAndBranchId", tenantId + "_" + branchId);
+        messageJsonObject.put("tenantCodeAndBranchCode", tenantCode + "_" + branchCode);
         messageJsonObject.put("type", type);
-        messageJsonObject.put("dietOrderId", elemeOrderId);
+        messageJsonObject.put("elemeOrderId", elemeOrderId);
         QueueUtils.convertAndSend(elemeOrderMessageChannel, messageJsonObject.toString());
     }
 
