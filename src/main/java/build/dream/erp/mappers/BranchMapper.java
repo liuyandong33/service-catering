@@ -15,7 +15,7 @@ public interface BranchMapper {
     long insertAll(List<Branch> branches);
     long update(Branch branch);
     long insertMergeUserBranch(@Param("userId") BigInteger userId, @Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId);
-    List<Branch> findAll(SearchModel searchModel);
+    List<Branch> findAllPaged(SearchModel searchModel);
     Branch find(SearchModel searchModel);
     Branch findByUserIdAndTenantId(@Param("tenantId") BigInteger tenantId, @Param("userId") BigInteger userId);
     List<BigInteger> findAllUserIds(SearchModel searchModel);

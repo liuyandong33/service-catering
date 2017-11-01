@@ -72,7 +72,7 @@ public class BranchService {
             rows = "20";
         }
         pagedSearchModel.setOffsetAndMaxResults(Integer.valueOf(page), Integer.valueOf(rows));
-        List<Branch> branches = branchMapper.findAll(pagedSearchModel);
+        List<Branch> branches = branchMapper.findAllPaged(pagedSearchModel);
         long total = branchMapper.countBranches(pagedSearchModel);
         ApiRest apiRest = new ApiRest(branches, "查询门店列表成功！");
         return apiRest;

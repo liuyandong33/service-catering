@@ -37,7 +37,7 @@
         INSERT INTO merge_user_branch(user_id, tenant_id, branch_id) VALUES (#{userId}, #{tenantId}, #{branchId})
     </insert>
 
-    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.Branch">
+    <select id="findAllPaged" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.Branch">
         SELECT * FROM branch <include refid="searchConditionSql"></include> <include refid="paginationSql"></include>
     </select>
 
