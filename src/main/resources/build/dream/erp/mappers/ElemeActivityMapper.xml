@@ -3,11 +3,13 @@
 <mapper namespace="build.dream.erp.mappers.ElemeActivityMapper">
     <insert id="insert" parameterType="build.dream.common.erp.domains.ElemeActivity" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO eleme_activity(eleme_order_id, eleme_activity_id, name,
-        category_id, meaning, amount,
-        create_user_id, last_update_user_id, last_update_remark)
+        category_id, eleme_part, restaurant_part,
+        amount, create_user_id, last_update_user_id,
+        last_update_remark)
         VALUES(#{elemeOrderId}, #{elemeActivityId}, #{name},
-        #{categoryId}, #{meaning}, #{amount},
-        #{createUserId}, #{lastUpdateUserId}, #{lastUpdateRemark})
+        #{categoryId}, #{elemePart}, #{restaurantPart},
+        #{amount}, #{createUserId}, #{lastUpdateUserId},
+        #{lastUpdateRemark})
     </insert>
 
     <update id="update" parameterType="build.dream.common.erp.domains.ElemeActivity">
@@ -16,7 +18,8 @@
             eleme_activity_id = #{elemeActivityId},
             name = #{name},
             category_id = #{categoryId},
-            meaning = #{meaning},
+            eleme_part = #{elemePart},
+            restaurant_part = #{restaurantPart},
             amount = #{amount},
             create_user_id = #{createUserId},
             last_update_user_id = #{lastUpdateUserId},
