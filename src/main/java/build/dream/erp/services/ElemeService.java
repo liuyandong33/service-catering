@@ -363,6 +363,7 @@ public class ElemeService {
         return apiRest;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ApiRest handleElemeOrderStateChangeMessage(BigInteger shopId, String message, Integer type) throws IOException {
         ApiRest apiRest = null;
         JSONObject messageJsonObject = JSONObject.fromObject(message);
@@ -418,6 +419,7 @@ public class ElemeService {
         return apiRest;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ApiRest handleElemeDeliveryOrderStateChangeMessage(BigInteger shopId, String message, Integer type) throws IOException {
         ApiRest apiRest = null;
         JSONObject messageJsonObject = JSONObject.fromObject(message);
@@ -509,6 +511,7 @@ public class ElemeService {
         return goodsCategory;
     }
 
+    @Transactional(readOnly = true)
     public ElemeOrder findElemeOrderInfo(BigInteger tenantId, BigInteger branchId, BigInteger elemeOrderId) {
         SearchModel searchModel = new SearchModel();
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
