@@ -111,6 +111,7 @@ public class ElemeService {
                 messageJsonObject.remove("orderActivities");
 
                 BigInteger userId = CommonUtils.getServiceSystemUserId();
+                // TODO 上线之前删除
                 userId = BigInteger.ONE;
                 ElemeOrder elemeOrder = GsonUtils.fromJson(messageJsonObject.toString(), ElemeOrder.class, "yyyy-MM-dd'T'HH:mm:ss");
                 elemeOrder.setTenantId(branch.getTenantId());
@@ -316,11 +317,11 @@ public class ElemeService {
     public ApiRest handleElemeReminderMessage(BigInteger shopId, String message, Integer type) throws IOException {
         ApiRest apiRest = null;
         JSONObject messageJsonObject = JSONObject.fromObject(message);
-        String orderId = messageJsonObject.optString("id");
+        String orderId = messageJsonObject.optString("orderId");
         String key = "_eleme_order_callback_" + orderId + "_" + type;
         try {
             Boolean returnValue = CacheUtils.setnx(key, key);
-            if (returnValue) {
+            if (!returnValue) {
                 apiRest = new ApiRest();
                 apiRest.setMessage("处理催单消息成功！");
                 apiRest.setSuccessful(true);
