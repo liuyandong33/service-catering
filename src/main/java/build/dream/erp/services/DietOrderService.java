@@ -4,11 +4,16 @@ import build.dream.common.api.ApiRest;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.domains.*;
 import build.dream.common.saas.domains.DietOrderDetailGoodsFlavor;
+import build.dream.common.saas.domains.TenantSecretKey;
 import build.dream.common.utils.*;
 import build.dream.erp.constants.Constants;
 import build.dream.erp.mappers.*;
 import build.dream.erp.models.dietorder.DoPayModel;
+import build.dream.erp.models.dietorder.DoPayOfflineModel;
 import build.dream.erp.models.dietorder.SaveDietOrderModel;
+import build.dream.erp.utils.TenantSecretKeyUtils;
+import net.sf.json.JSONObject;
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -269,6 +278,16 @@ public class DietOrderService {
         ApiRest apiRest = new ApiRest();
         apiRest.setData(doPayApiRest.getData());
         apiRest.setMessage("提交支付请求成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
+    }
+
+    public ApiRest doPayOffline(DoPayOfflineModel doPayOfflineModel, String bizContent, String signature) throws NoSuchAlgorithmException, SignatureException, InvalidKeySpecException, InvalidKeyException, DecoderException {
+        TenantSecretKey tenantSecretKey = TenantSecretKeyUtils.obtainTenantSecretKey(doPayOfflineModel.getTenantId());
+        Validate.isTrue(SignatureUtils.verifySign(bizContent, tenantSecretKey.getPublicKey(), SignatureUtils.SIGNATURE_TYPE_SHA256_WITH_RSA, SignatureUtils.OUTPUT_TYPE_BASE64, signature), "签名校验失败！");
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("提交线下支付请求成功！");
         apiRest.setSuccessful(true);
         return apiRest;
     }

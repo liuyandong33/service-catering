@@ -5,7 +5,9 @@ import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
+import build.dream.common.utils.SignatureUtils;
 import build.dream.erp.models.dietorder.DoPayModel;
+import build.dream.erp.models.dietorder.DoPayOfflineModel;
 import build.dream.erp.models.dietorder.SaveDietOrderModel;
 import build.dream.erp.services.DietOrderService;
 import org.apache.commons.lang.Validate;
@@ -57,6 +59,28 @@ public class DietOrderController extends BasicController {
             apiRest = dietOrderService.doPay(doPayModel);
         } catch (Exception e) {
             LogUtils.error("提交支付请求失败", controllerSimpleName, "doPay", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/doPayOffline")
+    @ResponseBody
+    public String doPayOffline() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            String bizContent = requestParameters.get("bizContent");
+            Validate.notNull(bizContent, ApplicationHandler.obtainParameterErrorMessage("bizContent"));
+
+            String signature = requestParameters.get("signature");
+            Validate.notNull(signature, ApplicationHandler.obtainParameterErrorMessage("signature"));
+
+            DoPayOfflineModel doPayOfflineModel = GsonUtils.fromJson(bizContent, DoPayOfflineModel.class);
+            doPayOfflineModel.validateAndThrow();
+            apiRest = dietOrderService.doPayOffline(doPayOfflineModel, bizContent, signature);
+        } catch (Exception e) {
+            LogUtils.error("提交线下支付请求失败", controllerSimpleName, "doPayOffline", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
