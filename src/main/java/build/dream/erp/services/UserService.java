@@ -1,11 +1,10 @@
 package build.dream.erp.services;
 
 import build.dream.common.api.ApiRest;
-import build.dream.common.erp.domains.Branch;
-import build.dream.common.utils.*;
+import build.dream.common.utils.PagedSearchModel;
+import build.dream.common.utils.ProxyUtils;
 import build.dream.erp.constants.Constants;
 import build.dream.erp.mappers.BranchMapper;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,36 +21,6 @@ import java.util.Map;
 public class UserService {
     @Autowired
     private BranchMapper branchMapper;
-
-    @Transactional(readOnly = true)
-    public ApiRest obtainUserInfo(String loginName) throws IOException {
-        Map<String, String> obtainUserInfoRequestParameters = new HashMap<String, String>();
-        obtainUserInfoRequestParameters.put("loginName", loginName);
-        String obtainUserInfoResult = ProxyUtils.doGetOriginalWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "user", "obtainUserInfo", obtainUserInfoRequestParameters);
-        ApiRest obtainUserInfoApiRest = ApiRest.fromJson(obtainUserInfoResult);
-        Validate.isTrue(obtainUserInfoApiRest.isSuccessful(), obtainUserInfoApiRest.getError());
-        Map<String, Object> obtainUserInfoApiRestData = (Map<String, Object>) obtainUserInfoApiRest.getData();
-        Map<String, Object> user = (Map<String, Object>) obtainUserInfoApiRestData.get("user");
-        Map<String, Object> tenant = (Map<String, Object>) obtainUserInfoApiRestData.get("tenant");
-        BigInteger userId = BigInteger.valueOf(MapUtils.getLongValue(user, "id"));
-        BigInteger tenantId = BigInteger.valueOf(MapUtils.getLongValue(tenant, "id"));
-        Branch branch = branchMapper.findByUserIdAndTenantId(tenantId, userId);
-        String posApiServiceDomain = ConfigurationUtils.getConfiguration(Constants.SERVICE_NAME_APPAPI);
-        String appApiServiceDomain = ConfigurationUtils.getConfiguration(Constants.SERVICE_NAME_APPAPI);
-        CacheUtils.hdel(Constants.CLIENT_INFO_KEY_PREFIX + MapUtils.getString(user, "loginName"), "changed");
-
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("user", user);
-        data.put("tenant", tenant);
-        data.put("branch", branch);
-        data.put("posApiServiceDomain", posApiServiceDomain);
-        data.put("appApiServiceDomain", appApiServiceDomain);
-        ApiRest apiRest = new ApiRest();
-        apiRest.setData(data);
-        apiRest.setMessage("获取用户信息成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
-    }
 
     @Transactional(readOnly = true)
     public ApiRest listUsers(Map<String, String> parameters) throws IOException {
@@ -85,19 +54,6 @@ public class UserService {
         data.put("total", total);
         data.put("rows", findAllUsersApiRest.getData());
         ApiRest apiRest = new ApiRest(data, "查询员工列表成功！");
-        return apiRest;
-    }
-
-    public ApiRest findAllAppAuthorities(String userId) throws IOException {
-        Map<String, String> findAllAppAuthoritiesRequestParameters = new HashMap<String, String>();
-        findAllAppAuthoritiesRequestParameters.put("userId", userId);
-        ApiRest findAllAppAuthoritiesApiRest = ProxyUtils.doGetWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "user", "findAllAppAuthorities", findAllAppAuthoritiesRequestParameters);
-        Validate.isTrue(findAllAppAuthoritiesApiRest.isSuccessful(), findAllAppAuthoritiesApiRest.getError());
-
-        ApiRest apiRest = new ApiRest();
-        apiRest.setData(findAllAppAuthoritiesApiRest.getData());
-        apiRest.setMessage("查询APP权限成功！");
-        apiRest.setSuccessful(true);
         return apiRest;
     }
 }
