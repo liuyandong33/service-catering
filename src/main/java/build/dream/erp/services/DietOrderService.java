@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
@@ -282,7 +283,7 @@ public class DietOrderService {
         return apiRest;
     }
 
-    public ApiRest doPayOffline(DoPayOfflineModel doPayOfflineModel, String bizContent, String signature) throws NoSuchAlgorithmException, SignatureException, InvalidKeySpecException, InvalidKeyException, DecoderException {
+    public ApiRest doPayOffline(DoPayOfflineModel doPayOfflineModel, String bizContent, String signature) throws NoSuchAlgorithmException, SignatureException, InvalidKeySpecException, InvalidKeyException, DecoderException, UnsupportedEncodingException {
         TenantSecretKey tenantSecretKey = TenantSecretKeyUtils.obtainTenantSecretKey(doPayOfflineModel.getTenantId());
         Validate.isTrue(SignatureUtils.verifySign(bizContent, tenantSecretKey.getPublicKey(), SignatureUtils.SIGNATURE_TYPE_SHA256_WITH_RSA, SignatureUtils.OUTPUT_TYPE_BASE64, signature), "签名校验失败！");
 
