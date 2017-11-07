@@ -63,8 +63,8 @@ public class ElemeController extends BasicController {
     @RequestMapping(value = "/handleOrderCallback")
     @ResponseBody
     public String handleOrderCallback() {
-        String returnValue = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        String returnValue = null;
         try {
             String orderCallbackRequestBody = requestParameters.get("orderCallbackRequestBody");
             int flag = Integer.valueOf(requestParameters.get("flag"));

@@ -5,10 +5,14 @@ import build.dream.common.controllers.BasicController;
 import build.dream.common.erp.domains.Branch;
 import build.dream.common.erp.domains.GoodsCategory;
 import build.dream.common.utils.ApplicationHandler;
+import build.dream.common.utils.ConfigurationUtils;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
+import build.dream.erp.constants.Constants;
 import build.dream.erp.services.MeiTuanService;
 import build.dream.erp.utils.ElemeUtils;
+import net.sf.json.JSONObject;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,9 +47,29 @@ public class MeiTuanController extends BasicController {
 
             apiRest = meiTuanService.generateBindingStoreLink(NumberUtils.createBigInteger(tenantId), NumberUtils.createBigInteger(branchId), businessId);
         } catch (Exception e) {
-            LogUtils.error("绑定门店失败", controllerSimpleName, "createCategoryWithChildren", e, requestParameters);
+            LogUtils.error("生成门店绑定链接失败", controllerSimpleName, "createCategoryWithChildren", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/orderEffectiveCallback")
+    @ResponseBody
+    public String orderEffectiveCallback() {
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        String returnValue = null;
+        try {
+            requestParameters.put("developerId", "100120");
+            requestParameters.put("ePoiId", "9384019");
+            requestParameters.put("sign", "52b379754c40c7865a48b84a24fb99c1ebb49f11");
+            requestParameters.put("order", "{\"caution\": \"哈哈\",\"cityId\": 132,\"ctime\": 12341234,\"daySeq\": \"1\",\"deliveryTime\": 124124123,\"detail\": [{\"app_food_code\": \"1\",\"food_name\": \"狗不理\",\"sku_id\": \"1\",\"quantity\": 6,\"price\": 100,\"box_num\": 2,\"box_price\": 1,\"unit\": \"份\",\"food_discount\": 0.8,\"spec\": \"大份\",\"food_property\": \"中辣,微甜\",\"cart_id\": 0}],\"ePoiId\": \"erp-poi\",\"extras\": [{\"act_detail_id\": 10,\"reduce_fee\": 2.5,\"mt_charge\": 1.5,\"poi_charge\": 1.5,\"remark\": \"满10元减2.5元\",\"type\": 2,\"avg_send_time\": 5.5},{\"reduce_fee\": 5,\"remark\": \"新用户立减5元\",\"type\": 1,\"avg_send_time\": 1.0},{\"rider_fee\": 10}],\"favorites\": false,\"hasInvoiced\": 1,\"invoiceTitle\": \"XXX公司\",\"taxpayerId\": \"91110108562144110X\",\"isFavorites\": false,\"isPoiFirstOrder\": false,\"isThirdShipping\": 0,\"latitude\": 234.12341234,\"longitude\": 534.12341234,\"logisticsCode\": 1002,\"orderId\": 12341234,\"orderIdView\": 12343412344,\"originalPrice\": 25,\"payType\": 2,\"pickType\": 0,\"poiAddress\": \"望京-研发园\",\"poiFirstOrder\": false,\"poiName\": \"门店名称\",\"poiPhone\": \"18610543723\",\"poiReceiveDetail\": {\"actOrderChargeByMt\":[{\"comment\":\"美团配送减3.0元\",\"feeTypeDesc\":\"活动款\",\"feeTypeId\":10019 ,\"moneyCent\":300}],\"actOrderChargeByPoi\" :[{\"comment\":\"美团配送减3.0元\",\"feeTypeDesc\":\"活动款\",\"feeTypeId\":10019,\"moneyCent\":0}],\"foodShareFeeChargeByPoi\":390,\"logisticsFee\":300 ,\"onlinePayment\":2000 ,\"wmPoiReceiveCent\":1610 },\"recipientAddress\": \"望京-西小区-8号楼5层\",\"recipientName\": \"X先生\",\"recipientPhone\": \"18610543723\",\"shipperPhone\": \"18610543723\",\"shippingFee\": 5,\"status\": 1,\"total\": 20,\"utime\": 235131234}");
+            ApiRest apiRest = meiTuanService.handleOrderEffectiveCallback(requestParameters);
+            Validate.isTrue(apiRest.isSuccessful(), apiRest.getError());
+            returnValue = Constants.ELEME_ORDER_CALLBACK_SUCCESS_RETURN_VALUE;
+        } catch (Exception e) {
+            LogUtils.error("订单生效回调处理失败", controllerSimpleName, "handleOrderCallback", e, requestParameters);
+            returnValue = e.getMessage();
+        }
+        return returnValue;
     }
 }

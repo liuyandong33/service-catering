@@ -23,4 +23,5 @@ public class Constants extends build.dream.common.constants.Constants {
 
     public static final String KEY_MEI_TUAN_APP_AUTH_TOKENS = "_mei_tuan_app_auth_tokens";
     public static final String MEI_MEI_TUAN_SERVICE_URL = "http://api.open.cater.meituan.com";
+    public static final String MEI_TUAN_CALLBACK_SUCCESS_RETURN_VALUE = "{\"data\": \"OK\"}";
 }

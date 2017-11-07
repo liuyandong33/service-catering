@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Map;
 
 @Service
 public class MeiTuanService {
@@ -40,5 +41,14 @@ public class MeiTuanService {
         apiRest.setMessage("生成门店绑定链接成功！");
         apiRest.setSuccessful(true);
         return apiRest;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest handleOrderEffectiveCallback(Map<String, String> parameters) {
+        String developerId = parameters.get("developerId");
+        String ePoiId = parameters.get("ePoiId");
+        String sign = parameters.get("sign");
+        String orderJson = parameters.get("order");
+        return null;
     }
 }
