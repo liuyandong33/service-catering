@@ -26,7 +26,7 @@ public class MeiTuanController extends BasicController {
     @Autowired
     private MeiTuanService meiTuanService;
 
-    @RequestMapping(value = "/bindingStore")
+    @RequestMapping(value = "/generateBindingStoreLink")
     @ResponseBody
     public String generateBindingStoreLink() {
         ApiRest apiRest = null;
@@ -41,7 +41,7 @@ public class MeiTuanController extends BasicController {
             String businessId = requestParameters.get("businessId");
             Validate.notNull(businessId, ApplicationHandler.obtainParameterErrorMessage("businessId"));
 
-            apiRest = meiTuanService.bindingStore(NumberUtils.createBigInteger(tenantId), NumberUtils.createBigInteger(branchId), businessId);
+            apiRest = meiTuanService.generateBindingStoreLink(NumberUtils.createBigInteger(tenantId), NumberUtils.createBigInteger(branchId), businessId);
         } catch (Exception e) {
             LogUtils.error("绑定门店失败", controllerSimpleName, "createCategoryWithChildren", e, requestParameters);
             apiRest = new ApiRest(e);

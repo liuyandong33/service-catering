@@ -20,7 +20,7 @@ public class MeiTuanService {
     private BranchMapper branchMapper;
 
     @Transactional(readOnly = true)
-    public ApiRest bindingStore(BigInteger tenantId, BigInteger branchId, String businessId) throws IOException {
+    public ApiRest generateBindingStoreLink(BigInteger tenantId, BigInteger branchId, String businessId) throws IOException {
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
