@@ -1,0 +1,9 @@
+package build.dream.erp.controllers;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping(value = "/meiTuan")
+public class MeiTuanController {
+}
