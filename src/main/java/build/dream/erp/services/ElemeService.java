@@ -61,7 +61,9 @@ public class ElemeService {
         Map<String, String> checkIsAuthorizeRequestParameters = new HashMap<String, String>();
         checkIsAuthorizeRequestParameters.put("tenantId", tenantId.toString());
         checkIsAuthorizeRequestParameters.put("branchId", branchId.toString());
-        checkIsAuthorizeRequestParameters.put("branchType", branch.getType().toString());
+
+        String elemeAccountType = branch.getElemeAccountType().toString();
+        checkIsAuthorizeRequestParameters.put("elemeAccountType", elemeAccountType);
         String checkIsAuthorizeResult = ProxyUtils.doGetOriginalWithRequestParameters(Constants.SERVICE_NAME_OUT, "eleme", "checkIsAuthorize", checkIsAuthorizeRequestParameters);
         ApiRest checkIsAuthorizeApiRest = ApiRest.fromJson(checkIsAuthorizeResult);
         Validate.isTrue(checkIsAuthorizeApiRest.isSuccessful(), checkIsAuthorizeApiRest.getError());
@@ -75,10 +77,9 @@ public class ElemeService {
         } else {
             String elemeUrl = ConfigurationUtils.getConfiguration(Constants.ELEME_SERVICE_URL);
             String elemeAppKey = ConfigurationUtils.getConfiguration(Constants.ELEME_APP_KEY);
-            String tenantType = checkIsAuthorizeApiRestData.get("tenantType").toString();
 
             String outServiceOutsideServiceDomain = SystemPartitionUtils.getOutsideServiceDomain(Constants.SERVICE_NAME_OUT);
-            data = String.format(Constants.ELEME_TENANT_AUTHORIZE_URL_FORMAT, elemeUrl + "/" + "authorize", "code", elemeAppKey, URLEncoder.encode(outServiceOutsideServiceDomain + "/eleme/tenantAuthorizeCallback", Constants.CHARSET_UTF_8), tenantType + "Z" + tenantId + "Z" + branch.getType() + "Z" + branchId, "all");
+            data = String.format(Constants.ELEME_TENANT_AUTHORIZE_URL_FORMAT, elemeUrl + "/" + "authorize", "code", elemeAppKey, URLEncoder.encode(outServiceOutsideServiceDomain + "/eleme/tenantAuthorizeCallback", Constants.CHARSET_UTF_8), tenantId + "Z" + branchId + "Z" + elemeAccountType, "all");
         }
         ApiRest apiRest = new ApiRest(data, "生成授权链接成功！");
         return apiRest;
