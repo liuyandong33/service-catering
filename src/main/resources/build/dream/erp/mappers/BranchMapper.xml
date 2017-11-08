@@ -4,17 +4,19 @@
     <insert id="insert" parameterType="build.dream.common.erp.domains.Branch" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO branch(code, name, type,
         status, tenant_id, tenant_code,
-        shop_id, create_user_id, last_update_user_id)
+        eleme_account_type, shop_id, create_user_id,
+        last_update_user_id)
         VALUES (#{code}, #{name}, #{type},
         #{status}, #{tenantId}, #{tenantCode},
-        #{shopId}, #{createUserId}, #{lastUpdateUserId})
+        #{elemeAccountType}, #{shopId}, #{createUserId},
+        #{lastUpdateUserId})
     </insert>
 
     <insert id="insertAll" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO branch(code, name, type, status, tenant_id, tenant_code, shop_id, create_user_id, last_update_user_id)
+        INSERT INTO branch(code, name, type, status, tenant_id, tenant_code, eleme_account_type, shop_id, create_user_id, last_update_user_id)
         VALUES
         <foreach collection="list" index="index" item="branch" separator=",">
-            (#{branch.code}, #{branch.name}, #{branch.type}, #{branch.status}, #{branch.tenantId}, #{branch.tenantCode}, #{branch.shopId}, #{branch.createUserId}, #{branch.lastUpdateUserId})
+            (#{branch.code}, #{branch.name}, #{branch.type}, #{branch.status}, #{branch.tenantId}, #{branch.tenantCode}, #{elemeAccountType}, #{branch.shopId}, #{branch.createUserId}, #{branch.lastUpdateUserId})
         </foreach>
     </insert>
 
@@ -26,6 +28,7 @@
             status = #{status},
             tenant_id = #{tenantId},
             tenant_code = #{tenantCode},
+            eleme_account_type = #{elemeAccountType},
             shop_id = #{shopId},
             create_user_id = #{createUserId},
             last_update_user_id = #{lastUpdateUserId},
