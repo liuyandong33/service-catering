@@ -23,6 +23,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
@@ -580,5 +582,21 @@ public class ElemeController extends BasicController {
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/bindingStore")
+    @ResponseBody
+    public String bindingStore() throws IOException {
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("views/eleme/bindingRestaurant.html");
+        StringBuffer stringBuffer = new StringBuffer();
+        int length = 0;
+        byte[] buffer = new byte[1024];
+        while ((length = inputStream.read(buffer, 0, 1024)) != -1) {
+            stringBuffer.append(new String(buffer, 0, length));
+        }
+        String result = stringBuffer.toString();
+        result = result.replaceAll("\\$\\{tenantId}", "100");
+        result = result.replaceAll("\\$\\{branchId}", "200");
+        return result;
     }
 }
