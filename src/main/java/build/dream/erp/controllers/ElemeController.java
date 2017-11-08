@@ -11,7 +11,6 @@ import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
 import build.dream.erp.constants.Constants;
 import build.dream.erp.models.eleme.*;
-import build.dream.erp.services.BranchService;
 import build.dream.erp.services.ElemeService;
 import build.dream.erp.utils.ElemeUtils;
 import net.sf.json.JSONObject;
@@ -39,8 +38,6 @@ public class ElemeController extends BasicController {
     private static final int[] ELEME_SHOP_STATE_CHANGE_MESSAGE_TYPES = {91, 92};
     @Autowired
     private ElemeService elemeService;
-    @Autowired
-    private BranchService branchService;
 
     @RequestMapping(value = "/tenantAuthorize")
     @ResponseBody
