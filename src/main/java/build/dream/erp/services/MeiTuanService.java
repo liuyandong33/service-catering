@@ -8,6 +8,7 @@ import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.SearchModel;
 import build.dream.erp.constants.Constants;
 import build.dream.erp.mappers.BranchMapper;
+import build.dream.erp.mappers.MeiTuanOrderMapper;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.Validate;
@@ -25,6 +26,8 @@ import java.util.Map;
 public class MeiTuanService {
     @Autowired
     private BranchMapper branchMapper;
+    @Autowired
+    private MeiTuanOrderMapper meiTuanOrderMapper;
 
     @Transactional(readOnly = true)
     public ApiRest generateBindingStoreLink(BigInteger tenantId, BigInteger branchId, String businessId) throws IOException {
@@ -97,7 +100,20 @@ public class MeiTuanService {
         meiTuanOrder.setDeliveryTime(deliveryTimeCalendar.getTime());
         meiTuanOrder.setHasInvoiced(hasInvoiced == 1);
         meiTuanOrder.setThirdShipping(isThirdShipping == 1);
+        meiTuanOrder.setTenantId(tenantId);
+        meiTuanOrder.setTenantCode(branch.getTenantCode());
+        meiTuanOrder.setBranchId(branchId);
+        meiTuanOrder.setBranchCode(branch.getCode());
 
-        return null;
+        BigInteger userId = BigInteger.TEN;
+        meiTuanOrder.setCreateUserId(userId);
+        meiTuanOrder.setLastUpdateUserId(userId);
+        meiTuanOrder.setLastUpdateRemark("处理美团订单生效回调，保存新订单！");
+        meiTuanOrderMapper.insert(meiTuanOrder);
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("美团订单生效回调处理成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
     }
 }

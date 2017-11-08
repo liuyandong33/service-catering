@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="build.dream.erp.mappers.MeiTuanOrderPoiReceiveDetailMapper">
+    <insert id="insert" parameterType="build.dream.common.erp.domains.MeiTuanOrderPoiReceiveDetail" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO mei_tuan_order_poi_receive_detail(mei_tuan_order_id, food_share_fee_charge_by_poi, logistics_fee,
+        online_payment, wm_poi_receive_cent, create_user_id,
+        last_update_user_id, last_update_remark)
+        VALUES(#{meiTuanOrderId}, #{foodShareFeeChargeByPoi}, #{logisticsFee},
+        #{onlinePayment}, #{wmPoiReceiveCent}, #{createUserId},
+        #{lastUpdateUserId}, #{lastUpdateRemark})
+    </insert>
+
+    <update id="update" parameterType="build.dream.common.erp.domains.MeiTuanOrderPoiReceiveDetail">
+        UPDATE mei_tuan_order_poi_receive_detail
+        SET mei_tuan_order_id = #{meiTuanOrderId},
+            food_share_fee_charge_by_poi = #{foodShareFeeChargeByPoi},
+            logistics_fee = #{logisticsFee},
+            online_payment = #{onlinePayment},
+            wm_poi_receive_cent = #{wmPoiReceiveCent},
+            create_user_id = #{createUserId},
+            last_update_user_id = #{lastUpdateUserId},
+            last_update_remark = #{lastUpdateRemark},
+            deleted = #{deleted}
+        WHERE id = #{id}
+    </update>
+
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.MeiTuanOrderPoiReceiveDetail">
+        SELECT * FROM mei_tuan_order_poi_receive_detail <include refid="searchConditionSql"></include>
+    </select>
+
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.MeiTuanOrderPoiReceiveDetail">
+        SELECT * FROM mei_tuan_order_poi_receive_detail <include refid="searchConditionSql"></include>
+    </select>
+
+    <sql id="searchConditionSql">
+        WHERE
+        <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
+            <choose>
+                <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
+                    ${searchCondition.columnName} ${searchCondition.operationSymbol}
+                    <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </when>
+                <otherwise>
+                    ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
+                </otherwise>
+            </choose>
+        </foreach>
+    </sql>
+</mapper>

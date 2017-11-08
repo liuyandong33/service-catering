@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="build.dream.erp.mappers.MeiTuanOrderMapper">
+    <insert id="insert" parameterType="build.dream.common.erp.domains.MeiTuanOrder" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO mei_tuan_order(tenant_id, tenant_code, branch_id,
+        branch_code, order_id, order_id_view,
+        caution, city_id, ctime,
+        utime, day_seq, delivery_time,
+        has_invoiced, invoice_title, taxpayer_id,
+        is_favorites, is_poi_first_order, is_third_shipping,
+        latitude, longitude, logistics_code,
+        original_price, pay_type, pick_type,
+        poi_address, poi_name, poi_phone,
+        recipient_address, recipient_name, recipient_phone,
+        shipper_phone, shipping_fee, status,
+        total, create_user_id, last_update_user_id,
+        last_update_remark)
+        VALUES(#{tenantId}, #{tenantCode}, #{branchId},
+        #{branchCode}, #{orderId}, #{orderIdView},
+        #{caution}, #{cityId}, #{ctime},
+        #{utime}, #{daySeq}, #{deliveryTime},
+        #{hasInvoiced}, #{invoiceTitle}, #{taxpayerId},
+        #{isFavorites}, #{isPoiFirstOrder}, #{isThirdShipping},
+        #{latitude}, #{longitude}, #{logisticsCode},
+        #{originalPrice}, #{payType}, #{pickType},
+        #{poiAddress}, #{poiName}, #{poiPhone},
+        #{recipientAddress}, #{recipientName}, #{recipientPhone},
+        #{shipperPhone}, #{shippingFee}, #{status},
+        #{total}, #{createUserId}, #{lastUpdateUserId},
+        #{lastUpdateRemark})
+    </insert>
+
+    <update id="update" parameterType="build.dream.common.erp.domains.MeiTuanOrder">
+        UPDATE mei_tuan_order
+        SET tenant_id = #{tenantId},
+            tenant_code = #{tenantCode},
+            branch_id = #{branchId},
+            branch_code = #{branchCode},
+            order_id = #{orderId},
+            order_id_view = #{orderIdView},
+            caution = #{caution},
+            city_id = #{cityId},
+            ctime = #{ctime},
+            utime = #{utime},
+            day_seq = #{daySeq},
+            delivery_time = #{deliveryTime},
+            has_invoiced = #{hasInvoiced},
+            invoice_title = #{invoiceTitle},
+            taxpayer_id = #{taxpayerId},
+            is_favorites = #{isFavorites},
+            is_poi_first_order = #{isPoiFirstOrder},
+            is_third_shipping = #{isThirdShipping},
+            latitude = #{latitude},
+            longitude = #{longitude},
+            logistics_code = #{logisticsCode},
+            original_price = #{originalPrice},
+            pay_type = #{payType},
+            pick_type = #{pickType},
+            poi_address = #{poiAddress},
+            poi_name = #{poiName},
+            poi_phone = #{poiPhone},
+            recipient_address = #{recipientAddress},
+            recipient_name = #{recipientName},
+            recipient_phone = #{recipientPhone},
+            shipper_phone = #{shipperPhone},
+            shipping_fee = #{shippingFee},
+            status = #{status},
+            total = #{total},
+            create_user_id = #{createUserId},
+            last_update_user_id = #{lastUpdateUserId},
+            last_update_remark = #{lastUpdateRemark},
+            deleted = #{deleted}
+        WHERE id = #{id}
+    </update>
+
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.MeiTuanOrder">
+        SELECT * FROM mei_tuan_order <include refid="searchConditionSql"></include>
+    </select>
+
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.MeiTuanOrder">
+        SELECT * FROM mei_tuan_order <include refid="searchConditionSql"></include>
+    </select>
+
+    <select id="findAllPaged" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.MeiTuanOrder">
+        SELECT * FROM mei_tuan_order <include refid="searchConditionSql"></include> <include refid="paginationSql"></include>
+    </select>
+
+    <sql id="searchConditionSql">
+        WHERE
+        <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
+            <choose>
+                <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
+                    ${searchCondition.columnName} ${searchCondition.operationSymbol}
+                    <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </when>
+                <otherwise>
+                    ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
+                </otherwise>
+            </choose>
+        </foreach>
+    </sql>
+
+    <sql id="paginationSql">
+        LIMIT #{offset}, #{maxResults}
+    </sql>
+</mapper>

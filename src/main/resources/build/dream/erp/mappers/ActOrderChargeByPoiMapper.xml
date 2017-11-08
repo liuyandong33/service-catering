@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="build.dream.erp.mappers.ActOrderChargeByPoiMapper">
+    <insert id="insert" parameterType="build.dream.common.erp.domains.ActOrderChargeByPoi" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO act_order_charge_by_poi(mei_tuan_order_poi_receive_detail_id, comment, fee_type_desc,
+        fee_type_id, money_cent, create_user_id,
+        last_update_user_id, last_update_remark)
+        VALUES(#{meiTuanOrderPoiReceiveDetailId}, #{comment}, #{feeTypeDesc},
+        #{feeTypeId}, #{moneyCent}, #{createUserId},
+        #{lastUpdateUserId}, #{lastUpdateRemark})
+    </insert>
+
+    <update id="update" parameterType="build.dream.common.erp.domains.ActOrderChargeByMt">
+        UPDATE act_order_charge_by_poi
+        SET mei_tuan_order_poi_receive_detail_id = #{meiTuanOrderPoiReceiveDetailId},
+            comment = #{comment},
+            fee_type_desc = #{feeTypeDesc},
+            fee_type_id = #{feeTypeId},
+            money_cent = #{moneyCent},
+            create_user_id = #{createUserId},
+            last_update_user_id = #{lastUpdateUserId},
+            last_update_remark = #{lastUpdateRemark},
+            deleted = #{deleted}
+        WHERE id = #{id}
+    </update>
+
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ActOrderChargeByPoi">
+        SELECT * FROM act_order_charge_by_poi <include refid="searchConditionSql"></include>
+    </select>
+
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ActOrderChargeByPoi">
+        SELECT * FROM act_order_charge_by_poi <include refid="searchConditionSql"></include>
+    </select>
+
+    <sql id="searchConditionSql">
+        WHERE
+        <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
+            <choose>
+                <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
+                    ${searchCondition.columnName} ${searchCondition.operationSymbol}
+                    <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </when>
+                <otherwise>
+                    ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
+                </otherwise>
+            </choose>
+        </foreach>
+    </sql>
+</mapper>
