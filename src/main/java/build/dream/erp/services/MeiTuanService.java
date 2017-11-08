@@ -234,6 +234,52 @@ public class MeiTuanService {
         JSONObject orderCancelJsonObject = JSONObject.fromObject(orderCancelJson);
         BigInteger orderId = BigInteger.valueOf(orderCancelJsonObject.getLong("orderId"));
 
+        MeiTuanOrder meiTuanOrder = findMeiTuanOrder(ePoiId, orderId);
+
+        meiTuanOrder.setStatus(9);
+        meiTuanOrderMapper.update(meiTuanOrder);
+        publishMeiTuanOrderMessage(meiTuanOrder.getTenantCode(), meiTuanOrder.getBranchCode(), meiTuanOrder.getId(), 2);
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("美团订单取消回调处理成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
+    }
+
+    public ApiRest handleOrderRefundCallback(Map<String, String> parameters) throws IOException {
+        String developerId = parameters.get("developerId");
+        String ePoiId = parameters.get("ePoiId");
+        String sign = parameters.get("sign");
+        String orderRefundJson = parameters.get("orderCancel");
+        JSONObject orderRefundJsonObject = JSONObject.fromObject(orderRefundJson);
+        BigInteger orderId = BigInteger.valueOf(orderRefundJsonObject.getLong("orderId"));
+
+        MeiTuanOrder meiTuanOrder = findMeiTuanOrder(ePoiId, orderId);
+
+        String notifyType = orderRefundJsonObject.getString("notifyType");
+        int status = 0;
+        if ("agree".equals(notifyType)) {
+
+        } else if ("".equals(notifyType)) {
+
+        }
+        meiTuanOrder.setStatus(status);
+        meiTuanOrderMapper.update(meiTuanOrder);
+        publishMeiTuanOrderMessage(meiTuanOrder.getTenantCode(), meiTuanOrder.getBranchCode(), meiTuanOrder.getId(), 2);
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("美团订单退款回调处理成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
+    }
+
+    /**
+     * 查询美团订单
+     * @param ePoiId
+     * @param orderId
+     * @return
+     */
+    private MeiTuanOrder findMeiTuanOrder(String ePoiId, BigInteger orderId) {
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
         BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
         BigInteger branchId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[1]);
@@ -249,15 +295,7 @@ public class MeiTuanService {
         meiTuanOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
         MeiTuanOrder meiTuanOrder = meiTuanOrderMapper.find(meiTuanOrderSearchModel);
         Validate.notNull(meiTuanOrder, "订单不存在！");
-
-        meiTuanOrder.setStatus(9);
-        meiTuanOrderMapper.update(meiTuanOrder);
-        publishMeiTuanOrderMessage(meiTuanOrder.getTenantCode(), meiTuanOrder.getBranchCode(), meiTuanOrder.getId(), 2);
-
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("美团订单取消回调处理成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return meiTuanOrder;
     }
 
     /**

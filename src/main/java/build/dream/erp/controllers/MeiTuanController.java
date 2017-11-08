@@ -84,4 +84,24 @@ public class MeiTuanController extends BasicController {
         }
         return returnValue;
     }
+
+    @RequestMapping(value = "/orderRefundCallback")
+    @ResponseBody
+    public String orderRefundCallback() {
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        String returnValue = null;
+        try {
+            requestParameters.put("developerId", "100120");
+            requestParameters.put("ePoiId", "1Z1");
+            requestParameters.put("sign", "52b379754c40c7865a48b84a24fb99c1ebb49f11");
+            requestParameters.put("orderRefund", "{\"notifyType\":\"agree\",\"orderId\":12341234,\"reason\":\"同意\"}");
+            ApiRest apiRest = meiTuanService.handleOrderRefundCallback(requestParameters);
+            Validate.isTrue(apiRest.isSuccessful(), apiRest.getError());
+            returnValue = Constants.ELEME_ORDER_CALLBACK_SUCCESS_RETURN_VALUE;
+        } catch (Exception e) {
+            LogUtils.error("订单取消回调处理失败", controllerSimpleName, "orderCancelCallback", e, requestParameters);
+            returnValue = e.getMessage();
+        }
+        return returnValue;
+    }
 }
