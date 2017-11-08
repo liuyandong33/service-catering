@@ -11,7 +11,7 @@ import java.util.List;
 public interface MeiTuanOrderMapper {
     long insert(MeiTuanOrder meiTuanOrder);
     long update(MeiTuanOrder meiTuanOrder);
-    Branch find(SearchModel searchModel);
-    List<Branch> findAll(SearchModel searchModel);
-    List<Branch> findAllPaged(SearchModel searchModel);
+    MeiTuanOrder find(SearchModel searchModel);
+    List<MeiTuanOrder> findAll(SearchModel searchModel);
+    List<MeiTuanOrder> findAllPaged(SearchModel searchModel);
 }

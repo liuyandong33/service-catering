@@ -4,6 +4,7 @@ import build.dream.common.api.ApiRest;
 import build.dream.common.erp.domains.*;
 import build.dream.common.utils.ConfigurationUtils;
 import build.dream.common.utils.GsonUtils;
+import build.dream.common.utils.QueueUtils;
 import build.dream.common.utils.SearchModel;
 import build.dream.erp.constants.Constants;
 import build.dream.erp.mappers.*;
@@ -62,7 +63,7 @@ public class MeiTuanService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleOrderEffectiveCallback(Map<String, String> parameters) {
+    public ApiRest handleOrderEffectiveCallback(Map<String, String> parameters) throws IOException {
         String developerId = parameters.get("developerId");
         String ePoiId = parameters.get("ePoiId");
         String sign = parameters.get("sign");
@@ -216,10 +217,63 @@ public class MeiTuanService {
                 actOrderChargeByPoiMapper.insert(actOrderChargeByPoi);
             }
         }
+        publishMeiTuanOrderMessage(meiTuanOrder.getTenantCode(), meiTuanOrder.getBranchCode(), meiTuanOrder.getId(), 1);
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("美团订单生效回调处理成功！");
         apiRest.setSuccessful(true);
         return apiRest;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest handleOrderCancelCallback(Map<String, String> parameters) throws IOException {
+        String developerId = parameters.get("developerId");
+        String ePoiId = parameters.get("ePoiId");
+        String sign = parameters.get("sign");
+        String orderCancelJson = parameters.get("orderCancel");
+        JSONObject orderCancelJsonObject = JSONObject.fromObject(orderCancelJson);
+        BigInteger orderId = BigInteger.valueOf(orderCancelJsonObject.getLong("orderId"));
+
+        String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
+        BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
+        BigInteger branchId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[1]);
+        SearchModel branchSearchModel = new SearchModel(true);
+        branchSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        branchSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        Branch branch = branchMapper.find(branchSearchModel);
+        Validate.notNull(branch, "门店不存在！");
+
+        SearchModel meiTuanOrderSearchModel = new SearchModel(true);
+        meiTuanOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        meiTuanOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        meiTuanOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
+        MeiTuanOrder meiTuanOrder = meiTuanOrderMapper.find(meiTuanOrderSearchModel);
+        Validate.notNull(meiTuanOrder, "订单不存在！");
+
+        meiTuanOrder.setStatus(9);
+        meiTuanOrderMapper.update(meiTuanOrder);
+        publishMeiTuanOrderMessage(meiTuanOrder.getTenantCode(), meiTuanOrder.getBranchCode(), meiTuanOrder.getId(), 2);
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("美团订单取消回调处理成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
+    }
+
+    /**
+     * 发布饿了么订单消息
+     * @param tenantCode：商户编码
+     * @param branchCode：门店编码
+     * @param meiTuanOrderId：订单ID
+     * @param type：消息类型
+     * @return
+     */
+    private void publishMeiTuanOrderMessage(String tenantCode, String branchCode, BigInteger meiTuanOrderId, Integer type) throws IOException {
+        String meiTuanOrderMessageChannel = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_ORDER_MESSAGE_CHANNEL);
+        JSONObject messageJsonObject = new JSONObject();
+        messageJsonObject.put("tenantCodeAndBranchCode", tenantCode + "_" + branchCode);
+        messageJsonObject.put("type", type);
+        messageJsonObject.put("elemeOrderId", meiTuanOrderId);
+        QueueUtils.convertAndSend(meiTuanOrderMessageChannel, messageJsonObject.toString());
     }
 }
