@@ -2,17 +2,11 @@ package build.dream.erp.controllers;
 
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
-import build.dream.common.erp.domains.Branch;
-import build.dream.common.erp.domains.GoodsCategory;
 import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.ConfigurationUtils;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
 import build.dream.erp.constants.Constants;
 import build.dream.erp.services.MeiTuanService;
-import build.dream.erp.utils.ElemeUtils;
-import net.sf.json.JSONObject;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +14,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.math.BigInteger;
-import java.util.HashMap;
 import java.util.Map;
 
 @Controller
