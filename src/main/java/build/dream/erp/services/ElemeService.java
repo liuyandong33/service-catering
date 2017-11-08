@@ -5,6 +5,7 @@ import build.dream.common.erp.domains.*;
 import build.dream.common.utils.*;
 import build.dream.erp.constants.Constants;
 import build.dream.erp.mappers.*;
+import build.dream.erp.models.eleme.DoBindingStoreModel;
 import build.dream.erp.models.eleme.ObtainElemeDeliveryOrderStateChangeMessageModel;
 import build.dream.erp.models.eleme.PullElemeOrderModel;
 import net.sf.json.JSONArray;
@@ -52,7 +53,7 @@ public class ElemeService {
     private ElemeRefundOrderMessageGoodsItemMapper elemeRefundOrderMessageGoodsItemMapper;
 
     @Transactional(readOnly = true)
-    public ApiRest tenantAuthorize(BigInteger tenantId, BigInteger branchId) throws IOException {
+    public ApiRest tenantAuthorize(BigInteger tenantId, BigInteger branchId, BigInteger userId) throws IOException {
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("tenant_id", "=", tenantId);
         searchModel.addSearchCondition("id", "=", branchId);
@@ -73,13 +74,14 @@ public class ElemeService {
         String data = null;
         if (isAuthorize) {
             String serviceName = ConfigurationUtils.getConfiguration(Constants.SERVICE_NAME);
-            data = SystemPartitionUtils.getOutsideServiceDomain(serviceName) + "/eleme/bindingRestaurant?tenantId=" + tenantId + "&branchId=" + branchId;
+            String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
+            data = SystemPartitionUtils.getOutsideUrl(partitionCode, serviceName, "eleme", "bindingStore") + "?tenantId=" + tenantId + "&branchId=" + branchId + "&userId=" + userId;
         } else {
             String elemeUrl = ConfigurationUtils.getConfiguration(Constants.ELEME_SERVICE_URL);
             String elemeAppKey = ConfigurationUtils.getConfiguration(Constants.ELEME_APP_KEY);
 
             String outServiceOutsideServiceDomain = SystemPartitionUtils.getOutsideServiceDomain(Constants.SERVICE_NAME_OUT);
-            data = String.format(Constants.ELEME_TENANT_AUTHORIZE_URL_FORMAT, elemeUrl + "/" + "authorize", "code", elemeAppKey, URLEncoder.encode(outServiceOutsideServiceDomain + "/eleme/tenantAuthorizeCallback", Constants.CHARSET_UTF_8), tenantId + "Z" + branchId + "Z" + elemeAccountType, "all");
+            data = String.format(Constants.ELEME_TENANT_AUTHORIZE_URL_FORMAT, elemeUrl + "/" + "authorize", "code", elemeAppKey, URLEncoder.encode(outServiceOutsideServiceDomain + "/eleme/tenantAuthorizeCallback", Constants.CHARSET_UTF_8), tenantId + "Z" + branchId + "Z" + userId + "Z" + elemeAccountType, "all");
         }
         ApiRest apiRest = new ApiRest(data, "生成授权链接成功！");
         return apiRest;
@@ -675,6 +677,33 @@ public class ElemeService {
         ApiRest apiRest = new ApiRest();
         apiRest.setData(elemeOrderMap);
         apiRest.setMessage("拉取饿了么订单成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest doBindingStore(DoBindingStoreModel doBindingStoreModel) throws IOException {
+        String lastUpdateRemark = "门店(" + doBindingStoreModel.getBranchId() + ")绑定饿了么(" + doBindingStoreModel.getShopId() + ")，清除绑定关系！";
+        branchMapper.clearBindingStore(doBindingStoreModel.getShopId(), doBindingStoreModel.getUserId(), lastUpdateRemark);
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, doBindingStoreModel.getTenantId());
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, doBindingStoreModel.getBranchId());
+        Branch branch = branchMapper.find(searchModel);
+        Validate.notNull(branch, "门店不存在！");
+        branch.setShopId(doBindingStoreModel.getShopId());
+        branchMapper.update(branch);
+
+        Map<String, String> saveElemeBranchMappingRequestParameters = new HashMap<String, String>();
+        saveElemeBranchMappingRequestParameters.put("tenantId", doBindingStoreModel.getTenantId().toString());
+        saveElemeBranchMappingRequestParameters.put("branchId", doBindingStoreModel.getBranchId().toString());
+        saveElemeBranchMappingRequestParameters.put("shopId", doBindingStoreModel.getShopId().toString());
+        saveElemeBranchMappingRequestParameters.put("userId", doBindingStoreModel.getUserId().toString());
+
+        ApiRest saveElemeBranchMappingApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "eleme", "saveElemeBranchMapping", saveElemeBranchMappingRequestParameters);
+        Validate.isTrue(saveElemeBranchMappingApiRest.isSuccessful(), saveElemeBranchMappingApiRest.getError());
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("饿了么门店绑定成功！");
         apiRest.setSuccessful(true);
         return apiRest;
     }

@@ -23,4 +23,5 @@ public interface BranchMapper {
     long countBranches(SearchModel searchModel);
     List<Map<String, Object>> findAllBranchInfos();
     Branch findBranchInfo(@Param("tenantId") BigInteger tenantId, @Param("userId") BigInteger userId);
+    long clearBindingStore(@Param("shopId") BigInteger shopId, @Param("userId") BigInteger userId, @Param("lastUpdateRemark") String lastUpdateRemark);
 }

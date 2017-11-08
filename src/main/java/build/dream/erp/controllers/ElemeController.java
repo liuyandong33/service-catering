@@ -49,12 +49,15 @@ public class ElemeController extends BasicController {
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
             String tenantId = requestParameters.get("tenantId");
-            Validate.notNull(tenantId, "参数(tenantId)不能为空！");
+            Validate.notNull(tenantId, ApplicationHandler.obtainParameterErrorMessage("tenantId"));
 
             String branchId = requestParameters.get("branchId");
-            Validate.notNull(branchId, "参数(branchId)不能为空！");
+            Validate.notNull(branchId, ApplicationHandler.obtainParameterErrorMessage("branchId"));
 
-            apiRest = elemeService.tenantAuthorize(BigInteger.valueOf(Long.valueOf(tenantId)), BigInteger.valueOf(Long.valueOf(branchId)));
+            String userId = requestParameters.get("userId");
+            Validate.notNull(userId, ApplicationHandler.obtainParameterErrorMessage("userId"));
+
+            apiRest = elemeService.tenantAuthorize(NumberUtils.createBigInteger(tenantId), NumberUtils.createBigInteger(branchId), NumberUtils.createBigInteger(userId));
         } catch (Exception e) {
             LogUtils.error("生成授权链接失败", controllerSimpleName, "tenantAuthorize", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -587,6 +590,7 @@ public class ElemeController extends BasicController {
     @RequestMapping(value = "/bindingStore")
     @ResponseBody
     public String bindingStore() throws IOException {
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("views/eleme/bindingRestaurant.html");
         StringBuffer stringBuffer = new StringBuffer();
         int length = 0;
@@ -595,8 +599,25 @@ public class ElemeController extends BasicController {
             stringBuffer.append(new String(buffer, 0, length));
         }
         String result = stringBuffer.toString();
-        result = result.replaceAll("\\$\\{tenantId}", "100");
-        result = result.replaceAll("\\$\\{branchId}", "200");
+        result = result.replaceAll("\\$\\{tenantId}", requestParameters.get("tenantId"));
+        result = result.replaceAll("\\$\\{branchId}", requestParameters.get("branchId"));
+        result = result.replaceAll("\\$\\{userId}", requestParameters.get("userId"));
         return result;
+    }
+
+    @RequestMapping(value = "/doBindingStore")
+    @ResponseBody
+    public String doBindingStore() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            DoBindingStoreModel doBindingStoreModel = ApplicationHandler.instantiateObject(DoBindingStoreModel.class, requestParameters);
+            doBindingStoreModel.validateAndThrow();
+            apiRest = elemeService.doBindingStore(doBindingStoreModel);
+        } catch (Exception e) {
+            LogUtils.error("绑定饿了么门店失败！", controllerSimpleName, "pullElemeOrder", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
     }
 }

@@ -103,4 +103,8 @@
         WHERE merge_user_branch.tenant_id = #{tenantId}
         AND merge_user_branch.user_id = #{userId}
     </select>
+
+    <update id="clearBindingStore">
+        UPDATE branch SET shop_id = NULL, last_update_user_id = #{userId}, last_update_remark = #{lastUpdateRemark} WHERE shop_id = #{shopId}
+    </update>
 </mapper>
