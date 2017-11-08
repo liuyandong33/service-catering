@@ -2,10 +2,7 @@ package build.dream.erp.services;
 
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.domains.*;
-import build.dream.common.utils.ConfigurationUtils;
-import build.dream.common.utils.GsonUtils;
-import build.dream.common.utils.QueueUtils;
-import build.dream.common.utils.SearchModel;
+import build.dream.common.utils.*;
 import build.dream.erp.constants.Constants;
 import build.dream.erp.mappers.*;
 import net.sf.json.JSONArray;
@@ -38,6 +35,8 @@ public class MeiTuanService {
     private ActOrderChargeByMtMapper actOrderChargeByMtMapper;
     @Autowired
     private ActOrderChargeByPoiMapper actOrderChargeByPoiMapper;
+    @Autowired
+    private MeiTuanOrderCancelMessageMapper meiTuanOrderCancelMessageMapper;
 
     @Transactional(readOnly = true)
     public ApiRest generateBindingStoreLink(BigInteger tenantId, BigInteger branchId, String businessId) throws IOException {
@@ -235,6 +234,22 @@ public class MeiTuanService {
         BigInteger orderId = BigInteger.valueOf(orderCancelJsonObject.getLong("orderId"));
 
         MeiTuanOrder meiTuanOrder = findMeiTuanOrder(ePoiId, orderId);
+        MeiTuanOrderCancelMessage meiTuanOrderCancelMessage = new MeiTuanOrderCancelMessage();
+        meiTuanOrderCancelMessage.setMeiOrderId(meiTuanOrder.getId());
+        meiTuanOrderCancelMessage.setDeveloperId(NumberUtils.createBigInteger(developerId));
+        meiTuanOrderCancelMessage.setePoiId(ePoiId);
+        meiTuanOrderCancelMessage.setSign(sign);
+        meiTuanOrderCancelMessage.setOrderId(orderId);
+        meiTuanOrderCancelMessage.setReasonCode(orderCancelJsonObject.optString("reasonCode"));
+        meiTuanOrderCancelMessage.setReason(orderCancelJsonObject.optString("reason"));
+
+        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        // TODO 删除
+        userId = BigInteger.ZERO;
+        meiTuanOrderCancelMessage.setCreateUserId(userId);
+        meiTuanOrderCancelMessage.setLastUpdateUserId(userId);
+        meiTuanOrderCancelMessage.setLastUpdateRemark("处理美团订单取消回调，保存美团订单取消消息！");
+        meiTuanOrderCancelMessageMapper.insert(meiTuanOrderCancelMessage);
 
         meiTuanOrder.setStatus(9);
         meiTuanOrderMapper.update(meiTuanOrder);
@@ -246,6 +261,7 @@ public class MeiTuanService {
         return apiRest;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ApiRest handleOrderRefundCallback(Map<String, String> parameters) throws IOException {
         String developerId = parameters.get("developerId");
         String ePoiId = parameters.get("ePoiId");
