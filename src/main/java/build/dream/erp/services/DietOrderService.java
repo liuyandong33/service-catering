@@ -12,7 +12,6 @@ import build.dream.erp.models.dietorder.DoPayModel;
 import build.dream.erp.models.dietorder.DoPayOfflineModel;
 import build.dream.erp.models.dietorder.SaveDietOrderModel;
 import build.dream.erp.utils.TenantSecretKeyUtils;
-import net.sf.json.JSONObject;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
@@ -156,13 +155,18 @@ public class DietOrderService {
             for (BigInteger goodsFlavorId : dietOrderModel.getGoodsFlavorIds()) {
                 GoodsFlavor goodsFlavor = goodsFlavorMap.get(goodsFlavorId);
                 Validate.notNull(goodsFlavor, "菜品口味不存在！");
+
+                GoodsFlavorGroup goodsFlavorGroup = goodsFlavorGroupMap.get(goodsFlavor.getGoodsFlavorGroupId());
+                Validate.notNull(goodsFlavorGroup, "口味组不存在！");
+
                 DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor = new DietOrderDetailGoodsFlavor();
                 dietOrderDetailGoodsFlavor.setTenantId(saveDietOrderModel.getTenantId());
                 dietOrderDetailGoodsFlavor.setBranchId(saveDietOrderModel.getBranchId());
 
-                GoodsFlavorGroup goodsFlavorGroup = goodsFlavorGroupMap.get(goodsFlavor.getGoodsFlavorGroupId());
-                Validate.notNull(goodsFlavorGroup, "口味组不存在！");
+                dietOrderDetailGoodsFlavor.setGoodsFlavorGroupId(goodsFlavorGroup.getId());
                 dietOrderDetailGoodsFlavor.setGoodsFlavorGroupName(goodsFlavorGroup.getName());
+
+                dietOrderDetailGoodsFlavor.setGoodsFlavorId(goodsFlavor.getId());
                 dietOrderDetailGoodsFlavor.setGoodsFlavorName(goodsFlavor.getName());
                 dietOrderDetailGoodsFlavors.add(dietOrderDetailGoodsFlavor);
 
