@@ -617,4 +617,18 @@ public class ElemeController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    @RequestMapping(value = "/test")
+    @ResponseBody
+    public String test() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            ElemeUtils.addElemeMessageBlockingQueue(requestParameters.get("elemeMessage"), 10);
+        } catch (Exception e) {
+            LogUtils.error("测试失败！", controllerSimpleName, "test", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }

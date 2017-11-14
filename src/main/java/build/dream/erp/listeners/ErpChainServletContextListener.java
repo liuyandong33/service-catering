@@ -1,6 +1,7 @@
 package build.dream.erp.listeners;
 
 import build.dream.common.listeners.BasicServletContextListener;
+import build.dream.erp.utils.ElemeUtils;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.annotation.WebListener;
@@ -10,6 +11,7 @@ public class ErpChainServletContextListener extends BasicServletContextListener 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         super.contextInitialized(servletContextEvent);
+        ElemeUtils.startElemeConsumerThread();
     }
 
     @Override

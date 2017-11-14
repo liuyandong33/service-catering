@@ -6,14 +6,14 @@ import build.dream.common.utils.ConfigurationUtils;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.ProxyUtils;
 import build.dream.erp.constants.Constants;
+import build.dream.erp.tools.ElemeConsumerThread;
 import net.sf.json.JSONObject;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created by liuyandong on 2017/3/13.
@@ -101,5 +101,22 @@ public class ElemeUtils {
         }
         stringBuilder.append(appSecret);
         return DigestUtils.md5Hex(stringBuilder.toString()).toUpperCase().equals(signature);
+    }
+
+    private static BlockingQueue<List<String>> elemeMessageBlockingQueue = new LinkedBlockingQueue<List<String>>();
+
+    public static void addElemeMessageBlockingQueue(String elemeMessage, Integer count) throws InterruptedException {
+        List<String> elemeMessageBody = new ArrayList<String>();
+        elemeMessageBody.add(elemeMessage);
+        elemeMessageBody.add(count.toString());
+        elemeMessageBlockingQueue.put(elemeMessageBody);
+    }
+
+    public static List<String> takeElemeMessage() throws InterruptedException {
+        return elemeMessageBlockingQueue.take();
+    }
+
+    public static void startElemeConsumerThread() {
+        new Thread(new ElemeConsumerThread()).start();
     }
 }
