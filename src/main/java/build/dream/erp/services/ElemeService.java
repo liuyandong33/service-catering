@@ -88,150 +88,129 @@ public class ElemeService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest saveElemeOrder(BigInteger shopId, String message, Integer type) throws IOException {
-        ApiRest apiRest = null;
+    public void saveElemeOrder(BigInteger shopId, String message, Integer type) throws IOException {
         JSONObject messageJsonObject = JSONObject.fromObject(message);
-        String orderId = messageJsonObject.optString("id");
-        String key = "_eleme_order_callback_" + orderId + "_" + type;
-        try {
-            Boolean returnValue = CacheUtils.setnx(key, key);
-            if (!returnValue) {
-                apiRest = new ApiRest();
-                apiRest.setMessage("保存订单成功！");
-                apiRest.setSuccessful(true);
-            } else {
-                CacheUtils.expire(key, 30 * 60, TimeUnit.SECONDS);
-                SearchModel branchSearchModel = new SearchModel(true);
-                branchSearchModel.addSearchCondition("shop_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, shopId);
-                Branch branch = branchMapper.find(branchSearchModel);
-                Validate.notNull(branch, "shopId为" + shopId + "的门店不存在！");
-                // 开始保存饿了么订单
-                JSONArray phoneList = messageJsonObject.optJSONArray("phoneList");
-                messageJsonObject.remove("phoneList");
+        SearchModel branchSearchModel = new SearchModel(true);
+        branchSearchModel.addSearchCondition("shop_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, shopId);
+        Branch branch = branchMapper.find(branchSearchModel);
+        Validate.notNull(branch, "shopId为" + shopId + "的门店不存在！");
+        // 开始保存饿了么订单
+        JSONArray phoneList = messageJsonObject.optJSONArray("phoneList");
+        messageJsonObject.remove("phoneList");
 
-                JSONArray elemeGroupJsonArray = messageJsonObject.optJSONArray("groups");
-                messageJsonObject.remove("groups");
+        JSONArray elemeGroupJsonArray = messageJsonObject.optJSONArray("groups");
+        messageJsonObject.remove("groups");
 
-                JSONArray orderActivityJsonArray = messageJsonObject.optJSONArray("orderActivities");
-                messageJsonObject.remove("orderActivities");
+        JSONArray orderActivityJsonArray = messageJsonObject.optJSONArray("orderActivities");
+        messageJsonObject.remove("orderActivities");
 
-                BigInteger userId = CommonUtils.getServiceSystemUserId();
-                // TODO 上线之前删除
-                userId = BigInteger.ONE;
-                ElemeOrder elemeOrder = GsonUtils.fromJson(messageJsonObject.toString(), ElemeOrder.class, "yyyy-MM-dd'T'HH:mm:ss");
-                elemeOrder.setTenantId(branch.getTenantId());
-                elemeOrder.setTenantCode(branch.getTenantCode());
-                elemeOrder.setBranchId(branch.getId());
-                elemeOrder.setBranchCode(branch.getCode());
-                elemeOrder.setCreateUserId(userId);
-                elemeOrder.setLastUpdateUserId(userId);
-                elemeOrder.setLastUpdateRemark("饿了么系统推送新订单，保存订单！");
-                elemeOrderMapper.insert(elemeOrder);
+        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        // TODO 上线之前删除
+        userId = BigInteger.ONE;
+        ElemeOrder elemeOrder = GsonUtils.fromJson(messageJsonObject.toString(), ElemeOrder.class, "yyyy-MM-dd'T'HH:mm:ss");
+        elemeOrder.setTenantId(branch.getTenantId());
+        elemeOrder.setTenantCode(branch.getTenantCode());
+        elemeOrder.setBranchId(branch.getId());
+        elemeOrder.setBranchCode(branch.getCode());
+        elemeOrder.setCreateUserId(userId);
+        elemeOrder.setLastUpdateUserId(userId);
+        elemeOrder.setLastUpdateRemark("饿了么系统推送新订单，保存订单！");
+        elemeOrderMapper.insert(elemeOrder);
 
-                List<ElemeItem> elemeItems = new ArrayList<ElemeItem>();
+        List<ElemeItem> elemeItems = new ArrayList<ElemeItem>();
 
-                int elemeGroupJsonArraySize = elemeGroupJsonArray.size();
-                for (int index = 0; index < elemeGroupJsonArraySize; index++) {
-                    JSONObject elemeGroupJsonObject = elemeGroupJsonArray.getJSONObject(index);
-                    ElemeGroup elemeGroup = new ElemeGroup();
-                    elemeGroup.setElemeOrderId(elemeOrder.getId());
-                    elemeGroup.setName(elemeGroupJsonObject.optString("name"));
-                    elemeGroup.setType(elemeGroupJsonObject.optString("type"));
-                    elemeGroup.setCreateUserId(userId);
-                    elemeGroup.setLastUpdateUserId(userId);
-                    elemeGroup.setLastUpdateRemark("饿了么系统推送新订单，保存分组");
-                    elemeGroupMapper.insert(elemeGroup);
-                    JSONArray elemeItemJsonArray = elemeGroupJsonObject.optJSONArray("items");
-                    int elemeItemJsonArraySize = elemeItemJsonArray.size();
-                    for (int elemeItemJsonArrayIndex = 0; elemeItemJsonArrayIndex < elemeItemJsonArraySize; elemeItemJsonArrayIndex++) {
-                        JSONObject elemeItemJsonObject = elemeItemJsonArray.optJSONObject(elemeItemJsonArrayIndex);
-                        ElemeItem elemeItem = new ElemeItem();
-                        elemeItem.setElemeGroupId(elemeGroup.getId());
-                        elemeItem.setElemeItemId(BigInteger.valueOf(elemeItemJsonObject.getLong("id")));
-                        elemeItem.setSkuId(BigInteger.valueOf(elemeItemJsonObject.getLong("skuId")));
-                        elemeItem.setName(elemeItemJsonObject.getString("name"));
-                        elemeItem.setCategoryId(BigInteger.valueOf(elemeItemJsonObject.getLong("categoryId")));
-                        elemeItem.setPrice(BigDecimal.valueOf(elemeItemJsonObject.optDouble("price")));
-                        elemeItem.setQuantity(elemeItemJsonObject.optInt("quantity"));
-                        elemeItem.setTotal(BigDecimal.valueOf(elemeItemJsonObject.optDouble("total")));
-                        elemeItem.setExtendCode(elemeItemJsonObject.optString("extendCode"));
-                        elemeItem.setBarCode(elemeItemJsonObject.optString("barCode"));
-                        elemeItem.setUserPrice(BigDecimal.valueOf(elemeItemJsonObject.getDouble("userPrice")));
-                        elemeItem.setShopPrice(BigDecimal.valueOf(elemeItemJsonObject.getDouble("shopPrice")));
-                        elemeItem.setVfoodId(BigInteger.valueOf(elemeItemJsonObject.getLong("vfoodId")));
+        int elemeGroupJsonArraySize = elemeGroupJsonArray.size();
+        for (int index = 0; index < elemeGroupJsonArraySize; index++) {
+            JSONObject elemeGroupJsonObject = elemeGroupJsonArray.getJSONObject(index);
+            ElemeGroup elemeGroup = new ElemeGroup();
+            elemeGroup.setElemeOrderId(elemeOrder.getId());
+            elemeGroup.setName(elemeGroupJsonObject.optString("name"));
+            elemeGroup.setType(elemeGroupJsonObject.optString("type"));
+            elemeGroup.setCreateUserId(userId);
+            elemeGroup.setLastUpdateUserId(userId);
+            elemeGroup.setLastUpdateRemark("饿了么系统推送新订单，保存分组");
+            elemeGroupMapper.insert(elemeGroup);
+            JSONArray elemeItemJsonArray = elemeGroupJsonObject.optJSONArray("items");
+            int elemeItemJsonArraySize = elemeItemJsonArray.size();
+            for (int elemeItemJsonArrayIndex = 0; elemeItemJsonArrayIndex < elemeItemJsonArraySize; elemeItemJsonArrayIndex++) {
+                JSONObject elemeItemJsonObject = elemeItemJsonArray.optJSONObject(elemeItemJsonArrayIndex);
+                ElemeItem elemeItem = new ElemeItem();
+                elemeItem.setElemeGroupId(elemeGroup.getId());
+                elemeItem.setElemeItemId(BigInteger.valueOf(elemeItemJsonObject.getLong("id")));
+                elemeItem.setSkuId(BigInteger.valueOf(elemeItemJsonObject.getLong("skuId")));
+                elemeItem.setName(elemeItemJsonObject.getString("name"));
+                elemeItem.setCategoryId(BigInteger.valueOf(elemeItemJsonObject.getLong("categoryId")));
+                elemeItem.setPrice(BigDecimal.valueOf(elemeItemJsonObject.optDouble("price")));
+                elemeItem.setQuantity(elemeItemJsonObject.optInt("quantity"));
+                elemeItem.setTotal(BigDecimal.valueOf(elemeItemJsonObject.optDouble("total")));
+                elemeItem.setExtendCode(elemeItemJsonObject.optString("extendCode"));
+                elemeItem.setBarCode(elemeItemJsonObject.optString("barCode"));
+                elemeItem.setUserPrice(BigDecimal.valueOf(elemeItemJsonObject.getDouble("userPrice")));
+                elemeItem.setShopPrice(BigDecimal.valueOf(elemeItemJsonObject.getDouble("shopPrice")));
+                elemeItem.setVfoodId(BigInteger.valueOf(elemeItemJsonObject.getLong("vfoodId")));
 
-                        Object weight = elemeItemJsonObject.opt("weight");
-                        if (weight != null) {
-                            elemeItem.setWeight(BigDecimal.valueOf(Double.valueOf(weight.toString())));
-                        }
-                        elemeItem.setCreateUserId(userId);
-                        elemeItem.setLastUpdateUserId(userId);
-                        elemeItem.setLastUpdateRemark("饿了么系统推送新订单，保存菜品属性！");
-                        elemeItemMapper.insert(elemeItem);
+                Object weight = elemeItemJsonObject.opt("weight");
+                if (weight != null) {
+                    elemeItem.setWeight(BigDecimal.valueOf(Double.valueOf(weight.toString())));
+                }
+                elemeItem.setCreateUserId(userId);
+                elemeItem.setLastUpdateUserId(userId);
+                elemeItem.setLastUpdateRemark("饿了么系统推送新订单，保存菜品属性！");
+                elemeItemMapper.insert(elemeItem);
 
-                        JSONArray elemeItemAttributeJsonArray = elemeItemJsonObject.optJSONArray("attributes");
-                        if (elemeItemAttributeJsonArray != null) {
-                            int elemeItemAttributeJsonArraySize = elemeItemAttributeJsonArray.size();
-                            for (int elemeItemAttributeJsonArrayIndex = 0; elemeItemAttributeJsonArrayIndex < elemeItemAttributeJsonArraySize; elemeItemAttributeJsonArrayIndex++) {
-                                JSONObject elemeItemAttributeJsonObject = elemeItemAttributeJsonArray.optJSONObject(index);
-                                ElemeItemAttribute elemeItemAttribute = new ElemeItemAttribute();
-                                elemeItemAttribute.setElemeItemId(elemeItem.getId());
-                                elemeItemAttribute.setName(elemeItemAttributeJsonObject.optString("name"));
-                                elemeItemAttribute.setValue(elemeItemAttributeJsonObject.optString("value"));
-                                elemeItemAttribute.setCreateUserId(userId);
-                                elemeItemAttribute.setLastUpdateUserId(userId);
-                                elemeItemAttribute.setLastUpdateRemark("饿了么系统推送新订单，保存菜品属性！");
-                                elemeItemAttributeMapper.insert(elemeItemAttribute);
-                            }
-                        }
-
-                        JSONArray elemeItemNewSpecJsonArray = elemeItemJsonObject.optJSONArray("newSpecs");
-                        if (elemeItemNewSpecJsonArray != null) {
-                            int elemeItemNewSpecJsonArraySize = elemeItemNewSpecJsonArray.size();
-                            for (int elemeItemNewSpecJsonArrayIndex = 0; elemeItemNewSpecJsonArrayIndex < elemeItemNewSpecJsonArraySize; elemeItemNewSpecJsonArrayIndex++) {
-                                JSONObject elemeItemNewSpecJsonObject = elemeItemNewSpecJsonArray.optJSONObject(index);
-                                ElemeItemNewSpec elemeItemNewSpec = new ElemeItemNewSpec();
-                                elemeItemNewSpec.setElemeItemId(elemeItem.getId());
-                                elemeItemNewSpec.setName(elemeItemNewSpecJsonObject.optString("name"));
-                                elemeItemNewSpec.setValue(elemeItemNewSpecJsonObject.optString("value"));
-                                elemeItemNewSpec.setCreateUserId(userId);
-                                elemeItemNewSpec.setLastUpdateUserId(userId);
-                                elemeItemNewSpec.setLastUpdateRemark("饿了么系统推送新订单，保存菜品规格！");
-                                elemeItemNewSpecMapper.insert(elemeItemNewSpec);
-                            }
-                        }
+                JSONArray elemeItemAttributeJsonArray = elemeItemJsonObject.optJSONArray("attributes");
+                if (elemeItemAttributeJsonArray != null) {
+                    int elemeItemAttributeJsonArraySize = elemeItemAttributeJsonArray.size();
+                    for (int elemeItemAttributeJsonArrayIndex = 0; elemeItemAttributeJsonArrayIndex < elemeItemAttributeJsonArraySize; elemeItemAttributeJsonArrayIndex++) {
+                        JSONObject elemeItemAttributeJsonObject = elemeItemAttributeJsonArray.optJSONObject(index);
+                        ElemeItemAttribute elemeItemAttribute = new ElemeItemAttribute();
+                        elemeItemAttribute.setElemeItemId(elemeItem.getId());
+                        elemeItemAttribute.setName(elemeItemAttributeJsonObject.optString("name"));
+                        elemeItemAttribute.setValue(elemeItemAttributeJsonObject.optString("value"));
+                        elemeItemAttribute.setCreateUserId(userId);
+                        elemeItemAttribute.setLastUpdateUserId(userId);
+                        elemeItemAttribute.setLastUpdateRemark("饿了么系统推送新订单，保存菜品属性！");
+                        elemeItemAttributeMapper.insert(elemeItemAttribute);
                     }
                 }
 
-                if (orderActivityJsonArray != null) {
-                    int orderActivityJsonArraySize = orderActivityJsonArray.size();
-                    for (int orderActivityJsonArrayIndex = 0; orderActivityJsonArrayIndex < orderActivityJsonArraySize; orderActivityJsonArrayIndex++) {
-                        JSONObject elemeActivityJsonObject = orderActivityJsonArray.optJSONObject(orderActivityJsonArrayIndex);
-                        ElemeActivity elemeActivity = new ElemeActivity();
-                        elemeActivity.setElemeOrderId(elemeOrder.getId());
-                        elemeActivity.setElemeActivityId(BigInteger.valueOf(elemeActivityJsonObject.optLong("id")));
-                        elemeActivity.setName(elemeActivityJsonObject.optString("name"));
-                        elemeActivity.setCategoryId(elemeActivityJsonObject.optInt("categoryId"));
-                        elemeActivity.setElemePart(BigDecimal.valueOf(elemeActivityJsonObject.optDouble("elemePart")));
-                        elemeActivity.setRestaurantPart(BigDecimal.valueOf(elemeActivityJsonObject.optDouble("restaurantPart")));
-                        elemeActivity.setAmount(BigDecimal.valueOf(elemeActivityJsonObject.optDouble("amount")));
-                        elemeActivity.setCreateUserId(userId);
-                        elemeActivity.setLastUpdateUserId(userId);
-                        elemeActivity.setLastUpdateRemark("饿了么系统推送新订单，保存饿了么订单活动！");
-                        elemeActivityMapper.insert(elemeActivity);
+                JSONArray elemeItemNewSpecJsonArray = elemeItemJsonObject.optJSONArray("newSpecs");
+                if (elemeItemNewSpecJsonArray != null) {
+                    int elemeItemNewSpecJsonArraySize = elemeItemNewSpecJsonArray.size();
+                    for (int elemeItemNewSpecJsonArrayIndex = 0; elemeItemNewSpecJsonArrayIndex < elemeItemNewSpecJsonArraySize; elemeItemNewSpecJsonArrayIndex++) {
+                        JSONObject elemeItemNewSpecJsonObject = elemeItemNewSpecJsonArray.optJSONObject(index);
+                        ElemeItemNewSpec elemeItemNewSpec = new ElemeItemNewSpec();
+                        elemeItemNewSpec.setElemeItemId(elemeItem.getId());
+                        elemeItemNewSpec.setName(elemeItemNewSpecJsonObject.optString("name"));
+                        elemeItemNewSpec.setValue(elemeItemNewSpecJsonObject.optString("value"));
+                        elemeItemNewSpec.setCreateUserId(userId);
+                        elemeItemNewSpec.setLastUpdateUserId(userId);
+                        elemeItemNewSpec.setLastUpdateRemark("饿了么系统推送新订单，保存菜品规格！");
+                        elemeItemNewSpecMapper.insert(elemeItemNewSpec);
                     }
                 }
-                publishElemeOrderMessage(branch.getTenantCode(), branch.getCode(), elemeOrder.getId(), type);
-
-                apiRest = new ApiRest();
-                apiRest.setMessage("保存订单成功！");
-                apiRest.setSuccessful(true);
             }
-        } catch (Exception e) {
-            CacheUtils.delete(key);
-            throw e;
         }
-        return apiRest;
+
+        if (orderActivityJsonArray != null) {
+            int orderActivityJsonArraySize = orderActivityJsonArray.size();
+            for (int orderActivityJsonArrayIndex = 0; orderActivityJsonArrayIndex < orderActivityJsonArraySize; orderActivityJsonArrayIndex++) {
+                JSONObject elemeActivityJsonObject = orderActivityJsonArray.optJSONObject(orderActivityJsonArrayIndex);
+                ElemeActivity elemeActivity = new ElemeActivity();
+                elemeActivity.setElemeOrderId(elemeOrder.getId());
+                elemeActivity.setElemeActivityId(BigInteger.valueOf(elemeActivityJsonObject.optLong("id")));
+                elemeActivity.setName(elemeActivityJsonObject.optString("name"));
+                elemeActivity.setCategoryId(elemeActivityJsonObject.optInt("categoryId"));
+                elemeActivity.setElemePart(BigDecimal.valueOf(elemeActivityJsonObject.optDouble("elemePart")));
+                elemeActivity.setRestaurantPart(BigDecimal.valueOf(elemeActivityJsonObject.optDouble("restaurantPart")));
+                elemeActivity.setAmount(BigDecimal.valueOf(elemeActivityJsonObject.optDouble("amount")));
+                elemeActivity.setCreateUserId(userId);
+                elemeActivity.setLastUpdateUserId(userId);
+                elemeActivity.setLastUpdateRemark("饿了么系统推送新订单，保存饿了么订单活动！");
+                elemeActivityMapper.insert(elemeActivity);
+            }
+        }
+        publishElemeOrderMessage(branch.getTenantCode(), branch.getCode(), elemeOrder.getId(), type);
     }
 
     /**
@@ -242,74 +221,55 @@ public class ElemeService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleElemeRefundOrderMessage(BigInteger shopId, String message, Integer type) throws IOException {
-        ApiRest apiRest = null;
+    public void handleElemeRefundOrderMessage(BigInteger shopId, String message, Integer type) throws IOException {
         JSONObject messageJsonObject = JSONObject.fromObject(message);
         String orderId = messageJsonObject.optString("id");
-        String key = "_eleme_order_callback_" + orderId + "_" + type;
-        try {
-            Boolean returnValue = CacheUtils.setnx(key, key);
-            if (returnValue) {
-                apiRest = new ApiRest();
-                apiRest.setMessage("处理退单消息成功！");
-                apiRest.setSuccessful(true);
-            } else {
-                SearchModel elemeOrderSearchModel = new SearchModel(true);
-                elemeOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
-                ElemeOrder elemeOrder = elemeOrderMapper.find(elemeOrderSearchModel);
-                Validate.notNull(elemeOrder, "饿了么订单不存在！");
+        SearchModel elemeOrderSearchModel = new SearchModel(true);
+        elemeOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
+        ElemeOrder elemeOrder = elemeOrderMapper.find(elemeOrderSearchModel);
+        Validate.notNull(elemeOrder, "饿了么订单不存在！");
 
-                String refundStatus = messageJsonObject.optString("refundStatus");
-                elemeOrder.setRefundStatus(refundStatus);
+        String refundStatus = messageJsonObject.optString("refundStatus");
+        elemeOrder.setRefundStatus(refundStatus);
 
-                BigInteger userId = CommonUtils.getServiceSystemUserId();
-                elemeOrder.setLastUpdateUserId(userId);
-                elemeOrder.setLastUpdateRemark("处理退单消息回调！");
-                elemeOrderMapper.update(elemeOrder);
+        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        elemeOrder.setLastUpdateUserId(userId);
+        elemeOrder.setLastUpdateRemark("处理退单消息回调！");
+        elemeOrderMapper.update(elemeOrder);
 
-                ElemeRefundOrderMessage elemeRefundOrderMessage = new ElemeRefundOrderMessage();
-                elemeRefundOrderMessage.setElemeOrderId(elemeOrder.getId());
-                elemeRefundOrderMessage.setOrderId(elemeOrder.getOrderId());
-                elemeRefundOrderMessage.setRefundStatus(messageJsonObject.optString("refundStatus"));
-                elemeRefundOrderMessage.setReason(messageJsonObject.optString("reason"));
-                elemeRefundOrderMessage.setShopId(shopId);
-                elemeRefundOrderMessage.setRefundType(messageJsonObject.optString("refundType"));
-                elemeRefundOrderMessage.setTotalPrice(BigDecimal.valueOf(messageJsonObject.optDouble("totalPrice")));
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(messageJsonObject.getLong("updateTime") * 1000);
-                elemeRefundOrderMessage.setUpdateTime(calendar.getTime());
-                elemeRefundOrderMessage.setTenantId(elemeOrder.getTenantId());
-                elemeRefundOrderMessage.setBranchId(elemeOrder.getBranchId());
-                elemeRefundOrderMessage.setCreateUserId(userId);
-                elemeRefundOrderMessage.setLastUpdateUserId(userId);
-                elemeRefundOrderMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么退单信息！");
-                elemeRefundOrderMessageMapper.insert(elemeRefundOrderMessage);
+        ElemeRefundOrderMessage elemeRefundOrderMessage = new ElemeRefundOrderMessage();
+        elemeRefundOrderMessage.setElemeOrderId(elemeOrder.getId());
+        elemeRefundOrderMessage.setOrderId(elemeOrder.getOrderId());
+        elemeRefundOrderMessage.setRefundStatus(messageJsonObject.optString("refundStatus"));
+        elemeRefundOrderMessage.setReason(messageJsonObject.optString("reason"));
+        elemeRefundOrderMessage.setShopId(shopId);
+        elemeRefundOrderMessage.setRefundType(messageJsonObject.optString("refundType"));
+        elemeRefundOrderMessage.setTotalPrice(BigDecimal.valueOf(messageJsonObject.optDouble("totalPrice")));
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(messageJsonObject.getLong("updateTime") * 1000);
+        elemeRefundOrderMessage.setUpdateTime(calendar.getTime());
+        elemeRefundOrderMessage.setTenantId(elemeOrder.getTenantId());
+        elemeRefundOrderMessage.setBranchId(elemeOrder.getBranchId());
+        elemeRefundOrderMessage.setCreateUserId(userId);
+        elemeRefundOrderMessage.setLastUpdateUserId(userId);
+        elemeRefundOrderMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么退单信息！");
+        elemeRefundOrderMessageMapper.insert(elemeRefundOrderMessage);
 
-                JSONArray goodsList = messageJsonObject.getJSONArray("goodsList");
-                int size = goodsList.size();
-                for (int index = 0; index < size; index++) {
-                    JSONObject itemJsonObject = goodsList.getJSONObject(index);
-                    ElemeRefundOrderMessageGoodsItem elemeRefundOrderMessageGoodsItem = new ElemeRefundOrderMessageGoodsItem();
-                    elemeRefundOrderMessageGoodsItem.setElemeRefundOrderMessageId(elemeRefundOrderMessage.getId());
-                    elemeRefundOrderMessageGoodsItem.setName(itemJsonObject.optString("name"));
-                    elemeRefundOrderMessageGoodsItem.setQuantity(itemJsonObject.optInt("quantity"));
-                    elemeRefundOrderMessageGoodsItem.setPrice(BigDecimal.valueOf(itemJsonObject.optDouble("price")));
-                    elemeRefundOrderMessageGoodsItemMapper.insert(elemeRefundOrderMessageGoodsItem);
-                }
-
-                if (type == 20 || type == 21 || type == 24 || type == 25 || type == 26 || type == 30 || type == 31 || type == 34 || type == 35 || type == 36) {
-                    publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type);
-                }
-
-                apiRest = new ApiRest();
-                apiRest.setMessage("处理退单消息成功！");
-                apiRest.setSuccessful(true);
-            }
-        } catch (Exception e) {
-            CacheUtils.delete(key);
-            throw e;
+        JSONArray goodsList = messageJsonObject.getJSONArray("goodsList");
+        int size = goodsList.size();
+        for (int index = 0; index < size; index++) {
+            JSONObject itemJsonObject = goodsList.getJSONObject(index);
+            ElemeRefundOrderMessageGoodsItem elemeRefundOrderMessageGoodsItem = new ElemeRefundOrderMessageGoodsItem();
+            elemeRefundOrderMessageGoodsItem.setElemeRefundOrderMessageId(elemeRefundOrderMessage.getId());
+            elemeRefundOrderMessageGoodsItem.setName(itemJsonObject.optString("name"));
+            elemeRefundOrderMessageGoodsItem.setQuantity(itemJsonObject.optInt("quantity"));
+            elemeRefundOrderMessageGoodsItem.setPrice(BigDecimal.valueOf(itemJsonObject.optDouble("price")));
+            elemeRefundOrderMessageGoodsItemMapper.insert(elemeRefundOrderMessageGoodsItem);
         }
-        return apiRest;
+
+        if (type == 20 || type == 21 || type == 24 || type == 25 || type == 26 || type == 30 || type == 31 || type == 34 || type == 35 || type == 36) {
+            publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type);
+        }
     }
 
     /**
@@ -320,180 +280,116 @@ public class ElemeService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleElemeReminderMessage(BigInteger shopId, String message, Integer type) throws IOException {
-        ApiRest apiRest = null;
+    public void handleElemeReminderMessage(BigInteger shopId, String message, Integer type) throws IOException {
         JSONObject messageJsonObject = JSONObject.fromObject(message);
         String orderId = messageJsonObject.optString("orderId");
-        String key = "_eleme_order_callback_" + orderId + "_" + type;
-        try {
-            Boolean returnValue = CacheUtils.setnx(key, key);
-            if (!returnValue) {
-                apiRest = new ApiRest();
-                apiRest.setMessage("处理催单消息成功！");
-                apiRest.setSuccessful(true);
-            } else {
-                SearchModel elemeOrderSearchModel = new SearchModel(true);
-                elemeOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
-                ElemeOrder elemeOrder = elemeOrderMapper.find(elemeOrderSearchModel);
-                Validate.notNull(elemeOrder, "饿了么订单不存在！");
+        SearchModel elemeOrderSearchModel = new SearchModel(true);
+        elemeOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
+        ElemeOrder elemeOrder = elemeOrderMapper.find(elemeOrderSearchModel);
+        Validate.notNull(elemeOrder, "饿了么订单不存在！");
 
-                ElemeReminderMessage elemeReminderMessage = new ElemeReminderMessage();
-                elemeReminderMessage.setElemeOrderId(elemeOrder.getId());
-                elemeReminderMessage.setOrderId(orderId);
-                elemeReminderMessage.setShopId(shopId);
-                elemeReminderMessage.setReminderId(BigInteger.valueOf(messageJsonObject.optLong("remindId")));
-                elemeReminderMessage.setUserId(BigInteger.valueOf(messageJsonObject.getLong("userId")));
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(messageJsonObject.getLong("updateTime") * 1000);
-                elemeReminderMessage.setUpdateTime(calendar.getTime());
-                elemeReminderMessage.setTenantId(elemeOrder.getTenantId());
-                elemeReminderMessage.setBranchId(elemeOrder.getBranchId());
+        ElemeReminderMessage elemeReminderMessage = new ElemeReminderMessage();
+        elemeReminderMessage.setElemeOrderId(elemeOrder.getId());
+        elemeReminderMessage.setOrderId(orderId);
+        elemeReminderMessage.setShopId(shopId);
+        elemeReminderMessage.setReminderId(BigInteger.valueOf(messageJsonObject.optLong("remindId")));
+        elemeReminderMessage.setUserId(BigInteger.valueOf(messageJsonObject.getLong("userId")));
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(messageJsonObject.getLong("updateTime") * 1000);
+        elemeReminderMessage.setUpdateTime(calendar.getTime());
+        elemeReminderMessage.setTenantId(elemeOrder.getTenantId());
+        elemeReminderMessage.setBranchId(elemeOrder.getBranchId());
 
-                BigInteger userId = CommonUtils.getServiceSystemUserId();
-                elemeReminderMessage.setCreateUserId(userId);
-                elemeReminderMessage.setLastUpdateUserId(userId);
-                elemeReminderMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么催单信息！");
-                elemeReminderMessageMapper.insert(elemeReminderMessage);
-                if (type == 45) {
-                    publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type);
-                }
-
-                apiRest = new ApiRest();
-                apiRest.setMessage("处理催单消息成功！");
-                apiRest.setSuccessful(true);
-            }
-        } catch (Exception e) {
-            CacheUtils.delete(key);
-            throw e;
+        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        elemeReminderMessage.setCreateUserId(userId);
+        elemeReminderMessage.setLastUpdateUserId(userId);
+        elemeReminderMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么催单信息！");
+        elemeReminderMessageMapper.insert(elemeReminderMessage);
+        if (type == 45) {
+            publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type);
         }
-        return apiRest;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleElemeOrderStateChangeMessage(BigInteger shopId, String message, Integer type) throws IOException {
-        ApiRest apiRest = null;
+    public void handleElemeOrderStateChangeMessage(BigInteger shopId, String message, Integer type) throws IOException {
         JSONObject messageJsonObject = JSONObject.fromObject(message);
         String orderId = messageJsonObject.optString("id");
-        String key = "_eleme_order_callback_" + orderId + "_" + type;
-        try {
-            Boolean returnValue = CacheUtils.setnx(key, key);
-            if (returnValue) {
-                apiRest = new ApiRest();
-                apiRest.setMessage("处理订单状态变更消息成功！");
-                apiRest.setSuccessful(true);
-            } else {
-                SearchModel elemeOrderSearchModel = new SearchModel(true);
-                elemeOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
-                ElemeOrder elemeOrder = elemeOrderMapper.find(elemeOrderSearchModel);
-                Validate.notNull(elemeOrder, "饿了么订单不存在！");
+        SearchModel elemeOrderSearchModel = new SearchModel(true);
+        elemeOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
+        ElemeOrder elemeOrder = elemeOrderMapper.find(elemeOrderSearchModel);
+        Validate.notNull(elemeOrder, "饿了么订单不存在！");
 
 
-                String state = elemeOrder.getStatus();
-                elemeOrder.setStatus(state);
+        String state = elemeOrder.getStatus();
+        elemeOrder.setStatus(state);
 
-                BigInteger userId = CommonUtils.getServiceSystemUserId();
-                elemeOrder.setLastUpdateUserId(userId);
-                elemeOrder.setLastUpdateRemark("处理饿了么订单状态变更消息，修改订单状态！");
-                elemeOrderMapper.update(elemeOrder);
+        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        elemeOrder.setLastUpdateUserId(userId);
+        elemeOrder.setLastUpdateRemark("处理饿了么订单状态变更消息，修改订单状态！");
+        elemeOrderMapper.update(elemeOrder);
 
-                ElemeOrderStateChangeMessage elemeOrderStateChangeMessage = new ElemeOrderStateChangeMessage();
-                elemeOrderStateChangeMessage.setElemeOrderId(elemeOrder.getId());
-                elemeOrderStateChangeMessage.setOrderId(orderId);
-                elemeOrderStateChangeMessage.setState(messageJsonObject.getString("state"));
-                elemeOrderStateChangeMessage.setShopId(BigInteger.valueOf(messageJsonObject.getLong("shopId")));
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(messageJsonObject.getLong("updateTime"));
-                elemeOrderStateChangeMessage.setUpdateTime(calendar.getTime());
-                elemeOrderStateChangeMessage.setRole(messageJsonObject.getInt("role"));
-                elemeOrderStateChangeMessage.setTenantId(elemeOrder.getTenantId());
-                elemeOrderStateChangeMessage.setBranchId(elemeOrder.getBranchId());
-                elemeOrderStateChangeMessage.setCreateUserId(userId);
-                elemeOrderStateChangeMessage.setLastUpdateUserId(userId);
-                elemeOrderStateChangeMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么订单变更消息！");
+        ElemeOrderStateChangeMessage elemeOrderStateChangeMessage = new ElemeOrderStateChangeMessage();
+        elemeOrderStateChangeMessage.setElemeOrderId(elemeOrder.getId());
+        elemeOrderStateChangeMessage.setOrderId(orderId);
+        elemeOrderStateChangeMessage.setState(messageJsonObject.getString("state"));
+        elemeOrderStateChangeMessage.setShopId(BigInteger.valueOf(messageJsonObject.getLong("shopId")));
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(messageJsonObject.getLong("updateTime"));
+        elemeOrderStateChangeMessage.setUpdateTime(calendar.getTime());
+        elemeOrderStateChangeMessage.setRole(messageJsonObject.getInt("role"));
+        elemeOrderStateChangeMessage.setTenantId(elemeOrder.getTenantId());
+        elemeOrderStateChangeMessage.setBranchId(elemeOrder.getBranchId());
+        elemeOrderStateChangeMessage.setCreateUserId(userId);
+        elemeOrderStateChangeMessage.setLastUpdateUserId(userId);
+        elemeOrderStateChangeMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么订单变更消息！");
 
-                elemeOrderStateChangeMessageMapper.insert(elemeOrderStateChangeMessage);
-                publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type);
-
-                apiRest = new ApiRest();
-                apiRest.setMessage("处理订单状态变更消息成功！");
-                apiRest.setSuccessful(true);
-            }
-        } catch (Exception e) {
-            CacheUtils.delete(key);
-            throw e;
-        }
-        return apiRest;
+        elemeOrderStateChangeMessageMapper.insert(elemeOrderStateChangeMessage);
+        publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleElemeDeliveryOrderStateChangeMessage(BigInteger shopId, String message, Integer type) throws IOException {
-        ApiRest apiRest = null;
+    public void handleElemeDeliveryOrderStateChangeMessage(BigInteger shopId, String message, Integer type) throws IOException {
         JSONObject messageJsonObject = JSONObject.fromObject(message);
         String orderId = messageJsonObject.optString("orderId");
-        String key = "_eleme_order_callback_" + orderId + "_" + type;
-        try {
-            Boolean returnValue = CacheUtils.setnx(key, key);
-            if (!returnValue) {
-                apiRest = new ApiRest();
-                apiRest.setMessage("处理订单状态变更消息成功！");
-                apiRest.setSuccessful(true);
-            } else {
-                CacheUtils.expire(key, 60 * 30, TimeUnit.SECONDS);
-                SearchModel elemeOrderSearchModel = new SearchModel(true);
-                elemeOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
-                ElemeOrder elemeOrder = elemeOrderMapper.find(elemeOrderSearchModel);
-                Validate.notNull(elemeOrder, "饿了么订单不存在！");
+        SearchModel elemeOrderSearchModel = new SearchModel(true);
+        elemeOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
+        ElemeOrder elemeOrder = elemeOrderMapper.find(elemeOrderSearchModel);
+        Validate.notNull(elemeOrder, "饿了么订单不存在！");
 
-                BigInteger userId = CommonUtils.getServiceSystemUserId();
-                // TODO 上线之前删除
-                userId = BigInteger.ZERO;
-                elemeOrder.setLastUpdateUserId(userId);
-                elemeOrder.setLastUpdateRemark("处理饿了么订单状态变更消息，修改订单状态！");
-                elemeOrderMapper.update(elemeOrder);
+        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        // TODO 上线之前删除
+        userId = BigInteger.ZERO;
+        elemeOrder.setLastUpdateUserId(userId);
+        elemeOrder.setLastUpdateRemark("处理饿了么订单状态变更消息，修改订单状态！");
+        elemeOrderMapper.update(elemeOrder);
 
-                ElemeDeliveryOrderStateChangeMessage elemeDeliveryOrderStateChangeMessage = new ElemeDeliveryOrderStateChangeMessage();
-                elemeDeliveryOrderStateChangeMessage.setElemeOrderId(elemeOrder.getId());
-                elemeDeliveryOrderStateChangeMessage.setOrderId(elemeOrder.getOrderId());
-                elemeDeliveryOrderStateChangeMessage.setShopId(shopId);
-                elemeDeliveryOrderStateChangeMessage.setState(messageJsonObject.optString("state"));
-                elemeDeliveryOrderStateChangeMessage.setSubState(messageJsonObject.optString("subState"));
-                elemeDeliveryOrderStateChangeMessage.setName(messageJsonObject.optString("name"));
-                elemeDeliveryOrderStateChangeMessage.setPhone(messageJsonObject.optString("phone"));
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(messageJsonObject.getLong("updateAt"));
-                elemeDeliveryOrderStateChangeMessage.setUpdateTime(calendar.getTime());
-                elemeDeliveryOrderStateChangeMessage.setTenantId(elemeOrder.getTenantId());
-                elemeDeliveryOrderStateChangeMessage.setBranchId(elemeOrder.getBranchId());
-                elemeDeliveryOrderStateChangeMessage.setCreateUserId(userId);
-                elemeDeliveryOrderStateChangeMessage.setLastUpdateUserId(userId);
-                elemeDeliveryOrderStateChangeMessage.setLastUpdateRemark("处理饿了么回调，保存饿了么运单状态变更消息！");
+        ElemeDeliveryOrderStateChangeMessage elemeDeliveryOrderStateChangeMessage = new ElemeDeliveryOrderStateChangeMessage();
+        elemeDeliveryOrderStateChangeMessage.setElemeOrderId(elemeOrder.getId());
+        elemeDeliveryOrderStateChangeMessage.setOrderId(elemeOrder.getOrderId());
+        elemeDeliveryOrderStateChangeMessage.setShopId(shopId);
+        elemeDeliveryOrderStateChangeMessage.setState(messageJsonObject.optString("state"));
+        elemeDeliveryOrderStateChangeMessage.setSubState(messageJsonObject.optString("subState"));
+        elemeDeliveryOrderStateChangeMessage.setName(messageJsonObject.optString("name"));
+        elemeDeliveryOrderStateChangeMessage.setPhone(messageJsonObject.optString("phone"));
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(messageJsonObject.getLong("updateAt"));
+        elemeDeliveryOrderStateChangeMessage.setUpdateTime(calendar.getTime());
+        elemeDeliveryOrderStateChangeMessage.setTenantId(elemeOrder.getTenantId());
+        elemeDeliveryOrderStateChangeMessage.setBranchId(elemeOrder.getBranchId());
+        elemeDeliveryOrderStateChangeMessage.setCreateUserId(userId);
+        elemeDeliveryOrderStateChangeMessage.setLastUpdateUserId(userId);
+        elemeDeliveryOrderStateChangeMessage.setLastUpdateRemark("处理饿了么回调，保存饿了么运单状态变更消息！");
 
-                elemeDeliveryOrderStateChangeMessageMapper.insert(elemeDeliveryOrderStateChangeMessage);
-                publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type);
-
-                apiRest = new ApiRest();
-                apiRest.setMessage("处理订单状态变更消息成功！");
-                apiRest.setSuccessful(true);
-            }
-        } catch (Exception e) {
-            CacheUtils.delete(key);
-            throw e;
-        }
-        return apiRest;
+        elemeDeliveryOrderStateChangeMessageMapper.insert(elemeDeliveryOrderStateChangeMessage);
+        publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type);
     }
 
-    public ApiRest handleElemeShopStateChangeMessage(BigInteger shopId, String message, Integer type) {
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("处理成功");
-        apiRest.setSuccessful(true);
-        return apiRest;
+    public void handleElemeShopStateChangeMessage(BigInteger shopId, String message, Integer type) {
+
     }
 
-    public ApiRest handleAuthorizationStateChangeMessage(BigInteger shopId, String message, Integer type) {
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("处理成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+    public void handleAuthorizationStateChangeMessage(BigInteger shopId, String message, Integer type) {
+
     }
 
     @Transactional(readOnly = true)
