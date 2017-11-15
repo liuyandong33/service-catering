@@ -6,12 +6,18 @@ import build.dream.common.utils.ConfigurationUtils;
 import build.dream.common.utils.ProxyUtils;
 import build.dream.common.utils.WebUtils;
 import build.dream.erp.constants.Constants;
+import build.dream.erp.tools.ElemeConsumerThread;
+import build.dream.erp.tools.MeiTuanConsumerThread;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.Validate;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class MeiTuanUtils {
     private static String generateSignature(String signKey, Map<String, String> requestParameters) {
@@ -59,5 +65,22 @@ public class MeiTuanUtils {
         requestParameters.put("timestamp", String.valueOf(System.currentTimeMillis()));
         requestParameters.put("version", "1");
         requestParameters.put("sign", generateSignature(signKey, requestParameters));
+    }
+
+    private static BlockingQueue<List<String>> meiTuanCallbackMessageBlockingQueue = new LinkedBlockingQueue<List<String>>();
+
+    public static void addMeiTuanMessageBlockingQueue(String meiTuanCallbackMessage, Integer count) throws InterruptedException {
+        List<String> meiTuanCallbackMessageBody = new ArrayList<String>();
+        meiTuanCallbackMessageBody.add(meiTuanCallbackMessage);
+        meiTuanCallbackMessageBody.add(count.toString());
+        meiTuanCallbackMessageBlockingQueue.put(meiTuanCallbackMessageBody);
+    }
+
+    public static List<String> takeMeiTuanMessage() throws InterruptedException {
+        return meiTuanCallbackMessageBlockingQueue.take();
+    }
+
+    public static void startMeiTuanConsumerThread() {
+        new Thread(new MeiTuanConsumerThread()).start();
     }
 }
