@@ -92,8 +92,8 @@ public class ElemeUtils {
         return ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "eleme", "callElemeSystem", callElemeSystemRequestParameters);
     }
 
-    public static boolean checkSignature(JSONObject orderCallbackJsonObject, String appSecret) {
-        Map<String, Object> map = new TreeMap<String, Object>(orderCallbackJsonObject);
+    public static boolean checkSignature(JSONObject callbackJsonObject, String appSecret) {
+        Map<String, Object> map = new TreeMap<String, Object>(callbackJsonObject);
         String signature = map.remove("signature").toString();
         StringBuilder stringBuilder = new StringBuilder();
         for (Map.Entry<String, Object> entry : map.entrySet()) {

@@ -14,7 +14,6 @@ import build.dream.erp.models.eleme.*;
 import build.dream.erp.services.ElemeService;
 import build.dream.erp.utils.ElemeUtils;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -559,7 +558,7 @@ public class ElemeController extends BasicController {
         return GsonUtils.toJson(apiRest);
     }
 
-    @RequestMapping(value = "/test")
+    @RequestMapping(value = "/elemeCallback")
     @ResponseBody
     public String elemeCallback() {
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
