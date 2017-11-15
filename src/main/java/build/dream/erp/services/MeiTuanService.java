@@ -49,6 +49,7 @@ public class MeiTuanService {
         String meiTuanDeveloperId = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_DEVELOPER_ID);
         String meiTuanSignKey = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_SIGN_KEY);
         StringBuffer bindingStoreLink = new StringBuffer(meiTuanErpServiceUrl);
+        bindingStoreLink.append(Constants.MEI_TUAN_PATH_STORE_MAP);
         bindingStoreLink.append("?developerId=").append(meiTuanDeveloperId);
         bindingStoreLink.append("&businessId=").append(businessId);
         bindingStoreLink.append("&ePoiId=").append(tenantId).append("Z").append(branchId);
@@ -323,11 +324,11 @@ public class MeiTuanService {
      * @return
      */
     private void publishMeiTuanOrderMessage(String tenantCode, String branchCode, BigInteger meiTuanOrderId, Integer type) throws IOException {
-        String meiTuanOrderMessageChannel = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_ORDER_MESSAGE_CHANNEL);
+        String meiTuanOrderMessageChannelTopic = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_ORDER_MESSAGE_CHANNEL_TOPIC);
         JSONObject messageJsonObject = new JSONObject();
         messageJsonObject.put("tenantCodeAndBranchCode", tenantCode + "_" + branchCode);
         messageJsonObject.put("type", type);
         messageJsonObject.put("elemeOrderId", meiTuanOrderId);
-        QueueUtils.convertAndSend(meiTuanOrderMessageChannel, messageJsonObject.toString());
+        QueueUtils.convertAndSend(meiTuanOrderMessageChannelTopic, messageJsonObject.toString());
     }
 }

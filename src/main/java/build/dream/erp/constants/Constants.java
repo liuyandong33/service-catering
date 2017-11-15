@@ -20,6 +20,7 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String MEI_TUAN_ERP_SERVICE_URL = "mei.tuan.erp.service.url";
     public static final String MEI_TUAN_DEVELOPER_ID = "mei.tuan.developer.id";
     public static final String MEI_TUAN_SIGN_KEY = "mei.tuan.sign.key";
+    public static final String MEI_TUAN_PATH_STORE_MAP = "/storemap";
 
     public static final String KEY_MEI_TUAN_APP_AUTH_TOKENS = "_mei_tuan_app_auth_tokens";
     public static final String MEI_MEI_TUAN_SERVICE_URL = "http://api.open.cater.meituan.com";
