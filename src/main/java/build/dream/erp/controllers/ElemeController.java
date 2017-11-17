@@ -6,14 +6,11 @@ import build.dream.common.erp.domains.Branch;
 import build.dream.common.erp.domains.ElemeOrder;
 import build.dream.common.erp.domains.GoodsCategory;
 import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.ConfigurationUtils;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
-import build.dream.erp.constants.Constants;
 import build.dream.erp.models.eleme.*;
 import build.dream.erp.services.ElemeService;
 import build.dream.erp.utils.ElemeUtils;
-import net.sf.json.JSONObject;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -556,44 +553,5 @@ public class ElemeController extends BasicController {
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
-    }
-
-    @RequestMapping(value = "/elemeCallback")
-    @ResponseBody
-    public String elemeCallback() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        String returnValue = null;
-        try {
-            String callbackRequestBody = requestParameters.get("callbackRequestBody");
-            int flag = Integer.valueOf(requestParameters.get("flag"));
-            if (flag == 10) {
-                callbackRequestBody = "{\"requestId\":\"200007211657667333\",\"type\":10,\"appId\":65929831,\"message\":\"{\\\"id\\\":\\\"3014728511382982849\\\",\\\"orderId\\\":\\\"3014728511382982849\\\",\\\"address\\\":\\\"南昌大学共青学院-学生公寓一栋111\\\",\\\"createdAt\\\":\\\"2017-10-30T20:08:07\\\",\\\"activeAt\\\":\\\"2017-10-30T20:08:07\\\",\\\"deliverFee\\\":3.0,\\\"deliverTime\\\":null,\\\"description\\\":\\\"\\\",\\\"groups\\\":[{\\\"name\\\":\\\"1号篮子\\\",\\\"type\\\":\\\"normal\\\",\\\"items\\\":[{\\\"id\\\":1298577560,\\\"skuId\\\":200000100943422213,\\\"name\\\":\\\"台湾烤肠\\\",\\\"categoryId\\\":1,\\\"price\\\":5.0,\\\"quantity\\\":2,\\\"total\\\":10.0,\\\"additions\\\":[],\\\"newSpecs\\\":[],\\\"attributes\\\":[],\\\"extendCode\\\":\\\"\\\",\\\"barCode\\\":\\\"\\\",\\\"weight\\\":1.0,\\\"userPrice\\\":0.0,\\\"shopPrice\\\":0.0,\\\"vfoodId\\\":1290927110},{\\\"id\\\":1288279667,\\\"skuId\\\":200000090398379781,\\\"name\\\":\\\"烧仙草奶茶-大杯热\\\",\\\"categoryId\\\":1,\\\"price\\\":14.0,\\\"quantity\\\":1,\\\"total\\\":14.0,\\\"additions\\\":[],\\\"newSpecs\\\":[],\\\"attributes\\\":[],\\\"extendCode\\\":\\\"\\\",\\\"barCode\\\":\\\"\\\",\\\"weight\\\":1.0,\\\"userPrice\\\":0.0,\\\"shopPrice\\\":0.0,\\\"vfoodId\\\":671477772}]}],\\\"invoice\\\":null,\\\"book\\\":false,\\\"onlinePaid\\\":true,\\\"railwayAddress\\\":null,\\\"phoneList\\\":[\\\"15079241539\\\"],\\\"shopId\\\":156898280,\\\"shopName\\\":\\\"Honey cup哈尼卡布\\\",\\\"daySn\\\":6,\\\"status\\\":\\\"unprocessed\\\",\\\"refundStatus\\\":\\\"noRefund\\\",\\\"userId\\\":201506988,\\\"totalPrice\\\":17.0,\\\"originalPrice\\\":27.0,\\\"consignee\\\":\\\"马成鹏(先生)\\\",\\\"deliveryGeo\\\":\\\"115.80731995,29.22636934\\\",\\\"deliveryPoiAddress\\\":\\\"南昌大学共青学院-学生公寓一栋111\\\",\\\"invoiced\\\":false,\\\"income\\\":13.6,\\\"serviceRate\\\":0.15,\\\"serviceFee\\\":-2.4,\\\"hongbao\\\":0.0,\\\"packageFee\\\":0.0,\\\"activityTotal\\\":-10.0,\\\"shopPart\\\":-8.0,\\\"elemePart\\\":-2.0,\\\"downgraded\\\":false,\\\"vipDeliveryFeeDiscount\\\":0.0,\\\"openId\\\":\\\"3028Z73140\\\",\\\"secretPhoneExpireTime\\\":null,\\\"orderActivities\\\":[{\\\"categoryId\\\":12,\\\"name\\\":\\\"在线支付立减优惠\\\",\\\"amount\\\":-10.0,\\\"elemePart\\\":0.0,\\\"restaurantPart\\\":0.0,\\\"id\\\":141587914}],\\\"invoiceType\\\":null,\\\"taxpayerId\\\":\\\"\\\",\\\"coldBoxFee\\\":0.0}\",\"shopId\":156898280,\"timestamp\":1509365287868,\"signature\":\"0A1D9E427F0AE7008BA8728E93E30162\",\"userId\":283166468248413847}";
-            } else if (flag == 45) {
-                callbackRequestBody = "{\"requestId\":\"200007250203163954\",\"type\":45,\"appId\":65929831,\"message\":\"{\\\"orderId\\\":\\\"3014771044452586573\\\",\\\"shopId\\\":157525513,\\\"remindId\\\":679303586,\\\"userId\\\":159547822,\\\"updateTime\\\":1509505415}\",\"shopId\":157525513,\"timestamp\":1509505415551,\"signature\":\"A80657F5F1989C2D3F49EEFCDA19586C\",\"userId\":283166468370013455}";
-            } else if (flag == 51) {
-                callbackRequestBody = "{\"requestId\":\"100007375037977242\",\"type\":51,\"appId\":65929831,\"message\":\"{\\\"orderId\\\":\\\"1213078763526670502\\\",\\\"shopId\\\":152182777,\\\"state\\\":\\\"tobeAssignedMerchant\\\",\\\"subState\\\":\\\"noSubstate\\\",\\\"name\\\":\\\"\\\",\\\"phone\\\":\\\"\\\",\\\"updateAt\\\":1509494778000}\",\"shopId\":152182777,\"timestamp\":1509494778200,\"signature\":\"71BE823829E02D6F93915A741697BBCD\",\"userId\":283166468180069210}";
-            } else if (flag == 52) {
-                callbackRequestBody = "{\"requestId\":\"100007375037983386\",\"type\":52,\"appId\":65929831,\"message\":\"{\\\"orderId\\\":\\\"1213078763526670502\\\",\\\"shopId\\\":152182777,\\\"state\\\":\\\"tobeAssignedCourier\\\",\\\"subState\\\":\\\"noSubstate\\\",\\\"name\\\":\\\"胡晓楠(调度员)\\\",\\\"phone\\\":\\\"15166456961\\\",\\\"updateAt\\\":1509494778000}\",\"shopId\":152182777,\"timestamp\":1509494778359,\"signature\":\"3EB51820B924546A7868C7785A9513E3\",\"userId\":283166468180069210}";
-            } else if (flag == 53) {
-                callbackRequestBody = "{\"requestId\":\"100007375057811098\",\"type\":53,\"appId\":65929831,\"message\":\"{\\\"orderId\\\":\\\"1213078763526670502\\\",\\\"shopId\\\":152182777,\\\"state\\\":\\\"tobeFetched\\\",\\\"subState\\\":\\\"noSubstate\\\",\\\"name\\\":\\\"穆振绍\\\",\\\"phone\\\":\\\"15065568965\\\",\\\"updateAt\\\":1509495038000}\",\"shopId\":152182777,\"timestamp\":1509495038404,\"signature\":\"6BB688915D4B10EF9CD7D15AB9C925F5\",\"userId\":283166468180069210}";
-            } else if (flag == 54) {
-                callbackRequestBody = "{\"requestId\":\"100007375094091418\",\"type\":54,\"appId\":65929831,\"message\":\"{\\\"orderId\\\":\\\"1213078763526670502\\\",\\\"shopId\\\":152182777,\\\"state\\\":\\\"arrived\\\",\\\"subState\\\":\\\"noSubstate\\\",\\\"name\\\":\\\"穆振绍\\\",\\\"phone\\\":\\\"15065568965\\\",\\\"updateAt\\\":1509495494000}\",\"shopId\":152182777,\"timestamp\":1509495494613,\"signature\":\"4EB0A1A9A83086E6AB26191FC20AFE1A\",\"userId\":283166468180069210}";
-            } else if (flag == 55) {
-                callbackRequestBody = "{\"requestId\":\"100007375110081178\",\"type\":55,\"appId\":65929831,\"message\":\"{\\\"orderId\\\":\\\"1213078763526670502\\\",\\\"shopId\\\":152182777,\\\"state\\\":\\\"delivering\\\",\\\"subState\\\":\\\"noSubstate\\\",\\\"name\\\":\\\"穆振绍\\\",\\\"phone\\\":\\\"15065568965\\\",\\\"updateAt\\\":1509495770000}\",\"shopId\":152182777,\"timestamp\":1509495770350,\"signature\":\"A07AD61808CA7C160D5BD44C44DA559B\",\"userId\":283166468180069210}";
-            } else if (flag == 56) {
-                callbackRequestBody = "{\"requestId\":\"100007375156055706\",\"type\":56,\"appId\":65929831,\"message\":\"{\\\"orderId\\\":\\\"1213078763526670502\\\",\\\"shopId\\\":152182777,\\\"state\\\":\\\"completed\\\",\\\"subState\\\":\\\"noSubstate\\\",\\\"name\\\":\\\"穆振绍\\\",\\\"phone\\\":\\\"15065568965\\\",\\\"updateAt\\\":1509496211000}\",\"shopId\":152182777,\"timestamp\":1509496212045,\"signature\":\"9E7216AC8DB921FC02CAC63D78447306\",\"userId\":283166468180069210}";
-            }
-            Validate.notNull(callbackRequestBody, "参数(callbackRequestBody)不能为空！");
-
-            JSONObject orderCallbackJsonObject = JSONObject.fromObject(callbackRequestBody);
-            Validate.isTrue(ElemeUtils.checkSignature(orderCallbackJsonObject, ConfigurationUtils.getConfiguration(Constants.ELEME_APP_SECRET)), "签名校验未通过！");
-
-            ElemeUtils.addElemeMessageBlockingQueue(callbackRequestBody, 10);
-            returnValue = Constants.ELEME_ORDER_CALLBACK_SUCCESS_RETURN_VALUE;
-        } catch (Exception e) {
-            LogUtils.error("订单回调处理失败", controllerSimpleName, "handleOrderCallback", e, requestParameters);
-            returnValue = e.getMessage();
-        }
-        return returnValue;
     }
 }
