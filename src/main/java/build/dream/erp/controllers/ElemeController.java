@@ -151,6 +151,11 @@ public class ElemeController extends BasicController {
 
             String branchId = requestParameters.get("branchId");
             Validate.notNull(branchId, "参数(branchId)不能为空！");
+
+            Branch branch = elemeService.findBranchInfo(NumberUtils.createBigInteger(tenantId), NumberUtils.createBigInteger(branchId));
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("shopId", branch.getShopId());
+            apiRest = ElemeUtils.callElemeSystem(tenantId, branchId, branch.getElemeAccountType(), "eleme.product.category.getShopCategoriesWithChildren", params);
         } catch (Exception e) {
             LogUtils.error("查询商品分类详情失败", controllerSimpleName, "getCategoryWithChildren", e, requestParameters);
             apiRest = new ApiRest(e);
