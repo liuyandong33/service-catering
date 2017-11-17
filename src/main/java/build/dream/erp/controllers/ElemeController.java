@@ -94,7 +94,7 @@ public class ElemeController extends BasicController {
             Branch branch = elemeService.findBranchInfo(BigInteger.valueOf(Long.valueOf(tenantId)), BigInteger.valueOf(Long.valueOf(branchId)));
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("shopId", branch.getShopId());
-            apiRest = ElemeUtils.callElemeSystem("1", tenantId.toString(), branch.getType().toString(), branchId.toString(), "eleme.product.category.getShopCategories", params);
+            apiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.product.category.getShopCategories", params);
         } catch (Exception e) {
             LogUtils.error("查询店铺商品分类失败", controllerSimpleName, "getShopCategories", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -117,7 +117,7 @@ public class ElemeController extends BasicController {
             Branch branch = elemeService.findBranchInfo(BigInteger.valueOf(Long.valueOf(tenantId)), BigInteger.valueOf(Long.valueOf(branchId)));
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("shopId", branch.getShopId());
-            apiRest = ElemeUtils.callElemeSystem("1", tenantId, branch.getType().toString(), branchId, "eleme.product.category.getShopCategoriesWithChildren", params);
+            apiRest = ElemeUtils.callElemeSystem(tenantId, branchId, branch.getElemeAccountType(), "eleme.product.category.getShopCategoriesWithChildren", params);
         } catch (Exception e) {
             LogUtils.error("查询店铺商品分类失败", controllerSimpleName, "getShopCategoriesWithChildren", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -186,7 +186,7 @@ public class ElemeController extends BasicController {
             params.put("shopId", branch.getShopId());
             params.put("name", goodsCategory.getName());
             params.put("description", goodsCategory.getDescription());
-            apiRest = ElemeUtils.callElemeSystem("1", tenantId, branch.getType().toString(), branchId, "eleme.product.category.createCategory", params);
+            apiRest = ElemeUtils.callElemeSystem(tenantId, branchId, branch.getElemeAccountType(), "eleme.product.category.createCategory", params);
         } catch (Exception e) {
             LogUtils.error("添加商品分类失败", controllerSimpleName, "createCategory", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -220,7 +220,7 @@ public class ElemeController extends BasicController {
             params.put("name", goodsCategory.getName());
             params.put("parentId", goodsCategory.getParentId());
             params.put("description", goodsCategory.getDescription());
-            apiRest = ElemeUtils.callElemeSystem("1", tenantId, branch.getType().toString(), branchId, "eleme.product.category.createCategoryWithChildren", params);
+            apiRest = ElemeUtils.callElemeSystem(tenantId, branchId, branch.getElemeAccountType(), "eleme.product.category.createCategoryWithChildren", params);
         } catch (Exception e) {
             LogUtils.error("添加商品分类失败", controllerSimpleName, "createCategoryWithChildren", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -253,7 +253,7 @@ public class ElemeController extends BasicController {
             params.put("categoryId", goodsCategory.getId());
             params.put("name", goodsCategory.getName());
             params.put("description", goodsCategory.getDescription());
-            apiRest = ElemeUtils.callElemeSystem("1", tenantId, branch.getType().toString(), branchId, "eleme.product.category.updateCategory", params);
+            apiRest = ElemeUtils.callElemeSystem(tenantId, branchId, branch.getElemeAccountType(), "eleme.product.category.updateCategory", params);
         } catch (Exception e) {
             LogUtils.error("更新商品分类失败", controllerSimpleName, "updateCategory", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -287,7 +287,7 @@ public class ElemeController extends BasicController {
             params.put("name", goodsCategory.getName());
             params.put("parentId", goodsCategory.getParentId());
             params.put("description", goodsCategory.getDescription());
-            apiRest = ElemeUtils.callElemeSystem("1", tenantId, branch.getType().toString(), branchId, "eleme.product.category.updateCategoryWithChildren", params);
+            apiRest = ElemeUtils.callElemeSystem(tenantId, branchId, branch.getElemeAccountType(), "eleme.product.category.updateCategoryWithChildren", params);
         } catch (Exception e) {
             LogUtils.error("更新商品分类失败", controllerSimpleName, "updateCategoryWithChildren", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -318,7 +318,7 @@ public class ElemeController extends BasicController {
             GoodsCategory goodsCategory = elemeService.findGoodsCategoryInfo(bigIntegerTenantId, bigIntegerBranchId, bigIntegerCategoryId);
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("categoryId", goodsCategory.getId());
-            apiRest = ElemeUtils.callElemeSystem("1", tenantId, branch.getType().toString(), branchId, "eleme.product.category.removeCategory", params);
+            apiRest = ElemeUtils.callElemeSystem(tenantId, branchId, branch.getElemeAccountType(), "eleme.product.category.removeCategory", params);
         } catch (Exception e) {
             LogUtils.error("删除商品分类失败", controllerSimpleName, "removeCategory", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -350,7 +350,7 @@ public class ElemeController extends BasicController {
 
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("orderId", elemeOrder.getOrderId());
-            apiRest = ElemeUtils.callElemeSystem("1", tenantId, branch.getType().toString(), branchId, "eleme.order.confirmOrderLite", params);
+            apiRest = ElemeUtils.callElemeSystem(tenantId, branchId, branch.getElemeAccountType(), "eleme.order.confirmOrderLite", params);
         } catch (Exception e) {
             LogUtils.error("确认订单失败", controllerSimpleName, "confirmOrderLite", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -372,7 +372,7 @@ public class ElemeController extends BasicController {
 
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("orderId", elemeOrder.getOrderId());
-            apiRest = ElemeUtils.callElemeSystem("1", cancelOrderLiteModel.getTenantId().toString(), branch.getType().toString(), branch.getId().toString(), "eleme.order.cancelOrderLite", params);
+            apiRest = ElemeUtils.callElemeSystem(cancelOrderLiteModel.getTenantId().toString(), branch.getId().toString(), branch.getElemeAccountType(), "eleme.order.cancelOrderLite", params);
         } catch (Exception e) {
             LogUtils.error("取消订单失败", controllerSimpleName, "cancelOrderLite", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -394,7 +394,7 @@ public class ElemeController extends BasicController {
 
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("orderId", elemeOrder.getOrderId());
-            apiRest = ElemeUtils.callElemeSystem("1", agreeRefundLiteModel.getTenantId().toString(), branch.getType().toString(), branch.getId().toString(), "eleme.order.agreeRefundLite", params);
+            apiRest = ElemeUtils.callElemeSystem(agreeRefundLiteModel.getTenantId().toString(), branch.getId().toString(), branch.getElemeAccountType(), "eleme.order.agreeRefundLite", params);
         } catch (Exception e) {
             LogUtils.error("同意退单/同意取消单失败", controllerSimpleName, "agreeRefundLite", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -416,7 +416,7 @@ public class ElemeController extends BasicController {
 
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("orderId", elemeOrder.getOrderId());
-            apiRest = ElemeUtils.callElemeSystem("1", disagreeRefundLiteModel.getTenantId().toString(), branch.getType().toString(), branch.getId().toString(), "eleme.order.disagreeRefundLite", params);
+            apiRest = ElemeUtils.callElemeSystem(disagreeRefundLiteModel.getTenantId().toString(), branch.getId().toString(), branch.getElemeAccountType(), "eleme.order.disagreeRefundLite", params);
         } catch (Exception e) {
             LogUtils.error("不同意退单/不同意取消单失败", controllerSimpleName, "disagreeRefundLite", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -438,7 +438,7 @@ public class ElemeController extends BasicController {
 
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("orderId", elemeOrder.getOrderId());
-            apiRest = ElemeUtils.callElemeSystem("1", deliveryStateRecordModel.getTenantId().toString(), branch.getType().toString(), branch.getId().toString(), "eleme.order.getDeliveryStateRecord", params);
+            apiRest = ElemeUtils.callElemeSystem(deliveryStateRecordModel.getTenantId().toString(), branch.getId().toString(), branch.getElemeAccountType(), "eleme.order.getDeliveryStateRecord", params);
         } catch (Exception e) {
             LogUtils.error("获取订单配送记录失败", controllerSimpleName, "getDeliveryStateRecord", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -460,7 +460,7 @@ public class ElemeController extends BasicController {
 
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("orderId", elemeOrder.getOrderId());
-            apiRest = ElemeUtils.callElemeSystem("1", deliveryBySelfLiteModel.getTenantId().toString(), branch.getType().toString(), branch.getId().toString(), "eleme.order.deliveryBySelfLite", params);
+            apiRest = ElemeUtils.callElemeSystem(deliveryBySelfLiteModel.getTenantId().toString(), branch.getId().toString(), branch.getElemeAccountType(), "eleme.order.deliveryBySelfLite", params);
         } catch (Exception e) {
             LogUtils.error("配送异常或者物流拒单后选择自行配送失败", controllerSimpleName, "deliveryBySelfLite", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -482,7 +482,7 @@ public class ElemeController extends BasicController {
 
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("orderId", elemeOrder.getOrderId());
-            apiRest = ElemeUtils.callElemeSystem("1", moreDeliveryLiteModel.getTenantId().toString(), branch.getType().toString(), branch.getId().toString(), "eleme.order.noMoreDeliveryLite", params);
+            apiRest = ElemeUtils.callElemeSystem(moreDeliveryLiteModel.getTenantId().toString(), branch.getId().toString(), branch.getElemeAccountType(), "eleme.order.noMoreDeliveryLite", params);
         } catch (Exception e) {
             LogUtils.error("配送异常或者物流拒单后选择不再配送失败", controllerSimpleName, "noMoreDeliveryLite", e, requestParameters);
             apiRest = new ApiRest(e);

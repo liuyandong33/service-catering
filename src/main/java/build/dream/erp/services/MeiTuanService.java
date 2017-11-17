@@ -324,11 +324,11 @@ public class MeiTuanService {
      * @return
      */
     private void publishMeiTuanOrderMessage(String tenantCode, String branchCode, BigInteger meiTuanOrderId, Integer type) throws IOException {
-        String meiTuanOrderMessageChannelTopic = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_ORDER_MESSAGE_CHANNEL_TOPIC);
+        String meiTuanMessageChannelTopic = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_MESSAGE_CHANNEL_TOPIC);
         JSONObject messageJsonObject = new JSONObject();
         messageJsonObject.put("tenantCodeAndBranchCode", tenantCode + "_" + branchCode);
         messageJsonObject.put("type", type);
         messageJsonObject.put("elemeOrderId", meiTuanOrderId);
-        QueueUtils.convertAndSend(meiTuanOrderMessageChannelTopic, messageJsonObject.toString());
+        QueueUtils.convertAndSend(meiTuanMessageChannelTopic, messageJsonObject.toString());
     }
 }

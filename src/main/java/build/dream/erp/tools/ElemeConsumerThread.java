@@ -61,6 +61,7 @@ public class ElemeConsumerThread implements Runnable {
                     elemeService.handleAuthorizationStateChangeMessage(shopId, message, type);
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 if (StringUtils.isNotBlank(elemeMessage)) {
                     count = count - 1;
                     if (count > 0) {

@@ -24,32 +24,16 @@ public class ElemeUtils {
         HEADERS.put("Content-Type", "application/json;charset=utf-8");
     }
 
-    public static String obtainAccessToken(String tenantId) throws IOException {
-        String tokenJson = CacheUtils.hget(Constants.KEY_ELEME_TOKEN, Constants.KEY_ELEME_TOKEN + "_" + tenantId);
-        JSONObject tokenJsonObject = JSONObject.fromObject(tokenJson);
-        return tokenJsonObject.getString("access_token");
-    }
-
-    public static String obtainAccessToken(String tenantId, String branchId) throws IOException {
-        String tokenJson = CacheUtils.hget(Constants.KEY_ELEME_TOKEN, Constants.KEY_ELEME_TOKEN + "_" + tenantId + "_" + branchId);
-        JSONObject tokenJsonObject = JSONObject.fromObject(tokenJson);
-        return tokenJsonObject.getString("access_token");
-    }
-
-    public static String obtainAccessToken(String tenantType, String tenantId, String branchType, String branchId) throws IOException {
+    public static String obtainAccessToken(String tenantId, String branchId, Integer elemeAccountType) throws IOException {
         String accessToken = null;
-        if ("1".equals(tenantType)) {
-            if (Constants.BRANCH_TYPE_DIRECT_SALE_STORE.equals(tenantType) || Constants.BRANCH_TYPE_HEADQUARTERS.equals(branchType)) {
-                accessToken = obtainAccessToken(tenantId);
-            } else if ("3".equals(tenantType)) {
-                accessToken = obtainAccessToken(tenantId, branchId);
-            }
-        } else if ("3".equals(tenantType)) {
-            accessToken = obtainAccessToken(tenantId, branchId);
+        if (elemeAccountType == Constants.ELEME_ACCOUNT_TYPE_CHAIN_ACCOUNT) {
+            accessToken = CacheUtils.hget(Constants.KEY_ELEME_TOKENS, Constants.ELEME_TOKEN + "_" + tenantId);
+        } else if (elemeAccountType == Constants.ELEME_ACCOUNT_TYPE_INDEPENDENT_ACCOUNT) {
+            accessToken = CacheUtils.hget(Constants.KEY_ELEME_TOKENS, Constants.ELEME_TOKEN + "_" + tenantId + "_" + branchId);
         }
-        accessToken = "4f4774b7e1eabdb73377826382bb4d32";
         return accessToken;
     }
+
     private static String generateSignature(String appKey, String appSecret, long timestamp, String action, String accessToken, Map<String, Object> params) throws Exception {
         Map<String, Object> sorted = new TreeMap<String, Object>(params);
         sorted.put("app_key", appKey);
@@ -61,7 +45,7 @@ public class ElemeUtils {
         return DigestUtils.md5Hex(String.format("%s%s%s%s", action, accessToken, stringBuffer, appSecret)).toUpperCase();
     }
 
-    public static String constructRequestBody(String tenantType, String tenantId, String branchType, String branchId, String action, Map<String, Object> params) throws Exception {
+    public static String constructRequestBody(String tenantId, String branchId, Integer elemeAccountType, String action, Map<String, Object> params) throws Exception {
         String appKey = ConfigurationUtils.getConfiguration(Constants.ELEME_APP_KEY);
         String appSecret = ConfigurationUtils.getConfiguration(Constants.ELEME_APP_SECRET);
         Map<String, Object> metas = new HashMap<String, Object>();
@@ -71,7 +55,7 @@ public class ElemeUtils {
         if (params == null) {
             params = new HashMap<String, Object>();
         }
-        String accessToken = obtainAccessToken(tenantType, tenantId, branchType, branchId);
+        String accessToken = obtainAccessToken(tenantId, branchId, elemeAccountType);
         String signature = generateSignature(appKey, appSecret, timestamp, action, accessToken, params);
         Map<String, Object> requestBody = new HashMap<String, Object>();
         String requestId = UUID.randomUUID().toString();
@@ -85,8 +69,8 @@ public class ElemeUtils {
         return GsonUtils.toJson(requestBody);
     }
 
-    public static ApiRest callElemeSystem(String tenantType, String tenantId, String branchType, String branchId, String action, Map<String, Object> params) throws Exception {
-        String requestBody = constructRequestBody(tenantType, tenantId, branchType, branchId, action, params);
+    public static ApiRest callElemeSystem(String tenantId, String branchId, Integer elemeAccountType, String action, Map<String, Object> params) throws Exception {
+        String requestBody = constructRequestBody(tenantId, branchId, elemeAccountType, action, params);
         Map<String, String> callElemeSystemRequestParameters = new HashMap<String, String>();
         callElemeSystemRequestParameters.put("requestBody", requestBody);
         return ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "eleme", "callElemeSystem", callElemeSystemRequestParameters);

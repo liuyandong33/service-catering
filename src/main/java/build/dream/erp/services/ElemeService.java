@@ -223,7 +223,7 @@ public class ElemeService {
     @Transactional(rollbackFor = Exception.class)
     public void handleElemeRefundOrderMessage(BigInteger shopId, String message, Integer type) throws IOException {
         JSONObject messageJsonObject = JSONObject.fromObject(message);
-        String orderId = messageJsonObject.optString("id");
+        String orderId = messageJsonObject.optString("orderId");
         SearchModel elemeOrderSearchModel = new SearchModel(true);
         elemeOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
         ElemeOrder elemeOrder = elemeOrderMapper.find(elemeOrderSearchModel);
@@ -613,11 +613,11 @@ public class ElemeService {
      * @return
      */
     private void publishElemeOrderMessage(String tenantCode, String branchCode, BigInteger elemeOrderId, Integer type) throws IOException {
-        String elemeOrderMessageChannel = ConfigurationUtils.getConfiguration(Constants.ELEME_ORDER_MESSAGE_CHANNEL);
+        String elemeMessageChannelTopic = ConfigurationUtils.getConfiguration(Constants.ELEME_MESSAGE_CHANNEL_TOPIC);
         JSONObject messageJsonObject = new JSONObject();
         messageJsonObject.put("tenantCodeAndBranchCode", tenantCode + "_" + branchCode);
         messageJsonObject.put("type", type);
         messageJsonObject.put("elemeOrderId", elemeOrderId);
-        QueueUtils.convertAndSend(elemeOrderMessageChannel, messageJsonObject.toString());
+        QueueUtils.convertAndSend(elemeMessageChannelTopic, messageJsonObject.toString());
     }
 }
