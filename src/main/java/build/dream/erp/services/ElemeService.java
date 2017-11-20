@@ -81,7 +81,7 @@ public class ElemeService {
             String elemeAppKey = ConfigurationUtils.getConfiguration(Constants.ELEME_APP_KEY);
 
             String outServiceOutsideServiceDomain = SystemPartitionUtils.getOutsideServiceDomain(Constants.SERVICE_NAME_OUT);
-            data = String.format(Constants.ELEME_TENANT_AUTHORIZE_URL_FORMAT, elemeUrl + "/" + "authorize", "code", elemeAppKey, URLEncoder.encode(outServiceOutsideServiceDomain + "/eleme/tenantAuthorizeCallback", Constants.CHARSET_UTF_8), tenantId + "Z" + branchId + "Z" + userId + "Z" + elemeAccountType, "all");
+            data = String.format(Constants.ELEME_TENANT_AUTHORIZE_URL_FORMAT, elemeUrl + "/" + "authorize", "code", elemeAppKey, URLEncoder.encode(outServiceOutsideServiceDomain + "/eleme/tenantAuthorizeCallback", Constants.CHARSET_NAME_UTF_8), tenantId + "Z" + branchId + "Z" + userId + "Z" + elemeAccountType, "all");
         }
         ApiRest apiRest = new ApiRest(data, "生成授权链接成功！");
         return apiRest;
@@ -582,8 +582,8 @@ public class ElemeService {
         String lastUpdateRemark = "门店(" + doBindingStoreModel.getBranchId() + ")绑定饿了么(" + doBindingStoreModel.getShopId() + ")，清除绑定关系！";
         branchMapper.clearBindingStore(doBindingStoreModel.getShopId(), doBindingStoreModel.getUserId(), lastUpdateRemark);
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, doBindingStoreModel.getTenantId());
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, doBindingStoreModel.getBranchId());
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, doBindingStoreModel.getBranchId());
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, doBindingStoreModel.getTenantId());
         Branch branch = branchMapper.find(searchModel);
         Validate.notNull(branch, "门店不存在！");
         branch.setShopId(doBindingStoreModel.getShopId());

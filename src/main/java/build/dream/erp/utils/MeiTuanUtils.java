@@ -61,7 +61,7 @@ public class MeiTuanUtils {
 
     public static void putSystemLevelParameter(String tenantId, String branchId, String signKey, Map<String, String> requestParameters) {
         requestParameters.put("appAuthToken", getMeiTuanAppAuthToken(tenantId, branchId));
-        requestParameters.put("charset", Constants.CHARSET_UTF_8);
+        requestParameters.put("charset", Constants.CHARSET_NAME_UTF_8);
         requestParameters.put("timestamp", String.valueOf(System.currentTimeMillis()));
         requestParameters.put("version", "1");
         requestParameters.put("sign", generateSignature(signKey, requestParameters));
