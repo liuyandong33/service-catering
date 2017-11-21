@@ -32,11 +32,11 @@ public class ElemeService {
     @Autowired
     private ElemeGroupMapper elemeGroupMapper;
     @Autowired
-    private ElemeItemMapper elemeItemMapper;
+    private ElemeOrderItemMapper elemeOrderItemMapper;
     @Autowired
-    private ElemeItemAttributeMapper elemeItemAttributeMapper;
+    private ElemeOrderItemAttributeMapper elemeOrderItemAttributeMapper;
     @Autowired
-    private ElemeItemNewSpecMapper elemeItemNewSpecMapper;
+    private ElemeOrderItemNewSpecMapper elemeOrderItemNewSpecMapper;
     @Autowired
     private ElemeActivityMapper elemeActivityMapper;
     @Autowired
@@ -117,7 +117,7 @@ public class ElemeService {
         elemeOrder.setLastUpdateRemark("饿了么系统推送新订单，保存订单！");
         elemeOrderMapper.insert(elemeOrder);
 
-        List<ElemeItem> elemeItems = new ArrayList<ElemeItem>();
+        List<ElemeOrderItem> elemeOrderItems = new ArrayList<ElemeOrderItem>();
 
         int elemeGroupJsonArraySize = elemeGroupJsonArray.size();
         for (int index = 0; index < elemeGroupJsonArraySize; index++) {
@@ -130,63 +130,63 @@ public class ElemeService {
             elemeGroup.setLastUpdateUserId(userId);
             elemeGroup.setLastUpdateRemark("饿了么系统推送新订单，保存分组");
             elemeGroupMapper.insert(elemeGroup);
-            JSONArray elemeItemJsonArray = elemeGroupJsonObject.optJSONArray("items");
-            int elemeItemJsonArraySize = elemeItemJsonArray.size();
-            for (int elemeItemJsonArrayIndex = 0; elemeItemJsonArrayIndex < elemeItemJsonArraySize; elemeItemJsonArrayIndex++) {
-                JSONObject elemeItemJsonObject = elemeItemJsonArray.optJSONObject(elemeItemJsonArrayIndex);
-                ElemeItem elemeItem = new ElemeItem();
-                elemeItem.setElemeGroupId(elemeGroup.getId());
-                elemeItem.setElemeItemId(BigInteger.valueOf(elemeItemJsonObject.getLong("id")));
-                elemeItem.setSkuId(BigInteger.valueOf(elemeItemJsonObject.getLong("skuId")));
-                elemeItem.setName(elemeItemJsonObject.getString("name"));
-                elemeItem.setCategoryId(BigInteger.valueOf(elemeItemJsonObject.getLong("categoryId")));
-                elemeItem.setPrice(BigDecimal.valueOf(elemeItemJsonObject.optDouble("price")));
-                elemeItem.setQuantity(elemeItemJsonObject.optInt("quantity"));
-                elemeItem.setTotal(BigDecimal.valueOf(elemeItemJsonObject.optDouble("total")));
-                elemeItem.setExtendCode(elemeItemJsonObject.optString("extendCode"));
-                elemeItem.setBarCode(elemeItemJsonObject.optString("barCode"));
-                elemeItem.setUserPrice(BigDecimal.valueOf(elemeItemJsonObject.getDouble("userPrice")));
-                elemeItem.setShopPrice(BigDecimal.valueOf(elemeItemJsonObject.getDouble("shopPrice")));
-                elemeItem.setVfoodId(BigInteger.valueOf(elemeItemJsonObject.getLong("vfoodId")));
+            JSONArray elemeOrderItemJsonArray = elemeGroupJsonObject.optJSONArray("items");
+            int elemeOrderItemJsonArraySize = elemeOrderItemJsonArray.size();
+            for (int elemeOrderItemJsonArrayIndex = 0; elemeOrderItemJsonArrayIndex < elemeOrderItemJsonArraySize; elemeOrderItemJsonArrayIndex++) {
+                JSONObject elemeOrderItemJsonObject = elemeOrderItemJsonArray.optJSONObject(elemeOrderItemJsonArrayIndex);
+                ElemeOrderItem elemeOrderItem = new ElemeOrderItem();
+                elemeOrderItem.setElemeGroupId(elemeGroup.getId());
+                elemeOrderItem.setElemeItemId(BigInteger.valueOf(elemeOrderItemJsonObject.getLong("id")));
+                elemeOrderItem.setSkuId(BigInteger.valueOf(elemeOrderItemJsonObject.getLong("skuId")));
+                elemeOrderItem.setName(elemeOrderItemJsonObject.getString("name"));
+                elemeOrderItem.setCategoryId(BigInteger.valueOf(elemeOrderItemJsonObject.getLong("categoryId")));
+                elemeOrderItem.setPrice(BigDecimal.valueOf(elemeOrderItemJsonObject.optDouble("price")));
+                elemeOrderItem.setQuantity(elemeOrderItemJsonObject.optInt("quantity"));
+                elemeOrderItem.setTotal(BigDecimal.valueOf(elemeOrderItemJsonObject.optDouble("total")));
+                elemeOrderItem.setExtendCode(elemeOrderItemJsonObject.optString("extendCode"));
+                elemeOrderItem.setBarCode(elemeOrderItemJsonObject.optString("barCode"));
+                elemeOrderItem.setUserPrice(BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("userPrice")));
+                elemeOrderItem.setShopPrice(BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("shopPrice")));
+                elemeOrderItem.setVfoodId(BigInteger.valueOf(elemeOrderItemJsonObject.getLong("vfoodId")));
 
-                Object weight = elemeItemJsonObject.opt("weight");
+                Object weight = elemeOrderItemJsonObject.opt("weight");
                 if (weight != null) {
-                    elemeItem.setWeight(BigDecimal.valueOf(Double.valueOf(weight.toString())));
+                    elemeOrderItem.setWeight(BigDecimal.valueOf(Double.valueOf(weight.toString())));
                 }
-                elemeItem.setCreateUserId(userId);
-                elemeItem.setLastUpdateUserId(userId);
-                elemeItem.setLastUpdateRemark("饿了么系统推送新订单，保存菜品属性！");
-                elemeItemMapper.insert(elemeItem);
+                elemeOrderItem.setCreateUserId(userId);
+                elemeOrderItem.setLastUpdateUserId(userId);
+                elemeOrderItem.setLastUpdateRemark("饿了么系统推送新订单，保存菜品属性！");
+                elemeOrderItemMapper.insert(elemeOrderItem);
 
-                JSONArray elemeItemAttributeJsonArray = elemeItemJsonObject.optJSONArray("attributes");
-                if (elemeItemAttributeJsonArray != null) {
-                    int elemeItemAttributeJsonArraySize = elemeItemAttributeJsonArray.size();
-                    for (int elemeItemAttributeJsonArrayIndex = 0; elemeItemAttributeJsonArrayIndex < elemeItemAttributeJsonArraySize; elemeItemAttributeJsonArrayIndex++) {
-                        JSONObject elemeItemAttributeJsonObject = elemeItemAttributeJsonArray.optJSONObject(index);
-                        ElemeItemAttribute elemeItemAttribute = new ElemeItemAttribute();
-                        elemeItemAttribute.setElemeItemId(elemeItem.getId());
-                        elemeItemAttribute.setName(elemeItemAttributeJsonObject.optString("name"));
-                        elemeItemAttribute.setValue(elemeItemAttributeJsonObject.optString("value"));
-                        elemeItemAttribute.setCreateUserId(userId);
-                        elemeItemAttribute.setLastUpdateUserId(userId);
-                        elemeItemAttribute.setLastUpdateRemark("饿了么系统推送新订单，保存菜品属性！");
-                        elemeItemAttributeMapper.insert(elemeItemAttribute);
+                JSONArray elemeOrderItemAttributeJsonArray = elemeOrderItemJsonObject.optJSONArray("attributes");
+                if (elemeOrderItemAttributeJsonArray != null) {
+                    int elemeOrderItemAttributeJsonArraySize = elemeOrderItemAttributeJsonArray.size();
+                    for (int elemeOrderItemAttributeJsonArrayIndex = 0; elemeOrderItemAttributeJsonArrayIndex < elemeOrderItemAttributeJsonArraySize; elemeOrderItemAttributeJsonArrayIndex++) {
+                        JSONObject elemeOrderItemAttributeJsonObject = elemeOrderItemAttributeJsonArray.optJSONObject(index);
+                        ElemeOrderItemAttribute elemeOrderItemAttribute = new ElemeOrderItemAttribute();
+                        elemeOrderItemAttribute.setElemeOrderItemId(elemeOrderItem.getId());
+                        elemeOrderItemAttribute.setName(elemeOrderItemAttributeJsonObject.optString("name"));
+                        elemeOrderItemAttribute.setValue(elemeOrderItemAttributeJsonObject.optString("value"));
+                        elemeOrderItemAttribute.setCreateUserId(userId);
+                        elemeOrderItemAttribute.setLastUpdateUserId(userId);
+                        elemeOrderItemAttribute.setLastUpdateRemark("饿了么系统推送新订单，保存菜品属性！");
+                        elemeOrderItemAttributeMapper.insert(elemeOrderItemAttribute);
                     }
                 }
 
-                JSONArray elemeItemNewSpecJsonArray = elemeItemJsonObject.optJSONArray("newSpecs");
-                if (elemeItemNewSpecJsonArray != null) {
-                    int elemeItemNewSpecJsonArraySize = elemeItemNewSpecJsonArray.size();
-                    for (int elemeItemNewSpecJsonArrayIndex = 0; elemeItemNewSpecJsonArrayIndex < elemeItemNewSpecJsonArraySize; elemeItemNewSpecJsonArrayIndex++) {
-                        JSONObject elemeItemNewSpecJsonObject = elemeItemNewSpecJsonArray.optJSONObject(index);
-                        ElemeItemNewSpec elemeItemNewSpec = new ElemeItemNewSpec();
-                        elemeItemNewSpec.setElemeItemId(elemeItem.getId());
-                        elemeItemNewSpec.setName(elemeItemNewSpecJsonObject.optString("name"));
-                        elemeItemNewSpec.setValue(elemeItemNewSpecJsonObject.optString("value"));
-                        elemeItemNewSpec.setCreateUserId(userId);
-                        elemeItemNewSpec.setLastUpdateUserId(userId);
-                        elemeItemNewSpec.setLastUpdateRemark("饿了么系统推送新订单，保存菜品规格！");
-                        elemeItemNewSpecMapper.insert(elemeItemNewSpec);
+                JSONArray elemeOrderItemNewSpecJsonArray = elemeOrderItemJsonObject.optJSONArray("newSpecs");
+                if (elemeOrderItemNewSpecJsonArray != null) {
+                    int elemeOrderItemNewSpecJsonArraySize = elemeOrderItemNewSpecJsonArray.size();
+                    for (int elemeOrderItemNewSpecJsonArrayIndex = 0; elemeOrderItemNewSpecJsonArrayIndex < elemeOrderItemNewSpecJsonArraySize; elemeOrderItemNewSpecJsonArrayIndex++) {
+                        JSONObject elemeOrderItemNewSpecJsonObject = elemeOrderItemNewSpecJsonArray.optJSONObject(index);
+                        ElemeOrderItemNewSpec elemeOrderItemNewSpec = new ElemeOrderItemNewSpec();
+                        elemeOrderItemNewSpec.setElemeOrderItemId(elemeOrderItem.getId());
+                        elemeOrderItemNewSpec.setName(elemeOrderItemNewSpecJsonObject.optString("name"));
+                        elemeOrderItemNewSpec.setValue(elemeOrderItemNewSpecJsonObject.optString("value"));
+                        elemeOrderItemNewSpec.setCreateUserId(userId);
+                        elemeOrderItemNewSpec.setLastUpdateUserId(userId);
+                        elemeOrderItemNewSpec.setLastUpdateRemark("饿了么系统推送新订单，保存菜品规格！");
+                        elemeOrderItemNewSpecMapper.insert(elemeOrderItemNewSpec);
                     }
                 }
             }
@@ -455,46 +455,46 @@ public class ElemeService {
         for (ElemeGroup elemeGroup : elemeGroups) {
             elemeGroupIds.add(elemeGroup.getId());
         }
-        SearchModel elemeItemSearchModel = new SearchModel(true);
-        elemeItemSearchModel.addSearchCondition("eleme_group_id", Constants.SQL_OPERATION_SYMBOL_IN, elemeGroupIds);
-        List<ElemeItem> elemeItems = elemeItemMapper.findAll(elemeItemSearchModel);
+        SearchModel elemeOrderItemSearchModel = new SearchModel(true);
+        elemeOrderItemSearchModel.addSearchCondition("eleme_group_id", Constants.SQL_OPERATION_SYMBOL_IN, elemeGroupIds);
+        List<ElemeOrderItem> elemeOrderItems = elemeOrderItemMapper.findAll(elemeOrderItemSearchModel);
 
-        List<BigInteger> elemeItemIds = new ArrayList<BigInteger>();
-        Map<BigInteger, List<ElemeItem>> elemeItemMap = new HashMap<BigInteger, List<ElemeItem>>();
-        for (ElemeItem elemeItem : elemeItems) {
-            elemeItemIds.add(elemeItem.getElemeItemId());
-            List<ElemeItem> elemeItemList = elemeItemMap.get(elemeItem.getElemeGroupId());
-            if (elemeItemList == null) {
-                elemeItemList = new ArrayList<ElemeItem>();
-                elemeItemMap.put(elemeItem.getElemeGroupId(), elemeItemList);
+        List<BigInteger> elemeOrderItemIds = new ArrayList<BigInteger>();
+        Map<BigInteger, List<ElemeOrderItem>> elemeOrderItemMap = new HashMap<BigInteger, List<ElemeOrderItem>>();
+        for (ElemeOrderItem elemeOrderItem : elemeOrderItems) {
+            elemeOrderItemIds.add(elemeOrderItem.getId());
+            List<ElemeOrderItem> elemeOrderItemList = elemeOrderItemMap.get(elemeOrderItem.getElemeGroupId());
+            if (elemeOrderItemList == null) {
+                elemeOrderItemList = new ArrayList<ElemeOrderItem>();
+                elemeOrderItemMap.put(elemeOrderItem.getElemeGroupId(), elemeOrderItemList);
             }
-            elemeItemList.add(elemeItem);
+            elemeOrderItemList.add(elemeOrderItem);
         }
 
-        SearchModel elemeItemNewSpecSearchModel = new SearchModel(true);
-        elemeItemNewSpecSearchModel.addSearchCondition("eleme_item_id", Constants.SQL_OPERATION_SYMBOL_IN, elemeItemIds);
-        List<ElemeItemNewSpec> elemeItemNewSpecs = elemeItemNewSpecMapper.findAll(elemeItemNewSpecSearchModel);
-        Map<BigInteger, List<ElemeItemNewSpec>> elemeItemNewSpecMap = new HashMap<BigInteger, List<ElemeItemNewSpec>>();
-        for (ElemeItemNewSpec elemeItemNewSpec : elemeItemNewSpecs) {
-            List<ElemeItemNewSpec> elemeItemNewSpecList = elemeItemNewSpecMap.get(elemeItemNewSpec.getElemeItemId());
-            if (elemeItemNewSpecList == null) {
-                elemeItemNewSpecList = new ArrayList<ElemeItemNewSpec>();
-                elemeItemNewSpecMap.put(elemeItemNewSpec.getElemeItemId(), elemeItemNewSpecList);
+        SearchModel elemeOrderItemNewSpecSearchModel = new SearchModel(true);
+        elemeOrderItemNewSpecSearchModel.addSearchCondition("eleme_order_item_id", Constants.SQL_OPERATION_SYMBOL_IN, elemeOrderItemIds);
+        List<ElemeOrderItemNewSpec> elemeOrderItemNewSpecs = elemeOrderItemNewSpecMapper.findAll(elemeOrderItemNewSpecSearchModel);
+        Map<BigInteger, List<ElemeOrderItemNewSpec>> elemeOrderItemNewSpecMap = new HashMap<BigInteger, List<ElemeOrderItemNewSpec>>();
+        for (ElemeOrderItemNewSpec elemeOrderItemNewSpec : elemeOrderItemNewSpecs) {
+            List<ElemeOrderItemNewSpec> elemeOrderItemNewSpecList = elemeOrderItemNewSpecMap.get(elemeOrderItemNewSpec.getElemeOrderItemId());
+            if (elemeOrderItemNewSpecList == null) {
+                elemeOrderItemNewSpecList = new ArrayList<ElemeOrderItemNewSpec>();
+                elemeOrderItemNewSpecMap.put(elemeOrderItemNewSpec.getElemeOrderItemId(), elemeOrderItemNewSpecList);
             }
-            elemeItemNewSpecList.add(elemeItemNewSpec);
+            elemeOrderItemNewSpecList.add(elemeOrderItemNewSpec);
         }
 
-        SearchModel elemeItemAttributeSearchModel = new SearchModel(true);
-        elemeItemAttributeSearchModel.addSearchCondition("eleme_item_id", Constants.SQL_OPERATION_SYMBOL_IN, elemeItemIds);
-        List<ElemeItemAttribute> elemeItemAttributes = elemeItemAttributeMapper.findAll(elemeItemAttributeSearchModel);
-        Map<BigInteger, List<ElemeItemAttribute>> elemeItemAttributeMap = new HashMap<BigInteger, List<ElemeItemAttribute>>();
-        for (ElemeItemAttribute elemeItemAttribute : elemeItemAttributes) {
-            List<ElemeItemAttribute> elemeItemAttributeList = elemeItemAttributeMap.get(elemeItemAttribute.getElemeItemId());
-            if (elemeItemAttributeList == null) {
-                elemeItemAttributeList = new ArrayList<ElemeItemAttribute>();
-                elemeItemAttributeMap.put(elemeItemAttribute.getElemeItemId(), elemeItemAttributeList);
+        SearchModel elemeOrderItemAttributeSearchModel = new SearchModel(true);
+        elemeOrderItemAttributeSearchModel.addSearchCondition("eleme_order_item_id", Constants.SQL_OPERATION_SYMBOL_IN, elemeOrderItemIds);
+        List<ElemeOrderItemAttribute> elemeOrderItemAttributes = elemeOrderItemAttributeMapper.findAll(elemeOrderItemAttributeSearchModel);
+        Map<BigInteger, List<ElemeOrderItemAttribute>> elemeOrderItemAttributeMap = new HashMap<BigInteger, List<ElemeOrderItemAttribute>>();
+        for (ElemeOrderItemAttribute elemeOrderItemAttribute : elemeOrderItemAttributes) {
+            List<ElemeOrderItemAttribute> elemeOrderItemAttributeList = elemeOrderItemAttributeMap.get(elemeOrderItemAttribute.getElemeOrderItemId());
+            if (elemeOrderItemAttributeList == null) {
+                elemeOrderItemAttributeList = new ArrayList<ElemeOrderItemAttribute>();
+                elemeOrderItemAttributeMap.put(elemeOrderItemAttribute.getElemeOrderItemId(), elemeOrderItemAttributeList);
             }
-            elemeItemAttributeList.add(elemeItemAttribute);
+            elemeOrderItemAttributeList.add(elemeOrderItemAttribute);
         }
 
         SearchModel elemeActivitySearchModel = new SearchModel(true);
@@ -507,47 +507,47 @@ public class ElemeService {
             elemeGroupMap.put("name", elemeGroup.getName());
             elemeGroupMap.put("type", elemeGroup.getType());
             List<Map<String, Object>> items = new ArrayList<Map<String, Object>>();
-            List<ElemeItem> elemeItemList = elemeItemMap.get(elemeGroup.getId());
-            for (ElemeItem elemeItem : elemeItemList) {
+            List<ElemeOrderItem> elemeOrderItemList = elemeOrderItemMap.get(elemeGroup.getId());
+            for (ElemeOrderItem elemeOrderItem : elemeOrderItemList) {
                 Map<String, Object> item = new HashMap<String, Object>();
-                item.put("id", elemeItem.getElemeItemId());
-                item.put("skuId", elemeItem.getSkuId());
-                item.put("name", elemeItem.getName());
-                item.put("categoryId", elemeItem.getCategoryId());
-                item.put("price", elemeItem.getPrice());
-                item.put("quantity", elemeItem.getQuantity());
-                item.put("total", elemeItem.getTotal());
+                item.put("id", elemeOrderItem.getElemeItemId());
+                item.put("skuId", elemeOrderItem.getSkuId());
+                item.put("name", elemeOrderItem.getName());
+                item.put("categoryId", elemeOrderItem.getCategoryId());
+                item.put("price", elemeOrderItem.getPrice());
+                item.put("quantity", elemeOrderItem.getQuantity());
+                item.put("total", elemeOrderItem.getTotal());
 
-                List<ElemeItemNewSpec> elemeItemNewSpecList = elemeItemNewSpecMap.get(elemeItem.getId());
+                List<ElemeOrderItemNewSpec> elemeOrderItemNewSpecList = elemeOrderItemNewSpecMap.get(elemeOrderItem.getId());
                 List<Map<String, String>> newSpecs = new ArrayList<Map<String, String>>();
-                if (CollectionUtils.isNotEmpty(elemeItemNewSpecList)) {
-                    for (ElemeItemNewSpec elemeItemNewSpec : elemeItemNewSpecList) {
+                if (CollectionUtils.isNotEmpty(elemeOrderItemNewSpecList)) {
+                    for (ElemeOrderItemNewSpec elemeOrderItemNewSpec : elemeOrderItemNewSpecList) {
                         Map<String, String> newSpec = new HashMap<String, String>();
-                        newSpec.put("name", elemeItemNewSpec.getName());
-                        newSpec.put("value", elemeItemNewSpec.getValue());
+                        newSpec.put("name", elemeOrderItemNewSpec.getName());
+                        newSpec.put("value", elemeOrderItemNewSpec.getValue());
                         newSpecs.add(newSpec);
                     }
                 }
                 item.put("newSpecs", newSpecs);
 
-                List<ElemeItemAttribute> elemeItemAttributeList = elemeItemAttributeMap.get(elemeItem.getId());
+                List<ElemeOrderItemAttribute> elemeOrderItemAttributeList = elemeOrderItemAttributeMap.get(elemeOrderItem.getId());
                 List<Map<String, String>> attributes = new ArrayList<Map<String, String>>();
-                if (CollectionUtils.isNotEmpty(elemeItemAttributeList)) {
-                    for (ElemeItemAttribute elemeItemAttribute : elemeItemAttributeList) {
+                if (CollectionUtils.isNotEmpty(elemeOrderItemAttributeList)) {
+                    for (ElemeOrderItemAttribute elemeOrderItemAttribute : elemeOrderItemAttributeList) {
                         Map<String, String> attribute = new HashMap<String, String>();
-                        attribute.put("name", elemeItemAttribute.getName());
-                        attribute.put("value", elemeItemAttribute.getValue());
+                        attribute.put("name", elemeOrderItemAttribute.getName());
+                        attribute.put("value", elemeOrderItemAttribute.getValue());
                         attributes.add(attribute);
                     }
                 }
                 item.put("attributes", attributes);
 
-                item.put("extendCode", elemeItem.getExtendCode());
-                item.put("barCode", elemeItem.getBarCode());
-                item.put("weight", elemeItem.getWeight());
-                item.put("userPrice", elemeItem.getUserPrice());
-                item.put("shopPrice", elemeItem.getShopPrice());
-                item.put("vfoodId", elemeItem.getVfoodId());
+                item.put("extendCode", elemeOrderItem.getExtendCode());
+                item.put("barCode", elemeOrderItem.getBarCode());
+                item.put("weight", elemeOrderItem.getWeight());
+                item.put("userPrice", elemeOrderItem.getUserPrice());
+                item.put("shopPrice", elemeOrderItem.getShopPrice());
+                item.put("vfoodId", elemeOrderItem.getVfoodId());
                 items.add(item);
             }
             elemeGroupMap.put("items", items);

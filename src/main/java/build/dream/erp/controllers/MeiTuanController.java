@@ -6,6 +6,8 @@ import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
 import build.dream.erp.constants.Constants;
+import build.dream.erp.models.eleme.PullElemeOrderModel;
+import build.dream.erp.models.meituan.PullMeiTuanOrderModel;
 import build.dream.erp.services.MeiTuanService;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
@@ -103,5 +105,22 @@ public class MeiTuanController extends BasicController {
             returnValue = e.getMessage();
         }
         return returnValue;
+    }
+
+    @RequestMapping(value = "/pullMeiTuanOrder")
+    @ResponseBody
+    public String pullMeiTuanOrder() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            PullMeiTuanOrderModel pullMeiTuanOrderModel = ApplicationHandler.instantiateObject(PullMeiTuanOrderModel.class, requestParameters);
+            pullMeiTuanOrderModel.validateAndThrow();
+
+            apiRest = meiTuanService.pullMeiTuanOrder(pullMeiTuanOrderModel);
+        } catch (Exception e) {
+            LogUtils.error("拉取美团订单失败！", controllerSimpleName, "pullMeiTuanOrder", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
     }
 }

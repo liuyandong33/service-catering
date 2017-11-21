@@ -5,8 +5,10 @@ import build.dream.common.erp.domains.*;
 import build.dream.common.utils.*;
 import build.dream.erp.constants.Constants;
 import build.dream.erp.mappers.*;
+import build.dream.erp.models.meituan.PullMeiTuanOrderModel;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Calendar;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class MeiTuanService {
@@ -26,7 +27,7 @@ public class MeiTuanService {
     @Autowired
     private MeiTuanOrderMapper meiTuanOrderMapper;
     @Autowired
-    private MeiTuanItemMapper meiTuanItemMapper;
+    private MeiTuanOrderItemMapper meiTuanOrderItemMapper;
     @Autowired
     private MeiTuanOrderExtraMapper meiTuanOrderExtraMapper;
     @Autowired
@@ -125,26 +126,26 @@ public class MeiTuanService {
         int detailJsonArraySize = detailJsonArray.size();
         for (int index = 0; index < detailJsonArraySize; index++) {
             JSONObject detailJsonObject = detailJsonArray.getJSONObject(index);
-            MeiTuanItem meiTuanItem = new MeiTuanItem();
-            meiTuanItem.setMeiTuanOrderId(meiTuanOrder.getId());
-            meiTuanItem.setAppFoodCode(detailJsonObject.optString("app_food_code"));
-            meiTuanItem.setBoxNum(detailJsonObject.optInt("box_num"));
-            meiTuanItem.setBoxPrice(BigDecimal.valueOf(detailJsonObject.optDouble("box_price")));
-            meiTuanItem.setFoodName(detailJsonObject.optString("food_name"));
-            meiTuanItem.setPrice(BigDecimal.valueOf(detailJsonObject.optDouble("price")));
-            meiTuanItem.setSkuId(detailJsonObject.optString("sku_id"));
-            meiTuanItem.setQuantity(detailJsonObject.optInt("quantity"));
-            meiTuanItem.setUnit(detailJsonObject.optString("unit"));
-            meiTuanItem.setFoodDiscount(BigDecimal.valueOf(detailJsonObject.optDouble("food_discount")));
-            meiTuanItem.setFoodProperty(detailJsonObject.optString("food_property"));
+            MeiTuanOrderItem meiTuanOrderItem = new MeiTuanOrderItem();
+            meiTuanOrderItem.setMeiTuanOrderId(meiTuanOrder.getId());
+            meiTuanOrderItem.setAppFoodCode(detailJsonObject.optString("app_food_code"));
+            meiTuanOrderItem.setBoxNum(detailJsonObject.optInt("box_num"));
+            meiTuanOrderItem.setBoxPrice(BigDecimal.valueOf(detailJsonObject.optDouble("box_price")));
+            meiTuanOrderItem.setFoodName(detailJsonObject.optString("food_name"));
+            meiTuanOrderItem.setPrice(BigDecimal.valueOf(detailJsonObject.optDouble("price")));
+            meiTuanOrderItem.setSkuId(detailJsonObject.optString("sku_id"));
+            meiTuanOrderItem.setQuantity(detailJsonObject.optInt("quantity"));
+            meiTuanOrderItem.setUnit(detailJsonObject.optString("unit"));
+            meiTuanOrderItem.setFoodDiscount(BigDecimal.valueOf(detailJsonObject.optDouble("food_discount")));
+            meiTuanOrderItem.setFoodProperty(detailJsonObject.optString("food_property"));
             if (detailJsonObject.has("foodShareFeeChargeByPoi")) {
-                meiTuanItem.setFoodShareFeeChargeByPoi(BigDecimal.valueOf(detailJsonObject.optDouble("foodShareFeeChargeByPoi")).divide(hundred));
+                meiTuanOrderItem.setFoodShareFeeChargeByPoi(BigDecimal.valueOf(detailJsonObject.optDouble("foodShareFeeChargeByPoi")).divide(hundred));
             }
-            meiTuanItem.setCartId(detailJsonObject.optInt("cart_id"));
-            meiTuanItem.setCreateUserId(userId);
-            meiTuanItem.setLastUpdateUserId(userId);
-            meiTuanItem.setLastUpdateRemark("处理美团订单生效回调，保存订单明细！");
-            meiTuanItemMapper.insert(meiTuanItem);
+            meiTuanOrderItem.setCartId(detailJsonObject.optInt("cart_id"));
+            meiTuanOrderItem.setCreateUserId(userId);
+            meiTuanOrderItem.setLastUpdateUserId(userId);
+            meiTuanOrderItem.setLastUpdateRemark("处理美团订单生效回调，保存订单明细！");
+            meiTuanOrderItemMapper.insert(meiTuanOrderItem);
         }
 
         int extrasJsonArraySize = extrasJsonArray.size();
@@ -330,5 +331,109 @@ public class MeiTuanService {
         messageJsonObject.put("type", type);
         messageJsonObject.put("elemeOrderId", meiTuanOrderId);
         QueueUtils.convertAndSend(meiTuanMessageChannelTopic, messageJsonObject.toString());
+    }
+
+    @Transactional(readOnly = true)
+    public ApiRest pullMeiTuanOrder(PullMeiTuanOrderModel pullMeiTuanOrderModel) {
+        SearchModel meiTuanOrderSearchModel = new SearchModel(true);
+        meiTuanOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, pullMeiTuanOrderModel.getTenantId());
+        meiTuanOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, pullMeiTuanOrderModel.getBranchId());
+        meiTuanOrderSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, pullMeiTuanOrderModel.getMeiTuanOrderId());
+        MeiTuanOrder meiTuanOrder = meiTuanOrderMapper.find(meiTuanOrderSearchModel);
+        Validate.notNull(meiTuanOrder, "订单不存在！");
+
+        SearchModel meiTuanItemSearchModel = new SearchModel(true);
+        meiTuanItemSearchModel.addSearchCondition("mei_tuan_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, meiTuanOrder.getId());
+        List<MeiTuanOrderItem> meiTuanOrderItems = meiTuanOrderItemMapper.findAll(meiTuanItemSearchModel);
+
+        SearchModel meiTuanOrderExtraSearchModel = new SearchModel(true);
+        meiTuanOrderExtraSearchModel.addSearchCondition("mei_tuan_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, meiTuanOrder.getId());
+        List<MeiTuanOrderExtra> meiTuanOrderExtras = meiTuanOrderExtraMapper.findAll(meiTuanOrderExtraSearchModel);
+
+        SearchModel meiTuanOrderPoiReceiveDetailSearchModel = new SearchModel(true);
+        meiTuanOrderPoiReceiveDetailSearchModel.addSearchCondition("mei_tuan_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, meiTuanOrder.getId());
+        MeiTuanOrderPoiReceiveDetail meiTuanOrderPoiReceiveDetail = meiTuanOrderPoiReceiveDetailMapper.find(meiTuanOrderPoiReceiveDetailSearchModel);
+
+        Map<String, Object> poiReceiveDetail = new HashMap<String, Object>();
+        if (meiTuanOrderPoiReceiveDetail != null) {
+            SearchModel actOrderChargeByMtSearchModel = new SearchModel(true);
+            actOrderChargeByMtSearchModel.addSearchCondition("mei_tuan_order_poi_receive_detail_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, meiTuanOrderPoiReceiveDetail.getId());
+            List<ActOrderChargeByMt> actOrderChargeByMts = actOrderChargeByMtMapper.findAll(actOrderChargeByMtSearchModel);
+
+            SearchModel actOrderChargeByPoiSearchModel = new SearchModel(true);
+            actOrderChargeByPoiSearchModel.addSearchCondition("mei_tuan_order_poi_receive_detail_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, meiTuanOrderPoiReceiveDetail.getId());
+            List<ActOrderChargeByPoi> actOrderChargeByPois = actOrderChargeByPoiMapper.findAll(actOrderChargeByPoiSearchModel);
+
+            poiReceiveDetail.put("foodShareFeeChargeByPoi", meiTuanOrderPoiReceiveDetail.getFoodShareFeeChargeByPoi());
+            poiReceiveDetail.put("logisticsFee", meiTuanOrderPoiReceiveDetail.getLogisticsFee());
+            poiReceiveDetail.put("onlinePayment", meiTuanOrderPoiReceiveDetail.getOnlinePayment());
+            poiReceiveDetail.put("wmPoiReceiveCent", meiTuanOrderPoiReceiveDetail.getWmPoiReceiveCent());
+
+            List<Map<String, Object>> actOrderChargeByMtData = new ArrayList<Map<String, Object>>();
+            if (CollectionUtils.isNotEmpty(actOrderChargeByMts)) {
+                for (ActOrderChargeByMt actOrderChargeByMt : actOrderChargeByMts) {
+                    Map<String, Object> actOrderChargeByMtMap = new HashMap<String, Object>();
+                    actOrderChargeByMtMap.put("comment", actOrderChargeByMt.getComment());
+                    actOrderChargeByMtMap.put("feeTypeDesc", actOrderChargeByMt.getFeeTypeDesc());
+                    actOrderChargeByMtMap.put("feeTypeId", actOrderChargeByMt.getFeeTypeId());
+                    actOrderChargeByMtMap.put("moneyCent", actOrderChargeByMt.getMoneyCent());
+                    actOrderChargeByMtData.add(actOrderChargeByMtMap);
+                }
+                poiReceiveDetail.put("actOrderChargeByMt", actOrderChargeByMtData);
+            }
+
+            List<Map<String, Object>> actOrderChargeByPoiData = new ArrayList<Map<String, Object>>();
+            if (CollectionUtils.isNotEmpty(actOrderChargeByPois)) {
+                for (ActOrderChargeByPoi actOrderChargeByPoi : actOrderChargeByPois) {
+                    Map<String, Object> actOrderChargeByPoiMap = new HashMap<String, Object>();
+                    actOrderChargeByPoiMap.put("comment", actOrderChargeByPoi.getComment());
+                    actOrderChargeByPoiMap.put("feeTypeDesc", actOrderChargeByPoi.getFeeTypeDesc());
+                    actOrderChargeByPoiMap.put("feeTypeId", actOrderChargeByPoi.getFeeTypeId());
+                    actOrderChargeByPoiMap.put("moneyCent", actOrderChargeByPoi.getMoneyCent());
+                    actOrderChargeByPoiData.add(actOrderChargeByPoiMap);
+                }
+                poiReceiveDetail.put("actOrderChargeByPoi", actOrderChargeByPoiData);
+            }
+        }
+
+        Map<String, Object> meiTuanOrderMap = BeanUtils.beanToMap(meiTuanOrder);
+        meiTuanOrderMap.put("poiReceiveDetail", poiReceiveDetail);
+
+        List<Map<String, Object>> detail = new ArrayList<Map<String, Object>>();
+        for (MeiTuanOrderItem meiTuanOrderItem : meiTuanOrderItems) {
+            Map<String, Object> meiTuanItemMap = new HashMap<String, Object>();
+            meiTuanItemMap.put("app_food_code", meiTuanOrderItem.getAppFoodCode());
+            meiTuanItemMap.put("box_num", meiTuanOrderItem.getBoxNum());
+            meiTuanItemMap.put("box_price", meiTuanOrderItem.getBoxPrice());
+            meiTuanItemMap.put("food_name", meiTuanOrderItem.getFoodName());
+            meiTuanItemMap.put("price", meiTuanOrderItem.getPrice());
+            meiTuanItemMap.put("sku_id", meiTuanOrderItem.getSkuId());
+            meiTuanItemMap.put("quantity", meiTuanOrderItem.getQuantity());
+            meiTuanItemMap.put("unit", meiTuanOrderItem.getUnit());
+            meiTuanItemMap.put("food_discount", meiTuanOrderItem.getFoodDiscount());
+            meiTuanItemMap.put("food_property", meiTuanOrderItem.getFoodProperty());
+            meiTuanItemMap.put("foodShareFeeChargeByPoi", meiTuanOrderItem.getFoodShareFeeChargeByPoi());
+            meiTuanItemMap.put("cart_id", meiTuanOrderItem.getCartId());
+            detail.add(meiTuanItemMap);
+        }
+        meiTuanOrderMap.put("detail", detail);
+
+        List<Map<String, Object>> extras = new ArrayList<Map<String, Object>>();
+        for (MeiTuanOrderExtra meiTuanOrderExtra : meiTuanOrderExtras) {
+            Map<String, Object> meiTuanOrderExtraMap = new HashMap<String, Object>();
+            meiTuanOrderExtraMap.put("mt_charge", meiTuanOrderExtra.getMtCharge());
+            meiTuanOrderExtraMap.put("poi_charge", meiTuanOrderExtra.getPoiCharge());
+            meiTuanOrderExtraMap.put("reduce_fee", meiTuanOrderExtra.getReduceFee());
+            meiTuanOrderExtraMap.put("remark", meiTuanOrderExtra.getRemark());
+            meiTuanOrderExtraMap.put("type", meiTuanOrderExtra.getType());
+            extras.add(meiTuanOrderExtraMap);
+        }
+        meiTuanOrderMap.put("extras", extras);
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setData(meiTuanOrderMap);
+        apiRest.setMessage("拉取美团订单成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
     }
 }

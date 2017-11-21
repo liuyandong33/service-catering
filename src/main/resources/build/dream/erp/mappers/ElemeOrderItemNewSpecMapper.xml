@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="build.dream.erp.mappers.ElemeItemNewSpecMapper">
-    <insert id="insert" parameterType="build.dream.common.erp.domains.ElemeItemNewSpec" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO eleme_item_new_spec(eleme_item_id, name, value,
+<mapper namespace="build.dream.erp.mappers.ElemeOrderItemNewSpecMapper">
+    <insert id="insert" parameterType="build.dream.common.erp.domains.ElemeOrderItemNewSpec" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO eleme_order_item_new_spec(eleme_item_id, name, value,
         create_user_id, last_update_user_id, last_update_remark)
         VALUES(#{elemeItemId}, #{name}, #{value},
         #{createUserId}, #{lastUpdateUserId}, #{lastUpdateRemark})
     </insert>
 
-    <update id="update" parameterType="build.dream.common.erp.domains.ElemeItemNewSpec">
-        UPDATE eleme_item_new_spec
+    <update id="update" parameterType="build.dream.common.erp.domains.ElemeOrderItemNewSpec">
+        UPDATE eleme_order_item_new_spec
         SET eleme_item_id = #{elemeItemId},
             name = #{name},
             value = #{value},
@@ -20,12 +20,12 @@
         WHERE id = #{id}
     </update>
     
-    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ElemeItemNewSpec">
-        SELECT * FROM eleme_item_new_spec <include refid="searchConditionSql"></include>
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ElemeOrderItemNewSpec">
+        SELECT * FROM eleme_order_item_new_spec <include refid="searchConditionSql"></include>
     </select>
 
-    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ElemeItemNewSpec">
-        SELECT * FROM eleme_item_new_spec <include refid="searchConditionSql"></include>
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ElemeOrderItemNewSpec">
+        SELECT * FROM eleme_order_item_new_spec <include refid="searchConditionSql"></include>
     </select>
 
     <sql id="searchConditionSql">

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="build.dream.erp.mappers.ElemeItemMapper">
-    <insert id="insert" parameterType="build.dream.common.erp.domains.ElemeItem" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO eleme_item(eleme_group_id, eleme_item_id, sku_id,
+<mapper namespace="build.dream.erp.mappers.ElemeOrderItemMapper">
+    <insert id="insert" parameterType="build.dream.common.erp.domains.ElemeOrderItem" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO eleme_order_item(eleme_group_id, eleme_item_id, sku_id,
         name, category_id, price,
         quantity, total, extend_code,
         bar_code, weight, user_price,
@@ -16,8 +16,8 @@
         #{lastUpdateUserId}, #{lastUpdateRemark})
     </insert>
 
-    <update id="update" parameterType="build.dream.common.erp.domains.ElemeItem">
-        UPDATE eleme_item
+    <update id="update" parameterType="build.dream.common.erp.domains.ElemeOrderItem">
+        UPDATE eleme_order_item
         SET eleme_group_id = #{elemeGroupId},
             eleme_item_id = #{elemeItemId},
             sku_id = #{skuId},
@@ -39,12 +39,12 @@
         WHERE id = #{id}
     </update>
     
-    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ElemeItem">
-        SELECT * FROM eleme_item <include refid="searchConditionSql"></include>
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ElemeOrderItem">
+        SELECT * FROM eleme_order_item <include refid="searchConditionSql"></include>
     </select>
 
-    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ElemeItem">
-        SELECT * FROM eleme_item <include refid="searchConditionSql"></include>
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ElemeOrderItem">
+        SELECT * FROM eleme_order_item <include refid="searchConditionSql"></include>
     </select>
 
     <sql id="searchConditionSql">
