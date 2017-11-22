@@ -43,6 +43,6 @@ dependencies {
     compile fileTree(include: ["*.jar"], dir: "libs")
     compile("net.sf.json-lib:json-lib:2.4:jdk15")
     compile("me.ele.openapi:eleme-openapi-sdk:1.6.18")
-
     compile("org.apache.tomcat.embed:tomcat-embed-jasper")
+    compile("org.apache.poi:poi-ooxml:3.17")
 }
