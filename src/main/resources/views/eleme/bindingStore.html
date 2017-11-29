@@ -36,7 +36,10 @@
             }
             var tenantId = $("#tenantId").val();
             var branchId = $("#branchId").val();
-            $.post("../eleme/doBindingStore", {"tenantId": tenantId, "branchId": branchId, "shopId": shopId}, function(data) {
+            var userId = $("#userId").val();
+
+            var doBindingStoreUrl = "${doBindingStoreUrl}";
+            $.post(doBindingStoreUrl, {tenantId: tenantId, branchId: branchId, shopId: shopId, userId: userId}, function(data) {
                 if (data["successful"]) {
                     alertMessage("提示", data["message"], "确定", undefined);
                     $("#ok-button").attr("disabled", false);
@@ -67,7 +70,7 @@
 <div style="text-align: center;margin-top: 60px;">
     <input type="hidden" name="tenantId" value="${tenantId}" id="tenantId">
     <input type="hidden" name="branchId" value="${branchId}" id="branchId">
-    <input type="hidden" name="branchId" value="${userId}" id="userId">
+    <input type="hidden" name="userId" value="${userId}" id="userId">
     <input type="text" name="shopId" id="shopId" value="" placeholder="请输入饿了么店铺号">
     <input type="button" value="确定" onclick="handleOkButtonOnClick();" id="ok-button">
 </div>
