@@ -22,6 +22,7 @@
     <script type="text/javascript">
         ${jquery-3.2.1.min.js}
         ${dialog.js}
+        var serviceName = "${serviceName}";
         var tenantId = "${tenantId}";
         var branchId = "${branchId}";
         var userId = "${userId}";
@@ -36,7 +37,8 @@
                 $("#ok-button").attr("disabled", false);
                 return;
             }
-            $.post("../eleme/doBindingStore", {tenantId: tenantId, branchId: branchId, shopId: shopId, userId: userId, controllerName: "eleme", actionName: "doBindingStore"}, function(data) {
+            var doBindingStoreUrl = "${doBindingStoreUrl}";
+            $.post(doBindingStoreUrl, {serviceName: serviceName, controllerName: "eleme", actionName: "doBindingStore", tenantId: tenantId, branchId: branchId, shopId: shopId, userId: userId, partitionCode: partitionCode}, function(data) {
                 if (data["successful"]) {
                     alertMessage("提示", data["message"], "确定", undefined);
                     $("#ok-button").attr("disabled", false);
