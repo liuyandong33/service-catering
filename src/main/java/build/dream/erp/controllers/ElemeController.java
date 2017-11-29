@@ -5,7 +5,10 @@ import build.dream.common.controllers.BasicController;
 import build.dream.common.erp.domains.Branch;
 import build.dream.common.erp.domains.ElemeOrder;
 import build.dream.common.erp.domains.GoodsCategory;
-import build.dream.common.utils.*;
+import build.dream.common.utils.ApplicationHandler;
+import build.dream.common.utils.ConfigurationUtils;
+import build.dream.common.utils.GsonUtils;
+import build.dream.common.utils.LogUtils;
 import build.dream.erp.constants.Constants;
 import build.dream.erp.models.eleme.*;
 import build.dream.erp.services.ElemeService;
@@ -536,10 +539,10 @@ public class ElemeController extends BasicController {
         result = result.replaceAll("\\$\\{tenantId}", requestParameters.get("tenantId"));
         result = result.replaceAll("\\$\\{branchId}", requestParameters.get("branchId"));
         result = result.replaceAll("\\$\\{userId}", requestParameters.get("userId"));
+        result = result.replaceAll("\\$\\{partitionCode}", ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE));
         result = StringUtils.join(result.split("\\$\\{ui-dialog\\.css}"), readResource("ui-dialog.css"));
         result = StringUtils.join(result.split("\\$\\{jquery-3\\.2\\.1\\.min.js}"), readResource("jquery-3.2.1.min.js"));
         result = StringUtils.join(result.split("\\$\\{dialog\\.js}"), readResource("dialog.js"));
-        result = result.replaceAll("\\$\\{doBindingStoreUrl}", SystemPartitionUtils.getOutsideUrl(ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE), ConfigurationUtils.getConfiguration(Constants.SERVICE_NAME), "eleme", "doBindingStore"));
         return result;
     }
 

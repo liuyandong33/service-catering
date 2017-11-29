@@ -22,24 +22,21 @@
     <script type="text/javascript">
         ${jquery-3.2.1.min.js}
         ${dialog.js}
+        var tenantId = "${tenantId}";
+        var branchId = "${branchId}";
+        var userId = "${userId}";
+        var partitionCode = "${partitionCode}";
         var height = $(window).height();
         var width = $(window).width();
         function handleOkButtonOnClick() {
             $("#ok-button").attr("disabled", true);
             var shopId = $("#shopId").val();
             if (!shopId) {
-                alertMessage("提示", "请输入饿了么门店号！", "确定", function () {
-                    alert(111)
-                });
+                alertMessage("提示", "请输入饿了么门店号！", "确定", undefined);
                 $("#ok-button").attr("disabled", false);
                 return;
             }
-            var tenantId = $("#tenantId").val();
-            var branchId = $("#branchId").val();
-            var userId = $("#userId").val();
-
-            var doBindingStoreUrl = "${doBindingStoreUrl}";
-            $.post(doBindingStoreUrl, {tenantId: tenantId, branchId: branchId, shopId: shopId, userId: userId}, function(data) {
+            $.post("../eleme/doBindingStore", {tenantId: tenantId, branchId: branchId, shopId: shopId, userId: userId, controllerName: "eleme", actionName: "doBindingStore"}, function(data) {
                 if (data["successful"]) {
                     alertMessage("提示", data["message"], "确定", undefined);
                     $("#ok-button").attr("disabled", false);
@@ -68,9 +65,6 @@
 <body>
 <div class="header">饿了么店铺绑定</div>
 <div style="text-align: center;margin-top: 60px;">
-    <input type="hidden" name="tenantId" value="${tenantId}" id="tenantId">
-    <input type="hidden" name="branchId" value="${branchId}" id="branchId">
-    <input type="hidden" name="userId" value="${userId}" id="userId">
     <input type="text" name="shopId" id="shopId" value="" placeholder="请输入饿了么店铺号">
     <input type="button" value="确定" onclick="handleOkButtonOnClick();" id="ok-button">
 </div>
