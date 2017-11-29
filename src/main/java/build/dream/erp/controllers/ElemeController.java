@@ -554,7 +554,7 @@ public class ElemeController extends BasicController {
             doBindingStoreModel.validateAndThrow();
             apiRest = elemeService.doBindingStore(doBindingStoreModel);
         } catch (Exception e) {
-            LogUtils.error("绑定饿了么门店失败！", controllerSimpleName, "pullElemeOrder", e, requestParameters);
+            LogUtils.error("绑定饿了么门店失败！", controllerSimpleName, "doBindingStore", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
