@@ -8,9 +8,11 @@ import build.dream.common.erp.domains.GoodsCategory;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
+import build.dream.erp.constants.Constants;
 import build.dream.erp.models.eleme.*;
 import build.dream.erp.services.ElemeService;
 import build.dream.erp.utils.ElemeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +20,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
@@ -530,18 +534,43 @@ public class ElemeController extends BasicController {
     @ResponseBody
     public String bindingStore() throws IOException {
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("views/eleme/bindingRestaurant.html");
-        StringBuffer stringBuffer = new StringBuffer();
-        int length = 0;
-        byte[] buffer = new byte[1024];
-        while ((length = inputStream.read(buffer, 0, 1024)) != -1) {
-            stringBuffer.append(new String(buffer, 0, length));
-        }
-        String result = stringBuffer.toString();
+        String result = readResource("bindingStore.html");
         result = result.replaceAll("\\$\\{tenantId}", requestParameters.get("tenantId"));
         result = result.replaceAll("\\$\\{branchId}", requestParameters.get("branchId"));
         result = result.replaceAll("\\$\\{userId}", requestParameters.get("userId"));
+        result = StringUtils.join(result.split("\\$\\{ui-dialog\\.css}"), readResource("ui-dialog.css"));
+        result = StringUtils.join(result.split("\\$\\{jquery-3\\.2\\.1\\.min.js}"), readResource("jquery-3.2.1.min.js"));
+        result = StringUtils.join(result.split("\\$\\{dialog\\.js}"), readResource("dialog.js"));
         return result;
+    }
+
+    private String readResource(String resourceName) throws IOException {
+        InputStream inputStream = null;
+        InputStreamReader inputStreamReader = null;
+        BufferedReader bufferedReader = null;
+        String line = null;
+        ClassLoader classLoader = this.getClass().getClassLoader();
+        StringBuffer result = new StringBuffer();
+        if ("bindingStore.html".equals(resourceName)) {
+            inputStream = classLoader.getResourceAsStream("views/eleme/bindingStore.html");
+        } else if ("ui-dialog.css".equals(resourceName)) {
+            inputStream = classLoader.getResourceAsStream("libraries/artDialog/css/ui-dialog.css");
+        } else if ("jquery-3.2.1.min.js".equals(resourceName)) {
+            inputStream = classLoader.getResourceAsStream("libraries/jquery/jquery-3.2.1.min.js");
+        } else if ("dialog.js".equals(resourceName)) {
+            inputStream = classLoader.getResourceAsStream("libraries/artDialog/dist/dialog.js");
+        }
+        inputStreamReader = new InputStreamReader(inputStream, Constants.CHARSET_NAME_UTF_8);
+        bufferedReader = new BufferedReader(inputStreamReader);
+        int length = 0;
+        char[] buffer = new char[1024];
+        while ((length = inputStreamReader.read(buffer, 0, 1024)) != -1) {
+            result.append(buffer, 0, length);
+        }
+        bufferedReader.close();
+        inputStreamReader.close();
+        inputStream.close();
+        return result.toString();
     }
 
     @RequestMapping(value = "/doBindingStore")
