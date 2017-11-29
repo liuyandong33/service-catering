@@ -74,8 +74,7 @@ public class ElemeService {
         String data = null;
         if (isAuthorize) {
             String serviceName = ConfigurationUtils.getConfiguration(Constants.SERVICE_NAME);
-            String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
-            data = SystemPartitionUtils.getOutsideUrl(partitionCode, serviceName, "eleme", "bindingStore") + "?tenantId=" + tenantId + "&branchId=" + branchId + "&userId=" + userId;
+            data = SystemPartitionUtils.getOutsideUrl(Constants.SERVICE_NAME_POSAPI, "eleme", "bindingStore") + "?serviceName=" + serviceName + "&controllerName=eleme&actionName=bindingStore" + "&tenantId=" + tenantId + "&branchId=" + branchId + "&userId=" + userId;
         } else {
             String elemeUrl = ConfigurationUtils.getConfiguration(Constants.ELEME_SERVICE_URL);
             String elemeAppKey = ConfigurationUtils.getConfiguration(Constants.ELEME_APP_KEY);
