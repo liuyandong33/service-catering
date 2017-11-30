@@ -86,7 +86,7 @@ public class ElemeService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void saveElemeOrder(BigInteger shopId, String message, Integer type) throws IOException {
+    public void saveElemeOrder(BigInteger shopId, String message, Integer type, String uuid) throws IOException {
         JSONObject messageJsonObject = JSONObject.fromObject(message);
         SearchModel branchSearchModel = new SearchModel(true);
         branchSearchModel.addSearchCondition("shop_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, shopId);
@@ -208,7 +208,7 @@ public class ElemeService {
                 elemeActivityMapper.insert(elemeActivity);
             }
         }
-        publishElemeOrderMessage(branch.getTenantCode(), branch.getCode(), elemeOrder.getId(), type);
+        publishElemeOrderMessage(branch.getTenantCode(), branch.getCode(), elemeOrder.getId(), type, uuid);
     }
 
     /**
@@ -219,7 +219,7 @@ public class ElemeService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleElemeRefundOrderMessage(BigInteger shopId, String message, Integer type) throws IOException {
+    public void handleElemeRefundOrderMessage(BigInteger shopId, String message, Integer type, String uuid) throws IOException {
         JSONObject messageJsonObject = JSONObject.fromObject(message);
         String orderId = messageJsonObject.optString("orderId");
         SearchModel elemeOrderSearchModel = new SearchModel(true);
@@ -266,7 +266,7 @@ public class ElemeService {
         }
 
         if (type == 20 || type == 21 || type == 24 || type == 25 || type == 26 || type == 30 || type == 31 || type == 34 || type == 35 || type == 36) {
-            publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type);
+            publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type, uuid);
         }
     }
 
@@ -278,7 +278,7 @@ public class ElemeService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleElemeReminderMessage(BigInteger shopId, String message, Integer type) throws IOException {
+    public void handleElemeReminderMessage(BigInteger shopId, String message, Integer type, String uuid) throws IOException {
         JSONObject messageJsonObject = JSONObject.fromObject(message);
         String orderId = messageJsonObject.optString("orderId");
         SearchModel elemeOrderSearchModel = new SearchModel(true);
@@ -304,12 +304,12 @@ public class ElemeService {
         elemeReminderMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么催单信息！");
         elemeReminderMessageMapper.insert(elemeReminderMessage);
         if (type == 45) {
-            publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type);
+            publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type, uuid);
         }
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void handleElemeOrderStateChangeMessage(BigInteger shopId, String message, Integer type) throws IOException {
+    public void handleElemeOrderStateChangeMessage(BigInteger shopId, String message, Integer type, String uuid) throws IOException {
         JSONObject messageJsonObject = JSONObject.fromObject(message);
         String orderId = messageJsonObject.optString("id");
         SearchModel elemeOrderSearchModel = new SearchModel(true);
@@ -342,11 +342,11 @@ public class ElemeService {
         elemeOrderStateChangeMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么订单变更消息！");
 
         elemeOrderStateChangeMessageMapper.insert(elemeOrderStateChangeMessage);
-        publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type);
+        publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type, uuid);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void handleElemeDeliveryOrderStateChangeMessage(BigInteger shopId, String message, Integer type) throws IOException {
+    public void handleElemeDeliveryOrderStateChangeMessage(BigInteger shopId, String message, Integer type, String uuid) throws IOException {
         JSONObject messageJsonObject = JSONObject.fromObject(message);
         String orderId = messageJsonObject.optString("orderId");
         SearchModel elemeOrderSearchModel = new SearchModel(true);
@@ -379,14 +379,14 @@ public class ElemeService {
         elemeDeliveryOrderStateChangeMessage.setLastUpdateRemark("处理饿了么回调，保存饿了么运单状态变更消息！");
 
         elemeDeliveryOrderStateChangeMessageMapper.insert(elemeDeliveryOrderStateChangeMessage);
-        publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type);
+        publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type, uuid);
     }
 
-    public void handleElemeShopStateChangeMessage(BigInteger shopId, String message, Integer type) {
+    public void handleElemeShopStateChangeMessage(BigInteger shopId, String message, Integer type, String uuid) {
 
     }
 
-    public void handleAuthorizationStateChangeMessage(BigInteger shopId, String message, Integer type) {
+    public void handleAuthorizationStateChangeMessage(BigInteger shopId, String message, Integer type, String uuid) {
 
     }
 
@@ -610,12 +610,13 @@ public class ElemeService {
      * @param type：消息类型
      * @return
      */
-    private void publishElemeOrderMessage(String tenantCode, String branchCode, BigInteger elemeOrderId, Integer type) throws IOException {
+    private void publishElemeOrderMessage(String tenantCode, String branchCode, BigInteger elemeOrderId, Integer type, String uuid) throws IOException {
         String elemeMessageChannelTopic = ConfigurationUtils.getConfiguration(Constants.ELEME_MESSAGE_CHANNEL_TOPIC);
         JSONObject messageJsonObject = new JSONObject();
         messageJsonObject.put("tenantCodeAndBranchCode", tenantCode + "_" + branchCode);
         messageJsonObject.put("type", type);
         messageJsonObject.put("elemeOrderId", elemeOrderId);
+        messageJsonObject.put("uuid", uuid);
         QueueUtils.convertAndSend(elemeMessageChannelTopic, messageJsonObject.toString());
     }
 }

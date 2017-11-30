@@ -91,9 +91,10 @@ public class ElemeUtils {
 
     private static BlockingQueue<List<String>> elemeMessageBlockingQueue = new LinkedBlockingQueue<List<String>>();
 
-    public static void addElemeMessageBlockingQueue(String elemeMessage, Integer count) throws InterruptedException {
+    public static void addElemeMessageBlockingQueue(String elemeMessage, String uuid, Integer count) throws InterruptedException {
         List<String> elemeMessageBody = new ArrayList<String>();
         elemeMessageBody.add(elemeMessage);
+        elemeMessageBody.add(uuid);
         elemeMessageBody.add(count.toString());
         elemeMessageBlockingQueue.put(elemeMessageBody);
     }

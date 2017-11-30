@@ -29,7 +29,7 @@ public class ElemeCallbackMessageListener implements MessageListener {
         if (setnxSuccessful) {
             CacheUtils.expire(uuid, 1800, TimeUnit.SECONDS);
             try {
-                ElemeUtils.addElemeMessageBlockingQueue(messageJsonObject.getString("callbackRequestBody"), 10);
+                ElemeUtils.addElemeMessageBlockingQueue(messageJsonObject.getString("callbackRequestBody"), uuid, 10);
             } catch (InterruptedException e) {
                 LogUtils.error("处理饿了么回调信息失败", ELEME_CALLBACK_MESSAGE_LISTENER_SIMPLE_NAME, "onMessage", e);
             }

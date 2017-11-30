@@ -32,12 +32,14 @@ public class ElemeConsumerThread implements Runnable {
     public void run() {
         while (true) {
             String elemeMessage = null;
+            String uuid = null;
             Integer count = null;
             JSONObject callbackJsonObject = null;
             try {
                 List<String> elemeMessageBody = ElemeUtils.takeElemeMessage();
                 elemeMessage = elemeMessageBody.get(0);
-                count = Integer.valueOf(elemeMessageBody.get(1));
+                uuid = elemeMessageBody.get(1);
+                count = Integer.valueOf(elemeMessageBody.get(2));
 
                 callbackJsonObject = JSONObject.fromObject(elemeMessage);
 
@@ -46,19 +48,19 @@ public class ElemeConsumerThread implements Runnable {
                 Integer type = callbackJsonObject.getInt("type");
 
                 if (type == 10) {
-                    elemeService.saveElemeOrder(shopId, message, type);
+                    elemeService.saveElemeOrder(shopId, message, type, uuid);
                 } else if (ArrayUtils.contains(ELEME_ORDER_STATE_CHANGE_MESSAGE_TYPES, type)) {
-                    elemeService.handleElemeOrderStateChangeMessage(shopId, message, type);
+                    elemeService.handleElemeOrderStateChangeMessage(shopId, message, type, uuid);
                 } else if (ArrayUtils.contains(ELEME_REFUND_ORDER_MESSAGE_TYPES, type)) {
-                    elemeService.handleElemeRefundOrderMessage(shopId, message, type);
+                    elemeService.handleElemeRefundOrderMessage(shopId, message, type, uuid);
                 } else if (ArrayUtils.contains(ELEME_REMINDER_MESSAGE_TYPES, type)) {
-                    elemeService.handleElemeReminderMessage(shopId, message, type);
+                    elemeService.handleElemeReminderMessage(shopId, message, type, uuid);
                 } else if (ArrayUtils.contains(ELEME_DELIVERY_ORDER_STATE_CHANGE_MESSAGE_TYPES, type)) {
-                    elemeService.handleElemeDeliveryOrderStateChangeMessage(shopId, message, type);
+                    elemeService.handleElemeDeliveryOrderStateChangeMessage(shopId, message, type, uuid);
                 } else if (ArrayUtils.contains(ELEME_SHOP_STATE_CHANGE_MESSAGE_TYPES, type)) {
-                    elemeService.handleElemeShopStateChangeMessage(shopId, message, type);
+                    elemeService.handleElemeShopStateChangeMessage(shopId, message, type, uuid);
                 } else if (type == 100) {
-                    elemeService.handleAuthorizationStateChangeMessage(shopId, message, type);
+                    elemeService.handleAuthorizationStateChangeMessage(shopId, message, type, uuid);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -66,7 +68,7 @@ public class ElemeConsumerThread implements Runnable {
                     count = count - 1;
                     if (count > 0) {
                         try {
-                            ElemeUtils.addElemeMessageBlockingQueue(elemeMessage, count);
+                            ElemeUtils.addElemeMessageBlockingQueue(elemeMessage, uuid, count);
                         } catch (InterruptedException e1) {
                             saveElemeCallbackMessage(callbackJsonObject);
                         }
