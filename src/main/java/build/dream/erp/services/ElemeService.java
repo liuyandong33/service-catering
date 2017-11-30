@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class ElemeService {
@@ -208,6 +209,8 @@ public class ElemeService {
                 elemeActivityMapper.insert(elemeActivity);
             }
         }
+        CacheUtils.hset(elemeOrder.getOrderId(), type.toString(), uuid);
+        CacheUtils.expire(elemeOrder.getOrderId(), 48, TimeUnit.HOURS);
         publishElemeOrderMessage(branch.getTenantCode(), branch.getCode(), elemeOrder.getId(), type, uuid);
     }
 
