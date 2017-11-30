@@ -613,7 +613,8 @@ public class ElemeService {
     private void publishElemeOrderMessage(String tenantCode, String branchCode, BigInteger elemeOrderId, Integer type, String uuid) throws IOException {
         String elemeMessageChannelTopic = ConfigurationUtils.getConfiguration(Constants.ELEME_MESSAGE_CHANNEL_TOPIC);
         JSONObject messageJsonObject = new JSONObject();
-        messageJsonObject.put("tenantCodeAndBranchCode", tenantCode + "_" + branchCode);
+        messageJsonObject.put("tenantCode", tenantCode);
+        messageJsonObject.put("branchCode", branchCode);
         messageJsonObject.put("type", type);
         messageJsonObject.put("elemeOrderId", elemeOrderId);
         messageJsonObject.put("uuid", uuid);
