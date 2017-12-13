@@ -18,7 +18,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -63,7 +63,11 @@ public class ElemeController extends BasicController {
     @RequestMapping(value = "/uploadImage")
     @ResponseBody
     public String uploadImage() {
-        return null;
+        File file = new File("C:\\Users\\liuyandong\\Desktop\\image.png");
+        String fileName = file.getName();
+        String fileNameExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
+        String mimeType = MimeMappingUtils.obtainMimeType(fileNameExtension);
+        return mimeType;
     }
 
     @RequestMapping(value = "/uploadImageWithRemoteUrl ")
@@ -548,7 +552,6 @@ public class ElemeController extends BasicController {
     private String readResource(String resourceName) throws IOException {
         InputStream inputStream = null;
         InputStreamReader inputStreamReader = null;
-        BufferedReader bufferedReader = null;
         ClassLoader classLoader = this.getClass().getClassLoader();
         StringBuffer result = new StringBuffer();
         if ("bindingStore.html".equals(resourceName)) {
@@ -561,13 +564,11 @@ public class ElemeController extends BasicController {
             inputStream = classLoader.getResourceAsStream("libraries/artDialog/dist/dialog.js");
         }
         inputStreamReader = new InputStreamReader(inputStream, Constants.CHARSET_NAME_UTF_8);
-        bufferedReader = new BufferedReader(inputStreamReader);
         int length = 0;
         char[] buffer = new char[1024];
         while ((length = inputStreamReader.read(buffer, 0, 1024)) != -1) {
             result.append(buffer, 0, length);
         }
-        bufferedReader.close();
         inputStreamReader.close();
         inputStream.close();
         return result.toString();
