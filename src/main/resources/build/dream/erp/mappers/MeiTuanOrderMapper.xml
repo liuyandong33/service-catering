@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.erp.mappers.MeiTuanOrderMapper">
-    <insert id="insert" parameterType="build.dream.common.erp.domains.MeiTuanOrder" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="build.dream.common.erp.catering.domains.MeiTuanOrder" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO mei_tuan_order(tenant_id, tenant_code, branch_id,
         branch_code, order_id, order_id_view,
         caution, city_id, ctime,
@@ -30,7 +30,7 @@
         #{lastUpdateRemark})
     </insert>
 
-    <update id="update" parameterType="build.dream.common.erp.domains.MeiTuanOrder">
+    <update id="update" parameterType="build.dream.common.erp.catering.domains.MeiTuanOrder">
         UPDATE mei_tuan_order
         SET tenant_id = #{tenantId},
             tenant_code = #{tenantCode},
@@ -73,15 +73,15 @@
         WHERE id = #{id}
     </update>
 
-    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.MeiTuanOrder">
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.MeiTuanOrder">
         SELECT * FROM mei_tuan_order <include refid="searchConditionSql"></include>
     </select>
 
-    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.MeiTuanOrder">
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.MeiTuanOrder">
         SELECT * FROM mei_tuan_order <include refid="searchConditionSql"></include>
     </select>
 
-    <select id="findAllPaged" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.MeiTuanOrder">
+    <select id="findAllPaged" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.MeiTuanOrder">
         SELECT * FROM mei_tuan_order <include refid="searchConditionSql"></include> <include refid="paginationSql"></include>
     </select>
 

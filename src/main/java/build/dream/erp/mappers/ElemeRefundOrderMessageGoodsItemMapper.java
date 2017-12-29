@@ -1,6 +1,6 @@
 package build.dream.erp.mappers;
 
-import build.dream.common.erp.domains.ElemeRefundOrderMessageGoodsItem;
+import build.dream.common.erp.catering.domains.ElemeRefundOrderMessageGoodsItem;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

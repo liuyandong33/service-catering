@@ -1,7 +1,7 @@
 package build.dream.erp.services;
 
 import build.dream.common.api.ApiRest;
-import build.dream.common.erp.domains.*;
+import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.BeanUtils;
 import build.dream.common.utils.PagedSearchModel;
 import build.dream.common.utils.SearchModel;
@@ -51,7 +51,8 @@ public class GoodsService {
         if (StringUtils.isBlank(rows)) {
             rows = "20";
         }
-        goodsPagedSearchModel.setOffsetAndMaxResults(Integer.valueOf(page), Integer.valueOf(rows));
+        goodsPagedSearchModel.setPage(Integer.valueOf(page));
+        goodsPagedSearchModel.setRows(Integer.valueOf(rows));
         List<Goods> goodses = goodsMapper.findAllPaged(goodsPagedSearchModel);
         List<BigInteger> goodsIds = new ArrayList<BigInteger>();
         for (Goods goods : goodses) {

@@ -41,7 +41,8 @@ public class UserService {
         if (StringUtils.isBlank(rows)) {
             rows = "20";
         }
-        pagedSearchModel.setOffsetAndMaxResults(Integer.valueOf(page), Integer.valueOf(rows));
+        pagedSearchModel.setPage(Integer.valueOf(page));
+        pagedSearchModel.setRows(Integer.valueOf(rows));
         List<BigInteger> userIds = branchMapper.findAllUserIds(pagedSearchModel);
         Map<String, String> findAllUsersRequestParameters = new HashMap<String, String>();
         findAllUsersRequestParameters.put("userIds", StringUtils.join(userIds, ","));

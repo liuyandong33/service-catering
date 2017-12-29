@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.erp.mappers.DietOrderDetailMapper">
-    <insert id="insert" parameterType="build.dream.common.erp.domains.DietOrderDetail">
+    <insert id="insert" parameterType="build.dream.common.erp.catering.domains.DietOrderDetail">
         INSERT INTO diet_order_detail(diet_order_id, goods_id,
         goods_specification_id, goods_flavor_ids, price,
         discount_amount, payable_amount, amount,
@@ -12,7 +12,7 @@
         #{createUserId}, #{lastUpdateUserId}, #{lastUpdateRemark})
     </insert>
 
-    <select id="update" parameterType="build.dream.common.erp.domains.DietOrderDetail">
+    <select id="update" parameterType="build.dream.common.erp.catering.domains.DietOrderDetail">
         UPDATE diet_order_detail
         SET diet_order_id = #{dietOrderId},
         goods_id = #{goodsId},
@@ -29,11 +29,11 @@
         WHERE id = #{id}
     </select>
 
-    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.DietOrderDetail">
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.DietOrderDetail">
         SELECT * FROM activity <include refid="searchConditionSql"></include>
     </select>
 
-    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.DietOrderDetail">
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.DietOrderDetail">
         SELECT * FROM activity <include refid="searchConditionSql"></include>
     </select>
 

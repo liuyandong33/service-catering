@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.erp.mappers.ElemeReminderMessageMapper">
-    <insert id="insert" parameterType="build.dream.common.erp.domains.ElemeReminderMessage" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="build.dream.common.erp.catering.domains.ElemeReminderMessage" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO eleme_reminder_message(eleme_order_id, order_id, shop_id,
         reminder_id, user_id, update_time,
         tenant_id, branch_id, create_user_id,
@@ -12,7 +12,7 @@
         #{lastUpdateUserId}, #{lastUpdateRemark})
     </insert>
 
-    <update id="update" parameterType="build.dream.common.erp.domains.ElemeReminderMessage">
+    <update id="update" parameterType="build.dream.common.erp.catering.domains.ElemeReminderMessage">
         UPDATE eleme_reminder_message
         SET eleme_order_id = #{elemeOrderId},
             order_id = #{orderId},

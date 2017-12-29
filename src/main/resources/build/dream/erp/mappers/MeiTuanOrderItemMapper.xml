@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.erp.mappers.MeiTuanOrderItemMapper">
-    <insert id="insert" parameterType="build.dream.common.erp.domains.MeiTuanOrderItem" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="build.dream.common.erp.catering.domains.MeiTuanOrderItem" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO mei_tuan_order_item(mei_tuan_order_id, app_food_code, box_num,
         box_price, food_name, price,
         sku_id, quantity, unit,
@@ -16,7 +16,7 @@
         #{lastUpdateRemark})
     </insert>
 
-    <update id="update" parameterType="build.dream.common.erp.domains.MeiTuanOrderItem">
+    <update id="update" parameterType="build.dream.common.erp.catering.domains.MeiTuanOrderItem">
         UPDATE mei_tuan_order_item
         SET mei_tuan_order_id = #{meiTuanOrderId},
             app_food_code = #{appFoodCode},
@@ -38,11 +38,11 @@
         WHERE id = #{id}
     </update>
 
-    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.MeiTuanOrderItem">
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.MeiTuanOrderItem">
         SELECT * FROM mei_tuan_order_item <include refid="searchConditionSql"></include>
     </select>
 
-    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.MeiTuanOrderItem">
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.MeiTuanOrderItem">
         SELECT * FROM mei_tuan_order_item <include refid="searchConditionSql"></include>
     </select>
 

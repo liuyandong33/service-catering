@@ -1,7 +1,7 @@
 package build.dream.erp.services;
 
 import build.dream.common.api.ApiRest;
-import build.dream.common.erp.domains.Branch;
+import build.dream.common.erp.catering.domains.Branch;
 import build.dream.common.utils.PagedSearchModel;
 import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.SerialNumberGenerator;
@@ -11,13 +11,11 @@ import build.dream.erp.mappers.DataDefinitionMapper;
 import build.dream.erp.mappers.SequenceMapper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -71,7 +69,8 @@ public class BranchService {
         if (StringUtils.isBlank(rows)) {
             rows = "20";
         }
-        pagedSearchModel.setOffsetAndMaxResults(Integer.valueOf(page), Integer.valueOf(rows));
+        pagedSearchModel.setPage(Integer.valueOf(page));
+        pagedSearchModel.setRows(Integer.valueOf(rows));
         List<Branch> branches = branchMapper.findAllPaged(pagedSearchModel);
         long total = branchMapper.countBranches(pagedSearchModel);
         ApiRest apiRest = new ApiRest(branches, "查询门店列表成功！");

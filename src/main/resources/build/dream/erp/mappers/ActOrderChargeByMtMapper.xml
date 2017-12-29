@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.erp.mappers.ActOrderChargeByMtMapper">
-    <insert id="insert" parameterType="build.dream.common.erp.domains.ActOrderChargeByMt" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="build.dream.common.erp.catering.domains.ActOrderChargeByMt" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO act_order_charge_by_mt(mei_tuan_order_poi_receive_detail_id, comment, fee_type_desc,
         fee_type_id, money_cent, create_user_id,
         last_update_user_id, last_update_remark)
@@ -10,7 +10,7 @@
         #{lastUpdateUserId}, #{lastUpdateRemark})
     </insert>
 
-    <update id="update" parameterType="build.dream.common.erp.domains.ActOrderChargeByMt">
+    <update id="update" parameterType="build.dream.common.erp.catering.domains.ActOrderChargeByMt">
         UPDATE act_order_charge_by_mt
         SET mei_tuan_order_poi_receive_detail_id = #{meiTuanOrderPoiReceiveDetailId},
             comment = #{comment},
@@ -24,11 +24,11 @@
         WHERE id = #{id}
     </update>
 
-    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ActOrderChargeByMt">
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.ActOrderChargeByMt">
         SELECT * FROM act_order_charge_by_mt <include refid="searchConditionSql"></include>
     </select>
 
-    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ActOrderChargeByMt">
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.ActOrderChargeByMt">
         SELECT * FROM act_order_charge_by_mt <include refid="searchConditionSql"></include>
     </select>
 

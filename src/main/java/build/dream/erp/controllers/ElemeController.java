@@ -2,9 +2,9 @@ package build.dream.erp.controllers;
 
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
-import build.dream.common.erp.domains.Branch;
-import build.dream.common.erp.domains.ElemeOrder;
-import build.dream.common.erp.domains.GoodsCategory;
+import build.dream.common.erp.catering.domains.Branch;
+import build.dream.common.erp.catering.domains.ElemeOrder;
+import build.dream.common.erp.catering.domains.GoodsCategory;
 import build.dream.common.utils.*;
 import build.dream.erp.constants.Constants;
 import build.dream.erp.models.eleme.*;
@@ -64,9 +64,7 @@ public class ElemeController extends BasicController {
     @ResponseBody
     public String uploadImage() {
         File file = new File("C:\\Users\\liuyandong\\Desktop\\image.png");
-        String fileName = file.getName();
-        String fileNameExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
-        String mimeType = MimeMappingUtils.obtainMimeType(fileNameExtension);
+        String mimeType = MimeMappingUtils.obtainMimeTypeByFileName(file.getName());
         return mimeType;
     }
 

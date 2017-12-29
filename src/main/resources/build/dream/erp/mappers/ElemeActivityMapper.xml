@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.erp.mappers.ElemeActivityMapper">
-    <insert id="insert" parameterType="build.dream.common.erp.domains.ElemeActivity" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="build.dream.common.erp.catering.domains.ElemeActivity" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO eleme_activity(eleme_order_id, eleme_activity_id, name,
         category_id, eleme_part, restaurant_part,
         amount, create_user_id, last_update_user_id,
@@ -12,7 +12,7 @@
         #{lastUpdateRemark})
     </insert>
 
-    <update id="update" parameterType="build.dream.common.erp.domains.ElemeActivity">
+    <update id="update" parameterType="build.dream.common.erp.catering.domains.ElemeActivity">
         UPDATE eleme_activity
         SET eleme_order_id = #{elemeOrderId},
             eleme_activity_id = #{elemeActivityId},
@@ -28,11 +28,11 @@
         WHERE id = #{id}
     </update>
     
-    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ElemeActivity">
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.ElemeActivity">
         SELECT * FROM eleme_activity <include refid="searchConditionSql"></include>
     </select>
 
-    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ElemeActivity">
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.ElemeActivity">
         SELECT * FROM eleme_activity <include refid="searchConditionSql"></include>
     </select>
 
