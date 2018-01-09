@@ -9,7 +9,8 @@
         remark, delivery_address, delivery_longitude,
         delivery_latitude, deliver_time, active_time,
         deliver_fee, telephone_number, day_serial_number,
-        consignee, create_user_id, last_update_user_id,
+        consignee, local_id, local_create_time,
+        local_last_update_time,create_user_id, last_update_user_id,
         last_update_remark)
         VALUES(#{orderNumber}, #{tenantId}, #{branchId},
         #{orderType}, #{orderStatus}, #{payStatus},
@@ -18,7 +19,8 @@
         #{remark}, #{deliveryAddress}, #{deliveryLongitude},
         #{deliveryLatitude}, #{deliverTime}, #{activeTime},
         #{deliverFee}, #{telephoneNumber}, #{daySerialNumber},
-        #{consignee}, #{createUserId}, #{lastUpdateUserId},
+        #{consignee}, #{localId}, #{localCreateTime},
+        #{localLastUpdateTime},#{createUserId}, #{lastUpdateUserId},
         #{lastUpdateRemark})
     </insert>
 
@@ -46,6 +48,9 @@
             telephone_number = #{telephoneNumber},
             day_serial_number = #{daySerialNumber},
             consignee = #{consignee},
+            local_id = #{localId},
+            local_create_time = #{lastUpdateUserId},
+            local_last_update_time = #{lastUpdateRemark},
             create_user_id = #{createUserId},
             last_update_user_id = #{lastUpdateUserId},
             last_update_remark = #{lastUpdateRemark},

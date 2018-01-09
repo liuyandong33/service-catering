@@ -36,8 +36,11 @@ public class DataJob implements Job {
             long length = QueueUtils.llen(KEY_DIET_ORDER_DATA);
             for (long index = 0; index < length; index++) {
                 String dietOrderData = QueueUtils.lpop(KEY_DIET_ORDER_DATA);
-                System.out.println(dietOrderData);
-                QueueUtils.rpush(KEY_DIET_ORDER_DATA, dietOrderData);
+                try {
+                    dataService.saveDietOrder(dietOrderData);
+                } catch (Exception e) {
+                    QueueUtils.rpush(KEY_DIET_ORDER_DATA, dietOrderData);
+                }
             }
         }
     }

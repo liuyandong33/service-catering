@@ -5,11 +5,29 @@
         INSERT INTO diet_order_detail(diet_order_id, goods_id,
         goods_specification_id, goods_flavor_ids, price,
         discount_amount, payable_amount, amount,
+        local_id, local_create_time, local_last_update_time,
         create_user_id, last_update_user_id, last_update_remark)
         VALUES(#{dietOrderId}, #{goodsId},
         #{goodsSpecificationId}, #{goodsFlavorIds}, #{price},
         #{discountAmount}, #{payableAmount}, #{amount},
+        #{localId}, #{localCreateTime}, #{localLastUpdateTime},
         #{createUserId}, #{lastUpdateUserId}, #{lastUpdateRemark})
+    </insert>
+
+    <insert id="insertAll" parameterType="java.util.List">
+        INSERT INTO diet_order_detail(diet_order_id, goods_id,
+        goods_specification_id, goods_flavor_ids, price,
+        discount_amount, payable_amount, amount,
+        local_id, local_create_time, local_last_update_time,
+        create_user_id, last_update_user_id, last_update_remark)
+        VALUES
+        <foreach collection="list" index="index" item="dietOrderDetail" separator=",">
+            (#{dietOrderDetail.dietOrderId}, #{dietOrderDetail.goodsId},
+            #{dietOrderDetail.goodsSpecificationId}, #{dietOrderDetail.goodsFlavorIds}, #{dietOrderDetail.price},
+            #{dietOrderDetail.discountAmount}, #{dietOrderDetail.payableAmount}, #{dietOrderDetail.amount},
+            #{dietOrderDetail.localId}, #{dietOrderDetail.localCreateTime}, #{dietOrderDetail.localLastUpdateTime},
+            #{dietOrderDetail.createUserId}, #{dietOrderDetail.lastUpdateUserId}, #{dietOrderDetail.lastUpdateRemark})
+        </foreach>
     </insert>
 
     <select id="update" parameterType="build.dream.common.erp.catering.domains.DietOrderDetail">
@@ -22,6 +40,9 @@
         discount_amount = #{discountAmount},
         payable_amount = #{payableAmount},
         amount = #{amount},
+        local_id = #{localId},
+        local_create_time = #{lastUpdateUserId},
+        local_last_update_time = #{lastUpdateRemark},
         create_user_id = #{createUserId},
         last_update_user_id = #{lastUpdateUserId},
         last_update_remark = #{lastUpdateRemark},
