@@ -144,3 +144,12 @@ order:{"caution": "哈哈","cityId": 132,"ctime": 12341234,"daySeq": "1","delive
     "utime": 235131234
 }
 
+${@build.dream.router.utils.BeanUtils@generateInsertSql('build.dream.common.saas.domains.SystemUser')}
+
+<bind name="sql" value="@build.dream.router.utils.BeanUtils@generateInsertAllSql('build.dream.common.saas.domains.SystemUser')"></bind>
+${sql[0]}
+<foreach collection="list" index="index" item="item" separator=",">
+    ${sql[1]}
+</foreach>
+
+${@build.dream.router.utils.BeanUtils@generateUpdateSql('build.dream.common.saas.domains.SystemUser')}
