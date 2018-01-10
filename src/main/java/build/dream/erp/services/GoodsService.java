@@ -9,6 +9,7 @@ import build.dream.erp.constants.Constants;
 import build.dream.erp.mappers.*;
 import build.dream.erp.models.goods.GoodsFlavorGroupModel;
 import build.dream.erp.models.goods.GoodsFlavorModel;
+import build.dream.erp.models.goods.ListGoodsesModel;
 import build.dream.erp.models.goods.SaveGoodsModel;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -37,22 +38,22 @@ public class GoodsService {
     private ActualDistributionDetailedListMapper actualDistributionDetailedListMapper;
 
     @Transactional(readOnly = true)
-    public ApiRest listGoodses(Map<String, String> parameters) {
-        BigInteger tenantId = BigInteger.valueOf(Long.valueOf(parameters.get("tenantId")));
-        BigInteger branchId = BigInteger.valueOf(Long.valueOf(parameters.get("branchId")));
+    public ApiRest listGoodses(ListGoodsesModel listGoodsesModel) {
+        BigInteger tenantId = listGoodsesModel.getTenantId();
+        BigInteger branchId = listGoodsesModel.getBranchId();
         PagedSearchModel goodsPagedSearchModel = new PagedSearchModel(true);
         goodsPagedSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
         goodsPagedSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        String page = parameters.get("page");
-        if (StringUtils.isBlank(page)) {
-            page = "1";
+        Integer page = listGoodsesModel.getPage();
+        if (page == null) {
+            page = 1;
         }
-        String rows = parameters.get("rows");
-        if (StringUtils.isBlank(rows)) {
-            rows = "20";
+        Integer rows = listGoodsesModel.getRows();
+        if (rows == null) {
+            rows = 20;
         }
-        goodsPagedSearchModel.setPage(Integer.valueOf(page));
-        goodsPagedSearchModel.setRows(Integer.valueOf(rows));
+        goodsPagedSearchModel.setPage(page);
+        goodsPagedSearchModel.setRows(rows);
         List<Goods> goodses = goodsMapper.findAllPaged(goodsPagedSearchModel);
         List<BigInteger> goodsIds = new ArrayList<BigInteger>();
         for (Goods goods : goodses) {

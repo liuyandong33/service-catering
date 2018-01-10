@@ -7,6 +7,7 @@ import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
 import build.dream.common.utils.ValidateUtils;
 import build.dream.erp.models.goods.GoodsFlavorGroupModel;
+import build.dream.erp.models.goods.ListGoodsesModel;
 import build.dream.erp.models.goods.SaveGoodsModel;
 import build.dream.erp.services.GoodsService;
 import org.apache.commons.lang.Validate;
@@ -31,8 +32,9 @@ public class GoodsController extends BasicController {
         ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
-            ValidateUtils.notNull(requestParameters, "tenantId", "branchId");
-            apiRest = goodsService.listGoodses(requestParameters);
+            ListGoodsesModel listGoodsesModel = ApplicationHandler.instantiateObject(ListGoodsesModel.class, requestParameters);
+            listGoodsesModel.validateAndThrow();
+            apiRest = goodsService.listGoodses(listGoodsesModel);
         } catch (Exception e) {
             LogUtils.error("查询菜品失败", controllerSimpleName, "listGoodses", e, requestParameters);
             apiRest = new ApiRest(e);
