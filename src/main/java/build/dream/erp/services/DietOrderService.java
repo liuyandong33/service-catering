@@ -2,7 +2,7 @@ package build.dream.erp.services;
 
 import build.dream.common.api.ApiRest;
 import build.dream.common.constants.DietOrderConstants;
-import build.dream.common.erp.domains.*;
+import build.dream.common.erp.catering.domains.*;
 import build.dream.common.saas.domains.DietOrderDetailGoodsFlavor;
 import build.dream.common.saas.domains.TenantSecretKey;
 import build.dream.common.utils.*;
@@ -289,7 +289,7 @@ public class DietOrderService {
 
     public ApiRest doPayOffline(DoPayOfflineModel doPayOfflineModel, String bizContent, String signature) throws NoSuchAlgorithmException, SignatureException, InvalidKeySpecException, InvalidKeyException, DecoderException, UnsupportedEncodingException {
         TenantSecretKey tenantSecretKey = TenantSecretKeyUtils.obtainTenantSecretKey(doPayOfflineModel.getTenantId());
-        Validate.isTrue(SignatureUtils.verifySign(bizContent, tenantSecretKey.getPublicKey(), SignatureUtils.SIGNATURE_TYPE_SHA256_WITH_RSA, SignatureUtils.OUTPUT_TYPE_BASE64, signature), "签名校验失败！");
+        Validate.isTrue(SignatureUtils.verifySign(bizContent, Constants.CHARSET_NAME_UTF_8, tenantSecretKey.getPublicKey(), SignatureUtils.SIGNATURE_TYPE_SHA256_WITH_RSA, SignatureUtils.OUTPUT_TYPE_BASE64, signature), "签名校验失败！");
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("提交线下支付请求成功！");

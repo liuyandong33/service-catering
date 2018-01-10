@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.erp.mappers.BranchMapper">
-    <insert id="insert" parameterType="build.dream.common.erp.domains.Branch" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="build.dream.common.erp.catering.domains.Branch" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO branch(code, name, type,
         status, tenant_id, tenant_code,
         eleme_account_type, shop_id, create_user_id,
@@ -20,7 +20,7 @@
         </foreach>
     </insert>
 
-    <update id="update" parameterType="build.dream.common.erp.domains.Branch">
+    <update id="update" parameterType="build.dream.common.erp.catering.domains.Branch">
         UPDATE branch
         SET code = #{code},
             name = #{name},
@@ -40,7 +40,7 @@
         INSERT INTO merge_user_branch(user_id, tenant_id, branch_id) VALUES (#{userId}, #{tenantId}, #{branchId})
     </insert>
 
-    <select id="findAllPaged" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.Branch">
+    <select id="findAllPaged" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.Branch">
         SELECT * FROM branch <include refid="searchConditionSql"></include> <include refid="paginationSql"></include>
     </select>
 
@@ -48,7 +48,7 @@
         SELECT COUNT(1) FROM branch <include refid="searchConditionSql"></include>
     </select>
 
-    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.Branch">
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.Branch">
         SELECT * FROM branch <include refid="searchConditionSql"></include>
     </select>
 
@@ -73,7 +73,7 @@
         LIMIT #{offset}, #{maxResults}
     </sql>
 
-    <select id="findByUserIdAndTenantId" resultType="build.dream.common.erp.domains.Branch">
+    <select id="findByUserIdAndTenantId" resultType="build.dream.common.erp.catering.domains.Branch">
         SELECT
         branch.*
         FROM branch
@@ -95,7 +95,7 @@
         SELECT id, code, name, type, status, tenant_id FROM branch WHERE deleted = 0;
     </select>
     
-    <select id="findBranchInfo" resultType="build.dream.common.erp.domains.Branch">
+    <select id="findBranchInfo" resultType="build.dream.common.erp.catering.domains.Branch">
         SELECT
         branch.*
         FROM merge_user_branch

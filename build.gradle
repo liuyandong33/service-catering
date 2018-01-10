@@ -45,4 +45,5 @@ dependencies {
     compile("me.ele.openapi:eleme-openapi-sdk:1.6.18")
     compile("org.apache.tomcat.embed:tomcat-embed-jasper")
     compile("org.apache.poi:poi-ooxml:3.17")
+    compile("org.quartz-scheduler:quartz:2.3.0")
 }

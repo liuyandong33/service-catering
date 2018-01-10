@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.erp.mappers.ElemeOrderItemAttributeMapper">
-    <insert id="insert" parameterType="build.dream.common.erp.domains.ElemeOrderItemAttribute" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="build.dream.common.erp.catering.domains.ElemeOrderItemAttribute" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO eleme_order_item_attribute(eleme_item_id, name, value,
         create_user_id, last_update_user_id, last_update_remark)
         VALUES(#{elemeItemId}, #{name}, #{value},
         #{createUserId}, #{lastUpdateUserId}, #{lastUpdateRemark})
     </insert>
 
-    <update id="update" parameterType="build.dream.common.erp.domains.ElemeOrderItemAttribute">
+    <update id="update" parameterType="build.dream.common.erp.catering.domains.ElemeOrderItemAttribute">
         UPDATE eleme_order_item_attribute
         SET eleme_item_id = #{elemeItemId},
             name = #{name},
@@ -20,11 +20,11 @@
         WHERE id = #{id}
     </update>
     
-    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ElemeOrderItemAttribute">
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.ElemeOrderItemAttribute">
         SELECT * FROM eleme_order_item_attribute <include refid="searchConditionSql"></include>
     </select>
 
-    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ElemeOrderItemAttribute">
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.ElemeOrderItemAttribute">
         SELECT * FROM eleme_order_item_attribute <include refid="searchConditionSql"></include>
     </select>
 

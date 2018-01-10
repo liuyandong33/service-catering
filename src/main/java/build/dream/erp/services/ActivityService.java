@@ -1,8 +1,8 @@
 package build.dream.erp.services;
 
 import build.dream.common.api.ApiRest;
-import build.dream.common.erp.domains.Activity;
-import build.dream.common.erp.domains.BasicActivity;
+import build.dream.common.erp.catering.domains.Activity;
+import build.dream.common.erp.catering.domains.BasicActivity;
 import build.dream.common.utils.SearchModel;
 import build.dream.erp.constants.Constants;
 import build.dream.erp.mappers.ActivityMapper;

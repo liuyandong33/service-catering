@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.erp.mappers.ElemeRefundOrderMessageMapper">
-    <insert id="insert" parameterType="build.dream.common.erp.domains.ElemeRefundOrderMessage" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="build.dream.common.erp.catering.domains.ElemeRefundOrderMessage" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO eleme_refund_order_message(eleme_order_id, order_id, refund_status,
         reason, shop_id, refund_type,
         total_price, update_time, tenant_id,

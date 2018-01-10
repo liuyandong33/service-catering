@@ -1,6 +1,6 @@
 package build.dream.erp.mappers;
 
-import build.dream.common.erp.domains.ElemeOrderStateChangeMessage;
+import build.dream.common.erp.catering.domains.ElemeOrderStateChangeMessage;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

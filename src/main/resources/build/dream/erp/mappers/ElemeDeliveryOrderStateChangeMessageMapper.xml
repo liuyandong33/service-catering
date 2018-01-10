@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.erp.mappers.ElemeDeliveryOrderStateChangeMessageMapper">
-    <insert id="insert" parameterType="build.dream.common.erp.domains.ElemeDeliveryOrderStateChangeMessage">
+    <insert id="insert" parameterType="build.dream.common.erp.catering.domains.ElemeDeliveryOrderStateChangeMessage">
         INSERT INTO eleme_delivery_order_state_change_message(eleme_order_id, order_id, shop_id,
         state, sub_state, name,
         phone, update_time, tenant_id,
@@ -14,7 +14,7 @@
         #{lastUpdateRemark})
     </insert>
 
-    <update id="update" parameterType="build.dream.common.erp.domains.ElemeDeliveryOrderStateChangeMessage">
+    <update id="update" parameterType="build.dream.common.erp.catering.domains.ElemeDeliveryOrderStateChangeMessage">
         UPDATE eleme_delivery_order_state_change_message
         SET eleme_order_id = #{elemeOrderId},
             order_id = #{orderId},
@@ -33,11 +33,11 @@
         WHERE id = #{id}
     </update>
 
-    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ElemeDeliveryOrderStateChangeMessage">
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.ElemeDeliveryOrderStateChangeMessage">
         SELECT * FROM eleme_delivery_order_state_change_message <include refid="searchConditionSql"></include>
     </select>
 
-    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.ElemeDeliveryOrderStateChangeMessage">
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.ElemeDeliveryOrderStateChangeMessage">
         SELECT * FROM eleme_delivery_order_state_change_message <include refid="searchConditionSql"></include>
     </select>
 

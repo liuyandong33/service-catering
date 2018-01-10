@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.erp.mappers.GoodsCategoryMapper">
-    <insert id="insert" parameterType="build.dream.common.erp.domains.GoodsCategory">
+    <insert id="insert" parameterType="build.dream.common.erp.catering.domains.GoodsCategory">
         INSERT INTO goods_category(tenant_id, branch_id, name,
         description, create_user_id, last_update_user_id,
         last_update_remark)
@@ -10,15 +10,15 @@
         #{lastUpdateRemark})
     </insert>
 
-    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.GoodsCategory">
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.GoodsCategory">
         SELECT * FROM activity <include refid="searchConditionSql"></include>
     </select>
 
-    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.GoodsCategory">
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.GoodsCategory">
         SELECT * FROM activity <include refid="searchConditionSql"></include>
     </select>
 
-    <select id="findAllPaged" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.domains.Goods">
+    <select id="findAllPaged" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.Goods">
         SELECT ${selectColumns} FROM goods <include refid="searchConditionSql"></include> <include refid="paginationSql"></include>
     </select>
 

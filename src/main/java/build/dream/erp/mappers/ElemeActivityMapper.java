@@ -1,6 +1,6 @@
 package build.dream.erp.mappers;
 
-import build.dream.common.erp.domains.ElemeActivity;
+import build.dream.common.erp.catering.domains.ElemeActivity;
 import build.dream.common.utils.SearchModel;
 import org.apache.ibatis.annotations.Mapper;
 

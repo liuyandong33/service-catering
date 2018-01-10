@@ -1,6 +1,6 @@
 package build.dream.erp.mappers;
 
-import build.dream.common.erp.domains.ElemeReminderMessage;
+import build.dream.common.erp.catering.domains.ElemeReminderMessage;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
