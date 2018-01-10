@@ -2,60 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.erp.mappers.DietOrderMapper">
     <insert id="insert" parameterType="build.dream.common.erp.catering.domains.DietOrder" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO diet_order(order_number, tenant_id, branch_id,
-        order_type, order_status, pay_status,
-        refund_status, total_amount, discount_amount,
-        payable_amount, paid_amount, paid_type,
-        remark, delivery_address, delivery_longitude,
-        delivery_latitude, deliver_time, active_time,
-        deliver_fee, telephone_number, day_serial_number,
-        consignee, local_id, local_create_time,
-        local_last_update_time,create_user_id, last_update_user_id,
-        last_update_remark)
-        VALUES(#{orderNumber}, #{tenantId}, #{branchId},
-        #{orderType}, #{orderStatus}, #{payStatus},
-        #{refundStatus}, #{totalAmount}, #{discountAmount},
-        #{payableAmount}, #{paidAmount}, #{paidType},
-        #{remark}, #{deliveryAddress}, #{deliveryLongitude},
-        #{deliveryLatitude}, #{deliverTime}, #{activeTime},
-        #{deliverFee}, #{telephoneNumber}, #{daySerialNumber},
-        #{consignee}, #{localId}, #{localCreateTime},
-        #{localLastUpdateTime},#{createUserId}, #{lastUpdateUserId},
-        #{lastUpdateRemark})
+        ${@build.dream.common.utils.BeanUtils@generateInsertSql("build.dream.common.erp.catering.domains.DietOrder")}
     </insert>
 
     <update id="update" parameterType="build.dream.common.erp.catering.domains.DietOrder">
-        UPDATE diet_order
-        SET order_number = #{orderNumber},
-            tenant_id = #{tenantId},
-            branch_id = #{branchId},
-            order_type = #{orderType},
-            order_status = #{orderStatus},
-            pay_status = #{payStatus},
-            refund_status = #{refundStatus},
-            total_amount = #{totalAmount},
-            discount_amount = #{discountAmount},
-            payable_amount = #{payableAmount},
-            paid_amount = #{paidAmount},
-            paid_type = #{paidType},
-            remark = #{remark},
-            delivery_address = #{deliveryAddress},
-            delivery_longitude = #{deliveryLongitude},
-            delivery_latitude = #{deliveryLatitude},
-            deliver_time = #{deliverTime},
-            active_time = #{activeTime},
-            deliver_fee = #{deliverFee},
-            telephone_number = #{telephoneNumber},
-            day_serial_number = #{daySerialNumber},
-            consignee = #{consignee},
-            local_id = #{localId},
-            local_create_time = #{lastUpdateUserId},
-            local_last_update_time = #{lastUpdateRemark},
-            create_user_id = #{createUserId},
-            last_update_user_id = #{lastUpdateUserId},
-            last_update_remark = #{lastUpdateRemark},
-            deleted = #{deleted}
-        WHERE id = #{id}
+        ${@build.dream.common.utils.BeanUtils@generateUpdateSql("build.dream.common.erp.catering.domains.DietOrder")}
     </update>
 
     <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.DietOrder">
@@ -67,20 +18,22 @@
     </select>
 
     <sql id="searchConditionSql">
-        WHERE
-        <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
-            <choose>
-                <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
-                    ${searchCondition.columnName} ${searchCondition.operationSymbol}
-                    <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
-                        #{item}
-                    </foreach>
-                </when>
-                <otherwise>
-                    ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
-                </otherwise>
-            </choose>
-        </foreach>
+        <if test="@org.apache.commons.collections.CollectionUtils@isNotEmpty(searchConditions)">
+            WHERE
+            <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
+                <choose>
+                    <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
+                        ${searchCondition.columnName} ${searchCondition.operationSymbol}
+                        <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
+                            #{item}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
+                    </otherwise>
+                </choose>
+            </foreach>
+        </if>
     </sql>
 
     <sql id="paginationSql">

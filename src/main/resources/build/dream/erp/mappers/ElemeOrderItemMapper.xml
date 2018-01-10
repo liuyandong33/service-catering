@@ -2,41 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.erp.mappers.ElemeOrderItemMapper">
     <insert id="insert" parameterType="build.dream.common.erp.catering.domains.ElemeOrderItem" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO eleme_order_item(eleme_group_id, eleme_item_id, sku_id,
-        name, category_id, price,
-        quantity, total, extend_code,
-        bar_code, weight, user_price,
-        shop_price, vfood_id, create_user_id,
-        last_update_user_id, last_update_remark)
-        VALUES(#{elemeGroupId}, #{elemeItemId}, #{skuId},
-        #{name}, #{categoryId}, #{price},
-        #{quantity}, #{total}, #{extendCode},
-        #{barCode}, #{weight}, #{userPrice},
-        #{shopPrice}, #{vfoodId}, #{createUserId},
-        #{lastUpdateUserId}, #{lastUpdateRemark})
+        ${@build.dream.common.utils.BeanUtils@generateInsertSql("build.dream.common.erp.catering.domains.ElemeOrderItem")}
     </insert>
 
     <update id="update" parameterType="build.dream.common.erp.catering.domains.ElemeOrderItem">
-        UPDATE eleme_order_item
-        SET eleme_group_id = #{elemeGroupId},
-            eleme_item_id = #{elemeItemId},
-            sku_id = #{skuId},
-            name = #{name},
-            category_id = #{categoryId},
-            price = #{price},
-            quantity = #{quantity},
-            total = #{total},
-            extend_code = #{extendCode},
-            bar_code = #{barCode},
-            weight = #{weight},
-            user_price = #{userPrice},
-            shop_price = #{shopPrice},
-            vfood_id = #{vfoodId},
-            create_user_id = #{createUserId},
-            last_update_user_id = #{lastUpdateUserId},
-            last_update_remark = #{lastUpdateRemark},
-            deleted = #{deleted}
-        WHERE id = #{id}
+        ${@build.dream.common.utils.BeanUtils@generateUpdateSql("build.dream.common.erp.catering.domains.ElemeOrderItem")}
     </update>
     
     <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.ElemeOrderItem">
@@ -48,19 +18,21 @@
     </select>
 
     <sql id="searchConditionSql">
-        WHERE
-        <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
-            <choose>
-                <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
-                    ${searchCondition.columnName} ${searchCondition.operationSymbol}
-                    <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
-                        #{item}
-                    </foreach>
-                </when>
-                <otherwise>
-                    ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
-                </otherwise>
-            </choose>
-        </foreach>
+        <if test="@org.apache.commons.collections.CollectionUtils@isNotEmpty(searchConditions)">
+            WHERE
+            <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
+                <choose>
+                    <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
+                        ${searchCondition.columnName} ${searchCondition.operationSymbol}
+                        <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
+                            #{item}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
+                    </otherwise>
+                </choose>
+            </foreach>
+        </if>
     </sql>
 </mapper>

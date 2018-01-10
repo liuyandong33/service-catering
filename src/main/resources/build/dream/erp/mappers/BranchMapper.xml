@@ -2,38 +2,19 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.erp.mappers.BranchMapper">
     <insert id="insert" parameterType="build.dream.common.erp.catering.domains.Branch" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO branch(code, name, type,
-        status, tenant_id, tenant_code,
-        eleme_account_type, shop_id, create_user_id,
-        last_update_user_id)
-        VALUES (#{code}, #{name}, #{type},
-        #{status}, #{tenantId}, #{tenantCode},
-        #{elemeAccountType}, #{shopId}, #{createUserId},
-        #{lastUpdateUserId})
+        ${@build.dream.common.utils.BeanUtils@generateInsertSql("build.dream.common.erp.catering.domains.Branch")}
     </insert>
 
     <insert id="insertAll" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO branch(code, name, type, status, tenant_id, tenant_code, eleme_account_type, shop_id, create_user_id, last_update_user_id)
-        VALUES
-        <foreach collection="list" index="index" item="branch" separator=",">
-            (#{branch.code}, #{branch.name}, #{branch.type}, #{branch.status}, #{branch.tenantId}, #{branch.tenantCode}, #{elemeAccountType}, #{branch.shopId}, #{branch.createUserId}, #{branch.lastUpdateUserId})
+        <bind name="sql" value="@build.dream.router.utils.BeanUtils@generateInsertAllSql('build.dream.common.erp.catering.domains.Branch')"></bind>
+        ${sql[0]}
+        <foreach collection="list" index="index" item="item" separator=",">
+            ${sql[1]}
         </foreach>
     </insert>
 
     <update id="update" parameterType="build.dream.common.erp.catering.domains.Branch">
-        UPDATE branch
-        SET code = #{code},
-            name = #{name},
-            type = #{type},
-            status = #{status},
-            tenant_id = #{tenantId},
-            tenant_code = #{tenantCode},
-            eleme_account_type = #{elemeAccountType},
-            shop_id = #{shopId},
-            create_user_id = #{createUserId},
-            last_update_user_id = #{lastUpdateUserId},
-            deleted = #{deleted}
-        WHERE id = #{id}
+        ${@build.dream.common.utils.BeanUtils@generateUpdateSql("build.dream.common.erp.catering.domains.Branch")}
     </update>
     
     <insert id="insertMergeUserBranch">
@@ -53,20 +34,22 @@
     </select>
 
     <sql id="searchConditionSql">
-        WHERE
-        <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
-            <choose>
-                <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
-                    ${searchCondition.columnName} ${searchCondition.operationSymbol}
-                    <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
-                        #{item}
-                    </foreach>
-                </when>
-                <otherwise>
-                    ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
-                </otherwise>
-            </choose>
-        </foreach>
+        <if test="@org.apache.commons.collections.CollectionUtils@isNotEmpty(searchConditions)">
+            WHERE
+            <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
+                <choose>
+                    <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
+                        ${searchCondition.columnName} ${searchCondition.operationSymbol}
+                        <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
+                            #{item}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
+                    </otherwise>
+                </choose>
+            </foreach>
+        </if>
     </sql>
 
     <sql id="paginationSql">

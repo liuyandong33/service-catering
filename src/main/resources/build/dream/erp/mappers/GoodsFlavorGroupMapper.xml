@@ -2,27 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.erp.mappers.GoodsFlavorGroupMapper">
     <insert id="insert" parameterType="build.dream.common.erp.catering.domains.GoodsFlavorGroup" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO goods_flavor_group(goods_id, name, price,
-        tenant_id, tenant_code, branch_id,
-        create_user_id, last_update_user_id, last_update_remark)
-        VALUES(#{goodsId}, #{name}, #{price},
-        #{tenantId}, #{tenantCode}, #{branchId},
-        #{createUserId}, #{lastUpdateUserId}, #{lastUpdateRemark})
+        ${@build.dream.common.utils.BeanUtils@generateInsertSql("build.dream.common.erp.catering.domains.GoodsFlavorGroup")}
     </insert>
 
     <update id="update" parameterType="build.dream.common.erp.catering.domains.GoodsFlavorGroup">
-        UPDATE goods_flavor_group
-        SET goods_id = #{goodsId},
-            name = #{name},
-            price = #{price},
-            tenant_id = #{tenantId},
-            tenant_code = #{tenantCode},
-            branch_id = #{branchId},
-            create_user_id = #{createUserId},
-            last_update_user_id = #{lastUpdateUserId},
-            last_update_remark = #{lastUpdateRemark},
-            deleted = #{deleted}
-        WHERE id = #{id}
+        ${@build.dream.common.utils.BeanUtils@generateUpdateSql("build.dream.common.erp.catering.domains.GoodsFlavorGroup")}
     </update>
 
     <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.GoodsFlavorGroup">
@@ -38,20 +22,22 @@
     </select>
 
     <sql id="searchConditionSql">
-        WHERE
-        <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
-            <choose>
-                <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
-                    ${searchCondition.columnName} ${searchCondition.operationSymbol}
-                    <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
-                        #{item}
-                    </foreach>
-                </when>
-                <otherwise>
-                    ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
-                </otherwise>
-            </choose>
-        </foreach>
+        <if test="@org.apache.commons.collections.CollectionUtils@isNotEmpty(searchConditions)">
+            WHERE
+            <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
+                <choose>
+                    <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
+                        ${searchCondition.columnName} ${searchCondition.operationSymbol}
+                        <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
+                            #{item}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
+                    </otherwise>
+                </choose>
+            </foreach>
+        </if>
     </sql>
 
     <sql id="paginationSql">

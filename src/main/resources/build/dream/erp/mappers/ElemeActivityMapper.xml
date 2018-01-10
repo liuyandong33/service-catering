@@ -2,30 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.erp.mappers.ElemeActivityMapper">
     <insert id="insert" parameterType="build.dream.common.erp.catering.domains.ElemeActivity" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO eleme_activity(eleme_order_id, eleme_activity_id, name,
-        category_id, eleme_part, restaurant_part,
-        amount, create_user_id, last_update_user_id,
-        last_update_remark)
-        VALUES(#{elemeOrderId}, #{elemeActivityId}, #{name},
-        #{categoryId}, #{elemePart}, #{restaurantPart},
-        #{amount}, #{createUserId}, #{lastUpdateUserId},
-        #{lastUpdateRemark})
+        ${@build.dream.common.utils.BeanUtils@generateInsertSql("build.dream.common.erp.catering.domains.ElemeActivity")}
     </insert>
 
     <update id="update" parameterType="build.dream.common.erp.catering.domains.ElemeActivity">
-        UPDATE eleme_activity
-        SET eleme_order_id = #{elemeOrderId},
-            eleme_activity_id = #{elemeActivityId},
-            name = #{name},
-            category_id = #{categoryId},
-            eleme_part = #{elemePart},
-            restaurant_part = #{restaurantPart},
-            amount = #{amount},
-            create_user_id = #{createUserId},
-            last_update_user_id = #{lastUpdateUserId},
-            last_update_remark = #{lastUpdateRemark},
-            deleted = #{deleted}
-        WHERE id = #{id}
+        ${@build.dream.common.utils.BeanUtils@generateUpdateSql("build.dream.common.erp.catering.domains.ElemeActivity")}
     </update>
     
     <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.ElemeActivity">
@@ -37,19 +18,21 @@
     </select>
 
     <sql id="searchConditionSql">
-        WHERE
-        <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
-            <choose>
-                <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
-                    ${searchCondition.columnName} ${searchCondition.operationSymbol}
-                    <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
-                        #{item}
-                    </foreach>
-                </when>
-                <otherwise>
-                    ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
-                </otherwise>
-            </choose>
-        </foreach>
+        <if test="@org.apache.commons.collections.CollectionUtils@isNotEmpty(searchConditions)">
+            WHERE
+            <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
+                <choose>
+                    <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
+                        ${searchCondition.columnName} ${searchCondition.operationSymbol}
+                        <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
+                            #{item}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
+                    </otherwise>
+                </choose>
+            </foreach>
+        </if>
     </sql>
 </mapper>

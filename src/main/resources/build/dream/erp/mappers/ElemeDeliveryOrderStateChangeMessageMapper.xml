@@ -2,35 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.erp.mappers.ElemeDeliveryOrderStateChangeMessageMapper">
     <insert id="insert" parameterType="build.dream.common.erp.catering.domains.ElemeDeliveryOrderStateChangeMessage">
-        INSERT INTO eleme_delivery_order_state_change_message(eleme_order_id, order_id, shop_id,
-        state, sub_state, name,
-        phone, update_time, tenant_id,
-        branch_id, create_user_id, last_update_user_id,
-        last_update_remark)
-        VALUES(#{elemeOrderId}, #{orderId}, #{shopId},
-        #{state}, #{subState}, #{name},
-        #{phone}, #{updateTime}, #{tenantId},
-        #{branchId}, #{createUserId}, #{lastUpdateUserId},
-        #{lastUpdateRemark})
+        ${@build.dream.common.utils.BeanUtils@generateInsertSql("build.dream.common.erp.catering.domains.ElemeDeliveryOrderStateChangeMessage")}
     </insert>
 
     <update id="update" parameterType="build.dream.common.erp.catering.domains.ElemeDeliveryOrderStateChangeMessage">
-        UPDATE eleme_delivery_order_state_change_message
-        SET eleme_order_id = #{elemeOrderId},
-            order_id = #{orderId},
-            shop_id = #{shopId},
-            state = #{state},
-            sub_state = #{subState},
-            name = #{name},
-            phone = #{phone},
-            update_time = #{updateTime},
-            tenant_id = #{tenantId},
-            branch_id = #{branchId},
-            create_user_id = #{createUserId},
-            last_update_user_id = #{lastUpdateUserId},
-            last_update_remark = #{lastUpdateRemark},
-            deleted = #{deleted}
-        WHERE id = #{id}
+        ${@build.dream.common.utils.BeanUtils@generateUpdateSql("build.dream.common.erp.catering.domains.ElemeDeliveryOrderStateChangeMessage")}
     </update>
 
     <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.ElemeDeliveryOrderStateChangeMessage">
@@ -42,19 +18,21 @@
     </select>
 
     <sql id="searchConditionSql">
-        WHERE
-        <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
-            <choose>
-                <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
-                    ${searchCondition.columnName} ${searchCondition.operationSymbol}
-                    <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
-                        #{item}
-                    </foreach>
-                </when>
-                <otherwise>
-                    ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
-                </otherwise>
-            </choose>
-        </foreach>
+        <if test="@org.apache.commons.collections.CollectionUtils@isNotEmpty(searchConditions)">
+            WHERE
+            <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
+                <choose>
+                    <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
+                        ${searchCondition.columnName} ${searchCondition.operationSymbol}
+                        <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
+                            #{item}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
+                    </otherwise>
+                </choose>
+            </foreach>
+        </if>
     </sql>
 </mapper>

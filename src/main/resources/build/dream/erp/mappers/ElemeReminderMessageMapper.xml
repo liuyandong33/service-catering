@@ -2,30 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.erp.mappers.ElemeReminderMessageMapper">
     <insert id="insert" parameterType="build.dream.common.erp.catering.domains.ElemeReminderMessage" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO eleme_reminder_message(eleme_order_id, order_id, shop_id,
-        reminder_id, user_id, update_time,
-        tenant_id, branch_id, create_user_id,
-        last_update_user_id, last_update_remark)
-        VALUES(#{elemeOrderId}, #{orderId}, #{shopId},
-        #{reminderId}, #{userId}, #{updateTime},
-        #{tenantId}, #{branchId}, #{createUserId},
-        #{lastUpdateUserId}, #{lastUpdateRemark})
+        ${@build.dream.common.utils.BeanUtils@generateInsertSql("build.dream.common.erp.catering.domains.ElemeReminderMessage")}
     </insert>
 
     <update id="update" parameterType="build.dream.common.erp.catering.domains.ElemeReminderMessage">
-        UPDATE eleme_reminder_message
-        SET eleme_order_id = #{elemeOrderId},
-            order_id = #{orderId},
-            shop_id = #{shopId},
-            reminder_id = #{reminderId},
-            user_id = #{userId},
-            update_time = #{updateTime},
-            tenant_id = #{tenantId},
-            branch_id = #{branchId},
-            create_user_id = #{createUserId},
-            last_update_user_id = #{lastUpdateUserId},
-            last_update_remark = #{lastUpdateRemark},
-            deleted = #{deleted}
-        WHERE id = #{id}
+        ${@build.dream.common.utils.BeanUtils@generateUpdateSql("build.dream.common.erp.catering.domains.ElemeReminderMessage")}
     </update>
 </mapper>
