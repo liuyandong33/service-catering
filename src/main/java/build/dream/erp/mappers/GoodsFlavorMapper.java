@@ -9,6 +9,7 @@ import java.util.List;
 @Mapper
 public interface GoodsFlavorMapper {
     long insert(GoodsFlavor goodsFlavor);
+    long insertAll(List<GoodsFlavor> goodsFlavors);
     long update(GoodsFlavor goodsFlavor);
     GoodsFlavor find(SearchModel searchModel);
     List<GoodsFlavor> findAll(SearchModel searchModel);

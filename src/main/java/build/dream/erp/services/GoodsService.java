@@ -187,8 +187,8 @@ public class GoodsService {
                 entry.getKey().setGoodsFlavorGroupId(goodsFlavorGroupMap.get(entry.getValue()).getId());
             }
 
-            goodsFlavorGroupMapper.insertAll(goodsFlavorGroupMap.values());
-            goodsFlavorMapper.insertAll(goodsFlavorMap.keySet());
+//            goodsFlavorGroupMapper.insertAll(goodsFlavorGroupMap.values());
+//            goodsFlavorMapper.insertAll(goodsFlavorMap.keySet());
         }
         return null;
     }

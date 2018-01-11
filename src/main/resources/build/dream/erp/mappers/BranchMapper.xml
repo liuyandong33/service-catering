@@ -44,11 +44,11 @@
     </select>
 
     <select id="findAllUserIds" parameterType="build.dream.common.utils.SearchModel" resultType="java.math.BigInteger">
-        SELECT user_id FROM merge_user_branch <include refid="searchConditionSql"></include> <include refid="paginationSql"></include>
+        SELECT user_id FROM merge_user_branch <include refid="build.dream.erp.mappers.CommonMapper.searchConditionSql"></include> <include refid="build.dream.erp.mappers.CommonMapper.paginationSql"></include>
     </select>
 
     <select id="countUsers" parameterType="build.dream.common.utils.SearchModel" resultType="java.lang.Long">
-        SELECT COUNT(1) FROM merge_user_branch <include refid="searchConditionSql"></include>
+        SELECT COUNT(1) FROM merge_user_branch <include refid="build.dream.erp.mappers.CommonMapper.searchConditionSql"></include>
     </select>
 
     <select id="findAllBranchInfos" resultType="build.dream.common.utils.UnderscoreToCamelCaseMap">
