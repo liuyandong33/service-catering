@@ -5,29 +5,12 @@
     <resultMap id="activityFullReduction" type="build.dream.common.erp.catering.domains.ActivityFullReduction"></resultMap>
 
     <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.Activity">
-        SELECT * FROM activity <include refid="searchConditionSql"></include>
+        SELECT * FROM activity <include refid="build.dream.erp.mappers.CommonMapper.searchConditionSql"></include>
     </select>
 
     <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.Activity">
-        SELECT * FROM activity <include refid="searchConditionSql"></include>
+        SELECT * FROM activity <include refid="build.dream.erp.mappers.CommonMapper.searchConditionSql"></include>
     </select>
-
-    <sql id="searchConditionSql">
-        WHERE
-        <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
-            <choose>
-                <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
-                    ${searchCondition.columnName} ${searchCondition.operationSymbol}
-                    <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
-                        #{item}
-                    </foreach>
-                </when>
-                <otherwise>
-                    ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
-                </otherwise>
-            </choose>
-        </foreach>
-    </sql>
 
     <select id="findAllActivities" statementType="CALLABLE" resultMap="activityBuyGive, activityFullReduction">
         {call proc_find_all_activities()}

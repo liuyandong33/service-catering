@@ -10,29 +10,10 @@
     </update>
     
     <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.ElemeOrderItemNewSpec">
-        SELECT * FROM eleme_order_item_new_spec <include refid="searchConditionSql"></include>
+        SELECT * FROM eleme_order_item_new_spec <include refid="build.dream.erp.mappers.CommonMapper.searchConditionSql"></include>
     </select>
 
     <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.ElemeOrderItemNewSpec">
-        SELECT * FROM eleme_order_item_new_spec <include refid="searchConditionSql"></include>
+        SELECT * FROM eleme_order_item_new_spec <include refid="build.dream.erp.mappers.CommonMapper.searchConditionSql"></include>
     </select>
-
-    <sql id="searchConditionSql">
-        <if test="@org.apache.commons.collections.CollectionUtils@isNotEmpty(searchConditions)">
-            WHERE
-            <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
-                <choose>
-                    <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
-                        ${searchCondition.columnName} ${searchCondition.operationSymbol}
-                        <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
-                            #{item}
-                        </foreach>
-                    </when>
-                    <otherwise>
-                        ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
-                    </otherwise>
-                </choose>
-            </foreach>
-        </if>
-    </sql>
 </mapper>
