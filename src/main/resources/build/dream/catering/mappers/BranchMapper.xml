@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="build.dream.catering.mappers.BranchMapper">
+    <insert id="insert" parameterType="build.dream.common.erp.catering.domains.Branch" useGeneratedKeys="true" keyProperty="id">
+        ${@build.dream.common.utils.BeanUtils@generateInsertSql("build.dream.common.erp.catering.domains.Branch")}
+    </insert>
+
+    <insert id="insertAll" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+        <bind name="sql" value="@build.dream.common.utils.BeanUtils@generateInsertAllSql('build.dream.common.erp.catering.domains.Branch')"></bind>
+        ${sql[0]}
+        <foreach collection="list" index="index" item="item" separator=",">
+            ${sql[1]}
+        </foreach>
+    </insert>
+
+    <update id="update" parameterType="build.dream.common.erp.catering.domains.Branch">
+        ${@build.dream.common.utils.BeanUtils@generateUpdateSql("build.dream.common.erp.catering.domains.Branch")}
+    </update>
+    
+    <insert id="insertMergeUserBranch">
+        INSERT INTO merge_user_branch(user_id, tenant_id, branch_id) VALUES (#{userId}, #{tenantId}, #{branchId})
+    </insert>
+
+    <select id="findAllPaged" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.Branch">
+        SELECT * FROM branch <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include> <include refid="build.dream.catering.mappers.CommonMapper.paginationSql"></include>
+    </select>
+
+    <select id="countBranches" parameterType="build.dream.common.utils.SearchModel" resultType="java.lang.Long">
+        SELECT COUNT(1) FROM branch <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
+    </select>
+
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.Branch">
+        SELECT * FROM branch <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
+    </select>
+
+    <select id="findByUserIdAndTenantId" resultType="build.dream.common.erp.catering.domains.Branch">
+        SELECT
+        branch.*
+        FROM branch
+        INNER JOIN merge_user_branch ON branch.id = merge_user_branch.branch_id AND branch.tenant_id = merge_user_branch.tenant_id
+        WHERE branch.tenant_id = #{tenantId}
+        AND merge_user_branch.user_id = #{userId}
+        AND branch.deleted = 0
+    </select>
+
+    <select id="findAllUserIds" parameterType="build.dream.common.utils.SearchModel" resultType="java.math.BigInteger">
+        SELECT user_id FROM merge_user_branch <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include> <include refid="build.dream.catering.mappers.CommonMapper.paginationSql"></include>
+    </select>
+
+    <select id="countUsers" parameterType="build.dream.common.utils.SearchModel" resultType="java.lang.Long">
+        SELECT COUNT(1) FROM merge_user_branch <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
+    </select>
+
+    <select id="findAllBranchInfos" resultType="build.dream.common.utils.UnderscoreToCamelCaseMap">
+        SELECT id, code, name, type, status, tenant_id FROM branch WHERE deleted = 0;
+    </select>
+    
+    <select id="findBranchInfo" resultType="build.dream.common.erp.catering.domains.Branch">
+        SELECT
+        branch.*
+        FROM merge_user_branch
+        INNER JOIN branch ON branch.id = merge_user_branch.branch_id AND branch.deleted = 0
+        WHERE merge_user_branch.tenant_id = #{tenantId}
+        AND merge_user_branch.user_id = #{userId}
+    </select>
+
+    <update id="clearBindingStore">
+        UPDATE branch SET shop_id = NULL, last_update_user_id = #{userId}, last_update_remark = #{lastUpdateRemark} WHERE shop_id = #{shopId}
+    </update>
+</mapper>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="build.dream.catering.mappers.MeiTuanOrderMapper">
+    <insert id="insert" parameterType="build.dream.common.erp.catering.domains.MeiTuanOrder" useGeneratedKeys="true" keyProperty="id">
+        ${@build.dream.common.utils.BeanUtils@generateInsertSql("build.dream.common.erp.catering.domains.MeiTuanOrder")}
+    </insert>
+
+    <update id="update" parameterType="build.dream.common.erp.catering.domains.MeiTuanOrder">
+        ${@build.dream.common.utils.BeanUtils@generateUpdateSql("build.dream.common.erp.catering.domains.MeiTuanOrder")}
+    </update>
+
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.MeiTuanOrder">
+        SELECT * FROM mei_tuan_order <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
+    </select>
+
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.MeiTuanOrder">
+        SELECT * FROM mei_tuan_order <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
+    </select>
+
+    <select id="findAllPaged" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.MeiTuanOrder">
+        SELECT * FROM mei_tuan_order <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include> <include refid="build.dream.catering.mappers.CommonMapper.paginationSql"></include>
+    </select>
+</mapper>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="build.dream.catering.mappers.ActualDistributionDetailedListMapper">
+    <insert id="insert" parameterType="build.dream.common.erp.catering.domains.ActualDistributionDetailedList">
+        INSERT INTO actual_distribution_detailed_list(distribution_time, bar_code, quantity)
+        VALUES(#{distributionTime}, #{barCode}, #{quantity})
+    </insert>
+
+    <insert id="insertAll" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO actual_distribution_detailed_list(distribution_time, bar_code, quantity)
+        VALUES
+        <foreach collection="list" index="index" item="actualDistributionDetailedDist" separator=",">
+            (#{actualDistributionDetailedDist.distributionTime}, #{actualDistributionDetailedDist.barCode}, #{actualDistributionDetailedDist.quantity})
+        </foreach>
+    </insert>
+
+    <update id="update" parameterType="build.dream.common.erp.catering.domains.ActualDistributionDetailedList">
+        UPDATE actual_distribution_detailed_list
+        SET distribution_time = #{distributionTime},
+            bar_code = #{barCode},
+            quantity = #{quantity}
+        WHERE id = #{id}
+    </update>
+
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.ActualDistributionDetailedList">
+        SELECT * FROM actual_distribution_detailed_list <include refid="searchConditionSql"></include>
+    </select>
+
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.ActualDistributionDetailedList">
+        SELECT * FROM actual_distribution_detailed_list <include refid="searchConditionSql"></include>
+    </select>
+
+    <sql id="searchConditionSql">
+        WHERE
+        <foreach collection="searchConditions" index="index" item="searchCondition" separator=" AND ">
+            <choose>
+                <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'IN')">
+                    ${searchCondition.columnName} ${searchCondition.operationSymbol}
+                    <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </when>
+                <otherwise>
+                    ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
+                </otherwise>
+            </choose>
+        </foreach>
+    </sql>
+</mapper>
