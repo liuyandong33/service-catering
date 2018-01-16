@@ -1,5 +1,6 @@
 package build.dream.catering.services;
 
+import build.dream.catering.models.goods.*;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.BeanUtils;
@@ -7,10 +8,6 @@ import build.dream.common.utils.PagedSearchModel;
 import build.dream.common.utils.SearchModel;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.*;
-import build.dream.catering.models.goods.GoodsFlavorGroupModel;
-import build.dream.catering.models.goods.GoodsFlavorModel;
-import build.dream.catering.models.goods.ListGoodsesModel;
-import build.dream.catering.models.goods.SaveGoodsModel;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
@@ -33,9 +30,7 @@ public class GoodsService {
     @Autowired
     private GoodsFlavorMapper goodsFlavorMapper;
     @Autowired
-    private DistributionDetailedListMapper distributionDetailedListMapper;
-    @Autowired
-    private ActualDistributionDetailedListMapper actualDistributionDetailedListMapper;
+    private PackageGroupMapper packageGroupMapper;
 
     @Transactional(readOnly = true)
     public ApiRest listGoodses(ListGoodsesModel listGoodsesModel) {
@@ -194,99 +189,41 @@ public class GoodsService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest saveActualDistributionDetailedList(String barCodes) {
-        String[] barCodeArray = barCodes.split("\n");
-        Map<String, Integer> barCodeAndQuantityMap = new HashMap<String, Integer>();
-        for (String barCode : barCodeArray) {
-            Integer quantity = barCodeAndQuantityMap.get(barCode);
-            if (quantity == null) {
-                barCodeAndQuantityMap.put(barCode, 1);
-            } else {
-                barCodeAndQuantityMap.put(barCode, quantity + 1);
+    public ApiRest savePackage(SavePackageModel savePackageModel) {
+        BigInteger packageId = savePackageModel.getPackageId();
+        if (packageId != null) {
+            SearchModel searchModel = new SearchModel(true);
+            searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, savePackageModel.getTenantId());
+            searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, savePackageModel.getBranchId());
+            searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, packageId);
+            Goods goods = goodsMapper.find(searchModel);
+            Validate.notNull(goods, "套餐不存在！");
+
+            List<BigInteger> packageGroupIds = new ArrayList<BigInteger>();
+            List<SavePackageModel.PackageGroupModel> packageGroupModels = savePackageModel.getPackageGroupModels();
+            for (SavePackageModel.PackageGroupModel packageGroupModel : packageGroupModels) {
+                if (packageGroupModel.getId() != null) {
+                    packageGroupIds.add(packageGroupModel.getId());
+                }
             }
-        }
-
-        List<ActualDistributionDetailedList> actualDistributionDetailedLists = new ArrayList<ActualDistributionDetailedList>();
-        Date date = new Date();
-        for (Map.Entry<String, Integer> entry : barCodeAndQuantityMap.entrySet()) {
-            ActualDistributionDetailedList actualDistributionDetailedList = new ActualDistributionDetailedList();
-            actualDistributionDetailedList.setDistributionTime(date);
-            actualDistributionDetailedList.setBarCode(entry.getKey());
-            actualDistributionDetailedList.setQuantity(entry.getValue());
-            actualDistributionDetailedLists.add(actualDistributionDetailedList);
-        }
-
-        SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("distribution_time", Constants.SQL_OPERATION_SYMBOL_EQUALS, new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
-        List<ActualDistributionDetailedList> persistentActualDistributionDetailedLists = actualDistributionDetailedListMapper.findAll(searchModel);
-        Map<String, ActualDistributionDetailedList> persistentActualDistributionDetailedListMap = new HashMap<String, ActualDistributionDetailedList>();
-        for (ActualDistributionDetailedList actualDistributionDetailedList : persistentActualDistributionDetailedLists) {
-            persistentActualDistributionDetailedListMap.put(actualDistributionDetailedList.getBarCode(), actualDistributionDetailedList);
-        }
-
-        List<ActualDistributionDetailedList> insertActualDistributionDetailedLists = new ArrayList<ActualDistributionDetailedList>();
-        for (ActualDistributionDetailedList actualDistributionDetailedList : actualDistributionDetailedLists) {
-            ActualDistributionDetailedList persistentActualDistributionDetailedList = persistentActualDistributionDetailedListMap.get(actualDistributionDetailedList.getBarCode());
-            if (persistentActualDistributionDetailedList == null) {
-                insertActualDistributionDetailedLists.add(actualDistributionDetailedList);
-            } else {
-                persistentActualDistributionDetailedList.setQuantity(persistentActualDistributionDetailedList.getQuantity() + actualDistributionDetailedList.getQuantity());
-                actualDistributionDetailedListMapper.update(persistentActualDistributionDetailedList);
+            SearchModel packageGroupSearchModel = new SearchModel(true);
+            packageGroupSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, packageGroupIds);
+            List<PackageGroup> packageGroups = packageGroupMapper.findAll(packageGroupSearchModel);
+            Map<BigInteger, PackageGroup> packageGroupMap = new HashMap<BigInteger, PackageGroup>();
+            for (PackageGroup packageGroup : packageGroups) {
+                packageGroupMap.put(packageGroup.getId(), packageGroup);
             }
-        }
-        if (CollectionUtils.isNotEmpty(insertActualDistributionDetailedLists)) {
-            actualDistributionDetailedListMapper.insertAll(insertActualDistributionDetailedLists);
-        }
 
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("保存成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
-    }
-
-    @Transactional(readOnly = true)
-    public ApiRest doTakeStock() {
-        SearchModel actualDistributionDetailedListSearchModel = new SearchModel(true);
-        String dateString = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        actualDistributionDetailedListSearchModel.addSearchCondition("distribution_time", Constants.SQL_OPERATION_SYMBOL_EQUALS, dateString);
-        List<ActualDistributionDetailedList> actualDistributionDetailedLists = actualDistributionDetailedListMapper.findAll(actualDistributionDetailedListSearchModel);
-
-        SearchModel distributionDetailedListSearchModel = new SearchModel(true);
-        distributionDetailedListSearchModel.addSearchCondition("distribution_time", Constants.SQL_OPERATION_SYMBOL_EQUALS, dateString);
-        List<DistributionDetailedList> distributionDetailedLists = distributionDetailedListMapper.findAll(distributionDetailedListSearchModel);
-        Map<String, DistributionDetailedList> distributionDetailedListMap = new HashMap<String, DistributionDetailedList>();
-        for (DistributionDetailedList distributionDetailedList : distributionDetailedLists) {
-            distributionDetailedListMap.put(distributionDetailedList.getBarCode(), distributionDetailedList);
-        }
-        Map<String, ActualDistributionDetailedList> actualDistributionDetailedListMap = new HashMap<String, ActualDistributionDetailedList>();
-        for (ActualDistributionDetailedList actualDistributionDetailedList : actualDistributionDetailedLists) {
-            actualDistributionDetailedListMap.put(actualDistributionDetailedList.getBarCode(), actualDistributionDetailedList);
-        }
-
-        StringBuffer errorMessage = new StringBuffer();
-        for (Map.Entry<String, DistributionDetailedList> entry : distributionDetailedListMap.entrySet()) {
-            String barCode = entry.getKey();
-            DistributionDetailedList distributionDetailedList = entry.getValue();
-            ActualDistributionDetailedList actualDistributionDetailedList = actualDistributionDetailedListMap.get(barCode);
-            if (actualDistributionDetailedList == null) {
-                errorMessage.append(barCode).append("：少").append(distributionDetailedList.getQuantity());
-            } else {
-                int difference = distributionDetailedList.getQuantity() - actualDistributionDetailedList.getQuantity();
-                if (difference > 0) {
-                    errorMessage.append(barCode).append("：少").append(difference);
-                } else if (difference < 0) {
-                    errorMessage.append(barCode).append("：多").append(difference * -1);
+            for (SavePackageModel.PackageGroupModel packageGroupModel : packageGroupModels) {
+                if (packageGroupModel.getId() != null) {
+                    PackageGroup packageGroup = packageGroupMap.get(packageGroupModel.getId());
+                    Validate.notNull(packageGroup, "套餐组不存在！");
+                    packageGroup.setGroupType(packageGroupModel.getGroupType());
+                    packageGroup.setOptionalQuantity(packageGroupModel.getOptionalQuantity());
                 }
             }
         }
-        ApiRest apiRest = new ApiRest();
-        if (StringUtils.isNotBlank(errorMessage.toString())) {
-            apiRest.setError(errorMessage.toString());
-            apiRest.setSuccessful(false);
-        } else {
-            apiRest.setMessage("配送数量匹配！");
-            apiRest.setSuccessful(true);
-        }
-        return apiRest;
+
+        return new ApiRest();
     }
 }

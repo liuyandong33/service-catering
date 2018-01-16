@@ -120,7 +120,7 @@ public class SaveDietOrderModel extends BasicModel {
     }
 
     @Override
-    public void validateAndThrow() throws NoSuchFieldException {
+    public void validateAndThrow() {
         Validate.isTrue(CollectionUtils.isNotEmpty(dietOrderModels), ApplicationHandler.obtainParameterErrorMessage("orderInfo"));
         for (DietOrderModel dietOrderModel : dietOrderModels) {
             Validate.isTrue(dietOrderModel.validate(), ApplicationHandler.obtainParameterErrorMessage("orderInfo"));

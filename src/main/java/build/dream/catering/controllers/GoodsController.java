@@ -1,20 +1,20 @@
 package build.dream.catering.controllers;
 
+import build.dream.catering.models.goods.GoodsFlavorGroupModel;
+import build.dream.catering.models.goods.ListGoodsesModel;
+import build.dream.catering.models.goods.SaveGoodsModel;
+import build.dream.catering.models.goods.SavePackageModel;
+import build.dream.catering.services.GoodsService;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
-import build.dream.catering.models.goods.GoodsFlavorGroupModel;
-import build.dream.catering.models.goods.ListGoodsesModel;
-import build.dream.catering.models.goods.SaveGoodsModel;
-import build.dream.catering.services.GoodsService;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
 import java.util.Map;
@@ -61,52 +61,27 @@ public class GoodsController extends BasicController {
         return GsonUtils.toJson(apiRest);
     }
 
-    @RequestMapping(value = "/takeStock")
-    public ModelAndView takeStock() {
-        ModelAndView modelAndView = new ModelAndView();
-        modelAndView.setViewName("goods/takeStock");
-        return modelAndView;
-    }
-
-    @RequestMapping(value = "/uploadDistributionDetailedList")
+    /**
+     * 保存套餐
+     *
+     * @return
+     */
+    @RequestMapping(value = "/savePackage")
     @ResponseBody
-    private String uploadDistributionDetailedList() {
+    public String savePackage() {
         ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
-            apiRest = new ApiRest();
-        } catch (Exception e) {
-            LogUtils.error("上传要货清单失败", controllerSimpleName, "uploadDistributionDetailedList", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
-    }
+            SavePackageModel savePackageModel = ApplicationHandler.instantiateObject(SavePackageModel.class, requestParameters);
+            String packageGroups = requestParameters.get("packageGroups");
+            ApplicationHandler.notEmpty(packageGroups, "packageGroups");
+            List<SavePackageModel.PackageGroupModel> packageGroupModels = GsonUtils.jsonToList(packageGroups, SavePackageModel.PackageGroupModel.class);
+            savePackageModel.setPackageGroupModels(packageGroupModels);
+            savePackageModel.validateAndThrow();
 
-    @RequestMapping(value = "/saveActualDistributionDetailedList")
-    @ResponseBody
-    public String saveActualDistributionDetailedList() {
-        ApiRest apiRest = null;
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
-            String barCodes = requestParameters.get("barCodes");
-            Validate.notNull(barCodes, "商品条码不能为空！");
-            apiRest = goodsService.saveActualDistributionDetailedList(barCodes);
+            apiRest = goodsService.savePackage(savePackageModel);
         } catch (Exception e) {
-            LogUtils.error("保存失败", controllerSimpleName, "saveActualDistributionDetailedList", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
-    }
-
-    @RequestMapping(value = "/doTakeStock")
-    @ResponseBody
-    public String doTakeStock() {
-        ApiRest apiRest = null;
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
-            apiRest = goodsService.doTakeStock();
-        } catch (Exception e) {
-            LogUtils.error("盘点失败", controllerSimpleName, "doTakeStock", e, requestParameters);
+            LogUtils.error("保存套餐失败", controllerSimpleName, "savePackage", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
