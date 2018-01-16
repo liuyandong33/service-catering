@@ -194,6 +194,26 @@ public class GoodsService {
     @Transactional(rollbackFor = Exception.class)
     public ApiRest savePackage(SavePackageModel savePackageModel) {
         BigInteger packageId = savePackageModel.getPackageId();
+
+
+        List<BigInteger> goodsIds = new ArrayList<BigInteger>();
+        for (SavePackageModel.PackageGroupModel packageGroupModel : savePackageModel.getPackageGroupModels()) {
+            for (SavePackageModel.PackageGroupGoodsModel packageGroupGoodsModel : packageGroupModel.getPackageGroupGoodsModels()) {
+                goodsIds.add(packageGroupGoodsModel.getGoodsId());
+            }
+        }
+
+        SearchModel goodsSearchModel = new SearchModel(true);
+        goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, savePackageModel.getTenantId());
+        goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, savePackageModel.getBranchId());
+        goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
+        List<Goods> goodses = goodsMapper.findAll(goodsSearchModel);
+        Map<BigInteger, Goods> goodsMap = new HashMap<BigInteger, Goods>();
+        for (Goods goods : goodses) {
+            goodsMap.put(goods.getId(), goods);
+        }
+
+
         List<PackageGroupGoods> packageGroupGoodses = new ArrayList<PackageGroupGoods>();
         if (packageId != null) {
             SearchModel searchModel = new SearchModel(true);
@@ -241,9 +261,9 @@ public class GoodsService {
                     }
                     packageGroup.setOptionalQuantity(packageGroupModel.getOptionalQuantity());
                     packageGroupMapper.update(packageGroup);
-                    packageGroupGoodses.addAll(buildPackageGroupGoodses(packageGroupModel.getPackageGroupGoodsModels(), packageGroup.getId()));
+                    packageGroupGoodses.addAll(buildPackageGroupGoodses(packageGroupModel.getPackageGroupGoodsModels(), packageGroup.getId(), goodsMap));
                 } else {
-                    packageGroupGoodses.addAll(savePackageGroup(packageGroupModel, goods.getId(), savePackageModel.getUserId(), "修改套餐信息！"));
+                    packageGroupGoodses.addAll(savePackageGroup(packageGroupModel, goods.getId(), savePackageModel.getUserId(), "修改套餐信息！", goodsMap));
                 }
             }
         } else {
@@ -260,7 +280,7 @@ public class GoodsService {
 
             List<SavePackageModel.PackageGroupModel> packageGroupModels = savePackageModel.getPackageGroupModels();
             for (SavePackageModel.PackageGroupModel packageGroupModel : packageGroupModels) {
-                packageGroupGoodses.addAll(savePackageGroup(packageGroupModel, goods.getId(), savePackageModel.getUserId(), "新增套餐信息！"));
+                packageGroupGoodses.addAll(savePackageGroup(packageGroupModel, goods.getId(), savePackageModel.getUserId(), "新增套餐信息！", goodsMap));
             }
         }
         packageGroupGoodsMapper.insertAll(packageGroupGoodses);
@@ -270,7 +290,7 @@ public class GoodsService {
         return apiRest;
     }
 
-    private List<PackageGroupGoods> savePackageGroup(SavePackageModel.PackageGroupModel packageGroupModel, BigInteger goodsId, BigInteger userId, String lastUpdateRemark) {
+    private List<PackageGroupGoods> savePackageGroup(SavePackageModel.PackageGroupModel packageGroupModel, BigInteger goodsId, BigInteger userId, String lastUpdateRemark, Map<BigInteger, Goods> goodsMap) {
         PackageGroup packageGroup = new PackageGroup();
         packageGroup.setPackageId(goodsId);
         packageGroup.setGroupType(packageGroupModel.getGroupType());
@@ -281,14 +301,16 @@ public class GoodsService {
         packageGroup.setLastUpdateUserId(userId);
         packageGroup.setLastUpdateRemark(lastUpdateRemark);
         packageGroupMapper.insert(packageGroup);
-        return buildPackageGroupGoodses(packageGroupModel.getPackageGroupGoodsModels(), packageGroup.getId());
+        return buildPackageGroupGoodses(packageGroupModel.getPackageGroupGoodsModels(), packageGroup.getId(), goodsMap);
     }
 
-    private List<PackageGroupGoods> buildPackageGroupGoodses(List<SavePackageModel.PackageGroupGoodsModel> packageGroupGoodsModels, BigInteger packageGroupId) {
+    private List<PackageGroupGoods> buildPackageGroupGoodses(List<SavePackageModel.PackageGroupGoodsModel> packageGroupGoodsModels, BigInteger packageGroupId, Map<BigInteger, Goods> goodsMap) {
         List<PackageGroupGoods> packageGroupGoodses = new ArrayList<PackageGroupGoods>();
         for (SavePackageModel.PackageGroupGoodsModel packageGroupGoodsModel : packageGroupGoodsModels) {
             PackageGroupGoods packageGroupGoods = new PackageGroupGoods();
             packageGroupGoods.setPackageGroupId(packageGroupId);
+            Goods goods = goodsMap.get(packageGroupGoodsModel.getGoodsId());
+            Validate.notNull(goods, "套餐组中包含不存在的产品！");
             packageGroupGoods.setGoodsId(packageGroupGoodsModel.getGoodsId());
             packageGroupGoods.setQuantity(packageGroupGoodsModel.getQuantity());
             packageGroupGoodses.add(packageGroupGoods);
