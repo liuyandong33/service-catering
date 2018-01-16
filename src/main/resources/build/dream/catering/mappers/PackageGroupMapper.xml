@@ -14,7 +14,7 @@
     </insert>
 
     <update id="update" parameterType="build.dream.common.erp.catering.domains.PackageGroup">
-        ${@build.dream.common.utils.BeanUtils@generateUpdateSql("build.dream.common.erp.catering.domains.Branch")}
+        ${@build.dream.common.utils.BeanUtils@generateUpdateSql("build.dream.common.erp.catering.domains.PackageGroup")}
     </update>
 
     <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.PackageGroup">

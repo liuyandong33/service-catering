@@ -21,6 +21,9 @@ public class SavePackageModel extends BasicModel {
     @NotNull
     private BigInteger branchId;
 
+    @NotNull
+    private BigInteger userId;
+
     private BigInteger packageId;
 
     @NotNull
@@ -51,6 +54,14 @@ public class SavePackageModel extends BasicModel {
 
     public void setBranchId(BigInteger branchId) {
         this.branchId = branchId;
+    }
+
+    public BigInteger getUserId() {
+        return userId;
+    }
+
+    public void setUserId(BigInteger userId) {
+        this.userId = userId;
     }
 
     public BigInteger getPackageId() {
