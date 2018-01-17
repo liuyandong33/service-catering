@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Mapper
-public interface GoodsSpecificationMapper {
+public interface GoodsSpecificationMapper extends CommonMapper {
     long insert(GoodsSpecification goodsSpecification);
     long insertAll(Collection<GoodsSpecification> goodsSpecifications);
     long update(GoodsSpecification goodsSpecification);

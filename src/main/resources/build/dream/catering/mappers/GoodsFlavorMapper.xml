@@ -28,4 +28,9 @@
     <select id="findAllPaged" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.GoodsFlavor">
         SELECT * FROM goods_flavor <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include> <include refid="build.dream.catering.mappers.CommonMapper.paginationSql"></include>
     </select>
+
+    <update id="deleteAllByGoodsId">
+        UPDATE goods_flavor SET last_update_user_id = #{userId}, last_update_remark = #{lastUpdateRemark}, deleted = 1
+        WHERE goods_flavor_group_id IN (SELECT id FROM goods_flavor_group WHERE goods_id = #{goodsId})
+    </update>
 </mapper>

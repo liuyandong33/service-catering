@@ -131,7 +131,28 @@ public class GoodsController extends BasicController {
 
             apiRest = goodsService.listCategories(listCategoriesModel);
         } catch (Exception e) {
-            LogUtils.error("查询菜品分类", controllerSimpleName, "listCategories", e, requestParameters);
+            LogUtils.error("查询菜品分类失败", controllerSimpleName, "listCategories", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 查询菜品分类
+     *
+     * @return
+     */
+    @RequestMapping(value = "/deleteGoods")
+    @ResponseBody
+    public String deleteGoods() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            DeleteGoodsModel deleteGoodsModel = ApplicationHandler.instantiateObject(DeleteGoodsModel.class, requestParameters);
+            deleteGoodsModel.validateAndThrow();
+            apiRest = goodsService.deleteGoods(deleteGoodsModel);
+        } catch (Exception e) {
+            LogUtils.error("删除菜品失败", controllerSimpleName, "deleteGoods", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);

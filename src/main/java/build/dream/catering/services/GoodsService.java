@@ -9,6 +9,7 @@ import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.BeanUtils;
 import build.dream.common.utils.PagedSearchModel;
 import build.dream.common.utils.SearchModel;
+import build.dream.common.utils.UpdateModel;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -446,5 +447,38 @@ public class GoodsService {
             zTreeNodes.add(new ZTreeNode(goodsCategory.getId().toString(), goodsCategory.getName(), goodsCategory.getParentId().toString()));
         }
         return new ApiRest(zTreeNodes, "查询菜品分类成功！");
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest deleteGoods(DeleteGoodsModel deleteGoodsModel) {
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getGoodsId());
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getTenantId());
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getBranchId());
+        Goods goods = goodsMapper.find(searchModel);
+        Validate.notNull(goods, "菜品不存在！");
+        goods.setLastUpdateUserId(deleteGoodsModel.getUserId());
+        goods.setLastUpdateRemark("删除菜品信息！");
+        goods.setDeleted(true);
+        goodsMapper.update(goods);
+
+        UpdateModel updateModel = new UpdateModel(true);
+        updateModel.setTableName("goods_specification");
+        updateModel.addContentValue("deleted", 1);
+        updateModel.addContentValue("last_update_user_id", deleteGoodsModel.getUserId());
+        updateModel.addContentValue("last_update_remark", "删除菜品信息！");
+        updateModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getGoodsId());
+        updateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getTenantId());
+        updateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getBranchId());
+        goodsSpecificationMapper.universalUpdate(updateModel);
+
+        updateModel.setTableName("goods_flavor_group");
+        goodsFlavorGroupMapper.universalUpdate(updateModel);
+        goodsFlavorMapper.deleteAllByGoodsId(deleteGoodsModel.getGoodsId(), deleteGoodsModel.getUserId(), "删除菜品信息！");
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("删除菜品信息成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
     }
 }

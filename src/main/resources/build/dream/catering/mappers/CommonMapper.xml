@@ -23,4 +23,12 @@
     <sql id="paginationSql">
         LIMIT #{offset}, #{maxResults}
     </sql>
+
+    <update id="universalUpdate" parameterType="build.dream.common.utils.UpdateModel">
+        UPDATE ${tableName} SET
+        <foreach collection="contentValues" index="index" item="contentValue" separator=",">
+            ${contentValue.column} = #{contentValue.value}
+        </foreach>
+        <include refid="searchConditionSql"></include>
+    </update>
 </mapper>

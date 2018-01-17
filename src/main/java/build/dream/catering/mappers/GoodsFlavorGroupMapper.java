@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Mapper
-public interface GoodsFlavorGroupMapper {
+public interface GoodsFlavorGroupMapper extends CommonMapper {
     long insert(GoodsFlavorGroup goodsFlavorGroup);
     long insertAll(Collection<GoodsFlavorGroup> goodsFlavorGroups);
     long update(GoodsFlavorGroup goodsFlavorGroup);

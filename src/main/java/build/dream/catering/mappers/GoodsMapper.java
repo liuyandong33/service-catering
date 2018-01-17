@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 
 @Mapper
-public interface GoodsMapper {
+public interface GoodsMapper extends CommonMapper {
     long insert(Goods goods);
     long update(Goods goods);
     Goods find(SearchModel searchModel);
