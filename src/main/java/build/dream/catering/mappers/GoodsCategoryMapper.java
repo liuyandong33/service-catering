@@ -11,5 +11,4 @@ public interface GoodsCategoryMapper {
     long insert(GoodsCategory goodsCategory);
     GoodsCategory find(SearchModel searchModel);
     List<GoodsCategory> findAll(SearchModel searchModel);
-    List<GoodsCategory> findAllPaged(SearchModel searchModel);
 }

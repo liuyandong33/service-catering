@@ -1,9 +1,6 @@
 package build.dream.catering.controllers;
 
-import build.dream.catering.models.goods.GoodsFlavorGroupModel;
-import build.dream.catering.models.goods.ListGoodsesModel;
-import build.dream.catering.models.goods.SaveGoodsModel;
-import build.dream.catering.models.goods.SavePackageModel;
+import build.dream.catering.models.goods.*;
 import build.dream.catering.services.GoodsService;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
@@ -82,6 +79,27 @@ public class GoodsController extends BasicController {
             apiRest = goodsService.savePackage(savePackageModel);
         } catch (Exception e) {
             LogUtils.error("保存套餐失败", controllerSimpleName, "savePackage", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 查询菜品分类
+     * @return
+     */
+    @RequestMapping(value = "/listCategories")
+    @ResponseBody
+    public String listCategories() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            ListCategoriesModel listCategoriesModel = ApplicationHandler.instantiateObject(ListCategoriesModel.class, requestParameters);
+            listCategoriesModel.validateAndThrow();
+
+            apiRest = goodsService.listCategories(listCategoriesModel);
+        } catch (Exception e) {
+            LogUtils.error("查询菜品分类", controllerSimpleName, "listCategories", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);

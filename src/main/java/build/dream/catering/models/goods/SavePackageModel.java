@@ -182,20 +182,11 @@ public class SavePackageModel extends BasicModel {
     }
 
     public static class PackageGroupGoodsModel extends BasicModel {
-        private BigInteger packageGroupId;
         @NotNull
         private BigInteger goodsId;
 
         @NotNull
         private Integer quantity;
-
-        public BigInteger getPackageGroupId() {
-            return packageGroupId;
-        }
-
-        public void setPackageGroupId(BigInteger packageGroupId) {
-            this.packageGroupId = packageGroupId;
-        }
 
         public BigInteger getGoodsId() {
             return goodsId;

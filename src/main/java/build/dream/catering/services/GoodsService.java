@@ -1,5 +1,6 @@
 package build.dream.catering.services;
 
+import build.dream.catering.beans.ZTreeNode;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.*;
 import build.dream.catering.models.goods.*;
@@ -34,6 +35,8 @@ public class GoodsService {
     private PackageGroupMapper packageGroupMapper;
     @Autowired
     private PackageGroupGoodsMapper packageGroupGoodsMapper;
+    @Autowired
+    private GoodsCategoryMapper goodsCategoryMapper;
 
     @Transactional(readOnly = true)
     public ApiRest listGoodses(ListGoodsesModel listGoodsesModel) {
@@ -193,9 +196,6 @@ public class GoodsService {
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest savePackage(SavePackageModel savePackageModel) {
-        BigInteger packageId = savePackageModel.getPackageId();
-
-
         List<BigInteger> goodsIds = new ArrayList<BigInteger>();
         for (SavePackageModel.PackageGroupModel packageGroupModel : savePackageModel.getPackageGroupModels()) {
             for (SavePackageModel.PackageGroupGoodsModel packageGroupGoodsModel : packageGroupModel.getPackageGroupGoodsModels()) {
@@ -213,12 +213,16 @@ public class GoodsService {
             goodsMap.put(goods.getId(), goods);
         }
 
-
+        BigInteger packageId = savePackageModel.getPackageId();
+        BigInteger tenantId = savePackageModel.getTenantId();
+        String tenantCode = savePackageModel.getTenantCode();
+        BigInteger branchId = savePackageModel.getBranchId();
+        BigInteger userId = savePackageModel.getUserId();
         List<PackageGroupGoods> packageGroupGoodses = new ArrayList<PackageGroupGoods>();
         if (packageId != null) {
             SearchModel searchModel = new SearchModel(true);
-            searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, savePackageModel.getTenantId());
-            searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, savePackageModel.getBranchId());
+            searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+            searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
             searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, packageId);
             Goods goods = goodsMapper.find(searchModel);
             Validate.notNull(goods, "套餐不存在！");
@@ -263,24 +267,24 @@ public class GoodsService {
                     packageGroupMapper.update(packageGroup);
                     packageGroupGoodses.addAll(buildPackageGroupGoodses(packageGroupModel.getPackageGroupGoodsModels(), packageGroup.getId(), goodsMap));
                 } else {
-                    packageGroupGoodses.addAll(savePackageGroup(packageGroupModel, goods.getId(), savePackageModel.getUserId(), "修改套餐信息！", goodsMap));
+                    packageGroupGoodses.addAll(savePackageGroup(packageGroupModel, goods.getId(), tenantId, tenantCode, branchId, userId, "修改套餐信息！", goodsMap));
                 }
             }
         } else {
             Goods goods = new Goods();
             goods.setName(savePackageModel.getName());
-            goods.setTenantId(savePackageModel.getTenantId());
-            goods.setTenantCode(savePackageModel.getTenantCode());
-            goods.setBranchId(savePackageModel.getBranchId());
+            goods.setTenantId(tenantId);
+            goods.setTenantCode(tenantCode);
+            goods.setBranchId(branchId);
             goods.setGoodsType(2);
-            goods.setCreateUserId(savePackageModel.getUserId());
-            goods.setLastUpdateUserId(savePackageModel.getUserId());
+            goods.setCreateUserId(userId);
+            goods.setLastUpdateUserId(userId);
             goods.setLastUpdateRemark("新增套餐信息！");
             goodsMapper.insert(goods);
 
             List<SavePackageModel.PackageGroupModel> packageGroupModels = savePackageModel.getPackageGroupModels();
             for (SavePackageModel.PackageGroupModel packageGroupModel : packageGroupModels) {
-                packageGroupGoodses.addAll(savePackageGroup(packageGroupModel, goods.getId(), savePackageModel.getUserId(), "新增套餐信息！", goodsMap));
+                packageGroupGoodses.addAll(savePackageGroup(packageGroupModel, goods.getId(), tenantId, tenantCode, branchId, userId, "新增套餐信息！", goodsMap));
             }
         }
         packageGroupGoodsMapper.insertAll(packageGroupGoodses);
@@ -290,7 +294,7 @@ public class GoodsService {
         return apiRest;
     }
 
-    private List<PackageGroupGoods> savePackageGroup(SavePackageModel.PackageGroupModel packageGroupModel, BigInteger goodsId, BigInteger userId, String lastUpdateRemark, Map<BigInteger, Goods> goodsMap) {
+    private List<PackageGroupGoods> savePackageGroup(SavePackageModel.PackageGroupModel packageGroupModel, BigInteger goodsId, BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger userId, String lastUpdateRemark, Map<BigInteger, Goods> goodsMap) {
         PackageGroup packageGroup = new PackageGroup();
         packageGroup.setPackageId(goodsId);
         packageGroup.setGroupType(packageGroupModel.getGroupType());
@@ -316,5 +320,19 @@ public class GoodsService {
             packageGroupGoodses.add(packageGroupGoods);
         }
         return packageGroupGoodses;
+    }
+
+    @Transactional(readOnly = true)
+    public ApiRest listCategories(ListCategoriesModel listCategoriesModel) {
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, listCategoriesModel.getTenantId());
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, listCategoriesModel.getBranchId());
+        List<GoodsCategory> goodsCategories = goodsCategoryMapper.findAll(searchModel);
+
+        List<ZTreeNode> zTreeNodes = new ArrayList<ZTreeNode>();
+        for (GoodsCategory goodsCategory : goodsCategories) {
+            zTreeNodes.add(new ZTreeNode(goodsCategory.getId().toString(), goodsCategory.getName(), goodsCategory.getParentId().toString()));
+        }
+        return new ApiRest(zTreeNodes, "查询菜品分类成功！");
     }
 }
