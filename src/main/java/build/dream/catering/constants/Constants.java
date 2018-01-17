@@ -30,4 +30,7 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String DIET_ORDER = "diet_order";
 
     public static final String DATA_JOB_CRON_EXPRESSION = "data.job.cron.expression";
+
+    public static Integer GOODS_TYPE_ORDINARY_GOODS = 1;
+    public static Integer GOODS_TYPE_PACKAGE = 2;
 }

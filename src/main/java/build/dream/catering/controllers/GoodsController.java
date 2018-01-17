@@ -7,6 +7,7 @@ import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -45,14 +46,44 @@ public class GoodsController extends BasicController {
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
             SaveGoodsModel saveGoodsModel = ApplicationHandler.instantiateObject(SaveGoodsModel.class, requestParameters);
-            String goodsFlavorGroup = requestParameters.get("goodsFlavorGroup");
-            Validate.notNull(goodsFlavorGroup);
 
-            List<GoodsFlavorGroupModel> goodsFlavorGroupModels = GsonUtils.jsonToList(goodsFlavorGroup, GoodsFlavorGroupModel.class);
-            saveGoodsModel.setGoodsFlavorGroupModels(goodsFlavorGroupModels);
+            String goodsSpecifications = requestParameters.get("goodsSpecifications");
+            ApplicationHandler.notEmpty(goodsSpecifications, "goodsSpecifications");
+
+            List<SaveGoodsModel.GoodsSpecificationModel> goodsSpecificationModels = GsonUtils.jsonToList(goodsSpecifications, SaveGoodsModel.GoodsSpecificationModel.class);
+            saveGoodsModel.setGoodsSpecificationModels(goodsSpecificationModels);
+
+            String goodsFlavorGroups = requestParameters.get("goodsFlavorGroups");
+            if (StringUtils.isNotBlank(goodsFlavorGroups)) {
+                List<SaveGoodsModel.GoodsFlavorGroupModel> goodsFlavorGroupModels = GsonUtils.jsonToList(goodsFlavorGroups, SaveGoodsModel.GoodsFlavorGroupModel.class);
+                saveGoodsModel.setGoodsFlavorGroupModels(goodsFlavorGroupModels);
+            }
+
+            saveGoodsModel.validateAndThrow();
             apiRest = goodsService.saveGoods(saveGoodsModel);
         } catch (Exception e) {
             LogUtils.error("保存菜品失败", controllerSimpleName, "saveGoods", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 删除菜品规格
+     *
+     * @return
+     */
+    @RequestMapping(value = "/deleteGoodsSpecification")
+    @ResponseBody
+    public String deleteGoodsSpecification() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            DeleteGoodsSpecificationModel deleteGoodsSpecificationModel = ApplicationHandler.instantiateObject(DeleteGoodsSpecificationModel.class, requestParameters);
+            deleteGoodsSpecificationModel.validateAndThrow();
+            apiRest = goodsService.deleteGoodsSpecification(deleteGoodsSpecificationModel);
+        } catch (Exception e) {
+            LogUtils.error("删除菜品规格失败！", controllerSimpleName, "deleteGoodsSpecification", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -86,6 +117,7 @@ public class GoodsController extends BasicController {
 
     /**
      * 查询菜品分类
+     *
      * @return
      */
     @RequestMapping(value = "/listCategories")

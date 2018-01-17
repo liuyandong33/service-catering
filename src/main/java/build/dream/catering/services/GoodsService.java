@@ -130,7 +130,13 @@ public class GoodsService {
         return apiRest;
     }
 
-    @Transactional
+    /**
+     * 保存菜品信息
+     *
+     * @param saveGoodsModel
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
     public ApiRest saveGoods(SaveGoodsModel saveGoodsModel) {
         BigInteger tenantId = saveGoodsModel.getTenantId();
         BigInteger branchId = saveGoodsModel.getBranchId();
@@ -146,31 +152,96 @@ public class GoodsService {
             goods.setName(saveGoodsModel.getName());
             goods.setLastUpdateRemark("修改产品信息！");
             goodsMapper.update(goods);
+
+            List<SaveGoodsModel.GoodsSpecificationModel> goodsSpecificationModels = saveGoodsModel.getGoodsSpecificationModels();
+            List<BigInteger> goodsSpecificationIds = new ArrayList<BigInteger>();
+            for (SaveGoodsModel.GoodsSpecificationModel goodsSpecificationModel : goodsSpecificationModels) {
+                if (goodsSpecificationModel.getId() != null) {
+                    goodsSpecificationIds.add(goodsSpecificationModel.getId());
+                }
+            }
+            SearchModel searchModel = new SearchModel(true);
+            searchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getId());
+            searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+            searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+            searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsSpecificationIds);
+            List<GoodsSpecification> persistenceGoodsSpecifications = goodsSpecificationMapper.findAll(searchModel);
+
+            Map<BigInteger, GoodsSpecification> goodsSpecificationMap = new HashMap<BigInteger, GoodsSpecification>();
+            for (GoodsSpecification goodsSpecification : persistenceGoodsSpecifications) {
+                goodsSpecificationMap.put(goodsSpecification.getId(), goodsSpecification);
+            }
+
+            List<GoodsSpecification> goodsSpecifications = new ArrayList<GoodsSpecification>();
+            for (SaveGoodsModel.GoodsSpecificationModel goodsSpecificationModel : goodsSpecificationModels) {
+                if (goodsSpecificationModel.getId() != null) {
+                    GoodsSpecification goodsSpecification = goodsSpecificationMap.get(goodsSpecificationModel.getId());
+                    Validate.notNull(goodsSpecification, "菜品规格不存在！");
+                    goodsSpecification.setName(goodsSpecificationModel.getName());
+                    goodsSpecification.setPrice(goodsSpecificationModel.getPrice());
+                    goodsSpecification.setCreateUserId(userId);
+                    goodsSpecification.setLastUpdateUserId(userId);
+                    goodsSpecification.setLastUpdateRemark("修改规格信息！");
+                    goodsSpecificationMapper.update(goodsSpecification);
+                } else {
+                    goodsSpecifications.add(buildGoodsSpecification(goodsSpecificationModel, goods.getId(), tenantId, tenantCode, branchId, userId, "新增规格信息！"));
+                }
+            }
+            goodsSpecificationMapper.insertAll(goodsSpecifications);
         } else {
             Goods goods = new Goods();
             goods.setName(saveGoodsModel.getName());
             goods.setTenantId(tenantId);
             goods.setTenantCode(tenantCode);
             goods.setBranchId(branchId);
+            goods.setGoodsType(Constants.GOODS_TYPE_ORDINARY_GOODS);
             goods.setCreateUserId(userId);
             goods.setLastUpdateUserId(userId);
             goods.setLastUpdateRemark("新增产品信息！");
             goodsMapper.insert(goods);
 
+            List<SaveGoodsModel.GoodsSpecificationModel> goodsSpecificationModels = saveGoodsModel.getGoodsSpecificationModels();
+            List<GoodsSpecification> goodsSpecifications = new ArrayList<GoodsSpecification>();
+            for (SaveGoodsModel.GoodsSpecificationModel goodsSpecificationModel : goodsSpecificationModels) {
+                goodsSpecifications.add(buildGoodsSpecification(goodsSpecificationModel, goods.getId(), tenantId, tenantCode, branchId, userId, "新增规格信息！"));
+            }
+            goodsSpecificationMapper.insertAll(goodsSpecifications);
+            saveGoodsFlavorGroups(saveGoodsModel.getGoodsFlavorGroupModels(), goods.getId(), tenantId, branchId, tenantCode, userId);
+        }
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("保存菜品信息成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
+    }
+
+    /**
+     * 批量插入菜品口味组以及口味
+     *
+     * @param goodsFlavorGroupModels
+     * @param goodsId
+     * @param tenantId
+     * @param branchId
+     * @param tenantCode
+     * @param userId
+     */
+    private void saveGoodsFlavorGroups(List<SaveGoodsModel.GoodsFlavorGroupModel> goodsFlavorGroupModels, BigInteger goodsId, BigInteger tenantId, BigInteger branchId, String tenantCode, BigInteger userId) {
+        if (CollectionUtils.isNotEmpty(goodsFlavorGroupModels)) {
             Map<Integer, GoodsFlavorGroup> goodsFlavorGroupMap = new HashMap<Integer, GoodsFlavorGroup>();
             Map<GoodsFlavor, Integer> goodsFlavorMap = new HashMap<GoodsFlavor, Integer>();
-            for (GoodsFlavorGroupModel goodsFlavorGroupModel : saveGoodsModel.getGoodsFlavorGroupModels()) {
+            for (SaveGoodsModel.GoodsFlavorGroupModel goodsFlavorGroupModel : goodsFlavorGroupModels) {
                 GoodsFlavorGroup goodsFlavorGroup = new GoodsFlavorGroup();
-                goodsFlavorGroup.setGoodsId(goods.getId());
+                goodsFlavorGroup.setGoodsId(goodsId);
                 goodsFlavorGroup.setName(goodsFlavorGroupModel.getName());
                 goodsFlavorGroup.setTenantId(tenantId);
                 goodsFlavorGroup.setBranchId(branchId);
                 goodsFlavorGroup.setTenantCode(tenantCode);
+                goodsFlavorGroup.setCreateUserId(userId);
+                goodsFlavorGroup.setLastUpdateUserId(userId);
                 goodsFlavorGroup.setLastUpdateRemark("新增菜品口味组！");
 
                 goodsFlavorGroupMap.put(goodsFlavorGroup.hashCode(), goodsFlavorGroup);
 
-                for (GoodsFlavorModel goodsFlavorModel : goodsFlavorGroupModel.getGoodsFlavorModels()) {
+                for (SaveGoodsModel.GoodsFlavorModel goodsFlavorModel : goodsFlavorGroupModel.getGoodsFlavorModels()) {
                     GoodsFlavor goodsFlavor = new GoodsFlavor();
                     goodsFlavor.setName(goodsFlavorModel.getName());
                     goodsFlavor.setPrice(goodsFlavorModel.getPrice());
@@ -184,14 +255,55 @@ public class GoodsService {
                 }
             }
 
+            goodsFlavorGroupMapper.insertAll(new ArrayList<GoodsFlavorGroup>(goodsFlavorGroupMap.values()));
             for (Map.Entry<GoodsFlavor, Integer> entry : goodsFlavorMap.entrySet()) {
                 entry.getKey().setGoodsFlavorGroupId(goodsFlavorGroupMap.get(entry.getValue()).getId());
             }
-
-//            goodsFlavorGroupMapper.insertAll(goodsFlavorGroupMap.values());
-//            goodsFlavorMapper.insertAll(goodsFlavorMap.keySet());
+            goodsFlavorMapper.insertAll(new ArrayList<GoodsFlavor>(goodsFlavorMap.keySet()));
         }
-        return null;
+    }
+
+    /**
+     * 构建菜品规格
+     * @param goodsSpecificationModel
+     * @param goodsId
+     * @param tenantId
+     * @param tenantCode
+     * @param branchId
+     * @param userId
+     * @param lastUpdateRemark
+     * @return
+     */
+    private GoodsSpecification buildGoodsSpecification(SaveGoodsModel.GoodsSpecificationModel goodsSpecificationModel, BigInteger goodsId, BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger userId, String lastUpdateRemark) {
+        GoodsSpecification goodsSpecification = new GoodsSpecification();
+        goodsSpecification.setGoodsId(goodsId);
+        goodsSpecification.setName(goodsSpecificationModel.getName());
+        goodsSpecification.setPrice(goodsSpecificationModel.getPrice());
+        goodsSpecification.setTenantId(tenantId);
+        goodsSpecification.setTenantCode(tenantCode);
+        goodsSpecification.setBranchId(branchId);
+        goodsSpecification.setCreateUserId(userId);
+        goodsSpecification.setLastUpdateUserId(userId);
+        goodsSpecification.setLastUpdateRemark(lastUpdateRemark);
+        return goodsSpecification;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest deleteGoodsSpecification(DeleteGoodsSpecificationModel deleteGoodsSpecificationModel) {
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsSpecificationModel.getGoodsSpecificationId());
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsSpecificationModel.getTenantId());
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsSpecificationModel.getBranchId());
+        GoodsSpecification goodsSpecification = goodsSpecificationMapper.find(searchModel);
+        Validate.notNull(goodsSpecification, "菜品规格不存在！");
+        goodsSpecification.setDeleted(true);
+        goodsSpecification.setLastUpdateUserId(deleteGoodsSpecificationModel.getUserId());
+        goodsSpecification.setLastUpdateRemark("删除菜品规格信息！");
+        goodsSpecificationMapper.update(goodsSpecification);
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("删除菜品规格成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
     }
 
     @Transactional(rollbackFor = Exception.class)
