@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="build.dream.catering.mappers.UniversalMapper">
+    <update id="universalUpdate" parameterType="build.dream.common.utils.UpdateModel">
+        UPDATE ${tableName} SET
+        <foreach collection="contentValues" index="index" item="contentValue" separator=",">
+            ${contentValue.columnName} = #{contentValue.value}
+        </foreach>
+        <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
+    </update>
+    
+    <select id="executeQuery" parameterType="java.util.Map" resultType="build.dream.common.utils.UnderscoreToCamelCaseMap">
+        ${sql}
+    </select>
+
+    <update id="executeUpdate" parameterType="java.util.Map">
+        ${sql}
+    </update>
+</mapper>

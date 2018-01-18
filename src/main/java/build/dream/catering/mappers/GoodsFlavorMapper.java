@@ -17,5 +17,4 @@ public interface GoodsFlavorMapper {
     GoodsFlavor find(SearchModel searchModel);
     List<GoodsFlavor> findAll(SearchModel searchModel);
     List<GoodsFlavor> findAllPaged(SearchModel searchModel);
-    long deleteAllByGoodsId(@Param("goodsId") BigInteger goodsId, @Param("userId") BigInteger userId, @Param("lastUpdateRemark") String lastUpdateRemark);
 }

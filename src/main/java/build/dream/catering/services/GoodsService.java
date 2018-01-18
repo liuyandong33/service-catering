@@ -38,6 +38,8 @@ public class GoodsService {
     private PackageGroupGoodsMapper packageGroupGoodsMapper;
     @Autowired
     private GoodsCategoryMapper goodsCategoryMapper;
+    @Autowired
+    private UniversalMapper universalMapper;
 
     @Transactional(readOnly = true)
     public ApiRest listGoodses(ListGoodsesModel listGoodsesModel) {
@@ -462,19 +464,36 @@ public class GoodsService {
         goods.setDeleted(true);
         goodsMapper.update(goods);
 
-        UpdateModel updateModel = new UpdateModel(true);
-        updateModel.setTableName("goods_specification");
-        updateModel.addContentValue("deleted", 1);
-        updateModel.addContentValue("last_update_user_id", deleteGoodsModel.getUserId());
-        updateModel.addContentValue("last_update_remark", "删除菜品信息！");
-        updateModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getGoodsId());
-        updateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getTenantId());
-        updateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getBranchId());
-        goodsSpecificationMapper.universalUpdate(updateModel);
+        // 删除该菜品的所有规格
+        UpdateModel goodsSpecificationUpdateModel = new UpdateModel(true);
+        goodsSpecificationUpdateModel.setTableName("goods_specification");
+        goodsSpecificationUpdateModel.addContentValue("deleted", 1);
+        goodsSpecificationUpdateModel.addContentValue("last_update_user_id", deleteGoodsModel.getUserId());
+        goodsSpecificationUpdateModel.addContentValue("last_update_remark", "删除菜品信息！");
+        goodsSpecificationUpdateModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getGoodsId());
+        goodsSpecificationUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getTenantId());
+        goodsSpecificationUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getBranchId());
+        universalMapper.universalUpdate(goodsSpecificationUpdateModel);
 
-        updateModel.setTableName("goods_flavor_group");
-        goodsFlavorGroupMapper.universalUpdate(updateModel);
-        goodsFlavorMapper.deleteAllByGoodsId(deleteGoodsModel.getGoodsId(), deleteGoodsModel.getUserId(), "删除菜品信息！");
+        // 删除该菜品的所有口味组
+        UpdateModel goodsFlavorGroupUpdateModel = new UpdateModel(true);
+        goodsFlavorGroupUpdateModel.setTableName("goods_flavor_group");
+        goodsFlavorGroupUpdateModel.addContentValue("deleted", 1);
+        goodsFlavorGroupUpdateModel.addContentValue("last_update_user_id", deleteGoodsModel.getUserId());
+        goodsFlavorGroupUpdateModel.addContentValue("last_update_remark", "删除菜品信息！");
+        goodsFlavorGroupUpdateModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getGoodsId());
+        goodsFlavorGroupUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getTenantId());
+        goodsFlavorGroupUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getBranchId());
+        universalMapper.universalUpdate(goodsFlavorGroupUpdateModel);
+
+        // 删除该菜品的所有口味
+        String deleteAllGoodsFlavorSql = "UPDATE goods_flavor SET last_update_user_id = #{userId}, last_update_remark = #{lastUpdateRemark}, deleted = 1 WHERE goods_flavor_group_id IN (SELECT id FROM goods_flavor_group WHERE goods_id = #{goodsId})";
+        Map<String, Object> deleteAllGoodsFlavorParameters = new HashMap<String, Object>();
+        deleteAllGoodsFlavorParameters.put("sql", deleteAllGoodsFlavorSql);
+        deleteAllGoodsFlavorParameters.put("userId", deleteGoodsModel.getUserId());
+        deleteAllGoodsFlavorParameters.put("lastUpdateRemark", "删除菜品信息！");
+        deleteAllGoodsFlavorParameters.put("goodsId", deleteGoodsModel.getGoodsId());
+        universalMapper.executeUpdate(deleteAllGoodsFlavorParameters);
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("删除菜品信息成功！");
