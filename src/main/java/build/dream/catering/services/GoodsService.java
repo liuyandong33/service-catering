@@ -11,6 +11,7 @@ import build.dream.common.utils.PagedSearchModel;
 import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.UpdateModel;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,7 +46,7 @@ public class GoodsService {
     public ApiRest listGoodses(ListGoodsesModel listGoodsesModel) {
         BigInteger tenantId = listGoodsesModel.getTenantId();
         BigInteger branchId = listGoodsesModel.getBranchId();
-        PagedSearchModel goodsPagedSearchModel = new PagedSearchModel(true);
+        /*PagedSearchModel goodsPagedSearchModel = new PagedSearchModel(true);
         goodsPagedSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
         goodsPagedSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
         Integer page = listGoodsesModel.getPage();
@@ -62,75 +63,99 @@ public class GoodsService {
         List<BigInteger> goodsIds = new ArrayList<BigInteger>();
         for (Goods goods : goodses) {
             goodsIds.add(goods.getId());
-        }
+        }*/
 
-        SearchModel goodsSpecificationSearchModel = new SearchModel(true);
-        goodsSpecificationSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        goodsSpecificationSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        goodsSpecificationSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
-        List<GoodsSpecification> goodsSpecifications = goodsSpecificationMapper.findAll(goodsSpecificationSearchModel);
+        String countSql = "SELECT COUNT(1) FROM goods LEFT OUTER JOIN goods_category ON goods_category.id = goods.category_id WHERE goods.tenant_id = #{tenantId} AND goods.branch_id = #{branchId} AND goods.deleted = 0";
+        Map<String, Object> countGoodsParameters = new HashMap<String, Object>();
+        countGoodsParameters.put("tenantId", tenantId);
+        countGoodsParameters.put("branchId", branchId);
+        countGoodsParameters.put("sql", countSql);
+        long total = universalMapper.universalCount(countGoodsParameters);
 
-        Map<BigInteger, List<GoodsSpecification>> goodsSpecificationMap = new HashMap<BigInteger, List<GoodsSpecification>>();
-        for (GoodsSpecification goodsSpecification : goodsSpecifications) {
-            List<GoodsSpecification> goodsSpecificationList = goodsSpecificationMap.get(goodsSpecification.getGoodsId());
-            if (goodsSpecificationList == null) {
-                goodsSpecificationList = new ArrayList<GoodsSpecification>();
-                goodsSpecificationMap.put(goodsSpecification.getGoodsId(), goodsSpecificationList);
+        List<Map<String, Object>> goodsInfos = new ArrayList<Map<String, Object>>();
+        if (total > 0) {
+            String queryGoodsInfosSql = "SELECT goods.*, goods_category.name AS category_name, goods_category.description FROM goods LEFT OUTER JOIN goods_category ON goods_category.id = goods.category_id WHERE goods.tenant_id = #{tenantId} AND goods.branch_id = #{branchId} AND goods.deleted = 0 LIMIT #{offset}, #{maxResults}";
+            Map<String, Object> queryGoodsInfosParameters = new HashMap<String, Object>();
+            queryGoodsInfosParameters.put("sql", queryGoodsInfosSql);
+            queryGoodsInfosParameters.put("tenantId", tenantId);
+            queryGoodsInfosParameters.put("branchId", branchId);
+            queryGoodsInfosParameters.put("offset", listGoodsesModel.getOffset());
+            queryGoodsInfosParameters.put("maxResults", listGoodsesModel.getMaxResults());
+            goodsInfos = universalMapper.executeQuery(queryGoodsInfosParameters);
+
+            List<BigInteger> goodsIds = new ArrayList<BigInteger>();
+            for (Map<String, Object> goodsInfo : goodsInfos) {
+                goodsIds.add(BigInteger.valueOf(MapUtils.getLongValue(goodsInfo, "id")));
             }
-            goodsSpecificationList.add(goodsSpecification);
-        }
 
-        SearchModel goodsFlavorGroupSearchModel = new SearchModel(true);
-        goodsFlavorGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        goodsFlavorGroupSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        goodsFlavorGroupSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
-        List<GoodsFlavorGroup> goodsFlavorGroups = goodsFlavorGroupMapper.findAll(goodsFlavorGroupSearchModel);
+            SearchModel goodsSpecificationSearchModel = new SearchModel(true);
+            goodsSpecificationSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+            goodsSpecificationSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+            goodsSpecificationSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
+            List<GoodsSpecification> goodsSpecifications = goodsSpecificationMapper.findAll(goodsSpecificationSearchModel);
 
-        List<BigInteger> goodsFlavorGroupIds = new ArrayList<BigInteger>();
-        for (GoodsFlavorGroup goodsFlavorGroup : goodsFlavorGroups) {
-            goodsFlavorGroupIds.add(goodsFlavorGroup.getId());
-        }
-
-        SearchModel goodsFlavorSearchModel = new SearchModel(true);
-        goodsFlavorSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        goodsFlavorSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        goodsFlavorSearchModel.addSearchCondition("goods_flavor_group_id", Constants.SQL_OPERATION_SYMBOL_IN, goodsFlavorGroupIds);
-        List<GoodsFlavor> goodsFlavors = goodsFlavorMapper.findAll(goodsFlavorSearchModel);
-
-        Map<BigInteger, List<GoodsFlavor>> goodsFlavorMap = new HashMap<BigInteger, List<GoodsFlavor>>();
-        for (GoodsFlavor goodsFlavor : goodsFlavors) {
-            List<GoodsFlavor> goodsFlavorList = goodsFlavorMap.get(goodsFlavor.getGoodsFlavorGroupId());
-            if (goodsFlavorList == null) {
-                goodsFlavorList = new ArrayList<GoodsFlavor>();
-                goodsFlavorMap.put(goodsFlavor.getGoodsFlavorGroupId(), goodsFlavorList);
+            Map<BigInteger, List<GoodsSpecification>> goodsSpecificationMap = new HashMap<BigInteger, List<GoodsSpecification>>();
+            for (GoodsSpecification goodsSpecification : goodsSpecifications) {
+                List<GoodsSpecification> goodsSpecificationList = goodsSpecificationMap.get(goodsSpecification.getGoodsId());
+                if (goodsSpecificationList == null) {
+                    goodsSpecificationList = new ArrayList<GoodsSpecification>();
+                    goodsSpecificationMap.put(goodsSpecification.getGoodsId(), goodsSpecificationList);
+                }
+                goodsSpecificationList.add(goodsSpecification);
             }
-            goodsFlavorList.add(goodsFlavor);
-        }
 
-        Map<BigInteger, List<Map<String, Object>>> goodsFlavorGroupMap = new HashMap<BigInteger, List<Map<String, Object>>>();
-        for (GoodsFlavorGroup goodsFlavorGroup : goodsFlavorGroups) {
-            List<Map<String, Object>> goodsFlavorGroupList = goodsFlavorGroupMap.get(goodsFlavorGroup.getGoodsId());
-            if (goodsFlavorGroupList == null) {
-                goodsFlavorGroupList = new ArrayList<Map<String, Object>>();
-                goodsFlavorGroupMap.put(goodsFlavorGroup.getGoodsId(), goodsFlavorGroupList);
+            SearchModel goodsFlavorGroupSearchModel = new SearchModel(true);
+            goodsFlavorGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+            goodsFlavorGroupSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+            goodsFlavorGroupSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
+            List<GoodsFlavorGroup> goodsFlavorGroups = goodsFlavorGroupMapper.findAll(goodsFlavorGroupSearchModel);
+
+            Map<BigInteger, List<Map<String, Object>>> goodsFlavorGroupMap = new HashMap<BigInteger, List<Map<String, Object>>>();
+            if (CollectionUtils.isNotEmpty(goodsFlavorGroups)) {
+                List<BigInteger> goodsFlavorGroupIds = new ArrayList<BigInteger>();
+                for (GoodsFlavorGroup goodsFlavorGroup : goodsFlavorGroups) {
+                    goodsFlavorGroupIds.add(goodsFlavorGroup.getId());
+                }
+
+                SearchModel goodsFlavorSearchModel = new SearchModel(true);
+                goodsFlavorSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+                goodsFlavorSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+                goodsFlavorSearchModel.addSearchCondition("goods_flavor_group_id", Constants.SQL_OPERATION_SYMBOL_IN, goodsFlavorGroupIds);
+                List<GoodsFlavor> goodsFlavors = goodsFlavorMapper.findAll(goodsFlavorSearchModel);
+
+                Map<BigInteger, List<GoodsFlavor>> goodsFlavorMap = new HashMap<BigInteger, List<GoodsFlavor>>();
+                for (GoodsFlavor goodsFlavor : goodsFlavors) {
+                    List<GoodsFlavor> goodsFlavorList = goodsFlavorMap.get(goodsFlavor.getGoodsFlavorGroupId());
+                    if (goodsFlavorList == null) {
+                        goodsFlavorList = new ArrayList<GoodsFlavor>();
+                        goodsFlavorMap.put(goodsFlavor.getGoodsFlavorGroupId(), goodsFlavorList);
+                    }
+                    goodsFlavorList.add(goodsFlavor);
+                }
+
+                for (GoodsFlavorGroup goodsFlavorGroup : goodsFlavorGroups) {
+                    List<Map<String, Object>> goodsFlavorGroupList = goodsFlavorGroupMap.get(goodsFlavorGroup.getGoodsId());
+                    if (goodsFlavorGroupList == null) {
+                        goodsFlavorGroupList = new ArrayList<Map<String, Object>>();
+                        goodsFlavorGroupMap.put(goodsFlavorGroup.getGoodsId(), goodsFlavorGroupList);
+                    }
+                    Map<String, Object> map = BeanUtils.beanToMap(goodsFlavorGroup);
+                    map.put("goodsFlavors", goodsFlavorMap.get(goodsFlavorGroup.getId()));
+                    goodsFlavorGroupList.add(map);
+                }
             }
-            Map<String, Object> map = BeanUtils.beanToMap(goodsFlavorGroup);
-            map.put("goodsFlavors", goodsFlavorMap.get(goodsFlavorGroup.getId()));
-            goodsFlavorGroupList.add(map);
+
+            for (Map<String, Object> goodsInfo : goodsInfos) {
+                BigInteger goodsId = BigInteger.valueOf(MapUtils.getLongValue(goodsInfo, "id"));
+                goodsInfo.put("goodsSpecifications", goodsSpecificationMap.get(goodsId));
+                goodsInfo.put("goodsFlavorGroups", goodsFlavorGroupMap.get(goodsId));
+            }
         }
 
-        List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
-        for (Goods goods : goodses) {
-            Map<String, Object> goodsMap = BeanUtils.beanToMap(goods);
-            goodsMap.put("goodsSpecifications", goodsSpecificationMap.get(goods.getId()));
-            goodsMap.put("goodsFlavorGroups", goodsFlavorGroupMap.get(goods.getId()));
-            data.add(goodsMap);
-        }
-        ApiRest apiRest = new ApiRest();
-        apiRest.setData(data);
-        apiRest.setSuccessful(true);
-        apiRest.setMessage("查询菜品信息成功！");
-        return apiRest;
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("total", total);
+        data.put("rows", goodsInfos);
+        return new ApiRest(data, "查询菜品信息成功！");
     }
 
     /**

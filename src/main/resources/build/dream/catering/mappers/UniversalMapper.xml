@@ -16,4 +16,12 @@
     <update id="executeUpdate" parameterType="java.util.Map">
         ${sql}
     </update>
+
+    <select id="executeUniqueResultQuery" parameterType="java.util.Map" resultType="build.dream.common.utils.UnderscoreToCamelCaseMap">
+        ${sql}
+    </select>
+
+    <select id="universalCount" parameterType="java.util.Map" resultType="long">
+        ${sql}
+    </select>
 </mapper>
