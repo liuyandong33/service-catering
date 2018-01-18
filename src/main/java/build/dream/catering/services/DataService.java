@@ -57,10 +57,10 @@ public class DataService {
             dataHandleHistory.setDataContent(dietOrderData);
             dataHandleHistoryMapper.insert(dataHandleHistory);
             CacheUtils.hset(Constants.KEY_DATA_HANDLE_SIGNATURES, signature, signature);
-//            DietOrderDataModel dietOrderDataModel = GsonUtils.fromJson(dietOrderData, DietOrderDataModel.class);
-//            dietOrderDataModel.handleData();
-//            dietOrderMapper.insert(dietOrderDataModel.getDietOrder());
-//            dietOrderDetailMapper.insertAll(dietOrderDataModel.getDietOrderDetails());
+            DietOrderDataModel dietOrderDataModel = GsonUtils.fromJson(dietOrderData, DietOrderDataModel.class);
+            dietOrderDataModel.handleData();
+            dietOrderMapper.insert(dietOrderDataModel.getDietOrder());
+            dietOrderDetailMapper.insertAll(dietOrderDataModel.getDietOrderDetails());
         }
     }
 }
