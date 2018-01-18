@@ -1,17 +1,14 @@
 package build.dream.catering.jobs;
 
-import build.dream.common.utils.CacheUtils;
+import build.dream.catering.constants.Constants;
+import build.dream.catering.services.DataService;
 import build.dream.common.utils.ConfigurationUtils;
 import build.dream.common.utils.LogUtils;
 import build.dream.common.utils.QueueUtils;
-import build.dream.catering.constants.Constants;
-import build.dream.catering.services.DataService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.concurrent.TimeUnit;
 
 public class DataJob implements Job {
     private static final String DATA_JOB_SIMPLE_NAME = "DataJob";
@@ -30,9 +27,9 @@ public class DataJob implements Job {
     }
     @Override
     public void execute(JobExecutionContext context) {
-        boolean setnxSuccessful = CacheUtils.setnx(FLAG, FLAG);
+        /*boolean setnxSuccessful = CacheUtils.setnx(FLAG, FLAG);
         if (setnxSuccessful) {
-            CacheUtils.expire(FLAG, 120, TimeUnit.SECONDS);
+            CacheUtils.expire(FLAG, 5, TimeUnit.SECONDS);
             long length = QueueUtils.llen(KEY_DIET_ORDER_DATA);
             for (long index = 0; index < length; index++) {
                 String dietOrderData = QueueUtils.lpop(KEY_DIET_ORDER_DATA);
@@ -41,6 +38,15 @@ public class DataJob implements Job {
                 } catch (Exception e) {
                     QueueUtils.rpush(KEY_DIET_ORDER_DATA, dietOrderData);
                 }
+            }
+        }*/
+        long length = QueueUtils.llen(KEY_DIET_ORDER_DATA);
+        for (long index = 0; index < length; index++) {
+            String dietOrderData = QueueUtils.lpop(KEY_DIET_ORDER_DATA);
+            try {
+                dataService.saveDietOrder(dietOrderData);
+            } catch (Exception e) {
+                QueueUtils.rpush(KEY_DIET_ORDER_DATA, dietOrderData);
             }
         }
     }

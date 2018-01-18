@@ -10,7 +10,7 @@
     </update>
 
     <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.DietOrder">
-        SELECT * FROM diet_order <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include> <include refid="build.dream.catering.mappers.CommonMapper.paginationSql"></include>
+        SELECT * FROM diet_order <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
     </select>
 
     <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.DietOrder">

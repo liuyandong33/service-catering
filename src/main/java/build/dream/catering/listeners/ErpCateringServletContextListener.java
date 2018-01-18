@@ -12,7 +12,7 @@ import javax.servlet.annotation.WebListener;
 import java.io.IOException;
 
 @WebListener
-public class ErpChainServletContextListener extends BasicServletContextListener {
+public class ErpCateringServletContextListener extends BasicServletContextListener {
     @Autowired
     private JobScheduler jobScheduler;
     @Override
