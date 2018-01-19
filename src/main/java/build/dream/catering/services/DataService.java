@@ -4,19 +4,19 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.DataHandleHistoryMapper;
 import build.dream.catering.mappers.DietOrderDetailMapper;
 import build.dream.catering.mappers.DietOrderMapper;
-import build.dream.catering.models.data.DietOrderDataModel;
 import build.dream.catering.models.data.UploadDataModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.DataHandleHistory;
 import build.dream.common.utils.CacheUtils;
 import build.dream.common.utils.ConfigurationUtils;
-import build.dream.common.utils.GsonUtils;
+import build.dream.common.utils.QueueUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.Date;
 
 @Service
 public class DataService {
@@ -36,10 +36,7 @@ public class DataService {
         if (Constants.DATA_TYPE_DIET_ORDER.equals(dataType)) {
             key = deploymentEnvironment + "_" + partitionCode + "_" + Constants.DIET_ORDER;
         }
-
-        String data = uploadDataModel.getData();
-        String signature = DigestUtils.md5Hex(data);
-        CacheUtils.hset(key, signature, data);
+        QueueUtils.rpush(key, uploadDataModel.getData());
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("数据上传成功！");
@@ -55,12 +52,13 @@ public class DataService {
             dataHandleHistory.setSignature(signature);
             dataHandleHistory.setDataType(Constants.DIET_ORDER);
             dataHandleHistory.setDataContent(dietOrderData);
+            dataHandleHistory.setHandleTime(new Date());
             dataHandleHistoryMapper.insert(dataHandleHistory);
             CacheUtils.hset(Constants.KEY_DATA_HANDLE_SIGNATURES, signature, signature);
-            DietOrderDataModel dietOrderDataModel = GsonUtils.fromJson(dietOrderData, DietOrderDataModel.class);
+            /*DietOrderDataModel dietOrderDataModel = GsonUtils.fromJson(dietOrderData, DietOrderDataModel.class);
             dietOrderDataModel.handleData();
             dietOrderMapper.insert(dietOrderDataModel.getDietOrder());
-            dietOrderDetailMapper.insertAll(dietOrderDataModel.getDietOrderDetails());
+            dietOrderDetailMapper.insertAll(dietOrderDataModel.getDietOrderDetails());*/
         }
     }
 }

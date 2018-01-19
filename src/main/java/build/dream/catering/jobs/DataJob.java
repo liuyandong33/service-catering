@@ -5,7 +5,7 @@ import build.dream.catering.services.DataService;
 import build.dream.common.utils.ConfigurationUtils;
 import build.dream.common.utils.LogUtils;
 import build.dream.common.utils.QueueUtils;
-import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.StringUtils;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class DataJob implements Job {
     private static final String DATA_JOB_SIMPLE_NAME = "DataJob";
     private static String KEY_DIET_ORDER_DATA;
-    private static final String FLAG = DigestUtils.md5Hex(DATA_JOB_SIMPLE_NAME);
     @Autowired
     private DataService dataService;
+
     static {
         try {
             String deploymentEnvironment = ConfigurationUtils.getConfiguration(Constants.DEPLOYMENT_ENVIRONMENT);
@@ -25,24 +25,15 @@ public class DataJob implements Job {
             LogUtils.error("数据上传定时任务初始化失败", DATA_JOB_SIMPLE_NAME, "", e);
         }
     }
+
     @Override
     public void execute(JobExecutionContext context) {
-        /*boolean setnxSuccessful = CacheUtils.setnx(FLAG, FLAG);
-        if (setnxSuccessful) {
-            CacheUtils.expire(FLAG, 5, TimeUnit.SECONDS);
-            long length = QueueUtils.llen(KEY_DIET_ORDER_DATA);
-            for (long index = 0; index < length; index++) {
-                String dietOrderData = QueueUtils.lpop(KEY_DIET_ORDER_DATA);
-                try {
-                    dataService.saveDietOrder(dietOrderData);
-                } catch (Exception e) {
-                    QueueUtils.rpush(KEY_DIET_ORDER_DATA, dietOrderData);
-                }
-            }
-        }*/
         long length = QueueUtils.llen(KEY_DIET_ORDER_DATA);
         for (long index = 0; index < length; index++) {
             String dietOrderData = QueueUtils.lpop(KEY_DIET_ORDER_DATA);
+            if (StringUtils.isBlank(dietOrderData)) {
+                continue;
+            }
             try {
                 dataService.saveDietOrder(dietOrderData);
             } catch (Exception e) {

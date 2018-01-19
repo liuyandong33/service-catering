@@ -34,5 +34,5 @@ public class Constants extends build.dream.common.constants.Constants {
     public static Integer GOODS_TYPE_ORDINARY_GOODS = 1;
     public static Integer GOODS_TYPE_PACKAGE = 2;
 
-    public static final String KEY_DATA_HANDLE_SIGNATURES = "_data_handle_signature";
+    public static final String KEY_DATA_HANDLE_SIGNATURES = "_data_handle_signatures";
 }
