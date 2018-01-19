@@ -402,6 +402,7 @@ public class DietOrderService {
             dietOrderDetailInfo.put("goodsSpecificationId", dietOrderDetail.getGoodsSpecificationId());
             dietOrderDetailInfo.put("goodsSpecificationName", dietOrderDetail.getGoodsSpecificationName());
             dietOrderDetailInfo.put("price", dietOrderDetail.getPrice());
+            dietOrderDetailInfo.put("flavorIncrease", dietOrderDetail.getFlavorIncrease());
             dietOrderDetailInfo.put("quantity", dietOrderDetail.getQuantity());
             dietOrderDetailInfo.put("totalAmount", dietOrderDetail.getTotalAmount());
             dietOrderDetailInfo.put("discountAmount", dietOrderDetail.getDiscountAmount());
