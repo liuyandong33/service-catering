@@ -3,6 +3,7 @@ package build.dream.catering.models.data;
 import build.dream.common.erp.catering.domains.DietOrder;
 import build.dream.common.erp.catering.domains.DietOrderDetail;
 
+import java.math.BigInteger;
 import java.util.List;
 
 public class DietOrderDataModel {
@@ -26,20 +27,9 @@ public class DietOrderDataModel {
     }
 
     public void handleData() {
-        dietOrder.setLocalId(dietOrder.getId());
-        dietOrder.setId(null);
-        dietOrder.setLocalCreateTime(dietOrder.getCreateTime());
-        dietOrder.setLocalCreateTime(null);
-        dietOrder.setLocalLastUpdateTime(dietOrder.getLastUpdateTime());
-        dietOrder.setLocalLastUpdateTime(null);
-
+        BigInteger dietOrderId = dietOrder.getId();
         for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
-            dietOrderDetail.setLocalId(dietOrder.getId());
-            dietOrderDetail.setId(null);
-            dietOrderDetail.setLocalCreateTime(dietOrder.getCreateTime());
-            dietOrderDetail.setLocalCreateTime(null);
-            dietOrderDetail.setLocalLastUpdateTime(dietOrder.getLastUpdateTime());
-            dietOrderDetail.setLocalLastUpdateTime(null);
+            dietOrderDetail.setDietOrderId(dietOrderId);
         }
     }
 }

@@ -4,11 +4,13 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.DataHandleHistoryMapper;
 import build.dream.catering.mappers.DietOrderDetailMapper;
 import build.dream.catering.mappers.DietOrderMapper;
+import build.dream.catering.models.data.DietOrderDataModel;
 import build.dream.catering.models.data.UploadDataModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.DataHandleHistory;
 import build.dream.common.utils.CacheUtils;
 import build.dream.common.utils.ConfigurationUtils;
+import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.QueueUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,11 +56,11 @@ public class DataService {
             dataHandleHistory.setDataContent(dietOrderData);
             dataHandleHistory.setHandleTime(new Date());
             dataHandleHistoryMapper.insert(dataHandleHistory);
-            CacheUtils.hset(Constants.KEY_DATA_HANDLE_SIGNATURES, signature, signature);
-            /*DietOrderDataModel dietOrderDataModel = GsonUtils.fromJson(dietOrderData, DietOrderDataModel.class);
-            dietOrderDataModel.handleData();
+//            CacheUtils.hset(Constants.KEY_DATA_HANDLE_SIGNATURES, signature, signature);
+            DietOrderDataModel dietOrderDataModel = GsonUtils.fromJson(dietOrderData, DietOrderDataModel.class);
             dietOrderMapper.insert(dietOrderDataModel.getDietOrder());
-            dietOrderDetailMapper.insertAll(dietOrderDataModel.getDietOrderDetails());*/
+            dietOrderDataModel.handleData();
+            dietOrderDetailMapper.insertAll(dietOrderDataModel.getDietOrderDetails());
         }
     }
 }
