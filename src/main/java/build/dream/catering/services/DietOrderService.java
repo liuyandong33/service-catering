@@ -13,6 +13,7 @@ import build.dream.common.erp.catering.domains.*;
 import build.dream.common.saas.domains.TenantSecretKey;
 import build.dream.common.utils.*;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -405,19 +406,21 @@ public class DietOrderService {
             dietOrderDetailInfo.put("totalAmount", dietOrderDetail.getTotalAmount());
             dietOrderDetailInfo.put("discountAmount", dietOrderDetail.getDiscountAmount());
             dietOrderDetailInfo.put("payableAmount", dietOrderDetail.getPayableAmount());
-            List<Map<String, Object>> flavors = new ArrayList<Map<String, Object>>();
 
             List<DietOrderDetailGoodsFlavor> dietOrderDetailGoodsFlavors = dietOrderDetailGoodsFlavorMap.get(dietOrderDetail.getId());
-            for (DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor : dietOrderDetailGoodsFlavors) {
-                Map<String, Object> flavor = new HashMap<String, Object>();
-                flavor.put("flavorGroupId", dietOrderDetailGoodsFlavor.getGoodsFlavorGroupId());
-                flavor.put("flavorGroupName", dietOrderDetailGoodsFlavor.getGoodsFlavorGroupName());
-                flavor.put("flavorId", dietOrderDetailGoodsFlavor.getGoodsFlavorId());
-                flavor.put("flavorName", dietOrderDetailGoodsFlavor.getGoodsFlavorName());
-                flavor.put("price", dietOrderDetailGoodsFlavor.getPrice());
-                flavors.add(flavor);
+            if (CollectionUtils.isNotEmpty(dietOrderDetailGoodsFlavors)) {
+                List<Map<String, Object>> flavors = new ArrayList<Map<String, Object>>();
+                for (DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor : dietOrderDetailGoodsFlavors) {
+                    Map<String, Object> flavor = new HashMap<String, Object>();
+                    flavor.put("flavorGroupId", dietOrderDetailGoodsFlavor.getGoodsFlavorGroupId());
+                    flavor.put("flavorGroupName", dietOrderDetailGoodsFlavor.getGoodsFlavorGroupName());
+                    flavor.put("flavorId", dietOrderDetailGoodsFlavor.getGoodsFlavorId());
+                    flavor.put("flavorName", dietOrderDetailGoodsFlavor.getGoodsFlavorName());
+                    flavor.put("price", dietOrderDetailGoodsFlavor.getPrice());
+                    flavors.add(flavor);
+                }
+                dietOrderDetailInfo.put("flavors", flavors);
             }
-            dietOrderDetailInfo.put("flavors", flavors);
             dietOrderDetailInfos.add(dietOrderDetailInfo);
         }
         return dietOrderDetailInfos;
