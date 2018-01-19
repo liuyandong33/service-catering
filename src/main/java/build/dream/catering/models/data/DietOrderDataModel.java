@@ -29,7 +29,7 @@ public class DietOrderDataModel {
     public void handleData() {
         BigInteger dietOrderId = dietOrder.getId();
         for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
-            dietOrderDetail.setDietOrderId(dietOrderId);
+            dietOrderDetail.setDietOrderGroupId(dietOrderId);
         }
     }
 }

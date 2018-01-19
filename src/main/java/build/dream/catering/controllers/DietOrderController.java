@@ -1,5 +1,6 @@
 package build.dream.catering.controllers;
 
+import build.dream.catering.models.dietorder.ObtainDietOrderInfoModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
@@ -80,6 +81,22 @@ public class DietOrderController extends BasicController {
             apiRest = dietOrderService.doPayOffline(doPayOfflineModel, bizContent, signature);
         } catch (Exception e) {
             LogUtils.error("提交线下支付请求失败", controllerSimpleName, "doPayOffline", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/obtainDietOrderInfo")
+    @ResponseBody
+    public String obtainDietOrderInfo() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            ObtainDietOrderInfoModel obtainDietOrderInfoModel = ApplicationHandler.instantiateObject(ObtainDietOrderInfoModel.class, requestParameters);
+            obtainDietOrderInfoModel.validateAndThrow();
+            apiRest = dietOrderService.obtainDietOrderInfo(obtainDietOrderInfoModel);
+        } catch (Exception e) {
+            LogUtils.error("获取订单信息失败", controllerSimpleName, "obtainDietOrderInfo", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);

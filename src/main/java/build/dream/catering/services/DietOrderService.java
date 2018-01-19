@@ -1,5 +1,6 @@
 package build.dream.catering.services;
 
+import build.dream.catering.models.dietorder.ObtainDietOrderInfoModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
@@ -50,6 +51,8 @@ public class DietOrderService {
     private SequenceMapper sequenceMapper;
     @Autowired
     private GoodsFlavorGroupMapper goodsFlavorGroupMapper;
+    @Autowired
+    private DietOrderGroupMapper dietOrderGroupMapper;
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveDietOrder(SaveDietOrderModel saveDietOrderModel) {
@@ -161,8 +164,6 @@ public class DietOrderService {
                 Validate.notNull(goodsFlavorGroup, "口味组不存在！");
 
                 DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor = new DietOrderDetailGoodsFlavor();
-                dietOrderDetailGoodsFlavor.setTenantId(saveDietOrderModel.getTenantId());
-                dietOrderDetailGoodsFlavor.setBranchId(saveDietOrderModel.getBranchId());
 
                 dietOrderDetailGoodsFlavor.setGoodsFlavorGroupId(goodsFlavorGroup.getId());
                 dietOrderDetailGoodsFlavor.setGoodsFlavorGroupName(goodsFlavorGroup.getName());
@@ -179,11 +180,11 @@ public class DietOrderService {
             totalAmount.add(goodsFlavorsTotalAmount);
             payableAmount.add(goodsFlavorsTotalAmount);
             DietOrderDetail dietOrderDetail = new DietOrderDetail();
-            dietOrderDetail.setDietOrderId(dietOrder.getId());
+//            dietOrderDetail.setDietOrderId(dietOrder.getId());
             dietOrderDetail.setGoodsId(goods.getId());
             dietOrderDetail.setGoodsSpecificationId(goodsSpecification.getId());
             dietOrderDetail.setPrice(goodsSpecification.getPrice().add(goodsFlavorsTotalAmount));
-            dietOrderDetail.setAmount(dietOrderModel.getAmount());
+//            dietOrderDetail.setQuantity(dietOrderModel.getAmount());
             dietOrderDetail.setTotalAmount(dietOrderDetail.getPrice().multiply(NumberUtils.createBigDecimal(dietOrderModel.getAmount().toString())));
             dietOrderDetail.setDiscountAmount(BigDecimal.ZERO);
             dietOrderDetail.setPayableAmount(dietOrderDetail.getPrice().multiply(NumberUtils.createBigDecimal(dietOrderModel.getAmount().toString())));
@@ -296,5 +297,103 @@ public class DietOrderService {
         apiRest.setMessage("提交线下支付请求成功！");
         apiRest.setSuccessful(true);
         return apiRest;
+    }
+
+    @Transactional(readOnly = true)
+    public ApiRest obtainDietOrderInfo(ObtainDietOrderInfoModel obtainDietOrderInfoModel) {
+        SearchModel dietOrderSearchModel = new SearchModel(true);
+        dietOrderSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainDietOrderInfoModel.getDietOrderId());
+        dietOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainDietOrderInfoModel.getTenantId());
+        dietOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainDietOrderInfoModel.getBranchId());
+        DietOrder dietOrder = dietOrderMapper.find(dietOrderSearchModel);
+        Validate.notNull(dietOrder, "订单不存在！");
+
+        SearchModel dietOrderGroupSearchModel = new SearchModel(true);
+        dietOrderGroupSearchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, dietOrder.getId());
+        List<DietOrderGroup> dietOrderGroups = dietOrderGroupMapper.findAll(dietOrderGroupSearchModel);
+        List<BigInteger> dietOrderGroupIds = new ArrayList<BigInteger>();
+        for (DietOrderGroup dietOrderGroup : dietOrderGroups) {
+            dietOrderGroupIds.add(dietOrderGroup.getId());
+        }
+
+        SearchModel dietOrderDetailSearchModel = new SearchModel(true);
+        dietOrderDetailSearchModel.addSearchCondition("diet_order_group_id", Constants.SQL_OPERATION_SYMBOL_IN, dietOrderGroupIds);
+        List<DietOrderDetail> dietOrderDetails = dietOrderDetailMapper.findAll(dietOrderDetailSearchModel);
+        Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap = new HashMap<BigInteger, List<DietOrderDetail>>();
+        List<BigInteger> dietOrderDetailIds = new ArrayList<BigInteger>();
+        for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
+            dietOrderDetailIds.add(dietOrderDetail.getId());
+            List<DietOrderDetail> dietOrderDetailList = dietOrderDetailMap.get(dietOrderDetail.getDietOrderGroupId());
+            if (dietOrderDetailList == null) {
+                dietOrderDetailList = new ArrayList<DietOrderDetail>();
+                dietOrderDetailMap.put(dietOrderDetail.getDietOrderGroupId(), dietOrderDetailList);
+            }
+            dietOrderDetailList.add(dietOrderDetail);
+            dietOrderDetailIds.add(dietOrderDetail.getId());
+        }
+
+        ApiRest apiRest = new ApiRest(obtainDietOrderInfo(dietOrder, dietOrderGroups, dietOrderDetailMap), "获取订单信息成功！");
+        return apiRest;
+    }
+
+    private Map<String, Object> obtainDietOrderInfo(DietOrder dietOrder, List<DietOrderGroup> dietOrderGroups, Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap) {
+        Map<String, Object> dietOrderInfo = new HashMap<String, Object>();
+        dietOrderInfo.put("id", dietOrder.getId());
+        dietOrderInfo.put("orderNumber", dietOrder.getOrderNumber());
+        dietOrderInfo.put("tenantId", dietOrder.getTenantId());
+        dietOrderInfo.put("tenantCode", dietOrder.getTenantCode());
+        dietOrderInfo.put("branchId", dietOrder.getBranchId());
+        dietOrderInfo.put("orderType", dietOrder.getOrderType());
+        dietOrderInfo.put("orderStatus", dietOrder.getOrderStatus());
+        dietOrderInfo.put("payStatus", dietOrder.getPayStatus());
+        dietOrderInfo.put("refundStatus", dietOrder.getRefundStatus());
+        dietOrderInfo.put("totalAmount", dietOrder.getTotalAmount());
+        dietOrderInfo.put("discountAmount", dietOrder.getDiscountAmount());
+        dietOrderInfo.put("payableAmount", dietOrder.getPayableAmount());
+        dietOrderInfo.put("paidAmount", dietOrder.getPaidAmount());
+        dietOrderInfo.put("paidType", dietOrder.getPaidType());
+        dietOrderInfo.put("remark", dietOrder.getRemark());
+        dietOrderInfo.put("deliveryAddress", dietOrder.getDeliveryAddress());
+        dietOrderInfo.put("deliveryLongitude", dietOrder.getDeliveryLongitude());
+        dietOrderInfo.put("deliveryLatitude", dietOrder.getDeliveryLatitude());
+        dietOrderInfo.put("deliverTime", dietOrder.getDeliverTime());
+        dietOrderInfo.put("activeTime", dietOrder.getActiveTime());
+        dietOrderInfo.put("deliverFee", dietOrder.getDeliverFee());
+        dietOrderInfo.put("telephoneNumber", dietOrder.getTelephoneNumber());
+        dietOrderInfo.put("daySerialNumber", dietOrder.getDaySerialNumber());
+        dietOrderInfo.put("consignee", dietOrder.getConsignee());
+        List<Map<String, Object>> groups = new ArrayList<Map<String, Object>>();
+        for (DietOrderGroup dietOrderGroup : dietOrderGroups) {
+            groups.add(obtainGroup(dietOrderGroup, dietOrderDetailMap.get(dietOrderGroup.getId())));
+        }
+        dietOrderInfo.put("groups", groups);
+        return dietOrderInfo;
+    }
+
+    private Map<String, Object> obtainGroup(DietOrderGroup dietOrderGroup, List<DietOrderDetail> dietOrderDetails) {
+        Map<String, Object> group = new HashMap<String, Object>();
+        group.put("id", dietOrderGroup.getId());
+        group.put("name", dietOrderGroup.getName());
+        group.put("type", dietOrderGroup.getType());
+        group.put("details", obtainDetails(dietOrderDetails));
+        return group;
+    }
+
+    private List<Map<String, Object>> obtainDetails(List<DietOrderDetail> dietOrderDetails) {
+        List<Map<String, Object>> dietOrderDetailInfos = new ArrayList<Map<String, Object>>();
+        for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
+            Map<String, Object> dietOrderDetailInfo = new HashMap<String, Object>();
+            dietOrderDetailInfo.put("goodsId", dietOrderDetail.getGoodsId());
+            dietOrderDetailInfo.put("goodsName", dietOrderDetail.getGoodsName());
+            dietOrderDetailInfo.put("goodsSpecificationId", dietOrderDetail.getGoodsSpecificationId());
+            dietOrderDetailInfo.put("goodsSpecificationName", dietOrderDetail.getGoodsSpecificationName());
+            dietOrderDetailInfo.put("price", dietOrderDetail.getPrice());
+            dietOrderDetailInfo.put("quantity", dietOrderDetail.getQuantity());
+            dietOrderDetailInfo.put("totalAmount", dietOrderDetail.getTotalAmount());
+            dietOrderDetailInfo.put("discountAmount", dietOrderDetail.getDiscountAmount());
+            dietOrderDetailInfo.put("payableAmount", dietOrderDetail.getPayableAmount());
+            dietOrderDetailInfos.add(dietOrderDetailInfo);
+        }
+        return dietOrderDetailInfos;
     }
 }

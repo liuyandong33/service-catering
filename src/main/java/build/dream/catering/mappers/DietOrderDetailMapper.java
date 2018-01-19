@@ -12,5 +12,5 @@ public interface DietOrderDetailMapper {
     long insertAll(List<DietOrderDetail> dietOrderDetails);
     long update(DietOrderDetail dietOrderDetail);
     DietOrderDetail find(SearchModel searchModel);
-    DietOrderDetail findAll(SearchModel searchModel);
+    List<DietOrderDetail> findAll(SearchModel searchModel);
 }

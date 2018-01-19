@@ -18,10 +18,10 @@
     </select>
 
     <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.DietOrderDetail">
-        SELECT * FROM activity <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
+        SELECT * FROM diet_order_detail <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
     </select>
 
     <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.DietOrderDetail">
-        SELECT * FROM activity <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
+        SELECT * FROM diet_order_detail <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
     </select>
 </mapper>
