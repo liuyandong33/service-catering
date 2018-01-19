@@ -1,19 +1,17 @@
 package build.dream.catering.services;
 
-import build.dream.catering.models.dietorder.ObtainDietOrderInfoModel;
-import build.dream.common.api.ApiRest;
-import build.dream.common.constants.DietOrderConstants;
-import build.dream.common.erp.catering.domains.*;
-import build.dream.common.saas.domains.DietOrderDetailGoodsFlavor;
-import build.dream.common.saas.domains.TenantSecretKey;
-import build.dream.common.utils.*;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.*;
 import build.dream.catering.models.dietorder.DoPayModel;
 import build.dream.catering.models.dietorder.DoPayOfflineModel;
+import build.dream.catering.models.dietorder.ObtainDietOrderInfoModel;
 import build.dream.catering.models.dietorder.SaveDietOrderModel;
 import build.dream.catering.utils.TenantSecretKeyUtils;
-import org.apache.commons.codec.DecoderException;
+import build.dream.common.api.ApiRest;
+import build.dream.common.constants.DietOrderConstants;
+import build.dream.common.erp.catering.domains.*;
+import build.dream.common.saas.domains.TenantSecretKey;
+import build.dream.common.utils.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
@@ -53,6 +51,8 @@ public class DietOrderService {
     private GoodsFlavorGroupMapper goodsFlavorGroupMapper;
     @Autowired
     private DietOrderGroupMapper dietOrderGroupMapper;
+    @Autowired
+    private DietOrderDetailGoodsFlavorMapper dietOrderDetailGoodsFlavorMapper;
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveDietOrder(SaveDietOrderModel saveDietOrderModel) {
@@ -332,11 +332,24 @@ public class DietOrderService {
             dietOrderDetailIds.add(dietOrderDetail.getId());
         }
 
-        ApiRest apiRest = new ApiRest(obtainDietOrderInfo(dietOrder, dietOrderGroups, dietOrderDetailMap), "获取订单信息成功！");
+        SearchModel dietOrderDetailGoodsFlavorSearchModel = new SearchModel(true);
+        dietOrderDetailGoodsFlavorSearchModel.addSearchCondition("diet_order_detail_id", Constants.SQL_OPERATION_SYMBOL_IN, dietOrderDetailIds);
+        List<DietOrderDetailGoodsFlavor> dietOrderDetailGoodsFlavors = dietOrderDetailGoodsFlavorMapper.findAll(dietOrderDetailGoodsFlavorSearchModel);
+        Map<BigInteger, List<DietOrderDetailGoodsFlavor>> dietOrderDetailGoodsFlavorMap = new HashMap<BigInteger, List<DietOrderDetailGoodsFlavor>>();
+        for (DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor : dietOrderDetailGoodsFlavors) {
+            List<DietOrderDetailGoodsFlavor> dietOrderDetailGoodsFlavorList = dietOrderDetailGoodsFlavorMap.get(dietOrderDetailGoodsFlavor.getDietOrderDetailId());
+            if (dietOrderDetailGoodsFlavorList == null) {
+                dietOrderDetailGoodsFlavorList = new ArrayList<DietOrderDetailGoodsFlavor>();
+                dietOrderDetailGoodsFlavorMap.put(dietOrderDetailGoodsFlavor.getDietOrderDetailId(), dietOrderDetailGoodsFlavorList);
+            }
+            dietOrderDetailGoodsFlavorList.add(dietOrderDetailGoodsFlavor);
+        }
+
+        ApiRest apiRest = new ApiRest(buildDietOrderInfo(dietOrder, dietOrderGroups, dietOrderDetailMap, dietOrderDetailGoodsFlavorMap), "获取订单信息成功！");
         return apiRest;
     }
 
-    private Map<String, Object> obtainDietOrderInfo(DietOrder dietOrder, List<DietOrderGroup> dietOrderGroups, Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap) {
+    private Map<String, Object> buildDietOrderInfo(DietOrder dietOrder, List<DietOrderGroup> dietOrderGroups, Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap, Map<BigInteger, List<DietOrderDetailGoodsFlavor>> dietOrderDetailGoodsFlavorMap) {
         Map<String, Object> dietOrderInfo = new HashMap<String, Object>();
         dietOrderInfo.put("id", dietOrder.getId());
         dietOrderInfo.put("orderNumber", dietOrder.getOrderNumber());
@@ -362,24 +375,24 @@ public class DietOrderService {
         dietOrderInfo.put("telephoneNumber", dietOrder.getTelephoneNumber());
         dietOrderInfo.put("daySerialNumber", dietOrder.getDaySerialNumber());
         dietOrderInfo.put("consignee", dietOrder.getConsignee());
-        List<Map<String, Object>> groups = new ArrayList<Map<String, Object>>();
-        for (DietOrderGroup dietOrderGroup : dietOrderGroups) {
-            groups.add(obtainGroup(dietOrderGroup, dietOrderDetailMap.get(dietOrderGroup.getId())));
-        }
-        dietOrderInfo.put("groups", groups);
+        dietOrderInfo.put("groups", buildGroups(dietOrderGroups, dietOrderDetailMap, dietOrderDetailGoodsFlavorMap));
         return dietOrderInfo;
     }
 
-    private Map<String, Object> obtainGroup(DietOrderGroup dietOrderGroup, List<DietOrderDetail> dietOrderDetails) {
-        Map<String, Object> group = new HashMap<String, Object>();
-        group.put("id", dietOrderGroup.getId());
-        group.put("name", dietOrderGroup.getName());
-        group.put("type", dietOrderGroup.getType());
-        group.put("details", obtainDetails(dietOrderDetails));
-        return group;
+    private List<Map<String,Object>> buildGroups(List<DietOrderGroup> dietOrderGroups, Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap, Map<BigInteger, List<DietOrderDetailGoodsFlavor>> dietOrderDetailGoodsFlavorMap) {
+        List<Map<String, Object>> groups = new ArrayList<Map<String, Object>>();
+        for (DietOrderGroup dietOrderGroup : dietOrderGroups) {
+            Map<String, Object> group = new HashMap<String, Object>();
+            group.put("id", dietOrderGroup.getId());
+            group.put("name", dietOrderGroup.getName());
+            group.put("type", dietOrderGroup.getType());
+            group.put("details", buildDetails(dietOrderDetailMap.get(dietOrderGroup.getId()), dietOrderDetailGoodsFlavorMap));
+            groups.add(group);
+        }
+        return groups;
     }
 
-    private List<Map<String, Object>> obtainDetails(List<DietOrderDetail> dietOrderDetails) {
+    private List<Map<String, Object>> buildDetails(List<DietOrderDetail> dietOrderDetails, Map<BigInteger, List<DietOrderDetailGoodsFlavor>> dietOrderDetailGoodsFlavorMap) {
         List<Map<String, Object>> dietOrderDetailInfos = new ArrayList<Map<String, Object>>();
         for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
             Map<String, Object> dietOrderDetailInfo = new HashMap<String, Object>();
@@ -392,6 +405,19 @@ public class DietOrderService {
             dietOrderDetailInfo.put("totalAmount", dietOrderDetail.getTotalAmount());
             dietOrderDetailInfo.put("discountAmount", dietOrderDetail.getDiscountAmount());
             dietOrderDetailInfo.put("payableAmount", dietOrderDetail.getPayableAmount());
+            List<Map<String, Object>> flavors = new ArrayList<Map<String, Object>>();
+
+            List<DietOrderDetailGoodsFlavor> dietOrderDetailGoodsFlavors = dietOrderDetailGoodsFlavorMap.get(dietOrderDetail.getId());
+            for (DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor : dietOrderDetailGoodsFlavors) {
+                Map<String, Object> flavor = new HashMap<String, Object>();
+                flavor.put("flavorGroupId", dietOrderDetailGoodsFlavor.getGoodsFlavorGroupId());
+                flavor.put("flavorGroupName", dietOrderDetailGoodsFlavor.getGoodsFlavorGroupName());
+                flavor.put("flavorId", dietOrderDetailGoodsFlavor.getGoodsFlavorId());
+                flavor.put("flavorName", dietOrderDetailGoodsFlavor.getGoodsFlavorName());
+                flavor.put("price", dietOrderDetailGoodsFlavor.getPrice());
+                flavors.add(flavor);
+            }
+            dietOrderDetailInfo.put("flavors", flavors);
             dietOrderDetailInfos.add(dietOrderDetailInfo);
         }
         return dietOrderDetailInfos;
