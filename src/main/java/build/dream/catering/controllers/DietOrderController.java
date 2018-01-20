@@ -25,67 +25,6 @@ public class DietOrderController extends BasicController {
     @Autowired
     private DietOrderService dietOrderService;
 
-    @RequestMapping(value = "/saveDietOrder")
-    @ResponseBody
-    public String saveDietOrder() {
-        ApiRest apiRest = null;
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
-            String orderInfo = requestParameters.get("orderInfo");
-            Validate.notNull(orderInfo, ApplicationHandler.obtainParameterErrorMessage("orderInfo"));
-            List<SaveDietOrderModel.DietOrderModel> dietOrderModels = GsonUtils.jsonToList(orderInfo, SaveDietOrderModel.DietOrderModel.class);
-
-            SaveDietOrderModel saveDietOrderModel = ApplicationHandler.instantiateObject(SaveDietOrderModel.class, requestParameters);
-            saveDietOrderModel.setDietOrderModels(dietOrderModels);
-            saveDietOrderModel.validateAndThrow();
-
-            apiRest = dietOrderService.saveDietOrder(saveDietOrderModel);
-        } catch (Exception e) {
-            LogUtils.error("保存订单失败", controllerSimpleName, "saveDietOrder", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
-    }
-
-    @RequestMapping(value = "/doPay")
-    @ResponseBody
-    public String doPay() {
-        ApiRest apiRest = null;
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
-            DoPayModel doPayModel = ApplicationHandler.instantiateObject(DoPayModel.class, requestParameters);
-            doPayModel.validateAndThrow();
-
-            apiRest = dietOrderService.doPay(doPayModel);
-        } catch (Exception e) {
-            LogUtils.error("提交支付请求失败", controllerSimpleName, "doPay", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
-    }
-
-    @RequestMapping(value = "/doPayOffline")
-    @ResponseBody
-    public String doPayOffline() {
-        ApiRest apiRest = null;
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
-            String bizContent = requestParameters.get("bizContent");
-            Validate.notNull(bizContent, ApplicationHandler.obtainParameterErrorMessage("bizContent"));
-
-            String signature = requestParameters.get("signature");
-            Validate.notNull(signature, ApplicationHandler.obtainParameterErrorMessage("signature"));
-
-            DoPayOfflineModel doPayOfflineModel = GsonUtils.fromJson(bizContent, DoPayOfflineModel.class);
-            doPayOfflineModel.validateAndThrow();
-            apiRest = dietOrderService.doPayOffline(doPayOfflineModel, bizContent, signature);
-        } catch (Exception e) {
-            LogUtils.error("提交线下支付请求失败", controllerSimpleName, "doPayOffline", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
-    }
-
     @RequestMapping(value = "/obtainDietOrderInfo")
     @ResponseBody
     public String obtainDietOrderInfo() {
@@ -97,6 +36,23 @@ public class DietOrderController extends BasicController {
             apiRest = dietOrderService.obtainDietOrderInfo(obtainDietOrderInfoModel);
         } catch (Exception e) {
             LogUtils.error("获取订单信息失败", controllerSimpleName, "obtainDietOrderInfo", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/saveDietOrder")
+    @ResponseBody
+    public String saveDietOrder() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            SaveDietOrderModel saveDietOrderModel = ApplicationHandler.instantiateObject(SaveDietOrderModel.class, requestParameters);
+            saveDietOrderModel.validateAndThrow();
+
+            apiRest = dietOrderService.saveDietOrder(saveDietOrderModel);
+        } catch (Exception e) {
+            LogUtils.error("保存订单失败", controllerSimpleName, "saveDietOrder", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
