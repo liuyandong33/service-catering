@@ -6,8 +6,6 @@ import build.dream.catering.mappers.*;
 import build.dream.catering.models.goods.*;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
-import build.dream.common.utils.BeanUtils;
-import build.dream.common.utils.PagedSearchModel;
 import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.UpdateModel;
 import org.apache.commons.collections.CollectionUtils;
@@ -46,25 +44,6 @@ public class GoodsService {
     public ApiRest listGoodses(ListGoodsesModel listGoodsesModel) {
         BigInteger tenantId = listGoodsesModel.getTenantId();
         BigInteger branchId = listGoodsesModel.getBranchId();
-        /*PagedSearchModel goodsPagedSearchModel = new PagedSearchModel(true);
-        goodsPagedSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        goodsPagedSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        Integer page = listGoodsesModel.getPage();
-        if (page == null) {
-            page = 1;
-        }
-        Integer rows = listGoodsesModel.getRows();
-        if (rows == null) {
-            rows = 20;
-        }
-        goodsPagedSearchModel.setPage(page);
-        goodsPagedSearchModel.setRows(rows);
-        List<Goods> goodses = goodsMapper.findAllPaged(goodsPagedSearchModel);
-        List<BigInteger> goodsIds = new ArrayList<BigInteger>();
-        for (Goods goods : goodses) {
-            goodsIds.add(goods.getId());
-        }*/
-
         String countSql = "SELECT COUNT(1) FROM goods LEFT OUTER JOIN goods_category ON goods_category.id = goods.category_id WHERE goods.tenant_id = #{tenantId} AND goods.branch_id = #{branchId} AND goods.deleted = 0";
         Map<String, Object> countGoodsParameters = new HashMap<String, Object>();
         countGoodsParameters.put("tenantId", tenantId);
@@ -89,8 +68,6 @@ public class GoodsService {
             }
 
             SearchModel goodsSpecificationSearchModel = new SearchModel(true);
-            goodsSpecificationSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-            goodsSpecificationSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
             goodsSpecificationSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
             List<GoodsSpecification> goodsSpecifications = goodsSpecificationMapper.findAll(goodsSpecificationSearchModel);
 
@@ -105,8 +82,6 @@ public class GoodsService {
             }
 
             SearchModel goodsFlavorGroupSearchModel = new SearchModel(true);
-            goodsFlavorGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-            goodsFlavorGroupSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
             goodsFlavorGroupSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
             List<GoodsFlavorGroup> goodsFlavorGroups = goodsFlavorGroupMapper.findAll(goodsFlavorGroupSearchModel);
 
@@ -118,8 +93,6 @@ public class GoodsService {
                 }
 
                 SearchModel goodsFlavorSearchModel = new SearchModel(true);
-                goodsFlavorSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-                goodsFlavorSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
                 goodsFlavorSearchModel.addSearchCondition("goods_flavor_group_id", Constants.SQL_OPERATION_SYMBOL_IN, goodsFlavorGroupIds);
                 List<GoodsFlavor> goodsFlavors = goodsFlavorMapper.findAll(goodsFlavorSearchModel);
 
@@ -132,23 +105,13 @@ public class GoodsService {
                     }
                     goodsFlavorList.add(goodsFlavor);
                 }
-
-                for (GoodsFlavorGroup goodsFlavorGroup : goodsFlavorGroups) {
-                    List<Map<String, Object>> goodsFlavorGroupList = goodsFlavorGroupMap.get(goodsFlavorGroup.getGoodsId());
-                    if (goodsFlavorGroupList == null) {
-                        goodsFlavorGroupList = new ArrayList<Map<String, Object>>();
-                        goodsFlavorGroupMap.put(goodsFlavorGroup.getGoodsId(), goodsFlavorGroupList);
-                    }
-                    Map<String, Object> map = BeanUtils.beanToMap(goodsFlavorGroup);
-                    map.put("goodsFlavors", goodsFlavorMap.get(goodsFlavorGroup.getId()));
-                    goodsFlavorGroupList.add(map);
-                }
+                goodsFlavorGroupMap = buildFlavorGroups(goodsFlavorGroups, goodsFlavorMap);
             }
 
             for (Map<String, Object> goodsInfo : goodsInfos) {
                 BigInteger goodsId = BigInteger.valueOf(MapUtils.getLongValue(goodsInfo, "id"));
-                goodsInfo.put("goodsSpecifications", goodsSpecificationMap.get(goodsId));
-                goodsInfo.put("goodsFlavorGroups", goodsFlavorGroupMap.get(goodsId));
+                goodsInfo.put("goodsSpecifications", buildGoodsSpecificationInfos(goodsSpecificationMap.get(goodsId)));
+                goodsInfo.put("flavorGroups", goodsFlavorGroupMap.get(goodsId));
             }
         }
 
@@ -156,6 +119,45 @@ public class GoodsService {
         data.put("total", total);
         data.put("rows", goodsInfos);
         return new ApiRest(data, "查询菜品信息成功！");
+    }
+
+    public Map<BigInteger, List<Map<String, Object>>> buildFlavorGroups(List<GoodsFlavorGroup> goodsFlavorGroups, Map<BigInteger, List<GoodsFlavor>> goodsFlavorMap) {
+        Map<BigInteger, List<Map<String, Object>>> flavorGroups = new HashMap<BigInteger, List<Map<String,Object>>>();
+        for (GoodsFlavorGroup goodsFlavorGroup : goodsFlavorGroups) {
+            Map<String, Object> goodsFlavorGroupInfo = new HashMap<String, Object>();
+            goodsFlavorGroupInfo.put("id", goodsFlavorGroup.getId());
+            goodsFlavorGroupInfo.put("name", goodsFlavorGroup.getName());
+
+            List<Map<String, Object>> goodsFlavorInfos = new ArrayList<Map<String, Object>>();
+            List<GoodsFlavor> goodsFlavors = goodsFlavorMap.get(goodsFlavorGroup.getGoodsId());
+            for (GoodsFlavor goodsFlavor : goodsFlavors) {
+                Map<String, Object> goodsFlavorInfo = new HashMap<String, Object>();
+                goodsFlavorInfo.put("id", goodsFlavor.getId());
+                goodsFlavorInfo.put("name", goodsFlavor.getName());
+                goodsFlavorInfo.put("price", goodsFlavor.getPrice());
+                goodsFlavorInfos.add(goodsFlavorInfo);
+            }
+            goodsFlavorGroupInfo.put("flavors", goodsFlavorInfos);
+            List<Map<String, Object>> goodsFlavorGroupInfos = flavorGroups.get(goodsFlavorGroup.getGoodsId());
+            if (goodsFlavorGroupInfos == null) {
+                goodsFlavorGroupInfos = new ArrayList<Map<String, Object>>();
+                flavorGroups.put(goodsFlavorGroup.getGoodsId(), goodsFlavorGroupInfos);
+            }
+            goodsFlavorGroupInfos.add(goodsFlavorGroupInfo);
+        }
+        return flavorGroups;
+    }
+
+    public List<Map<String, Object>> buildGoodsSpecificationInfos(List<GoodsSpecification> goodsSpecifications) {
+        List<Map<String, Object>> goodsSpecificationInfos = new ArrayList<Map<String, Object>>();
+        for (GoodsSpecification goodsSpecification : goodsSpecifications) {
+            Map<String, Object> goodsSpecificationInfo = new HashMap<String, Object>();
+            goodsSpecificationInfo.put("id", goodsSpecification.getId());
+            goodsSpecificationInfo.put("name", goodsSpecification.getName());
+            goodsSpecificationInfo.put("price", goodsSpecification.getPrice());
+            goodsSpecificationInfos.add(goodsSpecificationInfo);
+        }
+        return goodsSpecificationInfos;
     }
 
     /**
@@ -212,7 +214,7 @@ public class GoodsService {
                     goodsSpecification.setLastUpdateRemark("修改规格信息！");
                     goodsSpecificationMapper.update(goodsSpecification);
                 } else {
-                    goodsSpecifications.add(buildGoodsSpecification(goodsSpecificationModel, goods.getId(), tenantId, tenantCode, branchId, userId, "新增规格信息！"));
+                    goodsSpecifications.add(buildGoodsSpecification(goodsSpecificationModel, goods.getId(), userId, "新增规格信息！"));
                 }
             }
             goodsSpecificationMapper.insertAll(goodsSpecifications);
@@ -231,10 +233,10 @@ public class GoodsService {
             List<SaveGoodsModel.GoodsSpecificationModel> goodsSpecificationModels = saveGoodsModel.getGoodsSpecificationModels();
             List<GoodsSpecification> goodsSpecifications = new ArrayList<GoodsSpecification>();
             for (SaveGoodsModel.GoodsSpecificationModel goodsSpecificationModel : goodsSpecificationModels) {
-                goodsSpecifications.add(buildGoodsSpecification(goodsSpecificationModel, goods.getId(), tenantId, tenantCode, branchId, userId, "新增规格信息！"));
+                goodsSpecifications.add(buildGoodsSpecification(goodsSpecificationModel, goods.getId(), userId, "新增规格信息！"));
             }
             goodsSpecificationMapper.insertAll(goodsSpecifications);
-            saveGoodsFlavorGroups(saveGoodsModel.getGoodsFlavorGroupModels(), goods.getId(), tenantId, branchId, tenantCode, userId);
+            saveGoodsFlavorGroups(saveGoodsModel.getGoodsFlavorGroupModels(), goods.getId(), userId);
         }
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("保存菜品信息成功！");
@@ -247,12 +249,9 @@ public class GoodsService {
      *
      * @param goodsFlavorGroupModels
      * @param goodsId
-     * @param tenantId
-     * @param branchId
-     * @param tenantCode
      * @param userId
      */
-    private void saveGoodsFlavorGroups(List<SaveGoodsModel.GoodsFlavorGroupModel> goodsFlavorGroupModels, BigInteger goodsId, BigInteger tenantId, BigInteger branchId, String tenantCode, BigInteger userId) {
+    private void saveGoodsFlavorGroups(List<SaveGoodsModel.GoodsFlavorGroupModel> goodsFlavorGroupModels, BigInteger goodsId, BigInteger userId) {
         if (CollectionUtils.isNotEmpty(goodsFlavorGroupModels)) {
             Map<Integer, GoodsFlavorGroup> goodsFlavorGroupMap = new HashMap<Integer, GoodsFlavorGroup>();
             Map<GoodsFlavor, Integer> goodsFlavorMap = new HashMap<GoodsFlavor, Integer>();
@@ -260,9 +259,6 @@ public class GoodsService {
                 GoodsFlavorGroup goodsFlavorGroup = new GoodsFlavorGroup();
                 goodsFlavorGroup.setGoodsId(goodsId);
                 goodsFlavorGroup.setName(goodsFlavorGroupModel.getName());
-                goodsFlavorGroup.setTenantId(tenantId);
-                goodsFlavorGroup.setBranchId(branchId);
-                goodsFlavorGroup.setTenantCode(tenantCode);
                 goodsFlavorGroup.setCreateUserId(userId);
                 goodsFlavorGroup.setLastUpdateUserId(userId);
                 goodsFlavorGroup.setLastUpdateRemark("新增菜品口味组！");
@@ -273,9 +269,6 @@ public class GoodsService {
                     GoodsFlavor goodsFlavor = new GoodsFlavor();
                     goodsFlavor.setName(goodsFlavorModel.getName());
                     goodsFlavor.setPrice(goodsFlavorModel.getPrice());
-                    goodsFlavor.setTenantId(tenantId);
-                    goodsFlavor.setTenantCode(tenantCode);
-                    goodsFlavor.setBranchId(branchId);
                     goodsFlavor.setCreateUserId(userId);
                     goodsFlavor.setLastUpdateUserId(userId);
                     goodsFlavor.setLastUpdateRemark("新增菜品口味！");
@@ -295,21 +288,15 @@ public class GoodsService {
      * 构建菜品规格
      * @param goodsSpecificationModel
      * @param goodsId
-     * @param tenantId
-     * @param tenantCode
-     * @param branchId
      * @param userId
      * @param lastUpdateRemark
      * @return
      */
-    private GoodsSpecification buildGoodsSpecification(SaveGoodsModel.GoodsSpecificationModel goodsSpecificationModel, BigInteger goodsId, BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger userId, String lastUpdateRemark) {
+    private GoodsSpecification buildGoodsSpecification(SaveGoodsModel.GoodsSpecificationModel goodsSpecificationModel, BigInteger goodsId, BigInteger userId, String lastUpdateRemark) {
         GoodsSpecification goodsSpecification = new GoodsSpecification();
         goodsSpecification.setGoodsId(goodsId);
         goodsSpecification.setName(goodsSpecificationModel.getName());
         goodsSpecification.setPrice(goodsSpecificationModel.getPrice());
-        goodsSpecification.setTenantId(tenantId);
-        goodsSpecification.setTenantCode(tenantCode);
-        goodsSpecification.setBranchId(branchId);
         goodsSpecification.setCreateUserId(userId);
         goodsSpecification.setLastUpdateUserId(userId);
         goodsSpecification.setLastUpdateRemark(lastUpdateRemark);
