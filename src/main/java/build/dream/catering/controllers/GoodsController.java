@@ -45,19 +45,6 @@ public class GoodsController extends BasicController {
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
             SaveGoodsModel saveGoodsModel = ApplicationHandler.instantiateObject(SaveGoodsModel.class, requestParameters);
-
-            String goodsSpecifications = requestParameters.get("goodsSpecifications");
-            ApplicationHandler.notEmpty(goodsSpecifications, "goodsSpecifications");
-
-            List<SaveGoodsModel.GoodsSpecificationModel> goodsSpecificationModels = GsonUtils.jsonToList(goodsSpecifications, SaveGoodsModel.GoodsSpecificationModel.class);
-            saveGoodsModel.setGoodsSpecificationModels(goodsSpecificationModels);
-
-            String goodsFlavorGroups = requestParameters.get("goodsFlavorGroups");
-            if (StringUtils.isNotBlank(goodsFlavorGroups)) {
-                List<SaveGoodsModel.GoodsFlavorGroupModel> goodsFlavorGroupModels = GsonUtils.jsonToList(goodsFlavorGroups, SaveGoodsModel.GoodsFlavorGroupModel.class);
-                saveGoodsModel.setGoodsFlavorGroupModels(goodsFlavorGroupModels);
-            }
-
             saveGoodsModel.validateAndThrow();
             apiRest = goodsService.saveGoods(saveGoodsModel);
         } catch (Exception e) {
@@ -100,12 +87,7 @@ public class GoodsController extends BasicController {
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
             SavePackageModel savePackageModel = ApplicationHandler.instantiateObject(SavePackageModel.class, requestParameters);
-            String packageGroups = requestParameters.get("packageGroups");
-            ApplicationHandler.notEmpty(packageGroups, "packageGroups");
-            List<SavePackageModel.PackageGroupModel> packageGroupModels = GsonUtils.jsonToList(packageGroups, SavePackageModel.PackageGroupModel.class);
-            savePackageModel.setPackageGroupModels(packageGroupModels);
             savePackageModel.validateAndThrow();
-
             apiRest = goodsService.savePackage(savePackageModel);
         } catch (Exception e) {
             LogUtils.error("保存套餐失败", controllerSimpleName, "savePackage", e, requestParameters);

@@ -77,11 +77,6 @@ public class GoodsService {
 
             Map<BigInteger, List<Map<String, Object>>> goodsFlavorGroupMap = new HashMap<BigInteger, List<Map<String, Object>>>();
             if (CollectionUtils.isNotEmpty(goodsFlavorGroups)) {
-                List<BigInteger> goodsFlavorGroupIds = new ArrayList<BigInteger>();
-                for (GoodsFlavorGroup goodsFlavorGroup : goodsFlavorGroups) {
-                    goodsFlavorGroupIds.add(goodsFlavorGroup.getId());
-                }
-
                 SearchModel goodsFlavorSearchModel = new SearchModel(true);
                 goodsFlavorSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
                 goodsFlavorSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
@@ -106,6 +101,18 @@ public class GoodsService {
             }
         }
         return new ApiRest(goodsInfos, "查询菜品信息成功！");
+    }
+
+    public List<Map<String, Object>> buildGoodsSpecificationInfos(List<GoodsSpecification> goodsSpecifications) {
+        List<Map<String, Object>> goodsSpecificationInfos = new ArrayList<Map<String, Object>>();
+        for (GoodsSpecification goodsSpecification : goodsSpecifications) {
+            Map<String, Object> goodsSpecificationInfo = new HashMap<String, Object>();
+            goodsSpecificationInfo.put("id", goodsSpecification.getId());
+            goodsSpecificationInfo.put("name", goodsSpecification.getName());
+            goodsSpecificationInfo.put("price", goodsSpecification.getPrice());
+            goodsSpecificationInfos.add(goodsSpecificationInfo);
+        }
+        return goodsSpecificationInfos;
     }
 
     public Map<BigInteger, List<Map<String, Object>>> buildFlavorGroups(List<GoodsFlavorGroup> goodsFlavorGroups, Map<BigInteger, List<GoodsFlavor>> goodsFlavorMap) {
@@ -135,18 +142,6 @@ public class GoodsService {
         return flavorGroups;
     }
 
-    public List<Map<String, Object>> buildGoodsSpecificationInfos(List<GoodsSpecification> goodsSpecifications) {
-        List<Map<String, Object>> goodsSpecificationInfos = new ArrayList<Map<String, Object>>();
-        for (GoodsSpecification goodsSpecification : goodsSpecifications) {
-            Map<String, Object> goodsSpecificationInfo = new HashMap<String, Object>();
-            goodsSpecificationInfo.put("id", goodsSpecification.getId());
-            goodsSpecificationInfo.put("name", goodsSpecification.getName());
-            goodsSpecificationInfo.put("price", goodsSpecification.getPrice());
-            goodsSpecificationInfos.add(goodsSpecificationInfo);
-        }
-        return goodsSpecificationInfos;
-    }
-
     /**
      * 保存菜品信息
      *
@@ -155,142 +150,14 @@ public class GoodsService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveGoods(SaveGoodsModel saveGoodsModel) {
-        BigInteger tenantId = saveGoodsModel.getTenantId();
-        BigInteger branchId = saveGoodsModel.getBranchId();
-        BigInteger userId = saveGoodsModel.getUserId();
-        String tenantCode = saveGoodsModel.getTenantCode();
-
-        if (saveGoodsModel.getId() != null) {
-            SearchModel goodsSearchModel = new SearchModel(true);
-            goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getId());
-            Goods goods = goodsMapper.find(goodsSearchModel);
-            Validate.notNull(goods, "产品不存在！");
-
-            goods.setName(saveGoodsModel.getName());
-            goods.setLastUpdateRemark("修改产品信息！");
-            goodsMapper.update(goods);
-
-            List<SaveGoodsModel.GoodsSpecificationModel> goodsSpecificationModels = saveGoodsModel.getGoodsSpecificationModels();
-            List<BigInteger> goodsSpecificationIds = new ArrayList<BigInteger>();
-            for (SaveGoodsModel.GoodsSpecificationModel goodsSpecificationModel : goodsSpecificationModels) {
-                if (goodsSpecificationModel.getId() != null) {
-                    goodsSpecificationIds.add(goodsSpecificationModel.getId());
-                }
-            }
-            SearchModel searchModel = new SearchModel(true);
-            searchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getId());
-            searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-            searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-            searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsSpecificationIds);
-            List<GoodsSpecification> persistenceGoodsSpecifications = goodsSpecificationMapper.findAll(searchModel);
-
-            Map<BigInteger, GoodsSpecification> goodsSpecificationMap = new HashMap<BigInteger, GoodsSpecification>();
-            for (GoodsSpecification goodsSpecification : persistenceGoodsSpecifications) {
-                goodsSpecificationMap.put(goodsSpecification.getId(), goodsSpecification);
-            }
-
-            List<GoodsSpecification> goodsSpecifications = new ArrayList<GoodsSpecification>();
-            for (SaveGoodsModel.GoodsSpecificationModel goodsSpecificationModel : goodsSpecificationModels) {
-                if (goodsSpecificationModel.getId() != null) {
-                    GoodsSpecification goodsSpecification = goodsSpecificationMap.get(goodsSpecificationModel.getId());
-                    Validate.notNull(goodsSpecification, "菜品规格不存在！");
-                    goodsSpecification.setName(goodsSpecificationModel.getName());
-                    goodsSpecification.setPrice(goodsSpecificationModel.getPrice());
-                    goodsSpecification.setCreateUserId(userId);
-                    goodsSpecification.setLastUpdateUserId(userId);
-                    goodsSpecification.setLastUpdateRemark("修改规格信息！");
-                    goodsSpecificationMapper.update(goodsSpecification);
-                } else {
-                    goodsSpecifications.add(buildGoodsSpecification(goodsSpecificationModel, goods.getId(), userId, "新增规格信息！"));
-                }
-            }
-            goodsSpecificationMapper.insertAll(goodsSpecifications);
-        } else {
-            Goods goods = new Goods();
-            goods.setName(saveGoodsModel.getName());
-            goods.setTenantId(tenantId);
-            goods.setTenantCode(tenantCode);
-            goods.setBranchId(branchId);
-            goods.setGoodsType(Constants.GOODS_TYPE_ORDINARY_GOODS);
-            goods.setCreateUserId(userId);
-            goods.setLastUpdateUserId(userId);
-            goods.setLastUpdateRemark("新增产品信息！");
-            goodsMapper.insert(goods);
-
-            List<SaveGoodsModel.GoodsSpecificationModel> goodsSpecificationModels = saveGoodsModel.getGoodsSpecificationModels();
-            List<GoodsSpecification> goodsSpecifications = new ArrayList<GoodsSpecification>();
-            for (SaveGoodsModel.GoodsSpecificationModel goodsSpecificationModel : goodsSpecificationModels) {
-                goodsSpecifications.add(buildGoodsSpecification(goodsSpecificationModel, goods.getId(), userId, "新增规格信息！"));
-            }
-            goodsSpecificationMapper.insertAll(goodsSpecifications);
-            saveGoodsFlavorGroups(saveGoodsModel.getGoodsFlavorGroupModels(), goods.getId(), userId);
-        }
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("保存菜品信息成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return new ApiRest();
     }
 
     /**
-     * 批量插入菜品口味组以及口味
-     *
-     * @param goodsFlavorGroupModels
-     * @param goodsId
-     * @param userId
-     */
-    private void saveGoodsFlavorGroups(List<SaveGoodsModel.GoodsFlavorGroupModel> goodsFlavorGroupModels, BigInteger goodsId, BigInteger userId) {
-        if (CollectionUtils.isNotEmpty(goodsFlavorGroupModels)) {
-            Map<Integer, GoodsFlavorGroup> goodsFlavorGroupMap = new HashMap<Integer, GoodsFlavorGroup>();
-            Map<GoodsFlavor, Integer> goodsFlavorMap = new HashMap<GoodsFlavor, Integer>();
-            for (SaveGoodsModel.GoodsFlavorGroupModel goodsFlavorGroupModel : goodsFlavorGroupModels) {
-                GoodsFlavorGroup goodsFlavorGroup = new GoodsFlavorGroup();
-                goodsFlavorGroup.setGoodsId(goodsId);
-                goodsFlavorGroup.setName(goodsFlavorGroupModel.getName());
-                goodsFlavorGroup.setCreateUserId(userId);
-                goodsFlavorGroup.setLastUpdateUserId(userId);
-                goodsFlavorGroup.setLastUpdateRemark("新增菜品口味组！");
-
-                goodsFlavorGroupMap.put(goodsFlavorGroup.hashCode(), goodsFlavorGroup);
-
-                for (SaveGoodsModel.GoodsFlavorModel goodsFlavorModel : goodsFlavorGroupModel.getGoodsFlavorModels()) {
-                    GoodsFlavor goodsFlavor = new GoodsFlavor();
-                    goodsFlavor.setName(goodsFlavorModel.getName());
-                    goodsFlavor.setPrice(goodsFlavorModel.getPrice());
-                    goodsFlavor.setCreateUserId(userId);
-                    goodsFlavor.setLastUpdateUserId(userId);
-                    goodsFlavor.setLastUpdateRemark("新增菜品口味！");
-                    goodsFlavorMap.put(goodsFlavor, goodsFlavorGroup.hashCode());
-                }
-            }
-
-            goodsFlavorGroupMapper.insertAll(new ArrayList<GoodsFlavorGroup>(goodsFlavorGroupMap.values()));
-            for (Map.Entry<GoodsFlavor, Integer> entry : goodsFlavorMap.entrySet()) {
-                entry.getKey().setGoodsFlavorGroupId(goodsFlavorGroupMap.get(entry.getValue()).getId());
-            }
-            goodsFlavorMapper.insertAll(new ArrayList<GoodsFlavor>(goodsFlavorMap.keySet()));
-        }
-    }
-
-    /**
-     * 构建菜品规格
-     *
-     * @param goodsSpecificationModel
-     * @param goodsId
-     * @param userId
-     * @param lastUpdateRemark
+     * 删除菜品规格
+     * @param deleteGoodsSpecificationModel
      * @return
      */
-    private GoodsSpecification buildGoodsSpecification(SaveGoodsModel.GoodsSpecificationModel goodsSpecificationModel, BigInteger goodsId, BigInteger userId, String lastUpdateRemark) {
-        GoodsSpecification goodsSpecification = new GoodsSpecification();
-        goodsSpecification.setGoodsId(goodsId);
-        goodsSpecification.setName(goodsSpecificationModel.getName());
-        goodsSpecification.setPrice(goodsSpecificationModel.getPrice());
-        goodsSpecification.setCreateUserId(userId);
-        goodsSpecification.setLastUpdateUserId(userId);
-        goodsSpecification.setLastUpdateRemark(lastUpdateRemark);
-        return goodsSpecification;
-    }
-
     @Transactional(rollbackFor = Exception.class)
     public ApiRest deleteGoodsSpecification(DeleteGoodsSpecificationModel deleteGoodsSpecificationModel) {
         SearchModel searchModel = new SearchModel(true);
@@ -309,132 +176,14 @@ public class GoodsService {
         return apiRest;
     }
 
+    /**
+     * 保存套餐
+     * @param savePackageModel
+     * @return
+     */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest savePackage(SavePackageModel savePackageModel) {
-        List<BigInteger> goodsIds = new ArrayList<BigInteger>();
-        for (SavePackageModel.PackageGroupModel packageGroupModel : savePackageModel.getPackageGroupModels()) {
-            for (SavePackageModel.PackageGroupGoodsModel packageGroupGoodsModel : packageGroupModel.getPackageGroupGoodsModels()) {
-                goodsIds.add(packageGroupGoodsModel.getGoodsId());
-            }
-        }
-
-        SearchModel goodsSearchModel = new SearchModel(true);
-        goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, savePackageModel.getTenantId());
-        goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, savePackageModel.getBranchId());
-        goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
-        List<Goods> goodses = goodsMapper.findAll(goodsSearchModel);
-        Map<BigInteger, Goods> goodsMap = new HashMap<BigInteger, Goods>();
-        for (Goods goods : goodses) {
-            goodsMap.put(goods.getId(), goods);
-        }
-
-        BigInteger packageId = savePackageModel.getPackageId();
-        BigInteger tenantId = savePackageModel.getTenantId();
-        String tenantCode = savePackageModel.getTenantCode();
-        BigInteger branchId = savePackageModel.getBranchId();
-        BigInteger userId = savePackageModel.getUserId();
-        List<PackageGroupGoods> packageGroupGoodses = new ArrayList<PackageGroupGoods>();
-        if (packageId != null) {
-            SearchModel searchModel = new SearchModel(true);
-            searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-            searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-            searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, packageId);
-            Goods goods = goodsMapper.find(searchModel);
-            Validate.notNull(goods, "套餐不存在！");
-
-            goods.setName(savePackageModel.getName());
-            goodsMapper.update(goods);
-
-            List<BigInteger> packageGroupIds = new ArrayList<BigInteger>();
-            List<SavePackageModel.PackageGroupModel> packageGroupModels = savePackageModel.getPackageGroupModels();
-            for (SavePackageModel.PackageGroupModel packageGroupModel : packageGroupModels) {
-                if (packageGroupModel.getId() != null) {
-                    packageGroupIds.add(packageGroupModel.getId());
-                }
-            }
-
-            List<PackageGroup> packageGroups = null;
-            Map<BigInteger, PackageGroup> packageGroupMap = new HashMap<BigInteger, PackageGroup>();
-            if (CollectionUtils.isNotEmpty(packageGroupIds)) {
-                SearchModel packageGroupSearchModel = new SearchModel(true);
-                packageGroupSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, packageGroupIds);
-                packageGroups = packageGroupMapper.findAll(packageGroupSearchModel);
-                for (PackageGroup packageGroup : packageGroups) {
-                    packageGroupMap.put(packageGroup.getId(), packageGroup);
-                }
-
-                SearchModel deleteAllSearchModel = new SearchModel(false);
-                deleteAllSearchModel.addSearchCondition("package_group_id", Constants.SQL_OPERATION_SYMBOL_IN, packageGroupIds);
-                packageGroupGoodsMapper.deleteAll(deleteAllSearchModel);
-            }
-
-            for (SavePackageModel.PackageGroupModel packageGroupModel : packageGroupModels) {
-                if (packageGroupModel.getId() != null) {
-                    PackageGroup packageGroup = packageGroupMap.get(packageGroupModel.getId());
-                    Validate.notNull(packageGroup, "套餐组不存在！");
-                    packageGroup.setGroupType(packageGroupModel.getGroupType());
-                    if (packageGroupModel.getGroupType() == 2) {
-                        packageGroup.setOptionalQuantity(packageGroupModel.getOptionalQuantity());
-                    } else {
-                        packageGroup.setOptionalQuantity(null);
-                    }
-                    packageGroup.setOptionalQuantity(packageGroupModel.getOptionalQuantity());
-                    packageGroupMapper.update(packageGroup);
-                    packageGroupGoodses.addAll(buildPackageGroupGoodses(packageGroupModel.getPackageGroupGoodsModels(), packageGroup.getId(), goodsMap));
-                } else {
-                    packageGroupGoodses.addAll(savePackageGroup(packageGroupModel, goods.getId(), tenantId, tenantCode, branchId, userId, "修改套餐信息！", goodsMap));
-                }
-            }
-        } else {
-            Goods goods = new Goods();
-            goods.setName(savePackageModel.getName());
-            goods.setTenantId(tenantId);
-            goods.setTenantCode(tenantCode);
-            goods.setBranchId(branchId);
-            goods.setGoodsType(2);
-            goods.setCreateUserId(userId);
-            goods.setLastUpdateUserId(userId);
-            goods.setLastUpdateRemark("新增套餐信息！");
-            goodsMapper.insert(goods);
-
-            List<SavePackageModel.PackageGroupModel> packageGroupModels = savePackageModel.getPackageGroupModels();
-            for (SavePackageModel.PackageGroupModel packageGroupModel : packageGroupModels) {
-                packageGroupGoodses.addAll(savePackageGroup(packageGroupModel, goods.getId(), tenantId, tenantCode, branchId, userId, "新增套餐信息！", goodsMap));
-            }
-        }
-        packageGroupGoodsMapper.insertAll(packageGroupGoodses);
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("保存套餐信息成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
-    }
-
-    private List<PackageGroupGoods> savePackageGroup(SavePackageModel.PackageGroupModel packageGroupModel, BigInteger goodsId, BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger userId, String lastUpdateRemark, Map<BigInteger, Goods> goodsMap) {
-        PackageGroup packageGroup = new PackageGroup();
-        packageGroup.setPackageId(goodsId);
-        packageGroup.setGroupType(packageGroupModel.getGroupType());
-        if (packageGroupModel.getGroupType() == 2) {
-            packageGroup.setOptionalQuantity(packageGroupModel.getOptionalQuantity());
-        }
-        packageGroup.setCreateUserId(userId);
-        packageGroup.setLastUpdateUserId(userId);
-        packageGroup.setLastUpdateRemark(lastUpdateRemark);
-        packageGroupMapper.insert(packageGroup);
-        return buildPackageGroupGoodses(packageGroupModel.getPackageGroupGoodsModels(), packageGroup.getId(), goodsMap);
-    }
-
-    private List<PackageGroupGoods> buildPackageGroupGoodses(List<SavePackageModel.PackageGroupGoodsModel> packageGroupGoodsModels, BigInteger packageGroupId, Map<BigInteger, Goods> goodsMap) {
-        List<PackageGroupGoods> packageGroupGoodses = new ArrayList<PackageGroupGoods>();
-        for (SavePackageModel.PackageGroupGoodsModel packageGroupGoodsModel : packageGroupGoodsModels) {
-            PackageGroupGoods packageGroupGoods = new PackageGroupGoods();
-            packageGroupGoods.setPackageGroupId(packageGroupId);
-            Goods goods = goodsMap.get(packageGroupGoodsModel.getGoodsId());
-            Validate.notNull(goods, "套餐组中包含不存在的产品！");
-            packageGroupGoods.setGoodsId(packageGroupGoodsModel.getGoodsId());
-            packageGroupGoods.setQuantity(packageGroupGoodsModel.getQuantity());
-            packageGroupGoodses.add(packageGroupGoods);
-        }
-        return packageGroupGoodses;
+        return new ApiRest();
     }
 
     @Transactional(readOnly = true)
