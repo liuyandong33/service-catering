@@ -10,10 +10,6 @@ public class ListGoodsesModel extends BasicModel {
     private BigInteger tenantId;
     @NotNull
     private BigInteger branchId;
-    @NotNull
-    private Integer page;
-    @NotNull
-    private Integer rows;
 
     public BigInteger getTenantId() {
         return tenantId;
@@ -29,29 +25,5 @@ public class ListGoodsesModel extends BasicModel {
 
     public void setBranchId(BigInteger branchId) {
         this.branchId = branchId;
-    }
-
-    public Integer getPage() {
-        return page;
-    }
-
-    public void setPage(Integer page) {
-        this.page = page;
-    }
-
-    public Integer getRows() {
-        return rows;
-    }
-
-    public void setRows(Integer rows) {
-        this.rows = rows;
-    }
-
-    public Integer getOffset() {
-        return (page - 1) * rows;
-    }
-
-    public Integer getMaxResults() {
-        return rows;
     }
 }

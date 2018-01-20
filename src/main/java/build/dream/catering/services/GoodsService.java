@@ -10,6 +10,7 @@ import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.UpdateModel;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,35 +41,23 @@ public class GoodsService {
     @Autowired
     private UniversalMapper universalMapper;
 
+    private static final String SELECT_GOODS_TABLE_COLUMN_NAMES = StringUtils.join(new String[]{"goods.id", "goods.name", "goods.tenant_id", "goods.tenant_code", "goods.branch_id", "goods.goods_type", "goods.category_id"}, ", ");
+
     @Transactional(readOnly = true)
     public ApiRest listGoodses(ListGoodsesModel listGoodsesModel) {
         BigInteger tenantId = listGoodsesModel.getTenantId();
         BigInteger branchId = listGoodsesModel.getBranchId();
-        String countSql = "SELECT COUNT(1) FROM goods LEFT OUTER JOIN goods_category ON goods_category.id = goods.category_id WHERE goods.tenant_id = #{tenantId} AND goods.branch_id = #{branchId} AND goods.deleted = 0";
-        Map<String, Object> countGoodsParameters = new HashMap<String, Object>();
-        countGoodsParameters.put("tenantId", tenantId);
-        countGoodsParameters.put("branchId", branchId);
-        countGoodsParameters.put("sql", countSql);
-        long total = universalMapper.universalCount(countGoodsParameters);
+        String queryGoodsInfosSql = "SELECT " + SELECT_GOODS_TABLE_COLUMN_NAMES + ", goods_category.name AS category_name, goods_category.description FROM goods LEFT OUTER JOIN goods_category ON goods_category.id = goods.category_id WHERE goods.tenant_id = #{tenantId} AND goods.branch_id = #{branchId} AND goods.deleted = 0";
+        Map<String, Object> queryGoodsInfosParameters = new HashMap<String, Object>();
+        queryGoodsInfosParameters.put("sql", queryGoodsInfosSql);
+        queryGoodsInfosParameters.put("tenantId", tenantId);
+        queryGoodsInfosParameters.put("branchId", branchId);
+        List<Map<String, Object>> goodsInfos = universalMapper.executeQuery(queryGoodsInfosParameters);
 
-        List<Map<String, Object>> goodsInfos = new ArrayList<Map<String, Object>>();
-        if (total > 0) {
-            String queryGoodsInfosSql = "SELECT goods.*, goods_category.name AS category_name, goods_category.description FROM goods LEFT OUTER JOIN goods_category ON goods_category.id = goods.category_id WHERE goods.tenant_id = #{tenantId} AND goods.branch_id = #{branchId} AND goods.deleted = 0 LIMIT #{offset}, #{maxResults}";
-            Map<String, Object> queryGoodsInfosParameters = new HashMap<String, Object>();
-            queryGoodsInfosParameters.put("sql", queryGoodsInfosSql);
-            queryGoodsInfosParameters.put("tenantId", tenantId);
-            queryGoodsInfosParameters.put("branchId", branchId);
-            queryGoodsInfosParameters.put("offset", listGoodsesModel.getOffset());
-            queryGoodsInfosParameters.put("maxResults", listGoodsesModel.getMaxResults());
-            goodsInfos = universalMapper.executeQuery(queryGoodsInfosParameters);
-
-            List<BigInteger> goodsIds = new ArrayList<BigInteger>();
-            for (Map<String, Object> goodsInfo : goodsInfos) {
-                goodsIds.add(BigInteger.valueOf(MapUtils.getLongValue(goodsInfo, "id")));
-            }
-
+        if (CollectionUtils.isNotEmpty(goodsInfos)) {
             SearchModel goodsSpecificationSearchModel = new SearchModel(true);
-            goodsSpecificationSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
+            goodsSpecificationSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+            goodsSpecificationSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
             List<GoodsSpecification> goodsSpecifications = goodsSpecificationMapper.findAll(goodsSpecificationSearchModel);
 
             Map<BigInteger, List<GoodsSpecification>> goodsSpecificationMap = new HashMap<BigInteger, List<GoodsSpecification>>();
@@ -82,7 +71,8 @@ public class GoodsService {
             }
 
             SearchModel goodsFlavorGroupSearchModel = new SearchModel(true);
-            goodsFlavorGroupSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
+            goodsFlavorGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+            goodsFlavorGroupSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
             List<GoodsFlavorGroup> goodsFlavorGroups = goodsFlavorGroupMapper.findAll(goodsFlavorGroupSearchModel);
 
             Map<BigInteger, List<Map<String, Object>>> goodsFlavorGroupMap = new HashMap<BigInteger, List<Map<String, Object>>>();
@@ -93,7 +83,8 @@ public class GoodsService {
                 }
 
                 SearchModel goodsFlavorSearchModel = new SearchModel(true);
-                goodsFlavorSearchModel.addSearchCondition("goods_flavor_group_id", Constants.SQL_OPERATION_SYMBOL_IN, goodsFlavorGroupIds);
+                goodsFlavorSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+                goodsFlavorSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
                 List<GoodsFlavor> goodsFlavors = goodsFlavorMapper.findAll(goodsFlavorSearchModel);
 
                 Map<BigInteger, List<GoodsFlavor>> goodsFlavorMap = new HashMap<BigInteger, List<GoodsFlavor>>();
@@ -114,15 +105,11 @@ public class GoodsService {
                 goodsInfo.put("flavorGroups", goodsFlavorGroupMap.get(goodsId));
             }
         }
-
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("total", total);
-        data.put("rows", goodsInfos);
-        return new ApiRest(data, "查询菜品信息成功！");
+        return new ApiRest(goodsInfos, "查询菜品信息成功！");
     }
 
     public Map<BigInteger, List<Map<String, Object>>> buildFlavorGroups(List<GoodsFlavorGroup> goodsFlavorGroups, Map<BigInteger, List<GoodsFlavor>> goodsFlavorMap) {
-        Map<BigInteger, List<Map<String, Object>>> flavorGroups = new HashMap<BigInteger, List<Map<String,Object>>>();
+        Map<BigInteger, List<Map<String, Object>>> flavorGroups = new HashMap<BigInteger, List<Map<String, Object>>>();
         for (GoodsFlavorGroup goodsFlavorGroup : goodsFlavorGroups) {
             Map<String, Object> goodsFlavorGroupInfo = new HashMap<String, Object>();
             goodsFlavorGroupInfo.put("id", goodsFlavorGroup.getId());
@@ -286,6 +273,7 @@ public class GoodsService {
 
     /**
      * 构建菜品规格
+     *
      * @param goodsSpecificationModel
      * @param goodsId
      * @param userId
