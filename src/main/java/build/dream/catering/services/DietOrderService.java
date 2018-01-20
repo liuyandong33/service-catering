@@ -312,29 +312,22 @@ public class DietOrderService {
         SearchModel dietOrderGroupSearchModel = new SearchModel(true);
         dietOrderGroupSearchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, dietOrder.getId());
         List<DietOrderGroup> dietOrderGroups = dietOrderGroupMapper.findAll(dietOrderGroupSearchModel);
-        List<BigInteger> dietOrderGroupIds = new ArrayList<BigInteger>();
-        for (DietOrderGroup dietOrderGroup : dietOrderGroups) {
-            dietOrderGroupIds.add(dietOrderGroup.getId());
-        }
 
         SearchModel dietOrderDetailSearchModel = new SearchModel(true);
-        dietOrderDetailSearchModel.addSearchCondition("diet_order_group_id", Constants.SQL_OPERATION_SYMBOL_IN, dietOrderGroupIds);
+        dietOrderDetailSearchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, dietOrder.getId());
         List<DietOrderDetail> dietOrderDetails = dietOrderDetailMapper.findAll(dietOrderDetailSearchModel);
         Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap = new HashMap<BigInteger, List<DietOrderDetail>>();
-        List<BigInteger> dietOrderDetailIds = new ArrayList<BigInteger>();
         for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
-            dietOrderDetailIds.add(dietOrderDetail.getId());
             List<DietOrderDetail> dietOrderDetailList = dietOrderDetailMap.get(dietOrderDetail.getDietOrderGroupId());
             if (dietOrderDetailList == null) {
                 dietOrderDetailList = new ArrayList<DietOrderDetail>();
                 dietOrderDetailMap.put(dietOrderDetail.getDietOrderGroupId(), dietOrderDetailList);
             }
             dietOrderDetailList.add(dietOrderDetail);
-            dietOrderDetailIds.add(dietOrderDetail.getId());
         }
 
         SearchModel dietOrderDetailGoodsFlavorSearchModel = new SearchModel(true);
-        dietOrderDetailGoodsFlavorSearchModel.addSearchCondition("diet_order_detail_id", Constants.SQL_OPERATION_SYMBOL_IN, dietOrderDetailIds);
+        dietOrderDetailGoodsFlavorSearchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, dietOrder.getId());
         List<DietOrderDetailGoodsFlavor> dietOrderDetailGoodsFlavors = dietOrderDetailGoodsFlavorMapper.findAll(dietOrderDetailGoodsFlavorSearchModel);
         Map<BigInteger, List<DietOrderDetailGoodsFlavor>> dietOrderDetailGoodsFlavorMap = new HashMap<BigInteger, List<DietOrderDetailGoodsFlavor>>();
         for (DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor : dietOrderDetailGoodsFlavors) {
