@@ -319,17 +319,7 @@ public class GoodsService {
                                 goodsFlavor.setLastUpdateRemark("修改口味信息！");
                                 goodsFlavorMapper.update(goodsFlavor);
                             } else {
-                                GoodsFlavor goodsFlavor = new GoodsFlavor();
-                                goodsFlavor.setTenantId(tenantId);
-                                goodsFlavor.setTenantCode(tenantCode);
-                                goodsFlavor.setBranchId(branchId);
-                                goodsFlavor.setGoodsId(goods.getId());
-                                goodsFlavor.setGoodsFlavorGroupId(goodsFlavorGroup.getId());
-                                goodsFlavor.setName(goodsFlavorModel.getName());
-                                goodsFlavor.setPrice(goodsFlavorModel.getPrice() == null ? BigDecimal.ZERO : goodsFlavorModel.getPrice());
-                                goodsFlavor.setCreateUserId(userId);
-                                goodsFlavor.setLastUpdateUserId(userId);
-                                goodsFlavor.setLastUpdateRemark("新增口味信息！");
+                                GoodsFlavor goodsFlavor = buildGoodsFlavor(goodsFlavorModel, tenantId, tenantCode, branchId, goods.getId(), goodsFlavorGroup.getId(), userId);
                                 goodsFlavorMapper.insert(goodsFlavor);
                             }
                         }
@@ -346,17 +336,7 @@ public class GoodsService {
                         goodsFlavorGroupMapper.insert(goodsFlavorGroup);
 
                         for (SaveGoodsModel.GoodsFlavorModel goodsFlavorModel : goodsFlavorGroupModel.getGoodsFlavorModels()) {
-                            GoodsFlavor goodsFlavor = new GoodsFlavor();
-                            goodsFlavor.setTenantId(tenantId);
-                            goodsFlavor.setTenantCode(tenantCode);
-                            goodsFlavor.setBranchId(branchId);
-                            goodsFlavor.setGoodsId(goods.getId());
-                            goodsFlavor.setGoodsFlavorGroupId(goodsFlavorGroup.getId());
-                            goodsFlavor.setName(goodsFlavorModel.getName());
-                            goodsFlavor.setPrice(goodsFlavorModel.getPrice() == null ? BigDecimal.ZERO : goodsFlavorModel.getPrice());
-                            goodsFlavor.setCreateUserId(userId);
-                            goodsFlavor.setLastUpdateUserId(userId);
-                            goodsFlavor.setLastUpdateRemark("新增口味信息！");
+                            GoodsFlavor goodsFlavor = buildGoodsFlavor(goodsFlavorModel, tenantId, tenantCode, branchId, goods.getId(), goodsFlavorGroup.getId(), userId);
                             goodsFlavorMapper.insert(goodsFlavor);
                         }
                     }
@@ -364,6 +344,21 @@ public class GoodsService {
             }
         }
         return new ApiRest();
+    }
+
+    private GoodsFlavor buildGoodsFlavor(SaveGoodsModel.GoodsFlavorModel goodsFlavorModel, BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, BigInteger goodsFlavorGroupId, BigInteger userId) {
+        GoodsFlavor goodsFlavor = new GoodsFlavor();
+        goodsFlavor.setTenantId(tenantId);
+        goodsFlavor.setTenantCode(tenantCode);
+        goodsFlavor.setBranchId(branchId);
+        goodsFlavor.setGoodsId(goodsId);
+        goodsFlavor.setGoodsFlavorGroupId(goodsFlavorGroupId);
+        goodsFlavor.setName(goodsFlavorModel.getName());
+        goodsFlavor.setPrice(goodsFlavorModel.getPrice() == null ? BigDecimal.ZERO : goodsFlavorModel.getPrice());
+        goodsFlavor.setCreateUserId(userId);
+        goodsFlavor.setLastUpdateUserId(userId);
+        goodsFlavor.setLastUpdateRemark("新增口味信息！");
+        return goodsFlavor;
     }
 
     /**
