@@ -279,6 +279,8 @@ public class GoodsService {
                     if (goodsFlavorGroupModel.getId() != null) {
                         GoodsFlavorGroup goodsFlavorGroup = goodsFlavorGroupMap.get(goodsFlavorGroupModel.getId());
                         Validate.notNull(goodsFlavorGroup, "口味组不存在！");
+                        goodsFlavorGroup.setName(goodsFlavorGroupModel.getName());
+                        goodsFlavorGroupMapper.update(goodsFlavorGroup);
                     }
                 }
             }

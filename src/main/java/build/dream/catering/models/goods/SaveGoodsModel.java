@@ -224,7 +224,7 @@ public class SaveGoodsModel extends BasicModel {
         private BigInteger id;
         @NotNull
         @Length(max = 20)
-        private BigInteger name;
+        private String name;
 
         @SerializedName(value = "flavors", alternate = "goodsFlavorModels")
         private List<GoodsFlavorModel> goodsFlavorModels;
@@ -239,11 +239,11 @@ public class SaveGoodsModel extends BasicModel {
             this.id = id;
         }
 
-        public BigInteger getName() {
+        public String getName() {
             return name;
         }
 
-        public void setName(BigInteger name) {
+        public void setName(String name) {
             this.name = name;
         }
 
