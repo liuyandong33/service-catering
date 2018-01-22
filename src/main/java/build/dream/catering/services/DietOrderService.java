@@ -191,6 +191,20 @@ public class DietOrderService {
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveDietOrder(SaveDietOrderModel saveDietOrderModel) {
+        List<SaveDietOrderModel.GroupModel> groupModels = saveDietOrderModel.getGroupModels();
+        List<BigInteger> goodsIds = new ArrayList<BigInteger>();
+        List<BigInteger> goodsSpecificationIds = new ArrayList<BigInteger>();
+        List<BigInteger> flavorIds = new ArrayList<BigInteger>();
+        for (SaveDietOrderModel.GroupModel groupModel : groupModels) {
+            List<SaveDietOrderModel.DetailModel> detailModels = groupModel.getDetailModels();
+            for (SaveDietOrderModel.DetailModel detailModel : detailModels) {
+                goodsIds.add(detailModel.getGoodsId());
+                goodsSpecificationIds.add(detailModel.getGoodsSpecificationId());
+                if (CollectionUtils.isNotEmpty(detailModel.getFlavorIds())) {
+                    flavorIds.addAll(detailModel.getFlavorIds());
+                }
+            }
+        }
         return new ApiRest();
     }
 }

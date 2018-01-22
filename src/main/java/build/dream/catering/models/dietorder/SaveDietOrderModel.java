@@ -81,6 +81,8 @@ public class SaveDietOrderModel extends BasicModel {
     public static class GroupModel extends BasicModel {
         @NotNull
         private String name;
+        @NotNull
+        private String type;
         private List<DetailModel> detailModels;
 
         public String getName() {
@@ -89,6 +91,14 @@ public class SaveDietOrderModel extends BasicModel {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
         }
 
         public List<DetailModel> getDetailModels() {
@@ -116,9 +126,11 @@ public class SaveDietOrderModel extends BasicModel {
         }
     }
 
-    private static class DetailModel extends BasicModel {
+    public static class DetailModel extends BasicModel {
         @NotNull
         private BigInteger goodsId;
+        @NotNull
+        private BigInteger goodsSpecificationId;
 
         @NotNull
         private Integer quantity;
@@ -131,6 +143,14 @@ public class SaveDietOrderModel extends BasicModel {
 
         public void setGoodsId(BigInteger goodsId) {
             this.goodsId = goodsId;
+        }
+
+        public BigInteger getGoodsSpecificationId() {
+            return goodsSpecificationId;
+        }
+
+        public void setGoodsSpecificationId(BigInteger goodsSpecificationId) {
+            this.goodsSpecificationId = goodsSpecificationId;
         }
 
         public Integer getQuantity() {
