@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -150,6 +151,56 @@ public class GoodsService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveGoods(SaveGoodsModel saveGoodsModel) {
+        SearchModel goodsSearchModel = new SearchModel(true);
+        goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getTenantId());
+        goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getBranchId());
+        goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getGoodsId());
+        Goods goods = goodsMapper.find(goodsSearchModel);
+        Validate.notNull(goods, "商品不存在！");
+
+        goods.setName(saveGoodsModel.getGoodsName());
+        goodsMapper.update(goods);
+
+        if (saveGoodsModel.getGoodsId() != null) {
+            if (CollectionUtils.isNotEmpty(saveGoodsModel.getDeleteGoodsSpecificationIds())) {
+                UpdateModel updateModel = new UpdateModel(true);
+                updateModel.setTableName("goods_specification");
+                updateModel.addContentValue("last_update_user_id", saveGoodsModel.getUserId());
+                updateModel.addContentValue("last_update_remark", "删除商品规格信息！");
+                updateModel.addContentValue("deleted", 1);
+                updateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getTenantId());
+                updateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getBranchId());
+                updateModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, saveGoodsModel.getDeleteGoodsSpecificationIds());
+                universalMapper.universalUpdate(updateModel);
+            }
+
+            List<SaveGoodsModel.GoodsSpecificationModel> goodsSpecificationModels = saveGoodsModel.getGoodsSpecificationModels();
+            List<BigInteger> goodsSpecificationIds = new ArrayList<BigInteger>();
+            for (SaveGoodsModel.GoodsSpecificationModel goodsSpecificationModel : goodsSpecificationModels) {
+                if (goodsSpecificationModel.getId() != null) {
+                    goodsSpecificationIds.add(goodsSpecificationModel.getId());
+                }
+            }
+            SearchModel searchModel = new SearchModel(true);
+            searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getTenantId());
+            searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getBranchId());
+            searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsSpecificationIds);
+            List<GoodsSpecification> goodsSpecifications = goodsSpecificationMapper.findAll(searchModel);
+            Map<BigInteger, GoodsSpecification> goodsSpecificationMap = new HashMap<BigInteger, GoodsSpecification>();
+            for (GoodsSpecification goodsSpecification : goodsSpecifications) {
+                goodsSpecificationMap.put(goodsSpecification.getId(), goodsSpecification);
+            }
+
+            for (SaveGoodsModel.GoodsSpecificationModel goodsSpecificationModel : goodsSpecificationModels) {
+                if (goodsSpecificationModel.getId() != null) {
+                    GoodsSpecification goodsSpecification = goodsSpecificationMap.get(goodsSpecificationModel.getId());
+                    Validate.notNull(goodsSpecification, "商品规格不存在！");
+                    goodsSpecification.setName(goodsSpecificationModel.getName());
+                    goodsSpecification.setPrice(goodsSpecification.getPrice() == null ? BigDecimal.ZERO : goodsSpecification.getPrice());
+                    goodsSpecificationMapper.update(goodsSpecification);
+                }
+            }
+        }
         return new ApiRest();
     }
 
@@ -218,7 +269,7 @@ public class GoodsService {
         goodsSpecificationUpdateModel.setTableName("goods_specification");
         goodsSpecificationUpdateModel.addContentValue("deleted", 1);
         goodsSpecificationUpdateModel.addContentValue("last_update_user_id", deleteGoodsModel.getUserId());
-        goodsSpecificationUpdateModel.addContentValue("last_update_remark", "删除菜品信息！");
+        goodsSpecificationUpdateModel.addContentValue("last_update_remark", "删除菜品规格信息！");
         goodsSpecificationUpdateModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getGoodsId());
         goodsSpecificationUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getTenantId());
         goodsSpecificationUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getBranchId());
@@ -229,7 +280,7 @@ public class GoodsService {
         goodsFlavorGroupUpdateModel.setTableName("goods_flavor_group");
         goodsFlavorGroupUpdateModel.addContentValue("deleted", 1);
         goodsFlavorGroupUpdateModel.addContentValue("last_update_user_id", deleteGoodsModel.getUserId());
-        goodsFlavorGroupUpdateModel.addContentValue("last_update_remark", "删除菜品信息！");
+        goodsFlavorGroupUpdateModel.addContentValue("last_update_remark", "删除菜品口味组信息！");
         goodsFlavorGroupUpdateModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getGoodsId());
         goodsFlavorGroupUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getTenantId());
         goodsFlavorGroupUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteGoodsModel.getBranchId());
@@ -240,7 +291,7 @@ public class GoodsService {
         Map<String, Object> deleteAllGoodsFlavorParameters = new HashMap<String, Object>();
         deleteAllGoodsFlavorParameters.put("sql", deleteAllGoodsFlavorSql);
         deleteAllGoodsFlavorParameters.put("userId", deleteGoodsModel.getUserId());
-        deleteAllGoodsFlavorParameters.put("lastUpdateRemark", "删除菜品信息！");
+        deleteAllGoodsFlavorParameters.put("lastUpdateRemark", "删除口味信息！");
         deleteAllGoodsFlavorParameters.put("goodsId", deleteGoodsModel.getGoodsId());
         universalMapper.executeUpdate(deleteAllGoodsFlavorParameters);
 

@@ -45,6 +45,18 @@ public class GoodsController extends BasicController {
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
             SaveGoodsModel saveGoodsModel = ApplicationHandler.instantiateObject(SaveGoodsModel.class, requestParameters);
+
+            String goodsSpecifications = requestParameters.get("goodsSpecifications");
+            ApplicationHandler.notEmpty(goodsSpecifications, "goodsSpecifications");
+            List<SaveGoodsModel.GoodsSpecificationModel> goodsSpecificationModels = GsonUtils.jsonToList(goodsSpecifications, SaveGoodsModel.GoodsSpecificationModel.class);
+            saveGoodsModel.setGoodsSpecificationModels(goodsSpecificationModels);
+
+            String flavorGroups = requestParameters.get("flavorGroups");
+            if (StringUtils.isNotBlank(flavorGroups)) {
+                List<SaveGoodsModel.GoodsFlavorGroupModel> goodsFlavorGroupModels = GsonUtils.jsonToList(flavorGroups, SaveGoodsModel.GoodsFlavorGroupModel.class);
+                saveGoodsModel.setGoodsFlavorGroupModels(goodsFlavorGroupModels);
+            }
+
             saveGoodsModel.validateAndThrow();
             apiRest = goodsService.saveGoods(saveGoodsModel);
         } catch (Exception e) {
