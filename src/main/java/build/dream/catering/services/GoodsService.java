@@ -6,6 +6,7 @@ import build.dream.catering.mappers.*;
 import build.dream.catering.models.goods.*;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
+import build.dream.common.saas.domains.Tenant;
 import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.UpdateModel;
 import org.apache.commons.collections.CollectionUtils;
@@ -151,9 +152,14 @@ public class GoodsService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveGoods(SaveGoodsModel saveGoodsModel) {
+        BigInteger tenantId = saveGoodsModel.getTenantId();
+        String tenantCode = saveGoodsModel.getTenantCode();
+        BigInteger branchId = saveGoodsModel.getBranchId();
+        BigInteger userId = saveGoodsModel.getUserId();
+
         SearchModel goodsSearchModel = new SearchModel(true);
-        goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getTenantId());
-        goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getBranchId());
+        goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId));
         goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getGoodsId());
         Goods goods = goodsMapper.find(goodsSearchModel);
         Validate.notNull(goods, "商品不存在！");
@@ -168,8 +174,8 @@ public class GoodsService {
                 updateModel.addContentValue("last_update_user_id", saveGoodsModel.getUserId());
                 updateModel.addContentValue("last_update_remark", "删除商品规格信息！");
                 updateModel.addContentValue("deleted", 1);
-                updateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getTenantId());
-                updateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getBranchId());
+                updateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+                updateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
                 updateModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, saveGoodsModel.getDeleteGoodsSpecificationIds());
                 universalMapper.universalUpdate(updateModel);
             }
@@ -182,8 +188,8 @@ public class GoodsService {
                 }
             }
             SearchModel searchModel = new SearchModel(true);
-            searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getTenantId());
-            searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getBranchId());
+            searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+            searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
             searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsSpecificationIds);
             List<GoodsSpecification> goodsSpecifications = goodsSpecificationMapper.findAll(searchModel);
             Map<BigInteger, GoodsSpecification> goodsSpecificationMap = new HashMap<BigInteger, GoodsSpecification>();
@@ -198,6 +204,18 @@ public class GoodsService {
                     goodsSpecification.setName(goodsSpecificationModel.getName());
                     goodsSpecification.setPrice(goodsSpecification.getPrice() == null ? BigDecimal.ZERO : goodsSpecification.getPrice());
                     goodsSpecificationMapper.update(goodsSpecification);
+                } else {
+                    GoodsSpecification goodsSpecification = new GoodsSpecification();
+                    goodsSpecification.setTenantId(tenantId);
+                    goodsSpecification.setTenantCode(tenantCode);
+                    goodsSpecification.setBranchId(branchId);
+                    goodsSpecification.setGoodsId(saveGoodsModel.getGoodsId());
+                    goodsSpecification.setName(goodsSpecificationModel.getName());
+                    goodsSpecification.setPrice(goodsSpecificationModel.getPrice() == null ? BigDecimal.ZERO : goodsSpecificationModel.getPrice());
+                    goodsSpecification.setCreateUserId(userId);
+                    goodsSpecification.setLastUpdateUserId(userId);
+                    goodsSpecification.setLastUpdateRemark("新增规格信息！");
+                    goodsSpecificationMapper.insert(goodsSpecification);
                 }
             }
         }
