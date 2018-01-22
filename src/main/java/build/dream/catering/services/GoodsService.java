@@ -212,15 +212,18 @@ public class GoodsService {
                     goodsSpecificationIds.add(goodsSpecificationModel.getId());
                 }
             }
-            SearchModel searchModel = new SearchModel(true);
-            searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-            searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-            searchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, goods.getId());
-            searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsSpecificationIds);
-            List<GoodsSpecification> goodsSpecifications = goodsSpecificationMapper.findAll(searchModel);
+
             Map<BigInteger, GoodsSpecification> goodsSpecificationMap = new HashMap<BigInteger, GoodsSpecification>();
-            for (GoodsSpecification goodsSpecification : goodsSpecifications) {
-                goodsSpecificationMap.put(goodsSpecification.getId(), goodsSpecification);
+            if (CollectionUtils.isNotEmpty(goodsSpecificationIds)) {
+                SearchModel searchModel = new SearchModel(true);
+                searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+                searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+                searchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, goods.getId());
+                searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsSpecificationIds);
+                List<GoodsSpecification> goodsSpecifications = goodsSpecificationMapper.findAll(searchModel);
+                for (GoodsSpecification goodsSpecification : goodsSpecifications) {
+                    goodsSpecificationMap.put(goodsSpecification.getId(), goodsSpecification);
+                }
             }
 
             // 处理所有规格，修改与更新
