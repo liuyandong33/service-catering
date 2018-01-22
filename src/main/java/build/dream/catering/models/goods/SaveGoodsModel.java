@@ -45,6 +45,8 @@ public class SaveGoodsModel extends BasicModel {
 
     private List<BigInteger> deleteGoodsSpecificationIds;
 
+    private List<BigInteger> deleteGoodsFlavorGroupIds;
+
     public BigInteger getTenantId() {
         return tenantId;
     }
@@ -133,6 +135,14 @@ public class SaveGoodsModel extends BasicModel {
         this.deleteGoodsSpecificationIds = deleteGoodsSpecificationIds;
     }
 
+    public List<BigInteger> getDeleteGoodsFlavorGroupIds() {
+        return deleteGoodsFlavorGroupIds;
+    }
+
+    public void setDeleteGoodsFlavorGroupIds(List<BigInteger> deleteGoodsFlavorGroupIds) {
+        this.deleteGoodsFlavorGroupIds = deleteGoodsFlavorGroupIds;
+    }
+
     @Override
     public boolean validate() {
         if (!super.validate()) {
@@ -219,6 +229,8 @@ public class SaveGoodsModel extends BasicModel {
         @SerializedName(value = "flavors", alternate = "goodsFlavorModels")
         private List<GoodsFlavorModel> goodsFlavorModels;
 
+        private List<BigInteger> deleteGoodsFlavorIds;
+
         public BigInteger getId() {
             return id;
         }
@@ -241,6 +253,14 @@ public class SaveGoodsModel extends BasicModel {
 
         public void setGoodsFlavorModels(List<GoodsFlavorModel> goodsFlavorModels) {
             this.goodsFlavorModels = goodsFlavorModels;
+        }
+
+        public List<BigInteger> getDeleteGoodsFlavorIds() {
+            return deleteGoodsFlavorIds;
+        }
+
+        public void setDeleteGoodsFlavorIds(List<BigInteger> deleteGoodsFlavorIds) {
+            this.deleteGoodsFlavorIds = deleteGoodsFlavorIds;
         }
 
         @Override
@@ -266,6 +286,7 @@ public class SaveGoodsModel extends BasicModel {
         @NotNull
         @Length(max = 20)
         private String name;
+
         private BigDecimal price;
 
         public BigInteger getId() {

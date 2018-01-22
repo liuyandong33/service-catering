@@ -157,27 +157,49 @@ public class GoodsService {
         BigInteger branchId = saveGoodsModel.getBranchId();
         BigInteger userId = saveGoodsModel.getUserId();
 
-        SearchModel goodsSearchModel = new SearchModel(true);
-        goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId));
-        goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getGoodsId());
-        Goods goods = goodsMapper.find(goodsSearchModel);
-        Validate.notNull(goods, "商品不存在！");
-
-        goods.setName(saveGoodsModel.getGoodsName());
-        goodsMapper.update(goods);
-
         if (saveGoodsModel.getGoodsId() != null) {
+            SearchModel goodsSearchModel = new SearchModel(true);
+            goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+            goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId));
+            goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getGoodsId());
+            Goods goods = goodsMapper.find(goodsSearchModel);
+            Validate.notNull(goods, "商品不存在！");
+
+            goods.setName(saveGoodsModel.getGoodsName());
+            goodsMapper.update(goods);
+
             if (CollectionUtils.isNotEmpty(saveGoodsModel.getDeleteGoodsSpecificationIds())) {
                 UpdateModel updateModel = new UpdateModel(true);
                 updateModel.setTableName("goods_specification");
-                updateModel.addContentValue("last_update_user_id", saveGoodsModel.getUserId());
+                updateModel.addContentValue("last_update_user_id", userId);
                 updateModel.addContentValue("last_update_remark", "删除商品规格信息！");
                 updateModel.addContentValue("deleted", 1);
                 updateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
                 updateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
                 updateModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, saveGoodsModel.getDeleteGoodsSpecificationIds());
                 universalMapper.universalUpdate(updateModel);
+            }
+
+            if (CollectionUtils.isNotEmpty(saveGoodsModel.getDeleteGoodsFlavorGroupIds())) {
+                UpdateModel deleteGoodsFlavorGroupUpdateModel = new UpdateModel(true);
+                deleteGoodsFlavorGroupUpdateModel.setTableName("goods_flavor_group");
+                deleteGoodsFlavorGroupUpdateModel.addContentValue("last_update_user_id", userId);
+                deleteGoodsFlavorGroupUpdateModel.addContentValue("last_update_remark", "删除商品口味组信息！");
+                deleteGoodsFlavorGroupUpdateModel.addContentValue("delete", 1);
+                deleteGoodsFlavorGroupUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+                deleteGoodsFlavorGroupUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+                deleteGoodsFlavorGroupUpdateModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, saveGoodsModel.getDeleteGoodsFlavorGroupIds());
+                universalMapper.universalUpdate(deleteGoodsFlavorGroupUpdateModel);
+
+                UpdateModel deleteGoodsFlavorUpdateModel = new UpdateModel(true);
+                deleteGoodsFlavorUpdateModel.setTableName("goods_flavor");
+                deleteGoodsFlavorUpdateModel.addContentValue("last_update_user_id", userId);
+                deleteGoodsFlavorUpdateModel.addContentValue("last_update_remark", "删除商品口味信息！");
+                deleteGoodsFlavorUpdateModel.addContentValue("delete", 1);
+                deleteGoodsFlavorUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+                deleteGoodsFlavorUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+                deleteGoodsFlavorUpdateModel.addSearchCondition("goods_flavor_group_id", Constants.SQL_OPERATION_SYMBOL_IN, saveGoodsModel.getDeleteGoodsFlavorGroupIds());
+                universalMapper.universalUpdate(deleteGoodsFlavorUpdateModel);
             }
 
             List<SaveGoodsModel.GoodsSpecificationModel> goodsSpecificationModels = saveGoodsModel.getGoodsSpecificationModels();
@@ -216,6 +238,48 @@ public class GoodsService {
                     goodsSpecification.setLastUpdateUserId(userId);
                     goodsSpecification.setLastUpdateRemark("新增规格信息！");
                     goodsSpecificationMapper.insert(goodsSpecification);
+                }
+            }
+
+            List<SaveGoodsModel.GoodsFlavorGroupModel> goodsFlavorGroupModels = saveGoodsModel.getGoodsFlavorGroupModels();
+            if (CollectionUtils.isNotEmpty(goodsFlavorGroupModels)) {
+                List<BigInteger> goodsFlavorGroupIds = new ArrayList<BigInteger>();
+                List<BigInteger> deleteGoodsFlavorIds = new ArrayList<BigInteger>();
+                for (SaveGoodsModel.GoodsFlavorGroupModel goodsFlavorGroupModel : goodsFlavorGroupModels) {
+                    if (goodsFlavorGroupModel.getId() != null) {
+                        goodsFlavorGroupIds.add(goodsFlavorGroupModel.getId());
+                    }
+                    if (CollectionUtils.isNotEmpty(goodsFlavorGroupModel.getDeleteGoodsFlavorIds())) {
+                        deleteGoodsFlavorIds.addAll(goodsFlavorGroupModel.getDeleteGoodsFlavorIds());
+                    }
+                }
+                if (CollectionUtils.isNotEmpty(deleteGoodsFlavorIds)) {
+                    UpdateModel deleteGoodsFlavorUpdateModel = new UpdateModel(true);
+                    deleteGoodsFlavorUpdateModel.setTableName("goods_flavor");
+                    deleteGoodsFlavorUpdateModel.addContentValue("last_update_user_id", userId);
+                    deleteGoodsFlavorUpdateModel.addContentValue("last_update_remark", "删除商品口味信息！");
+                    deleteGoodsFlavorUpdateModel.addContentValue("delete", 1);
+                    deleteGoodsFlavorUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+                    deleteGoodsFlavorUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+                    deleteGoodsFlavorUpdateModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, deleteGoodsFlavorIds);
+                    universalMapper.universalUpdate(deleteGoodsFlavorUpdateModel);
+                }
+
+                SearchModel goodsFlavorGroupSearchModel = new SearchModel(true);
+                goodsFlavorGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+                goodsFlavorGroupSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+                goodsFlavorGroupSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsFlavorGroupIds);
+                List<GoodsFlavorGroup> goodsFlavorGroups = goodsFlavorGroupMapper.findAll(goodsFlavorGroupSearchModel);
+                Map<BigInteger, GoodsFlavorGroup> goodsFlavorGroupMap = new HashMap<BigInteger, GoodsFlavorGroup>();
+                for (GoodsFlavorGroup goodsFlavorGroup : goodsFlavorGroups) {
+                    goodsFlavorGroupMap.put(goodsFlavorGroup.getId(), goodsFlavorGroup);
+                }
+
+                for (SaveGoodsModel.GoodsFlavorGroupModel goodsFlavorGroupModel : goodsFlavorGroupModels) {
+                    if (goodsFlavorGroupModel.getId() != null) {
+                        GoodsFlavorGroup goodsFlavorGroup = goodsFlavorGroupMap.get(goodsFlavorGroupModel.getId());
+                        Validate.notNull(goodsFlavorGroup, "口味组不存在！");
+                    }
                 }
             }
         }
