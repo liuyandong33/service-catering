@@ -160,7 +160,7 @@ public class GoodsService {
         if (saveGoodsModel.getGoodsId() != null) {
             SearchModel goodsSearchModel = new SearchModel(true);
             goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-            goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId));
+            goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
             goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getGoodsId());
             Goods goods = goodsMapper.find(goodsSearchModel);
             Validate.notNull(goods, "商品不存在！");
