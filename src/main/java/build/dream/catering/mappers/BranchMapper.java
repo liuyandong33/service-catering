@@ -14,14 +14,11 @@ public interface BranchMapper {
     long insert(Branch branch);
     long insertAll(List<Branch> branches);
     long update(Branch branch);
-    long insertMergeUserBranch(@Param("userId") BigInteger userId, @Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId);
-    List<Branch> findAllPaged(SearchModel searchModel);
     Branch find(SearchModel searchModel);
-    Branch findByUserIdAndTenantId(@Param("tenantId") BigInteger tenantId, @Param("userId") BigInteger userId);
+    long count(SearchModel searchModel);
+    List<Branch> findAllPaged(SearchModel searchModel);
+    long insertMergeUserBranch(@Param("userId") BigInteger userId, @Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId);
     List<BigInteger> findAllUserIds(SearchModel searchModel);
     long countUsers(SearchModel searchModel);
-    long countBranches(SearchModel searchModel);
-    List<Map<String, Object>> findAllBranchInfos();
-    Branch findBranchInfo(@Param("tenantId") BigInteger tenantId, @Param("userId") BigInteger userId);
     long clearBindingStore(@Param("shopId") BigInteger shopId, @Param("userId") BigInteger userId, @Param("lastUpdateRemark") String lastUpdateRemark);
 }

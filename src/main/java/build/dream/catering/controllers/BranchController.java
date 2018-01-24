@@ -9,8 +9,6 @@ import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
-import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,58 +54,6 @@ public class BranchController extends BasicController {
         return GsonUtils.toJson(apiRest);
     }
 
-    @RequestMapping(value = "/findBranchInfoById")
-    @ResponseBody
-    public String findBranchInfoById() {
-        ApiRest apiRest = null;
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
-            String tenantId = requestParameters.get("tenantId");
-            Validate.notNull(tenantId, ApplicationHandler.obtainParameterErrorMessage("tenantId"));
-
-            String branchId = requestParameters.get("branchId");
-            Validate.notNull(branchId, ApplicationHandler.obtainParameterErrorMessage("branchId"));
-            apiRest = branchService.findBranchInfo(NumberUtils.createBigInteger(tenantId), NumberUtils.createBigInteger(branchId));
-        } catch (Exception e) {
-            LogUtils.error("查询门店失败", controllerSimpleName, "listBranches", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
-    }
-
-    @RequestMapping(value = "/findAllBranchInfos")
-    @ResponseBody
-    public String findAllBranchInfos() {
-        ApiRest apiRest = null;
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
-            apiRest = branchService.findAllBranchInfos();
-        } catch (Exception e) {
-            LogUtils.error("查询门店失败", controllerSimpleName, "findAllBranchInfos", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
-    }
-
-    @RequestMapping(value = "/findBranchInfo")
-    @ResponseBody
-    public String findBranchInfo() {
-        ApiRest apiRest = null;
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
-            String tenantId = requestParameters.get("tenantId");
-            Validate.notNull(tenantId, ApplicationHandler.obtainParameterErrorMessage("tenantId"));
-
-            String userId = requestParameters.get("userId");
-            Validate.notNull(userId, ApplicationHandler.obtainParameterErrorMessage("userId"));
-            apiRest = branchService.findBranchInfo(NumberUtils.createBigInteger(tenantId), NumberUtils.createBigInteger(userId));
-        } catch (Exception e) {
-            LogUtils.error("查询门店信息失败", controllerSimpleName, "findAllBranchInfos", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
-    }
-
     /**
      * 删除门店
      *
@@ -124,6 +70,25 @@ public class BranchController extends BasicController {
             apiRest = branchService.deleteBranch(deleteBranchModel);
         } catch (Exception e) {
             LogUtils.error("删除门店信息失败", controllerSimpleName, "deleteBranch", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 获取所有门店信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "/obtainAllBranchInfos")
+    @ResponseBody
+    public String obtainAllBranchInfos() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            apiRest = branchService.obtainAllBranchInfos();
+        } catch (Exception e) {
+            LogUtils.error("获取所有门店信息失败", controllerSimpleName, "obtainAllBranchInfos", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);

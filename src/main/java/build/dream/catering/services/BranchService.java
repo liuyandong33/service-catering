@@ -64,7 +64,7 @@ public class BranchService {
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.setSearchConditions(searchConditions);
-        long total = branchMapper.countBranches(searchModel);
+        long total = branchMapper.count(searchModel);
         List<Branch> branches = new ArrayList<Branch>();
         if (total > 0) {
             PagedSearchModel pagedSearchModel = new PagedSearchModel(true);
@@ -79,41 +79,6 @@ public class BranchService {
         return new ApiRest(data, "查询门店列表成功！");
     }
 
-    @Transactional(readOnly = true)
-    public ApiRest findBranchInfoById(BigInteger tenantId, BigInteger branchId) {
-        SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        Branch branch =  branchMapper.find(searchModel);
-
-        ApiRest apiRest = new ApiRest();
-        apiRest.setData(branch);
-        apiRest.setClassName(Branch.class.getName());
-        apiRest.setMessage("查询门店信息成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
-    }
-
-    @Transactional(readOnly = true)
-    public ApiRest findAllBranchInfos() {
-        List<Map<String, Object>> branchInfos = branchMapper.findAllBranchInfos();
-        ApiRest apiRest = new ApiRest();
-        apiRest.setData(branchInfos);
-        apiRest.setMessage("查询门店信息成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
-    }
-
-    @Transactional(readOnly = true)
-    public ApiRest findBranchInfo(BigInteger tenantId, BigInteger userId) {
-        Branch branch = branchMapper.findBranchInfo(tenantId, userId);
-        ApiRest apiRest = new ApiRest();
-        apiRest.setData(branch);
-        apiRest.setMessage("查询门店信息成功！");
-        apiRest.setClassName(Branch.class.getName());
-        apiRest.setSuccessful(true);
-        return apiRest;
-    }
 
     /**
      * 删除门店信息
@@ -162,5 +127,19 @@ public class BranchService {
         apiRest.setMessage("删除门店信息成功！");
         apiRest.setSuccessful(true);
         return apiRest;
+    }
+
+    /**
+     * 获取所有门店信息
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest obtainAllBranchInfos() {
+        String sql = "SELECT id, code, name, type, status, tenant_id, tenant_code, create_time, last_update_time FROM branch WHERE deleted = 0";
+        Map<String, Object> obtainAllBranchInfosParameters = new HashMap<String, Object>();
+        obtainAllBranchInfosParameters.put("sql", sql);
+        List<Map<String, Object>> allBranchInfos = universalMapper.executeQuery(obtainAllBranchInfosParameters);
+
+        return new ApiRest(allBranchInfos, "获取所有门店信息成功！");
     }
 }
