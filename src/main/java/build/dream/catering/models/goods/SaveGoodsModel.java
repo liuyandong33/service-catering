@@ -1,8 +1,12 @@
 package build.dream.catering.models.goods;
 
 import build.dream.catering.constants.Constants;
+import build.dream.catering.schemas.JsonSchemaValidateUtils;
 import build.dream.common.models.BasicModel;
 import build.dream.common.utils.ApplicationHandler;
+import build.dream.common.utils.GsonUtils;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.annotations.SerializedName;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -10,6 +14,7 @@ import org.apache.commons.lang.Validate;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
@@ -39,7 +44,7 @@ public class SaveGoodsModel extends BasicModel {
     @NotNull
     private BigInteger categoryId;
 
-    private List<GoodsSpecificationModel> goodsSpecificationModels;
+    private List<GoodsSpecificationInfo> goodsSpecificationInfos;
 
     private List<GoodsFlavorGroupModel> goodsFlavorGroupModels;
 
@@ -111,12 +116,19 @@ public class SaveGoodsModel extends BasicModel {
         this.categoryId = categoryId;
     }
 
-    public List<GoodsSpecificationModel> getGoodsSpecificationModels() {
-        return goodsSpecificationModels;
+    public List<GoodsSpecificationInfo> getGoodsSpecificationInfos() {
+        return goodsSpecificationInfos;
     }
 
-    public void setGoodsSpecificationModels(List<GoodsSpecificationModel> goodsSpecificationModels) {
-        this.goodsSpecificationModels = goodsSpecificationModels;
+    public void setGoodsSpecificationInfos(List<GoodsSpecificationInfo> goodsSpecificationInfos) {
+        this.goodsSpecificationInfos = goodsSpecificationInfos;
+    }
+
+    public void setGoodsSpecificationInfos(String goodsSpecificationInfos) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(goodsSpecificationInfos);
+        ApplicationHandler.isTrue(JsonSchemaValidateUtils.validate(jsonNode, ""), "goodsSpecificationInfos");
+        this.goodsSpecificationInfos = GsonUtils.jsonToList(goodsSpecificationInfos, GoodsSpecificationInfo.class);
     }
 
     public List<GoodsFlavorGroupModel> getGoodsFlavorGroupModels() {
@@ -151,21 +163,6 @@ public class SaveGoodsModel extends BasicModel {
         if (!ArrayUtils.contains(new Object[]{Constants.GOODS_TYPE_ORDINARY_GOODS, Constants.GOODS_TYPE_PACKAGE}, goodsType)) {
             return false;
         }
-        if (CollectionUtils.isEmpty(goodsSpecificationModels)) {
-            return false;
-        }
-        for (GoodsSpecificationModel goodsSpecificationModel : goodsSpecificationModels) {
-            if (!goodsSpecificationModel.validate()) {
-                return false;
-            }
-        }
-        if (CollectionUtils.isNotEmpty(goodsFlavorGroupModels)) {
-            for (GoodsFlavorGroupModel goodsFlavorGroupModel : goodsFlavorGroupModels) {
-                if (!goodsFlavorGroupModel.validate()) {
-                    return false;
-                }
-            }
-        }
         return true;
     }
 
@@ -174,25 +171,11 @@ public class SaveGoodsModel extends BasicModel {
         super.validateAndThrow();
         ApplicationHandler.notNull(goodsType, "goodsType");
         ApplicationHandler.inArray(new Object[]{Constants.GOODS_TYPE_ORDINARY_GOODS, Constants.GOODS_TYPE_PACKAGE}, goodsType, "goodsType");
-        Validate.notNull(goodsSpecificationModels, "goodsSpecifications");
-        for (GoodsSpecificationModel goodsSpecificationModel : goodsSpecificationModels) {
-            Validate.isTrue(goodsSpecificationModel.validate(), "goodsSpecifications");
-        }
-        if (CollectionUtils.isNotEmpty(goodsFlavorGroupModels)) {
-            for (GoodsFlavorGroupModel goodsFlavorGroupModel : goodsFlavorGroupModels) {
-                Validate.isTrue(goodsFlavorGroupModel.validate(), "flavorGroups");
-            }
-        }
     }
 
-    public static class GoodsSpecificationModel extends BasicModel {
+    public static class GoodsSpecificationInfo {
         private BigInteger id;
-
-        @NotNull
-        @Length(max = 20)
         private String name;
-
-        @NotNull
         private BigDecimal price;
 
         public BigInteger getId() {
