@@ -46,4 +46,5 @@ dependencies {
     compile("org.apache.tomcat.embed:tomcat-embed-jasper")
     compile("org.apache.poi:poi-ooxml:3.17")
     compile("org.quartz-scheduler:quartz:2.3.0")
+    compile("com.networknt:json-schema-validator:0.1.13")
 }

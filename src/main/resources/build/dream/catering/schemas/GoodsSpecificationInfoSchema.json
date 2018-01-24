@@ -1,0 +1,53 @@
+{
+    "type": "object",
+    "properties": {
+        "cardShowName": {
+            "type": "string",
+            "maxLength": 10
+        },
+        "logoId": {
+            "type": "string",
+            "maxLength": 1000
+        },
+        "color": {
+            "type": "string",
+            "maxLength": 64
+        },
+        "backgroundId": {
+            "type": "string",
+            "maxLength": 1000
+        },
+        "bgColor": {
+            "type": "string",
+            "maxLength": 32
+        },
+        "frontTextListEnable": {
+            "type": "boolean"
+        },
+        "frontImageEnable": {
+            "type": "boolean"
+        },
+        "featureDescriptions": {
+            "type": "string",
+            "maxLength": 4000
+        },
+        "slogan": {
+            "type": "string",
+            "maxLength": 100
+        },
+        "sloganImgId": {
+            "type": "string",
+            "maxLength": 100
+        },
+        "brandName": {
+            "type": "string",
+            "maxLength": 100
+        }
+    },
+    "required": [
+        "cardShowName",
+        "logoId",
+        "backgroundId",
+        "bgColor"
+    ]
+}
