@@ -3,6 +3,7 @@ package build.dream.catering.utils;
 import build.dream.catering.constants.Constants;
 import build.dream.common.utils.JacksonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.JsonValidator;
@@ -14,13 +15,22 @@ import org.apache.commons.lang.Validate;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class JsonSchemaValidateUtils {
-    public static JsonSchemaFactory JSON_SCHEMA_FACTORY;
+    public static JsonSchemaFactory JSON_SCHEMA_FACTORY = null;
     public static Map<String, Map<String, JsonValidator>> VALIDATORS_MAP = null;
+    private static ObjectMapper objectMapper = null;
+
+    private static ObjectMapper obtainObjectMapper() {
+        if (objectMapper == null) {
+            objectMapper = new ObjectMapper();
+        }
+        return objectMapper;
+    }
 
     public static JsonSchemaFactory obtainJsonSchemaFactory() {
         if (JSON_SCHEMA_FACTORY == null) {
@@ -64,7 +74,7 @@ public class JsonSchemaValidateUtils {
     public static boolean validate(String jsonString, String schemaFilePath) throws IOException {
         Map<String, JsonValidator> validators = obtainValidators(schemaFilePath);
         if (MapUtils.isNotEmpty(validators)) {
-            JsonNode jsonNode = JacksonUtils.obtainObjectMapper(Constants.DEFAULT_DATE_PATTERN).readTree(jsonString);
+            JsonNode jsonNode = obtainObjectMapper().readTree(jsonString);
             for (JsonValidator validator : validators.values()) {
                 Set<ValidationMessage> errors = validator.validate(jsonNode);
                 if (CollectionUtils.isNotEmpty(errors)) {
