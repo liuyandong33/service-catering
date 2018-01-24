@@ -249,22 +249,22 @@ public class GoodsService {
                 }
             }
 
-            List<SaveGoodsModel.GoodsFlavorGroupModel> goodsFlavorGroupModels = saveGoodsModel.getGoodsFlavorGroupModels();
-            if (CollectionUtils.isNotEmpty(goodsFlavorGroupModels)) {
+            List<SaveGoodsModel.FlavorGroupInfo> flavorGroupInfos = saveGoodsModel.getFlavorGroupInfos();
+            if (CollectionUtils.isNotEmpty(flavorGroupInfos)) {
                 List<BigInteger> goodsFlavorGroupIds = new ArrayList<BigInteger>();
                 List<BigInteger> deleteGoodsFlavorIds = new ArrayList<BigInteger>();
                 List<BigInteger> goodsFlavorIds = new ArrayList<BigInteger>();
-                for (SaveGoodsModel.GoodsFlavorGroupModel goodsFlavorGroupModel : goodsFlavorGroupModels) {
-                    if (goodsFlavorGroupModel.getId() != null) {
-                        goodsFlavorGroupIds.add(goodsFlavorGroupModel.getId());
+                for (SaveGoodsModel.FlavorGroupInfo goodsFlavorGroupInfo : flavorGroupInfos) {
+                    if (goodsFlavorGroupInfo.getId() != null) {
+                        goodsFlavorGroupIds.add(goodsFlavorGroupInfo.getId());
 
-                        if (CollectionUtils.isNotEmpty(goodsFlavorGroupModel.getDeleteGoodsFlavorIds())) {
-                            deleteGoodsFlavorIds.addAll(goodsFlavorGroupModel.getDeleteGoodsFlavorIds());
+                        if (CollectionUtils.isNotEmpty(goodsFlavorGroupInfo.getDeleteGoodsFlavorIds())) {
+                            deleteGoodsFlavorIds.addAll(goodsFlavorGroupInfo.getDeleteGoodsFlavorIds());
                         }
 
-                        for (SaveGoodsModel.GoodsFlavorModel goodsFlavorModel : goodsFlavorGroupModel.getGoodsFlavorModels()) {
-                            if (goodsFlavorModel.getId() != null) {
-                                goodsFlavorIds.add(goodsFlavorModel.getId());
+                        for (SaveGoodsModel.FlavorInfo flavorGroupInfo : goodsFlavorGroupInfo.getFlavorInfos()) {
+                            if (flavorGroupInfo.getId() != null) {
+                                goodsFlavorIds.add(flavorGroupInfo.getId());
                             }
                         }
                     }
@@ -303,26 +303,26 @@ public class GoodsService {
                     goodsFlavorMap.put(goodsFlavor.getId(), goodsFlavor);
                 }
 
-                for (SaveGoodsModel.GoodsFlavorGroupModel goodsFlavorGroupModel : goodsFlavorGroupModels) {
-                    if (goodsFlavorGroupModel.getId() != null) {
-                        GoodsFlavorGroup goodsFlavorGroup = goodsFlavorGroupMap.get(goodsFlavorGroupModel.getId());
+                for (SaveGoodsModel.FlavorGroupInfo flavorGroupInfo : flavorGroupInfos) {
+                    if (flavorGroupInfo.getId() != null) {
+                        GoodsFlavorGroup goodsFlavorGroup = goodsFlavorGroupMap.get(flavorGroupInfo.getId());
                         Validate.notNull(goodsFlavorGroup, "口味组不存在！");
-                        goodsFlavorGroup.setName(goodsFlavorGroupModel.getName());
+                        goodsFlavorGroup.setName(flavorGroupInfo.getName());
                         goodsFlavorGroup.setLastUpdateUserId(userId);
                         goodsFlavorGroup.setLastUpdateRemark("修改口味组信息！");
                         goodsFlavorGroupMapper.update(goodsFlavorGroup);
 
-                        for (SaveGoodsModel.GoodsFlavorModel goodsFlavorModel : goodsFlavorGroupModel.getGoodsFlavorModels()) {
-                            if (goodsFlavorModel.getId() != null) {
-                                GoodsFlavor goodsFlavor = goodsFlavorMap.get(goodsFlavorModel.getId());
+                        for (SaveGoodsModel.FlavorInfo flavorInfo : flavorGroupInfo.getFlavorInfos()) {
+                            if (flavorInfo.getId() != null) {
+                                GoodsFlavor goodsFlavor = goodsFlavorMap.get(flavorInfo.getId());
                                 Validate.notNull(goodsFlavor, "商品口味不存在！");
-                                goodsFlavor.setName(goodsFlavorModel.getName());
-                                goodsFlavor.setPrice(goodsFlavorModel.getPrice() == null ? BigDecimal.ZERO : goodsFlavorModel.getPrice());
+                                goodsFlavor.setName(flavorInfo.getName());
+                                goodsFlavor.setPrice(flavorInfo.getPrice() == null ? BigDecimal.ZERO : flavorInfo.getPrice());
                                 goodsFlavor.setLastUpdateUserId(userId);
                                 goodsFlavor.setLastUpdateRemark("修改口味信息！");
                                 goodsFlavorMapper.update(goodsFlavor);
                             } else {
-                                GoodsFlavor goodsFlavor = buildGoodsFlavor(goodsFlavorModel, tenantId, tenantCode, branchId, goods.getId(), goodsFlavorGroup.getId(), userId);
+                                GoodsFlavor goodsFlavor = buildGoodsFlavor(flavorInfo, tenantId, tenantCode, branchId, goods.getId(), goodsFlavorGroup.getId(), userId);
                                 goodsFlavorMapper.insert(goodsFlavor);
                             }
                         }
@@ -332,14 +332,14 @@ public class GoodsService {
                         goodsFlavorGroup.setTenantCode(tenantCode);
                         goodsFlavorGroup.setBranchId(branchId);
                         goodsFlavorGroup.setGoodsId(goods.getId());
-                        goodsFlavorGroup.setName(goodsFlavorGroupModel.getName());
+                        goodsFlavorGroup.setName(flavorGroupInfo.getName());
                         goodsFlavorGroup.setCreateUserId(userId);
                         goodsFlavorGroup.setLastUpdateUserId(userId);
                         goodsFlavorGroup.setLastUpdateRemark("新增口味组信息！");
                         goodsFlavorGroupMapper.insert(goodsFlavorGroup);
 
-                        for (SaveGoodsModel.GoodsFlavorModel goodsFlavorModel : goodsFlavorGroupModel.getGoodsFlavorModels()) {
-                            GoodsFlavor goodsFlavor = buildGoodsFlavor(goodsFlavorModel, tenantId, tenantCode, branchId, goods.getId(), goodsFlavorGroup.getId(), userId);
+                        for (SaveGoodsModel.FlavorInfo flavorInfo : flavorGroupInfo.getFlavorInfos()) {
+                            GoodsFlavor goodsFlavor = buildGoodsFlavor(flavorInfo, tenantId, tenantCode, branchId, goods.getId(), goodsFlavorGroup.getId(), userId);
                             goodsFlavorMapper.insert(goodsFlavor);
                         }
                     }
@@ -349,15 +349,15 @@ public class GoodsService {
         return new ApiRest();
     }
 
-    private GoodsFlavor buildGoodsFlavor(SaveGoodsModel.GoodsFlavorModel goodsFlavorModel, BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, BigInteger goodsFlavorGroupId, BigInteger userId) {
+    private GoodsFlavor buildGoodsFlavor(SaveGoodsModel.FlavorInfo flavorInfo, BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, BigInteger goodsFlavorGroupId, BigInteger userId) {
         GoodsFlavor goodsFlavor = new GoodsFlavor();
         goodsFlavor.setTenantId(tenantId);
         goodsFlavor.setTenantCode(tenantCode);
         goodsFlavor.setBranchId(branchId);
         goodsFlavor.setGoodsId(goodsId);
         goodsFlavor.setGoodsFlavorGroupId(goodsFlavorGroupId);
-        goodsFlavor.setName(goodsFlavorModel.getName());
-        goodsFlavor.setPrice(goodsFlavorModel.getPrice() == null ? BigDecimal.ZERO : goodsFlavorModel.getPrice());
+        goodsFlavor.setName(flavorInfo.getName());
+        goodsFlavor.setPrice(flavorInfo.getPrice() == null ? BigDecimal.ZERO : flavorInfo.getPrice());
         goodsFlavor.setCreateUserId(userId);
         goodsFlavor.setLastUpdateUserId(userId);
         goodsFlavor.setLastUpdateRemark("新增口味信息！");

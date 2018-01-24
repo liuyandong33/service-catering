@@ -50,10 +50,9 @@ public class GoodsController extends BasicController {
             ApplicationHandler.notEmpty(goodsSpecificationInfos, "goodsSpecificationInfos");
             saveGoodsModel.setGoodsSpecificationInfos(goodsSpecificationInfos);
 
-            String flavorGroups = requestParameters.get("flavorGroups");
-            if (StringUtils.isNotBlank(flavorGroups)) {
-                List<SaveGoodsModel.GoodsFlavorGroupModel> goodsFlavorGroupModels = GsonUtils.jsonToList(flavorGroups, SaveGoodsModel.GoodsFlavorGroupModel.class);
-                saveGoodsModel.setGoodsFlavorGroupModels(goodsFlavorGroupModels);
+            String flavorGroupInfos = requestParameters.get("flavorGroupInfos");
+            if (StringUtils.isNotBlank(flavorGroupInfos)) {
+                saveGoodsModel.setFlavorGroupInfos(flavorGroupInfos);
             }
 
             saveGoodsModel.validateAndThrow();

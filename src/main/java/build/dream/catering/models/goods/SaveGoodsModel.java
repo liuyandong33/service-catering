@@ -5,6 +5,7 @@ import build.dream.catering.utils.JsonSchemaValidateUtils;
 import build.dream.common.models.BasicModel;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
+import build.dream.common.utils.JacksonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.annotations.SerializedName;
@@ -45,7 +46,7 @@ public class SaveGoodsModel extends BasicModel {
 
     private List<GoodsSpecificationInfo> goodsSpecificationInfos;
 
-    private List<GoodsFlavorGroupModel> goodsFlavorGroupModels;
+    private List<FlavorGroupInfo> flavorGroupInfos;
 
     private List<BigInteger> deleteGoodsSpecificationIds;
 
@@ -124,18 +125,21 @@ public class SaveGoodsModel extends BasicModel {
     }
 
     public void setGoodsSpecificationInfos(String goodsSpecificationInfos) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(goodsSpecificationInfos);
-        ApplicationHandler.isTrue(JsonSchemaValidateUtils.validate(jsonNode, "build/dream/catering/schemas/goodsSpecificationInfosSchema.json"), "goodsSpecificationInfos");
+        ApplicationHandler.isTrue(JsonSchemaValidateUtils.validate(goodsSpecificationInfos, "build/dream/catering/schemas/goodsSpecificationInfosSchema.json"), "goodsSpecificationInfos");
         this.goodsSpecificationInfos = GsonUtils.jsonToList(goodsSpecificationInfos, GoodsSpecificationInfo.class);
     }
 
-    public List<GoodsFlavorGroupModel> getGoodsFlavorGroupModels() {
-        return goodsFlavorGroupModels;
+    public List<FlavorGroupInfo> getFlavorGroupInfos() {
+        return flavorGroupInfos;
     }
 
-    public void setGoodsFlavorGroupModels(List<GoodsFlavorGroupModel> goodsFlavorGroupModels) {
-        this.goodsFlavorGroupModels = goodsFlavorGroupModels;
+    public void setFlavorGroupInfos(List<FlavorGroupInfo> flavorGroupInfos) {
+        this.flavorGroupInfos = flavorGroupInfos;
+    }
+
+    public void setFlavorGroupInfos(String flavorGroupInfos) throws IOException {
+        ApplicationHandler.isTrue(JsonSchemaValidateUtils.validate(flavorGroupInfos, "build/dream/catering/schemas/flavorGroupInfosSchema.json"), "flavorGroupInfos");
+        this.flavorGroupInfos = GsonUtils.jsonToList(flavorGroupInfos, FlavorGroupInfo.class);
     }
 
     public List<BigInteger> getDeleteGoodsSpecificationIds() {
@@ -202,14 +206,13 @@ public class SaveGoodsModel extends BasicModel {
         }
     }
 
-    public static class GoodsFlavorGroupModel extends BasicModel {
+    public static class FlavorGroupInfo {
         private BigInteger id;
         @NotNull
         @Length(max = 20)
         private String name;
 
-        @SerializedName(value = "flavors", alternate = "goodsFlavorModels")
-        private List<GoodsFlavorModel> goodsFlavorModels;
+        private List<FlavorInfo> flavorInfos;
 
         private List<BigInteger> deleteGoodsFlavorIds;
 
@@ -229,12 +232,8 @@ public class SaveGoodsModel extends BasicModel {
             this.name = name;
         }
 
-        public List<GoodsFlavorModel> getGoodsFlavorModels() {
-            return goodsFlavorModels;
-        }
-
-        public void setGoodsFlavorModels(List<GoodsFlavorModel> goodsFlavorModels) {
-            this.goodsFlavorModels = goodsFlavorModels;
+        public List<FlavorInfo> getFlavorInfos() {
+            return flavorInfos;
         }
 
         public List<BigInteger> getDeleteGoodsFlavorIds() {
@@ -244,25 +243,9 @@ public class SaveGoodsModel extends BasicModel {
         public void setDeleteGoodsFlavorIds(List<BigInteger> deleteGoodsFlavorIds) {
             this.deleteGoodsFlavorIds = deleteGoodsFlavorIds;
         }
-
-        @Override
-        public boolean validate() {
-            if (!super.validate()) {
-                return false;
-            }
-            if (CollectionUtils.isEmpty(goodsFlavorModels)) {
-                return false;
-            }
-            for (GoodsFlavorModel goodsFlavorModel : goodsFlavorModels) {
-                if (!goodsFlavorModel.validate()) {
-                    return false;
-                }
-            }
-            return true;
-        }
     }
 
-    public static class GoodsFlavorModel extends BasicModel {
+    public static class FlavorInfo {
         private BigInteger id;
 
         @NotNull

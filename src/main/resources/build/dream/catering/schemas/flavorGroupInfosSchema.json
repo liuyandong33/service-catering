@@ -1,0 +1,45 @@
+{
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "id": {
+                "type": "integer"
+            },
+            "name": {
+                "type": "string",
+                "maxLength": 20
+            },
+            "flavorInfos": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "integer"
+                        },
+                        "name": {
+                            "type": "string",
+                            "maxLength": 20
+                        },
+                        "price": {
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "name"
+                    ]
+                }
+            },
+            "deleteGoodsFlavorIds": {
+                "type": "array",
+                "items": {
+                    "type": "integer"
+                }
+            }
+        },
+        "required": [
+            "name"
+        ]
+    }
+}
