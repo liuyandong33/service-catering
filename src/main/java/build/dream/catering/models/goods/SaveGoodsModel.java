@@ -1,7 +1,7 @@
 package build.dream.catering.models.goods;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.schemas.JsonSchemaValidateUtils;
+import build.dream.catering.utils.JsonSchemaValidateUtils;
 import build.dream.common.models.BasicModel;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.annotations.SerializedName;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.Validate;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
@@ -127,7 +126,7 @@ public class SaveGoodsModel extends BasicModel {
     public void setGoodsSpecificationInfos(String goodsSpecificationInfos) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(goodsSpecificationInfos);
-        ApplicationHandler.isTrue(JsonSchemaValidateUtils.validate(jsonNode, ""), "goodsSpecificationInfos");
+        ApplicationHandler.isTrue(JsonSchemaValidateUtils.validate(jsonNode, "build/dream/catering/schemas/goodsSpecificationInfosSchema.json"), "goodsSpecificationInfos");
         this.goodsSpecificationInfos = GsonUtils.jsonToList(goodsSpecificationInfos, GoodsSpecificationInfo.class);
     }
 

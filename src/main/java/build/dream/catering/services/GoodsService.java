@@ -205,11 +205,11 @@ public class GoodsService {
             }
 
             // 查询出需要修改的商品规格
-            List<SaveGoodsModel.GoodsSpecificationModel> goodsSpecificationModels = saveGoodsModel.getGoodsSpecificationModels();
+            List<SaveGoodsModel.GoodsSpecificationInfo> goodsSpecificationInfos = saveGoodsModel.getGoodsSpecificationInfos();
             List<BigInteger> goodsSpecificationIds = new ArrayList<BigInteger>();
-            for (SaveGoodsModel.GoodsSpecificationModel goodsSpecificationModel : goodsSpecificationModels) {
-                if (goodsSpecificationModel.getId() != null) {
-                    goodsSpecificationIds.add(goodsSpecificationModel.getId());
+            for (SaveGoodsModel.GoodsSpecificationInfo goodsSpecificationInfo : goodsSpecificationInfos) {
+                if (goodsSpecificationInfo.getId() != null) {
+                    goodsSpecificationIds.add(goodsSpecificationInfo.getId());
                 }
             }
 
@@ -227,11 +227,11 @@ public class GoodsService {
             }
 
             // 处理所有规格，修改与更新
-            for (SaveGoodsModel.GoodsSpecificationModel goodsSpecificationModel : goodsSpecificationModels) {
-                if (goodsSpecificationModel.getId() != null) {
-                    GoodsSpecification goodsSpecification = goodsSpecificationMap.get(goodsSpecificationModel.getId());
+            for (SaveGoodsModel.GoodsSpecificationInfo goodsSpecificationInfo : goodsSpecificationInfos) {
+                if (goodsSpecificationInfo.getId() != null) {
+                    GoodsSpecification goodsSpecification = goodsSpecificationMap.get(goodsSpecificationInfo.getId());
                     Validate.notNull(goodsSpecification, "商品规格不存在！");
-                    goodsSpecification.setName(goodsSpecificationModel.getName());
+                    goodsSpecification.setName(goodsSpecificationInfo.getName());
                     goodsSpecification.setPrice(goodsSpecification.getPrice());
                     goodsSpecificationMapper.update(goodsSpecification);
                 } else {
@@ -240,8 +240,8 @@ public class GoodsService {
                     goodsSpecification.setTenantCode(tenantCode);
                     goodsSpecification.setBranchId(branchId);
                     goodsSpecification.setGoodsId(saveGoodsModel.getGoodsId());
-                    goodsSpecification.setName(goodsSpecificationModel.getName());
-                    goodsSpecification.setPrice(goodsSpecificationModel.getPrice());
+                    goodsSpecification.setName(goodsSpecificationInfo.getName());
+                    goodsSpecification.setPrice(goodsSpecificationInfo.getPrice());
                     goodsSpecification.setCreateUserId(userId);
                     goodsSpecification.setLastUpdateUserId(userId);
                     goodsSpecification.setLastUpdateRemark("新增规格信息！");
