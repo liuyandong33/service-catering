@@ -279,9 +279,17 @@ public class ElemeService {
         elemeOrder.setLastUpdateRemark("处理退单消息回调！");
         elemeOrderMapper.update(elemeOrder);
 
+        BigInteger tenantId = elemeOrder.getTenantId();
+        String tenantCode = elemeOrder.getTenantCode();
+        BigInteger branchId = elemeOrder.getBranchId();
+        BigInteger elemeOrderId = elemeOrder.getId();
+
         ElemeRefundOrderMessage elemeRefundOrderMessage = new ElemeRefundOrderMessage();
+        elemeRefundOrderMessage.setTenantId(tenantId);
+        elemeRefundOrderMessage.setTenantCode(tenantCode);
+        elemeRefundOrderMessage.setBranchId(branchId);
         elemeRefundOrderMessage.setElemeOrderId(elemeOrder.getId());
-        elemeRefundOrderMessage.setOrderId(elemeOrder.getOrderId());
+        elemeRefundOrderMessage.setOrderId(orderId);
         elemeRefundOrderMessage.setRefundStatus(messageJsonObject.optString("refundStatus"));
         elemeRefundOrderMessage.setReason(messageJsonObject.optString("reason"));
         elemeRefundOrderMessage.setShopId(shopId);
@@ -290,8 +298,6 @@ public class ElemeService {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(messageJsonObject.getLong("updateTime") * 1000);
         elemeRefundOrderMessage.setUpdateTime(calendar.getTime());
-        elemeRefundOrderMessage.setTenantId(elemeOrder.getTenantId());
-        elemeRefundOrderMessage.setBranchId(elemeOrder.getBranchId());
         elemeRefundOrderMessage.setCreateUserId(userId);
         elemeRefundOrderMessage.setLastUpdateUserId(userId);
         elemeRefundOrderMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么退单信息！");
@@ -299,14 +305,23 @@ public class ElemeService {
 
         JSONArray goodsList = messageJsonObject.getJSONArray("goodsList");
         int size = goodsList.size();
+        List<ElemeRefundOrderMessageGoodsItem> elemeRefundOrderMessageGoodsItems = new ArrayList<ElemeRefundOrderMessageGoodsItem>();
         for (int index = 0; index < size; index++) {
             JSONObject itemJsonObject = goodsList.getJSONObject(index);
             ElemeRefundOrderMessageGoodsItem elemeRefundOrderMessageGoodsItem = new ElemeRefundOrderMessageGoodsItem();
+            elemeRefundOrderMessageGoodsItem.setTenantId(tenantId);
+            elemeRefundOrderMessageGoodsItem.setTenantCode(tenantCode);
+            elemeRefundOrderMessageGoodsItem.setBranchId(branchId);
+            elemeRefundOrderMessageGoodsItem.setElemeOrderId(elemeOrderId);
+            elemeRefundOrderMessageGoodsItem.setOrderId(orderId);
             elemeRefundOrderMessageGoodsItem.setElemeRefundOrderMessageId(elemeRefundOrderMessage.getId());
             elemeRefundOrderMessageGoodsItem.setName(itemJsonObject.optString("name"));
             elemeRefundOrderMessageGoodsItem.setQuantity(itemJsonObject.optInt("quantity"));
             elemeRefundOrderMessageGoodsItem.setPrice(BigDecimal.valueOf(itemJsonObject.optDouble("price")));
-            elemeRefundOrderMessageGoodsItemMapper.insert(elemeRefundOrderMessageGoodsItem);
+            elemeRefundOrderMessageGoodsItems.add(elemeRefundOrderMessageGoodsItem);
+        }
+        if (CollectionUtils.isNotEmpty(elemeRefundOrderMessageGoodsItems)) {
+            elemeRefundOrderMessageGoodsItemMapper.insertAll(elemeRefundOrderMessageGoodsItems);
         }
 
         if (type == 20 || type == 21 || type == 24 || type == 25 || type == 26 || type == 30 || type == 31 || type == 34 || type == 35 || type == 36) {

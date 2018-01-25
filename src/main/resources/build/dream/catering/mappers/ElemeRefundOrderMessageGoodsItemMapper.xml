@@ -4,4 +4,12 @@
     <insert id="insert" parameterType="build.dream.common.erp.catering.domains.ElemeRefundOrderMessageGoodsItem">
         ${@build.dream.common.utils.BeanUtils@generateInsertSql("build.dream.common.erp.catering.domains.ElemeRefundOrderMessageGoodsItem")}
     </insert>
+
+    <insert id="insertAll" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+        <bind name="sql" value="@build.dream.common.utils.BeanUtils@generateInsertAllSql('build.dream.common.erp.catering.domains.ElemeRefundOrderMessageGoodsItem')"></bind>
+        ${sql[0]}
+        <foreach collection="list" index="index" item="item" separator=",">
+            ${sql[1]}
+        </foreach>
+    </insert>
 </mapper>
