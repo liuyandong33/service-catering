@@ -35,4 +35,7 @@ public class Constants extends build.dream.common.constants.Constants {
     public static Integer GOODS_TYPE_PACKAGE = 2;
 
     public static final String KEY_DATA_HANDLE_SIGNATURES = "_data_handle_signatures";
+
+    public static final String GOODS_SPECIFICATION_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/goodsSpecificationInfosSchema.json";
+    public static final String FLAVOR_GROUP_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/flavorGroupInfosSchema.json";
 }

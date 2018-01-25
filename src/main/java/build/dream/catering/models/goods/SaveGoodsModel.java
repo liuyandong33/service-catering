@@ -1,20 +1,13 @@
 package build.dream.catering.models.goods;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.utils.JsonSchemaValidateUtils;
 import build.dream.common.models.BasicModel;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
-import build.dream.common.utils.JacksonUtils;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.annotations.SerializedName;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
@@ -33,13 +26,13 @@ public class SaveGoodsModel extends BasicModel {
     @NotNull
     private BigInteger userId;
 
-    private BigInteger goodsId;
+    private BigInteger id;
 
     @NotNull
     @Length(max = 20)
-    private String goodsName;
+    private String name;
 
-    private Integer goodsType;
+    private Integer type;
 
     @NotNull
     private BigInteger categoryId;
@@ -84,28 +77,28 @@ public class SaveGoodsModel extends BasicModel {
         this.userId = userId;
     }
 
-    public BigInteger getGoodsId() {
-        return goodsId;
+    public BigInteger getId() {
+        return id;
     }
 
-    public void setGoodsId(BigInteger goodsId) {
-        this.goodsId = goodsId;
+    public void setId(BigInteger id) {
+        this.id = id;
     }
 
-    public String getGoodsName() {
-        return goodsName;
+    public String getName() {
+        return name;
     }
 
-    public void setGoodsName(String goodsName) {
-        this.goodsName = goodsName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public Integer getGoodsType() {
-        return goodsType;
+    public Integer getType() {
+        return type;
     }
 
-    public void setGoodsType(Integer goodsType) {
-        this.goodsType = goodsType;
+    public void setType(Integer type) {
+        this.type = type;
     }
 
     public BigInteger getCategoryId() {
@@ -124,8 +117,8 @@ public class SaveGoodsModel extends BasicModel {
         this.goodsSpecificationInfos = goodsSpecificationInfos;
     }
 
-    public void setGoodsSpecificationInfos(String goodsSpecificationInfos) throws IOException {
-        ApplicationHandler.isTrue(JsonSchemaValidateUtils.validate(goodsSpecificationInfos, "build/dream/catering/schemas/goodsSpecificationInfosSchema.json"), "goodsSpecificationInfos");
+    public void setGoodsSpecificationInfos(String goodsSpecificationInfos) {
+        ApplicationHandler.validateJson(goodsSpecificationInfos, Constants.GOODS_SPECIFICATION_INFOS_SCHEMA_FILE_PATH, "goodsSpecificationInfos");
         this.goodsSpecificationInfos = GsonUtils.jsonToList(goodsSpecificationInfos, GoodsSpecificationInfo.class);
     }
 
@@ -137,8 +130,8 @@ public class SaveGoodsModel extends BasicModel {
         this.flavorGroupInfos = flavorGroupInfos;
     }
 
-    public void setFlavorGroupInfos(String flavorGroupInfos) throws IOException {
-        ApplicationHandler.isTrue(JsonSchemaValidateUtils.validate(flavorGroupInfos, "build/dream/catering/schemas/flavorGroupInfosSchema.json"), "flavorGroupInfos");
+    public void setFlavorGroupInfos(String flavorGroupInfos) {
+        ApplicationHandler.validateJson(flavorGroupInfos, Constants.FLAVOR_GROUP_INFOS_SCHEMA_FILE_PATH, "flavorGroupInfos");
         this.flavorGroupInfos = GsonUtils.jsonToList(flavorGroupInfos, FlavorGroupInfo.class);
     }
 
@@ -163,7 +156,7 @@ public class SaveGoodsModel extends BasicModel {
         if (!super.validate()) {
             return false;
         }
-        if (!ArrayUtils.contains(new Object[]{Constants.GOODS_TYPE_ORDINARY_GOODS, Constants.GOODS_TYPE_PACKAGE}, goodsType)) {
+        if (!ArrayUtils.contains(new Object[]{Constants.GOODS_TYPE_ORDINARY_GOODS, Constants.GOODS_TYPE_PACKAGE}, type)) {
             return false;
         }
         return true;
@@ -172,8 +165,8 @@ public class SaveGoodsModel extends BasicModel {
     @Override
     public void validateAndThrow() {
         super.validateAndThrow();
-        ApplicationHandler.notNull(goodsType, "goodsType");
-        ApplicationHandler.inArray(new Object[]{Constants.GOODS_TYPE_ORDINARY_GOODS, Constants.GOODS_TYPE_PACKAGE}, goodsType, "goodsType");
+        ApplicationHandler.notNull(type, "type");
+        ApplicationHandler.inArray(new Object[]{Constants.GOODS_TYPE_ORDINARY_GOODS, Constants.GOODS_TYPE_PACKAGE}, type, "type");
     }
 
     public static class GoodsSpecificationInfo {

@@ -157,15 +157,16 @@ public class GoodsService {
         BigInteger branchId = saveGoodsModel.getBranchId();
         BigInteger userId = saveGoodsModel.getUserId();
 
-        if (saveGoodsModel.getGoodsId() != null) {
+        if (saveGoodsModel.getId() != null) {
             SearchModel goodsSearchModel = new SearchModel(true);
             goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
             goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-            goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getGoodsId());
+            goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getId());
             Goods goods = goodsMapper.find(goodsSearchModel);
             Validate.notNull(goods, "商品不存在！");
 
-            goods.setName(saveGoodsModel.getGoodsName());
+            goods.setName(saveGoodsModel.getName());
+            goods.setCategoryId(saveGoodsModel.getCategoryId());
             goodsMapper.update(goods);
 
             // 删除需要删除的规格
@@ -228,31 +229,29 @@ public class GoodsService {
 
             // 处理所有规格，修改与更新
             for (SaveGoodsModel.GoodsSpecificationInfo goodsSpecificationInfo : goodsSpecificationInfos) {
+                List<GoodsSpecification> insertGoodsSpecifications = new ArrayList<GoodsSpecification>();
                 if (goodsSpecificationInfo.getId() != null) {
                     GoodsSpecification goodsSpecification = goodsSpecificationMap.get(goodsSpecificationInfo.getId());
                     Validate.notNull(goodsSpecification, "商品规格不存在！");
                     goodsSpecification.setName(goodsSpecificationInfo.getName());
-                    goodsSpecification.setPrice(goodsSpecification.getPrice());
+                    goodsSpecification.setPrice(goodsSpecificationInfo.getPrice());
                     goodsSpecificationMapper.update(goodsSpecification);
                 } else {
-                    GoodsSpecification goodsSpecification = new GoodsSpecification();
-                    goodsSpecification.setTenantId(tenantId);
-                    goodsSpecification.setTenantCode(tenantCode);
-                    goodsSpecification.setBranchId(branchId);
-                    goodsSpecification.setGoodsId(saveGoodsModel.getGoodsId());
-                    goodsSpecification.setName(goodsSpecificationInfo.getName());
-                    goodsSpecification.setPrice(goodsSpecificationInfo.getPrice());
-                    goodsSpecification.setCreateUserId(userId);
-                    goodsSpecification.setLastUpdateUserId(userId);
-                    goodsSpecification.setLastUpdateRemark("新增规格信息！");
-                    goodsSpecificationMapper.insert(goodsSpecification);
+                    GoodsSpecification goodsSpecification = buildGoodsSpecification(tenantId, tenantCode, branchId, goods.getId(), goodsSpecificationInfo, userId);
+                    insertGoodsSpecifications.add(goodsSpecification);
+                }
+                if (CollectionUtils.isNotEmpty(insertGoodsSpecifications)) {
+                    goodsSpecificationMapper.insertAll(insertGoodsSpecifications);
                 }
             }
 
             List<SaveGoodsModel.FlavorGroupInfo> flavorGroupInfos = saveGoodsModel.getFlavorGroupInfos();
             if (CollectionUtils.isNotEmpty(flavorGroupInfos)) {
+                // 用来保存需要修改的口味组id
                 List<BigInteger> goodsFlavorGroupIds = new ArrayList<BigInteger>();
+                // 用来保存需要删除的口味id
                 List<BigInteger> deleteGoodsFlavorIds = new ArrayList<BigInteger>();
+                // 用来保存需要修改的口味id
                 List<BigInteger> goodsFlavorIds = new ArrayList<BigInteger>();
                 for (SaveGoodsModel.FlavorGroupInfo goodsFlavorGroupInfo : flavorGroupInfos) {
                     if (goodsFlavorGroupInfo.getId() != null) {
@@ -269,6 +268,8 @@ public class GoodsService {
                         }
                     }
                 }
+
+                // 删除需要删除的口味
                 if (CollectionUtils.isNotEmpty(deleteGoodsFlavorIds)) {
                     UpdateModel deleteGoodsFlavorUpdateModel = new UpdateModel(true);
                     deleteGoodsFlavorUpdateModel.setTableName("goods_flavor");
@@ -281,6 +282,7 @@ public class GoodsService {
                     universalMapper.universalUpdate(deleteGoodsFlavorUpdateModel);
                 }
 
+                // 查询出需要修改的口味组
                 SearchModel goodsFlavorGroupSearchModel = new SearchModel(true);
                 goodsFlavorGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
                 goodsFlavorGroupSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
@@ -292,6 +294,7 @@ public class GoodsService {
                     goodsFlavorGroupMap.put(goodsFlavorGroup.getId(), goodsFlavorGroup);
                 }
 
+                // 查询出需要修改的口味
                 SearchModel goodsFlavorSearchModel = new SearchModel(true);
                 goodsFlavorSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
                 goodsFlavorSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
@@ -304,6 +307,8 @@ public class GoodsService {
                 }
 
                 for (SaveGoodsModel.FlavorGroupInfo flavorGroupInfo : flavorGroupInfos) {
+                    // 用来保存需要新增的口味，便于批量插入
+                    List<GoodsFlavor> insertGoodsFlavors = new ArrayList<GoodsFlavor>();
                     if (flavorGroupInfo.getId() != null) {
                         GoodsFlavorGroup goodsFlavorGroup = goodsFlavorGroupMap.get(flavorGroupInfo.getId());
                         Validate.notNull(goodsFlavorGroup, "口味组不存在！");
@@ -323,30 +328,80 @@ public class GoodsService {
                                 goodsFlavorMapper.update(goodsFlavor);
                             } else {
                                 GoodsFlavor goodsFlavor = buildGoodsFlavor(flavorInfo, tenantId, tenantCode, branchId, goods.getId(), goodsFlavorGroup.getId(), userId);
-                                goodsFlavorMapper.insert(goodsFlavor);
+                                insertGoodsFlavors.add(goodsFlavor);
+//                                goodsFlavorMapper.insert(goodsFlavor);
                             }
                         }
                     } else {
-                        GoodsFlavorGroup goodsFlavorGroup = new GoodsFlavorGroup();
-                        goodsFlavorGroup.setTenantId(tenantId);
-                        goodsFlavorGroup.setTenantCode(tenantCode);
-                        goodsFlavorGroup.setBranchId(branchId);
-                        goodsFlavorGroup.setGoodsId(goods.getId());
-                        goodsFlavorGroup.setName(flavorGroupInfo.getName());
-                        goodsFlavorGroup.setCreateUserId(userId);
-                        goodsFlavorGroup.setLastUpdateUserId(userId);
-                        goodsFlavorGroup.setLastUpdateRemark("新增口味组信息！");
+                        GoodsFlavorGroup goodsFlavorGroup = buildGoodsFlavorGroup(tenantId, tenantCode, branchId, goods.getId(), flavorGroupInfo, userId);
                         goodsFlavorGroupMapper.insert(goodsFlavorGroup);
 
                         for (SaveGoodsModel.FlavorInfo flavorInfo : flavorGroupInfo.getFlavorInfos()) {
                             GoodsFlavor goodsFlavor = buildGoodsFlavor(flavorInfo, tenantId, tenantCode, branchId, goods.getId(), goodsFlavorGroup.getId(), userId);
-                            goodsFlavorMapper.insert(goodsFlavor);
+                            insertGoodsFlavors.add(goodsFlavor);
+//                            goodsFlavorMapper.insert(goodsFlavor);
                         }
+                    }
+                    if (CollectionUtils.isNotEmpty(insertGoodsFlavors)) {
+                        goodsFlavorMapper.insertAll(insertGoodsFlavors);
                     }
                 }
             }
+        } else {
+            // 新增商品
+            Goods goods = new Goods();
+            goods.setTenantId(tenantId);
+            goods.setTenantCode(tenantCode);
+            goods.setBranchId(branchId);
+            goods.setName(saveGoodsModel.getName());
+            goods.setType(saveGoodsModel.getType());
+            goods.setCategoryId(saveGoodsModel.getCategoryId());
+            goods.setCreateUserId(userId);
+            goods.setLastUpdateUserId(userId);
+            goods.setLastUpdateRemark("新增商品信息！");
+            goodsMapper.insert(goods);
+
+            // 新增所有规格
+            List<GoodsSpecification> insertGoodsSpecifications = new ArrayList<GoodsSpecification>();
+            List<SaveGoodsModel.GoodsSpecificationInfo> goodsSpecificationInfos = saveGoodsModel.getGoodsSpecificationInfos();
+            for (SaveGoodsModel.GoodsSpecificationInfo goodsSpecificationInfo : goodsSpecificationInfos) {
+                GoodsSpecification goodsSpecification = buildGoodsSpecification(tenantId, tenantCode, branchId, goods.getId(), goodsSpecificationInfo, userId);
+                insertGoodsSpecifications.add(goodsSpecification);
+            }
+            goodsSpecificationMapper.insertAll(insertGoodsSpecifications);
+
+            List<SaveGoodsModel.FlavorGroupInfo> flavorGroupInfos = saveGoodsModel.getFlavorGroupInfos();
+            if (CollectionUtils.isNotEmpty(flavorGroupInfos)) {
+                List<GoodsFlavor> insertGoodsFlavors = new ArrayList<GoodsFlavor>();
+                for (SaveGoodsModel.FlavorGroupInfo flavorGroupInfo : flavorGroupInfos) {
+                    GoodsFlavorGroup goodsFlavorGroup = buildGoodsFlavorGroup(tenantId, tenantCode, branchId, goods.getId(), flavorGroupInfo, userId);
+                    goodsFlavorGroupMapper.insert(goodsFlavorGroup);
+
+                    for (SaveGoodsModel.FlavorInfo flavorInfo : flavorGroupInfo.getFlavorInfos()) {
+                        GoodsFlavor goodsFlavor = buildGoodsFlavor(flavorInfo, tenantId, tenantCode, branchId, goods.getId(), goodsFlavorGroup.getId(), userId);
+                        insertGoodsFlavors.add(goodsFlavor);
+                    }
+                }
+                goodsFlavorMapper.insertAll(insertGoodsFlavors);
+            }
         }
-        return new ApiRest();
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("保存商品信息成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
+    }
+
+    private GoodsFlavorGroup buildGoodsFlavorGroup(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, SaveGoodsModel.FlavorGroupInfo flavorGroupInfo, BigInteger userId) {
+        GoodsFlavorGroup goodsFlavorGroup = new GoodsFlavorGroup();
+        goodsFlavorGroup.setTenantId(tenantId);
+        goodsFlavorGroup.setTenantCode(tenantCode);
+        goodsFlavorGroup.setBranchId(branchId);
+        goodsFlavorGroup.setGoodsId(goodsId);
+        goodsFlavorGroup.setName(flavorGroupInfo.getName());
+        goodsFlavorGroup.setCreateUserId(userId);
+        goodsFlavorGroup.setLastUpdateUserId(userId);
+        goodsFlavorGroup.setLastUpdateRemark("新增口味组信息！");
+        return goodsFlavorGroup;
     }
 
     private GoodsFlavor buildGoodsFlavor(SaveGoodsModel.FlavorInfo flavorInfo, BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, BigInteger goodsFlavorGroupId, BigInteger userId) {
@@ -362,6 +417,20 @@ public class GoodsService {
         goodsFlavor.setLastUpdateUserId(userId);
         goodsFlavor.setLastUpdateRemark("新增口味信息！");
         return goodsFlavor;
+    }
+
+    private GoodsSpecification buildGoodsSpecification(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, SaveGoodsModel.GoodsSpecificationInfo goodsSpecificationInfo, BigInteger userId) {
+        GoodsSpecification goodsSpecification = new GoodsSpecification();
+        goodsSpecification.setTenantId(tenantId);
+        goodsSpecification.setTenantCode(tenantCode);
+        goodsSpecification.setBranchId(branchId);
+        goodsSpecification.setGoodsId(goodsId);
+        goodsSpecification.setName(goodsSpecificationInfo.getName());
+        goodsSpecification.setPrice(goodsSpecificationInfo.getPrice());
+        goodsSpecification.setCreateUserId(userId);
+        goodsSpecification.setLastUpdateUserId(userId);
+        goodsSpecification.setLastUpdateRemark("新增规格信息！");
+        return goodsSpecification;
     }
 
     /**
