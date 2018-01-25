@@ -250,8 +250,8 @@ public class ElemeService {
                 elemeOrderActivityMapper.insert(elemeOrderActivity);
             }
         }
-        CacheUtils.hset(elemeOrder.getOrderId(), type.toString(), uuid);
-        CacheUtils.expire(elemeOrder.getOrderId(), 48, TimeUnit.HOURS);
+//        CacheUtils.hset(elemeOrder.getOrderId(), type.toString(), uuid);
+//        CacheUtils.expire(elemeOrder.getOrderId(), 48, TimeUnit.HOURS);
         publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid);
     }
 
@@ -682,10 +682,11 @@ public class ElemeService {
     /**
      * 发布饿了么订单消息
      * @param tenantId：商户ID
-     * @param branchId：门店Id
-     * @param elemeOrderId：订单ID
+     * @param branchId：门店ID
+     * @param elemeOrderId：饿了么订单ID
      * @param type：消息类型
-     * @return
+     * @param uuid：消息唯一ID
+     * @throws IOException
      */
     private void publishElemeOrderMessage(BigInteger tenantId, BigInteger branchId, BigInteger elemeOrderId, Integer type, String uuid) throws IOException {
         String elemeMessageChannelTopic = ConfigurationUtils.getConfiguration(Constants.ELEME_MESSAGE_CHANNEL_TOPIC);
