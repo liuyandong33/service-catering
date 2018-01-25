@@ -596,4 +596,35 @@ public class ElemeController extends BasicController {
         elemeService.saveElemeOrder(BigInteger.valueOf(161505259L), message, 10, UUID.randomUUID().toString());
         return null;
     }
+
+    /**
+     * 分页获取店铺下的商品
+     *
+     * @return
+     */
+    @RequestMapping(value = "/queryItemByPage")
+    @ResponseBody
+    public String queryItemByPage() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            QueryItemByPageModel queryItemByPageModel = ApplicationHandler.instantiateObject(QueryItemByPageModel.class, requestParameters);
+            queryItemByPageModel.validateAndThrow();
+
+            Branch branch = elemeService.findBranchInfo(queryItemByPageModel.getTenantId(), queryItemByPageModel.getBranchId());
+            Map<String, Object> queryPage = new HashMap<String, Object>();
+            queryPage.put("shopId", branch.getShopId());
+            queryPage.put("offset", queryItemByPageModel.getOffset());
+            queryPage.put("limit", queryItemByPageModel.getLimit());
+
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("queryPage", queryPage);
+
+            apiRest = ElemeUtils.callElemeSystem(queryItemByPageModel.getTenantId().toString(), queryItemByPageModel.getBranchId().toString(), branch.getElemeAccountType(), "eleme.product.item.queryItemByPage", params);
+        } catch (Exception e) {
+            LogUtils.error("分页获取店铺下的商品失败", controllerSimpleName, "queryItemByPage", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }
