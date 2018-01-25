@@ -627,4 +627,69 @@ public class ElemeController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    /**
+     * 设置订单餐盒费
+     *
+     * @return
+     */
+    @RequestMapping(value = "/setOrderPackingFee")
+    @ResponseBody
+    public String setOrderPackingFee() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            SetOrderPackingFeeModel setOrderPackingFeeModel = ApplicationHandler.instantiateObject(SetOrderPackingFeeModel.class, requestParameters);
+            setOrderPackingFeeModel.validateAndThrow();
+
+            Branch branch = elemeService.findBranchInfo(setOrderPackingFeeModel.getTenantId(), setOrderPackingFeeModel.getBranchId());
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("shopId", branch.getShopId());
+            params.put("status", setOrderPackingFeeModel.getStatus());
+            ApplicationHandler.ifNotNullPut(params, "packingFee", setOrderPackingFeeModel.getPackingFee());
+
+            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(setOrderPackingFeeModel.getTenantId().toString(), setOrderPackingFeeModel.getBranchId().toString(), branch.getElemeAccountType(), "eleme.product.item.setOrderPackingFee", params);
+            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+            apiRest = new ApiRest();
+            apiRest.setMessage("设置订单餐盒费成功！");
+            apiRest.setSuccessful(true);
+        } catch (Exception e) {
+            LogUtils.error("设置订单餐盒费失败", controllerSimpleName, "setOrderPackingFee", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 查询店铺活动商品
+     *
+     * @return
+     */
+    @RequestMapping(value = "/getShopSalesItems")
+    @ResponseBody
+    public String getShopSalesItems() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            GetShopSalesItemsModel getShopSalesItemsModel = ApplicationHandler.instantiateObject(GetShopSalesItemsModel.class, requestParameters);
+            getShopSalesItemsModel.validateAndThrow();
+
+            Branch branch = elemeService.findBranchInfo(getShopSalesItemsModel.getTenantId(), getShopSalesItemsModel.getBranchId());
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("shopId", branch.getShopId());
+
+            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(getShopSalesItemsModel.getTenantId().toString(), getShopSalesItemsModel.getBranchId().toString(), branch.getElemeAccountType(), "eleme.product.item.getShopSalesItems", params);
+            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+            apiRest = new ApiRest();
+            apiRest.setData(callElemeSystemApiRest.getData());
+            apiRest.setMessage("查询店铺活动商品成功！");
+            apiRest.setSuccessful(true);
+        } catch (Exception e) {
+            LogUtils.error("查询店铺活动商品失败", controllerSimpleName, "getShopSalesItems", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }
