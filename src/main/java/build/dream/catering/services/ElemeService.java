@@ -12,6 +12,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,7 @@ public class ElemeService {
     @Autowired
     private ElemeOrderMapper elemeOrderMapper;
     @Autowired
-    private ElemeGroupMapper elemeGroupMapper;
+    private ElemeOrderGroupMapper elemeOrderGroupMapper;
     @Autowired
     private ElemeOrderItemMapper elemeOrderItemMapper;
     @Autowired
@@ -38,7 +39,7 @@ public class ElemeService {
     @Autowired
     private ElemeOrderItemNewSpecMapper elemeOrderItemNewSpecMapper;
     @Autowired
-    private ElemeActivityMapper elemeActivityMapper;
+    private ElemeOrderActivityMapper elemeOrderActivityMapper;
     @Autowired
     private ElemeRefundOrderMessageMapper elemeRefundOrderMessageMapper;
     @Autowired
@@ -89,11 +90,25 @@ public class ElemeService {
     @Transactional(rollbackFor = Exception.class)
     public void saveElemeOrder(BigInteger shopId, String message, Integer type, String uuid) throws IOException {
         JSONObject messageJsonObject = JSONObject.fromObject(message);
+
+        String openId = messageJsonObject.getString("openId");
+        String[] array = openId.split("Z");
+        BigInteger tenantId = NumberUtils.createBigInteger(array[0]);
+        BigInteger branchId = NumberUtils.createBigInteger(array[1]);
+
         SearchModel branchSearchModel = new SearchModel(true);
+        branchSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        branchSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
         branchSearchModel.addSearchCondition("shop_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, shopId);
         Branch branch = branchMapper.find(branchSearchModel);
-        Validate.notNull(branch, "shopId为" + shopId + "的门店不存在！");
+        Validate.notNull(branch, "门店不存在！");
+
+        String tenantCode = branch.getTenantCode();
+
         // 开始保存饿了么订单
+        String id = messageJsonObject.getString("id");
+        messageJsonObject.remove("id");
+
         JSONArray phoneList = messageJsonObject.optJSONArray("phoneList");
         messageJsonObject.remove("phoneList");
 
@@ -106,11 +121,12 @@ public class ElemeService {
         BigInteger userId = CommonUtils.getServiceSystemUserId();
         // TODO 上线之前删除
         userId = BigInteger.ONE;
+
+
         ElemeOrder elemeOrder = GsonUtils.fromJson(messageJsonObject.toString(), ElemeOrder.class, "yyyy-MM-dd'T'HH:mm:ss");
-        elemeOrder.setTenantId(branch.getTenantId());
-        elemeOrder.setTenantCode(branch.getTenantCode());
-        elemeOrder.setBranchId(branch.getId());
-        elemeOrder.setBranchCode(branch.getCode());
+        elemeOrder.setTenantId(tenantId);
+        elemeOrder.setTenantCode(tenantCode);
+        elemeOrder.setBranchId(branchId);
         elemeOrder.setCreateUserId(userId);
         elemeOrder.setLastUpdateUserId(userId);
         elemeOrder.setLastUpdateRemark("饿了么系统推送新订单，保存订单！");
@@ -121,20 +137,30 @@ public class ElemeService {
         int elemeGroupJsonArraySize = elemeGroupJsonArray.size();
         for (int index = 0; index < elemeGroupJsonArraySize; index++) {
             JSONObject elemeGroupJsonObject = elemeGroupJsonArray.getJSONObject(index);
-            ElemeGroup elemeGroup = new ElemeGroup();
-            elemeGroup.setElemeOrderId(elemeOrder.getId());
-            elemeGroup.setName(elemeGroupJsonObject.optString("name"));
-            elemeGroup.setType(elemeGroupJsonObject.optString("type"));
-            elemeGroup.setCreateUserId(userId);
-            elemeGroup.setLastUpdateUserId(userId);
-            elemeGroup.setLastUpdateRemark("饿了么系统推送新订单，保存分组");
-            elemeGroupMapper.insert(elemeGroup);
+            ElemeOrderGroup elemeOrderGroup = new ElemeOrderGroup();
+            elemeOrderGroup.setTenantId(tenantId);
+            elemeOrderGroup.setTenantCode(tenantCode);
+            elemeOrderGroup.setBranchId(branchId);
+            elemeOrderGroup.setElemeOrderId(elemeOrder.getId());
+            elemeOrderGroup.setOrderId(id);
+            elemeOrderGroup.setName(elemeGroupJsonObject.optString("name"));
+            elemeOrderGroup.setType(elemeGroupJsonObject.optString("type"));
+            elemeOrderGroup.setCreateUserId(userId);
+            elemeOrderGroup.setLastUpdateUserId(userId);
+            elemeOrderGroup.setLastUpdateRemark("饿了么系统推送新订单，保存订单分组！");
+            elemeOrderGroupMapper.insert(elemeOrderGroup);
+
             JSONArray elemeOrderItemJsonArray = elemeGroupJsonObject.optJSONArray("items");
             int elemeOrderItemJsonArraySize = elemeOrderItemJsonArray.size();
             for (int elemeOrderItemJsonArrayIndex = 0; elemeOrderItemJsonArrayIndex < elemeOrderItemJsonArraySize; elemeOrderItemJsonArrayIndex++) {
                 JSONObject elemeOrderItemJsonObject = elemeOrderItemJsonArray.optJSONObject(elemeOrderItemJsonArrayIndex);
                 ElemeOrderItem elemeOrderItem = new ElemeOrderItem();
-                elemeOrderItem.setElemeGroupId(elemeGroup.getId());
+                elemeOrderItem.setTenantId(tenantId);
+                elemeOrderItem.setTenantCode(tenantCode);
+                elemeOrderItem.setBranchId(branchId);
+                elemeOrderItem.setElemeOrderId(elemeOrder.getId());
+                elemeOrderItem.setOrderId(id);
+                elemeOrderItem.setElemeOrderGroupId(elemeOrderGroup.getId());
                 elemeOrderItem.setElemeItemId(BigInteger.valueOf(elemeOrderItemJsonObject.getLong("id")));
                 elemeOrderItem.setSkuId(BigInteger.valueOf(elemeOrderItemJsonObject.getLong("skuId")));
                 elemeOrderItem.setName(elemeOrderItemJsonObject.getString("name"));
@@ -148,13 +174,13 @@ public class ElemeService {
                 elemeOrderItem.setShopPrice(BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("shopPrice")));
                 elemeOrderItem.setVfoodId(BigInteger.valueOf(elemeOrderItemJsonObject.getLong("vfoodId")));
 
-                Object weight = elemeOrderItemJsonObject.opt("weight");
-                if (weight != null) {
+                Double weight = elemeOrderItemJsonObject.optDouble("weight");
+                if (!Double.isNaN(weight)) {
                     elemeOrderItem.setWeight(BigDecimal.valueOf(Double.valueOf(weight.toString())));
                 }
                 elemeOrderItem.setCreateUserId(userId);
                 elemeOrderItem.setLastUpdateUserId(userId);
-                elemeOrderItem.setLastUpdateRemark("饿了么系统推送新订单，保存菜品属性！");
+                elemeOrderItem.setLastUpdateRemark("饿了么系统推送新订单，保存菜品信息！");
                 elemeOrderItemMapper.insert(elemeOrderItem);
 
                 JSONArray elemeOrderItemAttributeJsonArray = elemeOrderItemJsonObject.optJSONArray("attributes");
@@ -163,6 +189,11 @@ public class ElemeService {
                     for (int elemeOrderItemAttributeJsonArrayIndex = 0; elemeOrderItemAttributeJsonArrayIndex < elemeOrderItemAttributeJsonArraySize; elemeOrderItemAttributeJsonArrayIndex++) {
                         JSONObject elemeOrderItemAttributeJsonObject = elemeOrderItemAttributeJsonArray.optJSONObject(index);
                         ElemeOrderItemAttribute elemeOrderItemAttribute = new ElemeOrderItemAttribute();
+                        elemeOrderItemAttribute.setTenantId(tenantId);
+                        elemeOrderItemAttribute.setTenantCode(tenantCode);
+                        elemeOrderItemAttribute.setBranchId(branchId);
+                        elemeOrderItemAttribute.setElemeOrderItemId(elemeOrder.getId());
+                        elemeOrderItemAttribute.setOrderId(id);
                         elemeOrderItemAttribute.setElemeOrderItemId(elemeOrderItem.getId());
                         elemeOrderItemAttribute.setName(elemeOrderItemAttributeJsonObject.optString("name"));
                         elemeOrderItemAttribute.setValue(elemeOrderItemAttributeJsonObject.optString("value"));
@@ -179,6 +210,11 @@ public class ElemeService {
                     for (int elemeOrderItemNewSpecJsonArrayIndex = 0; elemeOrderItemNewSpecJsonArrayIndex < elemeOrderItemNewSpecJsonArraySize; elemeOrderItemNewSpecJsonArrayIndex++) {
                         JSONObject elemeOrderItemNewSpecJsonObject = elemeOrderItemNewSpecJsonArray.optJSONObject(index);
                         ElemeOrderItemNewSpec elemeOrderItemNewSpec = new ElemeOrderItemNewSpec();
+                        elemeOrderItemNewSpec.setTenantId(tenantId);
+                        elemeOrderItemNewSpec.setTenantCode(tenantCode);
+                        elemeOrderItemNewSpec.setBranchId(branchId);
+                        elemeOrderItemNewSpec.setElemeOrderId(elemeOrder.getId());
+                        elemeOrderItemNewSpec.setOrderId(id);
                         elemeOrderItemNewSpec.setElemeOrderItemId(elemeOrderItem.getId());
                         elemeOrderItemNewSpec.setName(elemeOrderItemNewSpecJsonObject.optString("name"));
                         elemeOrderItemNewSpec.setValue(elemeOrderItemNewSpecJsonObject.optString("value"));
@@ -195,23 +231,28 @@ public class ElemeService {
             int orderActivityJsonArraySize = orderActivityJsonArray.size();
             for (int orderActivityJsonArrayIndex = 0; orderActivityJsonArrayIndex < orderActivityJsonArraySize; orderActivityJsonArrayIndex++) {
                 JSONObject elemeActivityJsonObject = orderActivityJsonArray.optJSONObject(orderActivityJsonArrayIndex);
-                ElemeActivity elemeActivity = new ElemeActivity();
-                elemeActivity.setElemeOrderId(elemeOrder.getId());
-                elemeActivity.setElemeActivityId(BigInteger.valueOf(elemeActivityJsonObject.optLong("id")));
-                elemeActivity.setName(elemeActivityJsonObject.optString("name"));
-                elemeActivity.setCategoryId(elemeActivityJsonObject.optInt("categoryId"));
-                elemeActivity.setElemePart(BigDecimal.valueOf(elemeActivityJsonObject.optDouble("elemePart")));
-                elemeActivity.setRestaurantPart(BigDecimal.valueOf(elemeActivityJsonObject.optDouble("restaurantPart")));
-                elemeActivity.setAmount(BigDecimal.valueOf(elemeActivityJsonObject.optDouble("amount")));
-                elemeActivity.setCreateUserId(userId);
-                elemeActivity.setLastUpdateUserId(userId);
-                elemeActivity.setLastUpdateRemark("饿了么系统推送新订单，保存饿了么订单活动！");
-                elemeActivityMapper.insert(elemeActivity);
+                ElemeOrderActivity elemeOrderActivity = new ElemeOrderActivity();
+                elemeOrderActivity.setTenantId(tenantId);
+                elemeOrderActivity.setTenantCode(tenantCode);
+                elemeOrderActivity.setBranchId(branchId);
+                elemeOrderActivity.setElemeOrderId(elemeOrder.getId());
+                elemeOrderActivity.setOrderId(id);
+                elemeOrderActivity.setElemeOrderId(elemeOrder.getId());
+                elemeOrderActivity.setElemeActivityId(BigInteger.valueOf(elemeActivityJsonObject.optLong("id")));
+                elemeOrderActivity.setName(elemeActivityJsonObject.optString("name"));
+                elemeOrderActivity.setCategoryId(elemeActivityJsonObject.optInt("categoryId"));
+                elemeOrderActivity.setElemePart(BigDecimal.valueOf(elemeActivityJsonObject.optDouble("elemePart")));
+                elemeOrderActivity.setRestaurantPart(BigDecimal.valueOf(elemeActivityJsonObject.optDouble("restaurantPart")));
+                elemeOrderActivity.setAmount(BigDecimal.valueOf(elemeActivityJsonObject.optDouble("amount")));
+                elemeOrderActivity.setCreateUserId(userId);
+                elemeOrderActivity.setLastUpdateUserId(userId);
+                elemeOrderActivity.setLastUpdateRemark("饿了么系统推送新订单，保存饿了么订单活动！");
+                elemeOrderActivityMapper.insert(elemeOrderActivity);
             }
         }
         CacheUtils.hset(elemeOrder.getOrderId(), type.toString(), uuid);
         CacheUtils.expire(elemeOrder.getOrderId(), 48, TimeUnit.HOURS);
-        publishElemeOrderMessage(branch.getTenantCode(), branch.getCode(), elemeOrder.getId(), type, uuid);
+        publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid);
     }
 
     /**
@@ -269,7 +310,7 @@ public class ElemeService {
         }
 
         if (type == 20 || type == 21 || type == 24 || type == 25 || type == 26 || type == 30 || type == 31 || type == 34 || type == 35 || type == 36) {
-            publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type, uuid);
+            publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid);
         }
     }
 
@@ -307,7 +348,7 @@ public class ElemeService {
         elemeReminderMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么催单信息！");
         elemeReminderMessageMapper.insert(elemeReminderMessage);
         if (type == 45) {
-            publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type, uuid);
+            publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid);
         }
     }
 
@@ -345,7 +386,7 @@ public class ElemeService {
         elemeOrderStateChangeMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么订单变更消息！");
 
         elemeOrderStateChangeMessageMapper.insert(elemeOrderStateChangeMessage);
-        publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type, uuid);
+        publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -382,7 +423,7 @@ public class ElemeService {
         elemeDeliveryOrderStateChangeMessage.setLastUpdateRemark("处理饿了么回调，保存饿了么运单状态变更消息！");
 
         elemeDeliveryOrderStateChangeMessageMapper.insert(elemeDeliveryOrderStateChangeMessage);
-        publishElemeOrderMessage(elemeOrder.getTenantCode(), elemeOrder.getBranchCode(), elemeOrder.getId(), type, uuid);
+        publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid);
     }
 
     public void handleElemeShopStateChangeMessage(BigInteger shopId, String message, Integer type, String uuid) {
@@ -448,26 +489,26 @@ public class ElemeService {
         ElemeOrder elemeOrder = elemeOrderMapper.find(elemeOrderSearchModel);
         Validate.notNull(elemeOrder, "订单不存在！");
 
-        SearchModel elemeGroupSearchModel = new SearchModel(true);
-        elemeGroupSearchModel.addSearchCondition("eleme_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, pullElemeOrderModel.getElemeOrderId());
-        List<ElemeGroup> elemeGroups = elemeGroupMapper.findAll(elemeGroupSearchModel);
+        SearchModel elemeOrderGroupSearchModel = new SearchModel(true);
+        elemeOrderGroupSearchModel.addSearchCondition("eleme_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, pullElemeOrderModel.getElemeOrderId());
+        List<ElemeOrderGroup> elemeOrderGroups = elemeOrderGroupMapper.findAll(elemeOrderGroupSearchModel);
 
-        List<BigInteger> elemeGroupIds = new ArrayList<BigInteger>();
-        for (ElemeGroup elemeGroup : elemeGroups) {
-            elemeGroupIds.add(elemeGroup.getId());
+        List<BigInteger> elemeOrderGroupIds = new ArrayList<BigInteger>();
+        for (ElemeOrderGroup elemeOrderGroup : elemeOrderGroups) {
+            elemeOrderGroupIds.add(elemeOrderGroup.getId());
         }
         SearchModel elemeOrderItemSearchModel = new SearchModel(true);
-        elemeOrderItemSearchModel.addSearchCondition("eleme_group_id", Constants.SQL_OPERATION_SYMBOL_IN, elemeGroupIds);
+        elemeOrderItemSearchModel.addSearchCondition("eleme_order_group_id", Constants.SQL_OPERATION_SYMBOL_IN, elemeOrderGroupIds);
         List<ElemeOrderItem> elemeOrderItems = elemeOrderItemMapper.findAll(elemeOrderItemSearchModel);
 
         List<BigInteger> elemeOrderItemIds = new ArrayList<BigInteger>();
         Map<BigInteger, List<ElemeOrderItem>> elemeOrderItemMap = new HashMap<BigInteger, List<ElemeOrderItem>>();
         for (ElemeOrderItem elemeOrderItem : elemeOrderItems) {
             elemeOrderItemIds.add(elemeOrderItem.getId());
-            List<ElemeOrderItem> elemeOrderItemList = elemeOrderItemMap.get(elemeOrderItem.getElemeGroupId());
+            List<ElemeOrderItem> elemeOrderItemList = elemeOrderItemMap.get(elemeOrderItem.getElemeOrderGroupId());
             if (elemeOrderItemList == null) {
                 elemeOrderItemList = new ArrayList<ElemeOrderItem>();
-                elemeOrderItemMap.put(elemeOrderItem.getElemeGroupId(), elemeOrderItemList);
+                elemeOrderItemMap.put(elemeOrderItem.getElemeOrderGroupId(), elemeOrderItemList);
             }
             elemeOrderItemList.add(elemeOrderItem);
         }
@@ -498,17 +539,17 @@ public class ElemeService {
             elemeOrderItemAttributeList.add(elemeOrderItemAttribute);
         }
 
-        SearchModel elemeActivitySearchModel = new SearchModel(true);
-        elemeActivitySearchModel.addSearchCondition("eleme_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, elemeOrder.getId());
-        List<ElemeActivity> elemeActivities = elemeActivityMapper.findAll(elemeActivitySearchModel);
+        SearchModel elemeOrderActivitySearchModel = new SearchModel(true);
+        elemeOrderActivitySearchModel.addSearchCondition("eleme_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, elemeOrder.getId());
+        List<ElemeOrderActivity> elemeActivities = elemeOrderActivityMapper.findAll(elemeOrderActivitySearchModel);
 
         List<Map<String, Object>> groups = new ArrayList<Map<String, Object>>();
-        for (ElemeGroup elemeGroup : elemeGroups) {
+        for (ElemeOrderGroup elemeOrderGroup : elemeOrderGroups) {
             Map<String, Object> elemeGroupMap = new HashMap<String, Object>();
-            elemeGroupMap.put("name", elemeGroup.getName());
-            elemeGroupMap.put("type", elemeGroup.getType());
+            elemeGroupMap.put("name", elemeOrderGroup.getName());
+            elemeGroupMap.put("type", elemeOrderGroup.getType());
             List<Map<String, Object>> items = new ArrayList<Map<String, Object>>();
-            List<ElemeOrderItem> elemeOrderItemList = elemeOrderItemMap.get(elemeGroup.getId());
+            List<ElemeOrderItem> elemeOrderItemList = elemeOrderItemMap.get(elemeOrderGroup.getId());
             for (ElemeOrderItem elemeOrderItem : elemeOrderItemList) {
                 Map<String, Object> item = new HashMap<String, Object>();
                 item.put("id", elemeOrderItem.getElemeItemId());
@@ -558,14 +599,14 @@ public class ElemeService {
         elemeOrderMap.put("groups", groups);
         List<Map<String, Object>> orderActivities = new ArrayList<Map<String, Object>>();
         if (CollectionUtils.isNotEmpty(elemeActivities)) {
-            for (ElemeActivity elemeActivity : elemeActivities) {
+            for (ElemeOrderActivity elemeOrderActivity : elemeActivities) {
                 Map<String, Object> elemeActivityMap = new HashMap<String, Object>();
-                elemeActivityMap.put("id", elemeActivity.getElemeActivityId());
-                elemeActivityMap.put("name", elemeActivity.getName());
-                elemeActivityMap.put("categoryId", elemeActivity.getCategoryId());
-                elemeActivityMap.put("elemePart", elemeActivity.getElemePart());
-                elemeActivityMap.put("restaurantPart", elemeActivity.getRestaurantPart());
-                elemeActivityMap.put("amount", elemeActivity.getAmount());
+                elemeActivityMap.put("id", elemeOrderActivity.getElemeActivityId());
+                elemeActivityMap.put("name", elemeOrderActivity.getName());
+                elemeActivityMap.put("categoryId", elemeOrderActivity.getCategoryId());
+                elemeActivityMap.put("elemePart", elemeOrderActivity.getElemePart());
+                elemeActivityMap.put("restaurantPart", elemeOrderActivity.getRestaurantPart());
+                elemeActivityMap.put("amount", elemeOrderActivity.getAmount());
                 orderActivities.add(elemeActivityMap);
             }
         }
@@ -607,17 +648,17 @@ public class ElemeService {
 
     /**
      * 发布饿了么订单消息
-     * @param tenantCode：商户编码
-     * @param branchCode：门店编码
+     * @param tenantId：商户ID
+     * @param branchId：门店Id
      * @param elemeOrderId：订单ID
      * @param type：消息类型
      * @return
      */
-    private void publishElemeOrderMessage(String tenantCode, String branchCode, BigInteger elemeOrderId, Integer type, String uuid) throws IOException {
+    private void publishElemeOrderMessage(BigInteger tenantId, BigInteger branchId, BigInteger elemeOrderId, Integer type, String uuid) throws IOException {
         String elemeMessageChannelTopic = ConfigurationUtils.getConfiguration(Constants.ELEME_MESSAGE_CHANNEL_TOPIC);
         JSONObject messageJsonObject = new JSONObject();
-        messageJsonObject.put("tenantCode", tenantCode);
-        messageJsonObject.put("branchCode", branchCode);
+        messageJsonObject.put("tenantId", tenantId);
+        messageJsonObject.put("branchId", branchId);
         messageJsonObject.put("type", type);
         messageJsonObject.put("elemeOrderId", elemeOrderId);
         messageJsonObject.put("uuid", uuid);
