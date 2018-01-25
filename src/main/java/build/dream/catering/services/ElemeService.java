@@ -482,29 +482,55 @@ public class ElemeService {
 
     @Transactional(readOnly = true)
     public ApiRest pullElemeOrder(PullElemeOrderModel pullElemeOrderModel) {
+        BigInteger tenantId = pullElemeOrderModel.getTenantId();
+        BigInteger branchId = pullElemeOrderModel.getBranchId();
+        BigInteger elemeOrderId = pullElemeOrderModel.getElemeOrderId();
+        // 查询订单
         SearchModel elemeOrderSearchModel = new SearchModel(true);
-        elemeOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, pullElemeOrderModel.getTenantId());
-        elemeOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, pullElemeOrderModel.getBranchId());
-        elemeOrderSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, pullElemeOrderModel.getElemeOrderId());
+        elemeOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        elemeOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        elemeOrderSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, elemeOrderId);
         ElemeOrder elemeOrder = elemeOrderMapper.find(elemeOrderSearchModel);
         Validate.notNull(elemeOrder, "订单不存在！");
 
+        // 查询订单分组
         SearchModel elemeOrderGroupSearchModel = new SearchModel(true);
-        elemeOrderGroupSearchModel.addSearchCondition("eleme_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, pullElemeOrderModel.getElemeOrderId());
+        elemeOrderGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        elemeOrderGroupSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        elemeOrderGroupSearchModel.addSearchCondition("eleme_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, elemeOrderId);
         List<ElemeOrderGroup> elemeOrderGroups = elemeOrderGroupMapper.findAll(elemeOrderGroupSearchModel);
 
-        List<BigInteger> elemeOrderGroupIds = new ArrayList<BigInteger>();
-        for (ElemeOrderGroup elemeOrderGroup : elemeOrderGroups) {
-            elemeOrderGroupIds.add(elemeOrderGroup.getId());
-        }
+        // 查询所有订单分组明细
         SearchModel elemeOrderItemSearchModel = new SearchModel(true);
-        elemeOrderItemSearchModel.addSearchCondition("eleme_order_group_id", Constants.SQL_OPERATION_SYMBOL_IN, elemeOrderGroupIds);
+        elemeOrderItemSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        elemeOrderItemSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        elemeOrderItemSearchModel.addSearchCondition("eleme_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, elemeOrderId);
         List<ElemeOrderItem> elemeOrderItems = elemeOrderItemMapper.findAll(elemeOrderItemSearchModel);
 
-        List<BigInteger> elemeOrderItemIds = new ArrayList<BigInteger>();
+        // 查询出所有的商品规格
+        SearchModel elemeOrderItemNewSpecSearchModel = new SearchModel(true);
+        elemeOrderItemNewSpecSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        elemeOrderItemNewSpecSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        elemeOrderItemNewSpecSearchModel.addSearchCondition("eleme_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, elemeOrderId);
+        List<ElemeOrderItemNewSpec> elemeOrderItemNewSpecs = elemeOrderItemNewSpecMapper.findAll(elemeOrderItemNewSpecSearchModel);
+
+        // 查询出所有的商品属性
+        SearchModel elemeOrderItemAttributeSearchModel = new SearchModel(true);
+        elemeOrderItemAttributeSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        elemeOrderItemAttributeSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        elemeOrderItemAttributeSearchModel.addSearchCondition("eleme_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, elemeOrderId);
+        List<ElemeOrderItemAttribute> elemeOrderItemAttributes = elemeOrderItemAttributeMapper.findAll(elemeOrderItemAttributeSearchModel);
+
+        // 查询出订单包含的所有活动
+        SearchModel elemeOrderActivitySearchModel = new SearchModel(true);
+        elemeOrderActivitySearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        elemeOrderActivitySearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        elemeOrderActivitySearchModel.addSearchCondition("eleme_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, elemeOrder.getId());
+        List<ElemeOrderActivity> elemeActivities = elemeOrderActivityMapper.findAll(elemeOrderActivitySearchModel);
+
+        // 封装订单分组与订单明细之间的 map
         Map<BigInteger, List<ElemeOrderItem>> elemeOrderItemMap = new HashMap<BigInteger, List<ElemeOrderItem>>();
         for (ElemeOrderItem elemeOrderItem : elemeOrderItems) {
-            elemeOrderItemIds.add(elemeOrderItem.getId());
             List<ElemeOrderItem> elemeOrderItemList = elemeOrderItemMap.get(elemeOrderItem.getElemeOrderGroupId());
             if (elemeOrderItemList == null) {
                 elemeOrderItemList = new ArrayList<ElemeOrderItem>();
@@ -513,9 +539,7 @@ public class ElemeService {
             elemeOrderItemList.add(elemeOrderItem);
         }
 
-        SearchModel elemeOrderItemNewSpecSearchModel = new SearchModel(true);
-        elemeOrderItemNewSpecSearchModel.addSearchCondition("eleme_order_item_id", Constants.SQL_OPERATION_SYMBOL_IN, elemeOrderItemIds);
-        List<ElemeOrderItemNewSpec> elemeOrderItemNewSpecs = elemeOrderItemNewSpecMapper.findAll(elemeOrderItemNewSpecSearchModel);
+        // 封装订单明细与商品规格之间的 map
         Map<BigInteger, List<ElemeOrderItemNewSpec>> elemeOrderItemNewSpecMap = new HashMap<BigInteger, List<ElemeOrderItemNewSpec>>();
         for (ElemeOrderItemNewSpec elemeOrderItemNewSpec : elemeOrderItemNewSpecs) {
             List<ElemeOrderItemNewSpec> elemeOrderItemNewSpecList = elemeOrderItemNewSpecMap.get(elemeOrderItemNewSpec.getElemeOrderItemId());
@@ -526,9 +550,7 @@ public class ElemeService {
             elemeOrderItemNewSpecList.add(elemeOrderItemNewSpec);
         }
 
-        SearchModel elemeOrderItemAttributeSearchModel = new SearchModel(true);
-        elemeOrderItemAttributeSearchModel.addSearchCondition("eleme_order_item_id", Constants.SQL_OPERATION_SYMBOL_IN, elemeOrderItemIds);
-        List<ElemeOrderItemAttribute> elemeOrderItemAttributes = elemeOrderItemAttributeMapper.findAll(elemeOrderItemAttributeSearchModel);
+        // 封装订单明细与商品属性之间的 map
         Map<BigInteger, List<ElemeOrderItemAttribute>> elemeOrderItemAttributeMap = new HashMap<BigInteger, List<ElemeOrderItemAttribute>>();
         for (ElemeOrderItemAttribute elemeOrderItemAttribute : elemeOrderItemAttributes) {
             List<ElemeOrderItemAttribute> elemeOrderItemAttributeList = elemeOrderItemAttributeMap.get(elemeOrderItemAttribute.getElemeOrderItemId());
@@ -538,10 +560,6 @@ public class ElemeService {
             }
             elemeOrderItemAttributeList.add(elemeOrderItemAttribute);
         }
-
-        SearchModel elemeOrderActivitySearchModel = new SearchModel(true);
-        elemeOrderActivitySearchModel.addSearchCondition("eleme_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, elemeOrder.getId());
-        List<ElemeOrderActivity> elemeActivities = elemeOrderActivityMapper.findAll(elemeOrderActivitySearchModel);
 
         List<Map<String, Object>> groups = new ArrayList<Map<String, Object>>();
         for (ElemeOrderGroup elemeOrderGroup : elemeOrderGroups) {
