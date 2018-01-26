@@ -2,7 +2,8 @@ package build.dream.catering.models.dietorder;
 
 import build.dream.common.models.BasicModel;
 import build.dream.common.utils.ApplicationHandler;
-import org.apache.commons.collections.CollectionUtils;
+import build.dream.common.utils.GsonUtils;
+import com.google.gson.annotations.SerializedName;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
@@ -19,7 +20,11 @@ public class SaveDietOrderModel extends BasicModel {
     private BigInteger branchId;
 
     @NotNull
-    private List<GroupModel> groupModels;
+    private Integer orderType;
+    @NotNull
+    private BigInteger userId;
+
+    private List<GroupInfo> groupInfos;
 
     public BigInteger getTenantId() {
         return tenantId;
@@ -45,45 +50,40 @@ public class SaveDietOrderModel extends BasicModel {
         this.branchId = branchId;
     }
 
-    public List<GroupModel> getGroupModels() {
-        return groupModels;
+    public Integer getOrderType() {
+        return orderType;
     }
 
-    public void setGroupModels(List<GroupModel> groupModels) {
-        this.groupModels = groupModels;
+    public void setOrderType(Integer orderType) {
+        this.orderType = orderType;
     }
 
-    @Override
-    public boolean validate() {
-        if (!super.validate()) {
-            return false;
-        }
-        if (CollectionUtils.isEmpty(groupModels)) {
-            return false;
-        }
-        for (GroupModel groupModel : groupModels) {
-            if (!groupModel.validate()) {
-                return false;
-            }
-        }
-        return true;
+    public BigInteger getUserId() {
+        return userId;
     }
 
-    @Override
-    public void validateAndThrow() {
-        super.validateAndThrow();
-        ApplicationHandler.notEmpty(groupModels, "groups");
-        for (GroupModel groupModel : groupModels) {
-            ApplicationHandler.isTrue(groupModel.validate(), "groups");
-        }
+    public void setUserId(BigInteger userId) {
+        this.userId = userId;
     }
 
-    public static class GroupModel extends BasicModel {
-        @NotNull
+    public List<GroupInfo> getGroupInfos() {
+        return groupInfos;
+    }
+
+    public void setGroupInfos(List<GroupInfo> groupInfos) {
+        this.groupInfos = groupInfos;
+    }
+
+    public void setGroupInfos(String groups) {
+        ApplicationHandler.validateJson(groups, "build/dream/catering/schemas/groupsSchema.json", "groups");
+        this.groupInfos = GsonUtils.jsonToList(groups, GroupInfo.class);
+    }
+
+    public static class GroupInfo {
         private String name;
-        @NotNull
         private String type;
-        private List<DetailModel> detailModels;
+        @SerializedName(value = "details", alternate = "detailInfos")
+        private List<DetailInfo> detailInfos;
 
         public String getName() {
             return name;
@@ -101,41 +101,21 @@ public class SaveDietOrderModel extends BasicModel {
             this.type = type;
         }
 
-        public List<DetailModel> getDetailModels() {
-            return detailModels;
+        public List<DetailInfo> getDetailInfos() {
+            return detailInfos;
         }
 
-        public void setDetailModels(List<DetailModel> detailModels) {
-            this.detailModels = detailModels;
-        }
-
-        @Override
-        public boolean validate() {
-            if (!super.validate()) {
-                return false;
-            }
-            if (CollectionUtils.isEmpty(detailModels)) {
-                return false;
-            }
-            for (DetailModel detailModel : detailModels) {
-                if (!detailModel.validate()) {
-                    return false;
-                }
-            }
-            return true;
+        public void setDetailInfos(List<DetailInfo> detailInfos) {
+            this.detailInfos = detailInfos;
         }
     }
 
-    public static class DetailModel extends BasicModel {
-        @NotNull
+    public static class DetailInfo {
         private BigInteger goodsId;
-        @NotNull
         private BigInteger goodsSpecificationId;
-
-        @NotNull
         private Integer quantity;
-
-        private List<BigInteger> flavorIds;
+        @SerializedName(value = "flavors", alternate = "flavorInfos")
+        private List<FlavorInfo> flavorInfos;
 
         public BigInteger getGoodsId() {
             return goodsId;
@@ -161,12 +141,33 @@ public class SaveDietOrderModel extends BasicModel {
             this.quantity = quantity;
         }
 
-        public List<BigInteger> getFlavorIds() {
-            return flavorIds;
+        public List<FlavorInfo> getFlavorInfos() {
+            return flavorInfos;
         }
 
-        public void setFlavorIds(List<BigInteger> flavorIds) {
-            this.flavorIds = flavorIds;
+        public void setFlavorInfos(List<FlavorInfo> flavorInfos) {
+            this.flavorInfos = flavorInfos;
+        }
+    }
+
+    public static class FlavorInfo {
+        private BigInteger flavorGroupId;
+        private BigInteger flavorId;
+
+        public BigInteger getFlavorGroupId() {
+            return flavorGroupId;
+        }
+
+        public void setFlavorGroupId(BigInteger flavorGroupId) {
+            this.flavorGroupId = flavorGroupId;
+        }
+
+        public BigInteger getFlavorId() {
+            return flavorId;
+        }
+
+        public void setFlavorId(BigInteger flavorId) {
+            this.flavorId = flavorId;
         }
     }
 }

@@ -44,13 +44,9 @@ public class DietOrderController extends BasicController {
         ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
-            String groups = requestParameters.get("groups");
-            ApplicationHandler.notEmpty(groups, "groups");
-
             SaveDietOrderModel saveDietOrderModel = ApplicationHandler.instantiateObject(SaveDietOrderModel.class, requestParameters);
-
-            List<SaveDietOrderModel.GroupModel> groupModels = GsonUtils.jsonToList(groups, SaveDietOrderModel.GroupModel.class);
-            saveDietOrderModel.setGroupModels(groupModels);
+            String groups = requestParameters.get("groups");
+            saveDietOrderModel.setGroupInfos(groups);
             saveDietOrderModel.validateAndThrow();
 
             apiRest = dietOrderService.saveDietOrder(saveDietOrderModel);
