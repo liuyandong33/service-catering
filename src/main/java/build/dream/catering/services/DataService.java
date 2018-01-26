@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class DataService {
@@ -53,7 +54,11 @@ public class DataService {
     @Transactional(rollbackFor = Exception.class)
     public void saveDietOrder(String dietOrderData) {
         String signature = DigestUtils.md5Hex(dietOrderData);
-        if (!CacheUtils.hexists(Constants.KEY_DATA_HANDLE_SIGNATURES, signature)) {
+        if (CacheUtils.exists(signature)) {
+            return;
+        }
+        try {
+            CacheUtils.setex(signature, signature, 30, TimeUnit.DAYS);
             DataHandleHistory dataHandleHistory = new DataHandleHistory();
             dataHandleHistory.setSignature(signature);
             dataHandleHistory.setDataType(Constants.DIET_ORDER);
@@ -104,6 +109,9 @@ public class DataService {
                     }
                 }
             }
+        } catch (Exception e) {
+            CacheUtils.delete(signature);
+            throw e;
         }
     }
 }
