@@ -1,20 +1,21 @@
 package build.dream.catering.tools;
 
+import build.dream.catering.constants.Constants;
+import build.dream.catering.services.ElemeService;
+import build.dream.catering.utils.ElemeUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.LogUtils;
 import build.dream.common.utils.ProxyUtils;
-import build.dream.catering.constants.Constants;
-import build.dream.catering.services.ElemeService;
-import build.dream.catering.utils.ElemeUtils;
 import net.sf.json.JSONObject;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ElemeConsumerThread implements Runnable {
@@ -36,10 +37,13 @@ public class ElemeConsumerThread implements Runnable {
             Integer count = null;
             JSONObject callbackJsonObject = null;
             try {
-                List<String> elemeMessageBody = ElemeUtils.takeElemeMessage();
-                elemeMessage = elemeMessageBody.get(0);
-                uuid = elemeMessageBody.get(1);
-                count = Integer.valueOf(elemeMessageBody.get(2));
+                Map<String, String> elemeMessageBody = ElemeUtils.takeElemeMessage();
+                if (MapUtils.isEmpty(elemeMessageBody)) {
+                    continue;
+                }
+                elemeMessage = elemeMessageBody.get("callbackRequestBody");
+                uuid = elemeMessageBody.get("uuid");
+                count = Integer.valueOf(elemeMessageBody.get("count"));
 
                 callbackJsonObject = JSONObject.fromObject(elemeMessage);
 
@@ -68,34 +72,27 @@ public class ElemeConsumerThread implements Runnable {
                     count = count - 1;
                     if (count > 0) {
                         try {
-                            ElemeUtils.addElemeMessageBlockingQueue(elemeMessage, uuid, count);
-                        } catch (InterruptedException e1) {
-                            saveElemeCallbackMessage(callbackJsonObject);
+                            ElemeUtils.addElemeMessage(elemeMessage, uuid, count);
+                        } catch (IOException e1) {
+                            markHandleFailureMessage(uuid);
                         }
                     } else {
-                        saveElemeCallbackMessage(callbackJsonObject);
+                        markHandleFailureMessage(uuid);
                     }
                 }
             }
         }
     }
 
-    private void saveElemeCallbackMessage(JSONObject callbackJsonObject) {
+    private void markHandleFailureMessage(String uuid) {
         try {
             Map<String, String> saveElemeCallbackMessageRequestParameters = new HashMap<String, String>();
-            saveElemeCallbackMessageRequestParameters.put("requestId", callbackJsonObject.getString("requestId"));
-            saveElemeCallbackMessageRequestParameters.put("type", callbackJsonObject.getString("type"));
-            saveElemeCallbackMessageRequestParameters.put("appId", callbackJsonObject.getString("appId"));
-            saveElemeCallbackMessageRequestParameters.put("message", callbackJsonObject.getString("message"));
-            saveElemeCallbackMessageRequestParameters.put("shopId", callbackJsonObject.getString("shopId"));
-            saveElemeCallbackMessageRequestParameters.put("timestamp", callbackJsonObject.getString("timestamp"));
-            saveElemeCallbackMessageRequestParameters.put("signature", callbackJsonObject.getString("signature"));
-            saveElemeCallbackMessageRequestParameters.put("userId", callbackJsonObject.getString("userId"));
+            saveElemeCallbackMessageRequestParameters.put("uuid", uuid);
 
             ApiRest saveElemeCallbackMessageApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "elemeCallbackMessage", "saveElemeCallbackMessage", saveElemeCallbackMessageRequestParameters);
             Validate.isTrue(saveElemeCallbackMessageApiRest.isSuccessful(), saveElemeCallbackMessageApiRest.getError());
         } catch (Exception e) {
-            LogUtils.error("保存饿了么回调信息失败", ELEME_CONSUMER_THREAD_SIMPLE_NAME, "saveElemeCallbackMessage", e);
+            LogUtils.error("标记处理失败消息失败", ELEME_CONSUMER_THREAD_SIMPLE_NAME, "markHandleFailureMessage", e);
         }
     }
 }
