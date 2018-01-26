@@ -1,23 +1,23 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.mappers.DataHandleHistoryMapper;
-import build.dream.catering.mappers.DietOrderDetailMapper;
-import build.dream.catering.mappers.DietOrderMapper;
-import build.dream.catering.models.data.DietOrderDataModel;
+import build.dream.catering.mappers.*;
 import build.dream.catering.models.data.UploadDataModel;
 import build.dream.common.api.ApiRest;
-import build.dream.common.erp.catering.domains.DataHandleHistory;
+import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.CacheUtils;
 import build.dream.common.utils.ConfigurationUtils;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.QueueUtils;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Date;
 
 @Service
@@ -25,7 +25,11 @@ public class DataService {
     @Autowired
     private DietOrderMapper dietOrderMapper;
     @Autowired
+    private DietOrderGroupMapper dietOrderGroupMapper;
+    @Autowired
     private DietOrderDetailMapper dietOrderDetailMapper;
+    @Autowired
+    private DietOrderDetailGoodsFlavorMapper dietOrderDetailGoodsFlavorMapper;
     @Autowired
     private DataHandleHistoryMapper dataHandleHistoryMapper;
 
@@ -56,11 +60,50 @@ public class DataService {
             dataHandleHistory.setDataContent(dietOrderData);
             dataHandleHistory.setHandleTime(new Date());
             dataHandleHistoryMapper.insert(dataHandleHistory);
-//            CacheUtils.hset(Constants.KEY_DATA_HANDLE_SIGNATURES, signature, signature);
-            DietOrderDataModel dietOrderDataModel = GsonUtils.fromJson(dietOrderData, DietOrderDataModel.class);
-            dietOrderMapper.insert(dietOrderDataModel.getDietOrder());
-            dietOrderDataModel.handleData();
-            dietOrderDetailMapper.insertAll(dietOrderDataModel.getDietOrderDetails());
+
+            JSONObject dietOrderJsonObject = JSONObject.fromObject(dietOrderData);
+            JSONArray dietOrderGroupJsonArray = dietOrderJsonObject.getJSONArray("dietOrderGroups");
+            dietOrderJsonObject.remove("dietOrderGroups");
+
+            DietOrder dietOrder = GsonUtils.fromJson(dietOrderJsonObject, DietOrder.class);
+            dietOrderMapper.insert(dietOrder);
+
+            BigInteger dietOrderId = dietOrder.getId();
+            int size = dietOrderGroupJsonArray.size();
+            for (int index = 0; index < size; index++) {
+                JSONObject dietOrderGroupJsonObject = dietOrderGroupJsonArray.getJSONObject(index);
+                JSONArray dietOrderDetailJsonArray = dietOrderGroupJsonObject.getJSONArray("dietOrderDetails");
+                dietOrderGroupJsonObject.remove("dietOrderDetails");
+                DietOrderGroup dietOrderGroup = GsonUtils.fromJson(dietOrderGroupJsonObject, DietOrderGroup.class);
+                dietOrderGroup.setDietOrderId(dietOrderId);
+                dietOrderGroupMapper.insert(dietOrderGroup);
+
+                int dietOrderDetailJsonArraySize = dietOrderDetailJsonArray.size();
+                for (int dietOrderDetailJsonArrayIndex = 0; dietOrderDetailJsonArrayIndex < dietOrderDetailJsonArraySize; dietOrderDetailJsonArrayIndex++) {
+                    JSONObject dietOrderDetailJsonObject = dietOrderDetailJsonArray.getJSONObject(dietOrderDetailJsonArrayIndex);
+
+                    JSONArray dietOrderDetailGoodsFlavorJsonArray = null;
+                    if (dietOrderDetailJsonObject.containsKey("dietOrderDetailGoodsFlavors")) {
+                        dietOrderDetailGoodsFlavorJsonArray = dietOrderDetailJsonObject.getJSONArray("dietOrderDetailGoodsFlavors");
+                        dietOrderDetailJsonObject.remove("dietOrderDetailGoodsFlavors");
+                    }
+
+                    DietOrderDetail dietOrderDetail = GsonUtils.fromJson(dietOrderDetailJsonObject, DietOrderDetail.class);
+                    dietOrderDetail.setDietOrderId(dietOrderId);
+                    dietOrderDetail.setDietOrderGroupId(dietOrderGroup.getId());
+                    dietOrderDetailMapper.insert(dietOrderDetail);
+
+                    int dietOrderDetailGoodsFlavorJsonArraySize = dietOrderDetailGoodsFlavorJsonArray.size();
+                    for (int dietOrderDetailGoodsFlavorJsonArrayIndex = 0; dietOrderDetailGoodsFlavorJsonArrayIndex < dietOrderDetailGoodsFlavorJsonArraySize; dietOrderDetailGoodsFlavorJsonArrayIndex++) {
+                        JSONObject dietOrderDetailGoodsFlavorJsonObject = dietOrderDetailGoodsFlavorJsonArray.getJSONObject(dietOrderDetailGoodsFlavorJsonArrayIndex);
+                        DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor = GsonUtils.fromJson(dietOrderDetailGoodsFlavorJsonObject, DietOrderDetailGoodsFlavor.class);
+                        dietOrderDetailGoodsFlavor.setDietOrderId(dietOrder.getId());
+                        dietOrderDetailGoodsFlavor.setDietOrderGroupId(dietOrderGroup.getId());
+                        dietOrderDetailGoodsFlavor.setDietOrderDetailId(dietOrderDetail.getId());
+                        dietOrderDetailGoodsFlavorMapper.insert(dietOrderDetailGoodsFlavor);
+                    }
+                }
+            }
         }
     }
 }
