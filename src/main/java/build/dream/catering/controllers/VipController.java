@@ -21,6 +21,11 @@ public class VipController extends BasicController {
     @Autowired
     private VipService vipService;
 
+    /**
+     * 获取会员信息
+     *
+     * @return
+     */
     @RequestMapping(value = "/obtainVipInfo")
     @ResponseBody
     public String obtainVipInfo() {
@@ -37,6 +42,11 @@ public class VipController extends BasicController {
         return GsonUtils.toJson(apiRest);
     }
 
+    /**
+     * 保存会员信息
+     *
+     * @return
+     */
     @RequestMapping(value = "/saveVipInfo")
     @ResponseBody
     public String saveVipInfo() {

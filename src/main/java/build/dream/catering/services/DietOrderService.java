@@ -42,7 +42,8 @@ public class DietOrderService {
     private DietOrderDetailGoodsFlavorMapper dietOrderDetailGoodsFlavorMapper;
 
     /**
-     * 获取订单信息
+     * 获取订单明细
+     *
      * @param obtainDietOrderInfoModel
      * @return
      */
@@ -108,6 +109,7 @@ public class DietOrderService {
 
     /**
      * 构建订单信息
+     *
      * @param dietOrder
      * @param dietOrderGroups
      * @param dietOrderDetailMap
@@ -146,12 +148,13 @@ public class DietOrderService {
 
     /**
      * 构建订单组信息
+     *
      * @param dietOrderGroups
      * @param dietOrderDetailMap
      * @param dietOrderDetailGoodsFlavorMap
      * @return
      */
-    private List<Map<String,Object>> buildGroups(List<DietOrderGroup> dietOrderGroups, Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap, Map<BigInteger, List<DietOrderDetailGoodsFlavor>> dietOrderDetailGoodsFlavorMap) {
+    private List<Map<String, Object>> buildGroups(List<DietOrderGroup> dietOrderGroups, Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap, Map<BigInteger, List<DietOrderDetailGoodsFlavor>> dietOrderDetailGoodsFlavorMap) {
         List<Map<String, Object>> groups = new ArrayList<Map<String, Object>>();
         for (DietOrderGroup dietOrderGroup : dietOrderGroups) {
             Map<String, Object> group = new HashMap<String, Object>();
@@ -166,6 +169,7 @@ public class DietOrderService {
 
     /**
      * 构建订单详情信息
+     *
      * @param dietOrderDetails
      * @param dietOrderDetailGoodsFlavorMap
      * @return
@@ -204,6 +208,12 @@ public class DietOrderService {
         return dietOrderDetailInfos;
     }
 
+    /**
+     * 保存订单信息
+     *
+     * @param saveDietOrderModel
+     * @return
+     */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveDietOrder(SaveDietOrderModel saveDietOrderModel) {
         BigInteger tenantId = saveDietOrderModel.getTenantId();

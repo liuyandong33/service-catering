@@ -21,6 +21,11 @@ public class DietOrderController extends BasicController {
     @Autowired
     private DietOrderService dietOrderService;
 
+    /**
+     * 获取订单明细
+     *
+     * @return
+     */
     @RequestMapping(value = "/obtainDietOrderInfo")
     @ResponseBody
     public String obtainDietOrderInfo() {
@@ -37,6 +42,11 @@ public class DietOrderController extends BasicController {
         return GsonUtils.toJson(apiRest);
     }
 
+    /**
+     * 保存订单
+     *
+     * @return
+     */
     @RequestMapping(value = "/saveDietOrder")
     @ResponseBody
     public String saveDietOrder() {

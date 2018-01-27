@@ -26,6 +26,12 @@ public class VipService {
     @Autowired
     private SequenceMapper sequenceMapper;
 
+    /**
+     * 获取会员信息
+     *
+     * @param obtainVipInfoModel
+     * @return
+     */
     @Transactional(readOnly = true)
     public ApiRest obtainVipInfo(ObtainVipInfoModel obtainVipInfoModel) {
         SearchModel searchModel = new SearchModel(true);
@@ -50,6 +56,12 @@ public class VipService {
         return new ApiRest(vip, "获取会员信息成功！");
     }
 
+    /**
+     * 保存会员信息
+     *
+     * @param saveVipInfoModel
+     * @return
+     */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveVipInfo(SaveVipInfoModel saveVipInfoModel) {
         BigInteger tenantId = saveVipInfoModel.getTenantId();
