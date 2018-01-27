@@ -1,13 +1,13 @@
 package build.dream.catering.services;
 
-import build.dream.common.api.ApiRest;
-import build.dream.common.erp.catering.domains.*;
-import build.dream.common.utils.*;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.*;
 import build.dream.catering.models.eleme.DoBindingStoreModel;
 import build.dream.catering.models.eleme.ObtainElemeDeliveryOrderStateChangeMessageModel;
 import build.dream.catering.models.eleme.PullElemeOrderModel;
+import build.dream.common.api.ApiRest;
+import build.dream.common.erp.catering.domains.*;
+import build.dream.common.utils.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class ElemeService {
@@ -52,6 +51,8 @@ public class ElemeService {
     private ElemeDeliveryOrderStateChangeMessageMapper elemeDeliveryOrderStateChangeMessageMapper;
     @Autowired
     private ElemeRefundOrderMessageGoodsItemMapper elemeRefundOrderMessageGoodsItemMapper;
+    @Autowired
+    private UniversalMapper universalMapper;
 
     @Transactional(readOnly = true)
     public ApiRest tenantAuthorize(BigInteger tenantId, BigInteger branchId, BigInteger userId) throws IOException {
@@ -654,21 +655,33 @@ public class ElemeService {
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest doBindingStore(DoBindingStoreModel doBindingStoreModel) throws IOException {
-        String lastUpdateRemark = "门店(" + doBindingStoreModel.getBranchId() + ")绑定饿了么(" + doBindingStoreModel.getShopId() + ")，清除绑定关系！";
-        branchMapper.clearBindingStore(doBindingStoreModel.getShopId(), doBindingStoreModel.getUserId(), lastUpdateRemark);
+        BigInteger tenantId = doBindingStoreModel.getTenantId();
+        BigInteger branchId = doBindingStoreModel.getBranchId();
+        BigInteger shopId = doBindingStoreModel.getShopId();
+        BigInteger userId = doBindingStoreModel.getUserId();
+
+        String lastUpdateRemark = "门店(" + branchId + ")绑定饿了么(" + shopId + ")，清除绑定关系！";
+        UpdateModel updateModel = new UpdateModel(true);
+        updateModel.setTableName("branch");
+        updateModel.addContentValue("shop_id", null);
+        updateModel.addContentValue("last_update_user_id", userId);
+        updateModel.addContentValue("last_update_remark", lastUpdateRemark);
+        updateModel.addSearchCondition("shop_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, shopId);
+        universalMapper.universalUpdate(updateModel);
+
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, doBindingStoreModel.getBranchId());
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, doBindingStoreModel.getTenantId());
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
         Branch branch = branchMapper.find(searchModel);
         Validate.notNull(branch, "门店不存在！");
         branch.setShopId(doBindingStoreModel.getShopId());
         branchMapper.update(branch);
 
         Map<String, String> saveElemeBranchMappingRequestParameters = new HashMap<String, String>();
-        saveElemeBranchMappingRequestParameters.put("tenantId", doBindingStoreModel.getTenantId().toString());
-        saveElemeBranchMappingRequestParameters.put("branchId", doBindingStoreModel.getBranchId().toString());
-        saveElemeBranchMappingRequestParameters.put("shopId", doBindingStoreModel.getShopId().toString());
-        saveElemeBranchMappingRequestParameters.put("userId", doBindingStoreModel.getUserId().toString());
+        saveElemeBranchMappingRequestParameters.put("tenantId", tenantId.toString());
+        saveElemeBranchMappingRequestParameters.put("branchId", branchId.toString());
+        saveElemeBranchMappingRequestParameters.put("shopId", shopId.toString());
+        saveElemeBranchMappingRequestParameters.put("userId", userId.toString());
 
         ApiRest saveElemeBranchMappingApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "eleme", "saveElemeBranchMapping", saveElemeBranchMappingRequestParameters);
         Validate.isTrue(saveElemeBranchMappingApiRest.isSuccessful(), saveElemeBranchMappingApiRest.getError());

@@ -1,15 +1,15 @@
 package build.dream.catering.controllers;
 
+import build.dream.catering.constants.Constants;
+import build.dream.catering.models.eleme.*;
+import build.dream.catering.services.ElemeService;
+import build.dream.catering.utils.ElemeUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.erp.catering.domains.Branch;
 import build.dream.common.erp.catering.domains.ElemeOrder;
 import build.dream.common.erp.catering.domains.GoodsCategory;
 import build.dream.common.utils.*;
-import build.dream.catering.constants.Constants;
-import build.dream.catering.models.eleme.*;
-import build.dream.catering.services.ElemeService;
-import build.dream.catering.utils.ElemeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
@@ -27,7 +27,6 @@ import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Controller
 @RequestMapping(value = "/eleme")
@@ -695,6 +694,36 @@ public class ElemeController extends BasicController {
             apiRest.setSuccessful(true);
         } catch (Exception e) {
             LogUtils.error("查询店铺活动商品失败", controllerSimpleName, "getShopSalesItems", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/getOrder")
+    @ResponseBody
+    public String getOrder() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            GetOrderModel getOrderModel = ApplicationHandler.instantiateObject(GetOrderModel.class, requestParameters);
+            getOrderModel.validateAndThrow();
+
+            BigInteger tenantId = getOrderModel.getTenantId();
+            BigInteger branchId = getOrderModel.getBranchId();
+            BigInteger elemeOrderId = getOrderModel.getElemeOrderId();
+
+
+            Branch branch = elemeService.findBranchInfo(tenantId, branchId);
+            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(tenantId, branchId, elemeOrderId);
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("orderId", elemeOrder.getOrderId());
+
+            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.getOrder", params);
+            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+            apiRest = new ApiRest(callElemeSystemApiRest.getData(), "查询店铺活动商品成功！");
+        } catch (Exception e) {
+            LogUtils.error("获取订单失败", controllerSimpleName, "getOrder", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);

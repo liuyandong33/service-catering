@@ -40,8 +40,4 @@
     <select id="countUsers" parameterType="build.dream.common.utils.SearchModel" resultType="java.lang.Long">
         SELECT COUNT(1) FROM merge_user_branch <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
     </select>
-
-    <update id="clearBindingStore">
-        UPDATE branch SET shop_id = NULL, last_update_user_id = #{userId}, last_update_remark = #{lastUpdateRemark} WHERE shop_id = #{shopId}
-    </update>
 </mapper>
