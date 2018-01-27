@@ -405,7 +405,7 @@ public class DietOrderService {
         }
         dietOrder.setTotalAmount(dietOrderTotalAmount);
         dietOrder.setDiscountAmount(BigDecimal.ZERO);
-        dietOrder.setPaidAmount(dietOrderTotalAmount);
+        dietOrder.setPayableAmount(dietOrderTotalAmount);
         dietOrder.setPaidAmount(BigDecimal.ZERO);
         dietOrderMapper.update(dietOrder);
         ApiRest apiRest = new ApiRest();
