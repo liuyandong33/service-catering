@@ -19,10 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class ActivityService {
@@ -134,10 +131,20 @@ public class ActivityService {
         activity.setBranchId(branchId);
         activity.setName(saveBuyGiveActivityModel.getName());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DEFAULT_DATE_PATTERN);
-        activity.setStartTime(simpleDateFormat.parse(saveBuyGiveActivityModel.getStartTime() + " 00:00:00"));
-        activity.setEndTime(simpleDateFormat.parse(saveBuyGiveActivityModel.getEndTime() + " 23:59:59"));
         activity.setType(1);
-        activity.setStatus(1);
+
+        Date startTime = simpleDateFormat.parse(saveBuyGiveActivityModel.getStartTime() + " 00:00:00");
+        activity.setStartTime(startTime);
+
+        Date endTime = simpleDateFormat.parse(saveBuyGiveActivityModel.getEndTime() + " 23:59:59");
+        activity.setEndTime(endTime);
+
+        long currentTimeMillis = System.currentTimeMillis();
+        if (currentTimeMillis >= startTime.getTime() && currentTimeMillis <= endTime.getTime()) {
+            activity.setStatus(2);
+        } else {
+            activity.setStatus(1);
+        }
         activity.setCreateUserId(userId);
         activity.setLastUpdateUserId(userId);
         activity.setLastUpdateRemark("保存活动信息！");
