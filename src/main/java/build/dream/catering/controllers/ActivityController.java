@@ -37,7 +37,7 @@ public class ActivityController extends BasicController {
         ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
-            SaveBuyGiveActivityModel saveBuyGiveActivityModel = ApplicationHandler.instantiateObject(SaveBuyGiveActivityModel.class, requestParameters, "yyyy-MM-dd");
+            SaveBuyGiveActivityModel saveBuyGiveActivityModel = ApplicationHandler.instantiateObject(SaveBuyGiveActivityModel.class, requestParameters);
             String buyGiveActivityInfos = requestParameters.get("buyGiveActivityInfos");
             saveBuyGiveActivityModel.setBuyGiveActivityInfos(buyGiveActivityInfos);
             saveBuyGiveActivityModel.validateAndThrow();

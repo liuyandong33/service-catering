@@ -8,7 +8,6 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
-import java.util.Date;
 import java.util.List;
 
 public class SaveBuyGiveActivityModel extends BasicModel {
@@ -36,9 +35,6 @@ public class SaveBuyGiveActivityModel extends BasicModel {
     @NotNull
     @Length(min = 10, max = 10)
     private String endTime;
-
-    @NotNull
-    private Integer type;
 
     private List<BuyGiveActivityInfo> buyGiveActivityInfos;
 
@@ -96,14 +92,6 @@ public class SaveBuyGiveActivityModel extends BasicModel {
 
     public void setEndTime(String endTime) {
         this.endTime = endTime;
-    }
-
-    public Integer getType() {
-        return type;
-    }
-
-    public void setType(Integer type) {
-        this.type = type;
     }
 
     public List<BuyGiveActivityInfo> getBuyGiveActivityInfos() {
