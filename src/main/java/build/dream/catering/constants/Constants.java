@@ -40,4 +40,5 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String FLAVOR_GROUP_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/flavorGroupInfosSchema.json";
 
     public static final String KEY_BUY_GIVE_ACTIVITIES = "_buy_give_activities";
+    public static final String KEY_FULL_REDUCTION_ACTIVITIES = "_full_reduction_activities";
 }

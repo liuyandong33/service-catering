@@ -1,6 +1,7 @@
 package build.dream.catering.services;
 
 import build.dream.catering.beans.BuyGiveActivityBean;
+import build.dream.catering.beans.FullReductionActivityBean;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.*;
 import build.dream.catering.models.dietorder.ObtainDietOrderInfoModel;
@@ -504,18 +505,45 @@ public class DietOrderService {
             dietOrderDetailMapper.insertAll(giveDietOrderDetails);
         }
 
+        BigDecimal dietOrderDiscountAmount = BigDecimal.ZERO;
+        // 处理整单优惠活动
+        String fullReductionActivityJson = CacheUtils.hget(Constants.KEY_FULL_REDUCTION_ACTIVITIES, tenantId + "_" + branchId);
+        if (StringUtils.isNotBlank(fullReductionActivityJson)) {
+            FullReductionActivityBean fullReductionActivityBean = GsonUtils.fromJson(fullReductionActivityJson, FullReductionActivityBean.class);
+            Integer discountType = fullReductionActivityBean.getDiscountType();
+            if (discountType == 1) {
+                dietOrderDiscountAmount = fullReductionActivityBean.getDiscountAmount();
+            } else if (discountType == 2) {
+                dietOrderDiscountAmount = dietOrderTotalAmount.multiply(fullReductionActivityBean.getDiscountRate()).divide(BigDecimal.valueOf(100L));
+            }
+            DietOrderActivity dietOrderActivity = new DietOrderActivity();
+            dietOrderActivity.setTenantId(tenantId);
+            dietOrderActivity.setTenantCode(tenantCode);
+            dietOrderActivity.setBranchId(branchId);
+            dietOrderActivity.setDietOrderId(dietOrderId);
+            dietOrderActivity.setActivityId(fullReductionActivityBean.getActivityId());
+            dietOrderActivity.setActivityName(fullReductionActivityBean.getActivityName());
+            dietOrderActivity.setActivityType(fullReductionActivityBean.getActivityType());
+            dietOrderActivity.setAmount(dietOrderDiscountAmount.multiply(BigDecimal.valueOf(-1L)));
+            dietOrderActivity.setCreateUserId(userId);
+            dietOrderActivity.setLastUpdateUserId(userId);
+            dietOrderActivity.setLastUpdateRemark("保存订单活动信息！");
+            dietOrderActivityMap.put(fullReductionActivityBean.getActivityId(), dietOrderActivity);
+        }
+
         if (MapUtils.isNotEmpty(dietOrderActivityMap)) {
             dietOrderActivityMapper.insertAll(new ArrayList<DietOrderActivity>(dietOrderActivityMap.values()));
         }
 
         dietOrder.setTotalAmount(dietOrderTotalAmount);
-        dietOrder.setDiscountAmount(BigDecimal.ZERO);
-        dietOrder.setPayableAmount(dietOrderTotalAmount);
+        dietOrder.setDiscountAmount(dietOrderDiscountAmount);
+        dietOrder.setPayableAmount(dietOrderTotalAmount.subtract(dietOrderDiscountAmount));
         dietOrder.setPaidAmount(BigDecimal.ZERO);
         dietOrderMapper.update(dietOrder);
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("保存订单成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("id", dietOrder.getId());
+        data.put("orderNumber", dietOrder.getOrderNumber());
+        return new ApiRest(data, "保存订单成功！");
     }
 }

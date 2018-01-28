@@ -24,9 +24,10 @@ public class ActivityService {
     private UniversalMapper universalMapper;
 
     public ApiRest test() {
-        String sql = "SELECT " +
+        String findAllBuyGiveActivitiesSql = "SELECT " +
                 "activity.tenant_id, " +
                 "activity.branch_id, " +
+                "activity.tenant_code, " +
                 "activity.id AS activity_id, " +
                 "activity.name AS activity_name, " +
                 "activity.type AS activity_type, " +
@@ -54,13 +55,13 @@ public class ActivityService {
                 "AND activity.status = #{status} " +
                 "AND activity.type = #{type} " +
                 "AND activity.deleted = 0";
-        Map<String, Object> findAllBuyGiveActivityParameters = new HashMap<String, Object>();
-        findAllBuyGiveActivityParameters.put("sql", sql);
-        findAllBuyGiveActivityParameters.put("tenantId", BigInteger.ONE);
-        findAllBuyGiveActivityParameters.put("branchId", BigInteger.ONE);
-        findAllBuyGiveActivityParameters.put("status", 2);
-        findAllBuyGiveActivityParameters.put("type", 1);
-        List<Map<String, Object>> allBuyGiveActivities = universalMapper.executeQuery(findAllBuyGiveActivityParameters);
+        Map<String, Object> findAllBuyGiveActivitiesParameters = new HashMap<String, Object>();
+        findAllBuyGiveActivitiesParameters.put("sql", findAllBuyGiveActivitiesSql);
+        findAllBuyGiveActivitiesParameters.put("tenantId", BigInteger.ONE);
+        findAllBuyGiveActivitiesParameters.put("branchId", BigInteger.ONE);
+        findAllBuyGiveActivitiesParameters.put("status", 2);
+        findAllBuyGiveActivitiesParameters.put("type", 1);
+        List<Map<String, Object>> allBuyGiveActivities = universalMapper.executeQuery(findAllBuyGiveActivitiesParameters);
 
         if (CollectionUtils.isNotEmpty(allBuyGiveActivities)) {
             for (Map<String, Object> buyGiveActivity : allBuyGiveActivities) {
@@ -69,6 +70,42 @@ public class ActivityService {
                 BigInteger buyGoodsId = BigInteger.valueOf(MapUtils.getLongValue(buyGiveActivity, "buyGoodsId"));
                 BigInteger buyGoodsSpecificationId = BigInteger.valueOf(MapUtils.getLongValue(buyGiveActivity, "buyGoodsSpecificationId"));
                 CacheUtils.hset(Constants.KEY_BUY_GIVE_ACTIVITIES, tenantId + "_" + branchId + "_" + buyGoodsId + "_" + buyGoodsSpecificationId, GsonUtils.toJson(buyGiveActivity));
+            }
+        }
+
+        String findAllFullReductionActivitiesSql = "SELECT " +
+                "activity.tenant_id, " +
+                "activity.tenant_code, " +
+                "activity.branch_id, " +
+                "activity.id AS activity_id, " +
+                "activity.name AS activity_name, " +
+                "activity.type AS activity_type, " +
+                "activity.status AS activity_status, " +
+                "activity.start_time, " +
+                "activity.end_time, " +
+                "activity_full_reduction.total_amount, " +
+                "activity_full_reduction.discount_type, " +
+                "activity_full_reduction.discount_rate, " +
+                "activity_full_reduction.discount_amount " +
+                "FROM activity " +
+                "LEFT JOIN activity_full_reduction ON activity.id = activity_full_reduction.activity_id " +
+                "WHERE activity.tenant_id = #{tenantId} " +
+                "AND activity.branch_id = #{branchId} " +
+                "AND activity.status = #{status} " +
+                "AND activity.type = #{type} " +
+                "AND activity.deleted = 0";
+        Map<String, Object> findAllFullReductionActivitiesParameters = new HashMap<String, Object>();
+        findAllFullReductionActivitiesParameters.put("sql", findAllFullReductionActivitiesSql);
+        findAllFullReductionActivitiesParameters.put("tenantId", BigInteger.ONE);
+        findAllFullReductionActivitiesParameters.put("branchId", BigInteger.ONE);
+        findAllFullReductionActivitiesParameters.put("status", 2);
+        findAllFullReductionActivitiesParameters.put("type", 2);
+        List<Map<String, Object>> allFullReductionActivities = universalMapper.executeQuery(findAllFullReductionActivitiesParameters);
+        if (CollectionUtils.isNotEmpty(allFullReductionActivities)) {
+            for (Map<String, Object> fullReductionActivity : allFullReductionActivities) {
+                BigInteger tenantId = BigInteger.valueOf(MapUtils.getLongValue(fullReductionActivity, "tenantId"));
+                BigInteger branchId = BigInteger.valueOf(MapUtils.getLongValue(fullReductionActivity, "branchId"));
+                CacheUtils.hset(Constants.KEY_FULL_REDUCTION_ACTIVITIES, tenantId + "_" + branchId, GsonUtils.toJson(fullReductionActivity));
             }
         }
 
