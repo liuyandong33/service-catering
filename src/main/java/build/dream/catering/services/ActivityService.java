@@ -1,17 +1,17 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.mappers.ActivityMapper;
-import build.dream.catering.mappers.BuyGiveActivityMapper;
-import build.dream.catering.mappers.UniversalMapper;
+import build.dream.catering.mappers.*;
 import build.dream.catering.models.activity.SaveBuyGiveActivityModel;
+import build.dream.catering.utils.CanNotDeleteReasonUtils;
 import build.dream.common.api.ApiRest;
-import build.dream.common.erp.catering.domains.Activity;
-import build.dream.common.erp.catering.domains.BuyGiveActivity;
+import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.CacheUtils;
 import build.dream.common.utils.GsonUtils;
+import build.dream.common.utils.SearchModel;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +29,12 @@ public class ActivityService {
     private UniversalMapper universalMapper;
     @Autowired
     private BuyGiveActivityMapper buyGiveActivityMapper;
+    @Autowired
+    private GoodsMapper goodsMapper;
+    @Autowired
+    private GoodsSpecificationMapper goodsSpecificationMapper;
+    @Autowired
+    private CanNotDeleteReasonMapper canNotDeleteReasonMapper;
 
     public ApiRest test() {
         String findAllBuyGiveActivitiesSql = "SELECT " +
@@ -150,26 +156,83 @@ public class ActivityService {
         activity.setLastUpdateRemark("保存活动信息！");
         activityMapper.insert(activity);
 
-        List<BuyGiveActivity> buyGiveActivities = new ArrayList<BuyGiveActivity>();
         List<SaveBuyGiveActivityModel.BuyGiveActivityInfo> buyGiveActivityInfos = saveBuyGiveActivityModel.getBuyGiveActivityInfos();
+
+        List<BigInteger> goodsIds = new ArrayList<BigInteger>();
+        List<BigInteger> goodsSpecificationIds = new ArrayList<BigInteger>();
         for (SaveBuyGiveActivityModel.BuyGiveActivityInfo buyGiveActivityInfo : buyGiveActivityInfos) {
+            goodsIds.add(buyGiveActivityInfo.getBuyGoodsId());
+            goodsSpecificationIds.add(buyGiveActivityInfo.getBuyGoodsSpecificationId());
+            goodsIds.add(buyGiveActivityInfo.getGiveGoodsId());
+            goodsSpecificationIds.add(buyGiveActivityInfo.getGiveGoodsSpecificationId());
+        }
+
+        // 查询出涉及的所有商品
+        SearchModel goodsSearchModel = new SearchModel(true);
+        goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
+        goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        List<Goods> goodses = goodsMapper.findAll(goodsSearchModel);
+
+        // 查询出涉及的所有商品规格
+        SearchModel goodsSpecificationSearchModel = new SearchModel(true);
+        goodsSpecificationSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsSpecificationIds);
+        goodsSpecificationSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        goodsSpecificationSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        List<GoodsSpecification> goodsSpecifications = goodsSpecificationMapper.findAll(goodsSpecificationSearchModel);
+
+        // 封装商品id与商品之间的map
+        Map<BigInteger, Goods> goodsMap = new HashMap<BigInteger, Goods>();
+        for (Goods goods : goodses) {
+            goodsMap.put(goods.getId(), goods);
+        }
+
+        // 封装商品规格id与商品规格之间的map
+        Map<BigInteger, GoodsSpecification> goodsSpecificationMap = new HashMap<BigInteger, GoodsSpecification>();
+        for (GoodsSpecification goodsSpecification : goodsSpecifications) {
+            goodsSpecificationMap.put(goodsSpecification.getId(), goodsSpecification);
+        }
+
+        List<BuyGiveActivity> buyGiveActivities = new ArrayList<BuyGiveActivity>();
+        List<CanNotDeleteReason> canNotDeleteReasons = new ArrayList<CanNotDeleteReason>();
+        for (SaveBuyGiveActivityModel.BuyGiveActivityInfo buyGiveActivityInfo : buyGiveActivityInfos) {
+            Goods buyGoods = goodsMap.get(buyGiveActivityInfo.getBuyGoodsId());
+            Validate.notNull(buyGoods, "商品不存在！");
+
+            GoodsSpecification buyGoodsSpecification = goodsSpecificationMap.get(buyGiveActivityInfo.getBuyGoodsSpecificationId());
+            Validate.notNull(buyGoods, "商品规格不存在！");
+
+            Goods giveGoods = goodsMap.get(buyGiveActivityInfo.getGiveGoodsId());
+            Validate.notNull(buyGoods, "商品不存在！");
+
+            GoodsSpecification giveGoodsSpecification = goodsSpecificationMap.get(buyGiveActivityInfo.getGiveGoodsSpecificationId());
+            Validate.notNull(buyGoods, "商品规格不存在！");
+
             BuyGiveActivity buyGiveActivity = new BuyGiveActivity();
             buyGiveActivity.setTenantId(tenantId);
             buyGiveActivity.setTenantCode(tenantCode);
             buyGiveActivity.setBranchId(branchId);
             buyGiveActivity.setActivityId(activity.getId());
-            buyGiveActivity.setBuyGoodsId(buyGiveActivityInfo.getBuyGoodsId());
-            buyGiveActivity.setBuyGoodsSpecificationId(buyGiveActivityInfo.getBuyGoodsSpecificationId());
+            buyGiveActivity.setBuyGoodsId(buyGoods.getId());
+            buyGiveActivity.setBuyGoodsSpecificationId(buyGoodsSpecification.getId());
             buyGiveActivity.setBuyQuantity(buyGiveActivityInfo.getBuyQuantity());
-            buyGiveActivity.setGiveGoodsId(buyGiveActivityInfo.getGiveGoodsId());
-            buyGiveActivity.setGiveGoodsSpecificationId(buyGiveActivityInfo.getGiveGoodsSpecificationId());
+            buyGiveActivity.setGiveGoodsId(giveGoods.getId());
+            buyGiveActivity.setGiveGoodsSpecificationId(giveGoodsSpecification.getId());
             buyGiveActivity.setGiveQuantity(buyGiveActivityInfo.getGiveQuantity());
             buyGiveActivity.setCreateUserId(userId);
             buyGiveActivity.setLastUpdateUserId(userId);
             buyGiveActivity.setLastUpdateRemark("保存买A赠B活动！");
             buyGiveActivities.add(buyGiveActivity);
+
+            String goodsReason = "该商品包含在促销活动【" + activity.getName() + "】中，不能删除！";
+            String goodsSpecificationReason = "该商品规格包含在促销活动【" + activity.getName() + "】中，不能删除！";
+            canNotDeleteReasons.add(CanNotDeleteReasonUtils.constructCanNotDeleteReason(tenantId, tenantCode, tenantId, buyGoods.getId(), "goods", activity.getId(), "activity", goodsReason));
+            canNotDeleteReasons.add(CanNotDeleteReasonUtils.constructCanNotDeleteReason(tenantId, tenantCode, tenantId, buyGoodsSpecification.getId(), "goods", activity.getId(), "activity", goodsSpecificationReason));
+            canNotDeleteReasons.add(CanNotDeleteReasonUtils.constructCanNotDeleteReason(tenantId, tenantCode, tenantId, giveGoods.getId(), "goods_specification", activity.getId(), "activity", goodsReason));
+            canNotDeleteReasons.add(CanNotDeleteReasonUtils.constructCanNotDeleteReason(tenantId, tenantCode, tenantId, giveGoodsSpecification.getId(), "goods_specification", activity.getId(), "activity", goodsSpecificationReason));;
         }
         buyGiveActivityMapper.insertAll(buyGiveActivities);
+        canNotDeleteReasonMapper.insertAll(canNotDeleteReasons);
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("保存买A赠B活动成功！");
         apiRest.setSuccessful(true);
