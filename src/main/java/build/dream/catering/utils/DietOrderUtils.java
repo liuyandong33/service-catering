@@ -62,13 +62,7 @@ public class DietOrderUtils {
         return dietOrderDetail;
     }
 
-    public static DietOrderDetailGoodsFlavor constructDietOrderDetailGoodsFlavor(BigInteger tenantId, String tenantCode,
-                                                                                 BigInteger branchId, BigInteger dietOrderId,
-                                                                                 BigInteger dietOrderGroupId, BigInteger dietOrderDetailId,
-                                                                                 BigInteger goodsFlavorGroupId, String goodsFlavorGroupName,
-                                                                                 BigInteger goodsFlavorId, String goodsFlavorName,
-                                                                                 BigDecimal price, BigInteger userId,
-                                                                                 String lastUpdateRemark) {
+    public static DietOrderDetailGoodsFlavor constructDietOrderDetailGoodsFlavor(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger dietOrderId, BigInteger dietOrderGroupId, BigInteger dietOrderDetailId, BigInteger goodsFlavorGroupId, String goodsFlavorGroupName, BigInteger goodsFlavorId, String goodsFlavorName, BigDecimal price, BigInteger userId, String lastUpdateRemark) {
         DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor = new DietOrderDetailGoodsFlavor();
         dietOrderDetailGoodsFlavor.setTenantId(tenantId);
         dietOrderDetailGoodsFlavor.setTenantCode(tenantCode);
