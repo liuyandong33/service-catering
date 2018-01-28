@@ -1,0 +1,35 @@
+{
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "buyGoodsId": {
+                "type": "integer"
+            },
+            "buyGoodsSpecificationId": {
+                "type": "integer"
+            },
+            "buyQuantity": {
+                "type": "integer"
+            },
+            "giveGoodsId": {
+                "type": "integer"
+            },
+            "giveGoodsSpecificationId": {
+                "type": "integer"
+            },
+            "giveQuantity": {
+                "type": "integer"
+            }
+        },
+        "required": [
+            "buyGoodsId",
+            "buyGoodsSpecificationId",
+            "buyQuantity",
+            "giveGoodsId",
+            "giveGoodsSpecificationId",
+            "giveQuantity"
+        ]
+    },
+    "minItems": 1
+}

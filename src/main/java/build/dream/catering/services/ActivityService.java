@@ -2,16 +2,24 @@ package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.ActivityMapper;
+import build.dream.catering.mappers.BuyGiveActivityMapper;
 import build.dream.catering.mappers.UniversalMapper;
+import build.dream.catering.models.activity.SaveBuyGiveActivityModel;
 import build.dream.common.api.ApiRest;
+import build.dream.common.erp.catering.domains.Activity;
+import build.dream.common.erp.catering.domains.BuyGiveActivity;
 import build.dream.common.utils.CacheUtils;
 import build.dream.common.utils.GsonUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +30,8 @@ public class ActivityService {
     private ActivityMapper activityMapper;
     @Autowired
     private UniversalMapper universalMapper;
+    @Autowired
+    private BuyGiveActivityMapper buyGiveActivityMapper;
 
     public ApiRest test() {
         String findAllBuyGiveActivitiesSql = "SELECT " +
@@ -38,18 +48,18 @@ public class ActivityService {
                 "buy_goods.name AS buy_goods_name, " +
                 "buy_goods_specification.id AS buy_goods_specification_id, " +
                 "buy_goods_specification.name AS buy_goods_specification_name, " +
-                "activity_buy_give.buy_quantity, " +
+                "buy_give_activity.buy_quantity, " +
                 "give_goods.id AS give_goods_id, " +
                 "give_goods.name AS give_goods_name, " +
                 "give_goods_specification.id AS give_goods_specification_id, " +
                 "give_goods_specification.name AS give_goods_specification_name, " +
-                "activity_buy_give.give_quantity " +
+                "buy_give_activity.give_quantity " +
                 "FROM activity " +
-                "LEFT JOIN activity_buy_give ON activity.id = activity_buy_give.activity_id AND activity_buy_give.deleted = 0 " +
-                "LEFT JOIN goods AS buy_goods ON buy_goods.id = activity_buy_give.buy_goods_id " +
-                "LEFT JOIN goods_specification AS buy_goods_specification ON buy_goods_specification.id = activity_buy_give.buy_goods_specification_id " +
-                "LEFT JOIN goods AS give_goods ON give_goods.id = activity_buy_give.give_goods_id " +
-                "LEFT JOIN goods_specification AS give_goods_specification ON give_goods_specification.id = activity_buy_give.give_goods_specification_id " +
+                "LEFT JOIN buy_give_activity ON activity.id = buy_give_activity.activity_id AND buy_give_activity.deleted = 0 " +
+                "LEFT JOIN goods AS buy_goods ON buy_goods.id = buy_give_activity.buy_goods_id " +
+                "LEFT JOIN goods_specification AS buy_goods_specification ON buy_goods_specification.id = buy_give_activity.buy_goods_specification_id " +
+                "LEFT JOIN goods AS give_goods ON give_goods.id = buy_give_activity.give_goods_id " +
+                "LEFT JOIN goods_specification AS give_goods_specification ON give_goods_specification.id = buy_give_activity.give_goods_specification_id " +
                 "WHERE activity.tenant_id = #{tenantId} " +
                 "AND activity.branch_id = #{branchId} " +
                 "AND activity.status = #{status} " +
@@ -83,12 +93,12 @@ public class ActivityService {
                 "activity.status AS activity_status, " +
                 "activity.start_time, " +
                 "activity.end_time, " +
-                "activity_full_reduction.total_amount, " +
-                "activity_full_reduction.discount_type, " +
-                "activity_full_reduction.discount_rate, " +
-                "activity_full_reduction.discount_amount " +
+                "full_reduction_activity.total_amount, " +
+                "full_reduction_activity.discount_type, " +
+                "full_reduction_activity.discount_rate, " +
+                "full_reduction_activity.discount_amount " +
                 "FROM activity " +
-                "LEFT JOIN activity_full_reduction ON activity.id = activity_full_reduction.activity_id " +
+                "LEFT JOIN full_reduction_activity ON activity.id = full_reduction_activity.activity_id " +
                 "WHERE activity.tenant_id = #{tenantId} " +
                 "AND activity.branch_id = #{branchId} " +
                 "AND activity.status = #{status} " +
@@ -110,5 +120,52 @@ public class ActivityService {
         }
 
         return new ApiRest(allBuyGiveActivities, "查询成功！");
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest saveBuyGiveActivity(SaveBuyGiveActivityModel saveBuyGiveActivityModel) throws ParseException {
+        BigInteger tenantId = saveBuyGiveActivityModel.getTenantId();
+        String tenantCode = saveBuyGiveActivityModel.getTenantCode();
+        BigInteger branchId = saveBuyGiveActivityModel.getBranchId();
+        BigInteger userId = saveBuyGiveActivityModel.getUserId();
+        Activity activity = new Activity();
+        activity.setTenantId(tenantId);
+        activity.setTenantCode(tenantCode);
+        activity.setBranchId(branchId);
+        activity.setName(saveBuyGiveActivityModel.getName());
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DEFAULT_DATE_PATTERN);
+        activity.setStartTime(simpleDateFormat.parse(saveBuyGiveActivityModel.getStartTime() + " 00:00:00"));
+        activity.setEndTime(simpleDateFormat.parse(saveBuyGiveActivityModel.getEndTime() + " 23:59:59"));
+        activity.setType(1);
+        activity.setStatus(1);
+        activity.setCreateUserId(userId);
+        activity.setLastUpdateUserId(userId);
+        activity.setLastUpdateRemark("保存活动信息！");
+        activityMapper.insert(activity);
+
+        List<BuyGiveActivity> buyGiveActivities = new ArrayList<BuyGiveActivity>();
+        List<SaveBuyGiveActivityModel.BuyGiveActivityInfo> buyGiveActivityInfos = saveBuyGiveActivityModel.getBuyGiveActivityInfos();
+        for (SaveBuyGiveActivityModel.BuyGiveActivityInfo buyGiveActivityInfo : buyGiveActivityInfos) {
+            BuyGiveActivity buyGiveActivity = new BuyGiveActivity();
+            buyGiveActivity.setTenantId(tenantId);
+            buyGiveActivity.setTenantCode(tenantCode);
+            buyGiveActivity.setBranchId(branchId);
+            buyGiveActivity.setActivityId(activity.getId());
+            buyGiveActivity.setBuyGoodsId(buyGiveActivityInfo.getBuyGoodsId());
+            buyGiveActivity.setBuyGoodsSpecificationId(buyGiveActivityInfo.getBuyGoodsSpecificationId());
+            buyGiveActivity.setBuyQuantity(buyGiveActivityInfo.getBuyQuantity());
+            buyGiveActivity.setGiveGoodsId(buyGiveActivityInfo.getGiveGoodsId());
+            buyGiveActivity.setGiveGoodsSpecificationId(buyGiveActivityInfo.getGiveGoodsSpecificationId());
+            buyGiveActivity.setGiveQuantity(buyGiveActivityInfo.getGiveQuantity());
+            buyGiveActivity.setCreateUserId(userId);
+            buyGiveActivity.setLastUpdateUserId(userId);
+            buyGiveActivity.setLastUpdateRemark("保存买A赠B活动！");
+            buyGiveActivities.add(buyGiveActivity);
+        }
+        buyGiveActivityMapper.insertAll(buyGiveActivities);
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("保存买A赠B活动成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
     }
 }
