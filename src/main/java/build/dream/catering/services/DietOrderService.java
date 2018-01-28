@@ -1,5 +1,6 @@
 package build.dream.catering.services;
 
+import build.dream.catering.beans.BuyGiveActivityBean;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.*;
 import build.dream.catering.models.dietorder.ObtainDietOrderInfoModel;
@@ -7,9 +8,13 @@ import build.dream.catering.models.dietorder.SaveDietOrderModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
+import build.dream.common.utils.CacheUtils;
+import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.SerialNumberGenerator;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -343,6 +348,12 @@ public class DietOrderService {
 
         BigDecimal dietOrderTotalAmount = BigDecimal.ZERO;
         BigInteger dietOrderId = dietOrder.getId();
+
+        // 存放赠品订单详情
+        List<DietOrderDetail> giveDietOrderDetails = new ArrayList<DietOrderDetail>();
+        // 用来保存订单活动
+        Map<BigInteger, DietOrderActivity> dietOrderActivityMap = new HashMap<BigInteger, DietOrderActivity>();
+
         for (SaveDietOrderModel.GroupInfo groupInfo : groupInfos) {
             DietOrderGroup dietOrderGroup = new DietOrderGroup();
             dietOrderGroup.setTenantId(tenantId);
@@ -429,8 +440,74 @@ public class DietOrderService {
                     dietOrderDetailGoodsFlavorMapper.insertAll(dietOrderDetailGoodsFlavors);
                 }
                 dietOrderTotalAmount = dietOrderTotalAmount.add(totalAmount);
+
+                String buyGiveActivityJson = CacheUtils.hget(Constants.KEY_BUY_GIVE_ACTIVITIES, tenantId + "_" + branchId + "_" + goods.getId() + "_" + goodsSpecification.getId());
+                if (StringUtils.isNotBlank(buyGiveActivityJson)) {
+                    BuyGiveActivityBean buyGiveActivityBean = GsonUtils.fromJson(buyGiveActivityJson, BuyGiveActivityBean.class);
+                    if (detailInfo.getQuantity() >= buyGiveActivityBean.getBuyQuantity()) {
+                        DietOrderDetail giveDietOrderDetail = new DietOrderDetail();
+                        giveDietOrderDetail.setTenantId(tenantId);
+                        giveDietOrderDetail.setTenantCode(tenantCode);
+                        giveDietOrderDetail.setBranchId(branchId);
+                        giveDietOrderDetail.setDietOrderId(dietOrderId);
+                        giveDietOrderDetail.setGoodsId(buyGiveActivityBean.getGiveGoodsId());
+                        giveDietOrderDetail.setGoodsName(buyGiveActivityBean.getGiveGoodsName());
+                        giveDietOrderDetail.setGoodsSpecificationId(buyGiveActivityBean.getGiveGoodsSpecificationId());
+                        giveDietOrderDetail.setGoodsSpecificationName(buyGiveActivityBean.getGiveGoodsSpecificationName());
+                        giveDietOrderDetail.setPrice(BigDecimal.ZERO);
+                        giveDietOrderDetail.setFlavorIncrease(BigDecimal.ZERO);
+                        giveDietOrderDetail.setQuantity(buyGiveActivityBean.getGiveQuantity());
+                        giveDietOrderDetail.setTotalAmount(BigDecimal.ZERO);
+                        giveDietOrderDetail.setDiscountAmount(BigDecimal.ZERO);
+                        giveDietOrderDetail.setPayableAmount(BigDecimal.ZERO);
+                        giveDietOrderDetail.setCreateUserId(userId);
+                        giveDietOrderDetail.setLastUpdateUserId(userId);
+                        giveDietOrderDetail.setLastUpdateRemark("保存订单详情信息！");
+                        giveDietOrderDetails.add(giveDietOrderDetail);
+
+                        if (!dietOrderActivityMap.containsKey(buyGiveActivityBean.getActivityId())) {
+                            DietOrderActivity dietOrderActivity = new DietOrderActivity();
+                            dietOrderActivity.setTenantId(tenantId);
+                            dietOrderActivity.setTenantCode(tenantCode);
+                            dietOrderActivity.setBranchId(branchId);
+                            dietOrderActivity.setDietOrderId(dietOrderId);
+                            dietOrderActivity.setActivityId(buyGiveActivityBean.getActivityId());
+                            dietOrderActivity.setActivityName(buyGiveActivityBean.getActivityName());
+                            dietOrderActivity.setActivityType(buyGiveActivityBean.getActivityType());
+                            dietOrderActivity.setAmount(BigDecimal.ZERO);
+                            dietOrderActivity.setCreateUserId(userId);
+                            dietOrderActivity.setLastUpdateUserId(userId);
+                            dietOrderActivity.setLastUpdateRemark("保存订单活动信息！");
+                            dietOrderActivityMap.put(buyGiveActivityBean.getActivityId(), dietOrderActivity);
+                        }
+                    }
+                }
             }
         }
+
+        if (CollectionUtils.isNotEmpty(giveDietOrderDetails)) {
+            DietOrderGroup giveDietOrderGroup = new DietOrderGroup();
+            giveDietOrderGroup.setTenantId(tenantId);
+            giveDietOrderGroup.setTenantCode(tenantCode);
+            giveDietOrderGroup.setBranchId(branchId);
+            giveDietOrderGroup.setDietOrderId(dietOrderId);
+            giveDietOrderGroup.setName("赠品");
+            giveDietOrderGroup.setType("discount");
+            giveDietOrderGroup.setCreateUserId(userId);
+            giveDietOrderGroup.setLastUpdateUserId(userId);
+            giveDietOrderGroup.setLastUpdateRemark("保存订单分组信息！");
+            dietOrderGroupMapper.insert(giveDietOrderGroup);
+
+            for (DietOrderDetail giveDietOrderDetail : giveDietOrderDetails) {
+                giveDietOrderDetail.setDietOrderGroupId(giveDietOrderGroup.getId());
+            }
+            dietOrderDetailMapper.insertAll(giveDietOrderDetails);
+        }
+
+        if (MapUtils.isNotEmpty(dietOrderActivityMap)) {
+            dietOrderActivityMapper.insertAll(new ArrayList<DietOrderActivity>(dietOrderActivityMap.values()));
+        }
+
         dietOrder.setTotalAmount(dietOrderTotalAmount);
         dietOrder.setDiscountAmount(BigDecimal.ZERO);
         dietOrder.setPayableAmount(dietOrderTotalAmount);
