@@ -42,4 +42,5 @@ public class Constants extends build.dream.common.constants.Constants {
 
     public static final String KEY_BUY_GIVE_ACTIVITIES = "_buy_give_activities";
     public static final String KEY_FULL_REDUCTION_ACTIVITIES = "_full_reduction_activities";
+    public static final String KEY_SPECIAL_GOODS_ACTIVITIES = "_special_goods_activities";
 }

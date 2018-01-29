@@ -2,6 +2,7 @@ package build.dream.catering.utils;
 
 import build.dream.catering.beans.BuyGiveActivityBean;
 import build.dream.catering.beans.FullReductionActivityBean;
+import build.dream.catering.beans.SpecialGoodsActivityBean;
 import build.dream.catering.constants.Constants;
 import build.dream.common.erp.catering.domains.DietOrderActivity;
 import build.dream.common.erp.catering.domains.DietOrderDetail;
@@ -128,5 +129,14 @@ public class DietOrderUtils {
             }
         }
         return fullReductionActivityBean;
+    }
+
+    public static SpecialGoodsActivityBean findSpecialGoodsActivityBean(BigInteger tenantId, BigInteger branchId, BigInteger goodsId, BigInteger goodsSpecificationId) {
+        String specialGoodsActivityJson = CacheUtils.hget(Constants.KEY_SPECIAL_GOODS_ACTIVITIES, tenantId + "_" + branchId + "_" + goodsId + "_" + goodsSpecificationId);
+        SpecialGoodsActivityBean specialGoodsActivityBean = null;
+        if (StringUtils.isNotBlank(specialGoodsActivityJson)) {
+            specialGoodsActivityBean = GsonUtils.fromJson(specialGoodsActivityJson, SpecialGoodsActivityBean.class);
+        }
+        return specialGoodsActivityBean;
     }
 }

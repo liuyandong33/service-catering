@@ -4,7 +4,6 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.*;
 import build.dream.catering.models.activity.SaveBuyGiveActivityModel;
 import build.dream.catering.utils.CanNotDeleteReasonUtils;
-import build.dream.catering.utils.DietOrderUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.CacheUtils;
@@ -13,12 +12,10 @@ import build.dream.common.utils.SearchModel;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -134,7 +131,50 @@ public class ActivityService {
             }
         }
 
-        DietOrderUtils.findFullReductionActivityBean(NumberUtils.createBigDecimal("150"), "1", "1");
+
+        String findAllSpecialGoodsActivitiesSql = "SELECT " +
+                "activity.tenant_id, " +
+                "activity.tenant_code, " +
+                "activity.branch_id, " +
+                "activity.id AS activity_id, " +
+                "activity.name AS activity_name, " +
+                "activity.type AS activity_type, " +
+                "activity.status AS activity_status, " +
+                "activity.start_time, " +
+                "activity.end_time, " +
+                "goods.id AS goods_id, " +
+                "goods.name AS goods_name, " +
+                "goods_specification.id AS goods_specification_id, " +
+                "goods_specification.name AS goods_specification_name, " +
+                "special_goods_activity.discount_type, " +
+                "special_goods_activity.special_price, " +
+                "special_goods_activity.discount_rate " +
+                "FROM activity " +
+                "LEFT JOIN special_goods_activity ON activity.id = special_goods_activity.activity_id " +
+                "LEFT JOIN goods ON goods.id = special_goods_activity.goods_id " +
+                "LEFT JOIN goods_specification ON goods_specification.id = special_goods_activity.goods_specification_id " +
+                "WHERE activity.tenant_id = #{tenantId} " +
+                "AND activity.branch_id = #{branchId} " +
+                "AND activity.status = #{status} " +
+                "AND activity.type = #{type} " +
+                "AND activity.deleted = 0";
+        Map<String, Object> findAllSpecialGoodsActivitiesParameters = new HashMap<String, Object>();
+        findAllSpecialGoodsActivitiesParameters.put("sql", findAllSpecialGoodsActivitiesSql);
+        findAllSpecialGoodsActivitiesParameters.put("tenantId", BigInteger.ONE);
+        findAllSpecialGoodsActivitiesParameters.put("branchId", BigInteger.ONE);
+        findAllSpecialGoodsActivitiesParameters.put("status", 2);
+        findAllSpecialGoodsActivitiesParameters.put("type", 3);
+        List<Map<String, Object>> allSpecialGoodsActivities = universalMapper.executeQuery(findAllSpecialGoodsActivitiesParameters);
+        if (CollectionUtils.isNotEmpty(allSpecialGoodsActivities)) {
+            for (Map<String, Object> specialGoodsActivity : allSpecialGoodsActivities) {
+                BigInteger tenantId = BigInteger.valueOf(MapUtils.getLongValue(specialGoodsActivity, "tenantId"));
+                BigInteger branchId = BigInteger.valueOf(MapUtils.getLongValue(specialGoodsActivity, "branchId"));
+                BigInteger buyGoodsId = BigInteger.valueOf(MapUtils.getLongValue(specialGoodsActivity, "goodsId"));
+                BigInteger buyGoodsSpecificationId = BigInteger.valueOf(MapUtils.getLongValue(specialGoodsActivity, "goodsSpecificationId"));
+                CacheUtils.hset(Constants.KEY_SPECIAL_GOODS_ACTIVITIES, tenantId + "_" + branchId + "_" + buyGoodsId + "_" + buyGoodsSpecificationId, GsonUtils.toJson(specialGoodsActivity));
+            }
+        }
+
         return new ApiRest(allBuyGiveActivities, "查询成功！");
     }
 
