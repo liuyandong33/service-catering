@@ -5,7 +5,7 @@ import build.dream.catering.mappers.*;
 import build.dream.catering.models.activity.SaveBuyGiveActivityModel;
 import build.dream.catering.models.activity.SaveFullReductionActivityModel;
 import build.dream.catering.utils.ActivityUtils;
-import build.dream.catering.utils.CanNotDeleteReasonUtils;
+import build.dream.catering.utils.CanNotOperateReasonUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.CacheUtils;
@@ -38,7 +38,7 @@ public class ActivityService {
     @Autowired
     private GoodsSpecificationMapper goodsSpecificationMapper;
     @Autowired
-    private CanNotDeleteReasonMapper canNotDeleteReasonMapper;
+    private CanNotOperateReasonMapper canNotOperateReasonMapper;
 
     public ApiRest test() {
         String findAllBuyGiveActivitiesSql = "SELECT " +
@@ -233,7 +233,7 @@ public class ActivityService {
         }
 
         List<BuyGiveActivity> buyGiveActivities = new ArrayList<BuyGiveActivity>();
-        List<CanNotDeleteReason> canNotDeleteReasons = new ArrayList<CanNotDeleteReason>();
+        List<CanNotOperateReason> canNotOperateReasons = new ArrayList<CanNotOperateReason>();
         for (SaveBuyGiveActivityModel.BuyGiveActivityInfo buyGiveActivityInfo : buyGiveActivityInfos) {
             Goods buyGoods = goodsMap.get(buyGiveActivityInfo.getBuyGoodsId());
             Validate.notNull(buyGoods, "商品不存在！");
@@ -263,15 +263,12 @@ public class ActivityService {
             buyGiveActivity.setLastUpdateRemark("保存买A赠B活动！");
             buyGiveActivities.add(buyGiveActivity);
 
-            String goodsReason = "该商品包含在促销活动【" + activity.getName() + "】中，不能删除！";
-            String goodsSpecificationReason = "该商品规格包含在促销活动【" + activity.getName() + "】中，不能删除！";
-            canNotDeleteReasons.add(CanNotDeleteReasonUtils.constructCanNotDeleteReason(tenantId, tenantCode, tenantId, buyGoods.getId(), "goods", activity.getId(), "activity", goodsReason));
-            canNotDeleteReasons.add(CanNotDeleteReasonUtils.constructCanNotDeleteReason(tenantId, tenantCode, tenantId, buyGoodsSpecification.getId(), "goods", activity.getId(), "activity", goodsSpecificationReason));
-            canNotDeleteReasons.add(CanNotDeleteReasonUtils.constructCanNotDeleteReason(tenantId, tenantCode, tenantId, giveGoods.getId(), "goods_specification", activity.getId(), "activity", goodsReason));
-            canNotDeleteReasons.add(CanNotDeleteReasonUtils.constructCanNotDeleteReason(tenantId, tenantCode, tenantId, giveGoodsSpecification.getId(), "goods_specification", activity.getId(), "activity", goodsSpecificationReason));;
+            String goodsReason = "该商品已参与促销活动【" + activity.getName() + "】，活动期间不可%s！如需更改，请先取消活动！";
+            canNotOperateReasons.add(CanNotOperateReasonUtils.constructCanNotOperateReason(tenantId, tenantCode, tenantId, buyGoods.getId(), "goods", activity.getId(), "activity", 3, goodsReason));
+            canNotOperateReasons.add(CanNotOperateReasonUtils.constructCanNotOperateReason(tenantId, tenantCode, tenantId, giveGoods.getId(), "goods", activity.getId(), "activity", 3, goodsReason));
         }
         buyGiveActivityMapper.insertAll(buyGiveActivities);
-        canNotDeleteReasonMapper.insertAll(canNotDeleteReasons);
+        canNotOperateReasonMapper.insertAll(canNotOperateReasons);
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("保存买A赠B活动成功！");
         apiRest.setSuccessful(true);

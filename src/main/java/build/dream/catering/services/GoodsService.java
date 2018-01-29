@@ -157,12 +157,17 @@ public class GoodsService extends BasicService {
         BigInteger userId = saveGoodsModel.getUserId();
 
         if (saveGoodsModel.getId() != null) {
+            BigInteger goodsId = saveGoodsModel.getId();
+
             SearchModel goodsSearchModel = new SearchModel(true);
             goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
             goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-            goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveGoodsModel.getId());
+            goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, goodsId);
             Goods goods = goodsMapper.find(goodsSearchModel);
             Validate.notNull(goods, "商品不存在！");
+
+            // 验证商品是否可以编辑
+            validateCanNotOperate(tenantId, branchId, "goods", goodsId, 1);
 
             goods.setName(saveGoodsModel.getName());
             goods.setCategoryId(saveGoodsModel.getCategoryId());
@@ -218,7 +223,7 @@ public class GoodsService extends BasicService {
                 SearchModel searchModel = new SearchModel(true);
                 searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
                 searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-                searchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, goods.getId());
+                searchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, goodsId);
                 searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsSpecificationIds);
                 List<GoodsSpecification> goodsSpecifications = goodsSpecificationMapper.findAll(searchModel);
                 for (GoodsSpecification goodsSpecification : goodsSpecifications) {
@@ -236,7 +241,7 @@ public class GoodsService extends BasicService {
                     goodsSpecification.setPrice(goodsSpecificationInfo.getPrice());
                     goodsSpecificationMapper.update(goodsSpecification);
                 } else {
-                    GoodsSpecification goodsSpecification = buildGoodsSpecification(tenantId, tenantCode, branchId, goods.getId(), goodsSpecificationInfo, userId);
+                    GoodsSpecification goodsSpecification = buildGoodsSpecification(tenantId, tenantCode, branchId, goodsId, goodsSpecificationInfo, userId);
                     insertGoodsSpecifications.add(goodsSpecification);
                 }
                 if (CollectionUtils.isNotEmpty(insertGoodsSpecifications)) {
@@ -285,7 +290,7 @@ public class GoodsService extends BasicService {
                 SearchModel goodsFlavorGroupSearchModel = new SearchModel(true);
                 goodsFlavorGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
                 goodsFlavorGroupSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-                goodsFlavorGroupSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, goods.getId());
+                goodsFlavorGroupSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, goodsId);
                 goodsFlavorGroupSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsFlavorGroupIds);
                 List<GoodsFlavorGroup> goodsFlavorGroups = goodsFlavorGroupMapper.findAll(goodsFlavorGroupSearchModel);
                 Map<BigInteger, GoodsFlavorGroup> goodsFlavorGroupMap = new HashMap<BigInteger, GoodsFlavorGroup>();
@@ -297,7 +302,7 @@ public class GoodsService extends BasicService {
                 SearchModel goodsFlavorSearchModel = new SearchModel(true);
                 goodsFlavorSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
                 goodsFlavorSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-                goodsFlavorSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, goods.getId());
+                goodsFlavorSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, goodsId);
                 goodsFlavorSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsFlavorIds);
                 List<GoodsFlavor> goodsFlavors = goodsFlavorMapper.findAll(goodsFlavorSearchModel);
                 Map<BigInteger, GoodsFlavor> goodsFlavorMap = new HashMap<BigInteger, GoodsFlavor>();
@@ -326,17 +331,17 @@ public class GoodsService extends BasicService {
                                 goodsFlavor.setLastUpdateRemark("修改口味信息！");
                                 goodsFlavorMapper.update(goodsFlavor);
                             } else {
-                                GoodsFlavor goodsFlavor = buildGoodsFlavor(flavorInfo, tenantId, tenantCode, branchId, goods.getId(), goodsFlavorGroup.getId(), userId);
+                                GoodsFlavor goodsFlavor = buildGoodsFlavor(flavorInfo, tenantId, tenantCode, branchId, goodsId, goodsFlavorGroup.getId(), userId);
                                 insertGoodsFlavors.add(goodsFlavor);
 //                                goodsFlavorMapper.insert(goodsFlavor);
                             }
                         }
                     } else {
-                        GoodsFlavorGroup goodsFlavorGroup = buildGoodsFlavorGroup(tenantId, tenantCode, branchId, goods.getId(), flavorGroupInfo, userId);
+                        GoodsFlavorGroup goodsFlavorGroup = buildGoodsFlavorGroup(tenantId, tenantCode, branchId, goodsId, flavorGroupInfo, userId);
                         goodsFlavorGroupMapper.insert(goodsFlavorGroup);
 
                         for (SaveGoodsModel.FlavorInfo flavorInfo : flavorGroupInfo.getFlavorInfos()) {
-                            GoodsFlavor goodsFlavor = buildGoodsFlavor(flavorInfo, tenantId, tenantCode, branchId, goods.getId(), goodsFlavorGroup.getId(), userId);
+                            GoodsFlavor goodsFlavor = buildGoodsFlavor(flavorInfo, tenantId, tenantCode, branchId, goodsId, goodsFlavorGroup.getId(), userId);
                             insertGoodsFlavors.add(goodsFlavor);
 //                            goodsFlavorMapper.insert(goodsFlavor);
                         }
@@ -360,11 +365,12 @@ public class GoodsService extends BasicService {
             goods.setLastUpdateRemark("新增商品信息！");
             goodsMapper.insert(goods);
 
+            BigInteger goodsId = goods.getId();
             // 新增所有规格
             List<GoodsSpecification> insertGoodsSpecifications = new ArrayList<GoodsSpecification>();
             List<SaveGoodsModel.GoodsSpecificationInfo> goodsSpecificationInfos = saveGoodsModel.getGoodsSpecificationInfos();
             for (SaveGoodsModel.GoodsSpecificationInfo goodsSpecificationInfo : goodsSpecificationInfos) {
-                GoodsSpecification goodsSpecification = buildGoodsSpecification(tenantId, tenantCode, branchId, goods.getId(), goodsSpecificationInfo, userId);
+                GoodsSpecification goodsSpecification = buildGoodsSpecification(tenantId, tenantCode, branchId, goodsId, goodsSpecificationInfo, userId);
                 insertGoodsSpecifications.add(goodsSpecification);
             }
             goodsSpecificationMapper.insertAll(insertGoodsSpecifications);
@@ -373,11 +379,11 @@ public class GoodsService extends BasicService {
             if (CollectionUtils.isNotEmpty(flavorGroupInfos)) {
                 List<GoodsFlavor> insertGoodsFlavors = new ArrayList<GoodsFlavor>();
                 for (SaveGoodsModel.FlavorGroupInfo flavorGroupInfo : flavorGroupInfos) {
-                    GoodsFlavorGroup goodsFlavorGroup = buildGoodsFlavorGroup(tenantId, tenantCode, branchId, goods.getId(), flavorGroupInfo, userId);
+                    GoodsFlavorGroup goodsFlavorGroup = buildGoodsFlavorGroup(tenantId, tenantCode, branchId, goodsId, flavorGroupInfo, userId);
                     goodsFlavorGroupMapper.insert(goodsFlavorGroup);
 
                     for (SaveGoodsModel.FlavorInfo flavorInfo : flavorGroupInfo.getFlavorInfos()) {
-                        GoodsFlavor goodsFlavor = buildGoodsFlavor(flavorInfo, tenantId, tenantCode, branchId, goods.getId(), goodsFlavorGroup.getId(), userId);
+                        GoodsFlavor goodsFlavor = buildGoodsFlavor(flavorInfo, tenantId, tenantCode, branchId, goodsId, goodsFlavorGroup.getId(), userId);
                         insertGoodsFlavors.add(goodsFlavor);
                     }
                 }
@@ -493,7 +499,7 @@ public class GoodsService extends BasicService {
         Goods goods = goodsMapper.find(searchModel);
         Validate.notNull(goods, "菜品不存在！");
 
-        validateCanBeDelete(tenantId, branchId, "goods", goodsId);
+        validateCanNotOperate(tenantId, branchId, "goods", goodsId, 2);
 
         goods.setLastUpdateUserId(userId);
         goods.setLastUpdateRemark("删除菜品信息！");
