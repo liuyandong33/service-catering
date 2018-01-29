@@ -3,6 +3,8 @@ package build.dream.catering.services;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.*;
 import build.dream.catering.models.activity.SaveBuyGiveActivityModel;
+import build.dream.catering.models.activity.SaveFullReductionActivityModel;
+import build.dream.catering.utils.ActivityUtils;
 import build.dream.catering.utils.CanNotDeleteReasonUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
@@ -29,6 +31,8 @@ public class ActivityService {
     private UniversalMapper universalMapper;
     @Autowired
     private BuyGiveActivityMapper buyGiveActivityMapper;
+    @Autowired
+    private FullReductionActivityMapper fullReductionActivityMapper;
     @Autowired
     private GoodsMapper goodsMapper;
     @Autowired
@@ -184,29 +188,11 @@ public class ActivityService {
         String tenantCode = saveBuyGiveActivityModel.getTenantCode();
         BigInteger branchId = saveBuyGiveActivityModel.getBranchId();
         BigInteger userId = saveBuyGiveActivityModel.getUserId();
-        Activity activity = new Activity();
-        activity.setTenantId(tenantId);
-        activity.setTenantCode(tenantCode);
-        activity.setBranchId(branchId);
-        activity.setName(saveBuyGiveActivityModel.getName());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DEFAULT_DATE_PATTERN);
-        activity.setType(1);
-
         Date startTime = simpleDateFormat.parse(saveBuyGiveActivityModel.getStartTime() + " 00:00:00");
-        activity.setStartTime(startTime);
-
         Date endTime = simpleDateFormat.parse(saveBuyGiveActivityModel.getEndTime() + " 23:59:59");
-        activity.setEndTime(endTime);
 
-        long currentTimeMillis = System.currentTimeMillis();
-        if (currentTimeMillis >= startTime.getTime() && currentTimeMillis <= endTime.getTime()) {
-            activity.setStatus(2);
-        } else {
-            activity.setStatus(1);
-        }
-        activity.setCreateUserId(userId);
-        activity.setLastUpdateUserId(userId);
-        activity.setLastUpdateRemark("保存活动信息！");
+        Activity activity = ActivityUtils.constructActivity(tenantId, tenantCode, branchId, saveBuyGiveActivityModel.getName(), 1, startTime, endTime, userId, "保存活动信息！");
         activityMapper.insert(activity);
 
         List<SaveBuyGiveActivityModel.BuyGiveActivityInfo> buyGiveActivityInfos = saveBuyGiveActivityModel.getBuyGiveActivityInfos();
@@ -288,6 +274,51 @@ public class ActivityService {
         canNotDeleteReasonMapper.insertAll(canNotDeleteReasons);
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("保存买A赠B活动成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest saveFullReductionActivity(SaveFullReductionActivityModel saveFullReductionActivityModel) throws ParseException {
+        BigInteger tenantId = saveFullReductionActivityModel.getTenantId();
+        String tenantCode = saveFullReductionActivityModel.getTenantCode();
+        BigInteger branchId = saveFullReductionActivityModel.getBranchId();
+        BigInteger userId = saveFullReductionActivityModel.getUserId();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DEFAULT_DATE_PATTERN);
+        Date startTime = simpleDateFormat.parse(saveFullReductionActivityModel.getStartTime() + " 00:00:00");
+        Date endTime = simpleDateFormat.parse(saveFullReductionActivityModel.getEndTime() + " 23:59:59");
+
+        Validate.isTrue(endTime.after(startTime), "活动结束时间必须大于开始时间！");
+
+        String sql = "SELECT * " +
+                "FROM activity " +
+                "WHERE tenant_id = #{tenantId} " +
+                "AND branch_id = #{branchId} " +
+                "AND deleted = 0 " +
+                "AND type = 2 " +
+                "AND status IN (1, 2) " +
+                "AND ((start_time <= #{startTime} AND end_time >= #{endTime}) OR (start_time >= #{startTime} AND start_time <= #{endTime}) OR (end_time >= #{startTime} AND end_time <= #{endTime})) " +
+                "LIMIT 0, 1";
+        Map<String, Object> findActivityParameters = new HashMap<String, Object>();
+        findActivityParameters.put("sql", sql);
+        findActivityParameters.put("tenantId", tenantId);
+        findActivityParameters.put("branchId", branchId);
+        findActivityParameters.put("startTime", startTime);
+        findActivityParameters.put("endTime", endTime);
+        Map<String, Object> activityMap = universalMapper.executeUniqueResultQuery(findActivityParameters);
+        if (MapUtils.isNotEmpty(activityMap)) {
+            throw new RuntimeException("活动日期与【" + activityMap.get("name") + "】在时间上冲突！");
+        }
+
+
+        Activity activity = ActivityUtils.constructActivity(tenantId, tenantCode, branchId, saveFullReductionActivityModel.getName(), 2, startTime, endTime, userId, "保存活动信息！");
+        activityMapper.insert(activity);
+
+        FullReductionActivity fullReductionActivity = ActivityUtils.constructFullReductionActivity(tenantId, tenantCode, branchId, activity.getId(), saveFullReductionActivityModel.getTotalAmount(), saveFullReductionActivityModel.getDiscountType(), saveFullReductionActivityModel.getDiscountRate(), saveFullReductionActivityModel.getDiscountAmount(), userId, "保存满减活动！");
+        fullReductionActivityMapper.insert(fullReductionActivity);
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("保存满减活动成功！");
         apiRest.setSuccessful(true);
         return apiRest;
     }
