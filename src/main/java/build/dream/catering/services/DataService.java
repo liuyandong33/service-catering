@@ -18,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -31,6 +33,8 @@ public class DataService {
     private DietOrderDetailMapper dietOrderDetailMapper;
     @Autowired
     private DietOrderDetailGoodsFlavorMapper dietOrderDetailGoodsFlavorMapper;
+    @Autowired
+    private DietOrderActivityMapper dietOrderActivityMapper;
     @Autowired
     private DataHandleHistoryMapper dataHandleHistoryMapper;
 
@@ -108,6 +112,18 @@ public class DataService {
                         dietOrderDetailGoodsFlavorMapper.insert(dietOrderDetailGoodsFlavor);
                     }
                 }
+            }
+
+            if (dietOrderJsonObject.containsKey("dietOrderActivities")) {
+                JSONArray dietOrderActivityJsonArray = dietOrderJsonObject.getJSONArray("dietOrderActivities");
+                int dietOrderActivityJsonArraySize = dietOrderActivityJsonArray.size();
+                List<DietOrderActivity> dietOrderActivities = new ArrayList<DietOrderActivity>();
+                for (int dietOrderActivityJsonArrayIndex = 0; dietOrderActivityJsonArrayIndex < dietOrderActivityJsonArraySize; dietOrderActivityJsonArrayIndex++) {
+                    DietOrderActivity dietOrderActivity = GsonUtils.fromJson(dietOrderActivityJsonArray.getJSONObject(dietOrderActivityJsonArrayIndex), DietOrderActivity.class);
+                    dietOrderActivity.setDietOrderId(dietOrderId);
+                    dietOrderActivities.add(dietOrderActivity);
+                }
+                dietOrderActivityMapper.insertAll(dietOrderActivities);
             }
         } catch (Exception e) {
             CacheUtils.delete(signature);
