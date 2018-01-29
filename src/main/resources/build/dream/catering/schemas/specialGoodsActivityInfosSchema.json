@@ -1,0 +1,34 @@
+{
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "goodsId": {
+                "type": "integer"
+            },
+            "goodsSpecificationId": {
+                "type": "integer"
+            },
+            "discountType": {
+                "enum": [
+                    1,
+                    2
+                ]
+            },
+            "specialPrice": {
+                "type": "integer"
+            },
+            "discountRate": {
+                "type": "integer"
+            }
+        },
+        "required": [
+            "goodsId",
+            "goodsSpecificationId",
+            "discountType",
+            "specialPrice",
+            "discountRate"
+        ]
+    },
+    "minItems": 1
+}

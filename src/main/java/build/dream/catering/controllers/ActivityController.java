@@ -2,6 +2,7 @@ package build.dream.catering.controllers;
 
 import build.dream.catering.models.activity.SaveBuyGiveActivityModel;
 import build.dream.catering.models.activity.SaveFullReductionActivityModel;
+import build.dream.catering.models.activity.SaveSpecialGoodsActivityModel;
 import build.dream.catering.services.ActivityService;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
@@ -68,6 +69,30 @@ public class ActivityController extends BasicController {
             apiRest = activityService.saveFullReductionActivity(saveFullReductionActivityModel);
         } catch (Exception e) {
             LogUtils.error("保存满减活动失败", controllerSimpleName, "saveFullReductionActivity", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 保存特价商品活动
+     *
+     * @return
+     */
+    @RequestMapping(value = "/saveSpecialGoodsActivity")
+    @ResponseBody
+    public String saveSpecialGoodsActivity() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            SaveSpecialGoodsActivityModel saveSpecialGoodsActivityModel = ApplicationHandler.instantiateObject(SaveSpecialGoodsActivityModel.class, requestParameters);
+            String specialGoodsActivityInfos = requestParameters.get("specialGoodsActivityInfos");
+            saveSpecialGoodsActivityModel.setSpecialGoodsActivityInfos(specialGoodsActivityInfos);
+
+            saveSpecialGoodsActivityModel.validateAndThrow();
+            apiRest = activityService.saveSpecialGoodsActivity(saveSpecialGoodsActivityModel);
+        } catch (Exception e) {
+            LogUtils.error("保存特价商品活动失败", controllerSimpleName, "saveSpecialGoodsActivity", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
