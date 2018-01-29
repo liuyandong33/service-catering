@@ -1,12 +1,20 @@
 package build.dream.catering.utils;
 
+import build.dream.catering.beans.BuyGiveActivityBean;
+import build.dream.catering.beans.FullReductionActivityBean;
+import build.dream.catering.constants.Constants;
 import build.dream.common.erp.catering.domains.DietOrderActivity;
 import build.dream.common.erp.catering.domains.DietOrderDetail;
 import build.dream.common.erp.catering.domains.DietOrderDetailGoodsFlavor;
 import build.dream.common.erp.catering.domains.DietOrderGroup;
+import build.dream.common.utils.CacheUtils;
+import build.dream.common.utils.GsonUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.*;
 
 public class DietOrderUtils {
     public static DietOrderActivity constructDietOrderActivity(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger dietOrderId, BigInteger activityId, String activityName, Integer activityType, BigDecimal amount, BigInteger userId, String lastUpdateRemark) {
@@ -79,5 +87,46 @@ public class DietOrderUtils {
         dietOrderDetailGoodsFlavor.setLastUpdateUserId(userId);
         dietOrderDetailGoodsFlavor.setLastUpdateRemark(lastUpdateRemark);
         return dietOrderDetailGoodsFlavor;
+    }
+
+    public static BuyGiveActivityBean findBuyGiveActivityBean(BigInteger tenantId, BigInteger branchId, BigInteger goodsId, BigInteger goodsSpecificationId, Integer quantity) {
+        String buyGiveActivityJson = CacheUtils.hget(Constants.KEY_BUY_GIVE_ACTIVITIES, tenantId + "_" + branchId + "_" + goodsId + "_" + goodsSpecificationId);
+        if (StringUtils.isNotBlank(buyGiveActivityJson)) {
+            BuyGiveActivityBean buyGiveActivityBean = GsonUtils.fromJson(buyGiveActivityJson, BuyGiveActivityBean.class);
+            if (quantity >= buyGiveActivityBean.getBuyQuantity()) {
+                return buyGiveActivityBean;
+            }
+        }
+        return null;
+    }
+
+    public static FullReductionActivityBean findFullReductionActivityBean(BigDecimal dietOrderTotalAmount, String tenantId, String branchId) {
+        String fullReductionActivitiesJson = CacheUtils.hget(Constants.KEY_FULL_REDUCTION_ACTIVITIES, tenantId + "_" + branchId);
+        if (StringUtils.isBlank(fullReductionActivitiesJson)) {
+            return null;
+        }
+        List<FullReductionActivityBean> fullReductionActivityBeans = GsonUtils.jsonToList(fullReductionActivitiesJson, FullReductionActivityBean.class);
+        Map<Integer, FullReductionActivityBean> fullReductionActivityBeanMap = new HashMap<Integer, FullReductionActivityBean>();
+        Map<BigDecimal, Integer> totalAmountAndHashCodeMap = new HashMap<BigDecimal, Integer>();
+        List<BigDecimal> keys = new ArrayList<BigDecimal>();
+        for (FullReductionActivityBean fullReductionActivityBean : fullReductionActivityBeans) {
+            keys.add(fullReductionActivityBean.getTotalAmount());
+            fullReductionActivityBeanMap.put(fullReductionActivityBean.hashCode(), fullReductionActivityBean);
+            totalAmountAndHashCodeMap.put(fullReductionActivityBean.getTotalAmount(), fullReductionActivityBean.hashCode());
+        }
+        Collections.sort(keys, new Comparator<BigDecimal>() {
+            @Override
+            public int compare(BigDecimal o1, BigDecimal o2) {
+                return o1.compareTo(o2) * -1;
+            }
+        });
+        FullReductionActivityBean fullReductionActivityBean = null;
+        for (BigDecimal key : keys) {
+            if (dietOrderTotalAmount.compareTo(key) >= 0) {
+                fullReductionActivityBean = fullReductionActivityBeanMap.get(totalAmountAndHashCodeMap.get(key));
+                break;
+            }
+        }
+        return fullReductionActivityBean;
     }
 }

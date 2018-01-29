@@ -4,6 +4,7 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.*;
 import build.dream.catering.models.activity.SaveBuyGiveActivityModel;
 import build.dream.catering.utils.CanNotDeleteReasonUtils;
+import build.dream.catering.utils.DietOrderUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.CacheUtils;
@@ -12,10 +13,12 @@ import build.dream.common.utils.SearchModel;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -115,13 +118,23 @@ public class ActivityService {
         findAllFullReductionActivitiesParameters.put("type", 2);
         List<Map<String, Object>> allFullReductionActivities = universalMapper.executeQuery(findAllFullReductionActivitiesParameters);
         if (CollectionUtils.isNotEmpty(allFullReductionActivities)) {
+            Map<String, List<Map<String, Object>>> fullReductionActivitiesMap = new HashMap<String, List<Map<String, Object>>>();
             for (Map<String, Object> fullReductionActivity : allFullReductionActivities) {
                 BigInteger tenantId = BigInteger.valueOf(MapUtils.getLongValue(fullReductionActivity, "tenantId"));
                 BigInteger branchId = BigInteger.valueOf(MapUtils.getLongValue(fullReductionActivity, "branchId"));
-                CacheUtils.hset(Constants.KEY_FULL_REDUCTION_ACTIVITIES, tenantId + "_" + branchId, GsonUtils.toJson(fullReductionActivity));
+                List<Map<String, Object>> fullReductionActivities = fullReductionActivitiesMap.get(tenantId + "_" + branchId);
+                if (fullReductionActivities == null) {
+                    fullReductionActivities = new ArrayList<Map<String, Object>>();
+                    fullReductionActivitiesMap.put(tenantId + "_" + branchId, fullReductionActivities);
+                }
+                fullReductionActivities.add(fullReductionActivity);
+            }
+            for (Map.Entry<String, List<Map<String, Object>>> entry : fullReductionActivitiesMap.entrySet()) {
+                CacheUtils.hset(Constants.KEY_FULL_REDUCTION_ACTIVITIES, entry.getKey(), GsonUtils.toJson(entry.getValue()));
             }
         }
 
+        DietOrderUtils.findFullReductionActivityBean(NumberUtils.createBigDecimal("150"), "1", "1");
         return new ApiRest(allBuyGiveActivities, "查询成功！");
     }
 

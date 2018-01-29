@@ -10,13 +10,10 @@ import build.dream.catering.utils.DietOrderUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
-import build.dream.common.utils.CacheUtils;
-import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.SerialNumberGenerator;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -397,16 +394,13 @@ public class DietOrderService {
                 }
                 dietOrderTotalAmount = dietOrderTotalAmount.add(totalAmount);
 
-                String buyGiveActivityJson = CacheUtils.hget(Constants.KEY_BUY_GIVE_ACTIVITIES, tenantId + "_" + branchId + "_" + goods.getId() + "_" + goodsSpecification.getId());
-                if (StringUtils.isNotBlank(buyGiveActivityJson)) {
-                    BuyGiveActivityBean buyGiveActivityBean = GsonUtils.fromJson(buyGiveActivityJson, BuyGiveActivityBean.class);
-                    if (detailInfo.getQuantity() >= buyGiveActivityBean.getBuyQuantity()) {
-                        DietOrderDetail giveDietOrderDetail = DietOrderUtils.constructDietOrderDetail(tenantId, tenantCode, branchId, dietOrderId, null, buyGiveActivityBean.getGiveGoodsId(), buyGiveActivityBean.getGiveGoodsName(), buyGiveActivityBean.getGiveGoodsSpecificationId(), buyGiveActivityBean.getGiveGoodsSpecificationName(), BigDecimal.ZERO, BigDecimal.ZERO, buyGiveActivityBean.getGiveQuantity(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, userId, "保存订单详情信息！");
-                        giveDietOrderDetails.add(giveDietOrderDetail);
-                        if (!dietOrderActivityMap.containsKey(buyGiveActivityBean.getActivityId())) {
-                            DietOrderActivity dietOrderActivity = DietOrderUtils.constructDietOrderActivity(tenantId, tenantCode, branchId, dietOrderId, buyGiveActivityBean.getActivityId(), buyGiveActivityBean.getActivityName(), buyGiveActivityBean.getActivityType(), BigDecimal.ZERO, userId, "保存订单活动信息！");
-                            dietOrderActivityMap.put(buyGiveActivityBean.getActivityId(), dietOrderActivity);
-                        }
+                BuyGiveActivityBean buyGiveActivityBean = DietOrderUtils.findBuyGiveActivityBean(tenantId, branchId, goods.getId(), goodsSpecification.getId(), detailInfo.getQuantity());
+                if (buyGiveActivityBean != null) {
+                    DietOrderDetail giveDietOrderDetail = DietOrderUtils.constructDietOrderDetail(tenantId, tenantCode, branchId, dietOrderId, null, buyGiveActivityBean.getGiveGoodsId(), buyGiveActivityBean.getGiveGoodsName(), buyGiveActivityBean.getGiveGoodsSpecificationId(), buyGiveActivityBean.getGiveGoodsSpecificationName(), BigDecimal.ZERO, BigDecimal.ZERO, buyGiveActivityBean.getGiveQuantity(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, userId, "保存订单详情信息！");
+                    giveDietOrderDetails.add(giveDietOrderDetail);
+                    if (!dietOrderActivityMap.containsKey(buyGiveActivityBean.getActivityId())) {
+                        DietOrderActivity dietOrderActivity = DietOrderUtils.constructDietOrderActivity(tenantId, tenantCode, branchId, dietOrderId, buyGiveActivityBean.getActivityId(), buyGiveActivityBean.getActivityName(), buyGiveActivityBean.getActivityType(), BigDecimal.ZERO, userId, "保存订单活动信息！");
+                        dietOrderActivityMap.put(buyGiveActivityBean.getActivityId(), dietOrderActivity);
                     }
                 }
             }
@@ -424,9 +418,8 @@ public class DietOrderService {
 
         BigDecimal dietOrderDiscountAmount = BigDecimal.ZERO;
         // 处理整单优惠活动
-        String fullReductionActivityJson = CacheUtils.hget(Constants.KEY_FULL_REDUCTION_ACTIVITIES, tenantId + "_" + branchId);
-        if (StringUtils.isNotBlank(fullReductionActivityJson)) {
-            FullReductionActivityBean fullReductionActivityBean = GsonUtils.fromJson(fullReductionActivityJson, FullReductionActivityBean.class);
+        FullReductionActivityBean fullReductionActivityBean = DietOrderUtils.findFullReductionActivityBean(dietOrderTotalAmount, tenantId.toString(), branchId.toString());
+        if (fullReductionActivityBean != null) {
             Integer discountType = fullReductionActivityBean.getDiscountType();
             if (discountType == 1) {
                 dietOrderDiscountAmount = fullReductionActivityBean.getDiscountAmount();
