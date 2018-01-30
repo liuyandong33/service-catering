@@ -2,11 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.catering.mappers.BuyGiveActivityMapper">
     <insert id="insert" parameterType="build.dream.common.erp.catering.domains.BuyGiveActivity" useGeneratedKeys="true" keyProperty="id">
-        ${@build.dream.common.utils.BeanUtils@generateInsertSql("build.dream.common.erp.catering.domains.BuyGiveActivity")}
+        ${@build.dream.common.utils.DatabaseUtils@generateInsertSql("build.dream.common.erp.catering.domains.BuyGiveActivity")}
     </insert>
 
     <insert id="insertAll" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
-        <bind name="sql" value="@build.dream.common.utils.BeanUtils@generateInsertAllSql('build.dream.common.erp.catering.domains.BuyGiveActivity')"></bind>
+        <bind name="sql" value="@build.dream.common.utils.DatabaseUtils@generateInsertAllSql('build.dream.common.erp.catering.domains.BuyGiveActivity')"></bind>
         ${sql[0]}
         <foreach collection="list" index="index" item="item" separator=",">
             ${sql[1]}

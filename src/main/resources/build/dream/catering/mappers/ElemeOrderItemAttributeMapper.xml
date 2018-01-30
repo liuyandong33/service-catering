@@ -2,11 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.catering.mappers.ElemeOrderItemAttributeMapper">
     <insert id="insert" parameterType="build.dream.common.erp.catering.domains.ElemeOrderItemAttribute" useGeneratedKeys="true" keyProperty="id">
-        ${@build.dream.common.utils.BeanUtils@generateInsertSql("build.dream.common.erp.catering.domains.ElemeOrderItemAttribute")}
+        ${@build.dream.common.utils.DatabaseUtils@generateInsertSql("build.dream.common.erp.catering.domains.ElemeOrderItemAttribute")}
     </insert>
 
     <update id="update" parameterType="build.dream.common.erp.catering.domains.ElemeOrderItemAttribute">
-        ${@build.dream.common.utils.BeanUtils@generateUpdateSql("build.dream.common.erp.catering.domains.ElemeOrderItemAttribute")}
+        ${@build.dream.common.utils.DatabaseUtils@generateUpdateSql("build.dream.common.erp.catering.domains.ElemeOrderItemAttribute")}
     </update>
     
     <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.ElemeOrderItemAttribute">

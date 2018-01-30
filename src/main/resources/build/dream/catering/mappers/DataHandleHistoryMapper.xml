@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.catering.mappers.DataHandleHistoryMapper">
     <insert id="insert" parameterType="build.dream.common.erp.catering.domains.DataHandleHistory" useGeneratedKeys="true" keyProperty="id">
-        ${@build.dream.common.utils.BeanUtils@generateInsertSql("build.dream.common.erp.catering.domains.DataHandleHistory")}
+        ${@build.dream.common.utils.DatabaseUtils@generateInsertSql("build.dream.common.erp.catering.domains.DataHandleHistory")}
     </insert>
 
     <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.DataHandleHistory">
