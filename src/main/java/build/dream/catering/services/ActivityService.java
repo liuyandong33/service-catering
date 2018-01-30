@@ -332,9 +332,7 @@ public class ActivityService {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DEFAULT_DATE_PATTERN);
         Date startTime = simpleDateFormat.parse(saveSpecialGoodsActivityModel.getStartTime() + " 00:00:00");
         Date endTime = simpleDateFormat.parse(saveSpecialGoodsActivityModel.getEndTime() + " 23:59:59");
-
-        Activity activity = ActivityUtils.constructActivity(tenantId, tenantCode, branchId, saveSpecialGoodsActivityModel.getName(), 1, startTime, endTime, userId, "保存活动信息！");
-        activityMapper.insert(activity);
+        Validate.isTrue(endTime.after(startTime), "活动结束时间必须大于开始时间！");
 
         List<SaveSpecialGoodsActivityModel.SpecialGoodsActivityInfo> specialGoodsActivityInfos = saveSpecialGoodsActivityModel.getSpecialGoodsActivityInfos();
         List<BigInteger> goodsIds = new ArrayList<BigInteger>();
@@ -351,6 +349,25 @@ public class ActivityService {
         goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
         List<Goods> goodses = goodsMapper.findAll(goodsSearchModel);
 
+        // 封装商品id与商品之间的map
+        Map<BigInteger, Goods> goodsMap = new HashMap<BigInteger, Goods>();
+        for (Goods goods : goodses) {
+            goodsMap.put(goods.getId(), goods);
+        }
+
+        SearchModel canNotOperateReasonSearchModel = new SearchModel();
+        canNotOperateReasonSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        canNotOperateReasonSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        canNotOperateReasonSearchModel.addSearchCondition("table_id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
+        canNotOperateReasonSearchModel.addSearchCondition("operate_type", Constants.SQL_OPERATION_SYMBOL_EQUALS, 4);
+        CanNotOperateReason persistenceCanNotOperateReason = canNotOperateReasonMapper.find(canNotOperateReasonSearchModel);
+        if (persistenceCanNotOperateReason != null) {
+            Goods goods = goodsMap.get(persistenceCanNotOperateReason.getTableId());
+            Validate.notNull(goods, "商品不存在！");
+
+            throw new RuntimeException(String.format(persistenceCanNotOperateReason.getReason(), goods.getName()));
+        }
+
         // 查询出涉及的所有商品规格
         SearchModel goodsSpecificationSearchModel = new SearchModel(true);
         goodsSpecificationSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsSpecificationIds);
@@ -358,17 +375,14 @@ public class ActivityService {
         goodsSpecificationSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
         List<GoodsSpecification> goodsSpecifications = goodsSpecificationMapper.findAll(goodsSpecificationSearchModel);
 
-        // 封装商品id与商品之间的map
-        Map<BigInteger, Goods> goodsMap = new HashMap<BigInteger, Goods>();
-        for (Goods goods : goodses) {
-            goodsMap.put(goods.getId(), goods);
-        }
-
         // 封装商品规格id与商品规格之间的map
         Map<BigInteger, GoodsSpecification> goodsSpecificationMap = new HashMap<BigInteger, GoodsSpecification>();
         for (GoodsSpecification goodsSpecification : goodsSpecifications) {
             goodsSpecificationMap.put(goodsSpecification.getId(), goodsSpecification);
         }
+
+        Activity activity = ActivityUtils.constructActivity(tenantId, tenantCode, branchId, saveSpecialGoodsActivityModel.getName(), 1, startTime, endTime, userId, "保存活动信息！");
+        activityMapper.insert(activity);
 
         List<SpecialGoodsActivity> specialGoodsActivities = new ArrayList<SpecialGoodsActivity>();
         List<CanNotOperateReason> canNotOperateReasons = new ArrayList<CanNotOperateReason>();
@@ -387,6 +401,7 @@ public class ActivityService {
             specialGoodsActivity.setGoodsId(goods.getId());
             specialGoodsActivity.setGoodsSpecificationId(goodsSpecification.getId());
             int discountType = specialGoodsActivityInfo.getDiscountType();
+            specialGoodsActivity.setDiscountType(discountType);
             if (discountType == 1) {
                 specialGoodsActivity.setSpecialPrice(specialGoodsActivityInfo.getSpecialPrice());
             } else if (discountType == 2) {
@@ -400,6 +415,10 @@ public class ActivityService {
             String reason = "该商品已参与促销活动【" + activity.getName() + "】，活动期间不可%s！如需更改，请先取消活动！";
             CanNotOperateReason canNotOperateReason = CanNotOperateReasonUtils.constructCanNotOperateReason(tenantId, tenantCode, branchId, goods.getId(), "goods", activity.getId(), "activity", 3, reason);
             canNotOperateReasons.add(canNotOperateReason);
+
+            String usedOtherActivityReason = "商品【%s】已参与促销活动【" + activity.getName() + "】，不可参与其他促销活动！";
+            CanNotOperateReason canNotUsedOtherActivityReason = CanNotOperateReasonUtils.constructCanNotOperateReason(tenantId, tenantCode, branchId, goods.getId(), "goods", activity.getId(), "activity", 4, usedOtherActivityReason);
+            canNotOperateReasons.add(canNotUsedOtherActivityReason);
         }
 
         specialGoodsActivityMapper.insertAll(specialGoodsActivities);
