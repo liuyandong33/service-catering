@@ -42,7 +42,7 @@ public class GoodsService extends BasicService {
     @Autowired
     private UniversalMapper universalMapper;
 
-    private static final String SELECT_GOODS_TABLE_COLUMN_NAMES = StringUtils.join(new String[]{"goods.id", "goods.name", "goods.tenant_id", "goods.tenant_code", "goods.branch_id", "goods.goods_type", "goods.category_id"}, ", ");
+    private static final String SELECT_GOODS_TABLE_COLUMN_NAMES = StringUtils.join(new String[]{"goods.id", "goods.name", "goods.tenant_id", "goods.tenant_code", "goods.branch_id", "goods.type", "goods.category_id"}, ", ");
 
     @Transactional(readOnly = true)
     public ApiRest listGoodses(ListGoodsesModel listGoodsesModel) {
@@ -124,7 +124,7 @@ public class GoodsService extends BasicService {
             goodsFlavorGroupInfo.put("name", goodsFlavorGroup.getName());
 
             List<Map<String, Object>> goodsFlavorInfos = new ArrayList<Map<String, Object>>();
-            List<GoodsFlavor> goodsFlavors = goodsFlavorMap.get(goodsFlavorGroup.getGoodsId());
+            List<GoodsFlavor> goodsFlavors = goodsFlavorMap.get(goodsFlavorGroup.getId());
             for (GoodsFlavor goodsFlavor : goodsFlavors) {
                 Map<String, Object> goodsFlavorInfo = new HashMap<String, Object>();
                 goodsFlavorInfo.put("id", goodsFlavor.getId());

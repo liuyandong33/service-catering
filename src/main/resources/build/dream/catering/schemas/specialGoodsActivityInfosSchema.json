@@ -2,33 +2,60 @@
     "type": "array",
     "items": {
         "type": "object",
-        "properties": {
-            "goodsId": {
-                "type": "integer"
+        "oneOf": [
+            {
+                "$ref": "#/definitions/specialPriceSchema"
             },
-            "goodsSpecificationId": {
-                "type": "integer"
-            },
-            "discountType": {
-                "enum": [
-                    1,
-                    2
-                ]
-            },
-            "specialPrice": {
-                "type": "integer"
-            },
-            "discountRate": {
-                "type": "integer"
+            {
+                "$ref": "#/definitions/discountRateSchema"
             }
-        },
-        "required": [
-            "goodsId",
-            "goodsSpecificationId",
-            "discountType",
-            "specialPrice",
-            "discountRate"
         ]
     },
-    "minItems": 1
+    "minItems": 1,
+    "definitions": {
+        "specialPriceSchema": {
+            "properties": {
+                "goodsId": {
+                    "type": "integer"
+                },
+                "goodsSpecificationId": {
+                    "type": "integer"
+                },
+                "discountType": {
+                    "enum": [1]
+                },
+                "specialPrice": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "goodsId",
+                "goodsSpecificationId",
+                "discountType",
+                "specialPrice"
+            ]
+        },
+        "discountRateSchema": {
+            "properties": {
+                "goodsId": {
+                    "type": "integer"
+                },
+                "goodsSpecificationId": {
+                    "type": "integer"
+                },
+                "discountType": {
+                    "enum": [2]
+                },
+                "discountRate": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "goodsId",
+                "goodsSpecificationId",
+                "discountType",
+                "discountRate"
+            ]
+        }
+    }
 }
