@@ -196,9 +196,6 @@ public class ActivityService {
         Date endTime = simpleDateFormat.parse(saveBuyGiveActivityModel.getEndTime() + " 23:59:59");
         Validate.isTrue(endTime.after(startTime), "活动结束时间必须大于开始时间！");
 
-        Activity activity = ActivityUtils.constructActivity(tenantId, tenantCode, branchId, saveBuyGiveActivityModel.getName(), 1, startTime, endTime, userId, "保存活动信息！");
-        activityMapper.insert(activity);
-
         List<SaveBuyGiveActivityModel.BuyGiveActivityInfo> buyGiveActivityInfos = saveBuyGiveActivityModel.getBuyGiveActivityInfos();
 
         List<BigInteger> goodsIds = new ArrayList<BigInteger>();
@@ -217,6 +214,25 @@ public class ActivityService {
         goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
         List<Goods> goodses = goodsMapper.findAll(goodsSearchModel);
 
+        // 封装商品id与商品之间的map
+        Map<BigInteger, Goods> goodsMap = new HashMap<BigInteger, Goods>();
+        for (Goods goods : goodses) {
+            goodsMap.put(goods.getId(), goods);
+        }
+
+        SearchModel canNotOperateReasonSearchModel = new SearchModel();
+        canNotOperateReasonSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        canNotOperateReasonSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        canNotOperateReasonSearchModel.addSearchCondition("table_id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
+        canNotOperateReasonSearchModel.addSearchCondition("operate_type", Constants.SQL_OPERATION_SYMBOL_EQUALS, 4);
+        CanNotOperateReason persistenceCanNotOperateReason = canNotOperateReasonMapper.find(canNotOperateReasonSearchModel);
+        if (persistenceCanNotOperateReason != null) {
+            Goods goods = goodsMap.get(persistenceCanNotOperateReason.getTableId());
+            Validate.notNull(goods, "商品不存在！");
+
+            throw new RuntimeException(String.format(persistenceCanNotOperateReason.getReason(), goods.getName()));
+        }
+
         // 查询出涉及的所有商品规格
         SearchModel goodsSpecificationSearchModel = new SearchModel(true);
         goodsSpecificationSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsSpecificationIds);
@@ -224,17 +240,14 @@ public class ActivityService {
         goodsSpecificationSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
         List<GoodsSpecification> goodsSpecifications = goodsSpecificationMapper.findAll(goodsSpecificationSearchModel);
 
-        // 封装商品id与商品之间的map
-        Map<BigInteger, Goods> goodsMap = new HashMap<BigInteger, Goods>();
-        for (Goods goods : goodses) {
-            goodsMap.put(goods.getId(), goods);
-        }
-
         // 封装商品规格id与商品规格之间的map
         Map<BigInteger, GoodsSpecification> goodsSpecificationMap = new HashMap<BigInteger, GoodsSpecification>();
         for (GoodsSpecification goodsSpecification : goodsSpecifications) {
             goodsSpecificationMap.put(goodsSpecification.getId(), goodsSpecification);
         }
+
+        Activity activity = ActivityUtils.constructActivity(tenantId, tenantCode, branchId, saveBuyGiveActivityModel.getName(), 1, startTime, endTime, userId, "保存活动信息！");
+        activityMapper.insert(activity);
 
         List<BuyGiveActivity> buyGiveActivities = new ArrayList<BuyGiveActivity>();
         List<CanNotOperateReason> canNotOperateReasons = new ArrayList<CanNotOperateReason>();
@@ -308,7 +321,7 @@ public class ActivityService {
         findActivityParameters.put("endTime", endTime);
         Map<String, Object> activityMap = universalMapper.executeUniqueResultQuery(findActivityParameters);
         if (MapUtils.isNotEmpty(activityMap)) {
-            throw new RuntimeException("活动日期与【" + activityMap.get("name") + "】在时间上冲突！");
+            throw new RuntimeException("活动日期与促销活动【" + activityMap.get("name") + "】在时间上冲突！");
         }
 
 
@@ -324,6 +337,13 @@ public class ActivityService {
         return apiRest;
     }
 
+    /**
+     * 保存特价商品活动
+     *
+     * @param saveSpecialGoodsActivityModel
+     * @return
+     * @throws ParseException
+     */
     public ApiRest saveSpecialGoodsActivity(SaveSpecialGoodsActivityModel saveSpecialGoodsActivityModel) throws ParseException {
         BigInteger tenantId = saveSpecialGoodsActivityModel.getTenantId();
         String tenantCode = saveSpecialGoodsActivityModel.getTenantCode();
@@ -333,6 +353,26 @@ public class ActivityService {
         Date startTime = simpleDateFormat.parse(saveSpecialGoodsActivityModel.getStartTime() + " 00:00:00");
         Date endTime = simpleDateFormat.parse(saveSpecialGoodsActivityModel.getEndTime() + " 23:59:59");
         Validate.isTrue(endTime.after(startTime), "活动结束时间必须大于开始时间！");
+
+        String sql = "SELECT * " +
+                "FROM activity " +
+                "WHERE tenant_id = #{tenantId} " +
+                "AND branch_id = #{branchId} " +
+                "AND deleted = 0 " +
+                "AND type = 3 " +
+                "AND status IN (1, 2) " +
+                "AND ((start_time <= #{startTime} AND end_time >= #{endTime}) OR (start_time >= #{startTime} AND start_time <= #{endTime}) OR (end_time >= #{startTime} AND end_time <= #{endTime})) " +
+                "LIMIT 0, 1";
+        Map<String, Object> findActivityParameters = new HashMap<String, Object>();
+        findActivityParameters.put("sql", sql);
+        findActivityParameters.put("tenantId", tenantId);
+        findActivityParameters.put("branchId", branchId);
+        findActivityParameters.put("startTime", startTime);
+        findActivityParameters.put("endTime", endTime);
+        Map<String, Object> activityMap = universalMapper.executeUniqueResultQuery(findActivityParameters);
+        if (MapUtils.isNotEmpty(activityMap)) {
+            throw new RuntimeException("活动日期与促销活动【" + activityMap.get("name") + "】在时间上冲突！");
+        }
 
         List<SaveSpecialGoodsActivityModel.SpecialGoodsActivityInfo> specialGoodsActivityInfos = saveSpecialGoodsActivityModel.getSpecialGoodsActivityInfos();
         List<BigInteger> goodsIds = new ArrayList<BigInteger>();
@@ -381,7 +421,7 @@ public class ActivityService {
             goodsSpecificationMap.put(goodsSpecification.getId(), goodsSpecification);
         }
 
-        Activity activity = ActivityUtils.constructActivity(tenantId, tenantCode, branchId, saveSpecialGoodsActivityModel.getName(), 1, startTime, endTime, userId, "保存活动信息！");
+        Activity activity = ActivityUtils.constructActivity(tenantId, tenantCode, branchId, saveSpecialGoodsActivityModel.getName(), 3, startTime, endTime, userId, "保存活动信息！");
         activityMapper.insert(activity);
 
         List<SpecialGoodsActivity> specialGoodsActivities = new ArrayList<SpecialGoodsActivity>();
