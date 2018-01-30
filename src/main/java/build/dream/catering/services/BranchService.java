@@ -43,6 +43,16 @@ public class BranchService {
         branch.setCreateUserId(BigInteger.ZERO);
         branch.setLastUpdateUserId(BigInteger.ZERO);
         branch.setTenantId(initializeBranchModel.getTenantId());
+        branch.setTenantCode(initializeBranchModel.getTenantCode());
+        branch.setProvinceCode(initializeBranchModel.getProvinceCode());
+        branch.setProvinceName(initializeBranchModel.getProvinceName());
+        branch.setCityCode(initializeBranchModel.getCityCode());
+        branch.setCityName(initializeBranchModel.getCityName());
+        branch.setDistrictCode(initializeBranchModel.getDistrictCode());
+        branch.setDistrictName(initializeBranchModel.getDistrictName());
+        branch.setAddress(initializeBranchModel.getAddress());
+        branch.setLongitude(initializeBranchModel.getLongitude());
+        branch.setLatitude(initializeBranchModel.getLatitude());
         branchMapper.insert(branch);
         branchMapper.insertMergeUserBranch(initializeBranchModel.getUserId(), initializeBranchModel.getTenantId(), branch.getId());
 
