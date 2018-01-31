@@ -92,7 +92,6 @@ public class VipService {
             String phoneNumber = saveVipInfoModel.getPhoneNumber();
             SearchModel searchModel = new SearchModel(true);
             searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-            searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
             searchModel.addSearchCondition("phone_number", Constants.SQL_OPERATION_SYMBOL_EQUALS, phoneNumber);
             long count = vipMapper.count(searchModel);
             Validate.isTrue(count == 0, "手机号已存在！");
