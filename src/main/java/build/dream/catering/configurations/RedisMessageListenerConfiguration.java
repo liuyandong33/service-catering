@@ -6,15 +6,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 
-import java.io.IOException;
-
 @Configuration
 public class RedisMessageListenerConfiguration {
     @Autowired
     private JedisConnectionFactory jedisConnectionFactory;
 
     @Bean(destroyMethod = "destroy")
-    public RedisMessageListenerContainer redisMessageListenerContainer() throws IOException {
+    public RedisMessageListenerContainer redisMessageListenerContainer() {
         RedisMessageListenerContainer redisMessageListenerContainer = new RedisMessageListenerContainer();
         redisMessageListenerContainer.setConnectionFactory(jedisConnectionFactory);
         return redisMessageListenerContainer;
