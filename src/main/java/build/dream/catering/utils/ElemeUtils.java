@@ -87,24 +87,13 @@ public class ElemeUtils {
         return DigestUtils.md5Hex(stringBuilder.toString()).toUpperCase().equals(signature);
     }
 
-    public static void addElemeMessage(String elemeMessage, String uuid, Integer count) throws IOException {
-        Map<String, String> messageMap = new HashMap<String, String>();
-        messageMap.put("callbackRequestBody", elemeMessage);
-        messageMap.put("uuid", uuid);
-        messageMap.put("count", count.toString());
-
-        String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
-        QueueUtils.rpush(Constants.KEY_ELEME_CALLBACK_MESSAGE + "_" + partitionCode, GsonUtils.toJson(messageMap));
+    public static void addElemeMessage(String elemeMessage) {
+        QueueUtils.rpush(Constants.KEY_ELEME_CALLBACK_MESSAGE, elemeMessage);
     }
 
-    public static Map<String, String> takeElemeMessage() throws IOException {
-        String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
-        String message = QueueUtils.blpop(Constants.KEY_ELEME_CALLBACK_MESSAGE + "_" + partitionCode, 1, TimeUnit.HOURS);
-        Map<String, String> messageMap = JacksonUtils.readValue(message, Map.class);
-        if (!messageMap.containsKey("count")) {
-            messageMap.put("count", "10");
-        }
-        return messageMap;
+    public static String takeElemeMessage() {
+        String elemeMessage = QueueUtils.blpop(Constants.KEY_ELEME_CALLBACK_MESSAGE, 1, TimeUnit.HOURS);
+        return elemeMessage;
     }
 
     public static void startElemeConsumerThread() {

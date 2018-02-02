@@ -77,17 +77,16 @@ public class MeiTuanService {
     /**
      * 处理订单生效回调
      *
-     * @param parameters
+     * @param callbackParametersJsonObject
      * @return
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleOrderEffectiveCallback(Map<String, String> parameters) throws IOException {
-        String developerId = parameters.get("developerId");
-        String ePoiId = parameters.get("ePoiId");
-        String sign = parameters.get("sign");
-        String orderJson = parameters.get("order");
-        JSONObject orderJsonObject = JSONObject.fromObject(orderJson);
+    public ApiRest handleOrderEffectiveCallback(JSONObject callbackParametersJsonObject) throws IOException {
+        String developerId = callbackParametersJsonObject.getString("developerId");
+        String ePoiId = callbackParametersJsonObject.getString("ePoiId");
+        String sign = callbackParametersJsonObject.getString("sign");
+        JSONObject orderJsonObject = callbackParametersJsonObject.getJSONObject("order");
         JSONArray detailJsonArray = orderJsonObject.optJSONArray("detail");
         JSONArray extrasJsonArray = orderJsonObject.optJSONArray("extras");
         JSONObject poiReceiveDetailJsonObject = orderJsonObject.optJSONObject("poiReceiveDetail");
@@ -247,17 +246,16 @@ public class MeiTuanService {
     /**
      * 处理订单取消回调
      *
-     * @param parameters
+     * @param callbackParametersJsonObject
      * @return
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleOrderCancelCallback(Map<String, String> parameters) throws IOException {
-        String developerId = parameters.get("developerId");
-        String ePoiId = parameters.get("ePoiId");
-        String sign = parameters.get("sign");
-        String orderCancelJson = parameters.get("orderCancel");
-        JSONObject orderCancelJsonObject = JSONObject.fromObject(orderCancelJson);
+    public ApiRest handleOrderCancelCallback(JSONObject callbackParametersJsonObject) throws IOException {
+        String developerId = callbackParametersJsonObject.getString("developerId");
+        String ePoiId = callbackParametersJsonObject.getString("ePoiId");
+        String sign = callbackParametersJsonObject.getString("sign");
+        JSONObject orderCancelJsonObject = callbackParametersJsonObject.getJSONObject("orderCancel");
         BigInteger orderId = BigInteger.valueOf(orderCancelJsonObject.getLong("orderId"));
 
         MeiTuanOrder meiTuanOrder = findMeiTuanOrder(ePoiId, orderId);
@@ -291,17 +289,16 @@ public class MeiTuanService {
     /**
      * 处理订单退款回调
      *
-     * @param parameters
+     * @param callbackParametersJsonObject
      * @return
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleOrderRefundCallback(Map<String, String> parameters) throws IOException {
-        String developerId = parameters.get("developerId");
-        String ePoiId = parameters.get("ePoiId");
-        String sign = parameters.get("sign");
-        String orderRefundJson = parameters.get("orderCancel");
-        JSONObject orderRefundJsonObject = JSONObject.fromObject(orderRefundJson);
+    public ApiRest handleOrderRefundCallback(JSONObject callbackParametersJsonObject) throws IOException {
+        String developerId = callbackParametersJsonObject.getString("developerId");
+        String ePoiId = callbackParametersJsonObject.getString("ePoiId");
+        String sign = callbackParametersJsonObject.getString("sign");
+        JSONObject orderRefundJsonObject = callbackParametersJsonObject.getJSONObject("orderCancel");
         BigInteger orderId = BigInteger.valueOf(orderRefundJsonObject.getLong("orderId"));
 
         MeiTuanOrder meiTuanOrder = findMeiTuanOrder(ePoiId, orderId);
