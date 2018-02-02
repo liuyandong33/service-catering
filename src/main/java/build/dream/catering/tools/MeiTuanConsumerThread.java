@@ -1,5 +1,6 @@
 package build.dream.catering.tools;
 
+import build.dream.catering.constants.Constants;
 import build.dream.catering.services.MeiTuanService;
 import build.dream.catering.utils.MeiTuanUtils;
 import build.dream.common.utils.ApplicationHandler;
@@ -16,7 +17,6 @@ public class MeiTuanConsumerThread implements Runnable {
     public void run() {
         while (true) {
             String meiTuanMessage = null;
-            Integer count = null;
             try {
                 meiTuanMessage = MeiTuanUtils.takeMeiTuanMessage();
                 JSONObject meiTuanMessageJsonObject = JSONObject.fromObject(meiTuanMessage);
@@ -24,11 +24,11 @@ public class MeiTuanConsumerThread implements Runnable {
                 JSONObject callbackParametersJsonObject = meiTuanMessageJsonObject.getJSONObject("callbackParameters");
                 Integer type = callbackParametersJsonObject.getInt("type");
 
-                if (type == 1) {
+                if (type == Constants.MEI_TUAN_CALLBACK_TYPE_ORDER_EFFECTIVE) {
                     meiTuanService.handleOrderEffectiveCallback(callbackParametersJsonObject);
-                } else if (type == 2) {
+                } else if (type == Constants.MEI_TUAN_CALLBACK_TYPE_ORDER_CANCEL) {
                     meiTuanService.handleOrderCancelCallback(callbackParametersJsonObject);
-                } else if (type == 3) {
+                } else if (type == Constants.MEI_TUAN_CALLBACK_TYPE_ORDER_REFUND) {
                     meiTuanService.handleOrderRefundCallback(callbackParametersJsonObject);
                 }
             } catch (Exception e) {
