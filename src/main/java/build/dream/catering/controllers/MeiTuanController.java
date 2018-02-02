@@ -1,15 +1,15 @@
 package build.dream.catering.controllers;
 
+import build.dream.catering.constants.Constants;
+import build.dream.catering.models.meituan.GenerateBindingStoreLinkModel;
+import build.dream.catering.models.meituan.PullMeiTuanOrderModel;
+import build.dream.catering.services.MeiTuanService;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
-import build.dream.catering.constants.Constants;
-import build.dream.catering.models.meituan.PullMeiTuanOrderModel;
-import build.dream.catering.services.MeiTuanService;
 import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,22 +23,20 @@ public class MeiTuanController extends BasicController {
     @Autowired
     private MeiTuanService meiTuanService;
 
+    /**
+     * 生成门店绑定链接
+     *
+     * @return
+     */
     @RequestMapping(value = "/generateBindingStoreLink")
     @ResponseBody
     public String generateBindingStoreLink() {
         ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
-            String tenantId = requestParameters.get("tenantId");
-            Validate.notNull(tenantId, ApplicationHandler.obtainParameterErrorMessage("tenantId"));
-
-            String branchId = requestParameters.get("branchId");
-            Validate.notNull(branchId, ApplicationHandler.obtainParameterErrorMessage("branchId"));
-
-            String businessId = requestParameters.get("businessId");
-            Validate.notNull(businessId, ApplicationHandler.obtainParameterErrorMessage("businessId"));
-
-            apiRest = meiTuanService.generateBindingStoreLink(NumberUtils.createBigInteger(tenantId), NumberUtils.createBigInteger(branchId), businessId);
+            GenerateBindingStoreLinkModel generateBindingStoreLinkModel = ApplicationHandler.instantiateObject(GenerateBindingStoreLinkModel.class, requestParameters);
+            generateBindingStoreLinkModel.validateAndThrow();
+            apiRest = meiTuanService.generateBindingStoreLink(generateBindingStoreLinkModel);
         } catch (Exception e) {
             LogUtils.error("生成门店绑定链接失败", controllerSimpleName, "createCategoryWithChildren", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -46,6 +44,22 @@ public class MeiTuanController extends BasicController {
         return GsonUtils.toJson(apiRest);
     }
 
+    /**
+     * 门店绑定回调
+     *
+     * @return
+     */
+    @RequestMapping(value = "/storeBindingCallback")
+    @ResponseBody
+    public String storeBindingCallback() {
+        return null;
+    }
+
+    /**
+     * 订单生效回调
+     *
+     * @return
+     */
     @RequestMapping(value = "/orderEffectiveCallback")
     @ResponseBody
     public String orderEffectiveCallback() {
@@ -66,6 +80,11 @@ public class MeiTuanController extends BasicController {
         return returnValue;
     }
 
+    /**
+     * 订单取消回调
+     *
+     * @return
+     */
     @RequestMapping(value = "/orderCancelCallback")
     @ResponseBody
     public String orderCancelCallback() {
@@ -86,6 +105,11 @@ public class MeiTuanController extends BasicController {
         return returnValue;
     }
 
+    /**
+     * 订单退款回调
+     *
+     * @return
+     */
     @RequestMapping(value = "/orderRefundCallback")
     @ResponseBody
     public String orderRefundCallback() {
@@ -106,6 +130,11 @@ public class MeiTuanController extends BasicController {
         return returnValue;
     }
 
+    /**
+     * 拉取美团订单
+     *
+     * @return
+     */
     @RequestMapping(value = "/pullMeiTuanOrder")
     @ResponseBody
     public String pullMeiTuanOrder() {
