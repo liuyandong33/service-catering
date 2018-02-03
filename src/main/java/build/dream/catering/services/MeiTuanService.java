@@ -1,5 +1,6 @@
 package build.dream.catering.services;
 
+import build.dream.catering.models.meituan.GenerateBindingStoreLinkModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.*;
@@ -39,8 +40,18 @@ public class MeiTuanService {
     @Autowired
     private MeiTuanOrderCancelMessageMapper meiTuanOrderCancelMessageMapper;
 
+    /**
+     * 生成门店绑定链接
+     *
+     * @param generateBindingStoreLinkModel
+     * @return
+     * @throws IOException
+     */
     @Transactional(readOnly = true)
-    public ApiRest generateBindingStoreLink(BigInteger tenantId, BigInteger branchId, String businessId) throws IOException {
+    public ApiRest generateBindingStoreLink(GenerateBindingStoreLinkModel generateBindingStoreLinkModel) throws IOException {
+        BigInteger tenantId = generateBindingStoreLinkModel.getTenantId();
+        BigInteger branchId = generateBindingStoreLinkModel.getBranchId();
+
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
@@ -50,9 +61,9 @@ public class MeiTuanService {
         String meiTuanDeveloperId = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_DEVELOPER_ID);
         String meiTuanSignKey = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_SIGN_KEY);
         StringBuffer bindingStoreLink = new StringBuffer(meiTuanErpServiceUrl);
-        bindingStoreLink.append(Constants.MEI_TUAN_PATH_STORE_MAP);
+        bindingStoreLink.append(Constants.MEI_TUAN_STORE_MAP_URI);
         bindingStoreLink.append("?developerId=").append(meiTuanDeveloperId);
-        bindingStoreLink.append("&businessId=").append(businessId);
+        bindingStoreLink.append("&businessId=").append(generateBindingStoreLinkModel.getBusinessId());
         bindingStoreLink.append("&ePoiId=").append(tenantId).append("Z").append(branchId);
         bindingStoreLink.append("&signKey=").append(meiTuanSignKey);
         bindingStoreLink.append("&ePoiName=").append(branch.getName());
@@ -63,13 +74,19 @@ public class MeiTuanService {
         return apiRest;
     }
 
+    /**
+     * 处理订单生效回调
+     *
+     * @param callbackParametersJsonObject
+     * @return
+     * @throws IOException
+     */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleOrderEffectiveCallback(Map<String, String> parameters) throws IOException {
-        String developerId = parameters.get("developerId");
-        String ePoiId = parameters.get("ePoiId");
-        String sign = parameters.get("sign");
-        String orderJson = parameters.get("order");
-        JSONObject orderJsonObject = JSONObject.fromObject(orderJson);
+    public ApiRest handleOrderEffectiveCallback(JSONObject callbackParametersJsonObject) throws IOException {
+        String developerId = callbackParametersJsonObject.getString("developerId");
+        String ePoiId = callbackParametersJsonObject.getString("ePoiId");
+        String sign = callbackParametersJsonObject.getString("sign");
+        JSONObject orderJsonObject = callbackParametersJsonObject.getJSONObject("order");
         JSONArray detailJsonArray = orderJsonObject.optJSONArray("detail");
         JSONArray extrasJsonArray = orderJsonObject.optJSONArray("extras");
         JSONObject poiReceiveDetailJsonObject = orderJsonObject.optJSONObject("poiReceiveDetail");
@@ -226,13 +243,19 @@ public class MeiTuanService {
         return apiRest;
     }
 
+    /**
+     * 处理订单取消回调
+     *
+     * @param callbackParametersJsonObject
+     * @return
+     * @throws IOException
+     */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleOrderCancelCallback(Map<String, String> parameters) throws IOException {
-        String developerId = parameters.get("developerId");
-        String ePoiId = parameters.get("ePoiId");
-        String sign = parameters.get("sign");
-        String orderCancelJson = parameters.get("orderCancel");
-        JSONObject orderCancelJsonObject = JSONObject.fromObject(orderCancelJson);
+    public ApiRest handleOrderCancelCallback(JSONObject callbackParametersJsonObject) throws IOException {
+        String developerId = callbackParametersJsonObject.getString("developerId");
+        String ePoiId = callbackParametersJsonObject.getString("ePoiId");
+        String sign = callbackParametersJsonObject.getString("sign");
+        JSONObject orderCancelJsonObject = callbackParametersJsonObject.getJSONObject("orderCancel");
         BigInteger orderId = BigInteger.valueOf(orderCancelJsonObject.getLong("orderId"));
 
         MeiTuanOrder meiTuanOrder = findMeiTuanOrder(ePoiId, orderId);
@@ -263,13 +286,19 @@ public class MeiTuanService {
         return apiRest;
     }
 
+    /**
+     * 处理订单退款回调
+     *
+     * @param callbackParametersJsonObject
+     * @return
+     * @throws IOException
+     */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleOrderRefundCallback(Map<String, String> parameters) throws IOException {
-        String developerId = parameters.get("developerId");
-        String ePoiId = parameters.get("ePoiId");
-        String sign = parameters.get("sign");
-        String orderRefundJson = parameters.get("orderCancel");
-        JSONObject orderRefundJsonObject = JSONObject.fromObject(orderRefundJson);
+    public ApiRest handleOrderRefundCallback(JSONObject callbackParametersJsonObject) throws IOException {
+        String developerId = callbackParametersJsonObject.getString("developerId");
+        String ePoiId = callbackParametersJsonObject.getString("ePoiId");
+        String sign = callbackParametersJsonObject.getString("sign");
+        JSONObject orderRefundJsonObject = callbackParametersJsonObject.getJSONObject("orderCancel");
         BigInteger orderId = BigInteger.valueOf(orderRefundJsonObject.getLong("orderId"));
 
         MeiTuanOrder meiTuanOrder = findMeiTuanOrder(ePoiId, orderId);
@@ -293,6 +322,7 @@ public class MeiTuanService {
 
     /**
      * 查询美团订单
+     *
      * @param ePoiId
      * @param orderId
      * @return
@@ -318,6 +348,7 @@ public class MeiTuanService {
 
     /**
      * 发布饿了么订单消息
+     *
      * @param tenantCode：商户编码
      * @param branchCode：门店编码
      * @param meiTuanOrderId：订单ID
@@ -333,6 +364,12 @@ public class MeiTuanService {
         QueueUtils.convertAndSend(meiTuanMessageChannelTopic, messageJsonObject.toString());
     }
 
+    /**
+     * 拉取美团订单
+     *
+     * @param pullMeiTuanOrderModel
+     * @return
+     */
     @Transactional(readOnly = true)
     public ApiRest pullMeiTuanOrder(PullMeiTuanOrderModel pullMeiTuanOrderModel) {
         SearchModel meiTuanOrderSearchModel = new SearchModel(true);

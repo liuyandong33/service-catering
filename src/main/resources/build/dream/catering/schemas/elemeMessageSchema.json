@@ -1,0 +1,51 @@
+{
+    "type": "object",
+    "properties": {
+        "uuid": {
+            "type": "string"
+        },
+        "callbackRequestBody": {
+            "type": "object",
+            "properties": {
+                "requestId": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "integer"
+                },
+                "appId": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "shopId": {
+                    "type": "integer"
+                },
+                "timestamp": {
+                    "type": "integer"
+                },
+                "signature": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "requestId",
+                "type",
+                "appId",
+                "message",
+                "shopId",
+                "timestamp",
+                "signature",
+                "userId"
+            ]
+        }
+    },
+    "required": [
+        "uuid",
+        "callbackRequestBody"
+    ]
+}

@@ -8,12 +8,10 @@ import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.LogUtils;
 import build.dream.common.utils.ProxyUtils;
 import net.sf.json.JSONObject;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,23 +31,26 @@ public class ElemeConsumerThread implements Runnable {
     public void run() {
         while (true) {
             String elemeMessage = null;
-            String uuid = null;
-            Integer count = null;
-            JSONObject callbackJsonObject = null;
             try {
-                Map<String, String> elemeMessageBody = ElemeUtils.takeElemeMessage();
-                if (MapUtils.isEmpty(elemeMessageBody)) {
+                elemeMessage = ElemeUtils.takeElemeMessage();
+                if (StringUtils.isBlank(elemeMessage)) {
                     continue;
                 }
-                elemeMessage = elemeMessageBody.get("callbackRequestBody");
-                uuid = elemeMessageBody.get("uuid");
-                count = Integer.valueOf(elemeMessageBody.get("count"));
 
-                callbackJsonObject = JSONObject.fromObject(elemeMessage);
+                if (!ApplicationHandler.isJson(elemeMessage)) {
+                    continue;
+                }
 
-                BigInteger shopId = BigInteger.valueOf(callbackJsonObject.getLong("shopId"));
-                String message = callbackJsonObject.getString("message");
-                Integer type = callbackJsonObject.getInt("type");
+                if (!ApplicationHandler.isRightJson(elemeMessage, Constants.ELEME_MESSAGE_SCHEMA_FILE_PATH)) {
+                    continue;
+                }
+
+                JSONObject elemeMessageJsonObject = JSONObject.fromObject(elemeMessage);
+                JSONObject callbackRequestBodyJsonObject = elemeMessageJsonObject.getJSONObject("callbackRequestBody");
+                String uuid = elemeMessageJsonObject.getString("uuid");
+                int type = callbackRequestBodyJsonObject.getInt("type");
+                BigInteger shopId = BigInteger.valueOf(callbackRequestBodyJsonObject.getLong("shopId"));
+                String message = callbackRequestBodyJsonObject.getString("message");
 
                 if (type == 10) {
                     elemeService.saveElemeOrder(shopId, message, type, uuid);
@@ -67,29 +68,20 @@ public class ElemeConsumerThread implements Runnable {
                     elemeService.handleAuthorizationStateChangeMessage(shopId, message, type, uuid);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
                 if (StringUtils.isNotBlank(elemeMessage)) {
-                    count = count - 1;
-                    if (count > 0) {
-                        try {
-                            ElemeUtils.addElemeMessage(elemeMessage, uuid, count);
-                        } catch (IOException e1) {
-                            markHandleFailureMessage(uuid);
-                        }
-                    } else {
-                        markHandleFailureMessage(uuid);
-                    }
+                    ElemeUtils.addElemeMessage(elemeMessage);
                 }
+                LogUtils.error("保存饿了么消息失败", ELEME_CONSUMER_THREAD_SIMPLE_NAME, "run", e);
             }
         }
     }
 
     private void markHandleFailureMessage(String uuid) {
         try {
-            Map<String, String> saveElemeCallbackMessageRequestParameters = new HashMap<String, String>();
-            saveElemeCallbackMessageRequestParameters.put("uuid", uuid);
+            Map<String, String> markHandleFailureMessageRequestParameters = new HashMap<String, String>();
+            markHandleFailureMessageRequestParameters.put("uuid", uuid);
 
-            ApiRest saveElemeCallbackMessageApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "elemeCallbackMessage", "saveElemeCallbackMessage", saveElemeCallbackMessageRequestParameters);
+            ApiRest saveElemeCallbackMessageApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "elemeCallbackMessage", "markHandleFailureMessage", markHandleFailureMessageRequestParameters);
             Validate.isTrue(saveElemeCallbackMessageApiRest.isSuccessful(), saveElemeCallbackMessageApiRest.getError());
         } catch (Exception e) {
             LogUtils.error("标记处理失败消息失败", ELEME_CONSUMER_THREAD_SIMPLE_NAME, "markHandleFailureMessage", e);

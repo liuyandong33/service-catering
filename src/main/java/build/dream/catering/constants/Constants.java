@@ -20,7 +20,7 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String MEI_TUAN_ERP_SERVICE_URL = "mei.tuan.erp.service.url";
     public static final String MEI_TUAN_DEVELOPER_ID = "mei.tuan.developer.id";
     public static final String MEI_TUAN_SIGN_KEY = "mei.tuan.sign.key";
-    public static final String MEI_TUAN_PATH_STORE_MAP = "/storemap";
+    public static final String MEI_TUAN_STORE_MAP_URI = "/storemap";
 
     public static final String KEY_MEI_TUAN_APP_AUTH_TOKENS = "_mei_tuan_app_auth_tokens";
     public static final String MEI_MEI_TUAN_SERVICE_URL = "http://api.open.cater.meituan.com";
@@ -40,6 +40,7 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String FLAVOR_GROUP_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/flavorGroupInfosSchema.json";
     public static final String BUY_GIVE_ACTIVITY_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/buyGiveActivityInfosSchema.json";
     public static final String SPECIAL_GOODS_ACTIVITY_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/specialGoodsActivityInfosSchema.json";
+    public static final String ELEME_MESSAGE_SCHEMA_FILE_PATH = "build/dream/catering/schemas/elemeMessageSchema.json";
 
     public static final String KEY_BUY_GIVE_ACTIVITIES = "_buy_give_activities";
     public static final String KEY_FULL_REDUCTION_ACTIVITIES = "_full_reduction_activities";

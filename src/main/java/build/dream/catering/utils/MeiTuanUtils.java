@@ -1,10 +1,7 @@
 package build.dream.catering.utils;
 
 import build.dream.common.api.ApiRest;
-import build.dream.common.utils.CacheUtils;
-import build.dream.common.utils.ConfigurationUtils;
-import build.dream.common.utils.ProxyUtils;
-import build.dream.common.utils.WebUtils;
+import build.dream.common.utils.*;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.tools.MeiTuanConsumerThread;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -17,6 +14,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class MeiTuanUtils {
     private static String generateSignature(String signKey, Map<String, String> requestParameters) {
@@ -66,17 +64,13 @@ public class MeiTuanUtils {
         requestParameters.put("sign", generateSignature(signKey, requestParameters));
     }
 
-    private static BlockingQueue<List<String>> meiTuanCallbackMessageBlockingQueue = new LinkedBlockingQueue<List<String>>();
-
-    public static void addMeiTuanMessageBlockingQueue(String meiTuanCallbackMessage, Integer count) throws InterruptedException {
-        List<String> meiTuanCallbackMessageBody = new ArrayList<String>();
-        meiTuanCallbackMessageBody.add(meiTuanCallbackMessage);
-        meiTuanCallbackMessageBody.add(count.toString());
-        meiTuanCallbackMessageBlockingQueue.put(meiTuanCallbackMessageBody);
+    public static void addMeiTuanMessage(String meiTuanMessage) {
+        QueueUtils.rpush(Constants.KEY_MEI_TUAN_CALLBACK_MESSAGE, meiTuanMessage);
     }
 
-    public static List<String> takeMeiTuanMessage() throws InterruptedException {
-        return meiTuanCallbackMessageBlockingQueue.take();
+    public static String takeMeiTuanMessage() {
+        String elemeMessage = QueueUtils.blpop(Constants.KEY_MEI_TUAN_CALLBACK_MESSAGE, 1, TimeUnit.HOURS);
+        return elemeMessage;
     }
 
     public static void startMeiTuanConsumerThread() {
