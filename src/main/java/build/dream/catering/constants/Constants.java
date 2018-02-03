@@ -44,4 +44,11 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String KEY_BUY_GIVE_ACTIVITIES = "_buy_give_activities";
     public static final String KEY_FULL_REDUCTION_ACTIVITIES = "_full_reduction_activities";
     public static final String KEY_SPECIAL_GOODS_ACTIVITIES = "_special_goods_activities";
+
+    public static final String ANUBIS_SERVICE_URL = "anubis.service.url";
+    public static final String ANUBIS_APP_ID = "anubis.app.id";
+    public static final String ANUBIS_APP_SECRET = "anubis.app.secret";
+
+    public static final String ANUBIS_GET_ACCESS_TOKEN_URI = "/get_access_token";
+    public static final String ANUBIS_CHAIN_STORE_URI = "/v2/chain_store";
 }
