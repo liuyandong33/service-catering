@@ -163,7 +163,7 @@ public class AnubisController extends BasicController {
     }
 
     /**
-     * 处理蜂鸟系统回调
+     * 处理蜂鸟配送系统回调
      *
      * @return
      */
@@ -173,6 +173,9 @@ public class AnubisController extends BasicController {
         ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
+            String callbackRequestBody = requestParameters.get("callbackRequestBody");
+            ApplicationHandler.notBlank(callbackRequestBody, "callbackRequestBody");
+            apiRest = anubisService.handleAnubisCallback(callbackRequestBody);
         } catch (Exception e) {
             LogUtils.error("处理蜂鸟系统回调失败", controllerSimpleName, "anubisCallback", e, requestParameters);
             apiRest = new ApiRest(e);

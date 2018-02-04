@@ -1,21 +1,16 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.mappers.BranchMapper;
-import build.dream.catering.mappers.DietOrderDetailMapper;
-import build.dream.catering.mappers.DietOrderGroupMapper;
-import build.dream.catering.mappers.DietOrderMapper;
+import build.dream.catering.mappers.*;
 import build.dream.catering.models.anubis.*;
 import build.dream.catering.utils.AnubisUtils;
 import build.dream.common.api.ApiRest;
-import build.dream.common.erp.catering.domains.Branch;
-import build.dream.common.erp.catering.domains.DietOrder;
-import build.dream.common.erp.catering.domains.DietOrderDetail;
-import build.dream.common.erp.catering.domains.DietOrderGroup;
+import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.ConfigurationUtils;
 import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.SystemPartitionUtils;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +18,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.*;
 
 @Service
 public class AnubisService {
@@ -39,6 +34,8 @@ public class AnubisService {
     private DietOrderGroupMapper dietOrderGroupMapper;
     @Autowired
     private DietOrderDetailMapper dietOrderDetailMapper;
+    @Autowired
+    private DietOrderDeliveryStateMapper dietOrderDeliveryStateMapper;
 
     /**
      * 添加门店
@@ -287,5 +284,59 @@ public class AnubisService {
         String url = ConfigurationUtils.getConfiguration(Constants.ANUBIS_SERVICE_URL) + Constants.ANUBIS_ORDER_COMPLAINT_URI;
         String appId = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_ID);
         return AnubisUtils.callAnubisSystem(url, appId, data);
+    }
+
+    /**
+     * 处理蜂鸟配送系统回调
+     * @param callbackRequestBody
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest handleAnubisCallback(String callbackRequestBody) throws UnsupportedEncodingException {
+        JSONObject callbackRequestBodyJsonObject = JSONObject.fromObject(callbackRequestBody);
+        JSONObject dataJsonObject = JSONObject.fromObject(URLDecoder.decode(callbackRequestBodyJsonObject.getString("data"), Constants.CHARSET_NAME_UTF_8));
+
+        String orderNumber = dataJsonObject.getString("partner_order_code");
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("order_number", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderNumber);
+        DietOrder dietOrder = dietOrderMapper.find(searchModel);
+        Validate.notNull(dietOrder, "订单不存在！");
+
+        DietOrderDeliveryState dietOrderDeliveryState = new DietOrderDeliveryState();
+        dietOrderDeliveryState.setTenantId(dietOrder.getTenantId());
+        dietOrderDeliveryState.setTenantCode(dietOrder.getTenantCode());
+        dietOrderDeliveryState.setBranchId(dietOrder.getBranchId());
+        dietOrderDeliveryState.setDietOrderId(dietOrder.getId());
+        dietOrderDeliveryState.setDietOrderNumber(orderNumber);
+        dietOrderDeliveryState.setStatus(dataJsonObject.getInt("order_status"));
+        dietOrderDeliveryState.setCarrierDriverName(dataJsonObject.optString("carrier_driver_name", null));
+        dietOrderDeliveryState.setCarrierDriverPhone(dataJsonObject.optString("carrier_driver_phone", null));
+        dietOrderDeliveryState.setDescription(dataJsonObject.optString("description", null));
+        dietOrderDeliveryState.setStationName(dataJsonObject.optString("station_name", null));
+        dietOrderDeliveryState.setStationTel(dataJsonObject.optString("station_tel", null));
+
+        int cancelReason = dataJsonObject.optInt("cancel_reason", -1);
+        dietOrderDeliveryState.setCancelReason(cancelReason == -1 ? null : cancelReason);
+        dietOrderDeliveryState.setErrorCode(dataJsonObject.optString("error_code", null));
+        dietOrderDeliveryState.setAddress(dataJsonObject.optString("address", null));
+        dietOrderDeliveryState.setLongitude(dataJsonObject.optString("longitude", null));
+        dietOrderDeliveryState.setLatitude(dataJsonObject.optString("latitude", null));
+
+        BigInteger userId = BigInteger.ZERO;
+        dietOrderDeliveryState.setCreateUserId(userId);
+        dietOrderDeliveryState.setLastUpdateUserId(userId);
+        long pushTime = dataJsonObject.getLong("push_time");
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(pushTime);
+
+        dietOrderDeliveryState.setPushTime(calendar.getTime());
+        dietOrderDeliveryStateMapper.insert(dietOrderDeliveryState);
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("处理成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
     }
 }
