@@ -1,15 +1,19 @@
 package build.dream.catering.models.dietorder;
 
+import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.models.BasicModel;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
 import com.google.gson.annotations.SerializedName;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
 import java.util.List;
 
 public class SaveDietOrderModel extends BasicModel {
+    private static final String[] INVOICE_TYPES = {DietOrderConstants.INVOICE_TYPE_PERSONAL, DietOrderConstants.INVOICE_TYPE_COMPANY};
+
     @NotNull
     private BigInteger tenantId;
 
@@ -21,6 +25,15 @@ public class SaveDietOrderModel extends BasicModel {
 
     @NotNull
     private Integer orderType;
+
+    @NotNull
+    private Boolean invoiced;
+
+    private String invoiceType;
+
+    @Length(max = 30)
+    private String invoice;
+
     @NotNull
     private BigInteger userId;
 
@@ -77,6 +90,39 @@ public class SaveDietOrderModel extends BasicModel {
     public void setGroupInfos(String groups) {
         ApplicationHandler.validateJson(groups, "build/dream/catering/schemas/groupsSchema.json", "groups");
         this.groupInfos = GsonUtils.jsonToList(groups, GroupInfo.class);
+    }
+
+    public Boolean getInvoiced() {
+        return invoiced;
+    }
+
+    public void setInvoiced(Boolean invoiced) {
+        this.invoiced = invoiced;
+    }
+
+    public String getInvoiceType() {
+        return invoiceType;
+    }
+
+    public void setInvoiceType(String invoiceType) {
+        this.invoiceType = invoiceType;
+    }
+
+    public void setInvoice(String invoice) {
+        this.invoice = invoice;
+    }
+
+    public String getInvoice() {
+        return invoice;
+    }
+
+    @Override
+    public void validateAndThrow() {
+        super.validateAndThrow();
+        if (invoiced) {
+            ApplicationHandler.inArray(INVOICE_TYPES, invoiceType, "invoiceType");
+            ApplicationHandler.notBlank(invoice, "invoice");
+        }
     }
 
     public static class GroupInfo {

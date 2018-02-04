@@ -344,6 +344,13 @@ public class DietOrderService {
         dietOrder.setPayStatus(DietOrderConstants.PAY_STATUS_UNPAID);
         dietOrder.setRefundStatus(DietOrderConstants.REFUND_STATUS_NO_REFUND);
         dietOrder.setDaySerialNumber(daySerialNumber.toString());
+
+        boolean invoiced = saveDietOrderModel.getInvoiced();
+        dietOrder.setInvoiced(invoiced);
+        if (invoiced) {
+            dietOrder.setInvoiceType(saveDietOrderModel.getInvoiceType());
+            dietOrder.setInvoice(saveDietOrderModel.getInvoice());
+        }
         dietOrder.setCreateUserId(userId);
         dietOrder.setLastUpdateUserId(userId);
         dietOrder.setLastUpdateRemark("保存订单信息！");

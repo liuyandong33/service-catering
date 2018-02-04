@@ -138,8 +138,13 @@ public class AnubisService {
         data.put("order_actual_amount", dietOrder.getPayableAmount());
         data.put("order_weight", 1);
         data.put("order_remark", dietOrder.getRemark());
-        data.put("is_invoiced", 0);
-        data.put("invoice", "发票抬头");
+
+        boolean invoiced = dietOrder.isInvoiced();
+
+        data.put("is_invoiced", invoiced ? 1 : 0);
+        if (invoiced) {
+            data.put("invoice", "发票抬头");
+        }
         data.put("order_payment_status", 1);
         data.put("order_payment_method", 1);
         data.put("is_agent_payment", 0);
