@@ -6,6 +6,6 @@
     </insert>
 
     <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.DietOrderDeliveryState">
-        SELECT * FROM branch <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
+        SELECT * FROM diet_order_delivery_state <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
     </select>
 </mapper>

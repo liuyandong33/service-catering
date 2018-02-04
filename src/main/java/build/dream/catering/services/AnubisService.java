@@ -346,4 +346,24 @@ public class AnubisService {
         apiRest.setSuccessful(true);
         return apiRest;
     }
+
+    /**
+     * 获取订单配送记录
+     *
+     * @param obtainDeliveryStatesModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest obtainDeliveryStates(ObtainDeliveryStatesModel obtainDeliveryStatesModel) {
+        BigInteger tenantId = obtainDeliveryStatesModel.getTenantId();
+        BigInteger branchId = obtainDeliveryStatesModel.getBranchId();
+        BigInteger dietOrderId = obtainDeliveryStatesModel.getDietOrderId();
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        searchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, dietOrderId);
+
+        List<DietOrderDeliveryState> dietOrderDeliveryStates = dietOrderDeliveryStateMapper.findAll(searchModel);
+        return new ApiRest(dietOrderDeliveryStates, "获取订单配送记录成功！");
+    }
 }

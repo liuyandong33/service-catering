@@ -182,4 +182,26 @@ public class AnubisController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    /**
+     * 获取配送记录
+     *
+     * @return
+     */
+    @RequestMapping(value = "/obtainDeliveryStates")
+    @ResponseBody
+    public String obtainDeliveryStates() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            ObtainDeliveryStatesModel obtainDeliveryStatesModel = ApplicationHandler.instantiateObject(ObtainDeliveryStatesModel.class, requestParameters);
+            obtainDeliveryStatesModel.validateAndThrow();
+
+            apiRest = anubisService.obtainDeliveryStates(obtainDeliveryStatesModel);
+        } catch (Exception e) {
+            LogUtils.error("获取配送记录失败", controllerSimpleName, "obtainDeliveryStates", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }
