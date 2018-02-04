@@ -143,7 +143,7 @@ public class AnubisService {
 
         data.put("is_invoiced", invoiced ? 1 : 0);
         if (invoiced) {
-            data.put("invoice", "发票抬头");
+            data.put("invoice", dietOrder.getInvoice());
         }
         data.put("order_payment_status", 1);
         data.put("order_payment_method", 1);
