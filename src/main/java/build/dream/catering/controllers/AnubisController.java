@@ -42,7 +42,7 @@ public class AnubisController extends BasicController {
 
             apiRest = anubisService.chainStore(chainStoreModel);
         } catch (Exception e) {
-            LogUtils.error("添加门店失败", controllerSimpleName, "getAccessToken", e, requestParameters);
+            LogUtils.error("添加门店失败", controllerSimpleName, "chainStore", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -90,6 +90,7 @@ public class AnubisController extends BasicController {
             OrderModel orderModel = ApplicationHandler.instantiateObject(OrderModel.class, requestParameters);
             orderModel.validateAndThrow();
 
+            apiRest = anubisService.order(orderModel);
         } catch (Exception e) {
             LogUtils.error("蜂鸟配送失败", controllerSimpleName, "order", e, requestParameters);
             apiRest = new ApiRest(e);
