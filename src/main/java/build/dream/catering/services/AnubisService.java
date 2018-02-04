@@ -15,6 +15,7 @@ import build.dream.common.erp.catering.domains.DietOrderGroup;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.ConfigurationUtils;
 import build.dream.common.utils.SearchModel;
+import build.dream.common.utils.SystemPartitionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,7 +120,10 @@ public class AnubisService {
         Map<String, Object> data = new HashMap<String, Object>();
         ApplicationHandler.ifNotNullPut(data, "partner_remark", orderModel.getPartnerRemark());
         data.put("partner_order_code", dietOrder.getOrderNumber());
-        data.put("notify_url", "");
+
+        String notifyUrl = SystemPartitionUtils.getUrl(ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE), Constants.SERVICE_NAME_CATERING, "anubis", "anubisCallback");
+
+        data.put("notify_url", notifyUrl);
         data.put("order_type", 1);
         data.put("chain_store_code", branch.getTenantCode() + "Z" + branch.getCode());
 
@@ -129,7 +133,7 @@ public class AnubisService {
         transportInfo.put("transport_longitude", branch.getLongitude());
         transportInfo.put("transport_latitude", branch.getLatitude());
         transportInfo.put("position_source", Constants.POSITION_SOURCE_BAIDU_MAP);
-        transportInfo.put("transport_tel", "13789871965");
+        transportInfo.put("transport_tel", branch.getContactPhone());
         ApplicationHandler.ifNotNullPut(transportInfo, "transport_remark", orderModel.getTransportRemark());
         data.put("transport_info", transportInfo);
 
@@ -218,6 +222,13 @@ public class AnubisService {
         return apiRest;
     }
 
+    /**
+     * 订单查询
+     *
+     * @param orderQueryModel
+     * @return
+     * @throws IOException
+     */
     @Transactional(readOnly = true)
     public ApiRest orderQuery(OrderQueryModel orderQueryModel) throws IOException {
         BigInteger tenantId = orderQueryModel.getTenantId();
@@ -252,6 +263,13 @@ public class AnubisService {
         return dietOrder;
     }
 
+    /**
+     * 订单投诉
+     *
+     * @param orderComplaintModel
+     * @return
+     * @throws IOException
+     */
     @Transactional(readOnly = true)
     public ApiRest orderComplaint(OrderComplaintModel orderComplaintModel) throws IOException {
         BigInteger tenantId = orderComplaintModel.getTenantId();

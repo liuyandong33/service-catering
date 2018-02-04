@@ -161,4 +161,22 @@ public class AnubisController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    /**
+     * 处理蜂鸟系统回调
+     *
+     * @return
+     */
+    @RequestMapping(value = "/anubisCallback")
+    @ResponseBody
+    public String anubisCallback() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+        } catch (Exception e) {
+            LogUtils.error("处理蜂鸟系统回调失败", controllerSimpleName, "anubisCallback", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }
