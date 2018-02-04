@@ -62,7 +62,7 @@ public class AnubisService {
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("chain_store_code", branch.getTenantCode() + "Z" + branch.getCode());
         data.put("chain_store_name", branch.getTenantCode() + "Z" + branch.getCode() + "Z" + branch.getName());
-        data.put("contact_phone", "13789871965");
+        data.put("contact_phone", branch.getContactPhone());
         data.put("address", branch.getProvinceName() + branch.getCityName() + branch.getDistrictName() + branch.getAddress());
         data.put("position_source", Constants.POSITION_SOURCE_BAIDU_MAP);
         data.put("longitude", branch.getLongitude());
