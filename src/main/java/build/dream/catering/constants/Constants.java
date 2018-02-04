@@ -52,4 +52,14 @@ public class Constants extends build.dream.common.constants.Constants {
 
     public static final String ANUBIS_GET_ACCESS_TOKEN_URI = "/get_access_token";
     public static final String ANUBIS_CHAIN_STORE_URI = "/v2/chain_store";
+    public static final String ANUBIS_CHAIN_STORE_QUERY_URI = "/v2/chain_store/query";
+    public static final String ANUBIS_ORDER_URI = "/v2/order";
+    public static final String ANUBIS_ORDER_CANCEL_URI = "/v2/order/cancel";
+    public static final String ANUBIS_ORDER_QUERY_URI = "/v2/order/query";
+    public static final String ANUBIS_ORDER_COMPLAINT_URI = "/v2/order/complaint";
+
+    public static final String KEY_ANUBIS_TOKEN = "_anubis_token";
+    public static Integer POSITION_SOURCE_TENCENT_MAP = 1;
+    public static Integer POSITION_SOURCE_BAIDU_MAP = 2;
+    public static Integer POSITION_SOURCE_GAODE_MAP = 3;
 }
