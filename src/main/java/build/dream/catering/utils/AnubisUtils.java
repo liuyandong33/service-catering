@@ -55,7 +55,7 @@ public class AnubisUtils {
         return obtainAccessToken(url, appId, appSecret);
     }
 
-    public static ApiRest callAnubisSystem(String url, String appId, Map<String, Object> data) throws IOException {
+    public static String getAccessToken() throws IOException {
         String accessToken = null;
         String accessTokenJson = CacheUtils.get(Constants.KEY_ANUBIS_TOKEN);
         boolean isRetrieveAccessToken = false;
@@ -78,13 +78,16 @@ public class AnubisUtils {
             CacheUtils.set(Constants.KEY_ANUBIS_TOKEN, GsonUtils.toJson(accessTokenMap));
             accessToken = MapUtils.getString(accessTokenMap, "access_token");
         }
+        return accessToken;
+    }
 
+    public static ApiRest callAnubisSystem(String url, String appId, Map<String, Object> data) throws IOException {
+        String accessToken = getAccessToken();
         int salt = RandomUtils.nextInt(1000, 9999);
         String signature = generateSignature(appId, GsonUtils.toJson(data), salt, accessToken);
 
         Map<String, Object> requestBody = new HashMap<String, Object>();
         requestBody.put("app_id", appId);
-//        requestBody.put("access_token", accessToken);
         requestBody.put("data", data);
         requestBody.put("salt", salt);
         requestBody.put("signature", signature);

@@ -26,23 +26,6 @@ public class AnubisController extends BasicController {
     @Autowired
     private AnubisService anubisService;
 
-    @RequestMapping(value = "/obtainAccessToken")
-    @ResponseBody
-    public String obtainAccessToken() {
-        ApiRest apiRest = null;
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
-            String appId = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_ID);
-            String appSecret = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_SECRET);
-            String url = ConfigurationUtils.getConfiguration(Constants.ANUBIS_SERVICE_URL) + Constants.ANUBIS_GET_ACCESS_TOKEN_URI;
-            apiRest = new ApiRest(AnubisUtils.obtainAccessToken(url, appId, appSecret), "获取token成功！");
-        } catch (Exception e) {
-            LogUtils.error("获取token失败", controllerSimpleName, "obtainAccessToken", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
-    }
-
     /**
      * 添加门店
      *
