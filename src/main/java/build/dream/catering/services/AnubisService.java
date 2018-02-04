@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.*;
 
 @Service
@@ -293,9 +292,16 @@ public class AnubisService {
      * @throws UnsupportedEncodingException
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleAnubisCallback(String callbackRequestBody) throws UnsupportedEncodingException {
+    public ApiRest handleAnubisCallback(String callbackRequestBody) throws IOException {
         JSONObject callbackRequestBodyJsonObject = JSONObject.fromObject(callbackRequestBody);
-        JSONObject dataJsonObject = JSONObject.fromObject(URLDecoder.decode(callbackRequestBodyJsonObject.getString("data"), Constants.CHARSET_NAME_UTF_8));
+        String data = URLDecoder.decode(callbackRequestBodyJsonObject.getString("data"), Constants.CHARSET_NAME_UTF_8);
+
+        String appId = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_ID);
+        String signature = callbackRequestBodyJsonObject.getString("signature");
+        int salt = callbackRequestBodyJsonObject.getInt("salt");
+        Validate.isTrue(AnubisUtils.verifySignature(appId, data, salt, signature), "签名验证未通过！");
+
+        JSONObject dataJsonObject = JSONObject.fromObject(data);
 
         String orderNumber = dataJsonObject.getString("partner_order_code");
         SearchModel searchModel = new SearchModel(true);

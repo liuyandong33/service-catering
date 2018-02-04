@@ -48,6 +48,10 @@ public class AnubisUtils {
         return (Map<String, Object>) obtainAccessTokenApiRest.getData();
     }
 
+    public static boolean verifySignature(String appId, String data, int salt, String signature) throws IOException {
+        return signature.equals(generateSignature(appId, data, salt, getAccessToken()));
+    }
+
     public static Map<String, Object> obtainAccessToken() throws IOException {
         String appId = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_ID);
         String appSecret = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_SECRET);
