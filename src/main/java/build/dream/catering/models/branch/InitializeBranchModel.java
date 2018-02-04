@@ -53,6 +53,14 @@ public class InitializeBranchModel extends BasicModel {
     @NotNull
     private BigInteger userId;
 
+    @NotNull
+    @Length(max = 20)
+    private String linkman;
+
+    @NotNull
+    @Length(max = 20)
+    private String contactPhone;
+
     public BigInteger getTenantId() {
         return tenantId;
     }
@@ -147,5 +155,21 @@ public class InitializeBranchModel extends BasicModel {
 
     public void setUserId(BigInteger userId) {
         this.userId = userId;
+    }
+
+    public String getLinkman() {
+        return linkman;
+    }
+
+    public void setLinkman(String linkman) {
+        this.linkman = linkman;
+    }
+
+    public String getContactPhone() {
+        return contactPhone;
+    }
+
+    public void setContactPhone(String contactPhone) {
+        this.contactPhone = contactPhone;
     }
 }

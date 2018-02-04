@@ -53,6 +53,8 @@ public class BranchService {
         branch.setAddress(initializeBranchModel.getAddress());
         branch.setLongitude(initializeBranchModel.getLongitude());
         branch.setLatitude(initializeBranchModel.getLatitude());
+        branch.setLinkman(initializeBranchModel.getLinkman());
+        branch.setContactPhone(initializeBranchModel.getContactPhone());
         branchMapper.insert(branch);
         branchMapper.insertMergeUserBranch(initializeBranchModel.getUserId(), initializeBranchModel.getTenantId(), branch.getId());
 
