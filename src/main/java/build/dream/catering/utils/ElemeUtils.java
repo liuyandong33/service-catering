@@ -1,17 +1,18 @@
 package build.dream.catering.utils;
 
-import build.dream.common.api.ApiRest;
-import build.dream.common.utils.*;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.tools.ElemeConsumerThread;
+import build.dream.common.api.ApiRest;
+import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.Validate;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -19,6 +20,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class ElemeUtils {
     public static final Map<String, String> HEADERS = new HashMap<String, String>();
+
     static {
         HEADERS.put("Content-Type", "application/json;charset=utf-8");
     }
@@ -87,13 +89,16 @@ public class ElemeUtils {
         return DigestUtils.md5Hex(stringBuilder.toString()).toUpperCase().equals(signature);
     }
 
-    public static void addElemeMessage(String elemeMessage) {
-        QueueUtils.rpush(Constants.KEY_ELEME_CALLBACK_MESSAGE, elemeMessage);
+    public static void addElemeMessage(JSONObject callbackRequestBodyJsonObject, String uuid, int count) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("callbackRequestBody", callbackRequestBodyJsonObject);
+        map.put("uuid", uuid);
+        map.put("count", count);
+        QueueUtils.rpush(Constants.KEY_ELEME_CALLBACK_MESSAGE, GsonUtils.toJson(map));
     }
 
     public static String takeElemeMessage() {
-        String elemeMessage = QueueUtils.blpop(Constants.KEY_ELEME_CALLBACK_MESSAGE, 1, TimeUnit.HOURS);
-        return elemeMessage;
+        return QueueUtils.blpop(Constants.KEY_ELEME_CALLBACK_MESSAGE, 1, TimeUnit.HOURS);
     }
 
     public static void startElemeConsumerThread() {

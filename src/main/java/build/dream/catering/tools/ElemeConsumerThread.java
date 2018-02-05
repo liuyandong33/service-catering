@@ -30,9 +30,11 @@ public class ElemeConsumerThread implements Runnable {
     @Override
     public void run() {
         while (true) {
-            String elemeMessage = null;
+            JSONObject callbackRequestBodyJsonObject = null;
+            String uuid = null;
+            int count = 0;
             try {
-                elemeMessage = ElemeUtils.takeElemeMessage();
+                String elemeMessage = ElemeUtils.takeElemeMessage();
                 if (StringUtils.isBlank(elemeMessage)) {
                     continue;
                 }
@@ -46,8 +48,9 @@ public class ElemeConsumerThread implements Runnable {
                 }
 
                 JSONObject elemeMessageJsonObject = JSONObject.fromObject(elemeMessage);
-                JSONObject callbackRequestBodyJsonObject = elemeMessageJsonObject.getJSONObject("callbackRequestBody");
-                String uuid = elemeMessageJsonObject.getString("uuid");
+                callbackRequestBodyJsonObject = elemeMessageJsonObject.getJSONObject("callbackRequestBody");
+                uuid = elemeMessageJsonObject.getString("uuid");
+                count = elemeMessageJsonObject.getInt("count");
                 int type = callbackRequestBodyJsonObject.getInt("type");
                 BigInteger shopId = BigInteger.valueOf(callbackRequestBodyJsonObject.getLong("shopId"));
                 String message = callbackRequestBodyJsonObject.getString("message");
@@ -68,8 +71,13 @@ public class ElemeConsumerThread implements Runnable {
                     elemeService.handleAuthorizationStateChangeMessage(shopId, message, type, uuid);
                 }
             } catch (Exception e) {
-                if (StringUtils.isNotBlank(elemeMessage)) {
-                    ElemeUtils.addElemeMessage(elemeMessage);
+                if (callbackRequestBodyJsonObject != null) {
+                    count = count - 1;
+                    if (count > 0) {
+                        ElemeUtils.addElemeMessage(callbackRequestBodyJsonObject, uuid, count);
+                    } else {
+                        markHandleFailureMessage(uuid);
+                    }
                 }
                 LogUtils.error("保存饿了么消息失败", ELEME_CONSUMER_THREAD_SIMPLE_NAME, "run", e);
             }
