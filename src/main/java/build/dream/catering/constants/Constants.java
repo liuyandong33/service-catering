@@ -65,4 +65,10 @@ public class Constants extends build.dream.common.constants.Constants {
     public static Integer POSITION_SOURCE_TENCENT_MAP = 1;
     public static Integer POSITION_SOURCE_BAIDU_MAP = 2;
     public static Integer POSITION_SOURCE_GAODE_MAP = 3;
+
+    public static final String KEY_DINGTALK_TOKEN = "_dingtalk_token";
+    public static final String DINGTALK_CORP_ID = "dingtalk.corp.id";
+    public static final String DINGTALK_CORP_SECRET = "dingtalk.corp.secret";
+    public static final String DINGTALK_SERVICE_URL = "dingtalk.service.url";
+    public static final String DINGTALK_GET_TOKEN_URI = "/gettoken";
 }

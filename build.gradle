@@ -40,6 +40,7 @@ dependencies {
     compile("commons-codec:commons-codec:1.10")
     compile("redis.clients:jedis:2.9.0")
     compile("org.springframework.boot:spring-boot-starter-data-redis")
+    compile("org.springframework.kafka:spring-kafka")
     compile fileTree(include: ["*.jar"], dir: "libs")
     compile("net.sf.json-lib:json-lib:2.4:jdk15")
     compile("me.ele.openapi:eleme-openapi-sdk:1.6.18")

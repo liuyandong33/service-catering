@@ -162,3 +162,6 @@ tenantCode
 branchId
 groups
 [{goodsId: 1, quantity: 10, flavorIds: [1, 2, 3]}, {goodsId: 1, quantity: 10, flavorIds: [1, 2, 3]}, {goodsId: 1, quantity: 10, flavorIds: [1, 2, 3]}]
+
+[{"goodsId": 1, "goodsSpecificationId": 1, "discountType": 2, "discountRate": 15.20}]
+[{"goodsId": 1, "goodsSpecificationId": 1, "discountType": 1, "specialPrice": 15.20}]
