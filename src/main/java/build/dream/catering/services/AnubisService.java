@@ -72,6 +72,71 @@ public class AnubisService {
     }
 
     /**
+     * 更新门店信息
+     *
+     * @param chainStoreUpdateModel
+     * @return
+     * @throws IOException
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest chainStoreUpdate(ChainStoreUpdateModel chainStoreUpdateModel) throws IOException {
+        BigInteger tenantId = chainStoreUpdateModel.getTenantId();
+        BigInteger branchId = chainStoreUpdateModel.getBranchId();
+        BigInteger userId = chainStoreUpdateModel.getUserId();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        Branch branch = branchMapper.find(searchModel);
+        Validate.notNull(branch, "门店不存在！");
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("chain_store_code", branch.getTenantCode() + "Z" + branch.getCode());
+        data.put("chain_store_name", branch.getTenantCode() + "Z" + branch.getCode() + "Z" + branch.getName());
+        data.put("contact_phone", branch.getContactPhone());
+        data.put("address", branch.getProvinceName() + branch.getCityName() + branch.getDistrictName() + branch.getAddress());
+        data.put("position_source", Constants.POSITION_SOURCE_BAIDU_MAP);
+        data.put("longitude", branch.getLongitude());
+        data.put("latitude", branch.getLatitude());
+        data.put("service_code", 1);
+
+        String url = ConfigurationUtils.getConfiguration(Constants.ANUBIS_SERVICE_URL) + Constants.ANUBIS_CHAIN_STORE_UPDATE_URI;
+        String appId = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_ID);
+        ApiRest apiRest = AnubisUtils.callAnubisSystem(url, appId, data);
+        return apiRest;
+    }
+
+    /**
+     * 查询配送服务
+     *
+     * @param chainStoreDeliveryQueryModel
+     * @return
+     * @throws IOException
+     */
+    @Transactional(readOnly = true)
+    public ApiRest chainStoreDeliveryQuery(ChainStoreDeliveryQueryModel chainStoreDeliveryQueryModel) throws IOException {
+        BigInteger tenantId = chainStoreDeliveryQueryModel.getTenantId();
+        BigInteger branchId = chainStoreDeliveryQueryModel.getBranchId();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        Branch branch = branchMapper.find(searchModel);
+        Validate.notNull(branch, "门店不存在！");
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("chain_store_code", branch.getTenantCode() + "Z" + branch.getCode());
+        data.put("position_source", Constants.POSITION_SOURCE_BAIDU_MAP);
+        data.put("receiver_longitude", chainStoreDeliveryQueryModel.getReceiverLongitude());
+        data.put("receiver_latitude", chainStoreDeliveryQueryModel.getReceiverLatitude());
+
+        String url = ConfigurationUtils.getConfiguration(Constants.ANUBIS_SERVICE_URL) + Constants.ANUBIS_CHAIN_STORE_DELIVERY_QUERY_URI;
+        String appId = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_ID);
+        ApiRest apiRest = AnubisUtils.callAnubisSystem(url, appId, data);
+        return apiRest;
+    }
+
+    /**
      * 蜂鸟配送
      *
      * @param orderModel
@@ -363,6 +428,7 @@ public class AnubisService {
         BigInteger tenantId = obtainDeliveryStatesModel.getTenantId();
         BigInteger branchId = obtainDeliveryStatesModel.getBranchId();
         BigInteger dietOrderId = obtainDeliveryStatesModel.getDietOrderId();
+
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
         searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
@@ -370,5 +436,27 @@ public class AnubisService {
 
         List<DietOrderDeliveryState> dietOrderDeliveryStates = dietOrderDeliveryStateMapper.findAll(searchModel);
         return new ApiRest(dietOrderDeliveryStates, "获取订单配送记录成功！");
+    }
+
+    /**
+     * 订单骑手位置查询
+     *
+     * @param orderCarrierModel
+     * @return
+     * @throws IOException
+     */
+    @Transactional(readOnly = true)
+    public ApiRest orderCarrier(OrderCarrierModel orderCarrierModel) throws IOException {
+        BigInteger tenantId = orderCarrierModel.getTenantId();
+        BigInteger branchId = orderCarrierModel.getBranchId();
+        BigInteger dietOrderId = orderCarrierModel.getDietOrderId();
+
+        DietOrder dietOrder = findDietOrder(tenantId, branchId, dietOrderId);
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("partner_order_code", dietOrder.getOrderNumber());
+
+        String url = ConfigurationUtils.getConfiguration(Constants.ANUBIS_SERVICE_URL) + Constants.ANUBIS_ORDER_CARRIER_URI;
+        String appId = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_ID);
+        return AnubisUtils.callAnubisSystem(url, appId, data);
     }
 }
