@@ -1,10 +1,8 @@
 package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
-import build.dream.common.utils.CacheUtils;
-import build.dream.common.utils.ConfigurationUtils;
-import build.dream.common.utils.GsonUtils;
-import build.dream.common.utils.ProxyUtils;
+import build.dream.common.api.ApiRest;
+import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
@@ -14,6 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DingtalkUtils {
+    private static final String DINGTALK_UTILS_SIMPLE_NAME = "DingtalkUtils";
+
     public static String obtainAccessToken() throws IOException {
         String accessToken = null;
         String tokenJson = CacheUtils.get(Constants.KEY_DINGTALK_TOKEN);
@@ -49,5 +49,38 @@ public class DingtalkUtils {
             CacheUtils.set(Constants.KEY_DINGTALK_TOKEN, GsonUtils.toJson(tokenMap));
         }
         return accessToken;
+    }
+
+    public static ApiRest send(String sender, String chatId, String content) throws IOException {
+        Map<String, Object> sendRequestBody = new HashMap<String, Object>();
+        sendRequestBody.put("sender", sender);
+        sendRequestBody.put("chatId", chatId);
+        sendRequestBody.put("msgtype", "text");
+        Map<String, Object> textMap = new HashMap<String, Object>();
+        textMap.put("content", content);
+        sendRequestBody.put("text", textMap);
+        String url = ConfigurationUtils.getConfiguration(Constants.DINGTALK_SERVICE_URL) + Constants.DINGTALK_CHAT_SEND_URI + "?access_token=" + obtainAccessToken();
+        Map<String, String> doPostRequestParameters = new HashMap<String, String>();
+        doPostRequestParameters.put("url", url);
+        doPostRequestParameters.put("requestBody", GsonUtils.toJson(sendRequestBody));
+        String result = ProxyUtils.doPostOriginalWithRequestParameters(Constants.SERVICE_NAME_OUT, "proxy", "doPost", doPostRequestParameters);
+        JSONObject resultJsonObject = JSONObject.fromObject(result);
+        int errcode = resultJsonObject.getInt("errcode");
+        Validate.isTrue(errcode == 0, resultJsonObject.optString("errmsg"));
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("messageId", resultJsonObject.getString("messageId"));
+
+        return new ApiRest(data, "发送群消息成功！");
+    }
+
+    public static void send(String content) {
+        try {
+            String sender = ConfigurationUtils.getConfiguration(Constants.DINGTALK_SENDER);
+            String chatId = ConfigurationUtils.getConfiguration(Constants.DINGTALK_CHAT_ID);
+            send(sender, chatId, content);
+        } catch (Exception e) {
+            LogUtils.error("发送钉钉消息失败", DINGTALK_UTILS_SIMPLE_NAME, "send", e);
+        }
     }
 }

@@ -2,6 +2,7 @@ package build.dream.catering.tools;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.services.ElemeService;
+import build.dream.catering.utils.DingtalkUtils;
 import build.dream.catering.utils.ElemeUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.utils.ApplicationHandler;
@@ -77,6 +78,7 @@ public class ElemeConsumerThread implements Runnable {
                         ElemeUtils.addElemeMessage(callbackRequestBodyJsonObject, uuid, count);
                     } else {
                         markHandleFailureMessage(uuid);
+                        DingtalkUtils.send(String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "饿了么消息处理失败", callbackRequestBodyJsonObject.toString(), e.getClass().getSimpleName(), e.getMessage()));
                     }
                 }
                 LogUtils.error("保存饿了么消息失败", ELEME_CONSUMER_THREAD_SIMPLE_NAME, "run", e);
