@@ -48,7 +48,7 @@ public class DietOrderUtils {
         return dietOrderGroup;
     }
 
-    public static DietOrderDetail constructDietOrderDetail(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger dietOrderId, BigInteger dietOrderGroupId, BigInteger goodsId, String goodsName, BigInteger goodsSpecificationId, String goodsSpecificationName, BigDecimal price, BigDecimal flavorIncrease, Integer quantity, BigDecimal totalAmount, BigDecimal discountAmount, BigDecimal payableAmount, BigInteger userId, String lastUpdateRemark) {
+    public static DietOrderDetail constructDietOrderDetail(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger dietOrderId, BigInteger dietOrderGroupId, BigInteger goodsId, String goodsName, BigInteger goodsSpecificationId, String goodsSpecificationName, BigInteger categoryId, BigDecimal price, BigDecimal flavorIncrease, Integer quantity, BigDecimal totalAmount, BigDecimal discountAmount, BigDecimal payableAmount, BigInteger userId, String lastUpdateRemark) {
         DietOrderDetail dietOrderDetail = new DietOrderDetail();
         dietOrderDetail.setTenantId(tenantId);
         dietOrderDetail.setTenantCode(tenantCode);
@@ -59,6 +59,7 @@ public class DietOrderUtils {
         dietOrderDetail.setGoodsName(goodsName);
         dietOrderDetail.setGoodsSpecificationId(goodsSpecificationId);
         dietOrderDetail.setGoodsSpecificationName(goodsSpecificationName);
+        dietOrderDetail.setCategoryId(categoryId);
         dietOrderDetail.setPrice(price);
         dietOrderDetail.setFlavorIncrease(flavorIncrease);
         dietOrderDetail.setQuantity(quantity);
