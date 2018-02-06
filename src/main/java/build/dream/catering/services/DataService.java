@@ -36,6 +36,8 @@ public class DataService {
     @Autowired
     private DietOrderActivityMapper dietOrderActivityMapper;
     @Autowired
+    private DietOrderPaymentMapper dietOrderPaymentMapper;
+    @Autowired
     private DataHandleHistoryMapper dataHandleHistoryMapper;
 
     public ApiRest uploadData(UploadDataModel uploadDataModel) throws IOException {
@@ -125,6 +127,16 @@ public class DataService {
                 }
                 dietOrderActivityMapper.insertAll(dietOrderActivities);
             }
+
+            JSONArray dietOrderPaymentJsonArray = dietOrderJsonObject.getJSONArray("dietOrderPayments");
+            int dietOrderPaymentJsonArraySize = dietOrderPaymentJsonArray.size();
+            List<DietOrderPayment> dietOrderPayments = new ArrayList<DietOrderPayment>();
+            for (int dietOrderPaymentJsonArrayIndex = 0; dietOrderPaymentJsonArrayIndex < dietOrderPaymentJsonArraySize; dietOrderPaymentJsonArrayIndex++) {
+                DietOrderPayment dietOrderPayment = GsonUtils.fromJson(dietOrderPaymentJsonArray.getJSONObject(dietOrderPaymentJsonArrayIndex), DietOrderPayment.class);
+                dietOrderPayment.setDietOrderId(dietOrderId);
+                dietOrderPayments.add(dietOrderPayment);
+            }
+            dietOrderPaymentMapper.insertAll(dietOrderPayments);
         } catch (Exception e) {
             CacheUtils.delete(signature);
             throw e;
