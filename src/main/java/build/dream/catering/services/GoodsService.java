@@ -486,7 +486,7 @@ public class GoodsService extends BasicService {
     }
 
     /**
-     * 删除菜品、菜品规格、菜品口味组、菜品口味
+     * 删除商品、商品规格、商品口味组、商品口味
      * @param deleteGoodsModel
      * @return
      */
@@ -502,50 +502,50 @@ public class GoodsService extends BasicService {
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
         searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
         Goods goods = goodsMapper.find(searchModel);
-        Validate.notNull(goods, "菜品不存在！");
+        Validate.notNull(goods, "商品不存在！");
 
         validateCanNotOperate(tenantId, branchId, "goods", goodsId, 2);
 
         goods.setLastUpdateUserId(userId);
-        goods.setLastUpdateRemark("删除菜品信息！");
+        goods.setLastUpdateRemark("删除商品信息！");
         goods.setDeleted(true);
         goodsMapper.update(goods);
 
-        // 删除该菜品的所有规格
+        // 删除该商品的所有规格
         UpdateModel goodsSpecificationUpdateModel = new UpdateModel(true);
         goodsSpecificationUpdateModel.setTableName("goods_specification");
         goodsSpecificationUpdateModel.addContentValue("deleted", 1);
         goodsSpecificationUpdateModel.addContentValue("last_update_user_id", userId);
-        goodsSpecificationUpdateModel.addContentValue("last_update_remark", "删除菜品规格信息！");
+        goodsSpecificationUpdateModel.addContentValue("last_update_remark", "删除商品规格信息！");
         goodsSpecificationUpdateModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, goodsId);
         goodsSpecificationUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
         goodsSpecificationUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
         universalMapper.universalUpdate(goodsSpecificationUpdateModel);
 
-        // 删除该菜品的所有口味组
+        // 删除该商品的所有口味组
         UpdateModel goodsFlavorGroupUpdateModel = new UpdateModel(true);
         goodsFlavorGroupUpdateModel.setTableName("goods_flavor_group");
         goodsFlavorGroupUpdateModel.addContentValue("deleted", 1);
         goodsFlavorGroupUpdateModel.addContentValue("last_update_user_id", userId);
-        goodsFlavorGroupUpdateModel.addContentValue("last_update_remark", "删除菜品口味组信息！");
+        goodsFlavorGroupUpdateModel.addContentValue("last_update_remark", "删除商品口味组信息！");
         goodsFlavorGroupUpdateModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, goodsId);
         goodsFlavorGroupUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
         goodsFlavorGroupUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
         universalMapper.universalUpdate(goodsFlavorGroupUpdateModel);
 
-        // 删除该菜品的所有口味
+        // 删除该商品的所有口味
         UpdateModel goodsFlavorUpdateModel = new UpdateModel(true);
         goodsFlavorUpdateModel.setTableName("goods_flavor");
         goodsFlavorUpdateModel.addContentValue("deleted", 1);
         goodsFlavorUpdateModel.addContentValue("last_update_user_id", userId);
-        goodsFlavorUpdateModel.addContentValue("last_update_remark", "删除菜品口味组信息！");
+        goodsFlavorUpdateModel.addContentValue("last_update_remark", "删除商品口味组信息！");
         goodsFlavorUpdateModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, goodsId);
         goodsFlavorUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
         goodsFlavorUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
         universalMapper.universalUpdate(goodsFlavorUpdateModel);
 
         ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("删除菜品信息成功！");
+        apiRest.setMessage("删除商品信息成功！");
         apiRest.setSuccessful(true);
         return apiRest;
     }
