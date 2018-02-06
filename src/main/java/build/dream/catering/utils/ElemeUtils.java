@@ -25,7 +25,7 @@ public class ElemeUtils {
         HEADERS.put("Content-Type", "application/json;charset=utf-8");
     }
 
-    public static String obtainAccessToken(String tenantId, String branchId, Integer elemeAccountType) throws IOException {
+    public static String obtainAccessToken(String tenantId, String branchId, Integer elemeAccountType) {
         String tokenJson = null;
         if (elemeAccountType == Constants.ELEME_ACCOUNT_TYPE_CHAIN_ACCOUNT) {
             tokenJson = CacheUtils.hget(Constants.KEY_ELEME_TOKENS, Constants.ELEME_TOKEN + "_" + tenantId);
@@ -36,7 +36,7 @@ public class ElemeUtils {
         return JSONObject.fromObject(tokenJson).getString("access_token");
     }
 
-    private static String generateSignature(String appKey, String appSecret, long timestamp, String action, String accessToken, Map<String, Object> params) throws Exception {
+    private static String generateSignature(String appKey, String appSecret, long timestamp, String action, String accessToken, Map<String, Object> params) {
         Map<String, Object> sorted = new TreeMap<String, Object>(params);
         sorted.put("app_key", appKey);
         sorted.put("timestamp", timestamp);
@@ -47,7 +47,7 @@ public class ElemeUtils {
         return DigestUtils.md5Hex(String.format("%s%s%s%s", action, accessToken, stringBuffer, appSecret)).toUpperCase();
     }
 
-    public static String constructRequestBody(String tenantId, String branchId, Integer elemeAccountType, String action, Map<String, Object> params) throws Exception {
+    public static String constructRequestBody(String tenantId, String branchId, Integer elemeAccountType, String action, Map<String, Object> params) throws IOException {
         String appKey = ConfigurationUtils.getConfiguration(Constants.ELEME_APP_KEY);
         String appSecret = ConfigurationUtils.getConfiguration(Constants.ELEME_APP_SECRET);
         Map<String, Object> metas = new HashMap<String, Object>();
@@ -71,7 +71,7 @@ public class ElemeUtils {
         return GsonUtils.toJson(requestBody);
     }
 
-    public static ApiRest callElemeSystem(String tenantId, String branchId, Integer elemeAccountType, String action, Map<String, Object> params) throws Exception {
+    public static ApiRest callElemeSystem(String tenantId, String branchId, Integer elemeAccountType, String action, Map<String, Object> params) throws IOException {
         String requestBody = constructRequestBody(tenantId, branchId, elemeAccountType, action, params);
         Map<String, String> callElemeSystemRequestParameters = new HashMap<String, String>();
         callElemeSystemRequestParameters.put("requestBody", requestBody);

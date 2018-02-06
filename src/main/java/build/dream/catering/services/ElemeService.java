@@ -462,6 +462,16 @@ public class ElemeService {
     }
 
     @Transactional(readOnly = true)
+    public Branch findBranch(BigInteger tenantId, BigInteger branchId) {
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        Branch branch = branchMapper.find(searchModel);
+        Validate.notNull(branch, "门店不存在！");
+        return branch;
+    }
+
+    @Transactional(readOnly = true)
     public GoodsCategory findGoodsCategoryInfo(BigInteger tenantId, BigInteger branchId, BigInteger categoryId) {
         SearchModel searchModel = new SearchModel();
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
@@ -481,6 +491,36 @@ public class ElemeService {
         ElemeOrder elemeOrder = elemeOrderMapper.find(searchModel);
         Validate.notNull(elemeOrder, "订单不存在！");
         return elemeOrder;
+    }
+
+    @Transactional(readOnly = true)
+    public ElemeOrder findElemeOrder(BigInteger tenantId, BigInteger branchId, BigInteger elemeOrderId) {
+        SearchModel searchModel = new SearchModel();
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, elemeOrderId);
+        ElemeOrder elemeOrder = elemeOrderMapper.find(searchModel);
+        Validate.notNull(elemeOrder, "订单不存在！");
+        return elemeOrder;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ElemeOrder> findAllElemeOrders(BigInteger tenantId, BigInteger branchId, List<BigInteger> elemeOrderIds) {
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, elemeOrderIds);
+        List<ElemeOrder> elemeOrders = elemeOrderMapper.findAll(searchModel);
+        Validate.notEmpty(elemeOrders, "订单不存在！");
+        return elemeOrders;
+    }
+
+    public List<String> obtainOrderIds(List<ElemeOrder> elemeOrders) {
+        List<String> orderIds = new ArrayList<String>();
+        for (ElemeOrder elemeOrder : elemeOrders) {
+            orderIds.add(elemeOrder.getOrderId());
+        }
+        return orderIds;
     }
 
     @Transactional(readOnly = true)
@@ -715,34 +755,43 @@ public class ElemeService {
     }
 
     /**
+     * 获取订单
+     *
+     * @param getOrderModel
+     * @return
+     */
+    public ApiRest getOrder(GetOrderModel getOrderModel) throws IOException {
+        BigInteger tenantId = getOrderModel.getTenantId();
+        BigInteger branchId = getOrderModel.getBranchId();
+        BigInteger elemeOrderId = getOrderModel.getElemeOrderId();
+
+
+        Branch branch = findBranch(tenantId, branchId);
+        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderId", elemeOrder.getOrderId());
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.getOrder", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "获取订单成功！");
+    }
+
+    /**
      * 批量查询订单
      *
      * @param batchGetOrdersModel
      * @return
-     * @throws Exception
+     * @throws IOException
      */
     @Transactional(readOnly = true)
-    public ApiRest batchGetOrders(BatchGetOrdersModel batchGetOrdersModel) throws Exception {
+    public ApiRest batchGetOrders(BatchGetOrdersModel batchGetOrdersModel) throws IOException {
         BigInteger tenantId = batchGetOrdersModel.getTenantId();
         BigInteger branchId = batchGetOrdersModel.getBranchId();
 
-        SearchModel branchSearchModel = new SearchModel(true);
-        branchSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        branchSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        Branch branch = branchMapper.find(branchSearchModel);
-        Validate.notNull(branch, "门店不存在！");
-
-        SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, batchGetOrdersModel.getElemeOrderIds());
-        List<ElemeOrder> elemeOrders = elemeOrderMapper.findAll(searchModel);
-        Validate.notEmpty(elemeOrders, "订单不存在！");
-
-        List<String> orderIds = new ArrayList<String>();
-        for (ElemeOrder elemeOrder : elemeOrders) {
-            orderIds.add(elemeOrder.getOrderId());
-        }
+        Branch branch = findBranch(tenantId, branchId);
+        List<ElemeOrder> elemeOrders = findAllElemeOrders(tenantId, branchId, batchGetOrdersModel.getElemeOrderIds());
+        List<String> orderIds = obtainOrderIds(elemeOrders);
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("orderIds", orderIds);
@@ -754,34 +803,136 @@ public class ElemeService {
     }
 
     /**
+     * 确认订单
+     *
+     * @param confirmOrderLiteModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest confirmOrderLite(ConfirmOrderLiteModel confirmOrderLiteModel) throws IOException {
+        BigInteger tenantId = confirmOrderLiteModel.getTenantId();
+        BigInteger branchId = confirmOrderLiteModel.getBranchId();
+        BigInteger elemeOrderId = confirmOrderLiteModel.getElemeOrderId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        ElemeOrder elemeOrder = findElemeOrderInfo(tenantId, branchId, elemeOrderId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderId", elemeOrder.getOrderId());
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.confirmOrderLite", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "确认订单成功！");
+    }
+
+    /**
+     * 取消订单
+     *
+     * @param cancelOrderLiteModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest cancelOrderLite(CancelOrderLiteModel cancelOrderLiteModel) throws IOException {
+        BigInteger tenantId = cancelOrderLiteModel.getTenantId();
+        BigInteger branchId = cancelOrderLiteModel.getBranchId();
+        BigInteger elemeOrderId = cancelOrderLiteModel.getElemeOrderId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        ElemeOrder elemeOrder = findElemeOrderInfo(tenantId, branchId, elemeOrderId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderId", elemeOrder.getOrderId());
+        params.put("type", cancelOrderLiteModel.getType());
+        ApplicationHandler.ifNotNullPut(params, "remark", cancelOrderLiteModel.getRemark());
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.cancelOrderLite", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "取消订单成功！");
+    }
+
+    /**
+     * 同意退单/同意取消单
+     *
+     * @param agreeRefundLiteModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest agreeRefundLite(AgreeRefundLiteModel agreeRefundLiteModel) throws IOException {
+        BigInteger tenantId = agreeRefundLiteModel.getTenantId();
+        BigInteger branchId = agreeRefundLiteModel.getBranchId();
+        BigInteger elemeOrderId = agreeRefundLiteModel.getElemeOrderId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        ElemeOrder elemeOrder = findElemeOrderInfo(tenantId, branchId, elemeOrderId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderId", elemeOrder.getOrderId());
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.agreeRefundLite", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "同意退单/同意取消单成功！");
+    }
+
+    /**
+     * 不同意退单/不同意取消单
+     *
+     * @param disagreeRefundLiteModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest disagreeRefundLite(DisagreeRefundLiteModel disagreeRefundLiteModel) throws IOException {
+        BigInteger tenantId = disagreeRefundLiteModel.getTenantId();
+        BigInteger branchId = disagreeRefundLiteModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, disagreeRefundLiteModel.getElemeOrderId());
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderId", elemeOrder.getOrderId());
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.disagreeRefundLite", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "不同意退单/不同意取消单成功！");
+    }
+
+    /**
+     * 获取订单配送记录
+     *
+     * @param getDeliveryStateRecordModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest getDeliveryStateRecord(GetDeliveryStateRecordModel getDeliveryStateRecordModel) throws IOException {
+        BigInteger tenantId = getDeliveryStateRecordModel.getTenantId();
+        BigInteger branchId = getDeliveryStateRecordModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, getDeliveryStateRecordModel.getElemeOrderId());
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderId", elemeOrder.getOrderId());
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.getDeliveryStateRecord", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "获取订单配送记录成功！");
+    }
+
+    /**
      * 批量获取订单配送记录
      *
      * @param batchGetDeliveryStatesModel
      * @return
-     * @throws Exception
+     * @throws IOException
      */
     @Transactional(readOnly = true)
-    public ApiRest batchGetDeliveryStates(BatchGetDeliveryStatesModel batchGetDeliveryStatesModel) throws Exception {
+    public ApiRest batchGetDeliveryStates(BatchGetDeliveryStatesModel batchGetDeliveryStatesModel) throws IOException {
         BigInteger tenantId = batchGetDeliveryStatesModel.getTenantId();
         BigInteger branchId = batchGetDeliveryStatesModel.getBranchId();
 
-        SearchModel branchSearchModel = new SearchModel(true);
-        branchSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        branchSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        Branch branch = branchMapper.find(branchSearchModel);
-        Validate.notNull(branch, "门店不存在！");
-
-        SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, batchGetDeliveryStatesModel.getElemeOrderIds());
-        List<ElemeOrder> elemeOrders = elemeOrderMapper.findAll(searchModel);
-        Validate.notEmpty(elemeOrders, "订单不存在！");
-
-        List<String> orderIds = new ArrayList<String>();
-        for (ElemeOrder elemeOrder : elemeOrders) {
-            orderIds.add(elemeOrder.getOrderId());
-        }
+        Branch branch = findBranch(tenantId, branchId);
+        List<ElemeOrder> elemeOrders = findAllElemeOrders(tenantId, branchId, batchGetDeliveryStatesModel.getElemeOrderIds());
+        List<String> orderIds = obtainOrderIds(elemeOrders);
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("orderIds", orderIds);
@@ -790,5 +941,211 @@ public class ElemeService {
         Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
 
         return new ApiRest(callElemeSystemApiRest.getData(), "批量获取订单配送记录成功！");
+    }
+
+    /**
+     * 配送异常或者物流拒单后选择自行配送
+     *
+     * @param deliveryBySelfLiteModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest deliveryBySelfLite(DeliveryBySelfLiteModel deliveryBySelfLiteModel) throws IOException {
+        BigInteger tenantId = deliveryBySelfLiteModel.getTenantId();
+        BigInteger branchId = deliveryBySelfLiteModel.getBranchId();
+        BigInteger elemeOrderId = deliveryBySelfLiteModel.getElemeOrderId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderId", elemeOrder.getOrderId());
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.deliveryBySelfLite", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "配送异常或者物流拒单后选择自行配送成功！");
+    }
+
+    /**
+     * 配送异常或者物流拒单后选择不再配送
+     *
+     * @param noMoreDeliveryLiteModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest noMoreDeliveryLite(NoMoreDeliveryLiteModel noMoreDeliveryLiteModel) throws IOException {
+        BigInteger tenantId = noMoreDeliveryLiteModel.getTenantId();
+        BigInteger branchId = noMoreDeliveryLiteModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, noMoreDeliveryLiteModel.getElemeOrderId());
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderId", elemeOrder.getOrderId());
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.noMoreDeliveryLite", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "配送异常或者物流拒单后选择不再配送成功！");
+    }
+
+    /**
+     * 订单确认送达
+     *
+     * @param receivedOrderLiteModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest receivedOrderLite(ReceivedOrderLiteModel receivedOrderLiteModel) throws IOException {
+        BigInteger tenantId = receivedOrderLiteModel.getTenantId();
+        BigInteger branchId = receivedOrderLiteModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, receivedOrderLiteModel.getElemeOrderId());
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderId", elemeOrder.getOrderId());
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.receivedOrderLite", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "订单确认送达成功！");
+    }
+
+    /**
+     * 回复催单
+     *
+     * @param replyReminderModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest replyReminder(ReplyReminderModel replyReminderModel) throws IOException {
+        BigInteger tenantId = replyReminderModel.getTenantId();
+        BigInteger branchId = replyReminderModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, replyReminderModel.getElemeOrderId());
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderId", elemeOrder.getOrderId());
+        params.put("type", replyReminderModel.getType());
+        ApplicationHandler.ifNotNullPut(params, "content", replyReminderModel.getContent());
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.replyReminder", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "回复催单成功！");
+    }
+
+    /**
+     * 获取指定订单菜品活动价格
+     *
+     * @param getCommoditiesModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest getCommodities(GetCommoditiesModel getCommoditiesModel) throws IOException {
+        BigInteger tenantId = getCommoditiesModel.getTenantId();
+        BigInteger branchId = getCommoditiesModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        ElemeOrder elemeOrder = findElemeOrderInfo(tenantId, branchId, getCommoditiesModel.getElemeOrderId());
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderId", elemeOrder.getOrderId());
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.getCommodities", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "获取指定订单菜品活动价格成功！");
+    }
+
+    /**
+     * 批量获取订单菜品活动价格成功
+     *
+     * @param batchGetCommoditiesModel
+     * @return
+     */
+    public ApiRest batchGetCommodities(BatchGetCommoditiesModel batchGetCommoditiesModel) throws IOException {
+        BigInteger tenantId = batchGetCommoditiesModel.getTenantId();
+        BigInteger branchId = batchGetCommoditiesModel.getBranchId();
+
+        Branch branch = findBranchInfo(tenantId, branchId);
+        List<ElemeOrder> elemeOrders = findAllElemeOrders(tenantId, branchId, batchGetCommoditiesModel.getElemeOrderIds());
+        List<String> orderIds = obtainOrderIds(elemeOrders);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderIds", orderIds);
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.mgetCommodities", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "批量获取订单菜品活动价格成功！");
+    }
+
+    /**
+     * 获取订单退款信息
+     *
+     * @param getRefundOrderModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest getRefundOrder(GetRefundOrderModel getRefundOrderModel) throws IOException {
+        BigInteger tenantId = getRefundOrderModel.getTenantId();
+        BigInteger branchId = getRefundOrderModel.getBranchId();
+
+        Branch branch = findBranchInfo(tenantId, branchId);
+        ElemeOrder elemeOrder = findElemeOrderInfo(tenantId, branchId, getRefundOrderModel.getElemeOrderId());
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderId", elemeOrder.getOrderId());
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.getRefundOrder", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "获取订单退款信息成功！");
+    }
+
+    /**
+     * 批量获取订单退款信息
+     *
+     * @param batchGetRefundOrdersModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest batchGetRefundOrders(BatchGetRefundOrdersModel batchGetRefundOrdersModel) throws IOException {
+        BigInteger tenantId = batchGetRefundOrdersModel.getTenantId();
+        BigInteger branchId = batchGetRefundOrdersModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        List<ElemeOrder> elemeOrders = findAllElemeOrders(tenantId, branchId, batchGetRefundOrdersModel.getElemeOrderIds());
+        List<String> orderIds = obtainOrderIds(elemeOrders);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderIds", orderIds);
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.mgetRefundOrders", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "批量获取订单退款信息成功！");
+    }
+
+    /**
+     * 取消呼叫配送
+     *
+     * @param cancelDeliveryModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest cancelDelivery(CancelDeliveryModel cancelDeliveryModel) throws IOException {
+        BigInteger tenantId = cancelDeliveryModel.getTenantId();
+        BigInteger branchId = cancelDeliveryModel.getBranchId();
+        BigInteger elemeOrderId = cancelDeliveryModel.getElemeOrderId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderId", elemeOrder.getOrderId());
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.cancelDelivery", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "取消呼叫配送成功！");
     }
 }

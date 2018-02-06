@@ -539,20 +539,7 @@ public class ElemeController extends BasicController {
             GetOrderModel getOrderModel = ApplicationHandler.instantiateObject(GetOrderModel.class, requestParameters);
             getOrderModel.validateAndThrow();
 
-            BigInteger tenantId = getOrderModel.getTenantId();
-            BigInteger branchId = getOrderModel.getBranchId();
-            BigInteger elemeOrderId = getOrderModel.getElemeOrderId();
-
-
-            Branch branch = elemeService.findBranchInfo(tenantId, branchId);
-            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(tenantId, branchId, elemeOrderId);
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("orderId", elemeOrder.getOrderId());
-
-            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.getOrder", params);
-            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
-
-            apiRest = new ApiRest(callElemeSystemApiRest.getData(), "查询店铺活动商品成功！");
+            apiRest = elemeService.getOrder(getOrderModel);
         } catch (Exception e) {
             LogUtils.error("获取订单失败", controllerSimpleName, "getOrder", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -591,19 +578,7 @@ public class ElemeController extends BasicController {
             ConfirmOrderLiteModel confirmOrderLiteModel = ApplicationHandler.instantiateObject(ConfirmOrderLiteModel.class, requestParameters);
             confirmOrderLiteModel.validateAndThrow();
 
-            BigInteger tenantId = confirmOrderLiteModel.getTenantId();
-            BigInteger branchId = confirmOrderLiteModel.getBranchId();
-            BigInteger elemeOrderId = confirmOrderLiteModel.getElemeOrderId();
-
-            Branch branch = elemeService.findBranchInfo(tenantId, branchId);
-            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(tenantId, branchId, elemeOrderId);
-
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("orderId", elemeOrder.getOrderId());
-            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.confirmOrderLite", params);
-            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
-
-            apiRest = new ApiRest(callElemeSystemApiRest.getData(), "确认订单成功！");
+            apiRest = elemeService.confirmOrderLite(confirmOrderLiteModel);
         } catch (Exception e) {
             LogUtils.error("确认订单失败", controllerSimpleName, "confirmOrderLite", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -625,22 +600,7 @@ public class ElemeController extends BasicController {
             CancelOrderLiteModel cancelOrderLiteModel = ApplicationHandler.instantiateObject(CancelOrderLiteModel.class, requestParameters);
             cancelOrderLiteModel.validateAndThrow();
 
-            BigInteger tenantId = cancelOrderLiteModel.getTenantId();
-            BigInteger branchId = cancelOrderLiteModel.getBranchId();
-            BigInteger elemeOrderId = cancelOrderLiteModel.getElemeOrderId();
-
-            Branch branch = elemeService.findBranchInfo(tenantId, branchId);
-            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(tenantId, branchId, elemeOrderId);
-
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("orderId", elemeOrder.getOrderId());
-            params.put("type", cancelOrderLiteModel.getType());
-            ApplicationHandler.ifNotNullPut(params, "remark", cancelOrderLiteModel.getRemark());
-
-            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.cancelOrderLite", params);
-            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
-
-            apiRest = new ApiRest(callElemeSystemApiRest.getData(), "取消订单成功！");
+            apiRest = elemeService.cancelOrderLite(cancelOrderLiteModel);
         } catch (Exception e) {
             LogUtils.error("取消订单失败", controllerSimpleName, "cancelOrderLite", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -662,19 +622,7 @@ public class ElemeController extends BasicController {
             AgreeRefundLiteModel agreeRefundLiteModel = ApplicationHandler.instantiateObject(AgreeRefundLiteModel.class, requestParameters);
             agreeRefundLiteModel.validateAndThrow();
 
-            BigInteger tenantId = agreeRefundLiteModel.getTenantId();
-            BigInteger branchId = agreeRefundLiteModel.getBranchId();
-            BigInteger elemeOrderId = agreeRefundLiteModel.getElemeOrderId();
-
-            Branch branch = elemeService.findBranchInfo(tenantId, branchId);
-            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(tenantId, branchId, elemeOrderId);
-
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("orderId", elemeOrder.getOrderId());
-            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.agreeRefundLite", params);
-            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
-
-            apiRest = new ApiRest(callElemeSystemApiRest.getData(), "同意退单/同意取消单失败成功！");
+            apiRest = elemeService.agreeRefundLite(agreeRefundLiteModel);
         } catch (Exception e) {
             LogUtils.error("同意退单/同意取消单失败", controllerSimpleName, "agreeRefundLite", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -695,20 +643,7 @@ public class ElemeController extends BasicController {
         try {
             DisagreeRefundLiteModel disagreeRefundLiteModel = ApplicationHandler.instantiateObject(DisagreeRefundLiteModel.class, requestParameters);
             disagreeRefundLiteModel.validateAndThrow();
-
-            BigInteger tenantId = disagreeRefundLiteModel.getTenantId();
-            BigInteger branchId = disagreeRefundLiteModel.getBranchId();
-            BigInteger elemeOrderId = disagreeRefundLiteModel.getElemeOrderId();
-
-            Branch branch = elemeService.findBranchInfo(tenantId, branchId);
-            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(tenantId, branchId, elemeOrderId);
-
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("orderId", elemeOrder.getOrderId());
-            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.disagreeRefundLite", params);
-            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
-
-            apiRest = new ApiRest(callElemeSystemApiRest.getData(), "不同意退单/不同意取消单成功！");
+            apiRest = elemeService.disagreeRefundLite(disagreeRefundLiteModel);
         } catch (Exception e) {
             LogUtils.error("不同意退单/不同意取消单失败", controllerSimpleName, "disagreeRefundLite", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -727,22 +662,9 @@ public class ElemeController extends BasicController {
         ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
-            GetDeliveryStateRecordModel deliveryStateRecordModel = ApplicationHandler.instantiateObject(GetDeliveryStateRecordModel.class, requestParameters);
-            deliveryStateRecordModel.validateAndThrow();
-
-            BigInteger tenantId = deliveryStateRecordModel.getTenantId();
-            BigInteger branchId = deliveryStateRecordModel.getBranchId();
-            BigInteger elemeOrderId = deliveryStateRecordModel.getElemeOrderId();
-
-            Branch branch = elemeService.findBranchInfo(tenantId, branchId);
-            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(tenantId, branchId, elemeOrderId);
-
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("orderId", elemeOrder.getOrderId());
-            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.getDeliveryStateRecord", params);
-            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
-
-            apiRest = new ApiRest(callElemeSystemApiRest.getData(), "获取订单配送记录成功！");
+            GetDeliveryStateRecordModel getDeliveryStateRecordModel = ApplicationHandler.instantiateObject(GetDeliveryStateRecordModel.class, requestParameters);
+            getDeliveryStateRecordModel.validateAndThrow();
+            apiRest = elemeService.getDeliveryStateRecord(getDeliveryStateRecordModel);
         } catch (Exception e) {
             LogUtils.error("获取订单配送记录失败", controllerSimpleName, "getDeliveryStateRecord", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -786,19 +708,7 @@ public class ElemeController extends BasicController {
             DeliveryBySelfLiteModel deliveryBySelfLiteModel = ApplicationHandler.instantiateObject(DeliveryBySelfLiteModel.class, requestParameters);
             deliveryBySelfLiteModel.validateAndThrow();
 
-            BigInteger tenantId = deliveryBySelfLiteModel.getTenantId();
-            BigInteger branchId = deliveryBySelfLiteModel.getBranchId();
-            BigInteger elemeOrderId = deliveryBySelfLiteModel.getElemeOrderId();
-
-            Branch branch = elemeService.findBranchInfo(tenantId, branchId);
-            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(tenantId, branchId, elemeOrderId);
-
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("orderId", elemeOrder.getOrderId());
-            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.deliveryBySelfLite", params);
-            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
-
-            apiRest = new ApiRest(callElemeSystemApiRest.getData(), "配送异常或者物流拒单后选择自行配送成功！");
+            apiRest = elemeService.deliveryBySelfLite(deliveryBySelfLiteModel);
         } catch (Exception e) {
             LogUtils.error("配送异常或者物流拒单后选择自行配送失败", controllerSimpleName, "deliveryBySelfLite", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -817,22 +727,10 @@ public class ElemeController extends BasicController {
         ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
-            NoMoreDeliveryLiteModel moreDeliveryLiteModel = ApplicationHandler.instantiateObject(NoMoreDeliveryLiteModel.class, requestParameters);
-            moreDeliveryLiteModel.validateAndThrow();
+            NoMoreDeliveryLiteModel noMoreDeliveryLiteModel = ApplicationHandler.instantiateObject(NoMoreDeliveryLiteModel.class, requestParameters);
+            noMoreDeliveryLiteModel.validateAndThrow();
 
-            BigInteger tenantId = moreDeliveryLiteModel.getTenantId();
-            BigInteger branchId = moreDeliveryLiteModel.getBranchId();
-            BigInteger elemeOrderId = moreDeliveryLiteModel.getElemeOrderId();
-
-            Branch branch = elemeService.findBranchInfo(tenantId, branchId);
-            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(tenantId, branchId, elemeOrderId);
-
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("orderId", elemeOrder.getOrderId());
-            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.noMoreDeliveryLite", params);
-            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
-
-            apiRest = new ApiRest(callElemeSystemApiRest.getData(), "配送异常或者物流拒单后选择不再配送成功！");
+            apiRest = elemeService.noMoreDeliveryLite(noMoreDeliveryLiteModel);
         } catch (Exception e) {
             LogUtils.error("配送异常或者物流拒单后选择不再配送失败", controllerSimpleName, "noMoreDeliveryLite", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -854,19 +752,7 @@ public class ElemeController extends BasicController {
             ReceivedOrderLiteModel receivedOrderLiteModel = ApplicationHandler.instantiateObject(ReceivedOrderLiteModel.class, requestParameters);
             receivedOrderLiteModel.validateAndThrow();
 
-            BigInteger tenantId = receivedOrderLiteModel.getTenantId();
-            BigInteger branchId = receivedOrderLiteModel.getBranchId();
-            BigInteger elemeOrderId = receivedOrderLiteModel.getElemeOrderId();
-
-            Branch branch = elemeService.findBranchInfo(tenantId, branchId);
-            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(tenantId, branchId, elemeOrderId);
-
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("orderId", elemeOrder.getOrderId());
-            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.receivedOrderLite", params);
-            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
-
-            apiRest = new ApiRest(callElemeSystemApiRest.getData(), "订单确认送达成功！");
+            apiRest = elemeService.receivedOrderLite(receivedOrderLiteModel);
         } catch (Exception e) {
             LogUtils.error("订单确认送达失败", controllerSimpleName, "receivedOrderLite", e, requestParameters);
             apiRest = new ApiRest(e);
@@ -888,23 +774,119 @@ public class ElemeController extends BasicController {
             ReplyReminderModel replyReminderModel = ApplicationHandler.instantiateObject(ReplyReminderModel.class, requestParameters);
             replyReminderModel.validateAndThrow();
 
-            BigInteger tenantId = replyReminderModel.getTenantId();
-            BigInteger branchId = replyReminderModel.getBranchId();
-            BigInteger elemeOrderId = replyReminderModel.getElemeOrderId();
-
-            Branch branch = elemeService.findBranchInfo(tenantId, branchId);
-            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(tenantId, branchId, elemeOrderId);
-
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("orderId", elemeOrder.getOrderId());
-            params.put("type", replyReminderModel.getType());
-            ApplicationHandler.ifNotNullPut(params, "content", replyReminderModel.getContent());
-            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.replyReminder", params);
-            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
-
-            apiRest = new ApiRest(callElemeSystemApiRest.getData(), "回复催单成功！");
+            apiRest = elemeService.replyReminder(replyReminderModel);
         } catch (Exception e) {
             LogUtils.error("回复催单失败", controllerSimpleName, "replyReminder", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 获取指定订单菜品活动价格
+     *
+     * @return
+     */
+    @RequestMapping(value = "getCommodities")
+    @ResponseBody
+    public String getCommodities() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            GetCommoditiesModel getCommoditiesModel = ApplicationHandler.instantiateObject(GetCommoditiesModel.class, requestParameters);
+            getCommoditiesModel.validateAndThrow();
+
+            apiRest = elemeService.getCommodities(getCommoditiesModel);
+        } catch (Exception e) {
+            LogUtils.error("获取指定订单菜品活动价格失败", controllerSimpleName, "getCommodities", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 批量获取订单菜品活动价格
+     *
+     * @return
+     */
+    @RequestMapping(value = "batchGetCommodities")
+    @ResponseBody
+    public String batchGetCommodities() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            BatchGetCommoditiesModel batchGetCommoditiesModel = ApplicationHandler.instantiateObject(BatchGetCommoditiesModel.class, requestParameters);
+            batchGetCommoditiesModel.validateAndThrow();
+
+            apiRest = elemeService.batchGetCommodities(batchGetCommoditiesModel);
+        } catch (Exception e) {
+            LogUtils.error("批量获取订单菜品活动价格失败", controllerSimpleName, "batchGetCommodities", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 获取订单退款信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "getRefundOrder")
+    @ResponseBody
+    public String getRefundOrder() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            GetRefundOrderModel getRefundOrderModel = ApplicationHandler.instantiateObject(GetRefundOrderModel.class, requestParameters);
+            getRefundOrderModel.validateAndThrow();
+
+            apiRest = elemeService.getRefundOrder(getRefundOrderModel);
+        } catch (Exception e) {
+            LogUtils.error("获取订单退款信息失败", controllerSimpleName, "getRefundOrder", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 批量获取订单退款信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "batchGetRefundOrders")
+    @ResponseBody
+    public String batchGetRefundOrders() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            BatchGetRefundOrdersModel batchGetRefundOrdersModel = ApplicationHandler.instantiateObject(BatchGetRefundOrdersModel.class, requestParameters);
+            batchGetRefundOrdersModel.validateAndThrow();
+
+            apiRest = elemeService.batchGetRefundOrders(batchGetRefundOrdersModel);
+        } catch (Exception e) {
+            LogUtils.error("批量获取订单退款信息失败", controllerSimpleName, "batchGetRefundOrders", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 取消呼叫配送
+     *
+     * @return
+     */
+    @RequestMapping(value = "cancelDelivery")
+    @ResponseBody
+    public String cancelDelivery() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            CancelDeliveryModel cancelDeliveryModel = ApplicationHandler.instantiateObject(CancelDeliveryModel.class, requestParameters);
+            cancelDeliveryModel.validateAndThrow();
+
+            apiRest = elemeService.cancelDelivery(cancelDeliveryModel);
+        } catch (Exception e) {
+            LogUtils.error("取消呼叫配送失败", controllerSimpleName, "cancelDelivery", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
