@@ -485,6 +485,11 @@ public class GoodsService extends BasicService {
         return new ApiRest(zTreeNodes, "查询菜品分类成功！");
     }
 
+    /**
+     * 删除菜品、菜品规格、菜品口味组、菜品口味
+     * @param deleteGoodsModel
+     * @return
+     */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest deleteGoods(DeleteGoodsModel deleteGoodsModel) {
         BigInteger tenantId = deleteGoodsModel.getTenantId();
