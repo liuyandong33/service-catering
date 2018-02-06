@@ -13,6 +13,7 @@ import java.util.Map;
 
 public class DingtalkUtils {
     private static final String DINGTALK_UTILS_SIMPLE_NAME = "DingtalkUtils";
+    private static String HEADERS = "{\"Content-Type\": \"application/json;charset=UTF-8\"}";
 
     public static String obtainAccessToken() throws IOException {
         String accessToken = null;
@@ -63,6 +64,7 @@ public class DingtalkUtils {
         Map<String, String> doPostRequestParameters = new HashMap<String, String>();
         doPostRequestParameters.put("url", url);
         doPostRequestParameters.put("requestBody", GsonUtils.toJson(sendRequestBody));
+        doPostRequestParameters.put("headers", HEADERS);
         String result = ProxyUtils.doPostOriginalWithRequestParameters(Constants.SERVICE_NAME_OUT, "proxy", "doPost", doPostRequestParameters);
         JSONObject resultJsonObject = JSONObject.fromObject(result);
         int errcode = resultJsonObject.getInt("errcode");
