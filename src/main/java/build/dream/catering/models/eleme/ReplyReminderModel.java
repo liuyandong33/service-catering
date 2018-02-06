@@ -1,14 +1,17 @@
 package build.dream.catering.models.eleme;
 
-import build.dream.common.constraints.InList;
 import build.dream.common.models.BasicModel;
 import build.dream.common.utils.ApplicationHandler;
+import org.apache.commons.lang.Validate;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
 
-public class CancelOrderLiteModel extends BasicModel {
-    private static final String[] TYPES = {"others", "fakeOrder", "contactUserFailed", "foodSoldOut", "restaurantClosed", "distanceTooFar", "restaurantTooBusy", "forceRejectOrder", "deliveryFault", "notSatisfiedDeliveryRequirement"};
+public class ReplyReminderModel extends BasicModel {
+    private static final String[] TYPES = {"custom", "hasOut", "inCooking", "weather", "shortHand"};
+    private static final String CUSTOM = "custom";
+
     @NotNull
     private BigInteger tenantId;
 
@@ -20,7 +23,8 @@ public class CancelOrderLiteModel extends BasicModel {
 
     private String type;
 
-    private String remark;
+    @Length(max = 30)
+    private String content;
 
     public BigInteger getTenantId() {
         return tenantId;
@@ -54,17 +58,20 @@ public class CancelOrderLiteModel extends BasicModel {
         this.type = type;
     }
 
-    public String getRemark() {
-        return remark;
+    public String getContent() {
+        return content;
     }
 
-    public void setRemark(String remark) {
-        this.remark = remark;
+    public void setContent(String content) {
+        this.content = content;
     }
 
     @Override
     public void validateAndThrow() {
         super.validateAndThrow();
         ApplicationHandler.inArray(TYPES, type, "type");
+        if (CUSTOM.equals(type)) {
+            ApplicationHandler.notBlank(content, "content");
+        }
     }
 }

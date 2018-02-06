@@ -2,10 +2,7 @@ package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.*;
-import build.dream.catering.models.eleme.BatchGetOrdersModel;
-import build.dream.catering.models.eleme.DoBindingStoreModel;
-import build.dream.catering.models.eleme.ObtainElemeDeliveryOrderStateChangeMessageModel;
-import build.dream.catering.models.eleme.PullElemeOrderModel;
+import build.dream.catering.models.eleme.*;
 import build.dream.catering.utils.ElemeUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
@@ -260,6 +257,7 @@ public class ElemeService {
 
     /**
      * 处理饿了么退单消息
+     *
      * @param shopId：店铺ID
      * @param message：消息内容
      * @param type：消息类型
@@ -334,6 +332,7 @@ public class ElemeService {
 
     /**
      * 处理饿了么催单消息
+     *
      * @param shopId：饿了么店铺ID
      * @param message：消息内容
      * @param type：消息类型
@@ -696,6 +695,7 @@ public class ElemeService {
 
     /**
      * 发布饿了么订单消息
+     *
      * @param tenantId：商户ID
      * @param branchId：门店ID
      * @param elemeOrderId：饿了么订单ID
@@ -714,6 +714,13 @@ public class ElemeService {
         QueueUtils.convertAndSend(elemeMessageChannelTopic, messageJsonObject.toString());
     }
 
+    /**
+     * 批量查询订单
+     *
+     * @param batchGetOrdersModel
+     * @return
+     * @throws Exception
+     */
     @Transactional(readOnly = true)
     public ApiRest batchGetOrders(BatchGetOrdersModel batchGetOrdersModel) throws Exception {
         BigInteger tenantId = batchGetOrdersModel.getTenantId();
@@ -744,5 +751,44 @@ public class ElemeService {
         Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
 
         return new ApiRest(callElemeSystemApiRest.getData(), "批量查询订单成功！");
+    }
+
+    /**
+     * 批量获取订单配送记录
+     *
+     * @param batchGetDeliveryStatesModel
+     * @return
+     * @throws Exception
+     */
+    @Transactional(readOnly = true)
+    public ApiRest batchGetDeliveryStates(BatchGetDeliveryStatesModel batchGetDeliveryStatesModel) throws Exception {
+        BigInteger tenantId = batchGetDeliveryStatesModel.getTenantId();
+        BigInteger branchId = batchGetDeliveryStatesModel.getBranchId();
+
+        SearchModel branchSearchModel = new SearchModel(true);
+        branchSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        branchSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        Branch branch = branchMapper.find(branchSearchModel);
+        Validate.notNull(branch, "门店不存在！");
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, batchGetDeliveryStatesModel.getElemeOrderIds());
+        List<ElemeOrder> elemeOrders = elemeOrderMapper.findAll(searchModel);
+        Validate.notEmpty(elemeOrders, "订单不存在！");
+
+        List<String> orderIds = new ArrayList<String>();
+        for (ElemeOrder elemeOrder : elemeOrders) {
+            orderIds.add(elemeOrder.getOrderId());
+        }
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderIds", orderIds);
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.batchGetDeliveryStates", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "批量获取订单配送记录成功！");
     }
 }

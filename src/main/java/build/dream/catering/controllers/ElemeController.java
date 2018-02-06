@@ -31,11 +31,6 @@ import java.util.Map;
 @Controller
 @RequestMapping(value = "/eleme")
 public class ElemeController extends BasicController {
-    private static final int[] ELEME_ORDER_STATE_CHANGE_MESSAGE_TYPES = {12, 14, 15, 17, 18};
-    private static final int[] ELEME_REFUND_ORDER_MESSAGE_TYPES = {20, 21, 22, 23, 24, 25, 26, 30, 31, 32, 33, 34, 35, 36};
-    private static final int[] ELEME_REMINDER_MESSAGE_TYPES = {45, 46};
-    private static final int[] ELEME_DELIVERY_ORDER_STATE_CHANGE_MESSAGE_TYPES = {51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76};
-    private static final int[] ELEME_SHOP_STATE_CHANGE_MESSAGE_TYPES = {91, 92};
     @Autowired
     private ElemeService elemeService;
 
@@ -334,170 +329,6 @@ public class ElemeController extends BasicController {
         return GsonUtils.toJson(apiRest);
     }
 
-    @RequestMapping(value = "/confirmOrderLite")
-    @ResponseBody
-    public String confirmOrderLite() {
-        ApiRest apiRest = null;
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
-            String tenantId = requestParameters.get("tenantId");
-            Validate.notNull(tenantId, "参数(tenantId)不能为空！");
-
-            String branchId = requestParameters.get("branchId");
-            Validate.notNull(branchId, "参数(branchId)不能为空！");
-
-            String elemeOrderId = requestParameters.get("elemeOrderId");
-            Validate.notNull(elemeOrderId, "参数(elemeOrderId)不能为空！");
-
-            BigInteger bigIntegerTenantId = NumberUtils.createBigInteger(tenantId);
-            BigInteger bigIntegerBranchId = NumberUtils.createBigInteger(branchId);
-            BigInteger bigIntegerElemeOrderId = NumberUtils.createBigInteger(elemeOrderId);
-
-            Branch branch = elemeService.findBranchInfo(bigIntegerTenantId, bigIntegerBranchId);
-            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(bigIntegerTenantId, bigIntegerBranchId, bigIntegerElemeOrderId);
-
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("orderId", elemeOrder.getOrderId());
-            apiRest = ElemeUtils.callElemeSystem(tenantId, branchId, branch.getElemeAccountType(), "eleme.order.confirmOrderLite", params);
-        } catch (Exception e) {
-            LogUtils.error("确认订单失败", controllerSimpleName, "confirmOrderLite", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
-    }
-
-    @RequestMapping(value = "/cancelOrderLite")
-    @ResponseBody
-    public String cancelOrderLite() {
-        ApiRest apiRest = null;
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
-            CancelOrderLiteModel cancelOrderLiteModel = ApplicationHandler.instantiateObject(CancelOrderLiteModel.class, requestParameters);
-            cancelOrderLiteModel.validateAndThrow();
-
-            Branch branch = elemeService.findBranchInfo(cancelOrderLiteModel.getTenantId(), cancelOrderLiteModel.getBranchId());
-            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(cancelOrderLiteModel.getTenantId(), cancelOrderLiteModel.getBranchId(), cancelOrderLiteModel.getElemeOrderId());
-
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("orderId", elemeOrder.getOrderId());
-            apiRest = ElemeUtils.callElemeSystem(cancelOrderLiteModel.getTenantId().toString(), branch.getId().toString(), branch.getElemeAccountType(), "eleme.order.cancelOrderLite", params);
-        } catch (Exception e) {
-            LogUtils.error("取消订单失败", controllerSimpleName, "cancelOrderLite", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
-    }
-
-    @RequestMapping(value = "/agreeRefundLite")
-    @ResponseBody
-    public String agreeRefundLite() {
-        ApiRest apiRest = null;
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
-            AgreeRefundLiteModel agreeRefundLiteModel = ApplicationHandler.instantiateObject(AgreeRefundLiteModel.class, requestParameters);
-            agreeRefundLiteModel.validateAndThrow();
-
-            Branch branch = elemeService.findBranchInfo(agreeRefundLiteModel.getTenantId(), agreeRefundLiteModel.getBranchId());
-            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(agreeRefundLiteModel.getTenantId(), agreeRefundLiteModel.getBranchId(), agreeRefundLiteModel.getElemeOrderId());
-
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("orderId", elemeOrder.getOrderId());
-            apiRest = ElemeUtils.callElemeSystem(agreeRefundLiteModel.getTenantId().toString(), branch.getId().toString(), branch.getElemeAccountType(), "eleme.order.agreeRefundLite", params);
-        } catch (Exception e) {
-            LogUtils.error("同意退单/同意取消单失败", controllerSimpleName, "agreeRefundLite", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
-    }
-
-    @RequestMapping(value = "/disagreeRefundLite")
-    @ResponseBody
-    public String disagreeRefundLite() {
-        ApiRest apiRest = null;
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
-            DisagreeRefundLiteModel disagreeRefundLiteModel = ApplicationHandler.instantiateObject(DisagreeRefundLiteModel.class, requestParameters);
-            disagreeRefundLiteModel.validateAndThrow();
-
-            Branch branch = elemeService.findBranchInfo(disagreeRefundLiteModel.getTenantId(), disagreeRefundLiteModel.getBranchId());
-            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(disagreeRefundLiteModel.getTenantId(), disagreeRefundLiteModel.getBranchId(), disagreeRefundLiteModel.getElemeOrderId());
-
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("orderId", elemeOrder.getOrderId());
-            apiRest = ElemeUtils.callElemeSystem(disagreeRefundLiteModel.getTenantId().toString(), branch.getId().toString(), branch.getElemeAccountType(), "eleme.order.disagreeRefundLite", params);
-        } catch (Exception e) {
-            LogUtils.error("不同意退单/不同意取消单失败", controllerSimpleName, "disagreeRefundLite", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
-    }
-
-    @RequestMapping(value = "/getDeliveryStateRecord")
-    @ResponseBody
-    public String getDeliveryStateRecord() {
-        ApiRest apiRest = null;
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
-            GetDeliveryStateRecordModel deliveryStateRecordModel = ApplicationHandler.instantiateObject(GetDeliveryStateRecordModel.class, requestParameters);
-            deliveryStateRecordModel.validateAndThrow();
-
-            Branch branch = elemeService.findBranchInfo(deliveryStateRecordModel.getTenantId(), deliveryStateRecordModel.getBranchId());
-            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(deliveryStateRecordModel.getTenantId(), deliveryStateRecordModel.getBranchId(), deliveryStateRecordModel.getElemeOrderId());
-
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("orderId", elemeOrder.getOrderId());
-            apiRest = ElemeUtils.callElemeSystem(deliveryStateRecordModel.getTenantId().toString(), branch.getId().toString(), branch.getElemeAccountType(), "eleme.order.getDeliveryStateRecord", params);
-        } catch (Exception e) {
-            LogUtils.error("获取订单配送记录失败", controllerSimpleName, "getDeliveryStateRecord", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
-    }
-
-    @RequestMapping(value = "/deliveryBySelfLite")
-    @ResponseBody
-    public String deliveryBySelfLite() {
-        ApiRest apiRest = null;
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
-            DeliveryBySelfLiteModel deliveryBySelfLiteModel = ApplicationHandler.instantiateObject(DeliveryBySelfLiteModel.class, requestParameters);
-            deliveryBySelfLiteModel.validateAndThrow();
-
-            Branch branch = elemeService.findBranchInfo(deliveryBySelfLiteModel.getTenantId(), deliveryBySelfLiteModel.getBranchId());
-            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(deliveryBySelfLiteModel.getTenantId(), deliveryBySelfLiteModel.getBranchId(), deliveryBySelfLiteModel.getElemeOrderId());
-
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("orderId", elemeOrder.getOrderId());
-            apiRest = ElemeUtils.callElemeSystem(deliveryBySelfLiteModel.getTenantId().toString(), branch.getId().toString(), branch.getElemeAccountType(), "eleme.order.deliveryBySelfLite", params);
-        } catch (Exception e) {
-            LogUtils.error("配送异常或者物流拒单后选择自行配送失败", controllerSimpleName, "deliveryBySelfLite", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
-    }
-
-    @RequestMapping(value = "/noMoreDeliveryLite")
-    @ResponseBody
-    public String noMoreDeliveryLite() {
-        ApiRest apiRest = null;
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
-            NoMoreDeliveryLiteModel moreDeliveryLiteModel = ApplicationHandler.instantiateObject(NoMoreDeliveryLiteModel.class, requestParameters);
-            moreDeliveryLiteModel.validateAndThrow();
-
-            Branch branch = elemeService.findBranchInfo(moreDeliveryLiteModel.getTenantId(), moreDeliveryLiteModel.getBranchId());
-            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(moreDeliveryLiteModel.getTenantId(), moreDeliveryLiteModel.getBranchId(), moreDeliveryLiteModel.getElemeOrderId());
-
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("orderId", elemeOrder.getOrderId());
-            apiRest = ElemeUtils.callElemeSystem(moreDeliveryLiteModel.getTenantId().toString(), branch.getId().toString(), branch.getElemeAccountType(), "eleme.order.noMoreDeliveryLite", params);
-        } catch (Exception e) {
-            LogUtils.error("配送异常或者物流拒单后选择不再配送失败", controllerSimpleName, "noMoreDeliveryLite", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
-    }
-
     @RequestMapping(value = "/obtainElemeDeliveryOrderStateChangeMessage")
     @ResponseBody
     public String obtainElemeDeliveryOrderStateChangeMessage() {
@@ -741,6 +572,339 @@ public class ElemeController extends BasicController {
             apiRest = elemeService.batchGetOrders(batchGetOrdersModel);
         } catch (Exception e) {
             LogUtils.error("批量获取订单失败", controllerSimpleName, "batchGetOrders", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 确认订单
+     *
+     * @return
+     */
+    @RequestMapping(value = "/confirmOrderLite")
+    @ResponseBody
+    public String confirmOrderLite() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            ConfirmOrderLiteModel confirmOrderLiteModel = ApplicationHandler.instantiateObject(ConfirmOrderLiteModel.class, requestParameters);
+            confirmOrderLiteModel.validateAndThrow();
+
+            BigInteger tenantId = confirmOrderLiteModel.getTenantId();
+            BigInteger branchId = confirmOrderLiteModel.getBranchId();
+            BigInteger elemeOrderId = confirmOrderLiteModel.getElemeOrderId();
+
+            Branch branch = elemeService.findBranchInfo(tenantId, branchId);
+            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(tenantId, branchId, elemeOrderId);
+
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("orderId", elemeOrder.getOrderId());
+            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.confirmOrderLite", params);
+            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+            apiRest = new ApiRest(callElemeSystemApiRest.getData(), "确认订单成功！");
+        } catch (Exception e) {
+            LogUtils.error("确认订单失败", controllerSimpleName, "confirmOrderLite", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 取消订单
+     *
+     * @return
+     */
+    @RequestMapping(value = "/cancelOrderLite")
+    @ResponseBody
+    public String cancelOrderLite() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            CancelOrderLiteModel cancelOrderLiteModel = ApplicationHandler.instantiateObject(CancelOrderLiteModel.class, requestParameters);
+            cancelOrderLiteModel.validateAndThrow();
+
+            BigInteger tenantId = cancelOrderLiteModel.getTenantId();
+            BigInteger branchId = cancelOrderLiteModel.getBranchId();
+            BigInteger elemeOrderId = cancelOrderLiteModel.getElemeOrderId();
+
+            Branch branch = elemeService.findBranchInfo(tenantId, branchId);
+            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(tenantId, branchId, elemeOrderId);
+
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("orderId", elemeOrder.getOrderId());
+            params.put("type", cancelOrderLiteModel.getType());
+            ApplicationHandler.ifNotNullPut(params, "remark", cancelOrderLiteModel.getRemark());
+
+            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.cancelOrderLite", params);
+            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+            apiRest = new ApiRest(callElemeSystemApiRest.getData(), "取消订单成功！");
+        } catch (Exception e) {
+            LogUtils.error("取消订单失败", controllerSimpleName, "cancelOrderLite", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 同意退单/同意取消单(推荐)
+     *
+     * @return
+     */
+    @RequestMapping(value = "/agreeRefundLite")
+    @ResponseBody
+    public String agreeRefundLite() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            AgreeRefundLiteModel agreeRefundLiteModel = ApplicationHandler.instantiateObject(AgreeRefundLiteModel.class, requestParameters);
+            agreeRefundLiteModel.validateAndThrow();
+
+            BigInteger tenantId = agreeRefundLiteModel.getTenantId();
+            BigInteger branchId = agreeRefundLiteModel.getBranchId();
+            BigInteger elemeOrderId = agreeRefundLiteModel.getElemeOrderId();
+
+            Branch branch = elemeService.findBranchInfo(tenantId, branchId);
+            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(tenantId, branchId, elemeOrderId);
+
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("orderId", elemeOrder.getOrderId());
+            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.agreeRefundLite", params);
+            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+            apiRest = new ApiRest(callElemeSystemApiRest.getData(), "同意退单/同意取消单失败成功！");
+        } catch (Exception e) {
+            LogUtils.error("同意退单/同意取消单失败", controllerSimpleName, "agreeRefundLite", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 不同意退单/不同意取消单
+     *
+     * @return
+     */
+    @RequestMapping(value = "/disagreeRefundLite")
+    @ResponseBody
+    public String disagreeRefundLite() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            DisagreeRefundLiteModel disagreeRefundLiteModel = ApplicationHandler.instantiateObject(DisagreeRefundLiteModel.class, requestParameters);
+            disagreeRefundLiteModel.validateAndThrow();
+
+            BigInteger tenantId = disagreeRefundLiteModel.getTenantId();
+            BigInteger branchId = disagreeRefundLiteModel.getBranchId();
+            BigInteger elemeOrderId = disagreeRefundLiteModel.getElemeOrderId();
+
+            Branch branch = elemeService.findBranchInfo(tenantId, branchId);
+            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(tenantId, branchId, elemeOrderId);
+
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("orderId", elemeOrder.getOrderId());
+            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.disagreeRefundLite", params);
+            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+            apiRest = new ApiRest(callElemeSystemApiRest.getData(), "不同意退单/不同意取消单成功！");
+        } catch (Exception e) {
+            LogUtils.error("不同意退单/不同意取消单失败", controllerSimpleName, "disagreeRefundLite", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 获取订单配送记录
+     *
+     * @return
+     */
+    @RequestMapping(value = "/getDeliveryStateRecord")
+    @ResponseBody
+    public String getDeliveryStateRecord() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            GetDeliveryStateRecordModel deliveryStateRecordModel = ApplicationHandler.instantiateObject(GetDeliveryStateRecordModel.class, requestParameters);
+            deliveryStateRecordModel.validateAndThrow();
+
+            BigInteger tenantId = deliveryStateRecordModel.getTenantId();
+            BigInteger branchId = deliveryStateRecordModel.getBranchId();
+            BigInteger elemeOrderId = deliveryStateRecordModel.getElemeOrderId();
+
+            Branch branch = elemeService.findBranchInfo(tenantId, branchId);
+            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(tenantId, branchId, elemeOrderId);
+
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("orderId", elemeOrder.getOrderId());
+            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.getDeliveryStateRecord", params);
+            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+            apiRest = new ApiRest(callElemeSystemApiRest.getData(), "获取订单配送记录成功！");
+        } catch (Exception e) {
+            LogUtils.error("获取订单配送记录失败", controllerSimpleName, "getDeliveryStateRecord", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 批量获取订单最新配送记录
+     *
+     * @return
+     */
+    @RequestMapping(value = "/batchGetDeliveryStates")
+    @ResponseBody
+    public String batchGetDeliveryStates() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            BatchGetDeliveryStatesModel batchGetDeliveryStatesModel = ApplicationHandler.instantiateObject(BatchGetDeliveryStatesModel.class, requestParameters);
+            batchGetDeliveryStatesModel.validateAndThrow();
+
+            apiRest = elemeService.batchGetDeliveryStates(batchGetDeliveryStatesModel);
+        } catch (Exception e) {
+            LogUtils.error("批量获取订单最新配送记录失败", controllerSimpleName, "batchGetDeliveryStates", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 配送异常或者物流拒单后选择自行配送
+     *
+     * @return
+     */
+    @RequestMapping(value = "/deliveryBySelfLite")
+    @ResponseBody
+    public String deliveryBySelfLite() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            DeliveryBySelfLiteModel deliveryBySelfLiteModel = ApplicationHandler.instantiateObject(DeliveryBySelfLiteModel.class, requestParameters);
+            deliveryBySelfLiteModel.validateAndThrow();
+
+            BigInteger tenantId = deliveryBySelfLiteModel.getTenantId();
+            BigInteger branchId = deliveryBySelfLiteModel.getBranchId();
+            BigInteger elemeOrderId = deliveryBySelfLiteModel.getElemeOrderId();
+
+            Branch branch = elemeService.findBranchInfo(tenantId, branchId);
+            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(tenantId, branchId, elemeOrderId);
+
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("orderId", elemeOrder.getOrderId());
+            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.deliveryBySelfLite", params);
+            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+            apiRest = new ApiRest(callElemeSystemApiRest.getData(), "配送异常或者物流拒单后选择自行配送成功！");
+        } catch (Exception e) {
+            LogUtils.error("配送异常或者物流拒单后选择自行配送失败", controllerSimpleName, "deliveryBySelfLite", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 配送异常或者物流拒单后选择不再配送
+     *
+     * @return
+     */
+    @RequestMapping(value = "/noMoreDeliveryLite")
+    @ResponseBody
+    public String noMoreDeliveryLite() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            NoMoreDeliveryLiteModel moreDeliveryLiteModel = ApplicationHandler.instantiateObject(NoMoreDeliveryLiteModel.class, requestParameters);
+            moreDeliveryLiteModel.validateAndThrow();
+
+            BigInteger tenantId = moreDeliveryLiteModel.getTenantId();
+            BigInteger branchId = moreDeliveryLiteModel.getBranchId();
+            BigInteger elemeOrderId = moreDeliveryLiteModel.getElemeOrderId();
+
+            Branch branch = elemeService.findBranchInfo(tenantId, branchId);
+            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(tenantId, branchId, elemeOrderId);
+
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("orderId", elemeOrder.getOrderId());
+            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.noMoreDeliveryLite", params);
+            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+            apiRest = new ApiRest(callElemeSystemApiRest.getData(), "配送异常或者物流拒单后选择不再配送成功！");
+        } catch (Exception e) {
+            LogUtils.error("配送异常或者物流拒单后选择不再配送失败", controllerSimpleName, "noMoreDeliveryLite", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 订单确认送达
+     *
+     * @return
+     */
+    @RequestMapping(value = "/receivedOrderLite")
+    @ResponseBody
+    public String receivedOrderLite() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            ReceivedOrderLiteModel receivedOrderLiteModel = ApplicationHandler.instantiateObject(ReceivedOrderLiteModel.class, requestParameters);
+            receivedOrderLiteModel.validateAndThrow();
+
+            BigInteger tenantId = receivedOrderLiteModel.getTenantId();
+            BigInteger branchId = receivedOrderLiteModel.getBranchId();
+            BigInteger elemeOrderId = receivedOrderLiteModel.getElemeOrderId();
+
+            Branch branch = elemeService.findBranchInfo(tenantId, branchId);
+            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(tenantId, branchId, elemeOrderId);
+
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("orderId", elemeOrder.getOrderId());
+            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.receivedOrderLite", params);
+            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+            apiRest = new ApiRest(callElemeSystemApiRest.getData(), "订单确认送达成功！");
+        } catch (Exception e) {
+            LogUtils.error("订单确认送达失败", controllerSimpleName, "receivedOrderLite", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 回复催单
+     *
+     * @return
+     */
+    @RequestMapping(value = "/replyReminder")
+    @ResponseBody
+    public String replyReminder() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            ReplyReminderModel replyReminderModel = ApplicationHandler.instantiateObject(ReplyReminderModel.class, requestParameters);
+            replyReminderModel.validateAndThrow();
+
+            BigInteger tenantId = replyReminderModel.getTenantId();
+            BigInteger branchId = replyReminderModel.getBranchId();
+            BigInteger elemeOrderId = replyReminderModel.getElemeOrderId();
+
+            Branch branch = elemeService.findBranchInfo(tenantId, branchId);
+            ElemeOrder elemeOrder = elemeService.findElemeOrderInfo(tenantId, branchId, elemeOrderId);
+
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("orderId", elemeOrder.getOrderId());
+            params.put("type", replyReminderModel.getType());
+            ApplicationHandler.ifNotNullPut(params, "content", replyReminderModel.getContent());
+            ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.replyReminder", params);
+            Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+            apiRest = new ApiRest(callElemeSystemApiRest.getData(), "回复催单成功！");
+        } catch (Exception e) {
+            LogUtils.error("回复催单失败", controllerSimpleName, "replyReminder", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
