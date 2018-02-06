@@ -728,4 +728,21 @@ public class ElemeController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    @RequestMapping(value = "/batchGetOrders")
+    @ResponseBody
+    public String batchGetOrders() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            BatchGetOrdersModel batchGetOrdersModel = ApplicationHandler.instantiateObject(BatchGetOrdersModel.class, requestParameters);
+            batchGetOrdersModel.validateAndThrow();
+
+            apiRest = elemeService.batchGetOrders(batchGetOrdersModel);
+        } catch (Exception e) {
+            LogUtils.error("批量获取订单失败", controllerSimpleName, "batchGetOrders", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }

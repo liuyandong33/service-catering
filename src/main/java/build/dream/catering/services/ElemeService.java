@@ -2,9 +2,11 @@ package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.*;
+import build.dream.catering.models.eleme.BatchGetOrdersModel;
 import build.dream.catering.models.eleme.DoBindingStoreModel;
 import build.dream.catering.models.eleme.ObtainElemeDeliveryOrderStateChangeMessageModel;
 import build.dream.catering.models.eleme.PullElemeOrderModel;
+import build.dream.catering.utils.ElemeUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.*;
@@ -710,5 +712,37 @@ public class ElemeService {
         messageJsonObject.put("elemeOrderId", elemeOrderId);
         messageJsonObject.put("uuid", uuid);
         QueueUtils.convertAndSend(elemeMessageChannelTopic, messageJsonObject.toString());
+    }
+
+    @Transactional(readOnly = true)
+    public ApiRest batchGetOrders(BatchGetOrdersModel batchGetOrdersModel) throws Exception {
+        BigInteger tenantId = batchGetOrdersModel.getTenantId();
+        BigInteger branchId = batchGetOrdersModel.getBranchId();
+
+        SearchModel branchSearchModel = new SearchModel(true);
+        branchSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        branchSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        Branch branch = branchMapper.find(branchSearchModel);
+        Validate.notNull(branch, "门店不存在！");
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, batchGetOrdersModel.getElemeOrderIds());
+        List<ElemeOrder> elemeOrders = elemeOrderMapper.findAll(searchModel);
+        Validate.notEmpty(elemeOrders, "订单不存在！");
+
+        List<String> orderIds = new ArrayList<String>();
+        for (ElemeOrder elemeOrder : elemeOrders) {
+            orderIds.add(elemeOrder.getOrderId());
+        }
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderIds", orderIds);
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.mgetOrders", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "批量查询订单成功！");
     }
 }
