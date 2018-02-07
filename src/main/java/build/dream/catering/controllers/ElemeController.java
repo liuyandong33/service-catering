@@ -1223,4 +1223,48 @@ public class ElemeController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    /**
+     * 非自配送餐厅标记已出餐
+     *
+     * @return
+     */
+    @RequestMapping(value = "setOrderPrepared")
+    @ResponseBody
+    public String setOrderPrepared() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            SetOrderPreparedModel setOrderPreparedModel = ApplicationHandler.instantiateObject(SetOrderPreparedModel.class, requestParameters);
+            setOrderPreparedModel.validateAndThrow();
+
+            apiRest = elemeService.setOrderPrepared(setOrderPreparedModel);
+        } catch (Exception e) {
+            LogUtils.error("非自配送餐厅标记已出餐失败", controllerSimpleName, "setOrderPrepared", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 查询已出餐列表
+     *
+     * @return
+     */
+    @RequestMapping(value = "getPreparedTimesByOrderIds")
+    @ResponseBody
+    public String getPreparedTimesByOrderIds() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            GetPreparedTimesByOrderIdsModel getPreparedTimesByOrderIdsModel = ApplicationHandler.instantiateObject(GetPreparedTimesByOrderIdsModel.class, requestParameters);
+            getPreparedTimesByOrderIdsModel.validateAndThrow();
+
+            apiRest = elemeService.getPreparedTimesByOrderIds(getPreparedTimesByOrderIdsModel);
+        } catch (Exception e) {
+            LogUtils.error("查询已出餐列表失败", controllerSimpleName, "getPreparedTimesByOrderIds", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }

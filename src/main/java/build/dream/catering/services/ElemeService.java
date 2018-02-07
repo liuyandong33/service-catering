@@ -1510,4 +1510,50 @@ public class ElemeService {
 
         return new ApiRest(callElemeSystemApiRest.getData(), "订单加小费成功！");
     }
+
+    /**
+     * 非自配送餐厅标记已出餐失败
+     *
+     * @param setOrderPreparedModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest setOrderPrepared(SetOrderPreparedModel setOrderPreparedModel) throws IOException {
+        BigInteger tenantId = setOrderPreparedModel.getTenantId();
+        BigInteger branchId = setOrderPreparedModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, setOrderPreparedModel.getElemeOrderId());
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderId", elemeOrder.getOrderId());
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.setOrderPrepared", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "非自配送餐厅标记已出餐失败成功！");
+    }
+
+    /**
+     * 查询已出餐列表
+     *
+     * @param getPreparedTimesByOrderIdsModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest getPreparedTimesByOrderIds(GetPreparedTimesByOrderIdsModel getPreparedTimesByOrderIdsModel) throws IOException {
+        BigInteger tenantId = getPreparedTimesByOrderIdsModel.getTenantId();
+        BigInteger branchId = getPreparedTimesByOrderIdsModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        List<ElemeOrder> elemeOrders = findAllElemeOrders(tenantId, branchId, getPreparedTimesByOrderIdsModel.getElemeOrderIds());
+        List<String> orderIds = obtainOrderIds(elemeOrders);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderIds", orderIds);
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.getPreparedTimesByOrderIds", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "查询已出餐列表成功！");
+    }
 }
