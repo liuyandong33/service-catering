@@ -1679,4 +1679,23 @@ public class ElemeService {
 
         return new ApiRest(callElemeSystemApiRest.getData(), "设置是否支持预定单及预定天数成功！");
     }
+
+    /**
+     * 获取商户账号信息
+     *
+     * @param getUserModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest getUser(GetUserModel getUserModel) throws IOException {
+        BigInteger tenantId = getUserModel.getTenantId();
+        BigInteger branchId = getUserModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.user.getUser", null);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "获取商户账号信息成功！");
+    }
 }

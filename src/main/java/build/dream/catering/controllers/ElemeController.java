@@ -7,7 +7,6 @@ import build.dream.catering.utils.ElemeUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.erp.catering.domains.Branch;
-import build.dream.common.erp.catering.domains.ElemeOrder;
 import build.dream.common.erp.catering.domains.GoodsCategory;
 import build.dream.common.utils.*;
 import org.apache.commons.lang.StringUtils;
@@ -1395,6 +1394,28 @@ public class ElemeController extends BasicController {
             apiRest = elemeService.setBookingStatus(setBookingStatusModel);
         } catch (Exception e) {
             LogUtils.error("设置是否支持预定单及预定天数失败", controllerSimpleName, "setBookingStatus", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 获取商户账号信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "/setBookingStatus")
+    @ResponseBody
+    public String getUser() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            GetUserModel getUserModel = ApplicationHandler.instantiateObject(GetUserModel.class, requestParameters);
+            getUserModel.validateAndThrow();
+
+            apiRest = elemeService.getUser(getUserModel);
+        } catch (Exception e) {
+            LogUtils.error("获取商户账号信息失败", controllerSimpleName, "getUser", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
