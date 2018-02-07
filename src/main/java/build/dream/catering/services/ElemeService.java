@@ -1556,4 +1556,127 @@ public class ElemeService {
 
         return new ApiRest(callElemeSystemApiRest.getData(), "查询已出餐列表成功！");
     }
+
+    /**
+     * 查询店铺信息
+     *
+     * @param getShopModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest getShop(GetShopModel getShopModel) throws IOException {
+        BigInteger tenantId = getShopModel.getTenantId();
+        BigInteger branchId = getShopModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("shopId", branch.getShopId());
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.shop.getShop", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "查询店铺信息成功！");
+    }
+
+    /**
+     * 更新店铺基本信息
+     *
+     * @param updateShopModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest updateShop(UpdateShopModel updateShopModel) {
+        return null;
+    }
+
+    /**
+     * 批量获取店铺简要
+     *
+     * @param batchGetShopStatusModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest batchGetShopStatus(BatchGetShopStatusModel batchGetShopStatusModel) throws IOException {
+        BigInteger tenantId = batchGetShopStatusModel.getTenantId();
+        BigInteger branchId = batchGetShopStatusModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+
+        List<BigInteger> shopIds = new ArrayList<BigInteger>();
+        shopIds.add(branchId);
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("shopIds", shopIds);
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.shop.mgetShopStatus", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "批量获取店铺简要成功！");
+    }
+
+    /**
+     * 设置送达时间
+     *
+     * @param setDeliveryTimeModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest setDeliveryTime(SetDeliveryTimeModel setDeliveryTimeModel) throws IOException {
+        BigInteger tenantId = setDeliveryTimeModel.getTenantId();
+        BigInteger branchId = setDeliveryTimeModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("shopId", branch.getShopId());
+        params.put("deliveryBasicMins", setDeliveryTimeModel.getDeliveryBasicMins());
+        params.put("deliveryAdjustMins", setDeliveryTimeModel.getDeliveryAdjustMins());
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.shop.setDeliveryTime", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "设置送达时间成功！");
+    }
+
+    /**
+     * 设置是否支持在线退单
+     *
+     * @param setOnlineRefundModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest setOnlineRefund(SetOnlineRefundModel setOnlineRefundModel) throws IOException {
+        BigInteger tenantId = setOnlineRefundModel.getTenantId();
+        BigInteger branchId = setOnlineRefundModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("shopId", branch.getShopId());
+        params.put("enable", setOnlineRefundModel.getEnable());
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.shop.setOnlineRefund", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "设置是否支持在线退单成功！");
+    }
+
+    /**
+     * 设置是否支持预定单及预定天数
+     *
+     * @param setBookingStatusModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest setBookingStatus(SetBookingStatusModel setBookingStatusModel) throws IOException {
+        BigInteger tenantId = setBookingStatusModel.getTenantId();
+        BigInteger branchId = setBookingStatusModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("shopId", branch.getShopId());
+        params.put("enable", setBookingStatusModel.getEnabled());
+        ApplicationHandler.ifNotNullPut(params, "maxBookingDays", setBookingStatusModel.getMaxBookingDays());
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.shop.setBookingStatus", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "设置是否支持预定单及预定天数成功！");
+    }
 }

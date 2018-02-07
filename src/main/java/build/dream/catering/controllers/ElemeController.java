@@ -1267,4 +1267,136 @@ public class ElemeController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    /**
+     * 查询店铺信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "getShop")
+    @ResponseBody
+    public String getShop() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            GetShopModel getShopModel = ApplicationHandler.instantiateObject(GetShopModel.class, requestParameters);
+            getShopModel.validateAndThrow();
+
+            apiRest = elemeService.getShop(getShopModel);
+        } catch (Exception e) {
+            LogUtils.error("查询店铺信息失败", controllerSimpleName, "getShop", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 查询店铺信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "updateShop")
+    @ResponseBody
+    public String updateShop() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            UpdateShopModel updateShopModel = ApplicationHandler.instantiateObject(UpdateShopModel.class, requestParameters);
+            updateShopModel.validateAndThrow();
+
+            apiRest = elemeService.updateShop(updateShopModel);
+        } catch (Exception e) {
+            LogUtils.error("查询店铺信息失败", controllerSimpleName, "updateShop", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 查询店铺信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "batchGetShopStatus")
+    @ResponseBody
+    public String batchGetShopStatus() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            BatchGetShopStatusModel batchGetShopStatusModel = ApplicationHandler.instantiateObject(BatchGetShopStatusModel.class, requestParameters);
+            batchGetShopStatusModel.validateAndThrow();
+
+            apiRest = elemeService.batchGetShopStatus(batchGetShopStatusModel);
+        } catch (Exception e) {
+            LogUtils.error("批量获取店铺简要失败", controllerSimpleName, "batchGetShopStatus", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 查询店铺信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "setDeliveryTime")
+    @ResponseBody
+    public String setDeliveryTime() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            SetDeliveryTimeModel setDeliveryTimeModel = ApplicationHandler.instantiateObject(SetDeliveryTimeModel.class, requestParameters);
+            setDeliveryTimeModel.validateAndThrow();
+
+            apiRest = elemeService.setDeliveryTime(setDeliveryTimeModel);
+        } catch (Exception e) {
+            LogUtils.error("设置送达时间失败", controllerSimpleName, "setDeliveryTime", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 设置是否支持在线退单
+     *
+     * @return
+     */
+    @RequestMapping(value = "/setOnlineRefund")
+    @ResponseBody
+    public String setOnlineRefund() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            SetOnlineRefundModel setOnlineRefundModel = ApplicationHandler.instantiateObject(SetOnlineRefundModel.class, requestParameters);
+            setOnlineRefundModel.validateAndThrow();
+
+            apiRest = elemeService.setOnlineRefund(setOnlineRefundModel);
+        } catch (Exception e) {
+            LogUtils.error("设置是否支持在线退单失败", controllerSimpleName, "setOnlineRefund", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 设置是否支持预定单及预定天数
+     *
+     * @return
+     */
+    @RequestMapping(value = "/setBookingStatus")
+    @ResponseBody
+    public String setBookingStatus() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            SetBookingStatusModel setBookingStatusModel = ApplicationHandler.instantiateObject(SetBookingStatusModel.class, requestParameters);
+            setBookingStatusModel.validateAndThrow();
+
+            apiRest = elemeService.setBookingStatus(setBookingStatusModel);
+        } catch (Exception e) {
+            LogUtils.error("设置是否支持预定单及预定天数失败", controllerSimpleName, "setBookingStatus", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }
