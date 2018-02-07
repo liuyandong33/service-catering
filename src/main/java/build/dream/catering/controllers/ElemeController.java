@@ -1069,4 +1069,136 @@ public class ElemeController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    /**
+     * 批量查询索赔结果
+     *
+     * @return
+     */
+    @RequestMapping(value = "queryCompensationOrders")
+    @ResponseBody
+    public String queryCompensationOrders() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            QueryCompensationOrdersModel queryCompensationOrdersModel = ApplicationHandler.instantiateObject(QueryCompensationOrdersModel.class, requestParameters);
+            queryCompensationOrdersModel.validateAndThrow();
+
+            apiRest = elemeService.queryCompensationOrders(queryCompensationOrdersModel);
+        } catch (Exception e) {
+            LogUtils.error("批量查询索赔结果失败", controllerSimpleName, "queryCompensationOrders", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 众包订单询价，获取配送费
+     *
+     * @return
+     */
+    @RequestMapping(value = "getDeliveryFeeForCrowd")
+    @ResponseBody
+    public String getDeliveryFeeForCrowd() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            GetDeliveryFeeForCrowdModel getDeliveryFeeForCrowdModel = ApplicationHandler.instantiateObject(GetDeliveryFeeForCrowdModel.class, requestParameters);
+            getDeliveryFeeForCrowdModel.validateAndThrow();
+
+            apiRest = elemeService.getDeliveryFeeForCrowd(getDeliveryFeeForCrowdModel);
+        } catch (Exception e) {
+            LogUtils.error("众包订单询价，获取配送费失败", controllerSimpleName, "getDeliveryFeeForCrowd", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 评价骑手
+     *
+     * @return
+     */
+    @RequestMapping(value = "evaluateRider")
+    @ResponseBody
+    public String evaluateRider() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            EvaluateRiderModel evaluateRiderModel = ApplicationHandler.instantiateObject(EvaluateRiderModel.class, requestParameters);
+            evaluateRiderModel.validateAndThrow();
+
+            apiRest = elemeService.evaluateRider(evaluateRiderModel);
+        } catch (Exception e) {
+            LogUtils.error("评价骑手失败", controllerSimpleName, "evaluateRider", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 批量获取骑手评价信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "batchGetEvaluationInfos")
+    @ResponseBody
+    public String batchGetEvaluationInfos() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            BatchGetEvaluationInfosModel batchGetEvaluationInfosModel = ApplicationHandler.instantiateObject(BatchGetEvaluationInfosModel.class, requestParameters);
+            batchGetEvaluationInfosModel.validateAndThrow();
+
+            apiRest = elemeService.batchGetEvaluationInfos(batchGetEvaluationInfosModel);
+        } catch (Exception e) {
+            LogUtils.error("批量获取骑手评价信息失败", controllerSimpleName, "batchGetEvaluationInfos", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 批量获取是否可以评价骑手
+     *
+     * @return
+     */
+    @RequestMapping(value = "batchGetEvaluationStatus")
+    @ResponseBody
+    public String batchGetEvaluationStatus() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            BatchGetEvaluationStatusModel batchGetEvaluationStatusModel = ApplicationHandler.instantiateObject(BatchGetEvaluationStatusModel.class, requestParameters);
+            batchGetEvaluationStatusModel.validateAndThrow();
+
+            apiRest = elemeService.batchGetEvaluationStatus(batchGetEvaluationStatusModel);
+        } catch (Exception e) {
+            LogUtils.error("批量获取骑手评价信息失败", controllerSimpleName, "batchGetEvaluationStatus", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 批量获取订单加小费信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "batchGetDeliveryTipInfos")
+    @ResponseBody
+    public String batchGetDeliveryTipInfos() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            BatchGetDeliveryTipInfosModel batchGetDeliveryTipInfosModel = ApplicationHandler.instantiateObject(BatchGetDeliveryTipInfosModel.class, requestParameters);
+            batchGetDeliveryTipInfosModel.validateAndThrow();
+
+            apiRest = elemeService.batchGetDeliveryTipInfos(batchGetDeliveryTipInfosModel);
+        } catch (Exception e) {
+            LogUtils.error("批量获取订单加小费信息失败", controllerSimpleName, "batchGetDeliveryTipInfos", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }

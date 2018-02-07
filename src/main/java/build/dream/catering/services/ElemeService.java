@@ -1340,4 +1340,152 @@ public class ElemeService {
 
         return new ApiRest(callElemeSystemApiRest.getData(), "批量申请索赔成功！");
     }
+
+    /**
+     * 批量查询索赔结果
+     *
+     * @param queryCompensationOrdersModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest queryCompensationOrders(QueryCompensationOrdersModel queryCompensationOrdersModel) throws IOException {
+        BigInteger tenantId = queryCompensationOrdersModel.getTenantId();
+        BigInteger branchId = queryCompensationOrdersModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        List<ElemeOrder> elemeOrders = findAllElemeOrders(tenantId, branchId, queryCompensationOrdersModel.getElemeOrderIds());
+        List<String> orderIds = obtainOrderIds(elemeOrders);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderIds", orderIds);
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.queryCompensationOrders", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "批量查询索赔结果成功！");
+    }
+
+    /**
+     * 众包订单询价，获取配送费
+     *
+     * @param getDeliveryFeeForCrowdModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest getDeliveryFeeForCrowd(GetDeliveryFeeForCrowdModel getDeliveryFeeForCrowdModel) throws IOException {
+        BigInteger tenantId = getDeliveryFeeForCrowdModel.getTenantId();
+        BigInteger branchId = getDeliveryFeeForCrowdModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, getDeliveryFeeForCrowdModel.getElemeOrderId());
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderId", elemeOrder.getOrderId());
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.getDeliveryFeeForCrowd", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "众包订单询价，获取配送费成功！");
+    }
+
+    /**
+     * 评价骑手
+     *
+     * @param evaluateRiderModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest evaluateRider(EvaluateRiderModel evaluateRiderModel) throws IOException {
+        BigInteger tenantId = evaluateRiderModel.getTenantId();
+        BigInteger branchId = evaluateRiderModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, evaluateRiderModel.getElemeOrderId());
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderId", elemeOrder.getOrderId());
+
+        Map<String, Object> evaluationInfo = new HashMap<String, Object>();
+        evaluationInfo.put("level", evaluateRiderModel.getLevel());
+        evaluationInfo.put("tags", evaluateRiderModel.getTags());
+        evaluationInfo.put("description", evaluateRiderModel.getDescription());
+        evaluationInfo.put("username", evaluateRiderModel.getUsername());
+        evaluationInfo.put("mobile", evaluateRiderModel.getMobile());
+        params.put("evaluationInfo", evaluationInfo);
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.evaluateRider", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "评价骑手成功！");
+    }
+
+    /**
+     * 批量获取骑手评价信息
+     *
+     * @param batchGetEvaluationInfosModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest batchGetEvaluationInfos(BatchGetEvaluationInfosModel batchGetEvaluationInfosModel) throws IOException {
+        BigInteger tenantId = batchGetEvaluationInfosModel.getTenantId();
+        BigInteger branchId = batchGetEvaluationInfosModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        List<ElemeOrder> elemeOrders = findAllElemeOrders(tenantId, branchId, batchGetEvaluationInfosModel.getElemeOrderIds());
+        List<String> orderIds = obtainOrderIds(elemeOrders);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderIds", orderIds);
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.mgetEvaluationInfos", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "批量获取骑手评价信息成功！");
+    }
+
+    /**
+     * 批量获取是否可以评价骑手
+     *
+     * @param batchGetEvaluationStatusModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest batchGetEvaluationStatus(BatchGetEvaluationStatusModel batchGetEvaluationStatusModel) throws IOException {
+        BigInteger tenantId = batchGetEvaluationStatusModel.getTenantId();
+        BigInteger branchId = batchGetEvaluationStatusModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        List<ElemeOrder> elemeOrders = findAllElemeOrders(tenantId, branchId, batchGetEvaluationStatusModel.getElemeOrderIds());
+        List<String> orderIds = obtainOrderIds(elemeOrders);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderIds", orderIds);
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.mgetEvaluationStatus", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "批量获取是否可以评价骑手成功！");
+    }
+
+    /**
+     * 批量获取订单加小费信息
+     *
+     * @param batchGetDeliveryTipInfosModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest batchGetDeliveryTipInfos(BatchGetDeliveryTipInfosModel batchGetDeliveryTipInfosModel) throws IOException {
+        BigInteger tenantId = batchGetDeliveryTipInfosModel.getTenantId();
+        BigInteger branchId = batchGetDeliveryTipInfosModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        List<ElemeOrder> elemeOrders = findAllElemeOrders(tenantId, branchId, batchGetDeliveryTipInfosModel.getElemeOrderIds());
+        List<String> orderIds = obtainOrderIds(elemeOrders);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderIds", orderIds);
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.mgetDeliveryTipInfos", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "批量获取订单加小费信息成功！");
+    }
 }
