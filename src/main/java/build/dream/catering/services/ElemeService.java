@@ -1698,4 +1698,25 @@ public class ElemeService {
 
         return new ApiRest(callElemeSystemApiRest.getData(), "获取商户账号信息成功！");
     }
+
+    /**
+     * 查询店铺当前生效合同类型
+     *
+     * @param getEffectServicePackContractModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest getEffectServicePackContract(GetEffectServicePackContractModel getEffectServicePackContractModel) throws IOException {
+        BigInteger tenantId = getEffectServicePackContractModel.getTenantId();
+        BigInteger branchId = getEffectServicePackContractModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("shopId", branch.getShopId());
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.packs.getEffectServicePackContract", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "查询店铺当前生效合同类型成功！");
+    }
 }

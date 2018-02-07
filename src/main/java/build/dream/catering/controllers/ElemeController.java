@@ -1420,4 +1420,26 @@ public class ElemeController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    /**
+     * 查询店铺当前生效合同类型
+     *
+     * @return
+     */
+    @RequestMapping(value = "/getEffectServicePackContract")
+    @ResponseBody
+    public String getEffectServicePackContract() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            GetEffectServicePackContractModel getEffectServicePackContractModel = ApplicationHandler.instantiateObject(GetEffectServicePackContractModel.class, requestParameters);
+            getEffectServicePackContractModel.validateAndThrow();
+
+            apiRest = elemeService.getEffectServicePackContract(getEffectServicePackContractModel);
+        } catch (Exception e) {
+            LogUtils.error("查询店铺当前生效合同类型失败", controllerSimpleName, "getEffectServicePackContract", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }
