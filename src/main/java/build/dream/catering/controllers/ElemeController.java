@@ -1001,4 +1001,72 @@ public class ElemeController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    /**
+     * 查询全部订单
+     *
+     * @return
+     */
+    @RequestMapping(value = "getAllOrders")
+    @ResponseBody
+    public String getAllOrders() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            GetAllOrdersModel getAllOrdersModel = ApplicationHandler.instantiateObject(GetAllOrdersModel.class, requestParameters);
+            getAllOrdersModel.validateAndThrow();
+
+            apiRest = elemeService.getAllOrders(getAllOrdersModel);
+        } catch (Exception e) {
+            LogUtils.error("查询全部订单失败", controllerSimpleName, "getAllOrders", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 批量查询订单是否支持索赔
+     *
+     * @return
+     */
+    @RequestMapping(value = "querySupportedCompensationOrders")
+    @ResponseBody
+    public String querySupportedCompensationOrders() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            QuerySupportedCompensationOrdersModel querySupportedCompensationOrdersModel = ApplicationHandler.instantiateObject(QuerySupportedCompensationOrdersModel.class, requestParameters);
+            querySupportedCompensationOrdersModel.validateAndThrow();
+
+            apiRest = elemeService.querySupportedCompensationOrders(querySupportedCompensationOrdersModel);
+        } catch (Exception e) {
+            LogUtils.error("批量查询订单是否支持索赔失败", controllerSimpleName, "querySupportedCompensationOrders", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 批量查询订单是否支持索赔
+     *
+     * @return
+     */
+    @RequestMapping(value = "batchApplyCompensations")
+    @ResponseBody
+    public String batchApplyCompensations() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            BatchApplyCompensationsModel batchApplyCompensationsModel = ApplicationHandler.instantiateObject(BatchApplyCompensationsModel.class, requestParameters);
+
+            batchApplyCompensationsModel.setRequests(requestParameters.get("requests"));
+            batchApplyCompensationsModel.validateAndThrow();
+
+            apiRest = elemeService.batchApplyCompensations(batchApplyCompensationsModel);
+        } catch (Exception e) {
+            LogUtils.error("批量申请索赔失败", controllerSimpleName, "batchApplyCompensations", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }

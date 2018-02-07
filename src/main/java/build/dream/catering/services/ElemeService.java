@@ -1254,4 +1254,90 @@ public class ElemeService {
         Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
         return new ApiRest(callElemeSystemApiRest.getData(), "查询店铺未处理的退单成功！");
     }
+
+    /**
+     * 查询全部订单
+     *
+     * @param getAllOrdersModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest getAllOrders(GetAllOrdersModel getAllOrdersModel) throws IOException {
+        BigInteger tenantId = getAllOrdersModel.getTenantId();
+        BigInteger branchId = getAllOrdersModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("shopId", branch.getShopId());
+        params.put("pageNo", getAllOrdersModel.getPageNo());
+        params.put("pageSize", getAllOrdersModel.getPageSize());
+        params.put("date", getAllOrdersModel.getDate());
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.getAllOrders", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+        return new ApiRest(callElemeSystemApiRest.getData(), "查询全部订单成功！");
+    }
+
+    /**
+     * 批量查询订单是否支持索赔
+     *
+     * @param querySupportedCompensationOrdersModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest querySupportedCompensationOrders(QuerySupportedCompensationOrdersModel querySupportedCompensationOrdersModel) throws IOException {
+        BigInteger tenantId = querySupportedCompensationOrdersModel.getTenantId();
+        BigInteger branchId = querySupportedCompensationOrdersModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        List<ElemeOrder> elemeOrders = findAllElemeOrders(tenantId, branchId, querySupportedCompensationOrdersModel.getElemeOrderIds());
+        List<String> orderIds = obtainOrderIds(elemeOrders);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderIds", orderIds);
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.querySupportedCompensationOrders", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "批量查询订单是否支持索赔成功！");
+    }
+
+    /**
+     * 批量申请索赔
+     *
+     * @param batchApplyCompensations
+     * @return
+     * @throws IOException
+     */
+    public ApiRest batchApplyCompensations(BatchApplyCompensationsModel batchApplyCompensations) throws IOException {
+        BigInteger tenantId = batchApplyCompensations.getTenantId();
+        BigInteger branchId = batchApplyCompensations.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        List<ElemeOrder> elemeOrders = findAllElemeOrders(tenantId, branchId, batchApplyCompensations.getElemeOrderIds());
+        Map<BigInteger, ElemeOrder> elemeOrderMap = new HashMap<BigInteger, ElemeOrder>();
+        for (ElemeOrder elemeOrder : elemeOrders) {
+            elemeOrderMap.put(elemeOrder.getId(), elemeOrder);
+        }
+        List<Map<String, Object>> requests = new ArrayList<Map<String, Object>>();
+        for (BatchApplyCompensationsModel.CompensationRequest compensationRequest : batchApplyCompensations.getRequests()) {
+            ElemeOrder elemeOrder = elemeOrderMap.get(compensationRequest.getElemeOrderId());
+            if (elemeOrder == null) {
+                continue;
+            }
+
+            Map<String, Object> request = new HashMap<String, Object>();
+            request.put("orderId", elemeOrder.getOrderId());
+            request.put("reason", compensationRequest.getReason());
+            request.put("description", compensationRequest.getDescription());
+            requests.add(request);
+        }
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("requests", requests);
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.batchApplyCompensations", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "批量申请索赔成功！");
+    }
 }
