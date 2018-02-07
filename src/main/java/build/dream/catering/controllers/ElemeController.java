@@ -891,4 +891,114 @@ public class ElemeController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    /**
+     * 呼叫配送
+     *
+     * @return
+     */
+    @RequestMapping(value = "callDelivery")
+    @ResponseBody
+    public String callDelivery() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            CallDeliveryModel callDeliveryModel = ApplicationHandler.instantiateObject(CallDeliveryModel.class, requestParameters);
+            callDeliveryModel.validateAndThrow();
+
+            apiRest = elemeService.callDelivery(callDeliveryModel);
+        } catch (Exception e) {
+            LogUtils.error("呼叫配送失败", controllerSimpleName, "callDelivery", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 获取店铺未回复的催单
+     *
+     * @return
+     */
+    @RequestMapping(value = "getUnreplyReminders")
+    @ResponseBody
+    public String getUnreplyReminders() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            GetUnreplyRemindersModel getUnreplyRemindersModel = ApplicationHandler.instantiateObject(GetUnreplyRemindersModel.class, requestParameters);
+            getUnreplyRemindersModel.validateAndThrow();
+
+            apiRest = elemeService.getUnreplyReminders(getUnreplyRemindersModel);
+        } catch (Exception e) {
+            LogUtils.error("获取店铺未回复的催单失败", controllerSimpleName, "getUnreplyReminders", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 查询店铺未处理订单
+     *
+     * @return
+     */
+    @RequestMapping(value = "getUnprocessOrders")
+    @ResponseBody
+    public String getUnprocessOrders() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            GetUnprocessOrdersModel getUnprocessOrdersModel = ApplicationHandler.instantiateObject(GetUnprocessOrdersModel.class, requestParameters);
+            getUnprocessOrdersModel.validateAndThrow();
+
+            apiRest = elemeService.getUnprocessOrders(getUnprocessOrdersModel);
+        } catch (Exception e) {
+            LogUtils.error("查询店铺未处理订单失败", controllerSimpleName, "getUnprocessOrders", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 查询店铺未处理的取消单
+     *
+     * @return
+     */
+    @RequestMapping(value = "getCancelOrders")
+    @ResponseBody
+    public String getCancelOrders() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            GetCancelOrdersModel getCancelOrdersModel = ApplicationHandler.instantiateObject(GetCancelOrdersModel.class, requestParameters);
+            getCancelOrdersModel.validateAndThrow();
+
+            apiRest = elemeService.getCancelOrders(getCancelOrdersModel);
+        } catch (Exception e) {
+            LogUtils.error("查询店铺未处理的取消单失败", controllerSimpleName, "getCancelOrders", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 查询店铺未处理的退单
+     *
+     * @return
+     */
+    @RequestMapping(value = "getRefundOrders")
+    @ResponseBody
+    public String getRefundOrders() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            GetRefundOrdersModel getRefundOrdersModel = ApplicationHandler.instantiateObject(GetRefundOrdersModel.class, requestParameters);
+            getRefundOrdersModel.validateAndThrow();
+
+            apiRest = elemeService.getRefundOrders(getRefundOrdersModel);
+        } catch (Exception e) {
+            LogUtils.error("查询店铺未处理的退单失败", controllerSimpleName, "getRefundOrders", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }

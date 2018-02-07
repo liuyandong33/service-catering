@@ -1148,4 +1148,110 @@ public class ElemeService {
 
         return new ApiRest(callElemeSystemApiRest.getData(), "取消呼叫配送成功！");
     }
+
+    /**
+     * 呼叫配送
+     *
+     * @param callDeliveryModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest callDelivery(CallDeliveryModel callDeliveryModel) throws IOException {
+        BigInteger tenantId = callDeliveryModel.getTenantId();
+        BigInteger branchId = callDeliveryModel.getBranchId();
+        BigInteger elemeOrderId = callDeliveryModel.getElemeOrderId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderId", elemeOrder.getOrderId());
+        ApplicationHandler.ifNotNullPut(params, "fee", callDeliveryModel.getFee());
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.callDelivery", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "呼叫配送成功！");
+    }
+
+    /**
+     * 获取店铺未回复的催单
+     *
+     * @param getUnreplyRemindersModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest getUnreplyReminders(GetUnreplyRemindersModel getUnreplyRemindersModel) throws IOException {
+        BigInteger tenantId = getUnreplyRemindersModel.getTenantId();
+        BigInteger branchId = getUnreplyRemindersModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("shopId", branch.getShopId());
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.getUnreplyReminders", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+        return new ApiRest(callElemeSystemApiRest.getData(), "获取店铺未回复的催单成功！");
+    }
+
+    /**
+     * 查询店铺未处理订单
+     *
+     * @param getUnprocessOrdersModel
+     * @return
+     */
+    public ApiRest getUnprocessOrders(GetUnprocessOrdersModel getUnprocessOrdersModel) throws IOException {
+        BigInteger tenantId = getUnprocessOrdersModel.getTenantId();
+        BigInteger branchId = getUnprocessOrdersModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("shopId", branch.getShopId());
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.getUnprocessOrders", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+        return new ApiRest(callElemeSystemApiRest.getData(), "查询店铺未处理订单成功！");
+    }
+
+    /**
+     * 查询店铺未处理的取消单
+     *
+     * @param getCancelOrdersModel
+     * @return
+     */
+    public ApiRest getCancelOrders(GetCancelOrdersModel getCancelOrdersModel) throws IOException {
+        BigInteger tenantId = getCancelOrdersModel.getTenantId();
+        BigInteger branchId = getCancelOrdersModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("shopId", branch.getShopId());
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.getCancelOrders", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+        return new ApiRest(callElemeSystemApiRest.getData(), "查询店铺未处理的取消单成功！");
+    }
+
+    /**
+     * 查询店铺未处理的退单
+     *
+     * @param getRefundOrdersModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest getRefundOrders(GetRefundOrdersModel getRefundOrdersModel) throws IOException {
+        BigInteger tenantId = getRefundOrdersModel.getTenantId();
+        BigInteger branchId = getRefundOrdersModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("shopId", branch.getShopId());
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.getRefundOrders", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+        return new ApiRest(callElemeSystemApiRest.getData(), "查询店铺未处理的退单成功！");
+    }
 }
