@@ -1488,4 +1488,26 @@ public class ElemeService {
 
         return new ApiRest(callElemeSystemApiRest.getData(), "批量获取订单加小费信息成功！");
     }
+
+    /**
+     * 订单加小费
+     *
+     * @param addDeliveryTipByOrderIdModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest addDeliveryTipByOrderId(AddDeliveryTipByOrderIdModel addDeliveryTipByOrderIdModel) throws IOException {
+        BigInteger tenantId = addDeliveryTipByOrderIdModel.getTenantId();
+        BigInteger branchId = addDeliveryTipByOrderIdModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, addDeliveryTipByOrderIdModel.getElemeOrderId());
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderId", elemeOrder.getOrderId());
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.addDeliveryTipByOrderId", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "订单加小费成功！");
+    }
 }

@@ -1201,4 +1201,26 @@ public class ElemeController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    /**
+     * 订单加小费
+     *
+     * @return
+     */
+    @RequestMapping(value = "addDeliveryTipByOrderId")
+    @ResponseBody
+    public String addDeliveryTipByOrderId() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            AddDeliveryTipByOrderIdModel addDeliveryTipByOrderIdModel = ApplicationHandler.instantiateObject(AddDeliveryTipByOrderIdModel.class, requestParameters);
+            addDeliveryTipByOrderIdModel.validateAndThrow();
+
+            apiRest = elemeService.addDeliveryTipByOrderId(addDeliveryTipByOrderIdModel);
+        } catch (Exception e) {
+            LogUtils.error("订单加小费失败", controllerSimpleName, "addDeliveryTipByOrderId", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }
