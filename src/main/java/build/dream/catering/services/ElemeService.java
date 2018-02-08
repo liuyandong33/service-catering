@@ -1719,4 +1719,26 @@ public class ElemeService {
 
         return new ApiRest(callElemeSystemApiRest.getData(), "查询店铺当前生效合同类型成功！");
     }
+
+    /**
+     * 获取指定订单的评论
+     *
+     * @param getOrderRateByOrderIdModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest getOrderRateByOrderId(GetOrderRateByOrderIdModel getOrderRateByOrderIdModel) throws IOException {
+        BigInteger tenantId = getOrderRateByOrderIdModel.getTenantId();
+        BigInteger branchId = getOrderRateByOrderIdModel.getBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, getOrderRateByOrderIdModel.getDietOrderId());
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("orderId", elemeOrder.getOrderId());
+
+        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.ugc.getOrderRateByOrderId", params);
+        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+
+        return new ApiRest(callElemeSystemApiRest.getData(), "获取指定订单的评论成功！");
+    }
 }

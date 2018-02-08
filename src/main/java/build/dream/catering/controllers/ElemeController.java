@@ -1442,4 +1442,26 @@ public class ElemeController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    /**
+     * 获取指定订单的评论
+     *
+     * @return
+     */
+    @RequestMapping(value = "/getOrderRateByOrderId")
+    @ResponseBody
+    public String getOrderRateByOrderId() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            GetOrderRateByOrderIdModel getOrderRateByOrderIdModel = ApplicationHandler.instantiateObject(GetOrderRateByOrderIdModel.class, requestParameters);
+            getOrderRateByOrderIdModel.validateAndThrow();
+
+            apiRest = elemeService.getOrderRateByOrderId(getOrderRateByOrderIdModel);
+        } catch (Exception e) {
+            LogUtils.error("获取指定订单的评论失败", controllerSimpleName, "getOrderRateByOrderId", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }
