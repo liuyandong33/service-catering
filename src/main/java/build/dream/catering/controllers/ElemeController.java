@@ -1404,7 +1404,7 @@ public class ElemeController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/setBookingStatus")
+    @RequestMapping(value = "/getUser")
     @ResponseBody
     public String getUser() {
         ApiRest apiRest = null;

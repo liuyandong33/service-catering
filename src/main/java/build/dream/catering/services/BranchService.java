@@ -7,6 +7,7 @@ import build.dream.catering.mappers.UniversalMapper;
 import build.dream.catering.models.branch.DeleteBranchModel;
 import build.dream.catering.models.branch.InitializeBranchModel;
 import build.dream.catering.models.branch.ListBranchesModel;
+import build.dream.catering.models.branch.PullBranchInfosModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.Branch;
 import build.dream.common.utils.*;
@@ -146,12 +147,24 @@ public class BranchService {
      * @return
      */
     @Transactional(readOnly = true)
-    public ApiRest obtainAllBranchInfos() {
-        String sql = "SELECT id, code, name, type, status, tenant_id, tenant_code, create_time, last_update_time FROM branch WHERE deleted = 0";
-        Map<String, Object> obtainAllBranchInfosParameters = new HashMap<String, Object>();
-        obtainAllBranchInfosParameters.put("sql", sql);
-        List<Map<String, Object>> allBranchInfos = universalMapper.executeQuery(obtainAllBranchInfosParameters);
+    public ApiRest pullBranchInfos(PullBranchInfosModel pullBranchInfosModel) {
+        String findInsertBranchSql = "SELECT tenant_id, id AS branch_id, code, name, type, status, tenant_code, create_time FROM branch WHERE create_time >= #{lastPullTime} AND deleted = 0";
+        Map<String, Object> findInsertBranchParameters = new HashMap<String, Object>();
+        findInsertBranchParameters.put("sql", findInsertBranchSql);
+        findInsertBranchParameters.put("lastPullTime", pullBranchInfosModel.getLastPullTime());
+        List<Map<String, Object>> insertBranchInfos = universalMapper.executeQuery(findInsertBranchParameters);
 
-        return new ApiRest(allBranchInfos, "获取所有门店信息成功！");
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("insertBranchInfos", insertBranchInfos);
+        if (!pullBranchInfosModel.getReacquire()) {
+            String findUpdateBranchSql = "SELECT tenant_id, id AS branch_id, code, name, type, status, tenant_code, create_time, deleted FROM branch WHERE create_time <= #{lastPullTime} AND last_update_time >= #{lastPullTime}";
+            Map<String, Object> findUpdateBranchParameters = new HashMap<String, Object>();
+            findUpdateBranchParameters.put("sql", findUpdateBranchSql);
+            findUpdateBranchParameters.put("lastPullTime", pullBranchInfosModel.getLastPullTime());
+            List<Map<String, Object>> updateBranchInfos = universalMapper.executeQuery(findUpdateBranchParameters);
+            data.put("updateBranchInfos", updateBranchInfos);
+        }
+
+        return new ApiRest(data, "获取所有门店信息成功！");
     }
 }

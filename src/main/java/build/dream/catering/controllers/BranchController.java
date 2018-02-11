@@ -3,6 +3,7 @@ package build.dream.catering.controllers;
 import build.dream.catering.models.branch.DeleteBranchModel;
 import build.dream.catering.models.branch.InitializeBranchModel;
 import build.dream.catering.models.branch.ListBranchesModel;
+import build.dream.catering.models.branch.PullBranchInfosModel;
 import build.dream.catering.services.BranchService;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
@@ -80,15 +81,17 @@ public class BranchController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/obtainAllBranchInfos")
+    @RequestMapping(value = "/pullBranchInfos")
     @ResponseBody
-    public String obtainAllBranchInfos() {
+    public String pullBranchInfos() {
         ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
-            apiRest = branchService.obtainAllBranchInfos();
+            PullBranchInfosModel pullBranchInfosModel = ApplicationHandler.instantiateObject(PullBranchInfosModel.class, requestParameters);
+            pullBranchInfosModel.validateAndThrow();
+            apiRest = branchService.pullBranchInfos(pullBranchInfosModel);
         } catch (Exception e) {
-            LogUtils.error("获取所有门店信息失败", controllerSimpleName, "obtainAllBranchInfos", e, requestParameters);
+            LogUtils.error("获取所有门店信息失败", controllerSimpleName, "pullBranchInfos", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
