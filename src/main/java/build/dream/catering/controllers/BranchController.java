@@ -77,7 +77,7 @@ public class BranchController extends BasicController {
     }
 
     /**
-     * 获取所有门店信息
+     * 拉取门店信息
      *
      * @return
      */
@@ -91,7 +91,7 @@ public class BranchController extends BasicController {
             pullBranchInfosModel.validateAndThrow();
             apiRest = branchService.pullBranchInfos(pullBranchInfosModel);
         } catch (Exception e) {
-            LogUtils.error("获取所有门店信息失败", controllerSimpleName, "pullBranchInfos", e, requestParameters);
+            LogUtils.error("拉取门店信息失败", controllerSimpleName, "pullBranchInfos", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
