@@ -1,9 +1,6 @@
 package build.dream.catering.controllers;
 
-import build.dream.catering.models.branch.DeleteBranchModel;
-import build.dream.catering.models.branch.InitializeBranchModel;
-import build.dream.catering.models.branch.ListBranchesModel;
-import build.dream.catering.models.branch.PullBranchInfosModel;
+import build.dream.catering.models.branch.*;
 import build.dream.catering.services.BranchService;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
@@ -92,6 +89,27 @@ public class BranchController extends BasicController {
             apiRest = branchService.pullBranchInfos(pullBranchInfosModel);
         } catch (Exception e) {
             LogUtils.error("拉取门店信息失败", controllerSimpleName, "pullBranchInfos", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 禁用门店产品
+     *
+     * @return
+     */
+    @RequestMapping(value = "/disableGoods")
+    @ResponseBody
+    public String disableGoods() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            DisableGoodsModel disableGoodsModel = ApplicationHandler.instantiateObject(DisableGoodsModel.class, requestParameters);
+            disableGoodsModel.validateAndThrow();
+            apiRest = branchService.disableGoods(disableGoodsModel);
+        } catch (Exception e) {
+            LogUtils.error("禁用门店产品失败", controllerSimpleName, "disableGoods", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);

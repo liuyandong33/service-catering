@@ -4,10 +4,7 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.BranchMapper;
 import build.dream.catering.mappers.SequenceMapper;
 import build.dream.catering.mappers.UniversalMapper;
-import build.dream.catering.models.branch.DeleteBranchModel;
-import build.dream.catering.models.branch.InitializeBranchModel;
-import build.dream.catering.models.branch.ListBranchesModel;
-import build.dream.catering.models.branch.PullBranchInfosModel;
+import build.dream.catering.models.branch.*;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.Branch;
 import build.dream.common.utils.*;
@@ -166,5 +163,21 @@ public class BranchService {
         }
 
         return new ApiRest(data, "获取所有门店信息成功！");
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest disableGoods(DisableGoodsModel disableGoodsModel) {
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, disableGoodsModel.getTenantId());
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, disableGoodsModel.getBranchId());
+        Branch branch = branchMapper.find(searchModel);
+        if (branch != null) {
+
+        }
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("禁用门店产品成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
     }
 }
