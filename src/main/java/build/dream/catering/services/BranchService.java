@@ -171,8 +171,16 @@ public class BranchService {
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, disableGoodsModel.getTenantId());
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, disableGoodsModel.getBranchId());
         Branch branch = branchMapper.find(searchModel);
-        if (branch != null) {
 
+        BigInteger goodsTypeId = disableGoodsModel.getGoodsTypeId();
+        if (branch != null) {
+            if (goodsTypeId == BigInteger.ONE) {
+
+            } else if (goodsTypeId == BigInteger.valueOf(2)) {
+
+            } else if (goodsTypeId == BigInteger.valueOf(3)) {
+
+            }
         }
 
         ApiRest apiRest = new ApiRest();

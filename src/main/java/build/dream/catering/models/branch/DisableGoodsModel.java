@@ -15,6 +15,9 @@ public class DisableGoodsModel extends BasicModel {
     @NotNull
     private BigInteger goodsId;
 
+    @NotNull
+    private BigInteger goodsTypeId;
+
     public BigInteger getTenantId() {
         return tenantId;
     }
@@ -37,5 +40,13 @@ public class DisableGoodsModel extends BasicModel {
 
     public void setGoodsId(BigInteger goodsId) {
         this.goodsId = goodsId;
+    }
+
+    public BigInteger getGoodsTypeId() {
+        return goodsTypeId;
+    }
+
+    public void setGoodsTypeId(BigInteger goodsTypeId) {
+        this.goodsTypeId = goodsTypeId;
     }
 }
