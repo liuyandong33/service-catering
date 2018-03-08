@@ -114,4 +114,25 @@ public class BranchController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    /**
+     * 门店续费回调
+     *
+     * @return
+     */
+    @RequestMapping(value = "/renewCallback")
+    @ResponseBody
+    public String renewCallback() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            RenewCallbackModel renewCallbackModel = ApplicationHandler.instantiateObject(RenewCallbackModel.class, requestParameters);
+            renewCallbackModel.validateAndThrow();
+            apiRest = branchService.handleRenewCallback(renewCallbackModel);
+        } catch (Exception e) {
+            LogUtils.error("处理门店续费回调失败", controllerSimpleName, "renewCallback", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }

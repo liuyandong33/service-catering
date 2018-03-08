@@ -92,6 +92,7 @@ public class BranchService {
 
     /**
      * 删除门店信息
+     *
      * @param deleteBranchModel
      * @return
      * @throws IOException
@@ -141,6 +142,7 @@ public class BranchService {
 
     /**
      * 获取所有门店信息
+     *
      * @return
      */
     @Transactional(readOnly = true)
@@ -165,6 +167,12 @@ public class BranchService {
         return new ApiRest(data, "获取所有门店信息成功！");
     }
 
+    /**
+     * 门店过期，禁用门店产品
+     *
+     * @param disableGoodsModel
+     * @return
+     */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest disableGoods(DisableGoodsModel disableGoodsModel) {
         SearchModel searchModel = new SearchModel(true);
@@ -172,8 +180,8 @@ public class BranchService {
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, disableGoodsModel.getBranchId());
         Branch branch = branchMapper.find(searchModel);
 
-        BigInteger goodsTypeId = disableGoodsModel.getGoodsTypeId();
         if (branch != null) {
+            BigInteger goodsTypeId = disableGoodsModel.getGoodsTypeId();
             if (goodsTypeId == BigInteger.ONE) {
 
             } else if (goodsTypeId == BigInteger.valueOf(2)) {
@@ -185,6 +193,28 @@ public class BranchService {
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("禁用门店产品成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
+    }
+
+    /**
+     * 处理门店续费回调
+     *
+     * @param renewCallbackModel
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest handleRenewCallback(RenewCallbackModel renewCallbackModel) {
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, renewCallbackModel.getTenantId());
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, renewCallbackModel.getBranchId());
+        Branch branch = branchMapper.find(searchModel);
+        if (branch != null) {
+            BigInteger goodsTypeId = renewCallbackModel.getGoodsTypeId();
+        }
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("处理门店续费回调成功！");
         apiRest.setSuccessful(true);
         return apiRest;
     }
