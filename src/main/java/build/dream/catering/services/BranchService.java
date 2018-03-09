@@ -15,6 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -175,21 +179,11 @@ public class BranchService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest disableGoods(DisableGoodsModel disableGoodsModel) {
-        SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, disableGoodsModel.getTenantId());
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, disableGoodsModel.getBranchId());
-        Branch branch = branchMapper.find(searchModel);
-
-        if (branch != null) {
-            BigInteger goodsTypeId = disableGoodsModel.getGoodsTypeId();
-            if (goodsTypeId == BigInteger.ONE) {
-
-            } else if (goodsTypeId == BigInteger.valueOf(2)) {
-
-            } else if (goodsTypeId == BigInteger.valueOf(3)) {
-
-            }
-        }
+        Map<String, Object> parameters = new HashMap<String, Object>();
+        parameters.put("sql", disableGoodsModel.getDisableSql());
+        parameters.put("tenantId", disableGoodsModel.getTenantId());
+        parameters.put("branchId", disableGoodsModel.getBranchId());
+        universalMapper.executeUpdate(parameters);
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("禁用门店产品成功！");
@@ -205,13 +199,11 @@ public class BranchService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest handleRenewCallback(RenewCallbackModel renewCallbackModel) {
-        SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, renewCallbackModel.getTenantId());
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, renewCallbackModel.getBranchId());
-        Branch branch = branchMapper.find(searchModel);
-        if (branch != null) {
-            BigInteger goodsTypeId = renewCallbackModel.getGoodsTypeId();
-        }
+        Map<String, Object> parameters = new HashMap<String, Object>();
+        parameters.put("sql", renewCallbackModel.getRenewSql());
+        parameters.put("tenantId", renewCallbackModel.getTenantId());
+        parameters.put("branchId", renewCallbackModel.getBranchId());
+        universalMapper.executeUpdate(parameters);
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("处理门店续费回调成功！");

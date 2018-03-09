@@ -12,11 +12,7 @@ public class RenewCallbackModel extends BasicModel {
     @NotNull
     private BigInteger branchId;
 
-    @NotNull
-    private BigInteger goodsId;
-
-    @NotNull
-    private BigInteger goodsTypeId;
+    private String renewSql;
 
     public BigInteger getTenantId() {
         return tenantId;
@@ -34,19 +30,11 @@ public class RenewCallbackModel extends BasicModel {
         this.branchId = branchId;
     }
 
-    public BigInteger getGoodsId() {
-        return goodsId;
+    public String getRenewSql() {
+        return renewSql;
     }
 
-    public void setGoodsId(BigInteger goodsId) {
-        this.goodsId = goodsId;
-    }
-
-    public BigInteger getGoodsTypeId() {
-        return goodsTypeId;
-    }
-
-    public void setGoodsTypeId(BigInteger goodsTypeId) {
-        this.goodsTypeId = goodsTypeId;
+    public void setRenewSql(String renewSql) {
+        this.renewSql = renewSql;
     }
 }

@@ -13,10 +13,7 @@ public class DisableGoodsModel extends BasicModel {
     private BigInteger branchId;
 
     @NotNull
-    private BigInteger goodsId;
-
-    @NotNull
-    private BigInteger goodsTypeId;
+    private String disableSql;
 
     public BigInteger getTenantId() {
         return tenantId;
@@ -34,19 +31,11 @@ public class DisableGoodsModel extends BasicModel {
         this.branchId = branchId;
     }
 
-    public BigInteger getGoodsId() {
-        return goodsId;
+    public String getDisableSql() {
+        return disableSql;
     }
 
-    public void setGoodsId(BigInteger goodsId) {
-        this.goodsId = goodsId;
-    }
-
-    public BigInteger getGoodsTypeId() {
-        return goodsTypeId;
-    }
-
-    public void setGoodsTypeId(BigInteger goodsTypeId) {
-        this.goodsTypeId = goodsTypeId;
+    public void setDisableSql(String disableSql) {
+        this.disableSql = disableSql;
     }
 }
