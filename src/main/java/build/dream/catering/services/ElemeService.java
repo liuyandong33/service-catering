@@ -20,7 +20,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class ElemeService {
@@ -39,19 +42,11 @@ public class ElemeService {
     @Autowired
     private ElemeOrderActivityMapper elemeOrderActivityMapper;
     @Autowired
-    private ElemeRefundOrderMessageMapper elemeRefundOrderMessageMapper;
-    @Autowired
-    private ElemeReminderMessageMapper elemeReminderMessageMapper;
-    @Autowired
     private GoodsCategoryMapper goodsCategoryMapper;
     @Autowired
-    private ElemeOrderStateChangeMessageMapper elemeOrderStateChangeMessageMapper;
-    @Autowired
-    private ElemeDeliveryOrderStateChangeMessageMapper elemeDeliveryOrderStateChangeMessageMapper;
-    @Autowired
-    private ElemeRefundOrderMessageGoodsItemMapper elemeRefundOrderMessageGoodsItemMapper;
-    @Autowired
     private UniversalMapper universalMapper;
+    @Autowired
+    private ElemeCallbackMessageMapper elemeCallbackMessageMapper;
 
     @Transactional(readOnly = true)
     public ApiRest tenantAuthorize(BigInteger tenantId, BigInteger branchId, BigInteger userId) throws IOException {
@@ -87,9 +82,16 @@ public class ElemeService {
         return apiRest;
     }
 
+    /**
+     * 保存饿了么订单
+     *
+     * @param elemeCallbackMessage
+     * @param uuid
+     * @throws IOException
+     */
     @Transactional(rollbackFor = Exception.class)
-    public void saveElemeOrder(BigInteger shopId, String message, Integer type, String uuid) throws IOException {
-        JSONObject messageJsonObject = JSONObject.fromObject(message);
+    public void saveElemeOrder(ElemeCallbackMessage elemeCallbackMessage, String uuid) throws IOException {
+        JSONObject messageJsonObject = JSONObject.fromObject(elemeCallbackMessage.getMessage());
 
         String openId = messageJsonObject.getString("openId");
         String[] array = openId.split("Z");
@@ -99,7 +101,7 @@ public class ElemeService {
         SearchModel branchSearchModel = new SearchModel(true);
         branchSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
         branchSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        branchSearchModel.addSearchCondition("shop_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, shopId);
+        branchSearchModel.addSearchCondition("shop_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, elemeCallbackMessage.getShopId());
         Branch branch = branchMapper.find(branchSearchModel);
         Validate.notNull(branch, "门店不存在！");
 
@@ -250,22 +252,21 @@ public class ElemeService {
                 elemeOrderActivityMapper.insert(elemeOrderActivity);
             }
         }
-//        CacheUtils.hset(elemeOrder.getOrderId(), type.toString(), uuid);
-//        CacheUtils.expire(elemeOrder.getOrderId(), 48, TimeUnit.HOURS);
-        publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid);
+        elemeCallbackMessage.setOrderId(id);
+        elemeCallbackMessageMapper.insert(elemeCallbackMessage);
+        publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), elemeCallbackMessage.getType(), uuid);
     }
 
     /**
      * 处理饿了么退单消息
      *
-     * @param shopId：店铺ID
-     * @param message：消息内容
-     * @param type：消息类型
-     * @return
+     * @param elemeCallbackMessage
+     * @param uuid
+     * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleElemeRefundOrderMessage(BigInteger shopId, String message, Integer type, String uuid) throws IOException {
-        JSONObject messageJsonObject = JSONObject.fromObject(message);
+    public void handleElemeRefundOrderMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) throws IOException {
+        JSONObject messageJsonObject = JSONObject.fromObject(elemeCallbackMessage.getMessage());
         String orderId = messageJsonObject.optString("orderId");
         SearchModel elemeOrderSearchModel = new SearchModel(true);
         elemeOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
@@ -280,51 +281,10 @@ public class ElemeService {
         elemeOrder.setLastUpdateRemark("处理退单消息回调！");
         elemeOrderMapper.update(elemeOrder);
 
-        BigInteger tenantId = elemeOrder.getTenantId();
-        String tenantCode = elemeOrder.getTenantCode();
-        BigInteger branchId = elemeOrder.getBranchId();
-        BigInteger elemeOrderId = elemeOrder.getId();
+        elemeCallbackMessage.setOrderId(orderId);
+        elemeCallbackMessageMapper.insert(elemeCallbackMessage);
 
-        ElemeRefundOrderMessage elemeRefundOrderMessage = new ElemeRefundOrderMessage();
-        elemeRefundOrderMessage.setTenantId(tenantId);
-        elemeRefundOrderMessage.setTenantCode(tenantCode);
-        elemeRefundOrderMessage.setBranchId(branchId);
-        elemeRefundOrderMessage.setElemeOrderId(elemeOrder.getId());
-        elemeRefundOrderMessage.setOrderId(orderId);
-        elemeRefundOrderMessage.setRefundStatus(messageJsonObject.optString("refundStatus"));
-        elemeRefundOrderMessage.setReason(messageJsonObject.optString("reason"));
-        elemeRefundOrderMessage.setShopId(shopId);
-        elemeRefundOrderMessage.setRefundType(messageJsonObject.optString("refundType"));
-        elemeRefundOrderMessage.setTotalPrice(BigDecimal.valueOf(messageJsonObject.optDouble("totalPrice")));
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(messageJsonObject.getLong("updateTime") * 1000);
-        elemeRefundOrderMessage.setUpdateTime(calendar.getTime());
-        elemeRefundOrderMessage.setCreateUserId(userId);
-        elemeRefundOrderMessage.setLastUpdateUserId(userId);
-        elemeRefundOrderMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么退单信息！");
-        elemeRefundOrderMessageMapper.insert(elemeRefundOrderMessage);
-
-        JSONArray goodsList = messageJsonObject.getJSONArray("goodsList");
-        int size = goodsList.size();
-        List<ElemeRefundOrderMessageGoodsItem> elemeRefundOrderMessageGoodsItems = new ArrayList<ElemeRefundOrderMessageGoodsItem>();
-        for (int index = 0; index < size; index++) {
-            JSONObject itemJsonObject = goodsList.getJSONObject(index);
-            ElemeRefundOrderMessageGoodsItem elemeRefundOrderMessageGoodsItem = new ElemeRefundOrderMessageGoodsItem();
-            elemeRefundOrderMessageGoodsItem.setTenantId(tenantId);
-            elemeRefundOrderMessageGoodsItem.setTenantCode(tenantCode);
-            elemeRefundOrderMessageGoodsItem.setBranchId(branchId);
-            elemeRefundOrderMessageGoodsItem.setElemeOrderId(elemeOrderId);
-            elemeRefundOrderMessageGoodsItem.setOrderId(orderId);
-            elemeRefundOrderMessageGoodsItem.setElemeRefundOrderMessageId(elemeRefundOrderMessage.getId());
-            elemeRefundOrderMessageGoodsItem.setName(itemJsonObject.optString("name"));
-            elemeRefundOrderMessageGoodsItem.setQuantity(itemJsonObject.optInt("quantity"));
-            elemeRefundOrderMessageGoodsItem.setPrice(BigDecimal.valueOf(itemJsonObject.optDouble("price")));
-            elemeRefundOrderMessageGoodsItems.add(elemeRefundOrderMessageGoodsItem);
-        }
-        if (CollectionUtils.isNotEmpty(elemeRefundOrderMessageGoodsItems)) {
-            elemeRefundOrderMessageGoodsItemMapper.insertAll(elemeRefundOrderMessageGoodsItems);
-        }
-
+        int type = elemeCallbackMessage.getType();
         if (type == 20 || type == 21 || type == 24 || type == 25 || type == 26 || type == 30 || type == 31 || type == 34 || type == 35 || type == 36) {
             publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid);
         }
@@ -333,45 +293,38 @@ public class ElemeService {
     /**
      * 处理饿了么催单消息
      *
-     * @param shopId：饿了么店铺ID
-     * @param message：消息内容
-     * @param type：消息类型
-     * @return
+     * @param elemeCallbackMessage
+     * @param uuid
+     * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleElemeReminderMessage(BigInteger shopId, String message, Integer type, String uuid) throws IOException {
-        JSONObject messageJsonObject = JSONObject.fromObject(message);
+    public void handleElemeReminderMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) throws IOException {
+        JSONObject messageJsonObject = JSONObject.fromObject(elemeCallbackMessage.getMessage());
         String orderId = messageJsonObject.optString("orderId");
         SearchModel elemeOrderSearchModel = new SearchModel(true);
         elemeOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
         ElemeOrder elemeOrder = elemeOrderMapper.find(elemeOrderSearchModel);
         Validate.notNull(elemeOrder, "饿了么订单不存在！");
 
-        ElemeReminderMessage elemeReminderMessage = new ElemeReminderMessage();
-        elemeReminderMessage.setElemeOrderId(elemeOrder.getId());
-        elemeReminderMessage.setOrderId(orderId);
-        elemeReminderMessage.setShopId(shopId);
-        elemeReminderMessage.setReminderId(BigInteger.valueOf(messageJsonObject.optLong("remindId")));
-        elemeReminderMessage.setUserId(BigInteger.valueOf(messageJsonObject.getLong("userId")));
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(messageJsonObject.getLong("updateTime") * 1000);
-        elemeReminderMessage.setUpdateTime(calendar.getTime());
-        elemeReminderMessage.setTenantId(elemeOrder.getTenantId());
-        elemeReminderMessage.setBranchId(elemeOrder.getBranchId());
+        elemeCallbackMessage.setOrderId(orderId);
+        elemeCallbackMessageMapper.insert(elemeCallbackMessage);
 
-        BigInteger userId = CommonUtils.getServiceSystemUserId();
-        elemeReminderMessage.setCreateUserId(userId);
-        elemeReminderMessage.setLastUpdateUserId(userId);
-        elemeReminderMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么催单信息！");
-        elemeReminderMessageMapper.insert(elemeReminderMessage);
+        int type = elemeCallbackMessage.getType();
         if (type == 45) {
             publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid);
         }
     }
 
+    /**
+     * 处理订单状态变更消息
+     *
+     * @param elemeCallbackMessage
+     * @param uuid
+     * @throws IOException
+     */
     @Transactional(rollbackFor = Exception.class)
-    public void handleElemeOrderStateChangeMessage(BigInteger shopId, String message, Integer type, String uuid) throws IOException {
-        JSONObject messageJsonObject = JSONObject.fromObject(message);
+    public void handleElemeOrderStateChangeMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) throws IOException {
+        JSONObject messageJsonObject = JSONObject.fromObject(elemeCallbackMessage.getMessage());
         String orderId = messageJsonObject.optString("id");
         SearchModel elemeOrderSearchModel = new SearchModel(true);
         elemeOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
@@ -379,75 +332,44 @@ public class ElemeService {
         Validate.notNull(elemeOrder, "饿了么订单不存在！");
 
 
-        String state = elemeOrder.getStatus();
-        elemeOrder.setStatus(state);
-
+        String state = messageJsonObject.getString("state");
         BigInteger userId = CommonUtils.getServiceSystemUserId();
+        elemeOrder.setStatus(state);
         elemeOrder.setLastUpdateUserId(userId);
         elemeOrder.setLastUpdateRemark("处理饿了么订单状态变更消息，修改订单状态！");
         elemeOrderMapper.update(elemeOrder);
 
-        ElemeOrderStateChangeMessage elemeOrderStateChangeMessage = new ElemeOrderStateChangeMessage();
-        elemeOrderStateChangeMessage.setElemeOrderId(elemeOrder.getId());
-        elemeOrderStateChangeMessage.setOrderId(orderId);
-        elemeOrderStateChangeMessage.setState(messageJsonObject.getString("state"));
-        elemeOrderStateChangeMessage.setShopId(BigInteger.valueOf(messageJsonObject.getLong("shopId")));
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(messageJsonObject.getLong("updateTime"));
-        elemeOrderStateChangeMessage.setUpdateTime(calendar.getTime());
-        elemeOrderStateChangeMessage.setRole(messageJsonObject.getInt("role"));
-        elemeOrderStateChangeMessage.setTenantId(elemeOrder.getTenantId());
-        elemeOrderStateChangeMessage.setBranchId(elemeOrder.getBranchId());
-        elemeOrderStateChangeMessage.setCreateUserId(userId);
-        elemeOrderStateChangeMessage.setLastUpdateUserId(userId);
-        elemeOrderStateChangeMessage.setLastUpdateRemark("饿了么系统回调，保存饿了么订单变更消息！");
-
-        elemeOrderStateChangeMessageMapper.insert(elemeOrderStateChangeMessage);
-        publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid);
+        elemeCallbackMessage.setOrderId(orderId);
+        elemeCallbackMessageMapper.insert(elemeCallbackMessage);
+        publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), elemeCallbackMessage.getType(), uuid);
     }
 
+    /**
+     * 处理运单状态变更消息
+     *
+     * @param elemeCallbackMessage
+     * @param uuid
+     * @throws IOException
+     */
     @Transactional(rollbackFor = Exception.class)
-    public void handleElemeDeliveryOrderStateChangeMessage(BigInteger shopId, String message, Integer type, String uuid) throws IOException {
-        JSONObject messageJsonObject = JSONObject.fromObject(message);
+    public void handleElemeDeliveryOrderStateChangeMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) throws IOException {
+        JSONObject messageJsonObject = JSONObject.fromObject(elemeCallbackMessage.getMessage());
         String orderId = messageJsonObject.optString("orderId");
         SearchModel elemeOrderSearchModel = new SearchModel(true);
         elemeOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
         ElemeOrder elemeOrder = elemeOrderMapper.find(elemeOrderSearchModel);
         Validate.notNull(elemeOrder, "饿了么订单不存在！");
 
-        BigInteger userId = CommonUtils.getServiceSystemUserId();
-        // TODO 上线之前删除
-        userId = BigInteger.ZERO;
-        elemeOrder.setLastUpdateUserId(userId);
-        elemeOrder.setLastUpdateRemark("处理饿了么订单状态变更消息，修改订单状态！");
-        elemeOrderMapper.update(elemeOrder);
-
-        ElemeDeliveryOrderStateChangeMessage elemeDeliveryOrderStateChangeMessage = new ElemeDeliveryOrderStateChangeMessage();
-        elemeDeliveryOrderStateChangeMessage.setElemeOrderId(elemeOrder.getId());
-        elemeDeliveryOrderStateChangeMessage.setOrderId(elemeOrder.getOrderId());
-        elemeDeliveryOrderStateChangeMessage.setShopId(shopId);
-        elemeDeliveryOrderStateChangeMessage.setState(messageJsonObject.optString("state"));
-        elemeDeliveryOrderStateChangeMessage.setSubState(messageJsonObject.optString("subState"));
-        elemeDeliveryOrderStateChangeMessage.setName(messageJsonObject.optString("name"));
-        elemeDeliveryOrderStateChangeMessage.setPhone(messageJsonObject.optString("phone"));
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(messageJsonObject.getLong("updateAt"));
-        elemeDeliveryOrderStateChangeMessage.setUpdateTime(calendar.getTime());
-        elemeDeliveryOrderStateChangeMessage.setTenantId(elemeOrder.getTenantId());
-        elemeDeliveryOrderStateChangeMessage.setBranchId(elemeOrder.getBranchId());
-        elemeDeliveryOrderStateChangeMessage.setCreateUserId(userId);
-        elemeDeliveryOrderStateChangeMessage.setLastUpdateUserId(userId);
-        elemeDeliveryOrderStateChangeMessage.setLastUpdateRemark("处理饿了么回调，保存饿了么运单状态变更消息！");
-
-        elemeDeliveryOrderStateChangeMessageMapper.insert(elemeDeliveryOrderStateChangeMessage);
-        publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid);
+        elemeCallbackMessage.setOrderId(orderId);
+        elemeCallbackMessageMapper.insert(elemeCallbackMessage);
+        publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), elemeCallbackMessage.getType(), uuid);
     }
 
-    public void handleElemeShopStateChangeMessage(BigInteger shopId, String message, Integer type, String uuid) {
+    public void handleElemeShopStateChangeMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
 
     }
 
-    public void handleAuthorizationStateChangeMessage(BigInteger shopId, String message, Integer type, String uuid) {
+    public void handleAuthorizationStateChangeMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
 
     }
 
@@ -525,16 +447,7 @@ public class ElemeService {
 
     @Transactional(readOnly = true)
     public ApiRest obtainElemeDeliveryOrderStateChangeMessage(ObtainElemeDeliveryOrderStateChangeMessageModel obtainElemeDeliveryOrderStateChangeMessageModel) {
-        SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainElemeDeliveryOrderStateChangeMessageModel.getTenantId());
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainElemeDeliveryOrderStateChangeMessageModel.getBranchId());
-        searchModel.addSearchCondition("eleme_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainElemeDeliveryOrderStateChangeMessageModel.getElemeOrderId());
-        List<ElemeDeliveryOrderStateChangeMessage> elemeDeliveryOrderStateChangeMessages = elemeDeliveryOrderStateChangeMessageMapper.findAll(searchModel);
-        ApiRest apiRest = new ApiRest();
-        apiRest.setData(elemeDeliveryOrderStateChangeMessages);
-        apiRest.setMessage("获取饿了么订单运单状态变更信息成功");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return null;
     }
 
     @Transactional(readOnly = true)

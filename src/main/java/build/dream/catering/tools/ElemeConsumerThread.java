@@ -5,6 +5,7 @@ import build.dream.catering.services.ElemeService;
 import build.dream.catering.utils.DingtalkUtils;
 import build.dream.catering.utils.ElemeUtils;
 import build.dream.common.api.ApiRest;
+import build.dream.common.erp.catering.domains.ElemeCallbackMessage;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.LogUtils;
 import build.dream.common.utils.ProxyUtils;
@@ -14,6 +15,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 
 import java.math.BigInteger;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,23 +55,33 @@ public class ElemeConsumerThread implements Runnable {
                 uuid = elemeMessageJsonObject.getString("uuid");
                 count = elemeMessageJsonObject.getInt("count");
                 int type = callbackRequestBodyJsonObject.getInt("type");
-                BigInteger shopId = BigInteger.valueOf(callbackRequestBodyJsonObject.getLong("shopId"));
-                String message = callbackRequestBodyJsonObject.getString("message");
+
+                ElemeCallbackMessage elemeCallbackMessage = new ElemeCallbackMessage();
+                elemeCallbackMessage.setRequestId(callbackRequestBodyJsonObject.getString("requestId"));
+                elemeCallbackMessage.setType(type);
+                elemeCallbackMessage.setAppId(BigInteger.valueOf(callbackRequestBodyJsonObject.getLong("appId")));
+                elemeCallbackMessage.setMessage(callbackRequestBodyJsonObject.getString("message"));
+                elemeCallbackMessage.setShopId(BigInteger.valueOf(callbackRequestBodyJsonObject.getLong("shopId")));
+
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(callbackRequestBodyJsonObject.getLong("timestamp"));
+                elemeCallbackMessage.setSignature(callbackRequestBodyJsonObject.getString("signature"));
+                elemeCallbackMessage.setUserId(BigInteger.valueOf(callbackRequestBodyJsonObject.getLong("userId")));
 
                 if (type == 10) {
-                    elemeService.saveElemeOrder(shopId, message, type, uuid);
+                    elemeService.saveElemeOrder(elemeCallbackMessage, uuid);
                 } else if (ArrayUtils.contains(ELEME_ORDER_STATE_CHANGE_MESSAGE_TYPES, type)) {
-                    elemeService.handleElemeOrderStateChangeMessage(shopId, message, type, uuid);
+                    elemeService.handleElemeOrderStateChangeMessage(elemeCallbackMessage, uuid);
                 } else if (ArrayUtils.contains(ELEME_REFUND_ORDER_MESSAGE_TYPES, type)) {
-                    elemeService.handleElemeRefundOrderMessage(shopId, message, type, uuid);
+                    elemeService.handleElemeRefundOrderMessage(elemeCallbackMessage, uuid);
                 } else if (ArrayUtils.contains(ELEME_REMINDER_MESSAGE_TYPES, type)) {
-                    elemeService.handleElemeReminderMessage(shopId, message, type, uuid);
+                    elemeService.handleElemeReminderMessage(elemeCallbackMessage, uuid);
                 } else if (ArrayUtils.contains(ELEME_DELIVERY_ORDER_STATE_CHANGE_MESSAGE_TYPES, type)) {
-                    elemeService.handleElemeDeliveryOrderStateChangeMessage(shopId, message, type, uuid);
+                    elemeService.handleElemeDeliveryOrderStateChangeMessage(elemeCallbackMessage, uuid);
                 } else if (ArrayUtils.contains(ELEME_SHOP_STATE_CHANGE_MESSAGE_TYPES, type)) {
-                    elemeService.handleElemeShopStateChangeMessage(shopId, message, type, uuid);
+                    elemeService.handleElemeShopStateChangeMessage(elemeCallbackMessage, uuid);
                 } else if (type == 100) {
-                    elemeService.handleAuthorizationStateChangeMessage(shopId, message, type, uuid);
+                    elemeService.handleAuthorizationStateChangeMessage(elemeCallbackMessage, uuid);
                 }
             } catch (Exception e) {
                 if (callbackRequestBodyJsonObject != null) {
