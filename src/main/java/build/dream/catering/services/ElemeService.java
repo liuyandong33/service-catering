@@ -471,10 +471,10 @@ public class ElemeService {
     }
 
     @Transactional(readOnly = true)
-    public ApiRest pullElemeOrder(PullElemeOrderModel pullElemeOrderModel) {
-        BigInteger tenantId = pullElemeOrderModel.getTenantId();
-        BigInteger branchId = pullElemeOrderModel.getBranchId();
-        BigInteger elemeOrderId = pullElemeOrderModel.getElemeOrderId();
+    public ApiRest obtainElemeOrder(ObtainElemeOrderModel obtainElemeOrderModel) {
+        BigInteger tenantId = obtainElemeOrderModel.getTenantId();
+        BigInteger branchId = obtainElemeOrderModel.getBranchId();
+        BigInteger elemeOrderId = obtainElemeOrderModel.getElemeOrderId();
         // 查询订单
         SearchModel elemeOrderSearchModel = new SearchModel(true);
         elemeOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
@@ -622,7 +622,7 @@ public class ElemeService {
 
         ApiRest apiRest = new ApiRest();
         apiRest.setData(elemeOrderMap);
-        apiRest.setMessage("拉取饿了么订单成功！");
+        apiRest.setMessage("获取饿了么订单成功！");
         apiRest.setSuccessful(true);
         return apiRest;
     }

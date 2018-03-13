@@ -345,18 +345,18 @@ public class ElemeController extends BasicController {
         return GsonUtils.toJson(apiRest);
     }
 
-    @RequestMapping(value = "/pullElemeOrder")
+    @RequestMapping(value = "/obtainElemeOrder")
     @ResponseBody
-    public String pullElemeOrder() {
+    public String obtainElemeOrder() {
         ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
-            PullElemeOrderModel pullElemeOrderModel = ApplicationHandler.instantiateObject(PullElemeOrderModel.class, requestParameters);
-            pullElemeOrderModel.validateAndThrow();
+            ObtainElemeOrderModel obtainElemeOrderModel = ApplicationHandler.instantiateObject(ObtainElemeOrderModel.class, requestParameters);
+            obtainElemeOrderModel.validateAndThrow();
 
-            apiRest = elemeService.pullElemeOrder(pullElemeOrderModel);
+            apiRest = elemeService.obtainElemeOrder(obtainElemeOrderModel);
         } catch (Exception e) {
-            LogUtils.error("拉取饿了么订单失败！", controllerSimpleName, "pullElemeOrder", e, requestParameters);
+            LogUtils.error("拉取饿了么订单失败！", controllerSimpleName, "obtainElemeOrder", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
