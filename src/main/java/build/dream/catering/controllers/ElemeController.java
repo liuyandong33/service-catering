@@ -88,7 +88,7 @@ public class ElemeController extends BasicController {
             String branchId = requestParameters.get("branchId");
             Validate.notNull(branchId, "参数(branchId)不能为空！");
 
-            Branch branch = elemeService.findBranchInfo(BigInteger.valueOf(Long.valueOf(tenantId)), BigInteger.valueOf(Long.valueOf(branchId)));
+            Branch branch = elemeService.findBranch(BigInteger.valueOf(Long.valueOf(tenantId)), BigInteger.valueOf(Long.valueOf(branchId)));
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("shopId", branch.getShopId());
             apiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.product.category.getShopCategories", params);
@@ -111,7 +111,7 @@ public class ElemeController extends BasicController {
             String branchId = requestParameters.get("branchId");
             Validate.notNull(branchId, "参数(branchId)不能为空！");
 
-            Branch branch = elemeService.findBranchInfo(BigInteger.valueOf(Long.valueOf(tenantId)), BigInteger.valueOf(Long.valueOf(branchId)));
+            Branch branch = elemeService.findBranch(BigInteger.valueOf(Long.valueOf(tenantId)), BigInteger.valueOf(Long.valueOf(branchId)));
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("shopId", branch.getShopId());
             apiRest = ElemeUtils.callElemeSystem(tenantId, branchId, branch.getElemeAccountType(), "eleme.product.category.getShopCategoriesWithChildren", params);
@@ -152,7 +152,7 @@ public class ElemeController extends BasicController {
             String branchId = requestParameters.get("branchId");
             Validate.notNull(branchId, "参数(branchId)不能为空！");
 
-            Branch branch = elemeService.findBranchInfo(NumberUtils.createBigInteger(tenantId), NumberUtils.createBigInteger(branchId));
+            Branch branch = elemeService.findBranch(NumberUtils.createBigInteger(tenantId), NumberUtils.createBigInteger(branchId));
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("shopId", branch.getShopId());
             apiRest = ElemeUtils.callElemeSystem(tenantId, branchId, branch.getElemeAccountType(), "eleme.product.category.getShopCategoriesWithChildren", params);
@@ -182,7 +182,7 @@ public class ElemeController extends BasicController {
             BigInteger bigIntegerBranchId = NumberUtils.createBigInteger(branchId);
             BigInteger bigIntegerCategoryId = NumberUtils.createBigInteger(categoryId);
 
-            Branch branch = elemeService.findBranchInfo(bigIntegerTenantId, bigIntegerBranchId);
+            Branch branch = elemeService.findBranch(bigIntegerTenantId, bigIntegerBranchId);
             GoodsCategory goodsCategory = elemeService.findGoodsCategoryInfo(bigIntegerTenantId, bigIntegerBranchId, bigIntegerCategoryId);
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("shopId", branch.getShopId());
@@ -215,7 +215,7 @@ public class ElemeController extends BasicController {
             BigInteger bigIntegerBranchId = NumberUtils.createBigInteger(branchId);
             BigInteger bigIntegerCategoryId = NumberUtils.createBigInteger(categoryId);
 
-            Branch branch = elemeService.findBranchInfo(bigIntegerTenantId, bigIntegerBranchId);
+            Branch branch = elemeService.findBranch(bigIntegerTenantId, bigIntegerBranchId);
             GoodsCategory goodsCategory = elemeService.findGoodsCategoryInfo(bigIntegerTenantId, bigIntegerBranchId, bigIntegerCategoryId);
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("shopId", branch.getShopId());
@@ -249,7 +249,7 @@ public class ElemeController extends BasicController {
             BigInteger bigIntegerBranchId = NumberUtils.createBigInteger(branchId);
             BigInteger bigIntegerCategoryId = NumberUtils.createBigInteger(categoryId);
 
-            Branch branch = elemeService.findBranchInfo(bigIntegerTenantId, bigIntegerBranchId);
+            Branch branch = elemeService.findBranch(bigIntegerTenantId, bigIntegerBranchId);
             GoodsCategory goodsCategory = elemeService.findGoodsCategoryInfo(bigIntegerTenantId, bigIntegerBranchId, bigIntegerCategoryId);
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("categoryId", goodsCategory.getId());
@@ -282,7 +282,7 @@ public class ElemeController extends BasicController {
             BigInteger bigIntegerBranchId = NumberUtils.createBigInteger(branchId);
             BigInteger bigIntegerCategoryId = NumberUtils.createBigInteger(categoryId);
 
-            Branch branch = elemeService.findBranchInfo(bigIntegerTenantId, bigIntegerBranchId);
+            Branch branch = elemeService.findBranch(bigIntegerTenantId, bigIntegerBranchId);
             GoodsCategory goodsCategory = elemeService.findGoodsCategoryInfo(bigIntegerTenantId, bigIntegerBranchId, bigIntegerCategoryId);
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("categoryId", goodsCategory.getId());
@@ -316,7 +316,7 @@ public class ElemeController extends BasicController {
             BigInteger bigIntegerBranchId = NumberUtils.createBigInteger(branchId);
             BigInteger bigIntegerCategoryId = NumberUtils.createBigInteger(categoryId);
 
-            Branch branch = elemeService.findBranchInfo(bigIntegerTenantId, bigIntegerBranchId);
+            Branch branch = elemeService.findBranch(bigIntegerTenantId, bigIntegerBranchId);
             GoodsCategory goodsCategory = elemeService.findGoodsCategoryInfo(bigIntegerTenantId, bigIntegerBranchId, bigIntegerCategoryId);
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("categoryId", goodsCategory.getId());
@@ -328,18 +328,18 @@ public class ElemeController extends BasicController {
         return GsonUtils.toJson(apiRest);
     }
 
-    @RequestMapping(value = "/obtainElemeDeliveryOrderStateChangeMessage")
+    @RequestMapping(value = "/obtainElemeCallbackMessage")
     @ResponseBody
-    public String obtainElemeDeliveryOrderStateChangeMessage() {
+    public String obtainElemeCallbackMessage() {
         ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
-            ObtainElemeDeliveryOrderStateChangeMessageModel obtainElemeDeliveryOrderStateChangeMessageModel = ApplicationHandler.instantiateObject(ObtainElemeDeliveryOrderStateChangeMessageModel.class, requestParameters);
-            obtainElemeDeliveryOrderStateChangeMessageModel.validateAndThrow();
+            ObtainElemeCallbackMessageModel obtainElemeCallbackMessageModel = ApplicationHandler.instantiateObject(ObtainElemeCallbackMessageModel.class, requestParameters);
+            obtainElemeCallbackMessageModel.validateAndThrow();
 
-            apiRest = elemeService.obtainElemeDeliveryOrderStateChangeMessage(obtainElemeDeliveryOrderStateChangeMessageModel);
+            apiRest = elemeService.obtainElemeCallbackMessage(obtainElemeCallbackMessageModel);
         } catch (Exception e) {
-            LogUtils.error("获取饿了么订单运单状态变更信息失败！", controllerSimpleName, "obtainElemeDeliveryOrderStateChangeMessage", e, requestParameters);
+            LogUtils.error("获取饿了么回调消息失败！", controllerSimpleName, "obtainElemeCallbackMessage", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -447,7 +447,7 @@ public class ElemeController extends BasicController {
             QueryItemByPageModel queryItemByPageModel = ApplicationHandler.instantiateObject(QueryItemByPageModel.class, requestParameters);
             queryItemByPageModel.validateAndThrow();
 
-            Branch branch = elemeService.findBranchInfo(queryItemByPageModel.getTenantId(), queryItemByPageModel.getBranchId());
+            Branch branch = elemeService.findBranch(queryItemByPageModel.getTenantId(), queryItemByPageModel.getBranchId());
             Map<String, Object> queryPage = new HashMap<String, Object>();
             queryPage.put("shopId", branch.getShopId());
             queryPage.put("offset", queryItemByPageModel.getOffset());
@@ -478,7 +478,7 @@ public class ElemeController extends BasicController {
             SetOrderPackingFeeModel setOrderPackingFeeModel = ApplicationHandler.instantiateObject(SetOrderPackingFeeModel.class, requestParameters);
             setOrderPackingFeeModel.validateAndThrow();
 
-            Branch branch = elemeService.findBranchInfo(setOrderPackingFeeModel.getTenantId(), setOrderPackingFeeModel.getBranchId());
+            Branch branch = elemeService.findBranch(setOrderPackingFeeModel.getTenantId(), setOrderPackingFeeModel.getBranchId());
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("shopId", branch.getShopId());
             params.put("status", setOrderPackingFeeModel.getStatus());
@@ -511,7 +511,7 @@ public class ElemeController extends BasicController {
             GetShopSalesItemsModel getShopSalesItemsModel = ApplicationHandler.instantiateObject(GetShopSalesItemsModel.class, requestParameters);
             getShopSalesItemsModel.validateAndThrow();
 
-            Branch branch = elemeService.findBranchInfo(getShopSalesItemsModel.getTenantId(), getShopSalesItemsModel.getBranchId());
+            Branch branch = elemeService.findBranch(getShopSalesItemsModel.getTenantId(), getShopSalesItemsModel.getBranchId());
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("shopId", branch.getShopId());
 

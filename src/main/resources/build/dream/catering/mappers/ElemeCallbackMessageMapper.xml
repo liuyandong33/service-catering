@@ -4,4 +4,8 @@
     <insert id="insert" parameterType="build.dream.common.erp.catering.domains.ElemeCallbackMessage" useGeneratedKeys="true" keyProperty="id">
         ${@build.dream.common.utils.DatabaseUtils@generateInsertSql("build.dream.common.erp.catering.domains.ElemeCallbackMessage")}
     </insert>
+
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.ElemeCallbackMessage">
+        SELECT ${selectColumns} FROM eleme_callback_message <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
+    </select>
 </mapper>
