@@ -383,7 +383,7 @@ public class ElemeController extends BasicController {
         InputStream inputStream = null;
         InputStreamReader inputStreamReader = null;
         ClassLoader classLoader = this.getClass().getClassLoader();
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         if ("bindingStore.html".equals(resourceName)) {
             inputStream = classLoader.getResourceAsStream("views/eleme/bindingStore.html");
         } else if ("ui-dialog.css".equals(resourceName)) {
