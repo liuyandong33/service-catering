@@ -40,11 +40,11 @@ public class ElemeUtils {
         Map<String, Object> sorted = new TreeMap<String, Object>(params);
         sorted.put("app_key", appKey);
         sorted.put("timestamp", timestamp);
-        StringBuffer stringBuffer = new StringBuffer();
+        StringBuilder stringBuilder = new StringBuilder();
         for (Map.Entry<String, Object> entry : sorted.entrySet()) {
-            stringBuffer.append(entry.getKey()).append("=").append(GsonUtils.toJson(entry.getValue()));
+            stringBuilder.append(entry.getKey()).append("=").append(GsonUtils.toJson(entry.getValue()));
         }
-        return DigestUtils.md5Hex(String.format("%s%s%s%s", action, accessToken, stringBuffer, appSecret)).toUpperCase();
+        return DigestUtils.md5Hex(String.format("%s%s%s%s", action, accessToken, stringBuilder, appSecret)).toUpperCase();
     }
 
     public static String constructRequestBody(String tenantId, String branchId, Integer elemeAccountType, String action, Map<String, Object> params) throws IOException {

@@ -285,7 +285,7 @@ public class ElemeService {
         elemeCallbackMessageMapper.insert(elemeCallbackMessage);
 
         int type = elemeCallbackMessage.getType();
-        if (type == 20 || type == 21 || type == 24 || type == 25 || type == 26 || type == 30 || type == 31 || type == 34 || type == 35 || type == 36) {
+        if (type == 30 || type == 31 || type == 34 || type == 35 || type == 36) {
             publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid);
         }
     }
@@ -311,6 +311,31 @@ public class ElemeService {
 
         int type = elemeCallbackMessage.getType();
         if (type == 45) {
+            publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid);
+        }
+    }
+
+    /**
+     * 处理饿了么取消单消息
+     *
+     * @param elemeCallbackMessage
+     * @param uuid
+     * @throws IOException
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void handleElemeCancelOrderMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) throws IOException {
+        JSONObject messageJsonObject = JSONObject.fromObject(elemeCallbackMessage.getMessage());
+        String orderId = messageJsonObject.optString("orderId");
+        SearchModel elemeOrderSearchModel = new SearchModel(true);
+        elemeOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
+        ElemeOrder elemeOrder = elemeOrderMapper.find(elemeOrderSearchModel);
+        Validate.notNull(elemeOrder, "饿了么订单不存在！");
+
+        elemeCallbackMessage.setOrderId(orderId);
+        elemeCallbackMessageMapper.insert(elemeCallbackMessage);
+
+        int type = elemeCallbackMessage.getType();
+        if (type == 20 || type == 21 || type == 24 || type == 25 || type == 26) {
             publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid);
         }
     }
@@ -374,16 +399,6 @@ public class ElemeService {
     }
 
     @Transactional(readOnly = true)
-    public Branch findBranchInfo(BigInteger tenantId, BigInteger branchId) {
-        SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        Branch branch = branchMapper.find(searchModel);
-        Validate.notNull(branch, "门店不存在！");
-        return branch;
-    }
-
-    @Transactional(readOnly = true)
     public Branch findBranch(BigInteger tenantId, BigInteger branchId) {
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
@@ -402,17 +417,6 @@ public class ElemeService {
         GoodsCategory goodsCategory = goodsCategoryMapper.find(searchModel);
         Validate.notNull(goodsCategory, "分类信息不存在！");
         return goodsCategory;
-    }
-
-    @Transactional(readOnly = true)
-    public ElemeOrder findElemeOrderInfo(BigInteger tenantId, BigInteger branchId, BigInteger elemeOrderId) {
-        SearchModel searchModel = new SearchModel();
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, elemeOrderId);
-        ElemeOrder elemeOrder = elemeOrderMapper.find(searchModel);
-        Validate.notNull(elemeOrder, "订单不存在！");
-        return elemeOrder;
     }
 
     @Transactional(readOnly = true)
@@ -446,15 +450,31 @@ public class ElemeService {
     }
 
     @Transactional(readOnly = true)
-    public ApiRest obtainElemeDeliveryOrderStateChangeMessage(ObtainElemeDeliveryOrderStateChangeMessageModel obtainElemeDeliveryOrderStateChangeMessageModel) {
-        return null;
+    public ApiRest obtainElemeCallbackMessage(ObtainElemeCallbackMessageModel obtainElemeCallbackMessageModel) {
+        SearchModel searchModel = new SearchModel(false);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainElemeCallbackMessageModel.getElemeCallbackMessageId());
+        ElemeCallbackMessage elemeCallbackMessage = elemeCallbackMessageMapper.find(searchModel);
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("id", elemeCallbackMessage.getId());
+        data.put("orderId", elemeCallbackMessage.getOrderId());
+        data.put("requestId", elemeCallbackMessage.getRequestId());
+        data.put("type", elemeCallbackMessage.getType());
+        data.put("appId", elemeCallbackMessage.getAppId());
+        data.put("message", JSONObject.fromObject(elemeCallbackMessage.getMessage()));
+        data.put("shopId", elemeCallbackMessage.getShopId());
+        data.put("timestamp", elemeCallbackMessage.getTimestamp());
+        data.put("signature", elemeCallbackMessage.getSignature());
+        data.put("userId", elemeCallbackMessage.getUserId());
+
+        return new ApiRest(data, "获取饿了么回调消息成功！");
     }
 
     @Transactional(readOnly = true)
-    public ApiRest pullElemeOrder(PullElemeOrderModel pullElemeOrderModel) {
-        BigInteger tenantId = pullElemeOrderModel.getTenantId();
-        BigInteger branchId = pullElemeOrderModel.getBranchId();
-        BigInteger elemeOrderId = pullElemeOrderModel.getElemeOrderId();
+    public ApiRest obtainElemeOrder(ObtainElemeOrderModel obtainElemeOrderModel) {
+        BigInteger tenantId = obtainElemeOrderModel.getTenantId();
+        BigInteger branchId = obtainElemeOrderModel.getBranchId();
+        BigInteger elemeOrderId = obtainElemeOrderModel.getElemeOrderId();
         // 查询订单
         SearchModel elemeOrderSearchModel = new SearchModel(true);
         elemeOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
@@ -602,7 +622,7 @@ public class ElemeService {
 
         ApiRest apiRest = new ApiRest();
         apiRest.setData(elemeOrderMap);
-        apiRest.setMessage("拉取饿了么订单成功！");
+        apiRest.setMessage("获取饿了么订单成功！");
         apiRest.setSuccessful(true);
         return apiRest;
     }
@@ -728,7 +748,7 @@ public class ElemeService {
         BigInteger elemeOrderId = confirmOrderLiteModel.getElemeOrderId();
 
         Branch branch = findBranch(tenantId, branchId);
-        ElemeOrder elemeOrder = findElemeOrderInfo(tenantId, branchId, elemeOrderId);
+        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("orderId", elemeOrder.getOrderId());
@@ -751,7 +771,7 @@ public class ElemeService {
         BigInteger elemeOrderId = cancelOrderLiteModel.getElemeOrderId();
 
         Branch branch = findBranch(tenantId, branchId);
-        ElemeOrder elemeOrder = findElemeOrderInfo(tenantId, branchId, elemeOrderId);
+        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("orderId", elemeOrder.getOrderId());
@@ -777,7 +797,7 @@ public class ElemeService {
         BigInteger elemeOrderId = agreeRefundLiteModel.getElemeOrderId();
 
         Branch branch = findBranch(tenantId, branchId);
-        ElemeOrder elemeOrder = findElemeOrderInfo(tenantId, branchId, elemeOrderId);
+        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("orderId", elemeOrder.getOrderId());
@@ -959,7 +979,7 @@ public class ElemeService {
         BigInteger branchId = getCommoditiesModel.getBranchId();
 
         Branch branch = findBranch(tenantId, branchId);
-        ElemeOrder elemeOrder = findElemeOrderInfo(tenantId, branchId, getCommoditiesModel.getElemeOrderId());
+        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, getCommoditiesModel.getElemeOrderId());
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("orderId", elemeOrder.getOrderId());
@@ -979,7 +999,7 @@ public class ElemeService {
         BigInteger tenantId = batchGetCommoditiesModel.getTenantId();
         BigInteger branchId = batchGetCommoditiesModel.getBranchId();
 
-        Branch branch = findBranchInfo(tenantId, branchId);
+        Branch branch = findBranch(tenantId, branchId);
         List<ElemeOrder> elemeOrders = findAllElemeOrders(tenantId, branchId, batchGetCommoditiesModel.getElemeOrderIds());
         List<String> orderIds = obtainOrderIds(elemeOrders);
 
@@ -1003,8 +1023,8 @@ public class ElemeService {
         BigInteger tenantId = getRefundOrderModel.getTenantId();
         BigInteger branchId = getRefundOrderModel.getBranchId();
 
-        Branch branch = findBranchInfo(tenantId, branchId);
-        ElemeOrder elemeOrder = findElemeOrderInfo(tenantId, branchId, getRefundOrderModel.getElemeOrderId());
+        Branch branch = findBranch(tenantId, branchId);
+        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, getRefundOrderModel.getElemeOrderId());
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("orderId", elemeOrder.getOrderId());

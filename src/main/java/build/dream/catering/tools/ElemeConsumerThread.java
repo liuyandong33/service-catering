@@ -23,7 +23,8 @@ public class ElemeConsumerThread implements Runnable {
     private static final String ELEME_CONSUMER_THREAD_SIMPLE_NAME = "ElemeConsumerThread";
 
     private static final int[] ELEME_ORDER_STATE_CHANGE_MESSAGE_TYPES = {12, 14, 15, 17, 18};
-    private static final int[] ELEME_REFUND_ORDER_MESSAGE_TYPES = {20, 21, 22, 23, 24, 25, 26, 30, 31, 32, 33, 34, 35, 36};
+    private static final int[] ELEME_CANCEL_ORDER_MESSAGE_TYPES = {20, 21, 22, 23, 24, 25, 26};
+    private static final int[] ELEME_REFUND_ORDER_MESSAGE_TYPES = {30, 31, 32, 33, 34, 35, 36};
     private static final int[] ELEME_REMINDER_MESSAGE_TYPES = {45, 46};
     private static final int[] ELEME_DELIVERY_ORDER_STATE_CHANGE_MESSAGE_TYPES = {51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76};
     private static final int[] ELEME_SHOP_STATE_CHANGE_MESSAGE_TYPES = {91, 92};
@@ -70,6 +71,8 @@ public class ElemeConsumerThread implements Runnable {
 
                 if (type == 10) {
                     elemeService.saveElemeOrder(elemeCallbackMessage, uuid);
+                } else if (ArrayUtils.contains(ELEME_CANCEL_ORDER_MESSAGE_TYPES, type)) {
+                    elemeService.handleElemeCancelOrderMessage(elemeCallbackMessage, uuid);
                 } else if (ArrayUtils.contains(ELEME_ORDER_STATE_CHANGE_MESSAGE_TYPES, type)) {
                     elemeService.handleElemeOrderStateChangeMessage(elemeCallbackMessage, uuid);
                 } else if (ArrayUtils.contains(ELEME_REFUND_ORDER_MESSAGE_TYPES, type)) {
