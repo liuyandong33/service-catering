@@ -171,6 +171,7 @@ public class GoodsService extends BasicService {
 
             goods.setName(saveGoodsModel.getName());
             goods.setCategoryId(saveGoodsModel.getCategoryId());
+            goods.setImageUrl(saveGoodsModel.getImageUrl());
             goodsMapper.update(goods);
 
             // 删除需要删除的规格
@@ -360,6 +361,7 @@ public class GoodsService extends BasicService {
             goods.setName(saveGoodsModel.getName());
             goods.setType(saveGoodsModel.getType());
             goods.setCategoryId(saveGoodsModel.getCategoryId());
+            goods.setImageUrl(saveGoodsModel.getImageUrl());
             goods.setCreateUserId(userId);
             goods.setLastUpdateUserId(userId);
             goods.setLastUpdateRemark("新增商品信息！");

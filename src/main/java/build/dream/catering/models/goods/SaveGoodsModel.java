@@ -37,6 +37,8 @@ public class SaveGoodsModel extends BasicModel {
     @NotNull
     private BigInteger categoryId;
 
+    private String imageUrl;
+
     private List<GoodsSpecificationInfo> goodsSpecificationInfos;
 
     private List<FlavorGroupInfo> flavorGroupInfos;
@@ -107,6 +109,14 @@ public class SaveGoodsModel extends BasicModel {
 
     public void setCategoryId(BigInteger categoryId) {
         this.categoryId = categoryId;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public List<GoodsSpecificationInfo> getGoodsSpecificationInfos() {
