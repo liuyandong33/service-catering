@@ -1,9 +1,12 @@
 package build.dream.catering.tools;
 
-import build.dream.common.utils.CacheUtils;
-import build.dream.common.utils.LogUtils;
-import build.dream.common.utils.WebUtils;
+import build.dream.catering.constants.Constants;
+import build.dream.common.api.ApiRest;
+import build.dream.common.utils.*;
 import org.apache.commons.lang.StringUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class PushElemeMessageThread implements Runnable {
     private boolean continued = true;
@@ -26,8 +29,10 @@ public class PushElemeMessageThread implements Runnable {
                 continued = false;
             } else {
                 try {
-                    String result = WebUtils.doGetWithRequestParameters("http://www.baidu.com", null);
-                    LogUtils.info(result);
+                    Map<String, String> pushRequestParameters = new HashMap<String, String>();
+                    pushRequestParameters.put("message", message);
+                    ApiRest apiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "jpush", "push", pushRequestParameters);
+                    LogUtils.info(GsonUtils.toJson(apiRest) + "-" + count);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
