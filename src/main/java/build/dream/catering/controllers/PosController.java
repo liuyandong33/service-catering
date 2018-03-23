@@ -9,11 +9,16 @@ import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
 import javafx.geometry.Pos;
+import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.UUID;
@@ -41,6 +46,37 @@ public class PosController extends BasicController {
             apiRest = posService.initPos(initPosModel);
         } catch (Exception e) {
             LogUtils.error("初始化POS失败", controllerSimpleName, "initPos", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @RequestMapping(value = "/uploadDatabase")
+    @ResponseBody
+    public String uploadDatabase(HttpServletRequest httpServletRequest) {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            Validate.isTrue(httpServletRequest instanceof MultipartHttpServletRequest, "请上传数据库文件！");
+            MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) httpServletRequest;
+
+            MultipartFile databaseFile = multipartHttpServletRequest.getFile("database");
+
+            String originalFilename = databaseFile.getOriginalFilename();
+            File directory = new File("/Users/liuyandong/Desktop/databases");
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+            File file = new File("/Users/liuyandong/Desktop/databases/" + originalFilename);
+            databaseFile.transferTo(file);
+
+            String tenantId = requestParameters.get("tenantId");
+            ApplicationHandler.notBlank(tenantId, "tenantId");
+
+            String branchId = requestParameters.get("branchId");
+            ApplicationHandler.notBlank(branchId, "branchId");
+        } catch (Exception e) {
+            LogUtils.error("上传数据库文件失败", controllerSimpleName, "uploadDatabase", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
