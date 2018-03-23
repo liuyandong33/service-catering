@@ -137,6 +137,8 @@ public class ElemeService {
         elemeOrder.setLastUpdateRemark("饿了么系统推送新订单，保存订单！");
         elemeOrderMapper.insert(elemeOrder);
 
+        BigInteger elemeOrderId = elemeOrder.getId();
+
         List<ElemeOrderItem> elemeOrderItems = new ArrayList<ElemeOrderItem>();
 
         int elemeGroupJsonArraySize = elemeGroupJsonArray.size();
@@ -146,7 +148,7 @@ public class ElemeService {
             elemeOrderGroup.setTenantId(tenantId);
             elemeOrderGroup.setTenantCode(tenantCode);
             elemeOrderGroup.setBranchId(branchId);
-            elemeOrderGroup.setElemeOrderId(elemeOrder.getId());
+            elemeOrderGroup.setElemeOrderId(elemeOrderId);
             elemeOrderGroup.setOrderId(id);
             elemeOrderGroup.setName(elemeGroupJsonObject.optString("name"));
             elemeOrderGroup.setType(elemeGroupJsonObject.optString("type"));
@@ -163,7 +165,7 @@ public class ElemeService {
                 elemeOrderItem.setTenantId(tenantId);
                 elemeOrderItem.setTenantCode(tenantCode);
                 elemeOrderItem.setBranchId(branchId);
-                elemeOrderItem.setElemeOrderId(elemeOrder.getId());
+                elemeOrderItem.setElemeOrderId(elemeOrderId);
                 elemeOrderItem.setOrderId(id);
                 elemeOrderItem.setElemeOrderGroupId(elemeOrderGroup.getId());
                 elemeOrderItem.setElemeItemId(BigInteger.valueOf(elemeOrderItemJsonObject.getLong("id")));
@@ -197,7 +199,7 @@ public class ElemeService {
                         elemeOrderItemAttribute.setTenantId(tenantId);
                         elemeOrderItemAttribute.setTenantCode(tenantCode);
                         elemeOrderItemAttribute.setBranchId(branchId);
-                        elemeOrderItemAttribute.setElemeOrderItemId(elemeOrder.getId());
+                        elemeOrderItemAttribute.setElemeOrderItemId(elemeOrderId);
                         elemeOrderItemAttribute.setOrderId(id);
                         elemeOrderItemAttribute.setElemeOrderItemId(elemeOrderItem.getId());
                         elemeOrderItemAttribute.setName(elemeOrderItemAttributeJsonObject.optString("name"));
@@ -218,7 +220,7 @@ public class ElemeService {
                         elemeOrderItemNewSpec.setTenantId(tenantId);
                         elemeOrderItemNewSpec.setTenantCode(tenantCode);
                         elemeOrderItemNewSpec.setBranchId(branchId);
-                        elemeOrderItemNewSpec.setElemeOrderId(elemeOrder.getId());
+                        elemeOrderItemNewSpec.setElemeOrderId(elemeOrderId);
                         elemeOrderItemNewSpec.setOrderId(id);
                         elemeOrderItemNewSpec.setElemeOrderItemId(elemeOrderItem.getId());
                         elemeOrderItemNewSpec.setName(elemeOrderItemNewSpecJsonObject.optString("name"));
@@ -240,9 +242,8 @@ public class ElemeService {
                 elemeOrderActivity.setTenantId(tenantId);
                 elemeOrderActivity.setTenantCode(tenantCode);
                 elemeOrderActivity.setBranchId(branchId);
-                elemeOrderActivity.setElemeOrderId(elemeOrder.getId());
+                elemeOrderActivity.setElemeOrderId(elemeOrderId);
                 elemeOrderActivity.setOrderId(id);
-                elemeOrderActivity.setElemeOrderId(elemeOrder.getId());
                 elemeOrderActivity.setElemeActivityId(BigInteger.valueOf(elemeActivityJsonObject.optLong("id")));
                 elemeOrderActivity.setName(elemeActivityJsonObject.optString("name"));
                 elemeOrderActivity.setCategoryId(elemeActivityJsonObject.optInt("categoryId"));
@@ -257,7 +258,8 @@ public class ElemeService {
         }
         elemeCallbackMessage.setOrderId(id);
         elemeCallbackMessageMapper.insert(elemeCallbackMessage);
-        publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), elemeCallbackMessage.getType(), uuid);
+//        publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrderId, elemeCallbackMessage.getType(), uuid);
+        pushElemeMessage(tenantId, branchId, elemeOrderId, elemeCallbackMessage.getType(), uuid, 5, 60000);
     }
 
     /**
@@ -289,7 +291,8 @@ public class ElemeService {
 
         int type = elemeCallbackMessage.getType();
         if (type == 30 || type == 31 || type == 34 || type == 35 || type == 36) {
-            publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid);
+//            publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid);
+            pushElemeMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid, 5, 60000);
         }
     }
 
@@ -314,7 +317,8 @@ public class ElemeService {
 
         int type = elemeCallbackMessage.getType();
         if (type == 45) {
-            publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid);
+//            publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid);
+            pushElemeMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid, 5, 60000);
         }
     }
 
@@ -339,7 +343,8 @@ public class ElemeService {
 
         int type = elemeCallbackMessage.getType();
         if (type == 20 || type == 21 || type == 24 || type == 25 || type == 26) {
-            publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid);
+//            publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid);
+            pushElemeMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), type, uuid, 5, 60000);
         }
     }
 
@@ -369,7 +374,8 @@ public class ElemeService {
 
         elemeCallbackMessage.setOrderId(orderId);
         elemeCallbackMessageMapper.insert(elemeCallbackMessage);
-        publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), elemeCallbackMessage.getType(), uuid);
+//        publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), elemeCallbackMessage.getType(), uuid);
+        pushElemeMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), elemeCallbackMessage.getType(), uuid, 5, 60000);
     }
 
     /**
@@ -390,7 +396,8 @@ public class ElemeService {
 
         elemeCallbackMessage.setOrderId(orderId);
         elemeCallbackMessageMapper.insert(elemeCallbackMessage);
-        publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), elemeCallbackMessage.getType(), uuid);
+//        publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), elemeCallbackMessage.getType(), uuid);
+        pushElemeMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrder.getId(), elemeCallbackMessage.getType(), uuid, 5, 60000);
     }
 
     public void handleElemeShopStateChangeMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
@@ -706,6 +713,8 @@ public class ElemeService {
 
             Map<String, Object> extras = new HashMap<String, Object>();
             extras.put("elemeOrderId", elemeOrderId);
+            extras.put("type", type);
+            extras.put("uuid", uuid);
 
             Map<String, Object> android = new HashMap<String, Object>();
             android.put("alert", "");
