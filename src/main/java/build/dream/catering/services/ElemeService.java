@@ -3,6 +3,7 @@ package build.dream.catering.services;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.*;
 import build.dream.catering.models.eleme.*;
+import build.dream.catering.tools.PushElemeMessageThread;
 import build.dream.catering.utils.ElemeUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
@@ -47,6 +48,8 @@ public class ElemeService {
     private UniversalMapper universalMapper;
     @Autowired
     private ElemeCallbackMessageMapper elemeCallbackMessageMapper;
+    @Autowired
+    private PosMapper posMapper;
 
     @Transactional(readOnly = true)
     public ApiRest tenantAuthorize(BigInteger tenantId, BigInteger branchId, BigInteger userId) throws IOException {
@@ -685,6 +688,22 @@ public class ElemeService {
         messageJsonObject.put("elemeOrderId", elemeOrderId);
         messageJsonObject.put("uuid", uuid);
         QueueUtils.convertAndSend(elemeMessageChannelTopic, messageJsonObject.toString());
+    }
+
+    @Transactional(readOnly = true)
+    public void pushElemeMessage(BigInteger tenantId, BigInteger branchId, BigInteger elemeOrderId, Integer type, String uuid, final int count, int interval) {
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        List<Pos> poses = posMapper.findAll(searchModel);
+        if (CollectionUtils.isNotEmpty(poses)) {
+            List<String> registrationIds = new ArrayList<String>();
+            for (Pos pos : poses) {
+                registrationIds.add(pos.getRegistrationId());
+            }
+            PushElemeMessageThread pushElemeMessageThread = new PushElemeMessageThread(GsonUtils.toJson(registrationIds), uuid, count, interval);
+            new Thread(pushElemeMessageThread).start();
+        }
     }
 
     /**

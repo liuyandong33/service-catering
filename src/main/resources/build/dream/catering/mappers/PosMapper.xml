@@ -12,4 +12,8 @@
     <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.Pos">
         SELECT * FROM pos <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
     </select>
+
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.Pos">
+        SELECT * FROM pos <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
+    </select>
 </mapper>

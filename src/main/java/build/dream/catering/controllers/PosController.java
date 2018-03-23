@@ -1,6 +1,7 @@
 package build.dream.catering.controllers;
 
 import build.dream.catering.models.pos.InitPosModel;
+import build.dream.catering.services.ElemeService;
 import build.dream.catering.services.PosService;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
@@ -13,7 +14,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.math.BigInteger;
 import java.util.Map;
+import java.util.UUID;
 
 @Controller
 @RequestMapping(value = "/pos")
@@ -38,6 +41,28 @@ public class PosController extends BasicController {
             apiRest = posService.initPos(initPosModel);
         } catch (Exception e) {
             LogUtils.error("初始化POS失败", controllerSimpleName, "initPos", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    @Autowired
+    private ElemeService elemeService;
+
+    @RequestMapping(value = "/test")
+    @ResponseBody
+    public String test() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            int count = Integer.parseInt(requestParameters.get("count"));
+            int interval = Integer.parseInt(requestParameters.get("interval"));
+            elemeService.pushElemeMessage(BigInteger.ONE, BigInteger.ONE, BigInteger.ZERO, 10, UUID.randomUUID().toString(), count, interval);
+            apiRest = new ApiRest();
+            apiRest.setMessage("测试成功！");
+            apiRest.setSuccessful(true);
+        } catch (Exception e) {
+            LogUtils.error("测试失败", controllerSimpleName, "test", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
