@@ -81,4 +81,6 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String MESSAGE_CODE_MEI_TUAN_MESSAGE = "2001";
     public static final String MESSAGE_CODE_UPLOAD_LOG = "3001";
     public static final String MESSAGE_CODE_UPLOAD_DATABASE = "4001";
+
+    public static final String POS_DATA_PATH = "pos.data.path";
 }
