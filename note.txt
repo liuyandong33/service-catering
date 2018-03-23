@@ -165,3 +165,9 @@ groups
 
 [{"goodsId": 1, "goodsSpecificationId": 1, "discountType": 2, "discountRate": 15.20}]
 [{"goodsId": 1, "goodsSpecificationId": 1, "discountType": 1, "specialPrice": 15.20}]
+
+
+1001-饿了么消息
+2001-美团消息
+3001-上传日志文件
+4001-上传数据库文件

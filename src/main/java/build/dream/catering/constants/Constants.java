@@ -76,4 +76,9 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String DINGTALK_CHAT_ID = "dingtalk.chat.id";
 
     public static final String DINGTALK_ERROR_MESSAGE_FORMAT = "%s-%s-%s-%s";
+
+    public static final String MESSAGE_CODE_ELEME_MESSAGE = "1001";
+    public static final String MESSAGE_CODE_MEI_TUAN_MESSAGE = "2001";
+    public static final String MESSAGE_CODE_UPLOAD_LOG = "3001";
+    public static final String MESSAGE_CODE_UPLOAD_DATABASE = "4001";
 }

@@ -715,6 +715,7 @@ public class ElemeService {
             extras.put("elemeOrderId", elemeOrderId);
             extras.put("type", type);
             extras.put("uuid", uuid);
+            extras.put("code", Constants.MESSAGE_CODE_ELEME_MESSAGE);
 
             Map<String, Object> android = new HashMap<String, Object>();
             android.put("alert", "");
