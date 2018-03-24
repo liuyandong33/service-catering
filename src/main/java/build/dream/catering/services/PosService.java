@@ -27,6 +27,8 @@ public class PosService {
         BigInteger branchId = initPosModel.getBranchId();
         BigInteger userId = initPosModel.getUserId();
         String registrationId = initPosModel.getRegistrationId();
+        String type = initPosModel.getType();
+        String version = initPosModel.getVersion();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
@@ -41,6 +43,8 @@ public class PosService {
             pos.setBranchCode(initPosModel.getBranchCode());
             pos.setUserId(userId);
             pos.setRegistrationId(registrationId);
+            pos.setType(type);
+            pos.setVersion(version);
             pos.setCreateUserId(userId);
             pos.setLastUpdateUserId(userId);
             pos.setLastUpdateRemark("POS不存在，初始化POS！");
@@ -48,6 +52,8 @@ public class PosService {
         } else {
             pos.setUserId(userId);
             pos.setRegistrationId(registrationId);
+            pos.setType(type);
+            pos.setVersion(version);
             pos.setLastUpdateUserId(userId);
             pos.setLastUpdateRemark("POS存在，初始化POS！");
             posMapper.update(pos);

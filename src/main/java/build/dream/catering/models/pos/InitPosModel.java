@@ -18,6 +18,10 @@ public class InitPosModel extends BasicModel {
     private BigInteger userId;
     @NotNull
     private String registrationId;
+    @NotNull
+    private String type;
+    @NotNull
+    private String version;
 
     public BigInteger getTenantId() {
         return tenantId;
@@ -65,5 +69,21 @@ public class InitPosModel extends BasicModel {
 
     public void setRegistrationId(String registrationId) {
         this.registrationId = registrationId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 }
