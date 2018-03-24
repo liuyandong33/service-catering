@@ -6,10 +6,7 @@ import build.dream.catering.services.ElemeService;
 import build.dream.catering.services.PosService;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
-import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.ConfigurationUtils;
-import build.dream.common.utils.GsonUtils;
-import build.dream.common.utils.LogUtils;
+import build.dream.common.utils.*;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -97,6 +94,31 @@ public class PosController extends BasicController {
             apiRest.setMessage("上传文件成功！");
         } catch (Exception e) {
             LogUtils.error("上传文件失败", controllerSimpleName, "uploadFile", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 回执
+     *
+     * @return
+     */
+    @RequestMapping(value = "/receipt")
+    @ResponseBody
+    public String receipt() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            String uuid = requestParameters.get("uuid");
+            ApplicationHandler.notBlank(uuid, "uuid");
+
+            CacheUtils.delete(uuid);
+            apiRest = new ApiRest();
+            apiRest.setMessage("回执成功！");
+            apiRest.setSuccessful(true);
+        } catch (Exception e) {
+            LogUtils.error("回执失败", controllerSimpleName, "receipt", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);

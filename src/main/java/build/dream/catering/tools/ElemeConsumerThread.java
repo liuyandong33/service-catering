@@ -66,6 +66,7 @@ public class ElemeConsumerThread implements Runnable {
 
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(callbackRequestBodyJsonObject.getLong("timestamp"));
+                elemeCallbackMessage.setTimestamp(calendar.getTime());
                 elemeCallbackMessage.setSignature(callbackRequestBodyJsonObject.getString("signature"));
                 elemeCallbackMessage.setUserId(BigInteger.valueOf(callbackRequestBodyJsonObject.getLong("userId")));
 

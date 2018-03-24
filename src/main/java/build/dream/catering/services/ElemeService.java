@@ -199,7 +199,7 @@ public class ElemeService {
                         elemeOrderItemAttribute.setTenantId(tenantId);
                         elemeOrderItemAttribute.setTenantCode(tenantCode);
                         elemeOrderItemAttribute.setBranchId(branchId);
-                        elemeOrderItemAttribute.setElemeOrderItemId(elemeOrderId);
+                        elemeOrderItemAttribute.setElemeOrderId(elemeOrderId);
                         elemeOrderItemAttribute.setOrderId(id);
                         elemeOrderItemAttribute.setElemeOrderItemId(elemeOrderItem.getId());
                         elemeOrderItemAttribute.setName(elemeOrderItemAttributeJsonObject.optString("name"));
@@ -715,7 +715,7 @@ public class ElemeService {
             extras.put("elemeOrderId", elemeOrderId);
             extras.put("type", type);
             extras.put("uuid", uuid);
-            extras.put("code", Constants.MESSAGE_CODE_UPLOAD_DATABASE);
+            extras.put("code", Constants.MESSAGE_CODE_ELEME_MESSAGE);
 
             Map<String, Object> android = new HashMap<String, Object>();
             android.put("alert", "");
