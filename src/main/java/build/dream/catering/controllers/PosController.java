@@ -72,6 +72,9 @@ public class PosController extends BasicController {
             String branchId = requestParameters.get("branchId");
             ApplicationHandler.notBlank(branchId, "branchId");
 
+            String userId = requestParameters.get("userId");
+            ApplicationHandler.notBlank(userId, "userId");
+
             String type = requestParameters.get("type");
             ApplicationHandler.notBlank(type, "type");
 
@@ -79,9 +82,9 @@ public class PosController extends BasicController {
             String posDataPath = ConfigurationUtils.getConfiguration(Constants.POS_DATA_PATH);
             String directoryPath = null;
             if ("database".equals(type)) {
-                directoryPath = posDataPath + File.separator + tenantId + File.separator + branchId + File.separator + "databases";
+                directoryPath = posDataPath + File.separator + tenantId + File.separator + branchId + File.separator + userId + File.separator + "databases";
             } else if ("log".equals(type)) {
-                directoryPath = posDataPath + File.separator + tenantId + File.separator + branchId + File.separator + "logs";
+                directoryPath = posDataPath + File.separator + tenantId + File.separator + branchId + File.separator + userId + File.separator + "logs";
             }
             File directory = new File(directoryPath);
             if (!directory.exists()) {
