@@ -1,7 +1,8 @@
 package build.dream.catering.controllers;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.models.pos.InitPosModel;
+import build.dream.catering.models.pos.OfflinePosModel;
+import build.dream.catering.models.pos.OnlinePosModel;
 import build.dream.catering.services.ElemeService;
 import build.dream.catering.services.PosService;
 import build.dream.common.api.ApiRest;
@@ -30,22 +31,43 @@ public class PosController extends BasicController {
     private PosService posService;
 
     /**
-     * 初始化POS
+     * 上线POS
      *
      * @return
      */
-    @RequestMapping(value = "/initPos")
+    @RequestMapping(value = "/onlinePos")
     @ResponseBody
-    public String initPos() {
+    public String onlinePos() {
         ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
-            InitPosModel initPosModel = ApplicationHandler.instantiateObject(InitPosModel.class, requestParameters);
-            initPosModel.validateAndThrow();
+            OnlinePosModel onlinePosModel = ApplicationHandler.instantiateObject(OnlinePosModel.class, requestParameters);
+            onlinePosModel.validateAndThrow();
 
-            apiRest = posService.initPos(initPosModel);
+            apiRest = posService.initPos(onlinePosModel);
         } catch (Exception e) {
-            LogUtils.error("初始化POS失败", controllerSimpleName, "initPos", e, requestParameters);
+            LogUtils.error("上线POS失败", controllerSimpleName, "onlinePos", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 下线POS
+     *
+     * @return
+     */
+    @RequestMapping(value = "/offlinePos")
+    @ResponseBody
+    public String offlinePos() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            OfflinePosModel offlinePosModel = ApplicationHandler.instantiateObject(OfflinePosModel.class, requestParameters);
+            offlinePosModel.validateAndThrow();
+            apiRest = posService.offlinePos(offlinePosModel);
+        } catch (Exception e) {
+            LogUtils.error("下线POS", controllerSimpleName, "offlinePos", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
