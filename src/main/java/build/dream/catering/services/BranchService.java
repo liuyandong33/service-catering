@@ -210,4 +210,24 @@ public class BranchService {
         apiRest.setSuccessful(true);
         return apiRest;
     }
+
+    /**
+     * 获取门店信息
+     *
+     * @param obtainBranchInfoModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest obtainBranchInfo(ObtainBranchInfoModel obtainBranchInfoModel) {
+        BigInteger tenantId = obtainBranchInfoModel.getTenantId();
+        BigInteger userId = obtainBranchInfoModel.getUserId();
+        Branch branch = branchMapper.findByTenantIdAndUserId(tenantId, userId);
+        Validate.notNull(branch, "门店不存在！");
+        ApiRest apiRest = new ApiRest();
+        apiRest.setData(branch);
+        apiRest.setClassName(Branch.class.getName());
+        apiRest.setMessage("获取门店信息成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
+    }
 }

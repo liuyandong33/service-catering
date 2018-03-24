@@ -135,4 +135,24 @@ public class BranchController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    /**
+     * 获取门店信息
+     * @return
+     */
+    @RequestMapping(value = "/obtainBranchInfo")
+    @ResponseBody
+    public String obtainBranchInfo() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            ObtainBranchInfoModel obtainBranchInfoModel = ApplicationHandler.instantiateObject(ObtainBranchInfoModel.class, requestParameters);
+            obtainBranchInfoModel.validateAndThrow();
+            apiRest = branchService.obtainBranchInfo(obtainBranchInfoModel);
+        } catch (Exception e) {
+            LogUtils.error("获取门店信息失败", controllerSimpleName, "obtainBranchInfo", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }

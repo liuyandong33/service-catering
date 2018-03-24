@@ -40,4 +40,8 @@
     <select id="countUsers" parameterType="build.dream.common.utils.SearchModel" resultType="java.lang.Long">
         SELECT COUNT(1) FROM merge_user_branch <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
     </select>
+
+    <select id="findByTenantIdAndUserId" resultType="build.dream.common.erp.catering.domains.Branch">
+        SELECT * FROM branch WHERE id = (SELECT branch_id FROM merge_user_branch WHERE tenant_id = #{tenantId} AND user_id = #{userId} AND deleted = 0) AND tenant_id = #{tenantId} AND deleted = 0;
+    </select>
 </mapper>
