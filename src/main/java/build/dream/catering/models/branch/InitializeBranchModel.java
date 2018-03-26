@@ -60,6 +60,8 @@ public class InitializeBranchModel extends BasicModel {
     @NotNull
     @Length(max = 20)
     private String contactPhone;
+    @NotNull
+    private Integer smartRestaurantStatus;
 
     public BigInteger getTenantId() {
         return tenantId;
@@ -171,5 +173,13 @@ public class InitializeBranchModel extends BasicModel {
 
     public void setContactPhone(String contactPhone) {
         this.contactPhone = contactPhone;
+    }
+
+    public Integer getSmartRestaurantStatus() {
+        return smartRestaurantStatus;
+    }
+
+    public void setSmartRestaurantStatus(Integer smartRestaurantStatus) {
+        this.smartRestaurantStatus = smartRestaurantStatus;
     }
 }

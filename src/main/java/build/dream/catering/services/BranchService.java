@@ -57,6 +57,7 @@ public class BranchService {
         branch.setLatitude(initializeBranchModel.getLatitude());
         branch.setLinkman(initializeBranchModel.getLinkman());
         branch.setContactPhone(initializeBranchModel.getContactPhone());
+        branch.setSmartRestaurantStatus(initializeBranchModel.getSmartRestaurantStatus());
         branchMapper.insert(branch);
         branchMapper.insertMergeUserBranch(initializeBranchModel.getUserId(), initializeBranchModel.getTenantId(), branch.getId());
 
