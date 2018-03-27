@@ -373,9 +373,7 @@ public class ElemeController extends BasicController {
         result = result.replaceAll("\\$\\{userId}", requestParameters.get("userId"));
         result = result.replaceAll("\\$\\{partitionCode}", ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE));
         result = result.replaceAll("\\$\\{doBindingStoreUrl}", SystemPartitionUtils.getOutsideUrl(Constants.SERVICE_NAME_POSAPI, "proxy", "doPostPermit"));
-        result = StringUtils.join(result.split("\\$\\{ui-dialog\\.css}"), readResource("ui-dialog.css"));
         result = StringUtils.join(result.split("\\$\\{jquery-3\\.2\\.1\\.min.js}"), readResource("jquery-3.2.1.min.js"));
-        result = StringUtils.join(result.split("\\$\\{dialog\\.js}"), readResource("dialog.js"));
         return result;
     }
 
@@ -386,12 +384,8 @@ public class ElemeController extends BasicController {
         StringBuilder result = new StringBuilder();
         if ("bindingStore.html".equals(resourceName)) {
             inputStream = classLoader.getResourceAsStream("views/eleme/bindingStore.html");
-        } else if ("ui-dialog.css".equals(resourceName)) {
-            inputStream = classLoader.getResourceAsStream("libraries/artDialog/css/ui-dialog.css");
         } else if ("jquery-3.2.1.min.js".equals(resourceName)) {
             inputStream = classLoader.getResourceAsStream("libraries/jquery/jquery-3.2.1.min.js");
-        } else if ("dialog.js".equals(resourceName)) {
-            inputStream = classLoader.getResourceAsStream("libraries/artDialog/dist/dialog.js");
         }
         inputStreamReader = new InputStreamReader(inputStream, Constants.CHARSET_NAME_UTF_8);
         int length = 0;
