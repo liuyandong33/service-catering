@@ -118,11 +118,11 @@ public class MeiTuanService {
 
         MeiTuanOrder meiTuanOrder = GsonUtils.fromJson(orderJsonObject.toString(), MeiTuanOrder.class);
         Calendar ctimeCalendar = Calendar.getInstance();
-        ctimeCalendar.setTimeInMillis(ctime);
+        ctimeCalendar.setTimeInMillis(ctime * 1000);
         meiTuanOrder.setCtime(ctimeCalendar.getTime());
 
         Calendar utimeCalendar = Calendar.getInstance();
-        utimeCalendar.setTimeInMillis(utime);
+        utimeCalendar.setTimeInMillis(utime * 1000);
         meiTuanOrder.setUtime(utimeCalendar.getTime());
 
         Calendar deliveryTimeCalendar = Calendar.getInstance();
