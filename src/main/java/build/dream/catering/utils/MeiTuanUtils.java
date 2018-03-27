@@ -4,14 +4,12 @@ import build.dream.common.api.ApiRest;
 import build.dream.common.utils.*;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.tools.MeiTuanConsumerThread;
+import net.sf.json.JSONObject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.Validate;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -64,8 +62,13 @@ public class MeiTuanUtils {
         requestParameters.put("sign", generateSignature(signKey, requestParameters));
     }
 
-    public static void addMeiTuanMessage(String meiTuanMessage) {
-        QueueUtils.rpush(Constants.KEY_MEI_TUAN_CALLBACK_MESSAGE, meiTuanMessage);
+    public static void addMeiTuanMessage(JSONObject meiTuanMessageJsonObject, String uuid, int count, int type) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("callbackParameters", meiTuanMessageJsonObject);
+        map.put("uuid", uuid);
+        map.put("count", count);
+        map.put("type", type);
+        QueueUtils.rpush(Constants.KEY_MEI_TUAN_CALLBACK_MESSAGE, GsonUtils.toJson(map));
     }
 
     public static String takeMeiTuanMessage() {

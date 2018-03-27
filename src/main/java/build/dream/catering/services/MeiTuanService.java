@@ -1,12 +1,13 @@
 package build.dream.catering.services;
 
+import build.dream.catering.constants.Constants;
+import build.dream.catering.mappers.*;
 import build.dream.catering.models.meituan.GenerateBindingStoreLinkModel;
+import build.dream.catering.models.meituan.PullMeiTuanOrderModel;
+import build.dream.catering.tools.PushMessageThread;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.*;
-import build.dream.catering.constants.Constants;
-import build.dream.catering.mappers.*;
-import build.dream.catering.models.meituan.PullMeiTuanOrderModel;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
@@ -39,6 +40,8 @@ public class MeiTuanService {
     private ActOrderChargeByPoiMapper actOrderChargeByPoiMapper;
     @Autowired
     private MeiTuanOrderCancelMessageMapper meiTuanOrderCancelMessageMapper;
+    @Autowired
+    private PosMapper posMapper;
 
     /**
      * 生成门店绑定链接
@@ -82,7 +85,7 @@ public class MeiTuanService {
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleOrderEffectiveCallback(JSONObject callbackParametersJsonObject) throws IOException {
+    public ApiRest handleOrderEffectiveCallback(JSONObject callbackParametersJsonObject, String uuid, Integer type) throws IOException {
         String developerId = callbackParametersJsonObject.getString("developerId");
         String ePoiId = callbackParametersJsonObject.getString("ePoiId");
         String sign = callbackParametersJsonObject.getString("sign");
@@ -96,7 +99,6 @@ public class MeiTuanService {
         int hasInvoiced = orderJsonObject.optInt("hasInvoiced");
         int isThirdShipping = orderJsonObject.optInt("isThirdShipping");
         orderJsonObject.remove("detail");
-        orderJsonObject.remove("ePoiId");
         orderJsonObject.remove("extras");
         orderJsonObject.remove("poiReceiveDetail");
         orderJsonObject.remove("ctime");
@@ -171,15 +173,15 @@ public class MeiTuanService {
             MeiTuanOrderExtra meiTuanOrderExtra = new MeiTuanOrderExtra();
             meiTuanOrderExtra.setMeiTuanOrderId(meiTuanOrder.getId());
             if (extraJsonObject.has("mt_charge")) {
-                meiTuanOrderExtra.setMtCharge(BigDecimal.valueOf(extraJsonObject.optDouble("mt_charge")));
+                meiTuanOrderExtra.setMtCharge(BigDecimal.valueOf(extraJsonObject.getDouble("mt_charge")));
             }
 
             if (extraJsonObject.has("poi_charge")) {
-                meiTuanOrderExtra.setPoiCharge(BigDecimal.valueOf(extraJsonObject.optDouble("poi_charge")));
+                meiTuanOrderExtra.setPoiCharge(BigDecimal.valueOf(extraJsonObject.getDouble("poi_charge")));
             }
 
             if (extraJsonObject.has("reduce_fee")) {
-                meiTuanOrderExtra.setReduceFee(BigDecimal.valueOf(extraJsonObject.optDouble("reduce_fee")));
+                meiTuanOrderExtra.setReduceFee(BigDecimal.valueOf(extraJsonObject.getDouble("reduce_fee")));
             }
             meiTuanOrderExtra.setRemark(extraJsonObject.optString("remark"));
             meiTuanOrderExtra.setType(extraJsonObject.optInt("type"));
@@ -235,7 +237,8 @@ public class MeiTuanService {
                 actOrderChargeByPoiMapper.insert(actOrderChargeByPoi);
             }
         }
-        publishMeiTuanOrderMessage(meiTuanOrder.getTenantCode(), meiTuanOrder.getBranchCode(), meiTuanOrder.getId(), 1);
+//        publishMeiTuanOrderMessage(meiTuanOrder.getTenantCode(), meiTuanOrder.getBranchCode(), meiTuanOrder.getId(), 1);
+        pushMeiTuanMessage(tenantId, branchId, meiTuanOrder.getId(), type, uuid, 5, 600000);
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("美团订单生效回调处理成功！");
@@ -362,6 +365,53 @@ public class MeiTuanService {
         messageJsonObject.put("type", type);
         messageJsonObject.put("elemeOrderId", meiTuanOrderId);
         QueueUtils.convertAndSend(meiTuanMessageChannelTopic, messageJsonObject.toString());
+    }
+
+    @Transactional(readOnly = true)
+    public void pushMeiTuanMessage(BigInteger tenantId, BigInteger branchId, BigInteger meiTuanOrderId, Integer type, String uuid, final int count, int interval) {
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        searchModel.addSearchCondition("online", Constants.SQL_OPERATION_SYMBOL_EQUALS, 1);
+        List<Pos> poses = posMapper.findAll(searchModel);
+        if (CollectionUtils.isNotEmpty(poses)) {
+            List<String> registrationIds = new ArrayList<String>();
+            for (Pos pos : poses) {
+                registrationIds.add(pos.getRegistrationId());
+            }
+            Map<String, Object> audience = new HashMap<String, Object>();
+            audience.put("registrationId", registrationIds);
+
+            Map<String, Object> extras = new HashMap<String, Object>();
+            extras.put("meiTuanOrderId", meiTuanOrderId);
+            extras.put("type", type);
+            extras.put("uuid", uuid);
+            extras.put("code", Constants.MESSAGE_CODE_MEI_TUAN_MESSAGE);
+
+            Map<String, Object> android = new HashMap<String, Object>();
+            android.put("alert", "");
+            android.put("title", "Send to Android");
+            android.put("builderId", 1);
+            android.put("extras", extras);
+
+            Map<String, Object> ios = new HashMap<String, Object>();
+            ios.put("alert", "Send to Ios");
+            ios.put("sound", "default");
+            ios.put("badge", "+1");
+            ios.put("extras", extras);
+
+            Map<String, Object> notification = new HashMap<String, Object>();
+            notification.put("alert", "饿了么新订单消息！");
+            notification.put("android", android);
+            notification.put("ios", ios);
+
+            Map<String, Object> message = new HashMap<String, Object>();
+            message.put("platform", "all");
+            message.put("audience", audience);
+            message.put("notification", notification);
+            PushMessageThread pushMessageThread = new PushMessageThread(GsonUtils.toJson(message), uuid, count, interval);
+            new Thread(pushMessageThread).start();
+        }
     }
 
     /**

@@ -16,26 +16,46 @@ public class MeiTuanConsumerThread implements Runnable {
     @Override
     public void run() {
         while (true) {
-            String meiTuanMessage = null;
+            JSONObject callbackParametersJsonObject = null;
+            String uuid = null;
+            int count = 0;
+            int type = 0;
             try {
-                meiTuanMessage = MeiTuanUtils.takeMeiTuanMessage();
+                String meiTuanMessage = MeiTuanUtils.takeMeiTuanMessage();
+                if (StringUtils.isBlank(meiTuanMessage)) {
+                    continue;
+                }
+
+                if (!ApplicationHandler.isJson(meiTuanMessage)) {
+                    continue;
+                }
+
+                if (!ApplicationHandler.isRightJson(meiTuanMessage, Constants.MEI_TUAN_MESSAGE_SCHEMA_FILE_PATH)) {
+                    continue;
+                }
+
                 JSONObject meiTuanMessageJsonObject = JSONObject.fromObject(meiTuanMessage);
 
-                JSONObject callbackParametersJsonObject = meiTuanMessageJsonObject.getJSONObject("callbackParameters");
-                Integer type = callbackParametersJsonObject.getInt("type");
+                callbackParametersJsonObject = meiTuanMessageJsonObject.getJSONObject("callbackParameters");
+                uuid = meiTuanMessageJsonObject.getString("uuid");
+                count = meiTuanMessageJsonObject.getInt("count");
+                type = meiTuanMessageJsonObject.getInt("type");
 
                 if (type == Constants.MEI_TUAN_CALLBACK_TYPE_ORDER_EFFECTIVE) {
-                    meiTuanService.handleOrderEffectiveCallback(callbackParametersJsonObject);
+                    meiTuanService.handleOrderEffectiveCallback(callbackParametersJsonObject, uuid, type);
                 } else if (type == Constants.MEI_TUAN_CALLBACK_TYPE_ORDER_CANCEL) {
                     meiTuanService.handleOrderCancelCallback(callbackParametersJsonObject);
                 } else if (type == Constants.MEI_TUAN_CALLBACK_TYPE_ORDER_REFUND) {
                     meiTuanService.handleOrderRefundCallback(callbackParametersJsonObject);
                 }
             } catch (Exception e) {
-                if (StringUtils.isNotBlank(meiTuanMessage)) {
-                    MeiTuanUtils.addMeiTuanMessage(meiTuanMessage);
+                if (callbackParametersJsonObject != null) {
+                    count = count - 1;
+                    if (count > 0) {
+                        MeiTuanUtils.addMeiTuanMessage(callbackParametersJsonObject, uuid, count, type);
+                    }
                 }
-                LogUtils.error("保存饿了么消息失败", MEI_TUAN_CONSUMER_THREAD_SIMPLE_NAME, "run", e);
+                LogUtils.error("处理美团消息失败", MEI_TUAN_CONSUMER_THREAD_SIMPLE_NAME, "run", e);
             }
         }
     }

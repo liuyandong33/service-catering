@@ -1,0 +1,23 @@
+{
+    "type": "object",
+    "properties": {
+        "uuid": {
+            "type": "string"
+        },
+        "callbackParameters": {
+            "type": "object"
+        },
+        "type": {
+            "type": "integer"
+        },
+        "count": {
+            "type": "integer"
+        }
+    },
+    "required": [
+        "uuid",
+        "callbackParameters",
+        "type",
+        "count"
+    ]
+}

@@ -3,7 +3,7 @@ package build.dream.catering.services;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.*;
 import build.dream.catering.models.eleme.*;
-import build.dream.catering.tools.PushElemeMessageThread;
+import build.dream.catering.tools.PushMessageThread;
 import build.dream.catering.utils.ElemeUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
@@ -702,6 +702,7 @@ public class ElemeService {
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
         searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        searchModel.addSearchCondition("online", Constants.SQL_OPERATION_SYMBOL_EQUALS, 1);
         List<Pos> poses = posMapper.findAll(searchModel);
         if (CollectionUtils.isNotEmpty(poses)) {
             List<String> registrationIds = new ArrayList<String>();
@@ -738,8 +739,8 @@ public class ElemeService {
             message.put("platform", "all");
             message.put("audience", audience);
             message.put("notification", notification);
-            PushElemeMessageThread pushElemeMessageThread = new PushElemeMessageThread(GsonUtils.toJson(message), uuid, count, interval);
-            new Thread(pushElemeMessageThread).start();
+            PushMessageThread pushMessageThread = new PushMessageThread(GsonUtils.toJson(message), uuid, count, interval);
+            new Thread(pushMessageThread).start();
         }
     }
 

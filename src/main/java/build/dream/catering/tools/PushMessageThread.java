@@ -8,13 +8,13 @@ import org.apache.commons.lang.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PushElemeMessageThread implements Runnable {
+public class PushMessageThread implements Runnable {
     private boolean continued = true;
     private String uuid;
     private int count;
     private int interval;
 
-    public PushElemeMessageThread(String message, String uuid, int count, int interval) {
+    public PushMessageThread(String message, String uuid, int count, int interval) {
         this.uuid = uuid;
         this.count = count;
         this.interval = interval;
