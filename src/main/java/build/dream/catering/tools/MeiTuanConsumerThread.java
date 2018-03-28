@@ -2,6 +2,7 @@ package build.dream.catering.tools;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.services.MeiTuanService;
+import build.dream.catering.utils.DingtalkUtils;
 import build.dream.catering.utils.MeiTuanUtils;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.LogUtils;
@@ -53,6 +54,8 @@ public class MeiTuanConsumerThread implements Runnable {
                     count = count - 1;
                     if (count > 0) {
                         MeiTuanUtils.addMeiTuanMessage(callbackParametersJsonObject, uuid, count, type);
+                    } else {
+                        DingtalkUtils.send(String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "饿了么消息处理失败", callbackParametersJsonObject.toString(), e.getClass().getSimpleName(), e.getMessage()));
                     }
                 }
                 LogUtils.error("处理美团消息失败", MEI_TUAN_CONSUMER_THREAD_SIMPLE_NAME, "run", e);
