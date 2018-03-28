@@ -39,16 +39,9 @@ public class ElemeController extends BasicController {
         ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
-            String tenantId = requestParameters.get("tenantId");
-            Validate.notNull(tenantId, ApplicationHandler.obtainParameterErrorMessage("tenantId"));
-
-            String branchId = requestParameters.get("branchId");
-            Validate.notNull(branchId, ApplicationHandler.obtainParameterErrorMessage("branchId"));
-
-            String userId = requestParameters.get("userId");
-            Validate.notNull(userId, ApplicationHandler.obtainParameterErrorMessage("userId"));
-
-            apiRest = elemeService.tenantAuthorize(NumberUtils.createBigInteger(tenantId), NumberUtils.createBigInteger(branchId), NumberUtils.createBigInteger(userId));
+            TenantAuthorizeModel tenantAuthorizeModel = ApplicationHandler.instantiateObject(TenantAuthorizeModel.class, requestParameters);
+            tenantAuthorizeModel.validateAndThrow();
+            apiRest = elemeService.tenantAuthorize(tenantAuthorizeModel);
         } catch (Exception e) {
             LogUtils.error("生成授权链接失败", controllerSimpleName, "tenantAuthorize", e, requestParameters);
             apiRest = new ApiRest(e);

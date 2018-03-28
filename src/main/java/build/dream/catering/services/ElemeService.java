@@ -52,10 +52,13 @@ public class ElemeService {
     private PosMapper posMapper;
 
     @Transactional(readOnly = true)
-    public ApiRest tenantAuthorize(BigInteger tenantId, BigInteger branchId, BigInteger userId) throws IOException {
+    public ApiRest tenantAuthorize(TenantAuthorizeModel tenantAuthorizeModel) throws IOException {
+        BigInteger tenantId = tenantAuthorizeModel.getTenantId();
+        BigInteger branchId = tenantAuthorizeModel.getBranchId();
+        BigInteger userId = tenantAuthorizeModel.getUserId();
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", "=", tenantId);
-        searchModel.addSearchCondition("id", "=", branchId);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
         Branch branch = branchMapper.find(searchModel);
         Validate.notNull(branch, "门店不存在！");
         Map<String, String> checkIsAuthorizeRequestParameters = new HashMap<String, String>();
