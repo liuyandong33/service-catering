@@ -70,6 +70,7 @@ public class MeiTuanService {
         bindingStoreLink.append("&ePoiId=").append(tenantId).append("Z").append(branchId);
         bindingStoreLink.append("&signKey=").append(meiTuanSignKey);
         bindingStoreLink.append("&ePoiName=").append(branch.getName());
+        bindingStoreLink.append("&timestamp=").append(System.currentTimeMillis());
         ApiRest apiRest = new ApiRest();
         apiRest.setData(bindingStoreLink.toString());
         apiRest.setMessage("生成门店绑定链接成功！");
