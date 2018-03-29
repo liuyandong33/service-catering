@@ -519,7 +519,7 @@ public class MeiTuanService {
 
         ApiRest apiRest = new ApiRest();
         apiRest.setData(meiTuanOrderMap);
-        apiRest.setMessage("拉取美团订单成功！");
+        apiRest.setMessage("获取美团订单成功！");
         apiRest.setSuccessful(true);
         return apiRest;
     }
