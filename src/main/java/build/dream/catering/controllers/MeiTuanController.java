@@ -63,4 +63,26 @@ public class MeiTuanController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    /**
+     * 查询门店是否绑定美团
+     *
+     * @return
+     */
+    @RequestMapping(value = "/checkIsBinding")
+    @ResponseBody
+    public String checkIsBinding() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            CheckIsBindingModel checkIsBindingModel = ApplicationHandler.instantiateObject(CheckIsBindingModel.class, requestParameters);
+            checkIsBindingModel.validateAndThrow();
+
+            apiRest = meiTuanService.checkIsBinding(checkIsBindingModel);
+        } catch (Exception e) {
+            LogUtils.error("查询门店是否绑定美团失败！", controllerSimpleName, "checkIsBinding", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }

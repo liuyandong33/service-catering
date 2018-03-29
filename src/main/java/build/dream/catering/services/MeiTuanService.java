@@ -1,6 +1,7 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
+import build.dream.catering.controllers.CheckIsBindingModel;
 import build.dream.catering.mappers.*;
 import build.dream.catering.models.meituan.GenerateBindingStoreLinkModel;
 import build.dream.catering.models.meituan.ObtainMeiTuanOrderModel;
@@ -11,6 +12,7 @@ import build.dream.common.utils.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -555,5 +557,26 @@ public class MeiTuanService {
         apiRest.setMessage("美团门店绑定回调处理成功！");
         apiRest.setSuccessful(true);
         return apiRest;
+    }
+
+    /**
+     * 查询门店是否绑定美团
+     *
+     * @param checkIsBindingModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest checkIsBinding(CheckIsBindingModel checkIsBindingModel) {
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, checkIsBindingModel.getTenantId());
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, checkIsBindingModel.getTenantId());
+        Branch branch = branchMapper.find(searchModel);
+        Validate.notNull(branch, "门店不存在！");
+
+        boolean isBinding = StringUtils.isNotBlank(branch.getAppAuthToken()) && StringUtils.isNotBlank(branch.getPoiId()) && StringUtils.isNotBlank(branch.getPoiName());
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("isBinding", isBinding);
+
+        return new ApiRest(data, "查询门店是否绑定美团成功！");
     }
 }
