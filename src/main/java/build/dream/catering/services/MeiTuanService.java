@@ -3,7 +3,7 @@ package build.dream.catering.services;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.*;
 import build.dream.catering.models.meituan.GenerateBindingStoreLinkModel;
-import build.dream.catering.models.meituan.PullMeiTuanOrderModel;
+import build.dream.catering.models.meituan.ObtainMeiTuanOrderModel;
 import build.dream.catering.tools.PushMessageThread;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
@@ -417,15 +417,15 @@ public class MeiTuanService {
     /**
      * 拉取美团订单
      *
-     * @param pullMeiTuanOrderModel
+     * @param obtainMeiTuanOrderModel
      * @return
      */
     @Transactional(readOnly = true)
-    public ApiRest pullMeiTuanOrder(PullMeiTuanOrderModel pullMeiTuanOrderModel) {
+    public ApiRest obtainMeiTuanOrder(ObtainMeiTuanOrderModel obtainMeiTuanOrderModel) {
         SearchModel meiTuanOrderSearchModel = new SearchModel(true);
-        meiTuanOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, pullMeiTuanOrderModel.getTenantId());
-        meiTuanOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, pullMeiTuanOrderModel.getBranchId());
-        meiTuanOrderSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, pullMeiTuanOrderModel.getMeiTuanOrderId());
+        meiTuanOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainMeiTuanOrderModel.getTenantId());
+        meiTuanOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainMeiTuanOrderModel.getBranchId());
+        meiTuanOrderSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainMeiTuanOrderModel.getMeiTuanOrderId());
         MeiTuanOrder meiTuanOrder = meiTuanOrderMapper.find(meiTuanOrderSearchModel);
         Validate.notNull(meiTuanOrder, "订单不存在！");
 

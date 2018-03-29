@@ -1,7 +1,7 @@
 package build.dream.catering.controllers;
 
 import build.dream.catering.models.meituan.GenerateBindingStoreLinkModel;
-import build.dream.catering.models.meituan.PullMeiTuanOrderModel;
+import build.dream.catering.models.meituan.ObtainMeiTuanOrderModel;
 import build.dream.catering.services.MeiTuanService;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
@@ -47,16 +47,16 @@ public class MeiTuanController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/pullMeiTuanOrder")
+    @RequestMapping(value = "/obtainMeiTuanOrder")
     @ResponseBody
-    public String pullMeiTuanOrder() {
+    public String obtainMeiTuanOrder() {
         ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
-            PullMeiTuanOrderModel pullMeiTuanOrderModel = ApplicationHandler.instantiateObject(PullMeiTuanOrderModel.class, requestParameters);
-            pullMeiTuanOrderModel.validateAndThrow();
+            ObtainMeiTuanOrderModel obtainMeiTuanOrderModel = ApplicationHandler.instantiateObject(ObtainMeiTuanOrderModel.class, requestParameters);
+            obtainMeiTuanOrderModel.validateAndThrow();
 
-            apiRest = meiTuanService.pullMeiTuanOrder(pullMeiTuanOrderModel);
+            apiRest = meiTuanService.obtainMeiTuanOrder(obtainMeiTuanOrderModel);
         } catch (Exception e) {
             LogUtils.error("拉取美团订单失败！", controllerSimpleName, "pullMeiTuanOrder", e, requestParameters);
             apiRest = new ApiRest(e);
