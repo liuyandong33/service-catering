@@ -97,8 +97,9 @@ public class ElemeUtils {
         QueueUtils.rpush(Constants.KEY_ELEME_CALLBACK_MESSAGE, GsonUtils.toJson(map));
     }
 
-    public static String takeElemeMessage() {
-        return QueueUtils.blpop(Constants.KEY_ELEME_CALLBACK_MESSAGE, 1, TimeUnit.HOURS);
+    public static String takeElemeMessage() throws IOException {
+        String key = Constants.KEY_ELEME_CALLBACK_MESSAGE + "_" + ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
+        return QueueUtils.blpop(key, 1, TimeUnit.HOURS);
     }
 
     public static void startElemeConsumerThread() {

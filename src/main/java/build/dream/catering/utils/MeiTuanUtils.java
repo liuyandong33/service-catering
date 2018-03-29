@@ -1,17 +1,17 @@
 package build.dream.catering.utils;
 
-import build.dream.common.api.ApiRest;
-import build.dream.common.utils.*;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.tools.MeiTuanConsumerThread;
+import build.dream.common.api.ApiRest;
+import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.Validate;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 public class MeiTuanUtils {
@@ -71,8 +71,9 @@ public class MeiTuanUtils {
         QueueUtils.rpush(Constants.KEY_MEI_TUAN_CALLBACK_MESSAGE, GsonUtils.toJson(map));
     }
 
-    public static String takeMeiTuanMessage() {
-        String elemeMessage = QueueUtils.blpop(Constants.KEY_MEI_TUAN_CALLBACK_MESSAGE, 1, TimeUnit.HOURS);
+    public static String takeMeiTuanMessage() throws IOException {
+        String key = Constants.KEY_MEI_TUAN_CALLBACK_MESSAGE + "_" + ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
+        String elemeMessage = QueueUtils.blpop(key, 1, TimeUnit.HOURS);
         return elemeMessage;
     }
 
