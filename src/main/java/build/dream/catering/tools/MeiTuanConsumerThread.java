@@ -48,6 +48,8 @@ public class MeiTuanConsumerThread implements Runnable {
                     meiTuanService.handleOrderCancelCallback(callbackParametersJsonObject);
                 } else if (type == Constants.MEI_TUAN_CALLBACK_TYPE_ORDER_REFUND) {
                     meiTuanService.handleOrderRefundCallback(callbackParametersJsonObject);
+                } else if (type == 8) {
+                    meiTuanService.handleBindingStoreCallback(callbackParametersJsonObject);
                 }
             } catch (Exception e) {
                 if (callbackParametersJsonObject != null) {

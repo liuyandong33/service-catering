@@ -524,4 +524,36 @@ public class MeiTuanService {
         apiRest.setSuccessful(true);
         return apiRest;
     }
+
+    /**
+     * 处理门店绑定回调
+     *
+     * @param callbackParametersJsonObject
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest handleBindingStoreCallback(JSONObject callbackParametersJsonObject) {
+        String ePoiId = callbackParametersJsonObject.getString("ePoiId");
+        String appAuthToken = callbackParametersJsonObject.getString("appAuthToken");
+        String poiId = callbackParametersJsonObject.getString("poiId");
+        String poiName = callbackParametersJsonObject.getString("poiName");
+        String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
+        BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
+        BigInteger branchId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[1]);
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        Branch branch = branchMapper.find(searchModel);
+        Validate.notNull(branch, "门店不存在！");
+
+        branch.setAppAuthToken(appAuthToken);
+        branch.setPoiId(poiId);
+        branch.setPoiName(poiName);
+        branchMapper.update(branch);
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("美团门店绑定回调处理成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
+    }
 }
