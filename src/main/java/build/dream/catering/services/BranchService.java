@@ -68,7 +68,7 @@ public class BranchService {
         branch.setCreateUserId(userId);
         branch.setLastUpdateUserId(userId);
         branchMapper.insert(branch);
-        branchMapper.insertMergeUserBranch(initializeBranchModel.getUserId(), initializeBranchModel.getTenantId(), branch.getId());
+        branchMapper.insertMergeUserBranch(userId, initializeBranchModel.getTenantId(), branch.getId());
 
         ApiRest apiRest = new ApiRest();
         apiRest.setData(branch);
