@@ -38,14 +38,14 @@ public class BranchService {
     @Transactional(rollbackFor = Exception.class)
     public ApiRest initializeBranch(InitializeBranchModel initializeBranchModel) {
         Branch branch = new Branch();
-        branch.setCode(SerialNumberGenerator.nextSerialNumber(4, sequenceMapper.nextValue(initializeBranchModel.getTenantCode() + "_branch_count")));
-        branch.setName("总部");
-        branch.setType(Constants.BRANCH_TYPE_HEADQUARTERS);
-        branch.setStatus(Constants.BRANCH_STATUS_ENABLED);
-        branch.setCreateUserId(BigInteger.ZERO);
-        branch.setLastUpdateUserId(BigInteger.ZERO);
         branch.setTenantId(initializeBranchModel.getTenantId());
         branch.setTenantCode(initializeBranchModel.getTenantCode());
+
+        String code = SerialNumberGenerator.nextSerialNumber(4, sequenceMapper.nextValue(initializeBranchModel.getTenantCode() + "_branch_count"));
+        branch.setCode(code);
+        branch.setName(initializeBranchModel.getName());
+        branch.setType(initializeBranchModel.getType());
+        branch.setStatus(initializeBranchModel.getStatus());
         branch.setProvinceCode(initializeBranchModel.getProvinceCode());
         branch.setProvinceName(initializeBranchModel.getProvinceName());
         branch.setCityCode(initializeBranchModel.getCityCode());
@@ -57,7 +57,16 @@ public class BranchService {
         branch.setLatitude(initializeBranchModel.getLatitude());
         branch.setLinkman(initializeBranchModel.getLinkman());
         branch.setContactPhone(initializeBranchModel.getContactPhone());
+        branch.setElemeAccountType(Constants.ELEME_ACCOUNT_TYPE_CHAIN_ACCOUNT);
+        branch.setShopId(null);
         branch.setSmartRestaurantStatus(initializeBranchModel.getSmartRestaurantStatus());
+        branch.setAppAuthToken(null);
+        branch.setPoiId(null);
+        branch.setPoiName(null);
+
+        BigInteger userId = initializeBranchModel.getUserId();
+        branch.setCreateUserId(userId);
+        branch.setLastUpdateUserId(userId);
         branchMapper.insert(branch);
         branchMapper.insertMergeUserBranch(initializeBranchModel.getUserId(), initializeBranchModel.getTenantId(), branch.getId());
 

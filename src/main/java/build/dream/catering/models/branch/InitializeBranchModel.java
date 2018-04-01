@@ -1,18 +1,30 @@
 package build.dream.catering.models.branch;
 
+import build.dream.catering.constants.Constants;
 import build.dream.common.models.BasicModel;
+import build.dream.common.utils.ApplicationHandler;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
 
 public class InitializeBranchModel extends BasicModel {
+    private static final Integer[] TYPES = {Constants.BRANCH_TYPE_HEADQUARTERS, Constants.BRANCH_TYPE_DIRECT_SALE_STORE, Constants.BRANCH_TYPE_FRANCHISE_STORE};
+    private static final Integer[] BRANCH_STATUS = {Constants.BRANCH_STATUS_ENABLED, Constants.BRANCH_STATUS_DISABLED};
     @NotNull
     private BigInteger tenantId;
 
     @NotNull
     @Length(max = 20)
     private String tenantCode;
+
+    private Integer type;
+
+    private Integer status;
+
+    @NotNull
+    @Length(max = 20)
+    private String name;
 
     @NotNull
     @Length(max = 10)
@@ -51,17 +63,22 @@ public class InitializeBranchModel extends BasicModel {
     private String latitude;
 
     @NotNull
-    private BigInteger userId;
-
-    @NotNull
     @Length(max = 20)
     private String linkman;
 
     @NotNull
     @Length(max = 20)
     private String contactPhone;
+
     @NotNull
     private Integer smartRestaurantStatus;
+
+    @NotNull
+    private BigInteger userId;
+
+    public static Integer[] getBranchStatus() {
+        return BRANCH_STATUS;
+    }
 
     public BigInteger getTenantId() {
         return tenantId;
@@ -77,6 +94,30 @@ public class InitializeBranchModel extends BasicModel {
 
     public void setTenantCode(String tenantCode) {
         this.tenantCode = tenantCode;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getProvinceCode() {
@@ -151,14 +192,6 @@ public class InitializeBranchModel extends BasicModel {
         this.latitude = latitude;
     }
 
-    public BigInteger getUserId() {
-        return userId;
-    }
-
-    public void setUserId(BigInteger userId) {
-        this.userId = userId;
-    }
-
     public String getLinkman() {
         return linkman;
     }
@@ -181,5 +214,20 @@ public class InitializeBranchModel extends BasicModel {
 
     public void setSmartRestaurantStatus(Integer smartRestaurantStatus) {
         this.smartRestaurantStatus = smartRestaurantStatus;
+    }
+
+    public BigInteger getUserId() {
+        return userId;
+    }
+
+    public void setUserId(BigInteger userId) {
+        this.userId = userId;
+    }
+
+    @Override
+    public void validateAndThrow() {
+        super.validateAndThrow();
+        ApplicationHandler.inArray(TYPES, type, "type");
+        ApplicationHandler.inArray(BRANCH_STATUS, status, "status");
     }
 }
