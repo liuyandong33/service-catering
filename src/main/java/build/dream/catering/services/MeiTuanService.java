@@ -257,7 +257,7 @@ public class MeiTuanService {
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleOrderCancelCallback(JSONObject callbackParametersJsonObject) throws IOException {
+    public ApiRest handleOrderCancelCallback(JSONObject callbackParametersJsonObject, String uuid, int type) throws IOException {
         String developerId = callbackParametersJsonObject.getString("developerId");
         String ePoiId = callbackParametersJsonObject.getString("ePoiId");
         String sign = callbackParametersJsonObject.getString("sign");
@@ -284,7 +284,8 @@ public class MeiTuanService {
 
         meiTuanOrder.setStatus(9);
         meiTuanOrderMapper.update(meiTuanOrder);
-        publishMeiTuanOrderMessage(meiTuanOrder.getTenantCode(), meiTuanOrder.getBranchCode(), meiTuanOrder.getId(), 2);
+//        publishMeiTuanOrderMessage(meiTuanOrder.getTenantCode(), meiTuanOrder.getBranchCode(), meiTuanOrder.getId(), 2);
+        pushMeiTuanMessage(meiTuanOrder.getTenantId(), meiTuanOrder.getBranchId(), meiTuanOrder.getId(), type, uuid, 5, 60000);
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("美团订单取消回调处理成功！");
@@ -300,7 +301,7 @@ public class MeiTuanService {
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleOrderRefundCallback(JSONObject callbackParametersJsonObject) throws IOException {
+    public ApiRest handleOrderRefundCallback(JSONObject callbackParametersJsonObject, String uuid, int type) throws IOException {
         String developerId = callbackParametersJsonObject.getString("developerId");
         String ePoiId = callbackParametersJsonObject.getString("ePoiId");
         String sign = callbackParametersJsonObject.getString("sign");
@@ -318,7 +319,8 @@ public class MeiTuanService {
         }
         meiTuanOrder.setStatus(status);
         meiTuanOrderMapper.update(meiTuanOrder);
-        publishMeiTuanOrderMessage(meiTuanOrder.getTenantCode(), meiTuanOrder.getBranchCode(), meiTuanOrder.getId(), 2);
+//        publishMeiTuanOrderMessage(meiTuanOrder.getTenantCode(), meiTuanOrder.getBranchCode(), meiTuanOrder.getId(), 2);
+        pushMeiTuanMessage(meiTuanOrder.getTenantId(), meiTuanOrder.getBranchId(), meiTuanOrder.getId(), type, uuid, 5, 60000);
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("美团订单退款回调处理成功！");
@@ -534,7 +536,7 @@ public class MeiTuanService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleBindingStoreCallback(JSONObject callbackParametersJsonObject) {
+    public ApiRest handleBindingStoreCallback(JSONObject callbackParametersJsonObject, String uuid, int type) {
         String ePoiId = callbackParametersJsonObject.getString("ePoiId");
         String appAuthToken = callbackParametersJsonObject.getString("appAuthToken");
         String poiId = callbackParametersJsonObject.getString("poiId");

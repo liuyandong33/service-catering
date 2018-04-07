@@ -45,11 +45,11 @@ public class MeiTuanConsumerThread implements Runnable {
                 if (type == Constants.MEI_TUAN_CALLBACK_TYPE_ORDER_EFFECTIVE) {
                     meiTuanService.handleOrderEffectiveCallback(callbackParametersJsonObject, uuid, type);
                 } else if (type == Constants.MEI_TUAN_CALLBACK_TYPE_ORDER_CANCEL) {
-                    meiTuanService.handleOrderCancelCallback(callbackParametersJsonObject);
+                    meiTuanService.handleOrderCancelCallback(callbackParametersJsonObject, uuid, type);
                 } else if (type == Constants.MEI_TUAN_CALLBACK_TYPE_ORDER_REFUND) {
-                    meiTuanService.handleOrderRefundCallback(callbackParametersJsonObject);
+                    meiTuanService.handleOrderRefundCallback(callbackParametersJsonObject, uuid, type);
                 } else if (type == 8) {
-                    meiTuanService.handleBindingStoreCallback(callbackParametersJsonObject);
+                    meiTuanService.handleBindingStoreCallback(callbackParametersJsonObject, uuid, type);
                 }
             } catch (Exception e) {
                 if (callbackParametersJsonObject != null) {
@@ -57,15 +57,11 @@ public class MeiTuanConsumerThread implements Runnable {
                     if (count > 0) {
                         MeiTuanUtils.addMeiTuanMessage(callbackParametersJsonObject, uuid, count, type);
                     } else {
-                        DingtalkUtils.send(String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "饿了么消息处理失败", callbackParametersJsonObject.toString(), e.getClass().getSimpleName(), e.getMessage()));
+                        DingtalkUtils.send(String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "美团消息处理失败", callbackParametersJsonObject.toString(), e.getClass().getSimpleName(), e.getMessage()));
                     }
                 }
                 LogUtils.error("处理美团消息失败", MEI_TUAN_CONSUMER_THREAD_SIMPLE_NAME, "run", e);
             }
         }
-    }
-
-    private void saveMeiTuanCallbackMessage(JSONObject callbackJsonObject) {
-
     }
 }
