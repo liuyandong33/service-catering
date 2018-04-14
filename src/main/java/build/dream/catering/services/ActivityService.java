@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
+import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -191,9 +192,12 @@ public class ActivityService {
         String tenantCode = saveBuyGiveActivityModel.getTenantCode();
         BigInteger branchId = saveBuyGiveActivityModel.getBranchId();
         BigInteger userId = saveBuyGiveActivityModel.getUserId();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DEFAULT_DATE_PATTERN);
-        Date startTime = simpleDateFormat.parse(saveBuyGiveActivityModel.getStartTime() + " 00:00:00");
-        Date endTime = simpleDateFormat.parse(saveBuyGiveActivityModel.getEndTime() + " 23:59:59");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date startDate = simpleDateFormat.parse(saveBuyGiveActivityModel.getStartDate());
+        Date endDate = simpleDateFormat.parse(saveBuyGiveActivityModel.getEndDate());
+        Time startTime = Time.valueOf(saveBuyGiveActivityModel.getStartTime());
+        Time endTime = Time.valueOf(saveBuyGiveActivityModel.getEndTime());
+        Validate.isTrue(endDate.after(startDate), "活动结束日期必须大于开始日期！");
         Validate.isTrue(endTime.after(startTime), "活动结束时间必须大于开始时间！");
 
         List<SaveBuyGiveActivityModel.BuyGiveActivityInfo> buyGiveActivityInfos = saveBuyGiveActivityModel.getBuyGiveActivityInfos();
@@ -246,7 +250,7 @@ public class ActivityService {
             goodsSpecificationMap.put(goodsSpecification.getId(), goodsSpecification);
         }
 
-        Activity activity = ActivityUtils.constructActivity(tenantId, tenantCode, branchId, saveBuyGiveActivityModel.getName(), 1, startTime, endTime, userId, "保存活动信息！");
+        Activity activity = ActivityUtils.constructActivity(tenantId, tenantCode, saveBuyGiveActivityModel.getName(), 1, startDate, startTime, endDate, endTime, userId, "保存活动信息！");
         activityMapper.insert(activity);
 
         List<BuyGiveActivity> buyGiveActivities = new ArrayList<BuyGiveActivity>();
@@ -267,7 +271,6 @@ public class ActivityService {
             BuyGiveActivity buyGiveActivity = new BuyGiveActivity();
             buyGiveActivity.setTenantId(tenantId);
             buyGiveActivity.setTenantCode(tenantCode);
-            buyGiveActivity.setBranchId(branchId);
             buyGiveActivity.setActivityId(activity.getId());
             buyGiveActivity.setBuyGoodsId(buyGoods.getId());
             buyGiveActivity.setBuyGoodsSpecificationId(buyGoodsSpecification.getId());
@@ -298,10 +301,13 @@ public class ActivityService {
         String tenantCode = saveFullReductionActivityModel.getTenantCode();
         BigInteger branchId = saveFullReductionActivityModel.getBranchId();
         BigInteger userId = saveFullReductionActivityModel.getUserId();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DEFAULT_DATE_PATTERN);
-        Date startTime = simpleDateFormat.parse(saveFullReductionActivityModel.getStartTime() + " 00:00:00");
-        Date endTime = simpleDateFormat.parse(saveFullReductionActivityModel.getEndTime() + " 23:59:59");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date startDate = simpleDateFormat.parse(saveFullReductionActivityModel.getStartTime());
+        Date endDate = simpleDateFormat.parse(saveFullReductionActivityModel.getEndTime());
+        Time startTime = Time.valueOf(saveFullReductionActivityModel.getStartTime());
+        Time endTime = Time.valueOf(saveFullReductionActivityModel.getEndTime());
 
+        Validate.isTrue(endDate.after(startDate), "活动结束日期必须大于开始日期！");
         Validate.isTrue(endTime.after(startTime), "活动结束时间必须大于开始时间！");
 
         String sql = "SELECT * " +
@@ -325,7 +331,7 @@ public class ActivityService {
         }
 
 
-        Activity activity = ActivityUtils.constructActivity(tenantId, tenantCode, branchId, saveFullReductionActivityModel.getName(), 2, startTime, endTime, userId, "保存活动信息！");
+        Activity activity = ActivityUtils.constructActivity(tenantId, tenantCode, saveFullReductionActivityModel.getName(), 2, startDate, startTime, endDate, endTime, userId, "保存活动信息！");
         activityMapper.insert(activity);
 
         FullReductionActivity fullReductionActivity = ActivityUtils.constructFullReductionActivity(tenantId, tenantCode, branchId, activity.getId(), saveFullReductionActivityModel.getTotalAmount(), saveFullReductionActivityModel.getDiscountType(), saveFullReductionActivityModel.getDiscountRate(), saveFullReductionActivityModel.getDiscountAmount(), userId, "保存满减活动！");
@@ -350,8 +356,13 @@ public class ActivityService {
         BigInteger branchId = saveSpecialGoodsActivityModel.getBranchId();
         BigInteger userId = saveSpecialGoodsActivityModel.getUserId();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DEFAULT_DATE_PATTERN);
-        Date startTime = simpleDateFormat.parse(saveSpecialGoodsActivityModel.getStartTime() + " 00:00:00");
-        Date endTime = simpleDateFormat.parse(saveSpecialGoodsActivityModel.getEndTime() + " 23:59:59");
+        Date startDate = simpleDateFormat.parse(saveSpecialGoodsActivityModel.getStartTime());
+        Date endDate = simpleDateFormat.parse(saveSpecialGoodsActivityModel.getEndTime());
+
+        Time startTime = Time.valueOf(saveSpecialGoodsActivityModel.getStartTime());
+        Time endTime = Time.valueOf(saveSpecialGoodsActivityModel.getEndTime());
+
+        Validate.isTrue(endDate.after(startDate), "活动结束日期必须大于开始日期！");
         Validate.isTrue(endTime.after(startTime), "活动结束时间必须大于开始时间！");
 
         String sql = "SELECT * " +
@@ -421,7 +432,7 @@ public class ActivityService {
             goodsSpecificationMap.put(goodsSpecification.getId(), goodsSpecification);
         }
 
-        Activity activity = ActivityUtils.constructActivity(tenantId, tenantCode, branchId, saveSpecialGoodsActivityModel.getName(), 3, startTime, endTime, userId, "保存活动信息！");
+        Activity activity = ActivityUtils.constructActivity(tenantId, tenantCode, saveSpecialGoodsActivityModel.getName(), 3, startDate, startTime, endDate, endTime, userId, "保存活动信息！");
         activityMapper.insert(activity);
 
         List<SpecialGoodsActivity> specialGoodsActivities = new ArrayList<SpecialGoodsActivity>();
@@ -436,7 +447,6 @@ public class ActivityService {
             SpecialGoodsActivity specialGoodsActivity = new SpecialGoodsActivity();
             specialGoodsActivity.setTenantId(tenantId);
             specialGoodsActivity.setTenantCode(tenantCode);
-            specialGoodsActivity.setBranchId(branchId);
             specialGoodsActivity.setActivityId(activity.getId());
             specialGoodsActivity.setGoodsId(goods.getId());
             specialGoodsActivity.setGoodsSpecificationId(goodsSpecification.getId());

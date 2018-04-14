@@ -5,17 +5,19 @@ import build.dream.common.erp.catering.domains.FullReductionActivity;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Time;
 import java.util.Date;
 
 public class ActivityUtils {
-    public static Activity constructActivity(BigInteger tenantId, String tenantCode, BigInteger branchId, String name, Integer type, Date startTime, Date endTime, BigInteger userId, String lastUpdateRemark) {
+    public static Activity constructActivity(BigInteger tenantId, String tenantCode, String name, Integer type, Date startDate, Time startTime, Date endDate, Time endTime, BigInteger userId, String lastUpdateRemark) {
         Activity activity = new Activity();
         activity.setTenantId(tenantId);
         activity.setTenantCode(tenantCode);
-        activity.setBranchId(branchId);
         activity.setName(name);
         activity.setType(type);
+        activity.setStartDate(startDate);
         activity.setStartTime(startTime);
+        activity.setEndDate(endDate);
         activity.setEndTime(endTime);
         long currentTimeMillis = System.currentTimeMillis();
         if (currentTimeMillis >= startTime.getTime() && currentTimeMillis <= endTime.getTime()) {

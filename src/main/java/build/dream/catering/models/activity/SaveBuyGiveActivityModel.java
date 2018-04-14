@@ -30,10 +30,18 @@ public class SaveBuyGiveActivityModel extends BasicModel {
 
     @NotNull
     @Length(min = 10, max = 10)
+    private String startDate;
+
+    @NotNull
+    @Length(min = 5, max = 5)
     private String startTime;
 
     @NotNull
     @Length(min = 10, max = 10)
+    private String endDate;
+
+    @NotNull
+    @Length(min = 5, max = 5)
     private String endTime;
 
     private List<BuyGiveActivityInfo> buyGiveActivityInfos;
@@ -78,12 +86,28 @@ public class SaveBuyGiveActivityModel extends BasicModel {
         this.name = name;
     }
 
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
     public String getStartTime() {
         return startTime;
     }
 
     public void setStartTime(String startTime) {
         this.startTime = startTime;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
     }
 
     public String getEndTime() {
