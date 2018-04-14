@@ -27,4 +27,21 @@
             (#{activityId}, #{tenantId}, #{branchId})
         </foreach>
     </insert>
+
+    <select id="listFullReductionActivities" resultType="build.dream.common.erp.catering.domains.FullReductionActivity">
+        SELECT
+        full_reduction_activity.*
+        FROM activity
+        INNER JOIN activity_branch_r ON activity_branch_r.activity_id = activity.id AND activity_branch_r.tenant_id = #{tenantId} AND activity_branch_r.branch_id = #{branchId}
+        INNER JOIN full_reduction_activity ON full_reduction_activity.activity_id = activity.id
+        WHERE activity.deleted = 0
+        AND activity.type = 2
+        AND activity.start_date &lt;= DATE(NOW())
+        AND activity.end_date &gt;= DATE(NOW())
+        AND activity.start_time &lt;= TIME(NOW())
+        AND activity.end_time &gt;= TIME(NOW())
+        AND activity.status = 2
+        AND activity.tenant_id = #{tenantId}
+        AND (CASE (DAYOFWEEK(NOW())) WHEN 2 THEN week_sign % 2 = 0 WHEN 3 THEN week_sign % 3 = 0 WHEN 4 THEN week_sign % 5 = 0 WHEN 5 THEN week_sign % 7 = 0 WHEN 6 THEN week_sign % 11 = 0 WHEN 7 THEN week_sign % 13 = 0 WHEN 1 THEN week_sign % 17 = 0 END);
+    </select>
 </mapper>

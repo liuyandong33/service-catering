@@ -1,9 +1,6 @@
 package build.dream.catering.controllers;
 
-import build.dream.catering.models.activity.ListEffectiveActivitiesModel;
-import build.dream.catering.models.activity.SaveBuyGiveActivityModel;
-import build.dream.catering.models.activity.SaveFullReductionActivityModel;
-import build.dream.catering.models.activity.SaveSpecialGoodsActivityModel;
+import build.dream.catering.models.activity.*;
 import build.dream.catering.services.ActivityService;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
@@ -109,6 +106,27 @@ public class ActivityController extends BasicController {
             apiRest = activityService.listEffectiveActivities(listEffectiveActivitiesModel);
         } catch (Exception e) {
             LogUtils.error("查询生效的活动失败", controllerSimpleName, "listEffectiveActivities", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 查询所有生效的整单满减活动
+     *
+     * @return
+     */
+    @RequestMapping(value = "/listFullReductionActivities")
+    @ResponseBody
+    public String listFullReductionActivities() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            ListFullReductionActivitiesModel listFullReductionActivitiesModel = ApplicationHandler.instantiateObject(ListFullReductionActivitiesModel.class, requestParameters);
+            listFullReductionActivitiesModel.validateAndThrow();
+            apiRest = activityService.listFullReductionActivities(listFullReductionActivitiesModel);
+        } catch (Exception e) {
+            LogUtils.error("查询所有生效的整单满减活动失败", controllerSimpleName, "listFullReductionActivities", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);

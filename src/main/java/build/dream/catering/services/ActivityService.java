@@ -2,10 +2,7 @@ package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.*;
-import build.dream.catering.models.activity.ListEffectiveActivitiesModel;
-import build.dream.catering.models.activity.SaveBuyGiveActivityModel;
-import build.dream.catering.models.activity.SaveFullReductionActivityModel;
-import build.dream.catering.models.activity.SaveSpecialGoodsActivityModel;
+import build.dream.catering.models.activity.*;
 import build.dream.catering.utils.ActivityUtils;
 import build.dream.catering.utils.CanNotOperateReasonUtils;
 import build.dream.common.api.ApiRest;
@@ -363,6 +360,25 @@ public class ActivityService {
         ApiRest apiRest = new ApiRest();
         apiRest.setData(effectiveActivities);
         apiRest.setMessage("查询生效的活动成功！");
+        return apiRest;
+    }
+
+    /**
+     * 查询所有生效的整单满减活动
+     *
+     * @param listFullReductionActivitiesModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest listFullReductionActivities(ListFullReductionActivitiesModel listFullReductionActivitiesModel) {
+        BigInteger tenantId = listFullReductionActivitiesModel.getTenantId();
+        BigInteger branchId = listFullReductionActivitiesModel.getBranchId();
+
+        List<FullReductionActivity> fullReductionActivities = activityMapper.listFullReductionActivities(tenantId, branchId);
+        ApiRest apiRest = new ApiRest();
+        apiRest.setData(fullReductionActivities);
+        apiRest.setMessage("查询所有生效的整单满减活动成功！");
+        apiRest.setSuccessful(true);
         return apiRest;
     }
 }
