@@ -44,7 +44,7 @@ public class PosController extends BasicController {
             OnlinePosModel onlinePosModel = ApplicationHandler.instantiateObject(OnlinePosModel.class, requestParameters);
             onlinePosModel.validateAndThrow();
 
-            apiRest = posService.initPos(onlinePosModel);
+            apiRest = posService.onlinePos(onlinePosModel);
         } catch (Exception e) {
             LogUtils.error("上线POS失败", controllerSimpleName, "onlinePos", e, requestParameters);
             apiRest = new ApiRest(e);

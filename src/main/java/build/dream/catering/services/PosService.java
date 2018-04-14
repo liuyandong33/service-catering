@@ -25,7 +25,7 @@ public class PosService {
      * @param onlinePosModel
      * @return
      */
-    public ApiRest initPos(OnlinePosModel onlinePosModel) {
+    public ApiRest onlinePos(OnlinePosModel onlinePosModel) {
         BigInteger tenantId = onlinePosModel.getTenantId();
         BigInteger branchId = onlinePosModel.getBranchId();
         BigInteger userId = onlinePosModel.getUserId();
