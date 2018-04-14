@@ -16,4 +16,15 @@
     <select id="findAllPaged" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.Activity">
         SELECT * FROM branch <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include> <include refid="build.dream.catering.mappers.CommonMapper.paginationSql"></include>
     </select>
+    
+    <select id="callProcedureEffectiveActivity" resultType="build.dream.common.erp.catering.domains.EffectiveActivity">
+        call procedure_effective_activity(#{tenantId}, #{branchId});
+    </select>
+
+    <insert id="insertAllActivityBranchR">
+        INSERT INTO activity_branch_r(activity_id, tenant_id, branch_id) VALUES
+        <foreach collection="branchIds" index="index" item="branchId" open="" separator="," close="">
+            (#{activityId}, #{tenantId}, #{branchId})
+        </foreach>
+    </insert>
 </mapper>

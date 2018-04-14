@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
+import java.util.List;
 
 public class SaveFullReductionActivityModel extends BasicModel {
     @NotNull
@@ -19,7 +20,7 @@ public class SaveFullReductionActivityModel extends BasicModel {
     private String tenantCode;
 
     @NotNull
-    private BigInteger branchId;
+    private List<BigInteger> branchIds;
 
     @NotNull
     private BigInteger userId;
@@ -46,6 +47,9 @@ public class SaveFullReductionActivityModel extends BasicModel {
     private String endTime;
 
     @NotNull
+    private Integer weekSign;
+
+    @NotNull
     private BigDecimal totalAmount;
 
     private Integer discountType;
@@ -68,12 +72,12 @@ public class SaveFullReductionActivityModel extends BasicModel {
         this.tenantCode = tenantCode;
     }
 
-    public BigInteger getBranchId() {
-        return branchId;
+    public List<BigInteger> getBranchIds() {
+        return branchIds;
     }
 
-    public void setBranchId(BigInteger branchId) {
-        this.branchId = branchId;
+    public void setBranchIds(List<BigInteger> branchIds) {
+        this.branchIds = branchIds;
     }
 
     public BigInteger getUserId() {
@@ -126,6 +130,14 @@ public class SaveFullReductionActivityModel extends BasicModel {
 
     public void setEndTime(String endTime) {
         this.endTime = endTime;
+    }
+
+    public Integer getWeekSign() {
+        return weekSign;
+    }
+
+    public void setWeekSign(Integer weekSign) {
+        this.weekSign = weekSign;
     }
 
     public void setTotalAmount(BigDecimal totalAmount) {

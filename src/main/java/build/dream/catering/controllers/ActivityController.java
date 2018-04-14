@@ -1,5 +1,6 @@
 package build.dream.catering.controllers;
 
+import build.dream.catering.models.activity.ListEffectiveActivitiesModel;
 import build.dream.catering.models.activity.SaveBuyGiveActivityModel;
 import build.dream.catering.models.activity.SaveFullReductionActivityModel;
 import build.dream.catering.models.activity.SaveSpecialGoodsActivityModel;
@@ -21,12 +22,6 @@ import java.util.Map;
 public class ActivityController extends BasicController {
     @Autowired
     private ActivityService activityService;
-
-    @RequestMapping(value = "/test")
-    @ResponseBody
-    public String test() {
-        return GsonUtils.toJson(activityService.test());
-    }
 
     /**
      * 保存买A赠B活动
@@ -93,6 +88,27 @@ public class ActivityController extends BasicController {
             apiRest = activityService.saveSpecialGoodsActivity(saveSpecialGoodsActivityModel);
         } catch (Exception e) {
             LogUtils.error("保存特价商品活动失败", controllerSimpleName, "saveSpecialGoodsActivity", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 查询生效的活动
+     *
+     * @return
+     */
+    @RequestMapping(value = "/listEffectiveActivities")
+    @ResponseBody
+    public String listEffectiveActivities() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            ListEffectiveActivitiesModel listEffectiveActivitiesModel = ApplicationHandler.instantiateObject(ListEffectiveActivitiesModel.class, requestParameters);
+            listEffectiveActivitiesModel.validateAndThrow();
+            apiRest = activityService.listEffectiveActivities(listEffectiveActivitiesModel);
+        } catch (Exception e) {
+            LogUtils.error("查询生效的活动失败", controllerSimpleName, "listEffectiveActivities", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);

@@ -6,6 +6,7 @@ import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
 import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
 import java.util.List;
@@ -18,8 +19,8 @@ public class SaveBuyGiveActivityModel extends BasicModel {
     @Length(max = 20)
     private String tenantCode;
 
-    @NotNull
-    private BigInteger branchId;
+    @NotEmpty
+    private List<BigInteger> branchIds;
 
     @NotNull
     private BigInteger userId;
@@ -44,6 +45,9 @@ public class SaveBuyGiveActivityModel extends BasicModel {
     @Length(min = 5, max = 5)
     private String endTime;
 
+    @NotNull
+    private Integer weekSign;
+
     private List<BuyGiveActivityInfo> buyGiveActivityInfos;
 
     public BigInteger getTenantId() {
@@ -62,12 +66,12 @@ public class SaveBuyGiveActivityModel extends BasicModel {
         this.tenantCode = tenantCode;
     }
 
-    public BigInteger getBranchId() {
-        return branchId;
+    public List<BigInteger> getBranchIds() {
+        return branchIds;
     }
 
-    public void setBranchId(BigInteger branchId) {
-        this.branchId = branchId;
+    public void setBranchIds(List<BigInteger> branchIds) {
+        this.branchIds = branchIds;
     }
 
     public BigInteger getUserId() {
@@ -116,6 +120,14 @@ public class SaveBuyGiveActivityModel extends BasicModel {
 
     public void setEndTime(String endTime) {
         this.endTime = endTime;
+    }
+
+    public Integer getWeekSign() {
+        return weekSign;
+    }
+
+    public void setWeekSign(Integer weekSign) {
+        this.weekSign = weekSign;
     }
 
     public List<BuyGiveActivityInfo> getBuyGiveActivityInfos() {

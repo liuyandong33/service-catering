@@ -20,7 +20,7 @@ public class SaveSpecialGoodsActivityModel extends BasicModel {
     private String tenantCode;
 
     @NotNull
-    private BigInteger branchId;
+    private List<BigInteger> branchIds;
 
     @NotNull
     private BigInteger userId;
@@ -45,6 +45,9 @@ public class SaveSpecialGoodsActivityModel extends BasicModel {
     @Length(min = 5, max = 5)
     private String endTime;
 
+    @NotNull
+    private Integer weekSign;
+
     private List<SpecialGoodsActivityInfo> specialGoodsActivityInfos;
 
     public BigInteger getTenantId() {
@@ -63,12 +66,12 @@ public class SaveSpecialGoodsActivityModel extends BasicModel {
         this.tenantCode = tenantCode;
     }
 
-    public BigInteger getBranchId() {
-        return branchId;
+    public List<BigInteger> getBranchIds() {
+        return branchIds;
     }
 
-    public void setBranchId(BigInteger branchId) {
-        this.branchId = branchId;
+    public void setBranchIds(List<BigInteger> branchIds) {
+        this.branchIds = branchIds;
     }
 
     public BigInteger getUserId() {
@@ -117,6 +120,14 @@ public class SaveSpecialGoodsActivityModel extends BasicModel {
 
     public void setEndTime(String endTime) {
         this.endTime = endTime;
+    }
+
+    public Integer getWeekSign() {
+        return weekSign;
+    }
+
+    public void setWeekSign(Integer weekSign) {
+        this.weekSign = weekSign;
     }
 
     public List<SpecialGoodsActivityInfo> getSpecialGoodsActivityInfos() {
