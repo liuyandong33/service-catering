@@ -131,4 +131,25 @@ public class ActivityController extends BasicController {
         }
         return GsonUtils.toJson(apiRest);
     }
+
+    /**
+     * 查询所有生效的支付促销活动
+     *
+     * @return
+     */
+    @RequestMapping(value = "/listPaymentActivities")
+    @ResponseBody
+    public String listPaymentActivities() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            ListPaymentActivitiesModel listPaymentActivitiesModel = ApplicationHandler.instantiateObject(ListPaymentActivitiesModel.class, requestParameters);
+            listPaymentActivitiesModel.validateAndThrow();
+            apiRest = activityService.listPaymentActivities(listPaymentActivitiesModel);
+        } catch (Exception e) {
+            LogUtils.error("查询所有生效的支付促销活动失败", controllerSimpleName, "listPaymentActivities", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
 }

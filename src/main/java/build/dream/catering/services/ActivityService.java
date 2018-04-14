@@ -381,4 +381,23 @@ public class ActivityService {
         apiRest.setSuccessful(true);
         return apiRest;
     }
+
+    /**
+     * 查询所有生效的支付促销活动
+     *
+     * @param listPaymentActivitiesModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest listPaymentActivities(ListPaymentActivitiesModel listPaymentActivitiesModel) {
+        BigInteger tenantId = listPaymentActivitiesModel.getTenantId();
+        BigInteger branchId = listPaymentActivitiesModel.getBranchId();
+
+        List<PaymentActivity> paymentActivities = activityMapper.listPaymentActivities(tenantId, branchId);
+        ApiRest apiRest = new ApiRest();
+        apiRest.setData(paymentActivities);
+        apiRest.setMessage("查询所有生效的支付促销活动成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
+    }
 }
