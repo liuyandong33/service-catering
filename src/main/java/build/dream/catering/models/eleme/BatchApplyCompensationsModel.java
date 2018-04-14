@@ -4,8 +4,8 @@ import build.dream.common.constraints.InList;
 import build.dream.common.models.BasicModel;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
-import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
 import java.util.ArrayList;

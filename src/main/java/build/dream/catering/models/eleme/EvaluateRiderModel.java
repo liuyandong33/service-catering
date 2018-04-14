@@ -2,10 +2,10 @@ package build.dream.catering.models.eleme;
 
 import build.dream.common.constraints.ItemsInList;
 import build.dream.common.models.BasicModel;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
 import java.util.List;
