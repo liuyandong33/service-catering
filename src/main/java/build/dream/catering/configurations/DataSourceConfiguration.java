@@ -12,7 +12,7 @@ import javax.sql.DataSource;
 public class DataSourceConfiguration {
     @Bean(name = "dataSource")
     @ConfigurationProperties(prefix = "datasource")
-    public DataSource primaryDataSource() {
+    public DataSource dataSource() {
         return DataSourceBuilder.create().type(DruidDataSource.class).build();
     }
 }
