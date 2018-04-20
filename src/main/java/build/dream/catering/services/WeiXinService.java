@@ -103,6 +103,7 @@ public class WeiXinService {
 
         String cardId = createMemberCardResultJsonObject.getString("card_id");
 
+        // 设置开卡字段
         Map<String, Object> serviceStatement = new HashMap<String, Object>();
         serviceStatement.put("name", "会员守则");
         serviceStatement.put("url", "https://www.qq.com");
@@ -158,6 +159,27 @@ public class WeiXinService {
         String activateUserFormResult = activateUserFormApiRest.getData().toString();
         JSONObject activateUserFormResultJsonObject = JSONObject.fromObject(activateUserFormResult);
         Validate.isTrue(activateUserFormResultJsonObject.getInt("errcode") == 0, activateUserFormResultJsonObject.getString("errmsg"));
+
+        Map<String, Object> actionInfoCard = new HashMap<String, Object>();
+        actionInfoCard.put("card_id", cardId);
+
+        Map<String, Object> actionInfo = new HashMap<String, Object>();
+        actionInfo.put("card", actionInfoCard);
+
+        Map<String, Object> createQRcodeRequestBody = new HashMap<String, Object>();
+        createQRcodeRequestBody.put("action_name", "QR_CARD");
+        createQRcodeRequestBody.put("action_info", actionInfo);
+
+        Map<String, String> createQRCodeRequestParameters = new HashMap<String, String>();
+        createQRCodeRequestParameters.put("url", "https://api.weixin.qq.com/card/qrcode/create?access_token=" + accessToken);
+        createQRCodeRequestParameters.put("requestBody", GsonUtils.toJson(createQRcodeRequestBody));
+
+        ApiRest createQRCodeApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "proxy", "doPost", createQRCodeRequestParameters);
+        Validate.isTrue(createQRCodeApiRest.isSuccessful(), createQRCodeApiRest.getError());
+
+        String createQRCodeResult = createQRCodeApiRest.getData().toString();
+        JSONObject createQRCodeResultJsonObject = JSONObject.fromObject(createQRCodeResult);
+        Validate.isTrue(createQRCodeResultJsonObject.getInt("errcode") == 0, createQRCodeResultJsonObject.getString("errmsg"));
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("创建会员卡成功！");
