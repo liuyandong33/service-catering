@@ -16,10 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class WeiXinService {
@@ -188,10 +185,15 @@ public class WeiXinService {
         weiXinMemberCard.put("tenantId", tenantId);
         weiXinMemberCard.put("appId", appId);
         weiXinMemberCard.put("appSecret", appSecret);
-        weiXinMemberCard.put("createUserId", createMemberCardModel.getUserId());
         weiXinMemberCard.put("cardId", cardId);
         weiXinMemberCard.put("url", url);
         weiXinMemberCard.put("showQrCodeUrl", showQrCodeUrl);
+        weiXinMemberCard.put("createTime", new Date());
+        weiXinMemberCard.put("createUserId", createMemberCardModel.getUserId());
+        weiXinMemberCard.put("lastUpdateTime", new Date());
+        weiXinMemberCard.put("lastUpdateUserId", createMemberCardModel.getUserId());
+        weiXinMemberCard.put("lastUpdateRemark", null);
+        weiXinMemberCard.put("deleted", false);
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("创建会员卡成功！");
