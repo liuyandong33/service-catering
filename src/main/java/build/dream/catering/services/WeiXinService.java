@@ -170,16 +170,28 @@ public class WeiXinService {
         createQRcodeRequestBody.put("action_name", "QR_CARD");
         createQRcodeRequestBody.put("action_info", actionInfo);
 
-        Map<String, String> createQRCodeRequestParameters = new HashMap<String, String>();
-        createQRCodeRequestParameters.put("url", "https://api.weixin.qq.com/card/qrcode/create?access_token=" + accessToken);
-        createQRCodeRequestParameters.put("requestBody", GsonUtils.toJson(createQRcodeRequestBody));
+        Map<String, String> createQrCodeRequestParameters = new HashMap<String, String>();
+        createQrCodeRequestParameters.put("url", "https://api.weixin.qq.com/card/qrcode/create?access_token=" + accessToken);
+        createQrCodeRequestParameters.put("requestBody", GsonUtils.toJson(createQRcodeRequestBody));
 
-        ApiRest createQRCodeApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "proxy", "doPost", createQRCodeRequestParameters);
-        Validate.isTrue(createQRCodeApiRest.isSuccessful(), createQRCodeApiRest.getError());
+        ApiRest createQrCodeApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "proxy", "doPost", createQrCodeRequestParameters);
+        Validate.isTrue(createQrCodeApiRest.isSuccessful(), createQrCodeApiRest.getError());
 
-        String createQRCodeResult = createQRCodeApiRest.getData().toString();
-        JSONObject createQRCodeResultJsonObject = JSONObject.fromObject(createQRCodeResult);
-        Validate.isTrue(createQRCodeResultJsonObject.getInt("errcode") == 0, createQRCodeResultJsonObject.getString("errmsg"));
+        String createQrCodeResult = createQrCodeApiRest.getData().toString();
+        JSONObject createQrCodeResultJsonObject = JSONObject.fromObject(createQrCodeResult);
+        Validate.isTrue(createQrCodeResultJsonObject.getInt("errcode") == 0, createQrCodeResultJsonObject.getString("errmsg"));
+
+        String url = createQrCodeResultJsonObject.getString("url");
+        String showQrCodeUrl = createQrCodeResultJsonObject.getString("show_qrcode_url");
+
+        Map<String, Object> weiXinMemberCard = new HashMap<String, Object>();
+        weiXinMemberCard.put("tenantId", tenantId);
+        weiXinMemberCard.put("appId", appId);
+        weiXinMemberCard.put("appSecret", appSecret);
+        weiXinMemberCard.put("createUserId", createMemberCardModel.getUserId());
+        weiXinMemberCard.put("cardId", cardId);
+        weiXinMemberCard.put("url", url);
+        weiXinMemberCard.put("showQrCodeUrl", showQrCodeUrl);
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("创建会员卡成功！");

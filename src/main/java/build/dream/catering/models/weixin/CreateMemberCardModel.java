@@ -12,6 +12,9 @@ public class CreateMemberCardModel extends BasicModel {
     private BigInteger tenantId;
 
     @NotNull
+    private BigInteger userId;
+
+    @NotNull
     @Length(max = 12)
     private String brandName;
 
@@ -39,6 +42,14 @@ public class CreateMemberCardModel extends BasicModel {
 
     public void setTenantId(BigInteger tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public BigInteger getUserId() {
+        return userId;
+    }
+
+    public void setUserId(BigInteger userId) {
+        this.userId = userId;
     }
 
     public String getBrandName() {
