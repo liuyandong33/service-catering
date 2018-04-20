@@ -16,7 +16,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -89,15 +91,73 @@ public class WeiXinService {
         Map<String, Object> createMemberCardRequestBody = new HashMap<String, Object>();
         createMemberCardRequestBody.put("card", card);
 
-        Map<String, String> doPostRequestParameters = new HashMap<String, String>();
-        doPostRequestParameters.put("url", "https://api.weixin.qq.com/card/create?access_token=" + accessToken);
-        doPostRequestParameters.put("requestBody", GsonUtils.toJson(createMemberCardRequestBody));
+        Map<String, String> createMemberCardRequestParameters = new HashMap<String, String>();
+        createMemberCardRequestParameters.put("url", "https://api.weixin.qq.com/card/create?access_token=" + accessToken);
+        createMemberCardRequestParameters.put("requestBody", GsonUtils.toJson(createMemberCardRequestBody));
 
-        ApiRest doPostApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "proxy", "doPost", doPostRequestParameters);
-        Validate.isTrue(doPostApiRest.isSuccessful(), doPostApiRest.getError());
-        String createMemberCardResult = doPostApiRest.getData().toString();
+        ApiRest createMemberCardApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "proxy", "doPost", createMemberCardRequestParameters);
+        Validate.isTrue(createMemberCardApiRest.isSuccessful(), createMemberCardApiRest.getError());
+        String createMemberCardResult = createMemberCardApiRest.getData().toString();
         JSONObject createMemberCardResultJsonObject = JSONObject.fromObject(createMemberCardResult);
         Validate.isTrue(createMemberCardResultJsonObject.getInt("errcode") == 0, createMemberCardResultJsonObject.getString("errmsg"));
+
+        String cardId = createMemberCardResultJsonObject.getString("card_id");
+
+        Map<String, Object> serviceStatement = new HashMap<String, Object>();
+        serviceStatement.put("name", "会员守则");
+        serviceStatement.put("url", "https://www.qq.com");
+
+        Map<String, Object> bindOldCard = new HashMap<String, Object>();
+        bindOldCard.put("name", "老会员绑定");
+        bindOldCard.put("url", "https://www.qq.com");
+
+        Map<String, Object> richField1 = new HashMap<String, Object>();
+        richField1.put("type", "FORM_FIELD_RADIO");
+        richField1.put("name", "兴趣");
+        richField1.put("values", new String[]{"钢琴", "舞蹈", "足球"});
+
+        Map<String, Object> richField2 = new HashMap<String, Object>();
+        richField2.put("type", "FORM_FIELD_SELECT");
+        richField2.put("name", "喜好");
+        richField2.put("values", new String[]{"郭敬明", "韩寒", "南派三叔"});
+
+        Map<String, Object> richField3 = new HashMap<String, Object>();
+        richField3.put("type", "FORM_FIELD_CHECK_BOX");
+        richField3.put("name", "职业");
+        richField3.put("values", new String[]{"赛车手", "旅行家"});
+
+        List<Map<String, Object>> richFieldList = new ArrayList<Map<String, Object>>();
+        richFieldList.add(richField1);
+        richFieldList.add(richField2);
+        richFieldList.add(richField3);
+
+        Map<String, Object> requiredForm = new HashMap<String, Object>();
+        requiredForm.put("can_modify", false);
+        requiredForm.put("rich_field_list", richFieldList);
+        requiredForm.put("common_field_id_list", new String[]{"USER_FORM_INFO_FLAG_MOBILE"});
+
+        Map<String, Object> optionalForm = new HashMap<String, Object>();
+        optionalForm.put("can_modify", false);
+        optionalForm.put("common_field_id_list", new String[]{"USER_FORM_INFO_FLAG_LOCATION", "USER_FORM_INFO_FLAG_BIRTHDAY"});
+        optionalForm.put("custom_field_list", new String[]{"喜欢的电影"});
+
+        Map<String, Object> activateUserFormRequestBody = new HashMap<String, Object>();
+        activateUserFormRequestBody.put("card_id", cardId);
+        activateUserFormRequestBody.put("service_statement", serviceStatement);
+        activateUserFormRequestBody.put("bind_old_card", bindOldCard);
+        activateUserFormRequestBody.put("required_form", requiredForm);
+        activateUserFormRequestBody.put("optional_form", optionalForm);
+
+        Map<String, String> activateUserFormRequestParameters = new HashMap<String, String>();
+        activateUserFormRequestParameters.put("url", "https://api.weixin.qq.com/card/membercard/activateuserform/set?access_token=" + accessToken);
+        activateUserFormRequestParameters.put("requestBody", GsonUtils.toJson(activateUserFormRequestBody));
+
+        ApiRest activateUserFormApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "proxy", "doPost", activateUserFormRequestParameters);
+        Validate.isTrue(activateUserFormApiRest.isSuccessful(), activateUserFormApiRest.getError());
+
+        String activateUserFormResult = activateUserFormApiRest.getData().toString();
+        JSONObject activateUserFormResultJsonObject = JSONObject.fromObject(activateUserFormResult);
+        Validate.isTrue(activateUserFormResultJsonObject.getInt("errcode") == 0, activateUserFormResultJsonObject.getString("errmsg"));
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("创建会员卡成功！");
