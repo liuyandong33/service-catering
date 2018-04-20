@@ -2,7 +2,9 @@ package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.weixin.CreateMemberCardModel;
+import build.dream.catering.utils.WeiXinUtils;
 import build.dream.common.api.ApiRest;
+import build.dream.common.saas.domains.WeiXinPublicAccount;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.ProxyUtils;
 import net.sf.json.JSONObject;
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,7 +23,14 @@ import java.util.Map;
 public class WeiXinService {
     @Transactional(readOnly = true)
     public ApiRest createMemberCard(CreateMemberCardModel createMemberCardModel, MultipartFile backgroundPicFile, MultipartFile logoFile) throws IOException {
-        String accessToken = null;
+        BigInteger tenantId = createMemberCardModel.getTenantId();
+        WeiXinPublicAccount weiXinPublicAccount = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
+        Validate.notNull(weiXinPublicAccount, "未配置微信公众号，不能创建会员卡！");
+
+        String appId = weiXinPublicAccount.getAppId();
+        String appSecret = weiXinPublicAccount.getAppSecret();
+
+        String accessToken = WeiXinUtils.obtainAccessToken(appId, appSecret);
 
         String backgroundPicUrl = null;
         if (backgroundPicFile != null) {
