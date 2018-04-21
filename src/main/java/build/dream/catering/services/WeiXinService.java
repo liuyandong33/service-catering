@@ -263,14 +263,22 @@ public class WeiXinService {
         return apiRest;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ApiRest payGiftCard(PayGiftCardModel payGiftCardModel) throws IOException {
         BigInteger tenantId = payGiftCardModel.getTenantId();
+        BigInteger weiXinCardId = payGiftCardModel.getWeiXinCardId();
+
         WeiXinPublicAccount weiXinPublicAccount = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
         Validate.notNull(weiXinPublicAccount, "未配置微信公众号，不能开通支付即会员！");
 
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, weiXinCardId);
+        WeiXinMemberCard weiXinMemberCard = weiXinMemberCardMapper.find(searchModel);
+        Validate.notNull(weiXinMemberCard, "微信会员卡不存在！");
+
         String appId = weiXinPublicAccount.getAppId();
         String appSecret = weiXinPublicAccount.getAppSecret();
-
         String accessToken = WeiXinUtils.obtainAccessToken(appId, appSecret);
 
         Map<String, Object> baseInfo = new HashMap<String, Object>();
@@ -279,7 +287,7 @@ public class WeiXinService {
         baseInfo.put("end_time", payGiftCardModel.getEndTime().getTime() / 1000);
 
         Map<String, Object> memberRule = new HashedMap<String, Object>();
-        memberRule.put("card_id", "");
+        memberRule.put("card_id", weiXinMemberCard.getCardId());
         memberRule.put("least_cost", payGiftCardModel.getLeastCost());
         memberRule.put("max_cost", payGiftCardModel.getMaxCost());
 
@@ -329,6 +337,8 @@ public class WeiXinService {
         Validate.isTrue(deleteCardResultJsonObject.getInt("errcode") == 0, deleteCardResultJsonObject.getString("errmsg"));
 
         weiXinMemberCard.setDeleted(true);
+        weiXinMemberCard.setLastUpdateUserId(userId);
+        weiXinMemberCard.setLastUpdateRemark("删除微信会员卡！");
         weiXinMemberCardMapper.update(weiXinMemberCard);
 
         ApiRest apiRest = new ApiRest();
