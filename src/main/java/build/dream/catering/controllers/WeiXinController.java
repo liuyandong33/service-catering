@@ -25,6 +25,12 @@ public class WeiXinController extends BasicController {
     @Autowired
     private WeiXinService weiXinService;
 
+    /**
+     * 创建会员开
+     *
+     * @param httpServletRequest
+     * @return
+     */
     @RequestMapping(value = "/createMemberCard")
     @ResponseBody
     public String createMemberCard(HttpServletRequest httpServletRequest) {
@@ -50,6 +56,11 @@ public class WeiXinController extends BasicController {
         return GsonUtils.toJson(apiRest);
     }
 
+    /**
+     * 开通支付即使会员
+     *
+     * @return
+     */
     @RequestMapping(value = "/payGiftCard")
     @ResponseBody
     public String payGiftCard() {
