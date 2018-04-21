@@ -1,29 +1,42 @@
 package build.dream.catering.services;
 
+import build.dream.catering.constants.Constants;
+import build.dream.catering.mappers.WeiXinMemberCardMapper;
 import build.dream.catering.models.weixin.CreateMemberCardModel;
+import build.dream.catering.models.weixin.DeleteWeiXinMemberCardModel;
 import build.dream.catering.models.weixin.PayGiftCardModel;
 import build.dream.catering.utils.WeiXinUtils;
 import build.dream.common.api.ApiRest;
+import build.dream.common.erp.catering.domains.WeiXinMemberCard;
 import build.dream.common.saas.domains.WeiXinPublicAccount;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.OutUtils;
+import build.dream.common.utils.SearchModel;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class WeiXinService {
-    @Transactional(readOnly = true)
+    @Autowired
+    private WeiXinMemberCardMapper weiXinMemberCardMapper;
+
+    @Transactional(rollbackFor = Exception.class)
     public ApiRest createMemberCard(CreateMemberCardModel createMemberCardModel, MultipartFile backgroundPicFile, MultipartFile logoFile) throws IOException {
         BigInteger tenantId = createMemberCardModel.getTenantId();
+        BigInteger userId = createMemberCardModel.getUserId();
         WeiXinPublicAccount weiXinPublicAccount = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
         Validate.notNull(weiXinPublicAccount, "未配置微信公众号，不能创建会员卡！");
 
@@ -91,6 +104,10 @@ public class WeiXinService {
         }
         memberCard.put("base_info", baseInfo);
         memberCard.put("prerogative", "prerogative");
+        memberCard.put("auto_activate", false);
+        memberCard.put("wx_activate", true);
+        memberCard.put("wx_activate_after_submit", true);
+        memberCard.put("wx_activate_after_submit_url", "http://www.baidu.com");
         memberCard.put("supply_bonus", true);
         memberCard.put("supply_balance", false);
 
@@ -228,21 +245,19 @@ public class WeiXinService {
         String url = createQrCodeResultJsonObject.getString("url");
         String showQrCodeUrl = createQrCodeResultJsonObject.getString("show_qrcode_url");
 
-        Map<String, Object> weiXinMemberCard = new HashMap<String, Object>();
-        weiXinMemberCard.put("tenantId", tenantId);
-        weiXinMemberCard.put("appId", appId);
-        weiXinMemberCard.put("appSecret", appSecret);
-        weiXinMemberCard.put("cardId", cardId);
-        weiXinMemberCard.put("url", url);
-        weiXinMemberCard.put("showQrCodeUrl", showQrCodeUrl);
-        weiXinMemberCard.put("createTime", new Date());
-        weiXinMemberCard.put("createUserId", createMemberCardModel.getUserId());
-        weiXinMemberCard.put("lastUpdateTime", new Date());
-        weiXinMemberCard.put("lastUpdateUserId", createMemberCardModel.getUserId());
-        weiXinMemberCard.put("lastUpdateRemark", null);
-        weiXinMemberCard.put("deleted", false);
+        WeiXinMemberCard weiXinMemberCard = new WeiXinMemberCard();
+        weiXinMemberCard.setTenantId(tenantId);
+        weiXinMemberCard.setAppId(appId);
+        weiXinMemberCard.setCardId(cardId);
+        weiXinMemberCard.setUrl(url);
+        weiXinMemberCard.setShowQrCodeUrl(showQrCodeUrl);
+        weiXinMemberCard.setCreateUserId(userId);
+        weiXinMemberCard.setLastUpdateUserId(userId);
+        weiXinMemberCard.setLastUpdateRemark("创建微信会员卡！");
+        weiXinMemberCardMapper.insert(weiXinMemberCard);
 
         ApiRest apiRest = new ApiRest();
+        apiRest.setData(weiXinMemberCard);
         apiRest.setMessage("创建会员卡成功！");
         apiRest.setSuccessful(true);
         return apiRest;
@@ -282,6 +297,42 @@ public class WeiXinService {
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("开通支付即会员成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest deleteWeiXinMemberCard(DeleteWeiXinMemberCardModel deleteWeiXinMemberCardModel) throws IOException {
+        BigInteger tenantId = deleteWeiXinMemberCardModel.getTenantId();
+        BigInteger userId = deleteWeiXinMemberCardModel.getUserId();
+        BigInteger weiXinCardId = deleteWeiXinMemberCardModel.getWeiXinCardId();
+
+        WeiXinPublicAccount weiXinPublicAccount = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
+        Validate.notNull(weiXinPublicAccount, "未配置微信公众号，不能删除微信会员卡！");
+
+        String appId = weiXinPublicAccount.getAppId();
+        String appSecret = weiXinPublicAccount.getAppSecret();
+
+        String accessToken = WeiXinUtils.obtainAccessToken(appId, appSecret);
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, weiXinCardId);
+        WeiXinMemberCard weiXinMemberCard = weiXinMemberCardMapper.find(searchModel);
+        Validate.notNull(weiXinMemberCard, "微信会员卡不存在！");
+
+        Map<String, Object> deleteCardRequestBody = new HashMap<String, Object>();
+        deleteCardRequestBody.put("card_id", weiXinMemberCard.getCardId());
+
+        String deleteCardResult = OutUtils.doPost("https://api.weixin.qq.com/card/delete?access_token=" + accessToken, GsonUtils.toJson(deleteCardRequestBody), null);
+        JSONObject deleteCardResultJsonObject = JSONObject.fromObject(deleteCardResult);
+        Validate.isTrue(deleteCardResultJsonObject.getInt("errcode") == 0, deleteCardResultJsonObject.getString("errmsg"));
+
+        weiXinMemberCard.setDeleted(true);
+        weiXinMemberCardMapper.update(weiXinMemberCard);
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("删除微信会员卡成功！");
         apiRest.setSuccessful(true);
         return apiRest;
     }

@@ -1,6 +1,7 @@
 package build.dream.catering.controllers;
 
 import build.dream.catering.models.weixin.CreateMemberCardModel;
+import build.dream.catering.models.weixin.DeleteWeiXinMemberCardModel;
 import build.dream.catering.models.weixin.PayGiftCardModel;
 import build.dream.catering.services.WeiXinService;
 import build.dream.common.api.ApiRest;
@@ -73,6 +74,27 @@ public class WeiXinController extends BasicController {
             apiRest = weiXinService.payGiftCard(payGiftCardModel);
         } catch (Exception e) {
             LogUtils.error("开通支付即会员失败", controllerSimpleName, "payGiftCard", e, requestParameters);
+            apiRest = new ApiRest(e);
+        }
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 删除微信会员卡
+     *
+     * @return
+     */
+    @RequestMapping(value = "/deleteWeiXinMemberCard")
+    @ResponseBody
+    public String deleteWeiXinMemberCard() {
+        ApiRest apiRest = null;
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        try {
+            DeleteWeiXinMemberCardModel deleteWeiXinMemberCardModel = ApplicationHandler.instantiateObject(DeleteWeiXinMemberCardModel.class, requestParameters);
+            deleteWeiXinMemberCardModel.validateAndThrow();
+            apiRest = weiXinService.deleteWeiXinMemberCard(deleteWeiXinMemberCardModel);
+        } catch (Exception e) {
+            LogUtils.error("删除微信会员卡失败", controllerSimpleName, "deleteWeiXinMemberCard", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
