@@ -1,13 +1,14 @@
 package build.dream.catering.services;
 
-import build.dream.catering.constants.Constants;
 import build.dream.catering.models.weixin.CreateMemberCardModel;
+import build.dream.catering.models.weixin.PayGiftCardModel;
 import build.dream.catering.utils.WeiXinUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.saas.domains.WeiXinPublicAccount;
 import build.dream.common.utils.GsonUtils;
-import build.dream.common.utils.ProxyUtils;
+import build.dream.common.utils.OutUtils;
 import net.sf.json.JSONObject;
+import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.stereotype.Service;
@@ -31,28 +32,25 @@ public class WeiXinService {
 
         String accessToken = WeiXinUtils.obtainAccessToken(appId, appSecret);
 
+        String uploadImgUrl = "https://api.weixin.qq.com/cgi-bin/media/uploadimg";
         String backgroundPicUrl = null;
         if (backgroundPicFile != null) {
             Map<String, Object> uploadBackgroundPicRequestParameters = new HashMap<String, Object>();
             uploadBackgroundPicRequestParameters.put("buffer", backgroundPicFile);
             uploadBackgroundPicRequestParameters.put("access_token", accessToken);
-            ApiRest uploadBackgroundPicApiRest = ProxyUtils.doPostWithRequestParametersAndFiles(Constants.SERVICE_NAME_OUT, "proxy", "doPostMultipart", uploadBackgroundPicRequestParameters);
-            Validate.isTrue(uploadBackgroundPicApiRest.isSuccessful(), uploadBackgroundPicApiRest.getError());
 
-            String uploadBackgroundPicResult = uploadBackgroundPicApiRest.getData().toString();
+            String uploadBackgroundPicResult = OutUtils.doPostMultipart(uploadImgUrl, uploadBackgroundPicRequestParameters, null);
             JSONObject uploadBackgroundPicResultJsonObject = JSONObject.fromObject(uploadBackgroundPicResult);
             Validate.isTrue(uploadBackgroundPicResultJsonObject.has("errcode"), uploadBackgroundPicResultJsonObject.optString("errmsg"));
 
             backgroundPicUrl = uploadBackgroundPicResultJsonObject.getString("url");
         }
 
-        Map<String, Object> uploadBackgroundPicRequestParameters = new HashMap<String, Object>();
-        uploadBackgroundPicRequestParameters.put("buffer", logoFile);
-        uploadBackgroundPicRequestParameters.put("access_token", accessToken);
-        ApiRest uploadLogoApiRest = ProxyUtils.doPostWithRequestParametersAndFiles(Constants.SERVICE_NAME_OUT, "proxy", "doPostMultipart", uploadBackgroundPicRequestParameters);
-        Validate.isTrue(uploadLogoApiRest.isSuccessful(), uploadLogoApiRest.getError());
+        Map<String, Object> uploadLogoRequestParameters = new HashMap<String, Object>();
+        uploadLogoRequestParameters.put("buffer", logoFile);
+        uploadLogoRequestParameters.put("access_token", accessToken);
 
-        String uploadLogoResult = uploadLogoApiRest.getData().toString();
+        String uploadLogoResult = OutUtils.doPostMultipart(uploadImgUrl, uploadLogoRequestParameters, null);
         JSONObject uploadLogoResultJsonObject = JSONObject.fromObject(uploadLogoResult);
         Validate.isTrue(uploadLogoResultJsonObject.has("errcode"), uploadLogoResultJsonObject.optString("errmsg"));
 
@@ -88,13 +86,7 @@ public class WeiXinService {
         Map<String, Object> createMemberCardRequestBody = new HashMap<String, Object>();
         createMemberCardRequestBody.put("card", card);
 
-        Map<String, String> createMemberCardRequestParameters = new HashMap<String, String>();
-        createMemberCardRequestParameters.put("url", "https://api.weixin.qq.com/card/create?access_token=" + accessToken);
-        createMemberCardRequestParameters.put("requestBody", GsonUtils.toJson(createMemberCardRequestBody));
-
-        ApiRest createMemberCardApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "proxy", "doPost", createMemberCardRequestParameters);
-        Validate.isTrue(createMemberCardApiRest.isSuccessful(), createMemberCardApiRest.getError());
-        String createMemberCardResult = createMemberCardApiRest.getData().toString();
+        String createMemberCardResult = OutUtils.doPost("https://api.weixin.qq.com/card/create?access_token=" + accessToken, GsonUtils.toJson(createMemberCardRequestBody), null);
         JSONObject createMemberCardResultJsonObject = JSONObject.fromObject(createMemberCardResult);
         Validate.isTrue(createMemberCardResultJsonObject.getInt("errcode") == 0, createMemberCardResultJsonObject.getString("errmsg"));
 
@@ -146,14 +138,7 @@ public class WeiXinService {
         activateUserFormRequestBody.put("required_form", requiredForm);
         activateUserFormRequestBody.put("optional_form", optionalForm);
 
-        Map<String, String> activateUserFormRequestParameters = new HashMap<String, String>();
-        activateUserFormRequestParameters.put("url", "https://api.weixin.qq.com/card/membercard/activateuserform/set?access_token=" + accessToken);
-        activateUserFormRequestParameters.put("requestBody", GsonUtils.toJson(activateUserFormRequestBody));
-
-        ApiRest activateUserFormApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "proxy", "doPost", activateUserFormRequestParameters);
-        Validate.isTrue(activateUserFormApiRest.isSuccessful(), activateUserFormApiRest.getError());
-
-        String activateUserFormResult = activateUserFormApiRest.getData().toString();
+        String activateUserFormResult = OutUtils.doPost("https://api.weixin.qq.com/card/membercard/activateuserform/set?access_token=" + accessToken, GsonUtils.toJson(activateUserFormRequestBody), null);
         JSONObject activateUserFormResultJsonObject = JSONObject.fromObject(activateUserFormResult);
         Validate.isTrue(activateUserFormResultJsonObject.getInt("errcode") == 0, activateUserFormResultJsonObject.getString("errmsg"));
 
@@ -167,14 +152,7 @@ public class WeiXinService {
         createQRcodeRequestBody.put("action_name", "QR_CARD");
         createQRcodeRequestBody.put("action_info", actionInfo);
 
-        Map<String, String> createQrCodeRequestParameters = new HashMap<String, String>();
-        createQrCodeRequestParameters.put("url", "https://api.weixin.qq.com/card/qrcode/create?access_token=" + accessToken);
-        createQrCodeRequestParameters.put("requestBody", GsonUtils.toJson(createQRcodeRequestBody));
-
-        ApiRest createQrCodeApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "proxy", "doPost", createQrCodeRequestParameters);
-        Validate.isTrue(createQrCodeApiRest.isSuccessful(), createQrCodeApiRest.getError());
-
-        String createQrCodeResult = createQrCodeApiRest.getData().toString();
+        String createQrCodeResult = OutUtils.doPost("https://api.weixin.qq.com/card/qrcode/create?access_token=" + accessToken, GsonUtils.toJson(createQRcodeRequestBody), null);
         JSONObject createQrCodeResultJsonObject = JSONObject.fromObject(createQrCodeResult);
         Validate.isTrue(createQrCodeResultJsonObject.getInt("errcode") == 0, createQrCodeResultJsonObject.getString("errmsg"));
 
@@ -197,6 +175,44 @@ public class WeiXinService {
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("创建会员卡成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
+    }
+
+    public ApiRest payGiftCard(PayGiftCardModel payGiftCardModel) throws IOException {
+        BigInteger tenantId = payGiftCardModel.getTenantId();
+        WeiXinPublicAccount weiXinPublicAccount = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
+        Validate.notNull(weiXinPublicAccount, "未配置微信公众号，不能开通支付即会员！");
+
+        String appId = weiXinPublicAccount.getAppId();
+        String appSecret = weiXinPublicAccount.getAppSecret();
+
+        String accessToken = WeiXinUtils.obtainAccessToken(appId, appSecret);
+
+        Map<String, Object> baseInfo = new HashMap<String, Object>();
+        baseInfo.put("mchid_list", payGiftCardModel.getMchIdList());
+        baseInfo.put("begin_time", payGiftCardModel.getBeginTime().getTime() / 1000);
+        baseInfo.put("end_time", payGiftCardModel.getEndTime().getTime() / 1000);
+
+        Map<String, Object> memberRule = new HashedMap<String, Object>();
+        memberRule.put("card_id", "");
+        memberRule.put("least_cost", payGiftCardModel.getLeastCost());
+        memberRule.put("max_cost", payGiftCardModel.getMaxCost());
+
+        Map<String, Object> ruleInfo = new HashMap<String, Object>();
+        ruleInfo.put("type", "RULE_TYPE_PAY_MEMBER_CARD");
+        ruleInfo.put("base_info", baseInfo);
+        ruleInfo.put("member_rule", memberRule);
+
+        Map<String, Object> payGiftCardRequestBody = new HashMap<String, Object>();
+        payGiftCardRequestBody.put("rule_info", ruleInfo);
+
+        String payGiftCardResult = OutUtils.doPost("https://api.weixin.qq.com/card/paygiftcard/add?access_token=" + accessToken, GsonUtils.toJson(payGiftCardRequestBody), null);
+        JSONObject payGiftCardResultJsonObject = JSONObject.fromObject(payGiftCardResult);
+        Validate.isTrue(payGiftCardResultJsonObject.getInt("errcode") == 0, payGiftCardResultJsonObject.getString("errmsg"));
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("开通支付即会员成功！");
         apiRest.setSuccessful(true);
         return apiRest;
     }

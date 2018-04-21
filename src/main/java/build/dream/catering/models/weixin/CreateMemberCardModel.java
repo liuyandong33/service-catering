@@ -3,7 +3,6 @@ package build.dream.catering.models.weixin;
 import build.dream.common.models.BasicModel;
 import org.hibernate.validator.constraints.Length;
 
-import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
 
