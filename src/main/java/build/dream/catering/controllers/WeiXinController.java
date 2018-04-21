@@ -1,6 +1,5 @@
 package build.dream.catering.controllers;
 
-import build.dream.catering.models.goods.ListGoodsesModel;
 import build.dream.catering.models.weixin.CreateMemberCardModel;
 import build.dream.catering.models.weixin.PayGiftCardModel;
 import build.dream.catering.services.WeiXinService;
