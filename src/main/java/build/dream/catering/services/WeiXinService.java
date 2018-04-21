@@ -41,7 +41,7 @@ public class WeiXinService {
 
             String uploadBackgroundPicResult = OutUtils.doPostMultipart(uploadImgUrl, uploadBackgroundPicRequestParameters, null);
             JSONObject uploadBackgroundPicResultJsonObject = JSONObject.fromObject(uploadBackgroundPicResult);
-            Validate.isTrue(uploadBackgroundPicResultJsonObject.has("errcode"), uploadBackgroundPicResultJsonObject.optString("errmsg"));
+            Validate.isTrue(!uploadBackgroundPicResultJsonObject.has("errcode"), uploadBackgroundPicResultJsonObject.optString("errmsg"));
 
             backgroundPicUrl = uploadBackgroundPicResultJsonObject.getString("url");
         }
@@ -52,31 +52,100 @@ public class WeiXinService {
 
         String uploadLogoResult = OutUtils.doPostMultipart(uploadImgUrl, uploadLogoRequestParameters, null);
         JSONObject uploadLogoResultJsonObject = JSONObject.fromObject(uploadLogoResult);
-        Validate.isTrue(uploadLogoResultJsonObject.has("errcode"), uploadLogoResultJsonObject.optString("errmsg"));
+        Validate.isTrue(!uploadLogoResultJsonObject.has("errcode"), uploadLogoResultJsonObject.optString("errmsg"));
 
         String logoUrl = uploadLogoResultJsonObject.getString("url");
 
         Map<String, Object> baseInfo = new HashMap<String, Object>();
         baseInfo.put("logo_url", logoUrl);
+        baseInfo.put("code_type", "CODE_TYPE_QRCODE");
         baseInfo.put("brand_name", createMemberCardModel.getBrandName());
-        baseInfo.put("code_type", "CODE_TYPE_TEXT");
         baseInfo.put("title", createMemberCardModel.getTitle());
         baseInfo.put("color", createMemberCardModel.getColor());
         baseInfo.put("notice", createMemberCardModel.getNotice());
+        baseInfo.put("description", createMemberCardModel.getDescription());
+        Map<String, Object> sku = new HashMap<String, Object>();
+        sku.put("quantity", 100000000);
+        baseInfo.put("sku", sku);
 
-        Map<String, Object> advancedInfo = new HashMap<String, Object>();
+        Map<String, Object> dateInfo = new HashMap<String, Object>();
+        dateInfo.put("type", "DATE_TYPE_PERMANENT");
+        baseInfo.put("date_info", dateInfo);
 
         String servicePhone = createMemberCardModel.getServicePhone();
         if (StringUtils.isNotBlank(servicePhone)) {
             baseInfo.put("service_phone", servicePhone);
         }
-        baseInfo.put("description", createMemberCardModel.getDescription());
+
+        baseInfo.put("custom_url_name", "立即使用");
+        baseInfo.put("custom_url", "http://weixin.qq.com");
+        baseInfo.put("custom_url_sub_title", "6个汉字tips");
+        baseInfo.put("promotion_url_name", "营销入口1");
+        baseInfo.put("promotion_url", "http://weixin.qq.com");
+        baseInfo.put("get_limit", 1);
+        baseInfo.put("can_give_friend", false);
 
         Map<String, Object> memberCard = new HashMap<String, Object>();
         if (StringUtils.isNotBlank(backgroundPicUrl)) {
             memberCard.put("background_pic_url", backgroundPicUrl);
         }
         memberCard.put("base_info", baseInfo);
+        memberCard.put("prerogative", "prerogative");
+        memberCard.put("supply_bonus", true);
+        memberCard.put("supply_balance", false);
+
+        Map<String, Object> customField1 = new HashMap<String, Object>();
+        customField1.put("name_type", "FIELD_NAME_TYPE_LEVEL");
+        customField1.put("url", "http://www.qq.com");
+        memberCard.put("custom_field1", customField1);
+
+        Map<String, Object> customCell1 = new HashMap<String, Object>();
+        customCell1.put("name", "使用入口2");
+        customCell1.put("tips", "激活后显示");
+        customCell1.put("url", "http://www.xxx.com");
+        memberCard.put("custom_cell1", customCell1);
+
+        Map<String, Object> bonusRule = new HashMap<String, Object>();
+        bonusRule.put("cost_money_unit", 100);
+        bonusRule.put("increase_bonus", 1);
+        bonusRule.put("max_increase_bonus", 200);
+        bonusRule.put("init_increase_bonus", 10);
+        bonusRule.put("cost_bonus_unit", 5);
+        bonusRule.put("reduce_money", 100);
+        bonusRule.put("least_money_to_use_bonus", 1000);
+        bonusRule.put("max_reduce_bonus", 50);
+        memberCard.put("bonus_rule", bonusRule);
+
+        memberCard.put("discount", 10);
+
+        Map<String, Object> useCondition = new HashMap<String, Object>();
+        useCondition.put("accept_category", "鞋类");
+        useCondition.put("reject_category", "阿迪达斯");
+        useCondition.put("can_use_with_other_discount", true);
+
+        Map<String, Object> advancedInfo = new HashMap<String, Object>();
+        advancedInfo.put("use_condition", useCondition);
+
+        Map<String, Object> abstractInfo = new HashMap<String, Object>();
+        abstractInfo.put("abstract", "微信餐厅推出多种新季菜品，期待您的光临");
+        List<String> iconUrlList = new ArrayList<String>();
+        iconUrlList.add("http://mmbiz.qpic.cn/mmbiz/p98FjXy8LacgHxp3sJ3vn97bGLz0ib0Sfz1bjiaoOYA027iasqSG0sjpiby4vce3AtaPu6cIhBHkt6IjlkY9YnDsfw/0");
+        abstractInfo.put("icon_url_list", iconUrlList);
+        advancedInfo.put("abstract", abstractInfo);
+
+        Map<String, Object> textImage1 = new HashMap<String, Object>();
+        textImage1.put("image_url", "http://mmbiz.qpic.cn/mmbiz/p98FjXy8LacgHxp3sJ3vn97bGLz0ib0Sfz1bjiaoOYA027iasqSG0sjpiby4vce3AtaPu6cIhBHkt6IjlkY9YnDsfw/0");
+        textImage1.put("text", "此菜品精选食材，以独特的烹饪方法，最大程度地刺激食客的味蕾");
+
+        Map<String, Object> textImage2 = new HashMap<String, Object>();
+        textImage2.put("image_url", "http://mmbiz.qpic.cn/mmbiz/p98FjXy8LacgHxp3sJ3vn97bGLz0ib0Sfz1bjiaoOYA027iasqSG0sjpiby4vce3AtaPu6cIhBHkt6IjlkY9YnDsfw/0");
+        textImage2.put("text", "此菜品迎合大众口味，老少皆宜，营养均衡");
+
+        List<Map<String, Object>> textImageList = new ArrayList<Map<String, Object>>();
+        textImageList.add(textImage1);
+        textImageList.add(textImage2);
+        advancedInfo.put("text_image_list", textImageList);
+
         memberCard.put("advanced_info", advancedInfo);
 
         Map<String, Object> card = new HashMap<String, Object>();

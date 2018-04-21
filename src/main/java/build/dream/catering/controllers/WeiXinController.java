@@ -45,7 +45,7 @@ public class WeiXinController extends BasicController {
 
             MultipartFile backgroundPicFile = multipartHttpServletRequest.getFile("backgroundPic");
 
-            MultipartFile logoFile = multipartHttpServletRequest.getFile("logoFile");
+            MultipartFile logoFile = multipartHttpServletRequest.getFile("logo");
             Validate.notNull(logoFile, "请上传logo！");
 
             apiRest = weiXinService.createMemberCard(createMemberCardModel, backgroundPicFile, logoFile);

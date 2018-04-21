@@ -26,7 +26,7 @@ public class WeiXinUtils {
         obtainAccessTokenRequestParameters.put("appId", appId);
         obtainAccessTokenRequestParameters.put("appSecret", appSecret);
 
-        ApiRest apiRest = ProxyUtils.doGetWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "weiXin", "obtainAccessToken", obtainAccessTokenRequestParameters);
+        ApiRest apiRest = ProxyUtils.doGetWithRequestParameters(Constants.SERVICE_NAME_OUT, "weiXin", "obtainAccessToken", obtainAccessTokenRequestParameters);
         Validate.isTrue(apiRest.isSuccessful(), apiRest.getError());
 
         WeiXinAccessToken weiXinAccessToken = (WeiXinAccessToken) apiRest.getData();
