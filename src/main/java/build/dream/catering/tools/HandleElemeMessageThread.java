@@ -1,7 +1,10 @@
 package build.dream.catering.tools;
 
+import build.dream.catering.constants.Constants;
 import build.dream.catering.services.ElemeService;
+import build.dream.catering.utils.DingtalkUtils;
 import build.dream.common.erp.catering.domains.ElemeCallbackMessage;
+import build.dream.common.utils.GsonUtils;
 import org.apache.commons.lang.ArrayUtils;
 
 public class HandleElemeMessageThread implements Runnable {
@@ -50,7 +53,9 @@ public class HandleElemeMessageThread implements Runnable {
                     elemeService.handleAuthorizationStateChangeMessage(elemeCallbackMessage, uuid);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                if (count == 1) {
+                    DingtalkUtils.send(String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "饿了么消息处理失败", GsonUtils.toJson(elemeCallbackMessage), e.getClass().getSimpleName(), e.getMessage()));
+                }
             }
             count = count - 1;
             if (count <= 0) {

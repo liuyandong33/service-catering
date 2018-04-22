@@ -13,7 +13,11 @@ import java.util.Map;
 
 public class DingtalkUtils {
     private static final String DINGTALK_UTILS_SIMPLE_NAME = "DingtalkUtils";
-    private static String HEADERS = "{\"Content-Type\": \"application/json;charset=UTF-8\"}";
+    private static final Map<String, String> HEADERS = new HashMap<String, String>();
+
+    static {
+        HEADERS.put("Content-Type", "application/json;charset=UTF-8");
+    }
 
     public static String obtainAccessToken() throws IOException {
         String accessToken = null;
@@ -34,10 +38,8 @@ public class DingtalkUtils {
         if (isRetrieveAccessToken) {
             String corpId = ConfigurationUtils.getConfiguration(Constants.DINGTALK_CORP_ID);
             String corpSecret = ConfigurationUtils.getConfiguration(Constants.DINGTALK_CORP_SECRET);
-            Map<String, String> doGetRequestParameters = new HashMap<String, String>();
             String url = ConfigurationUtils.getConfiguration(Constants.DINGTALK_SERVICE_URL) + Constants.DINGTALK_GET_TOKEN_URI + "?corpid=" + corpId + "&corpsecret=" + corpSecret;
-            doGetRequestParameters.put("url", url);
-            String result = ProxyUtils.doGetOriginalWithRequestParameters(Constants.SERVICE_NAME_OUT, "proxy", "doGet", doGetRequestParameters);
+            String result = OutUtils.doGet(url, null);
             JSONObject resultJsonObject = JSONObject.fromObject(result);
             int errcode = resultJsonObject.getInt("errcode");
             Validate.isTrue(errcode == 0, resultJsonObject.optString("errmsg"));
@@ -61,11 +63,7 @@ public class DingtalkUtils {
         textMap.put("content", content);
         sendRequestBody.put("text", textMap);
         String url = ConfigurationUtils.getConfiguration(Constants.DINGTALK_SERVICE_URL) + Constants.DINGTALK_CHAT_SEND_URI + "?access_token=" + obtainAccessToken();
-        Map<String, String> doPostRequestParameters = new HashMap<String, String>();
-        doPostRequestParameters.put("url", url);
-        doPostRequestParameters.put("requestBody", GsonUtils.toJson(sendRequestBody));
-        doPostRequestParameters.put("headers", HEADERS);
-        String result = ProxyUtils.doPostOriginalWithRequestParameters(Constants.SERVICE_NAME_OUT, "proxy", "doPost", doPostRequestParameters);
+        String result = OutUtils.doPost(url, GsonUtils.toJson(sendRequestBody), HEADERS);
         JSONObject resultJsonObject = JSONObject.fromObject(result);
         int errcode = resultJsonObject.getInt("errcode");
         Validate.isTrue(errcode == 0, resultJsonObject.optString("errmsg"));
