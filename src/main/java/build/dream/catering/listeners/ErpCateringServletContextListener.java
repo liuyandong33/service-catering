@@ -18,8 +18,8 @@ public class ErpCateringServletContextListener extends BasicServletContextListen
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         super.contextInitialized(servletContextEvent);
-        ElemeUtils.startElemeConsumerThread();
-        MeiTuanUtils.startMeiTuanConsumerThread();
+//        ElemeUtils.startElemeConsumerThread();
+//        MeiTuanUtils.startMeiTuanConsumerThread();
         try {
             jobScheduler.scheduler();
         } catch (IOException e) {
