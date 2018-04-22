@@ -85,4 +85,11 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String MESSAGE_CODE_EXECUTE_SQL = "5001";
 
     public static final String POS_DATA_PATH = "pos.data.path";
+
+    public static final String WEI_XIN_API_URL = "wei.xin.api.url";
+    public static final String WEI_XIN_CARD_CREATE_URI = "/card/create";
+    public static final String WEI_XIN_CARD_MEMBER_CARD_ACTIVATE_USER_FORM_SET_URI = "/card/membercard/activateuserform/set";
+    public static final String WEI_XIN_CARD_QRCODE_CREATE_URI = "/card/qrcode/create";
+    public static final String WEI_XIN_CARD_PAY_GIFT_CARD_ADD_URI = "/card/paygiftcard/add";
+    public static final String WEI_XIN_CARD_DELETE_URI = "/card/delete";
 }

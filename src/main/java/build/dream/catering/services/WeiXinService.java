@@ -9,6 +9,7 @@ import build.dream.catering.utils.WeiXinUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.WeiXinMemberCard;
 import build.dream.common.saas.domains.WeiXinPublicAccount;
+import build.dream.common.utils.ConfigurationUtils;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.OutUtils;
 import build.dream.common.utils.SearchModel;
@@ -172,7 +173,9 @@ public class WeiXinService {
         Map<String, Object> createMemberCardRequestBody = new HashMap<String, Object>();
         createMemberCardRequestBody.put("card", card);
 
-        String createMemberCardResult = OutUtils.doPost("https://api.weixin.qq.com/card/create?access_token=" + accessToken, GsonUtils.toJson(createMemberCardRequestBody), null);
+        String weiXinApiUrl = ConfigurationUtils.getConfiguration(Constants.WEI_XIN_API_URL);
+        String createMemberCardUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_CREATE_URI + "?access_token=" + accessToken;
+        String createMemberCardResult = OutUtils.doPost(createMemberCardUrl, GsonUtils.toJson(createMemberCardRequestBody), null);
         JSONObject createMemberCardResultJsonObject = JSONObject.fromObject(createMemberCardResult);
         Validate.isTrue(createMemberCardResultJsonObject.getInt("errcode") == 0, createMemberCardResultJsonObject.getString("errmsg"));
 
@@ -224,7 +227,8 @@ public class WeiXinService {
         activateUserFormRequestBody.put("required_form", requiredForm);
         activateUserFormRequestBody.put("optional_form", optionalForm);
 
-        String activateUserFormResult = OutUtils.doPost("https://api.weixin.qq.com/card/membercard/activateuserform/set?access_token=" + accessToken, GsonUtils.toJson(activateUserFormRequestBody), null);
+        String activateUserFormUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_MEMBER_CARD_ACTIVATE_USER_FORM_SET_URI + "?access_token=" + accessToken;
+        String activateUserFormResult = OutUtils.doPost(activateUserFormUrl, GsonUtils.toJson(activateUserFormRequestBody), null);
         JSONObject activateUserFormResultJsonObject = JSONObject.fromObject(activateUserFormResult);
         Validate.isTrue(activateUserFormResultJsonObject.getInt("errcode") == 0, activateUserFormResultJsonObject.getString("errmsg"));
 
@@ -238,7 +242,8 @@ public class WeiXinService {
         createQRcodeRequestBody.put("action_name", "QR_CARD");
         createQRcodeRequestBody.put("action_info", actionInfo);
 
-        String createQrCodeResult = OutUtils.doPost("https://api.weixin.qq.com/card/qrcode/create?access_token=" + accessToken, GsonUtils.toJson(createQRcodeRequestBody), null);
+        String createQrCodeUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_QRCODE_CREATE_URI + "?access_token=" + accessToken;
+        String createQrCodeResult = OutUtils.doPost(createQrCodeUrl, GsonUtils.toJson(createQRcodeRequestBody), null);
         JSONObject createQrCodeResultJsonObject = JSONObject.fromObject(createQrCodeResult);
         Validate.isTrue(createQrCodeResultJsonObject.getInt("errcode") == 0, createQrCodeResultJsonObject.getString("errmsg"));
 
@@ -264,7 +269,7 @@ public class WeiXinService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest payGiftCard(PayGiftCardModel payGiftCardModel) throws IOException {
+    public ApiRest addPayGiftCard(PayGiftCardModel payGiftCardModel) throws IOException {
         BigInteger tenantId = payGiftCardModel.getTenantId();
         BigInteger weiXinCardId = payGiftCardModel.getWeiXinCardId();
 
@@ -299,7 +304,9 @@ public class WeiXinService {
         Map<String, Object> payGiftCardRequestBody = new HashMap<String, Object>();
         payGiftCardRequestBody.put("rule_info", ruleInfo);
 
-        String payGiftCardResult = OutUtils.doPost("https://api.weixin.qq.com/card/paygiftcard/add?access_token=" + accessToken, GsonUtils.toJson(payGiftCardRequestBody), null);
+        String weiXinApiUrl = ConfigurationUtils.getConfiguration(Constants.WEI_XIN_API_URL);
+        String weiXinAddPayGiftCardUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_PAY_GIFT_CARD_ADD_URI + "?access_token=" + accessToken;
+        String payGiftCardResult = OutUtils.doPost(weiXinAddPayGiftCardUrl, GsonUtils.toJson(payGiftCardRequestBody), null);
         JSONObject payGiftCardResultJsonObject = JSONObject.fromObject(payGiftCardResult);
         Validate.isTrue(payGiftCardResultJsonObject.getInt("errcode") == 0, payGiftCardResultJsonObject.getString("errmsg"));
 
@@ -332,7 +339,9 @@ public class WeiXinService {
         Map<String, Object> deleteCardRequestBody = new HashMap<String, Object>();
         deleteCardRequestBody.put("card_id", weiXinMemberCard.getCardId());
 
-        String deleteCardResult = OutUtils.doPost("https://api.weixin.qq.com/card/delete?access_token=" + accessToken, GsonUtils.toJson(deleteCardRequestBody), null);
+        String weiXinApiUrl = ConfigurationUtils.getConfiguration(Constants.WEI_XIN_API_URL);
+        String deleteCardUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_DELETE_URI + "?access_token=" + accessToken;
+        String deleteCardResult = OutUtils.doPost(deleteCardUrl, GsonUtils.toJson(deleteCardRequestBody), null);
         JSONObject deleteCardResultJsonObject = JSONObject.fromObject(deleteCardResult);
         Validate.isTrue(deleteCardResultJsonObject.getInt("errcode") == 0, deleteCardResultJsonObject.getString("errmsg"));
 

@@ -62,18 +62,18 @@ public class WeiXinController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/payGiftCard")
+    @RequestMapping(value = "/addPayGiftCard")
     @ResponseBody
-    public String payGiftCard() {
+    public String addPayGiftCard() {
         ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         try {
             PayGiftCardModel payGiftCardModel = ApplicationHandler.instantiateObject(PayGiftCardModel.class, requestParameters);
             payGiftCardModel.validateAndThrow();
 
-            apiRest = weiXinService.payGiftCard(payGiftCardModel);
+            apiRest = weiXinService.addPayGiftCard(payGiftCardModel);
         } catch (Exception e) {
-            LogUtils.error("开通支付即会员失败", controllerSimpleName, "payGiftCard", e, requestParameters);
+            LogUtils.error("开通支付即会员失败", controllerSimpleName, "addPayGiftCard", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
