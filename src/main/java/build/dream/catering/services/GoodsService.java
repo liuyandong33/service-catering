@@ -6,8 +6,10 @@ import build.dream.catering.mappers.*;
 import build.dream.catering.models.goods.*;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
+import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.UpdateModel;
+import build.dream.common.utils.ZipUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -442,6 +444,7 @@ public class GoodsService extends BasicService {
 
     /**
      * 删除菜品规格
+     *
      * @param deleteGoodsSpecificationModel
      * @return
      */
@@ -465,6 +468,7 @@ public class GoodsService extends BasicService {
 
     /**
      * 保存套餐
+     *
      * @param savePackageModel
      * @return
      */
@@ -489,6 +493,7 @@ public class GoodsService extends BasicService {
 
     /**
      * 删除商品、商品规格、商品口味组、商品口味
+     *
      * @param deleteGoodsModel
      * @return
      */
@@ -548,6 +553,60 @@ public class GoodsService extends BasicService {
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("删除商品信息成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
+    }
+
+    /**
+     * 导入商品信息
+     *
+     * @param importGoodsModel
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest importGoods(ImportGoodsModel importGoodsModel) {
+        BigInteger tenantId = importGoodsModel.getTenantId();
+        String tenantCode = importGoodsModel.getTenantCode();
+        BigInteger branchId = importGoodsModel.getBranchId();
+        String zipGoodsInfos = importGoodsModel.getZipGoodsInfos();
+        List<Map<String, Object>> goodsInfos = GsonUtils.fromJson(ZipUtils.unzipText(zipGoodsInfos), List.class);
+
+        List<Goods> goodses = new ArrayList<Goods>();
+        List<GoodsSpecification> goodsSpecifications = new ArrayList<GoodsSpecification>();
+        Map<Integer, Goods> goodsMap = new HashMap<Integer, Goods>();
+        Map<Integer, GoodsSpecification> goodsSpecificationMap = new HashMap<Integer, GoodsSpecification>();
+        Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+
+        for (Map<String, Object> goodsInfo : goodsInfos) {
+            Goods goods = new Goods();
+            goods.setTenantId(tenantId);
+            goods.setTenantCode(tenantCode);
+            goods.setBranchId(branchId);
+            goods.setName(MapUtils.getString(goodsInfo, "name"));
+            goods.setType(1);
+            goods.setCategoryId(BigInteger.ONE);
+            goodsMap.put(goods.hashCode(), goods);
+            goodses.add(goods);
+
+            GoodsSpecification goodsSpecification = new GoodsSpecification();
+            goodsSpecification.setTenantId(tenantId);
+            goodsSpecification.setTenantCode(tenantCode);
+            goodsSpecification.setBranchId(branchId);
+            goodsSpecification.setPrice(BigDecimal.valueOf(MapUtils.getDoubleValue(goodsInfo, "price")));
+            goodsSpecificationMap.put(goodsSpecification.hashCode(), goodsSpecification);
+
+            map.put(goodsSpecification.hashCode(), goods.hashCode());
+        }
+
+        goodsMapper.insertAll(goodses);
+        for (GoodsSpecification goodsSpecification : goodsSpecifications) {
+            goodsSpecification.setGoodsId(goodsMap.get(map.get(goodsSpecification.hashCode())).getId());
+        }
+
+        goodsSpecificationMapper.insertAll(goodsSpecifications);
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("导入商品信息成功！");
         apiRest.setSuccessful(true);
         return apiRest;
     }

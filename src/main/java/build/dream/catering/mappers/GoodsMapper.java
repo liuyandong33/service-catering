@@ -9,8 +9,14 @@ import java.util.List;
 @Mapper
 public interface GoodsMapper {
     long insert(Goods goods);
+
+    long insertAll(List<Goods> goodses);
+
     long update(Goods goods);
+
     Goods find(SearchModel searchModel);
+
     List<Goods> findAll(SearchModel searchModel);
+
     List<Goods> findAllPaged(SearchModel searchModel);
 }
