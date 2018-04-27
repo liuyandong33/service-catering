@@ -20,10 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class GoodsService extends BasicService {
@@ -568,16 +565,16 @@ public class GoodsService extends BasicService {
         BigInteger tenantId = importGoodsModel.getTenantId();
         String tenantCode = importGoodsModel.getTenantCode();
         BigInteger branchId = importGoodsModel.getBranchId();
+        BigInteger userId = importGoodsModel.getUserId();
         String zipGoodsInfos = importGoodsModel.getZipGoodsInfos();
         List<Map<String, Object>> goodsInfos = GsonUtils.fromJson(ZipUtils.unzipText(zipGoodsInfos), List.class);
 
         List<Goods> goodses = new ArrayList<Goods>();
-        List<GoodsSpecification> goodsSpecifications = new ArrayList<GoodsSpecification>();
-        Map<Integer, Goods> goodsMap = new HashMap<Integer, Goods>();
-        Map<Integer, GoodsSpecification> goodsSpecificationMap = new HashMap<Integer, GoodsSpecification>();
-        Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+        Map<String, Goods> goodsMap = new HashMap<String, Goods>();
+        Map<String, GoodsSpecification> goodsSpecificationMap = new HashMap<String, GoodsSpecification>();
 
         for (Map<String, Object> goodsInfo : goodsInfos) {
+            String uuid = UUID.randomUUID().toString();
             Goods goods = new Goods();
             goods.setTenantId(tenantId);
             goods.setTenantCode(tenantCode);
@@ -585,7 +582,9 @@ public class GoodsService extends BasicService {
             goods.setName(MapUtils.getString(goodsInfo, "name"));
             goods.setType(1);
             goods.setCategoryId(BigInteger.ONE);
-            goodsMap.put(goods.hashCode(), goods);
+            goods.setCreateUserId(userId);
+            goods.setLastUpdateUserId(userId);
+            goodsMap.put(uuid, goods);
             goodses.add(goods);
 
             GoodsSpecification goodsSpecification = new GoodsSpecification();
@@ -593,14 +592,18 @@ public class GoodsService extends BasicService {
             goodsSpecification.setTenantCode(tenantCode);
             goodsSpecification.setBranchId(branchId);
             goodsSpecification.setPrice(BigDecimal.valueOf(MapUtils.getDoubleValue(goodsInfo, "price")));
-            goodsSpecificationMap.put(goodsSpecification.hashCode(), goodsSpecification);
-
-            map.put(goodsSpecification.hashCode(), goods.hashCode());
+            goodsSpecification.setCreateUserId(userId);
+            goodsSpecification.setLastUpdateUserId(userId);
+            goodsSpecificationMap.put(uuid, goodsSpecification);
         }
 
         goodsMapper.insertAll(goodses);
-        for (GoodsSpecification goodsSpecification : goodsSpecifications) {
-            goodsSpecification.setGoodsId(goodsMap.get(map.get(goodsSpecification.hashCode())).getId());
+
+        List<GoodsSpecification> goodsSpecifications = new ArrayList<GoodsSpecification>();
+        for (Map.Entry<String, GoodsSpecification> entry : goodsSpecificationMap.entrySet()) {
+            GoodsSpecification goodsSpecification = entry.getValue();
+            goodsSpecification.setGoodsId(goodsMap.get(entry.getKey()).getId());
+            goodsSpecifications.add(goodsSpecification);
         }
 
         goodsSpecificationMapper.insertAll(goodsSpecifications);

@@ -16,6 +16,9 @@ public class ImportGoodsModel extends BasicModel {
     private BigInteger branchId;
 
     @NotNull
+    private BigInteger userId;
+
+    @NotNull
     private String zipGoodsInfos;
 
     public BigInteger getTenantId() {
@@ -48,5 +51,13 @@ public class ImportGoodsModel extends BasicModel {
 
     public void setZipGoodsInfos(String zipGoodsInfos) {
         this.zipGoodsInfos = zipGoodsInfos;
+    }
+
+    public BigInteger getUserId() {
+        return userId;
+    }
+
+    public void setUserId(BigInteger userId) {
+        this.userId = userId;
     }
 }
