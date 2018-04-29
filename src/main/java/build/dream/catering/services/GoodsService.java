@@ -4,6 +4,7 @@ import build.dream.catering.beans.ZTreeNode;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.*;
 import build.dream.catering.models.goods.*;
+import build.dream.catering.utils.TenantConfigUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.GsonUtils;
@@ -568,6 +569,12 @@ public class GoodsService extends BasicService {
         BigInteger userId = importGoodsModel.getUserId();
         String zipGoodsInfos = importGoodsModel.getZipGoodsInfos();
         List<Map<String, Object>> goodsInfos = GsonUtils.fromJson(ZipUtils.unzipText(zipGoodsInfos), List.class);
+        int count = goodsInfos.size();
+
+        TenantConfig tenantConfig = TenantConfigUtils.addTenantConfig(BigInteger.ONE, "goods_num", count);
+        int currentValue = tenantConfig.getCurrentValue();
+        int maxValue = tenantConfig.getMaxValue();
+        Validate.isTrue(currentValue <= maxValue, "您最多可以添加" + (maxValue - currentValue + count) + "条商品信息！");
 
         List<Goods> goodses = new ArrayList<Goods>();
         Map<String, Goods> goodsMap = new HashMap<String, Goods>();
