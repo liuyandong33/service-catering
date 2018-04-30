@@ -7,7 +7,7 @@ import build.dream.common.erp.catering.domains.ElemeCallbackMessage;
 import build.dream.common.utils.GsonUtils;
 import org.apache.commons.lang.ArrayUtils;
 
-public class HandleElemeMessageThread implements Runnable {
+public class HandleElemeMessageRunnable implements Runnable {
     private static final int[] ELEME_ORDER_STATE_CHANGE_MESSAGE_TYPES = {12, 14, 15, 17, 18};
     private static final int[] ELEME_CANCEL_ORDER_MESSAGE_TYPES = {20, 21, 22, 23, 24, 25, 26};
     private static final int[] ELEME_REFUND_ORDER_MESSAGE_TYPES = {30, 31, 32, 33, 34, 35, 36};
@@ -22,7 +22,7 @@ public class HandleElemeMessageThread implements Runnable {
     private int interval;
     private String uuid;
 
-    public HandleElemeMessageThread(ElemeService elemeService, ElemeCallbackMessage elemeCallbackMessage, int count, int interval, String uuid) {
+    public HandleElemeMessageRunnable(ElemeService elemeService, ElemeCallbackMessage elemeCallbackMessage, int count, int interval, String uuid) {
         this.elemeService = elemeService;
         this.elemeCallbackMessage = elemeCallbackMessage;
         this.count = count;

@@ -2,7 +2,7 @@ package build.dream.catering.listeners;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.services.ElemeService;
-import build.dream.catering.tools.HandleElemeMessageThread;
+import build.dream.catering.tools.HandleElemeMessageRunnable;
 import build.dream.common.erp.catering.domains.ElemeCallbackMessage;
 import build.dream.common.utils.ApplicationHandler;
 import net.sf.json.JSONObject;
@@ -54,6 +54,6 @@ public class ElemeMessageListener {
         elemeCallbackMessage.setSignature(callbackRequestBodyJsonObject.getString("signature"));
         elemeCallbackMessage.setUserId(BigInteger.valueOf(callbackRequestBodyJsonObject.getLong("userId")));
 
-        new Thread(new HandleElemeMessageThread(elemeService, elemeCallbackMessage, count, 1000, uuid)).start();
+        new Thread(new HandleElemeMessageRunnable(elemeService, elemeCallbackMessage, count, 1000, uuid)).start();
     }
 }
