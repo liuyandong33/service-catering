@@ -2,13 +2,12 @@ package build.dream.catering.controllers;
 
 import build.dream.catering.models.weixin.CreateMemberCardModel;
 import build.dream.catering.models.weixin.DeleteWeiXinMemberCardModel;
+import build.dream.catering.models.weixin.ListWeiXinMemberCardsModel;
 import build.dream.catering.models.weixin.PayGiftCardModel;
 import build.dream.catering.services.WeiXinService;
-import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.GsonUtils;
-import build.dream.common.utils.LogUtils;
+import build.dream.common.utils.MethodCaller;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -35,9 +34,8 @@ public class WeiXinController extends BasicController {
     @RequestMapping(value = "/createMemberCard")
     @ResponseBody
     public String createMemberCard(HttpServletRequest httpServletRequest) {
-        ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters(httpServletRequest);
-        try {
+        MethodCaller methodCaller = () -> {
             CreateMemberCardModel createMemberCardModel = ApplicationHandler.instantiateObject(CreateMemberCardModel.class, requestParameters);
             createMemberCardModel.validateAndThrow();
 
@@ -49,12 +47,9 @@ public class WeiXinController extends BasicController {
             MultipartFile logoFile = multipartHttpServletRequest.getFile("logo");
             Validate.notNull(logoFile, "请上传logo！");
 
-            apiRest = weiXinService.createMemberCard(createMemberCardModel, backgroundPicFile, logoFile);
-        } catch (Exception e) {
-            LogUtils.error("创建会员卡失败", controllerSimpleName, "createMemberCard", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
+            return weiXinService.createMemberCard(createMemberCardModel, backgroundPicFile, logoFile);
+        };
+        return ApplicationHandler.callMethod(methodCaller, "创建会员卡失败", requestParameters);
     }
 
     /**
@@ -65,18 +60,14 @@ public class WeiXinController extends BasicController {
     @RequestMapping(value = "/addPayGiftCard")
     @ResponseBody
     public String addPayGiftCard() {
-        ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
+        MethodCaller methodCaller = () -> {
             PayGiftCardModel payGiftCardModel = ApplicationHandler.instantiateObject(PayGiftCardModel.class, requestParameters);
             payGiftCardModel.validateAndThrow();
 
-            apiRest = weiXinService.addPayGiftCard(payGiftCardModel);
-        } catch (Exception e) {
-            LogUtils.error("开通支付即会员失败", controllerSimpleName, "addPayGiftCard", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
+            return weiXinService.addPayGiftCard(payGiftCardModel);
+        };
+        return ApplicationHandler.callMethod(methodCaller, "开通支付即会员失败", requestParameters);
     }
 
     /**
@@ -87,16 +78,29 @@ public class WeiXinController extends BasicController {
     @RequestMapping(value = "/deleteWeiXinMemberCard")
     @ResponseBody
     public String deleteWeiXinMemberCard() {
-        ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
+        MethodCaller methodCaller = () -> {
             DeleteWeiXinMemberCardModel deleteWeiXinMemberCardModel = ApplicationHandler.instantiateObject(DeleteWeiXinMemberCardModel.class, requestParameters);
             deleteWeiXinMemberCardModel.validateAndThrow();
-            apiRest = weiXinService.deleteWeiXinMemberCard(deleteWeiXinMemberCardModel);
-        } catch (Exception e) {
-            LogUtils.error("删除微信会员卡失败", controllerSimpleName, "deleteWeiXinMemberCard", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
+            return weiXinService.deleteWeiXinMemberCard(deleteWeiXinMemberCardModel);
+        };
+        return ApplicationHandler.callMethod(methodCaller, "删除微信会员卡失败", requestParameters);
+    }
+
+    /**
+     * 删除微信会员卡
+     *
+     * @return
+     */
+    @RequestMapping(value = "/listWeiXinMemberCards")
+    @ResponseBody
+    public String listWeiXinMemberCards() {
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        MethodCaller methodCaller = () -> {
+            ListWeiXinMemberCardsModel listWeiXinMemberCardsModel = ApplicationHandler.instantiateObject(ListWeiXinMemberCardsModel.class, requestParameters);
+            listWeiXinMemberCardsModel.validateAndThrow();
+            return weiXinService.listWeiXinMemberCards(listWeiXinMemberCardsModel);
+        };
+        return ApplicationHandler.callMethod(methodCaller, "查询会员卡列表失败", requestParameters);
     }
 }

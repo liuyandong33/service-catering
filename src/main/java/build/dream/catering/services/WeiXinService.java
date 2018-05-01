@@ -4,15 +4,13 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.WeiXinMemberCardMapper;
 import build.dream.catering.models.weixin.CreateMemberCardModel;
 import build.dream.catering.models.weixin.DeleteWeiXinMemberCardModel;
+import build.dream.catering.models.weixin.ListWeiXinMemberCardsModel;
 import build.dream.catering.models.weixin.PayGiftCardModel;
 import build.dream.catering.utils.WeiXinUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.WeiXinMemberCard;
 import build.dream.common.saas.domains.WeiXinPublicAccount;
-import build.dream.common.utils.ConfigurationUtils;
-import build.dream.common.utils.GsonUtils;
-import build.dream.common.utils.OutUtils;
-import build.dream.common.utils.SearchModel;
+import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
@@ -354,5 +352,37 @@ public class WeiXinService {
         apiRest.setMessage("删除微信会员卡成功！");
         apiRest.setSuccessful(true);
         return apiRest;
+    }
+
+    /**
+     * 查询会员卡列表
+     *
+     * @param listWeiXinMemberCardsModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest listWeiXinMemberCards(ListWeiXinMemberCardsModel listWeiXinMemberCardsModel) {
+        BigInteger tenantId = listWeiXinMemberCardsModel.getTenantId();
+        BigInteger branchId = listWeiXinMemberCardsModel.getBranchId();
+
+        SearchModel searchModel = new SearchModel(true);
+        List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
+        searchConditions.add(new SearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId));
+        searchModel.setSearchConditions(searchConditions);
+        long count = weiXinMemberCardMapper.count(searchModel);
+
+        List<WeiXinMemberCard> weiXinMemberCards = new ArrayList<WeiXinMemberCard>();
+        if (count > 0) {
+            PagedSearchModel pagedSearchModel = new PagedSearchModel(true);
+            pagedSearchModel.setPage(listWeiXinMemberCardsModel.getPage());
+            pagedSearchModel.setRows(listWeiXinMemberCardsModel.getRows());
+            pagedSearchModel.setSearchConditions(searchConditions);
+            weiXinMemberCards = weiXinMemberCardMapper.findAllPaged(pagedSearchModel);
+        }
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("total", count);
+        data.put("rows", weiXinMemberCards);
+        return new ApiRest(data, "查询会员卡列表成功！");
     }
 }
