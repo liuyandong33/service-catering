@@ -7,17 +7,23 @@ import build.dream.catering.models.vip.ObtainVipInfoModel;
 import build.dream.catering.models.vip.SaveVipInfoModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.Vip;
+import build.dream.common.utils.GsonUtils;
+import build.dream.common.utils.OutUtils;
 import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.SerialNumberGenerator;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class VipService {
@@ -118,5 +124,30 @@ public class VipService {
         apiRest.setMessage("保存会员信息成功！");
         apiRest.setSuccessful(true);
         return apiRest;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest updateUser() throws IOException {
+        BigInteger tenantId = BigInteger.ONE;
+        BigInteger branchId = BigInteger.ONE;
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        Vip vip = vipMapper.find(searchModel);
+        Validate.notNull(vip, "会员信息不存在！");
+
+        Map<String, Object> updateUserRequestBody = new HashMap<String, Object>();
+        updateUserRequestBody.put("code", "");
+        updateUserRequestBody.put("card_id", "");
+        updateUserRequestBody.put("bonus", 100);
+        updateUserRequestBody.put("add_bonus", 10);
+        updateUserRequestBody.put("record_bonus", "消费10元，获得10积分！");
+
+        String accessToken = "";
+        String updateUserResult = OutUtils.doPost("https://api.weixin.qq.com/card/membercard/updateuser?access_token=" + accessToken, GsonUtils.toJson(updateUserRequestBody), null);
+        JSONObject updateUserResultJsonObject = JSONObject.fromObject(updateUserResult);
+        Validate.isTrue(updateUserResultJsonObject.getInt("errcode") == 0, updateUserResultJsonObject.getString("errmsg"));
+
+        return new ApiRest();
     }
 }
