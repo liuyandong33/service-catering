@@ -3,7 +3,6 @@ package build.dream.catering.listeners;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.services.MeiTuanService;
 import build.dream.catering.tools.HandleMeiTuanMessageRunnable;
-import build.dream.catering.utils.MeiTuanUtils;
 import build.dream.common.utils.ApplicationHandler;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
