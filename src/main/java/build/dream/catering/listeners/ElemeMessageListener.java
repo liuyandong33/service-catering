@@ -7,22 +7,29 @@ import build.dream.common.erp.catering.domains.ElemeCallbackMessage;
 import build.dream.common.utils.ApplicationHandler;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.listener.MessageListener;
 import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
 import java.util.Calendar;
 
 @Component
-public class ElemeMessageListener {
-    private static final String KEY_ELEME_CALLBACK_MESSAGE_TOPIC = "_zd1_eleme_callback_message_topic";
-
+public class ElemeMessageListener implements MessageListener<String, String> {
     @Autowired
     private ElemeService elemeService;
 
-    @KafkaListener(topics = {KEY_ELEME_CALLBACK_MESSAGE_TOPIC})
+    @KafkaListener(topics = "${eleme.message.topic}")
     public void listenElemeMessage(String elemeMessage) {
+
+    }
+
+    @KafkaListener(topics = "${eleme.message.topic}")
+    @Override
+    public void onMessage(ConsumerRecord<String, String> data) {
+        String elemeMessage = data.value();
         if (StringUtils.isBlank(elemeMessage)) {
             return;
         }
