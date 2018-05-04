@@ -1,18 +1,17 @@
 package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.tools.MeiTuanConsumerThread;
 import build.dream.common.api.ApiRest;
-import build.dream.common.utils.*;
-import net.sf.json.JSONObject;
+import build.dream.common.utils.CacheUtils;
+import build.dream.common.utils.ConfigurationUtils;
+import build.dream.common.utils.ProxyUtils;
+import build.dream.common.utils.WebUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.Validate;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
 
 public class MeiTuanUtils {
     private static String generateSignature(String signKey, Map<String, String> requestParameters) {
@@ -60,24 +59,5 @@ public class MeiTuanUtils {
         requestParameters.put("timestamp", String.valueOf(System.currentTimeMillis()));
         requestParameters.put("version", "1");
         requestParameters.put("sign", generateSignature(signKey, requestParameters));
-    }
-
-    public static void addMeiTuanMessage(JSONObject meiTuanMessageJsonObject, String uuid, int count, int type) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("callbackParameters", meiTuanMessageJsonObject);
-        map.put("uuid", uuid);
-        map.put("count", count);
-        map.put("type", type);
-        QueueUtils.rpush(Constants.KEY_MEI_TUAN_CALLBACK_MESSAGE, GsonUtils.toJson(map));
-    }
-
-    public static String takeMeiTuanMessage() throws IOException {
-        String key = Constants.KEY_MEI_TUAN_CALLBACK_MESSAGE + "_" + ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
-        String elemeMessage = QueueUtils.blpop(key, 1, TimeUnit.HOURS);
-        return elemeMessage;
-    }
-
-    public static void startMeiTuanConsumerThread() {
-        new Thread(new MeiTuanConsumerThread()).start();
     }
 }

@@ -1,9 +1,11 @@
 package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.tools.ElemeConsumerThread;
 import build.dream.common.api.ApiRest;
-import build.dream.common.utils.*;
+import build.dream.common.utils.CacheUtils;
+import build.dream.common.utils.ConfigurationUtils;
+import build.dream.common.utils.GsonUtils;
+import build.dream.common.utils.ProxyUtils;
 import net.sf.json.JSONObject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.Validate;
@@ -13,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by liuyandong on 2017/3/13.
@@ -87,22 +88,5 @@ public class ElemeUtils {
         }
         stringBuilder.append(appSecret);
         return DigestUtils.md5Hex(stringBuilder.toString()).toUpperCase().equals(signature);
-    }
-
-    public static void addElemeMessage(JSONObject callbackRequestBodyJsonObject, String uuid, int count) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("callbackRequestBody", callbackRequestBodyJsonObject);
-        map.put("uuid", uuid);
-        map.put("count", count);
-        QueueUtils.rpush(Constants.KEY_ELEME_CALLBACK_MESSAGE, GsonUtils.toJson(map));
-    }
-
-    public static String takeElemeMessage() throws IOException {
-        String key = Constants.KEY_ELEME_CALLBACK_MESSAGE + "_" + ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
-        return QueueUtils.blpop(key, 1, TimeUnit.HOURS);
-    }
-
-    public static void startElemeConsumerThread() {
-        new Thread(new ElemeConsumerThread()).start();
     }
 }
