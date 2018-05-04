@@ -28,4 +28,23 @@
     <select id="findAllPaged" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.Goods">
         SELECT ${selectColumns} FROM goods <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include> <include refid="build.dream.catering.mappers.CommonMapper.paginationSql"></include>
     </select>
+
+    <select id="listPackageInfos" resultType="build.dream.common.utils.UnderscoreToCamelCaseMap">
+        SELECT
+        goods.id AS goods_id,
+        goods.name AS goods_name,
+        goods_specification.id AS goods_specification_id,
+        goods_specification.name AS goods_specification_name,
+        goods_specification.price,
+        package_group_goods.quantity,
+        package_group_goods.package_group_id
+        FROM package_group_goods
+        INNER JOIN goods ON goods.id = package_group_goods.goods_id AND goods.deleted = 0
+        INNER JOIN goods_specification ON goods_specification.id = package_group_goods.goods_specification_id AND goods_specification.deleted = 0
+        WHERE package_group_goods.package_id IN
+        <foreach collection="packageIds" index="index" item="packageId" open="(" separator="," close=")">
+            #{packageId}
+        </foreach>
+        AND package_group_goods.deleted = 0;
+    </select>
 </mapper>

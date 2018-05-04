@@ -95,10 +95,59 @@ public class GoodsService extends BasicService {
                 goodsFlavorGroupMap = buildFlavorGroups(goodsFlavorGroups, goodsFlavorMap);
             }
 
+            List<BigInteger> packageIds = new ArrayList<BigInteger>();
+
+            for (Map<String, Object> goodsInfo : goodsInfos) {
+                int type = MapUtils.getIntValue(goodsInfo, "type");
+                if (type == 2) {
+                    BigInteger goodsId = BigInteger.valueOf(MapUtils.getLongValue(goodsInfo, "id"));
+                    packageIds.add(goodsId);
+                }
+            }
+
+            Map<BigInteger, List<Map<String, Object>>> packageGroupMap = new HashMap<BigInteger, List<Map<String,Object>>>();
+            if (CollectionUtils.isNotEmpty(packageIds)) {
+                Map<BigInteger, List<Map<String, Object>>> packageInfoMap = new HashMap<BigInteger, List<Map<String,Object>>>();
+
+                List<Map<String, Object>> packageInfos = goodsMapper.listPackageInfos(packageIds);
+                for (Map<String, Object> packageInfo : packageInfos) {
+                    BigInteger packageGroupId = BigInteger.valueOf(MapUtils.getLongValue(packageInfo, "packageGroupId"));
+                    List<Map<String, Object>> packageInfoList = packageInfoMap.get(packageGroupId);
+                    if (CollectionUtils.isEmpty(packageInfoList)) {
+                        packageInfoList = new ArrayList<Map<String, Object>>();
+                        packageInfoMap.put(packageGroupId, packageInfoList);
+                    }
+                    packageInfoList.add(packageInfo);
+                }
+
+                SearchModel packageGroupSearchModel = new SearchModel(true);
+                packageGroupSearchModel.addSearchCondition("package_id", Constants.SQL_OPERATION_SYMBOL_IN, packageIds);
+                List<PackageGroup> packageGroups = packageGroupMapper.findAll(packageGroupSearchModel);
+                for (PackageGroup packageGroup : packageGroups) {
+                    BigInteger packageId = packageGroup.getPackageId();
+                    List<Map<String, Object>> packageGroupList = packageGroupMap.get(packageId);
+                    if (CollectionUtils.isEmpty(packageGroupList)) {
+                        packageGroupList = new ArrayList<Map<String, Object>>();
+                        packageGroupMap.put(packageId, packageGroupList);
+                    }
+
+                    Map<String, Object> map = new HashMap<String, Object>();
+                    map.put("packageGroup", packageGroup);
+                    map.put("packageGroupGoodses", packageInfoMap.get(packageGroup.getId()));
+
+                    packageGroupList.add(map);
+                }
+            }
+
             for (Map<String, Object> goodsInfo : goodsInfos) {
                 BigInteger goodsId = BigInteger.valueOf(MapUtils.getLongValue(goodsInfo, "id"));
-                goodsInfo.put("goodsSpecifications", buildGoodsSpecificationInfos(goodsSpecificationMap.get(goodsId)));
-                goodsInfo.put("flavorGroups", goodsFlavorGroupMap.get(goodsId));
+                int type = MapUtils.getIntValue(goodsInfo, "type");
+                if (type == 1) {
+                    goodsInfo.put("goodsSpecifications", buildGoodsSpecificationInfos(goodsSpecificationMap.get(goodsId)));
+                    goodsInfo.put("flavorGroups", goodsFlavorGroupMap.get(goodsId));
+                } else if (type == 2) {
+                    goodsInfo.put("groups", packageGroupMap.get(goodsId));
+                }
             }
         }
         return new ApiRest(goodsInfos, "查询菜品信息成功！");
