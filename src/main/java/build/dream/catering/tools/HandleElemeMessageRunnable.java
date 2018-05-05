@@ -54,7 +54,7 @@ public class HandleElemeMessageRunnable implements Runnable {
                 }
             } catch (Exception e) {
                 if (count == 1) {
-                    DingtalkUtils.send(String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "饿了么消息处理失败", GsonUtils.toJson(elemeCallbackMessage), e.getClass().getSimpleName(), e.getMessage()));
+                    DingtalkUtils.send(String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "饿了么消息处理失败", GsonUtils.toJson(elemeCallbackMessage), e.getClass().getName(), e.getMessage()));
                 }
             }
             count = count - 1;

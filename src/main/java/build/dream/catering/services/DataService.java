@@ -2,12 +2,14 @@ package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.*;
+import build.dream.catering.utils.DingtalkUtils;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.CacheUtils;
 import build.dream.common.utils.GsonUtils;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,11 +39,13 @@ public class DataService {
 
     @Transactional(rollbackFor = Exception.class)
     public void saveDietOrder(String dietOrderData) {
-        String signature = DigestUtils.md5Hex(dietOrderData);
-        if (CacheUtils.exists(signature)) {
-            return;
-        }
+        String signature = null;
         try {
+            DigestUtils.md5Hex(dietOrderData);
+            if (CacheUtils.exists(signature)) {
+                return;
+            }
+
             CacheUtils.setex(signature, signature, 30, TimeUnit.DAYS);
             DataHandleHistory dataHandleHistory = new DataHandleHistory();
             dataHandleHistory.setSignature(signature);
@@ -116,8 +120,10 @@ public class DataService {
             }
             dietOrderPaymentMapper.insertAll(dietOrderPayments);
         } catch (Exception e) {
-            CacheUtils.delete(signature);
-            throw e;
+            if (StringUtils.isNotBlank(signature)) {
+                CacheUtils.delete(signature);
+            }
+            DingtalkUtils.send(String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "保存POS上传的订单数据失败", GsonUtils.toJson(dietOrderData), e.getClass().getName(), e.getMessage()));
         }
     }
 }
