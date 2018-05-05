@@ -26,8 +26,7 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String MEI_MEI_TUAN_SERVICE_URL = "http://api.open.cater.meituan.com";
     public static final String MEI_TUAN_CALLBACK_SUCCESS_RETURN_VALUE = "{\"data\": \"OK\"}";
 
-    public static final String DATA_TYPE_DIET_ORDER = "dietOrder";
-    public static final String DIET_ORDER = "diet_order";
+    public static final String DATA_TYPE_DIET_ORDER = "DIET_ORDER";
 
     public static final String DATA_JOB_CRON_EXPRESSION = "data.job.cron.expression";
 

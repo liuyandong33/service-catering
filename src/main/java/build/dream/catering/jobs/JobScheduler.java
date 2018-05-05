@@ -16,13 +16,13 @@ public class JobScheduler {
     SchedulerFactoryBean schedulerFactoryBean;
 
     public void scheduler() throws IOException, SchedulerException {
-        Scheduler scheduler = schedulerFactoryBean.getScheduler();
+        /*Scheduler scheduler = schedulerFactoryBean.getScheduler();
         String dataJobCronExpression = ConfigurationUtils.getConfiguration(Constants.DATA_JOB_CRON_EXPRESSION);
         if (StringUtils.isNotBlank(dataJobCronExpression)) {
             JobDetail dataJobDetail = JobBuilder.newJob(DataJob.class).withIdentity("dataJob", "cateringJobGroup").build();
             CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(dataJobCronExpression);
             Trigger dataJobCronTrigger = TriggerBuilder.newTrigger().withIdentity("dataJobTrigger", "cateringJobGroup").withSchedule(cronScheduleBuilder).build();
             scheduler.scheduleJob(dataJobDetail, dataJobCronTrigger);
-        }
+        }*/
     }
 }
