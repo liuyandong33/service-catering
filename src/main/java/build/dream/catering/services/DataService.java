@@ -2,7 +2,6 @@ package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.*;
-import build.dream.catering.utils.DingtalkUtils;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.CacheUtils;
 import build.dream.common.utils.GsonUtils;
@@ -123,7 +122,7 @@ public class DataService {
             if (StringUtils.isNotBlank(signature)) {
                 CacheUtils.delete(signature);
             }
-            DingtalkUtils.send(String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "保存POS上传的订单数据失败", GsonUtils.toJson(dietOrderData), e.getClass().getName(), e.getMessage()));
+            throw e;
         }
     }
 }

@@ -2,6 +2,8 @@ package build.dream.catering.listeners;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.services.DataService;
+import build.dream.catering.utils.DingtalkUtils;
+import build.dream.common.utils.GsonUtils;
 import net.sf.json.JSONObject;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,15 +16,19 @@ public class UploadDataMessageListener implements MessageListener<String, String
     @Autowired
     private DataService dataService;
 
-    @KafkaListener
+    @KafkaListener(topics = "${upload.data.message.topic}")
     @Override
     public void onMessage(ConsumerRecord<String, String> consumerRecord) {
         String value = consumerRecord.value();
-        JSONObject valueJsonObject = JSONObject.fromObject(value);
-        String dataType = valueJsonObject.getString("dataType");
-        String data = valueJsonObject.getString("data");
-        if (Constants.DATA_TYPE_DIET_ORDER.equals(dataType)) {
-            dataService.saveDietOrder(data);
+        try {
+            JSONObject valueJsonObject = JSONObject.fromObject(value);
+            String dataType = valueJsonObject.getString("dataType");
+            String data = valueJsonObject.getString("data");
+            if (Constants.DATA_TYPE_DIET_ORDER.equals(dataType)) {
+                dataService.saveDietOrder(data);
+            }
+        } catch (Exception e) {
+            DingtalkUtils.send(String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "保存POS上传的数据失败", GsonUtils.toJson(value), e.getClass().getName(), e.getMessage()));
         }
     }
 }
