@@ -71,12 +71,14 @@ public class VipService {
         BigInteger tenantId = saveVipInfoModel.getTenantId();
         BigInteger branchId = saveVipInfoModel.getBranchId();
         BigInteger userId = saveVipInfoModel.getUserId();
+
+        Vip vip = null;
         if (saveVipInfoModel.getVipId() != null) {
             SearchModel searchModel = new SearchModel(true);
             searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
             searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
             searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveVipInfoModel.getVipId());
-            Vip vip = VipUtils.find(searchModel);
+            vip = VipUtils.find(searchModel);
             Validate.notNull(vip, "会员不存在！");
 
             if (StringUtils.isNotBlank(saveVipInfoModel.getVipName())) {
@@ -100,7 +102,7 @@ public class VipService {
             long count = VipUtils.count(searchModel);
             Validate.isTrue(count == 0, "手机号已存在！");
 
-            Vip vip = new Vip();
+            vip = new Vip();
             vip.setTenantId(saveVipInfoModel.getTenantId());
             vip.setTenantCode(saveVipInfoModel.getTenantCode());
             vip.setBranchId(saveVipInfoModel.getBranchId());
@@ -112,6 +114,7 @@ public class VipService {
             vip.setOpenId(saveVipInfoModel.getOpenId());
             vip.setMainOpenId(saveVipInfoModel.getMainOpenId());
             vip.setAlipayUserId(saveVipInfoModel.getAlipayUserId());
+            vip.setBonus(0);
             vip.setLastUpdateUserId(saveVipInfoModel.getUserId());
             vip.setCreateUserId(userId);
             vip.setLastUpdateUserId(userId);
@@ -119,6 +122,7 @@ public class VipService {
             VipUtils.insert(vip);
         }
         ApiRest apiRest = new ApiRest();
+        apiRest.setData(vip);
         apiRest.setMessage("保存会员信息成功！");
         apiRest.setSuccessful(true);
         return apiRest;
