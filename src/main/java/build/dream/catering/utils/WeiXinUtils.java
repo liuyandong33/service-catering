@@ -72,8 +72,8 @@ public class WeiXinUtils {
             parameters.put("tenantId", tenantId);
             parameters.put("code", code);
             parameters.put("cardId", cardId);
-            parameters.put("bonus", String.valueOf(bonus));
-            parameters.put("addBonus", String.valueOf(addBonus));
+            parameters.put("bonus", bonus == null ? null : bonus.toString());
+            parameters.put("addBonus", addBonus == null ? null : addBonus.toString());
             parameters.put("recordBonus", recordBonus);
             LogUtils.error("更新微信会员积分失败", WeiXinUtils.class.getName(), "updateMemberBonusSafe", e, parameters);
         }
