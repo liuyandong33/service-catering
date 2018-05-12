@@ -2,9 +2,9 @@ package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.SequenceMapper;
-import build.dream.catering.mappers.VipMapper;
 import build.dream.catering.models.vip.ObtainVipInfoModel;
 import build.dream.catering.models.vip.SaveVipInfoModel;
+import build.dream.catering.utils.VipUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.Vip;
 import build.dream.common.utils.GsonUtils;
@@ -27,8 +27,6 @@ import java.util.Map;
 
 @Service
 public class VipService {
-    @Autowired
-    private VipMapper vipMapper;
     @Autowired
     private SequenceMapper sequenceMapper;
 
@@ -58,7 +56,7 @@ public class VipService {
         if (StringUtils.isNotBlank(obtainVipInfoModel.getAlipayUserId())) {
             searchModel.addSearchCondition("alipay_user_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainVipInfoModel.getAlipayUserId());
         }
-        Vip vip = vipMapper.find(searchModel);
+        Vip vip = VipUtils.find(searchModel);
         return new ApiRest(vip, "获取会员信息成功！");
     }
 
@@ -78,7 +76,7 @@ public class VipService {
             searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
             searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
             searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveVipInfoModel.getVipId());
-            Vip vip = vipMapper.find(searchModel);
+            Vip vip = VipUtils.find(searchModel);
             Validate.notNull(vip, "会员不存在！");
 
             if (StringUtils.isNotBlank(saveVipInfoModel.getVipName())) {
@@ -93,13 +91,13 @@ public class VipService {
             vip.setAlipayUserId(saveVipInfoModel.getAlipayUserId());
             vip.setLastUpdateUserId(userId);
             vip.setLastUpdateRemark("修改会员信息！");
-            vipMapper.update(vip);
+            VipUtils.update(vip);
         } else {
             String phoneNumber = saveVipInfoModel.getPhoneNumber();
             SearchModel searchModel = new SearchModel(true);
             searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
             searchModel.addSearchCondition("phone_number", Constants.SQL_OPERATION_SYMBOL_EQUALS, phoneNumber);
-            long count = vipMapper.count(searchModel);
+            long count = VipUtils.count(searchModel);
             Validate.isTrue(count == 0, "手机号已存在！");
 
             Vip vip = new Vip();
@@ -118,7 +116,7 @@ public class VipService {
             vip.setCreateUserId(userId);
             vip.setLastUpdateUserId(userId);
             vip.setLastUpdateRemark("新增会员信息！");
-            vipMapper.insert(vip);
+            VipUtils.insert(vip);
         }
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("保存会员信息成功！");
@@ -133,7 +131,7 @@ public class VipService {
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
         searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        Vip vip = vipMapper.find(searchModel);
+        Vip vip = VipUtils.find(searchModel);
         Validate.notNull(vip, "会员信息不存在！");
 
         Map<String, Object> updateUserRequestBody = new HashMap<String, Object>();
