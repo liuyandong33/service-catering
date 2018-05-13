@@ -3,7 +3,6 @@ package build.dream.catering.utils;
 import build.dream.catering.constants.Constants;
 import build.dream.common.api.ApiRest;
 import build.dream.common.beans.WeiXinAccessToken;
-import build.dream.common.erp.catering.domains.Vip;
 import build.dream.common.saas.domains.WeiXinPublicAccount;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.LogUtils;
