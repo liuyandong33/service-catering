@@ -1,5 +1,6 @@
 package build.dream.catering.controllers;
 
+import build.dream.catering.models.meituan.CheckIsBindingModel;
 import build.dream.catering.models.meituan.GenerateBindingStoreLinkModel;
 import build.dream.catering.models.meituan.ObtainMeiTuanOrderModel;
 import build.dream.catering.services.MeiTuanService;

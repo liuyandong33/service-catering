@@ -1,4 +1,4 @@
-package build.dream.catering.controllers;
+package build.dream.catering.models.meituan;
 
 import build.dream.common.models.BasicModel;
 
