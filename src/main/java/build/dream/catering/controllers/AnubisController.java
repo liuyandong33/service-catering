@@ -4,12 +4,10 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.models.anubis.*;
 import build.dream.catering.services.AnubisService;
 import build.dream.catering.utils.AnubisUtils;
-import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.ConfigurationUtils;
-import build.dream.common.utils.GsonUtils;
-import build.dream.common.utils.LogUtils;
+import build.dream.common.utils.MethodCaller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,18 +32,14 @@ public class AnubisController extends BasicController {
     @RequestMapping(value = "/chainStore")
     @ResponseBody
     public String chainStore() {
-        ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
+        MethodCaller methodCaller = () -> {
             ChainStoreModel chainStoreModel = ApplicationHandler.instantiateObject(ChainStoreModel.class, requestParameters);
             chainStoreModel.validateAndThrow();
 
-            apiRest = anubisService.chainStore(chainStoreModel);
-        } catch (Exception e) {
-            LogUtils.error("添加门店失败", controllerSimpleName, "chainStore", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
+            return anubisService.chainStore(chainStoreModel);
+        };
+        return ApplicationHandler.callMethod(methodCaller, "添加门店失败", requestParameters);
     }
 
     /**
@@ -56,9 +50,8 @@ public class AnubisController extends BasicController {
     @RequestMapping(value = "/chainStoreQuery")
     @ResponseBody
     public String chainStoreQuery() {
-        ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
+        MethodCaller methodCaller = () -> {
             List<String> chainStoreCodes = new ArrayList<String>();
             chainStoreCodes.add("A001");
             chainStoreCodes.add("A002");
@@ -68,12 +61,9 @@ public class AnubisController extends BasicController {
 
             String url = ConfigurationUtils.getConfiguration(Constants.ANUBIS_SERVICE_URL) + Constants.ANUBIS_CHAIN_STORE_QUERY_URI;
             String appId = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_ID);
-            apiRest = AnubisUtils.callAnubisSystem(url, appId, data);
-        } catch (Exception e) {
-            LogUtils.error("查询门店信息失败", controllerSimpleName, "chainStoreQuery", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
+            return AnubisUtils.callAnubisSystem(url, appId, data);
+        };
+        return ApplicationHandler.callMethod(methodCaller, "查询门店信息失败", requestParameters);
     }
 
     /**
@@ -84,18 +74,14 @@ public class AnubisController extends BasicController {
     @RequestMapping(value = "/chainStoreUpdate")
     @ResponseBody
     public String chainStoreUpdate() {
-        ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
+        MethodCaller methodCaller = () -> {
             ChainStoreUpdateModel chainStoreUpdateModel = ApplicationHandler.instantiateObject(ChainStoreUpdateModel.class, requestParameters);
             chainStoreUpdateModel.validateAndThrow();
 
-            apiRest = anubisService.chainStoreUpdate(chainStoreUpdateModel);
-        } catch (Exception e) {
-            LogUtils.error("更新门店信息失败", controllerSimpleName, "chainStoreUpdate", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
+            return anubisService.chainStoreUpdate(chainStoreUpdateModel);
+        };
+        return ApplicationHandler.callMethod(methodCaller, "更新门店信息失败", requestParameters);
     }
 
     /**
@@ -106,18 +92,14 @@ public class AnubisController extends BasicController {
     @RequestMapping(value = "/chainStoreDeliveryQuery")
     @ResponseBody
     public String chainStoreDeliveryQuery() {
-        ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
+        MethodCaller methodCaller = () -> {
             ChainStoreDeliveryQueryModel chainStoreDeliveryQueryModel = ApplicationHandler.instantiateObject(ChainStoreDeliveryQueryModel.class, requestParameters);
             chainStoreDeliveryQueryModel.validateAndThrow();
 
-            apiRest = anubisService.chainStoreDeliveryQuery(chainStoreDeliveryQueryModel);
-        } catch (Exception e) {
-            LogUtils.error("查询配送服务失败", controllerSimpleName, "chainStoreDeliveryQuery", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
+            return anubisService.chainStoreDeliveryQuery(chainStoreDeliveryQueryModel);
+        };
+        return ApplicationHandler.callMethod(methodCaller, "查询配送服务失败", requestParameters);
     }
 
     /**
@@ -128,18 +110,14 @@ public class AnubisController extends BasicController {
     @RequestMapping(value = "/order")
     @ResponseBody
     public String order() {
-        ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
+        MethodCaller methodCaller = () -> {
             OrderModel orderModel = ApplicationHandler.instantiateObject(OrderModel.class, requestParameters);
             orderModel.validateAndThrow();
 
-            apiRest = anubisService.order(orderModel);
-        } catch (Exception e) {
-            LogUtils.error("蜂鸟配送失败", controllerSimpleName, "order", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
+            return anubisService.order(orderModel);
+        };
+        return ApplicationHandler.callMethod(methodCaller, "蜂鸟配送失败", requestParameters);
     }
 
     /**
@@ -150,18 +128,14 @@ public class AnubisController extends BasicController {
     @RequestMapping(value = "/orderCancel")
     @ResponseBody
     public String orderCancel() {
-        ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
+        MethodCaller methodCaller = () -> {
             OrderCancelModel orderCancelModel = ApplicationHandler.instantiateObject(OrderCancelModel.class, requestParameters);
             orderCancelModel.validateAndThrow();
 
-            apiRest = anubisService.orderCancel(orderCancelModel);
-        } catch (Exception e) {
-            LogUtils.error("同步取消订单失败", controllerSimpleName, "orderCancel", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
+            return anubisService.orderCancel(orderCancelModel);
+        };
+        return ApplicationHandler.callMethod(methodCaller, "同步取消订单失败", requestParameters);
     }
 
     /**
@@ -172,17 +146,14 @@ public class AnubisController extends BasicController {
     @RequestMapping(value = "/orderQuery")
     @ResponseBody
     public String orderQuery() {
-        ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
+        MethodCaller methodCaller = () -> {
             OrderQueryModel orderQueryModel = ApplicationHandler.instantiateObject(OrderQueryModel.class, requestParameters);
             orderQueryModel.validateAndThrow();
-            apiRest = anubisService.orderQuery(orderQueryModel);
-        } catch (Exception e) {
-            LogUtils.error("订单查询失败", controllerSimpleName, "orderQuery", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
+
+            return anubisService.orderQuery(orderQueryModel);
+        };
+        return ApplicationHandler.callMethod(methodCaller, "订单查询失败", requestParameters);
     }
 
     /**
@@ -193,18 +164,14 @@ public class AnubisController extends BasicController {
     @RequestMapping(value = "/orderComplaint")
     @ResponseBody
     public String orderComplaint() {
-        ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
+        MethodCaller methodCaller = () -> {
             OrderComplaintModel orderComplaintModel = ApplicationHandler.instantiateObject(OrderComplaintModel.class, requestParameters);
             orderComplaintModel.validateAndThrow();
 
-            apiRest = anubisService.orderComplaint(orderComplaintModel);
-        } catch (Exception e) {
-            LogUtils.error("订单查询失败", controllerSimpleName, "orderComplaint", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
+            return anubisService.orderComplaint(orderComplaintModel);
+        };
+        return ApplicationHandler.callMethod(methodCaller, "订单查询失败", requestParameters);
     }
 
     /**
@@ -215,17 +182,14 @@ public class AnubisController extends BasicController {
     @RequestMapping(value = "/anubisCallback")
     @ResponseBody
     public String anubisCallback() {
-        ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
+        MethodCaller methodCaller = () -> {
             String callbackRequestBody = requestParameters.get("callbackRequestBody");
             ApplicationHandler.notBlank(callbackRequestBody, "callbackRequestBody");
-            apiRest = anubisService.handleAnubisCallback(callbackRequestBody);
-        } catch (Exception e) {
-            LogUtils.error("处理蜂鸟系统回调失败", controllerSimpleName, "anubisCallback", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
+
+            return anubisService.handleAnubisCallback(callbackRequestBody);
+        };
+        return ApplicationHandler.callMethod(methodCaller, "处理蜂鸟系统回调失败", requestParameters);
     }
 
     /**
@@ -236,18 +200,14 @@ public class AnubisController extends BasicController {
     @RequestMapping(value = "/obtainDeliveryStates")
     @ResponseBody
     public String obtainDeliveryStates() {
-        ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
+        MethodCaller methodCaller = () -> {
             ObtainDeliveryStatesModel obtainDeliveryStatesModel = ApplicationHandler.instantiateObject(ObtainDeliveryStatesModel.class, requestParameters);
             obtainDeliveryStatesModel.validateAndThrow();
 
-            apiRest = anubisService.obtainDeliveryStates(obtainDeliveryStatesModel);
-        } catch (Exception e) {
-            LogUtils.error("获取配送记录失败", controllerSimpleName, "obtainDeliveryStates", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
+            return anubisService.obtainDeliveryStates(obtainDeliveryStatesModel);
+        };
+        return ApplicationHandler.callMethod(methodCaller, "获取配送记录失败", requestParameters);
     }
 
     /**
@@ -258,17 +218,13 @@ public class AnubisController extends BasicController {
     @RequestMapping(value = "/orderCarrier")
     @ResponseBody
     public String orderCarrier() {
-        ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
+        MethodCaller methodCaller = () -> {
             OrderCarrierModel orderCarrierModel = ApplicationHandler.instantiateObject(OrderCarrierModel.class, requestParameters);
             orderCarrierModel.validateAndThrow();
 
-            apiRest = anubisService.orderCarrier(orderCarrierModel);
-        } catch (Exception e) {
-            LogUtils.error("订单骑手位置查询失败", controllerSimpleName, "orderCarrier", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
+            return anubisService.orderCarrier(orderCarrierModel);
+        };
+        return ApplicationHandler.callMethod(methodCaller, "订单骑手位置查询失败", requestParameters);
     }
 }
