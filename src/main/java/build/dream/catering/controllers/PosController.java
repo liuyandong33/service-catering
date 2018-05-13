@@ -3,11 +3,13 @@ package build.dream.catering.controllers;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.pos.OfflinePosModel;
 import build.dream.catering.models.pos.OnlinePosModel;
-import build.dream.catering.services.ElemeService;
 import build.dream.catering.services.PosService;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
-import build.dream.common.utils.*;
+import build.dream.common.utils.ApplicationHandler;
+import build.dream.common.utils.CacheUtils;
+import build.dream.common.utils.ConfigurationUtils;
+import build.dream.common.utils.MethodCaller;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,11 +20,9 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
-import java.util.UUID;
 
 @Controller
 @RequestMapping(value = "/pos")
@@ -38,18 +38,14 @@ public class PosController extends BasicController {
     @RequestMapping(value = "/onlinePos")
     @ResponseBody
     public String onlinePos() {
-        ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
+        MethodCaller methodCaller = () -> {
             OnlinePosModel onlinePosModel = ApplicationHandler.instantiateObject(OnlinePosModel.class, requestParameters);
             onlinePosModel.validateAndThrow();
 
-            apiRest = posService.onlinePos(onlinePosModel);
-        } catch (Exception e) {
-            LogUtils.error("上线POS失败", controllerSimpleName, "onlinePos", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
+            return posService.onlinePos(onlinePosModel);
+        };
+        return ApplicationHandler.callMethod(methodCaller, "上线POS失败", requestParameters);
     }
 
     /**
@@ -60,25 +56,20 @@ public class PosController extends BasicController {
     @RequestMapping(value = "/offlinePos")
     @ResponseBody
     public String offlinePos() {
-        ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
+        MethodCaller methodCaller = () -> {
             OfflinePosModel offlinePosModel = ApplicationHandler.instantiateObject(OfflinePosModel.class, requestParameters);
             offlinePosModel.validateAndThrow();
-            apiRest = posService.offlinePos(offlinePosModel);
-        } catch (Exception e) {
-            LogUtils.error("下线POS", controllerSimpleName, "offlinePos", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
+            return posService.offlinePos(offlinePosModel);
+        };
+        return ApplicationHandler.callMethod(methodCaller, "下线POS", requestParameters);
     }
 
     @RequestMapping(value = "/uploadFile")
     @ResponseBody
     public String uploadFile(HttpServletRequest httpServletRequest) {
-        ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
+        MethodCaller methodCaller = () -> {
             Validate.isTrue(httpServletRequest instanceof MultipartHttpServletRequest, "请上传文件！");
             MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) httpServletRequest;
 
@@ -112,13 +103,11 @@ public class PosController extends BasicController {
             File file = new File(directoryPath + File.separator + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + originalFilename);
             multipartFile.transferTo(file);
 
-            apiRest = new ApiRest();
+            ApiRest apiRest = new ApiRest();
             apiRest.setMessage("上传文件成功！");
-        } catch (Exception e) {
-            LogUtils.error("上传文件失败", controllerSimpleName, "uploadFile", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
+            return apiRest;
+        };
+        return ApplicationHandler.callMethod(methodCaller, "上传文件失败", requestParameters);
     }
 
     /**
@@ -129,42 +118,17 @@ public class PosController extends BasicController {
     @RequestMapping(value = "/receipt")
     @ResponseBody
     public String receipt() {
-        ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
+        MethodCaller methodCaller = () -> {
             String uuid = requestParameters.get("uuid");
             ApplicationHandler.notBlank(uuid, "uuid");
 
             CacheUtils.delete(uuid);
-            apiRest = new ApiRest();
+            ApiRest apiRest = new ApiRest();
             apiRest.setMessage("回执成功！");
             apiRest.setSuccessful(true);
-        } catch (Exception e) {
-            LogUtils.error("回执失败", controllerSimpleName, "receipt", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
-    }
-
-    @Autowired
-    private ElemeService elemeService;
-
-    @RequestMapping(value = "/test")
-    @ResponseBody
-    public String test() {
-        ApiRest apiRest = null;
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
-            int count = Integer.parseInt(requestParameters.get("count"));
-            int interval = Integer.parseInt(requestParameters.get("interval"));
-            elemeService.pushElemeMessage(BigInteger.ONE, BigInteger.ONE, BigInteger.ZERO, 10, UUID.randomUUID().toString(), count, interval);
-            apiRest = new ApiRest();
-            apiRest.setMessage("测试成功！");
-            apiRest.setSuccessful(true);
-        } catch (Exception e) {
-            LogUtils.error("测试失败", controllerSimpleName, "test", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
+            return apiRest;
+        };
+        return ApplicationHandler.callMethod(methodCaller, "回执失败", requestParameters);
     }
 }

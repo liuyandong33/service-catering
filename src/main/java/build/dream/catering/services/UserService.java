@@ -1,10 +1,11 @@
 package build.dream.catering.services;
 
+import build.dream.catering.constants.Constants;
+import build.dream.catering.mappers.BranchMapper;
+import build.dream.catering.models.user.ListUsersModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.utils.PagedSearchModel;
 import build.dream.common.utils.ProxyUtils;
-import build.dream.catering.constants.Constants;
-import build.dream.catering.mappers.BranchMapper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,26 +24,17 @@ public class UserService {
     private BranchMapper branchMapper;
 
     @Transactional(readOnly = true)
-    public ApiRest listUsers(Map<String, String> parameters) throws IOException {
-        String tenantId = parameters.get("tenantId");
-        Validate.notNull(tenantId, "参数(tenantId)不能为空！");
-
-        String branchId = parameters.get("branchId");
-        Validate.notNull(branchId, "参数(branchId)不能为空！");
+    public ApiRest listUsers(ListUsersModel listUsersModel) throws IOException {
+        BigInteger tenantId = listUsersModel.getTenantId();
+        BigInteger branchId = listUsersModel.getBranchId();
+        Integer page = listUsersModel.getPage();
+        Integer rows = listUsersModel.getRows();
 
         PagedSearchModel pagedSearchModel = new PagedSearchModel();
-        pagedSearchModel.addSearchCondition("tenant_id", "=", BigInteger.valueOf(Long.valueOf(tenantId)));
-        pagedSearchModel.addSearchCondition("branch_id", "=", BigInteger.valueOf(Long.valueOf(branchId)));
-        String page = parameters.get("page");
-        if (StringUtils.isBlank(page)) {
-            page = "1";
-        }
-        String rows = parameters.get("rows");
-        if (StringUtils.isBlank(rows)) {
-            rows = "20";
-        }
-        pagedSearchModel.setPage(Integer.valueOf(page));
-        pagedSearchModel.setRows(Integer.valueOf(rows));
+        pagedSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
+        pagedSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        pagedSearchModel.setPage(page);
+        pagedSearchModel.setRows(rows);
         List<BigInteger> userIds = branchMapper.findAllUserIds(pagedSearchModel);
         Map<String, String> findAllUsersRequestParameters = new HashMap<String, String>();
         findAllUsersRequestParameters.put("userIds", StringUtils.join(userIds, ","));

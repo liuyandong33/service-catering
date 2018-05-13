@@ -1,11 +1,10 @@
 package build.dream.catering.controllers;
 
-import build.dream.common.api.ApiRest;
+import build.dream.catering.models.user.ListUsersModel;
+import build.dream.catering.services.UserService;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.GsonUtils;
-import build.dream.common.utils.LogUtils;
-import build.dream.catering.services.UserService;
+import build.dream.common.utils.MethodCaller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,16 +21,12 @@ public class UserController extends BasicController {
     @RequestMapping(value = "/listUsers")
     @ResponseBody
     public String listUsers() {
-        ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
-            apiRest = userService.listUsers(requestParameters);
-        } catch (Exception e) {
-            LogUtils.error("查询员工列表失败", controllerSimpleName, "listUsers", e.getClass().getSimpleName(), e.getMessage(), requestParameters);
-            apiRest = new ApiRest();
-            apiRest.setError(e.getMessage());
-            apiRest.setSuccessful(false);
-        }
-        return GsonUtils.toJson(apiRest);
+        MethodCaller methodCaller = () -> {
+            ListUsersModel listUsersModel = ApplicationHandler.instantiateObject(ListUsersModel.class, requestParameters);
+            listUsersModel.validateAndThrow();
+            return userService.listUsers(listUsersModel);
+        };
+        return ApplicationHandler.callMethod(methodCaller, "查询员工列表失败", requestParameters);
     }
 }
