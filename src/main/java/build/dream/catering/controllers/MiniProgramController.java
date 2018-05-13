@@ -4,8 +4,8 @@ import build.dream.catering.models.miniprogram.ObtainSessionWithJsCodeModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.GsonUtils;
-import build.dream.common.utils.LogUtils;
+import build.dream.common.utils.MethodCaller;
+import build.dream.common.utils.OutUtils;
 import build.dream.common.utils.WebUtils;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.Validate;
@@ -22,9 +22,8 @@ public class MiniProgramController extends BasicController {
     @RequestMapping(value = "/obtainSessionWithJsCode")
     @ResponseBody
     public String obtainSessionWithJsCode() {
-        ApiRest apiRest = null;
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        try {
+        MethodCaller methodCaller = () -> {
             ObtainSessionWithJsCodeModel obtainSessionWithJsCodeModel = ApplicationHandler.instantiateObject(ObtainSessionWithJsCodeModel.class, requestParameters);
             obtainSessionWithJsCodeModel.validateAndThrow();
 
@@ -34,18 +33,17 @@ public class MiniProgramController extends BasicController {
             obtainSessionRequestParameters.put("js_code", obtainSessionWithJsCodeModel.getCode());
             obtainSessionRequestParameters.put("grant_type", "authorization_code");
 
-            String obtainSessionResult = WebUtils.doGetWithRequestParameters("https://api.weixin.qq.com/sns/jscode2session", obtainSessionRequestParameters);
+            String url = "https://api.weixin.qq.com/sns/jscode2session?" + WebUtils.buildQueryString(obtainSessionRequestParameters);
+            String obtainSessionResult = OutUtils.doGet(url, null);
             JSONObject obtainSessionResultJsonObject = JSONObject.fromObject(obtainSessionResult);
             Validate.isTrue(!obtainSessionResultJsonObject.has("errcode"), obtainSessionResultJsonObject.optString("errmsg"));
 
-            apiRest = new ApiRest();
+            ApiRest apiRest = new ApiRest();
             apiRest.setData(obtainSessionResultJsonObject);
-            apiRest.setMessage("处理成功！");
+            apiRest.setMessage("code换取session_key成功！");
             apiRest.setSuccessful(true);
-        } catch (Exception e) {
-            LogUtils.error("code换取session_key失败", controllerSimpleName, "obtainSessionWithJsCode", e, requestParameters);
-            apiRest = new ApiRest(e);
-        }
-        return GsonUtils.toJson(apiRest);
+            return apiRest;
+        };
+        return ApplicationHandler.callMethod(methodCaller, "code换取session_key失败", requestParameters);
     }
 }
