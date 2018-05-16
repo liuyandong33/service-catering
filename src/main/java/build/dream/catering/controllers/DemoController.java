@@ -25,7 +25,7 @@ public class DemoController {
     @RequestMapping(value = "/testKafka")
     @ResponseBody
     public String testKafka() {
-        kafkaTemplate.send("_zd1_eleme_callback_message_topic", "你好");
+        kafkaTemplate.send("zd1_eleme_message_topic", "你好");
         return GsonUtils.toJson(new ApiRest());
     }
 }
