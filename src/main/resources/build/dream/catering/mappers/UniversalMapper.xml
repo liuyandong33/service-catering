@@ -24,4 +24,28 @@
     <select id="universalCount" parameterType="java.util.Map" resultType="long">
         ${sql}
     </select>
+
+    <insert id="insert" parameterType="java.lang.Object" useGeneratedKeys="true" keyProperty="id">
+        ${@build.dream.common.utils.DatabaseUtils@generateInsertSql(class.name)}
+    </insert>
+
+    <update id="update" parameterType="java.lang.Object">
+        ${@build.dream.common.utils.DatabaseUtils@generateUpdateSql(class.name)}
+    </update>
+
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.utils.UnderscoreToCamelCaseMap">
+        SELECT ${selectColumns} FROM ${tableName} <include refid="build.dream.platform.mappers.CommonMapper.searchConditionSql"></include>
+    </select>
+
+    <select id="findAll" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.utils.UnderscoreToCamelCaseMap">
+        SELECT ${selectColumns} FROM ${tableName} <include refid="build.dream.platform.mappers.CommonMapper.searchConditionSql"></include>
+    </select>
+
+    <select id="count" parameterType="build.dream.common.utils.SearchModel" resultType="long">
+        SELECT COUNT(1) FROM ${tableName} <include refid="build.dream.platform.mappers.CommonMapper.searchConditionSql"></include>
+    </select>
+
+    <select id="findAllPaged" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.utils.UnderscoreToCamelCaseMap">
+        SELECT ${selectColumns} FROM ${tableName} <include refid="build.dream.platform.mappers.CommonMapper.searchConditionSql"></include> <include refid="build.dream.platform.mappers.CommonMapper.paginationSql"></include>
+    </select>
 </mapper>
