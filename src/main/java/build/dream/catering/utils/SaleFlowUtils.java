@@ -29,12 +29,12 @@ public class SaleFlowUtils {
         for (Map.Entry<String, List<DietOrderDetail>> entry : dietOrderDetailListMap.entrySet()) {
             List<DietOrderDetail> dietOrderDetailList = entry.getValue();
             if (dietOrderDetailList.size() > 1) {
-                int quantity = 0;
+                BigDecimal quantity = BigDecimal.ZERO;
                 BigDecimal totalAmount = BigDecimal.ZERO;
                 BigDecimal discountAmount = BigDecimal.ZERO;
                 BigDecimal payableAmount = BigDecimal.ZERO;
                 for (DietOrderDetail dietOrderDetail : dietOrderDetailList) {
-                    quantity = quantity + dietOrderDetail.getQuantity();
+                    quantity = quantity.add(dietOrderDetail.getQuantity());
                     totalAmount = totalAmount.add(dietOrderDetail.getTotalAmount());
                     discountAmount = discountAmount.add(dietOrderDetail.getDiscountAmount());
                     payableAmount = payableAmount.add(dietOrderDetail.getPayableAmount());
@@ -95,6 +95,7 @@ public class SaleFlowUtils {
             }
             dietOrderDetail.setDiscountAmount(discountAmount.multiply(weight));
             dietOrderDetail.setPayableAmount(payableAmount.multiply(weight));
+            dietOrderDetail.setPaidAmount(paidAmount.multiply(weight));
 
             SaleDetail saleDetail = new SaleDetail();
             saleDetail.setSaleId(saleId);
@@ -107,9 +108,9 @@ public class SaleFlowUtils {
             saleDetail.setGoodsSpecificationId(dietOrderDetail.getGoodsSpecificationId());
             saleDetail.setGoodsSpecificationName(dietOrderDetail.getGoodsSpecificationName());
             saleDetail.setCategoryId(dietOrderDetail.getCategoryId());
-            saleDetail.setCategoryName("");
+            saleDetail.setCategoryName(dietOrderDetail.getCategoryName());
             saleDetail.setPrice(dietOrderDetail.getPrice());
-            saleDetail.setQuantity(BigDecimal.ZERO);
+            saleDetail.setQuantity(dietOrderDetail.getQuantity());
             saleDetail.setTotalAmount(dietOrderDetail.getTotalAmount());
             saleDetail.setDiscountAmount(dietOrderDetail.getDiscountAmount());
             saleDetail.setPayableAmount(dietOrderDetail.getPayableAmount());
