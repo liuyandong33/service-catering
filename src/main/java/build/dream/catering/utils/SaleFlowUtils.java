@@ -1,9 +1,7 @@
 package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
-import build.dream.common.erp.catering.domains.DietOrder;
-import build.dream.common.erp.catering.domains.DietOrderDetail;
-import build.dream.common.erp.catering.domains.DietOrderPayment;
+import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.ObjectUtils;
 import build.dream.common.utils.SearchModel;
 import org.apache.commons.collections.CollectionUtils;
@@ -12,10 +10,7 @@ import org.apache.commons.lang.Validate;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SaleFlowUtils {
     public static void writeSaleFlow(DietOrder dietOrder, List<DietOrderDetail> dietOrderDetails, List<DietOrderPayment> dietOrderPayments) throws IllegalAccessException, InvocationTargetException, InstantiationException {
@@ -56,12 +51,39 @@ public class SaleFlowUtils {
         }
 
         BigDecimal totalAmount = dietOrder.getTotalAmount();
-        BigDecimal payableAmount = dietOrder.getPayableAmount();
         BigDecimal discountAmount = dietOrder.getDiscountAmount();
+        BigDecimal payableAmount = dietOrder.getPayableAmount();
+        BigDecimal paidAmount = dietOrder.getPaidAmount();
 
+        BigInteger tenantId = dietOrder.getTenantId();
+        String tenantCode = dietOrder.getTenantCode();
+        BigInteger branchId = dietOrder.getBranchId();
+        Date saleTime = dietOrder.getActiveTime();
 
-        int size = mergedDietOrderDetails.size();
+        BigInteger userId = BigInteger.ZERO;
+        Date date = new Date();
+
+        Sale sale = new Sale();
+        sale.setTenantId(tenantId);
+        sale.setTenantCode(tenantCode);
+        sale.setBranchId(branchId);
+        sale.setSaleCode(dietOrder.getOrderNumber());
+        sale.setSaleTime(saleTime);
+        sale.setTotalAmount(totalAmount);
+        sale.setDiscountAmount(discountAmount);
+        sale.setPayableAmount(payableAmount);
+        sale.setPaidAmount(paidAmount);
+        sale.setCreateTime(date);
+        sale.setLastUpdateTime(date);
+        sale.setCreateUserId(userId);
+        sale.setLastUpdateUserId(userId);
+        DatabaseHelper.insert(sale);
+
+        BigInteger saleId = sale.getId();
+
+        List<SaleDetail> saleDetails = new ArrayList<SaleDetail>();
         BigDecimal weightSum = BigDecimal.ZERO;
+        int size = mergedDietOrderDetails.size();
         for (int index = 0; index < size; index++) {
             DietOrderDetail dietOrderDetail = mergedDietOrderDetails.get(index);
             BigDecimal weight = null;
@@ -72,7 +94,33 @@ public class SaleFlowUtils {
                 weightSum = weightSum.add(weight);
             }
             dietOrderDetail.setDiscountAmount(discountAmount.multiply(weight));
+            dietOrderDetail.setPayableAmount(payableAmount.multiply(weight));
+
+            SaleDetail saleDetail = new SaleDetail();
+            saleDetail.setSaleId(saleId);
+            saleDetail.setSaleTime(saleTime);
+            saleDetail.setTenantId(tenantId);
+            saleDetail.setTenantCode(tenantCode);
+            saleDetail.setBranchId(branchId);
+            saleDetail.setGoodsId(dietOrderDetail.getGoodsId());
+            saleDetail.setGoodsName(dietOrderDetail.getGoodsName());
+            saleDetail.setGoodsSpecificationId(dietOrderDetail.getGoodsSpecificationId());
+            saleDetail.setGoodsSpecificationName(dietOrderDetail.getGoodsSpecificationName());
+            saleDetail.setCategoryId(dietOrderDetail.getCategoryId());
+            saleDetail.setCategoryName("");
+            saleDetail.setPrice(dietOrderDetail.getPrice());
+            saleDetail.setQuantity(BigDecimal.ZERO);
+            saleDetail.setTotalAmount(dietOrderDetail.getTotalAmount());
+            saleDetail.setDiscountAmount(dietOrderDetail.getDiscountAmount());
+            saleDetail.setPayableAmount(dietOrderDetail.getPayableAmount());
+            saleDetail.setPaidAmount(null);
+            saleDetail.setCreateUserId(userId);
+            saleDetail.setLastUpdateUserId(userId);
+            saleDetail.setCreateTime(date);
+            saleDetail.setLastUpdateTime(date);
+            saleDetails.add(saleDetail);
         }
+        DatabaseHelper.insertAll(saleDetails);
     }
 
     public static void writeSaleFlow(BigInteger dietOrderId) throws IllegalAccessException, InstantiationException, InvocationTargetException {
