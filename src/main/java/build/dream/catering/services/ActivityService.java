@@ -5,6 +5,7 @@ import build.dream.catering.mappers.*;
 import build.dream.catering.models.activity.*;
 import build.dream.catering.utils.ActivityUtils;
 import build.dream.catering.utils.CanNotOperateReasonUtils;
+import build.dream.catering.utils.DatabaseHelper;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.SearchModel;
@@ -24,20 +25,6 @@ import java.util.*;
 public class ActivityService {
     @Autowired
     private ActivityMapper activityMapper;
-    @Autowired
-    private UniversalMapper universalMapper;
-    @Autowired
-    private BuyGiveActivityMapper buyGiveActivityMapper;
-    @Autowired
-    private FullReductionActivityMapper fullReductionActivityMapper;
-    @Autowired
-    private SpecialGoodsActivityMapper specialGoodsActivityMapper;
-    @Autowired
-    private GoodsMapper goodsMapper;
-    @Autowired
-    private GoodsSpecificationMapper goodsSpecificationMapper;
-    @Autowired
-    private CanNotOperateReasonMapper canNotOperateReasonMapper;
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveBuyGiveActivity(SaveBuyGiveActivityModel saveBuyGiveActivityModel) throws ParseException {
@@ -68,9 +55,9 @@ public class ActivityService {
         // 查询出涉及的所有商品
         SearchModel goodsSearchModel = new SearchModel(true);
         goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
-        goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, BigInteger.ZERO);
-        List<Goods> goodses = goodsMapper.findAll(goodsSearchModel);
+        goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, BigInteger.ZERO);
+        List<Goods> goodses = DatabaseHelper.findAll(Goods.class, goodsSearchModel);
 
         // 封装商品id与商品之间的map
         Map<BigInteger, Goods> goodsMap = new HashMap<BigInteger, Goods>();
@@ -79,11 +66,11 @@ public class ActivityService {
         }
 
         SearchModel canNotOperateReasonSearchModel = new SearchModel();
-        canNotOperateReasonSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        canNotOperateReasonSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, BigInteger.ZERO);
+        canNotOperateReasonSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        canNotOperateReasonSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, BigInteger.ZERO);
         canNotOperateReasonSearchModel.addSearchCondition("table_id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
-        canNotOperateReasonSearchModel.addSearchCondition("operate_type", Constants.SQL_OPERATION_SYMBOL_EQUALS, 4);
-        CanNotOperateReason persistenceCanNotOperateReason = canNotOperateReasonMapper.find(canNotOperateReasonSearchModel);
+        canNotOperateReasonSearchModel.addSearchCondition("operate_type", Constants.SQL_OPERATION_SYMBOL_EQUAL, 4);
+        CanNotOperateReason persistenceCanNotOperateReason = DatabaseHelper.find(CanNotOperateReason.class, canNotOperateReasonSearchModel);
         if (persistenceCanNotOperateReason != null) {
             Goods goods = goodsMap.get(persistenceCanNotOperateReason.getTableId());
             Validate.notNull(goods, "商品不存在！");
@@ -94,9 +81,9 @@ public class ActivityService {
         // 查询出涉及的所有商品规格
         SearchModel goodsSpecificationSearchModel = new SearchModel(true);
         goodsSpecificationSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsSpecificationIds);
-        goodsSpecificationSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        goodsSpecificationSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, BigInteger.ZERO);
-        List<GoodsSpecification> goodsSpecifications = goodsSpecificationMapper.findAll(goodsSpecificationSearchModel);
+        goodsSpecificationSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        goodsSpecificationSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, BigInteger.ZERO);
+        List<GoodsSpecification> goodsSpecifications = DatabaseHelper.findAll(GoodsSpecification.class, goodsSpecificationSearchModel);
 
         // 封装商品规格id与商品规格之间的map
         Map<BigInteger, GoodsSpecification> goodsSpecificationMap = new HashMap<BigInteger, GoodsSpecification>();
@@ -105,7 +92,7 @@ public class ActivityService {
         }
 
         Activity activity = ActivityUtils.constructActivity(tenantId, tenantCode, saveBuyGiveActivityModel.getName(), 1, startDate, startTime, endDate, endTime, weekSign, userId, "保存活动信息！");
-        activityMapper.insert(activity);
+        DatabaseHelper.insert(activity);
 
         BigInteger activityId = activity.getId();
 
@@ -145,8 +132,8 @@ public class ActivityService {
             canNotOperateReasons.add(CanNotOperateReasonUtils.constructCanNotOperateReason(tenantId, tenantCode, BigInteger.ZERO, buyGoods.getId(), "goods", activityId, "activity", 3, reason));
             canNotOperateReasons.add(CanNotOperateReasonUtils.constructCanNotOperateReason(tenantId, tenantCode, BigInteger.ZERO, giveGoods.getId(), "goods", activityId, "activity", 3, reason));
         }
-        buyGiveActivityMapper.insertAll(buyGiveActivities);
-        canNotOperateReasonMapper.insertAll(canNotOperateReasons);
+        DatabaseHelper.insertAll(buyGiveActivities);
+        DatabaseHelper.insertAll(canNotOperateReasons);
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("保存买A赠B活动成功！");
         apiRest.setSuccessful(true);
@@ -183,21 +170,21 @@ public class ActivityService {
         findActivityParameters.put("tenantId", tenantId);
         findActivityParameters.put("startTime", startTime);
         findActivityParameters.put("endTime", endTime);
-        Map<String, Object> activityMap = universalMapper.executeUniqueResultQuery(findActivityParameters);
+        Map<String, Object> activityMap = DatabaseHelper.executeUniqueResultQuery(findActivityParameters);
         if (MapUtils.isNotEmpty(activityMap)) {
             throw new RuntimeException("活动日期与促销活动【" + activityMap.get("name") + "】在时间上冲突！");
         }
 
 
         Activity activity = ActivityUtils.constructActivity(tenantId, tenantCode, saveFullReductionActivityModel.getName(), 2, startDate, startTime, endDate, endTime, weekSign, userId, "保存活动信息！");
-        activityMapper.insert(activity);
+        DatabaseHelper.insert(activity);
 
         BigInteger activityId = activity.getId();
 
         activityMapper.insertAllActivityBranchR(activityId, tenantId, branchIds);
 
         FullReductionActivity fullReductionActivity = ActivityUtils.constructFullReductionActivity(tenantId, tenantCode, activityId, saveFullReductionActivityModel.getTotalAmount(), saveFullReductionActivityModel.getDiscountType(), saveFullReductionActivityModel.getDiscountRate(), saveFullReductionActivityModel.getDiscountAmount(), userId, "保存满减活动！");
-        fullReductionActivityMapper.insert(fullReductionActivity);
+        DatabaseHelper.insert(fullReductionActivity);
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("保存满减活动成功！");
@@ -242,7 +229,7 @@ public class ActivityService {
         findActivityParameters.put("tenantId", tenantId);
         findActivityParameters.put("startTime", startTime);
         findActivityParameters.put("endTime", endTime);
-        Map<String, Object> activityMap = universalMapper.executeUniqueResultQuery(findActivityParameters);
+        Map<String, Object> activityMap = DatabaseHelper.executeUniqueResultQuery(findActivityParameters);
         if (MapUtils.isNotEmpty(activityMap)) {
             throw new RuntimeException("活动日期与促销活动【" + activityMap.get("name") + "】在时间上冲突！");
         }
@@ -258,9 +245,9 @@ public class ActivityService {
         // 查询出涉及的所有商品
         SearchModel goodsSearchModel = new SearchModel(true);
         goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
-        goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, BigInteger.ZERO);
-        List<Goods> goodses = goodsMapper.findAll(goodsSearchModel);
+        goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, BigInteger.ZERO);
+        List<Goods> goodses = DatabaseHelper.findAll(Goods.class, goodsSearchModel);
 
         // 封装商品id与商品之间的map
         Map<BigInteger, Goods> goodsMap = new HashMap<BigInteger, Goods>();
@@ -269,11 +256,11 @@ public class ActivityService {
         }
 
         SearchModel canNotOperateReasonSearchModel = new SearchModel();
-        canNotOperateReasonSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        canNotOperateReasonSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, BigInteger.ZERO);
+        canNotOperateReasonSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        canNotOperateReasonSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, BigInteger.ZERO);
         canNotOperateReasonSearchModel.addSearchCondition("table_id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
-        canNotOperateReasonSearchModel.addSearchCondition("operate_type", Constants.SQL_OPERATION_SYMBOL_EQUALS, 4);
-        CanNotOperateReason persistenceCanNotOperateReason = canNotOperateReasonMapper.find(canNotOperateReasonSearchModel);
+        canNotOperateReasonSearchModel.addSearchCondition("operate_type", Constants.SQL_OPERATION_SYMBOL_EQUAL, 4);
+        CanNotOperateReason persistenceCanNotOperateReason = DatabaseHelper.find(CanNotOperateReason.class, canNotOperateReasonSearchModel);
         if (persistenceCanNotOperateReason != null) {
             Goods goods = goodsMap.get(persistenceCanNotOperateReason.getTableId());
             Validate.notNull(goods, "商品不存在！");
@@ -284,9 +271,9 @@ public class ActivityService {
         // 查询出涉及的所有商品规格
         SearchModel goodsSpecificationSearchModel = new SearchModel(true);
         goodsSpecificationSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsSpecificationIds);
-        goodsSpecificationSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        goodsSpecificationSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, BigInteger.ZERO);
-        List<GoodsSpecification> goodsSpecifications = goodsSpecificationMapper.findAll(goodsSpecificationSearchModel);
+        goodsSpecificationSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        goodsSpecificationSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, BigInteger.ZERO);
+        List<GoodsSpecification> goodsSpecifications = DatabaseHelper.findAll(GoodsSpecification.class, goodsSpecificationSearchModel);
 
         // 封装商品规格id与商品规格之间的map
         Map<BigInteger, GoodsSpecification> goodsSpecificationMap = new HashMap<BigInteger, GoodsSpecification>();
@@ -295,7 +282,7 @@ public class ActivityService {
         }
 
         Activity activity = ActivityUtils.constructActivity(tenantId, tenantCode, saveSpecialGoodsActivityModel.getName(), 3, startDate, startTime, endDate, endTime, weekSign, userId, "保存活动信息！");
-        activityMapper.insert(activity);
+        DatabaseHelper.insert(activity);
 
         BigInteger activityId = activity.getId();
 
@@ -337,8 +324,8 @@ public class ActivityService {
             canNotOperateReasons.add(canNotUsedOtherActivityReason);
         }
 
-        specialGoodsActivityMapper.insertAll(specialGoodsActivities);
-        canNotOperateReasonMapper.insertAll(canNotOperateReasons);
+        DatabaseHelper.insertAll(specialGoodsActivities);
+        DatabaseHelper.insertAll(canNotOperateReasons);
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("保存特价商品活动成功！");
         apiRest.setSuccessful(true);

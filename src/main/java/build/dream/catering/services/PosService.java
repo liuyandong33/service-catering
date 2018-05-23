@@ -1,14 +1,13 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.mappers.PosMapper;
 import build.dream.catering.models.pos.OfflinePosModel;
 import build.dream.catering.models.pos.OnlinePosModel;
+import build.dream.catering.utils.DatabaseHelper;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.Pos;
 import build.dream.common.utils.SearchModel;
 import org.apache.commons.lang.Validate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,9 +15,6 @@ import java.math.BigInteger;
 
 @Service
 public class PosService {
-    @Autowired
-    private PosMapper posMapper;
-
     /**
      * 上线POS
      *
@@ -34,10 +30,10 @@ public class PosService {
         String version = onlinePosModel.getVersion();
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        searchModel.addSearchCondition("user_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, userId);
-        Pos pos = posMapper.find(searchModel);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition("user_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, userId);
+        Pos pos = DatabaseHelper.find(Pos.class, searchModel);
         if (pos == null) {
             pos = new Pos();
             pos.setTenantId(tenantId);
@@ -52,7 +48,7 @@ public class PosService {
             pos.setCreateUserId(userId);
             pos.setLastUpdateUserId(userId);
             pos.setLastUpdateRemark("POS不存在，新增POS并且设置为在线状态！");
-            posMapper.insert(pos);
+            DatabaseHelper.insert(pos);
         } else {
             pos.setUserId(userId);
             pos.setRegistrationId(registrationId);
@@ -61,7 +57,7 @@ public class PosService {
             pos.setOnline(true);
             pos.setLastUpdateUserId(userId);
             pos.setLastUpdateRemark("POS存在，设置为在线状态！");
-            posMapper.update(pos);
+            DatabaseHelper.update(pos);
         }
         return new ApiRest(pos, "上线POS成功！");
     }
@@ -79,15 +75,15 @@ public class PosService {
         BigInteger userId = offlinePosModel.getUserId();
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        searchModel.addSearchCondition("user_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, userId);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition("user_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, userId);
 
-        Pos pos = posMapper.find(searchModel);
+        Pos pos = DatabaseHelper.find(Pos.class, searchModel);
         Validate.notNull(pos, "POS不存在！");
 
         pos.setOnline(false);
-        posMapper.update(pos);
+        DatabaseHelper.update(pos);
 
         return new ApiRest(pos, "下线POS成功！");
     }

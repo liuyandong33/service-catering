@@ -8,6 +8,5 @@ import java.util.List;
 
 @Mapper
 public interface PackageGroupGoodsMapper {
-    long insertAll(List<PackageGroupGoods> packageGroupGoods);
     long deleteAll(SearchModel searchModel);
 }

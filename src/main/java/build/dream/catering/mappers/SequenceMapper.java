@@ -6,4 +6,6 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface SequenceMapper {
     Integer nextValue(@Param("sequenceName") String sequenceName);
+
+    Integer currentValue(@Param("sequenceName") String sequenceName);
 }

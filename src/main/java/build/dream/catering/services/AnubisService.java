@@ -1,9 +1,9 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.mappers.*;
 import build.dream.catering.models.anubis.*;
 import build.dream.catering.utils.AnubisUtils;
+import build.dream.catering.utils.DatabaseHelper;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.ApplicationHandler;
@@ -13,7 +13,6 @@ import build.dream.common.utils.SystemPartitionUtils;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,17 +24,6 @@ import java.util.*;
 
 @Service
 public class AnubisService {
-    @Autowired
-    private BranchMapper branchMapper;
-    @Autowired
-    private DietOrderMapper dietOrderMapper;
-    @Autowired
-    private DietOrderGroupMapper dietOrderGroupMapper;
-    @Autowired
-    private DietOrderDetailMapper dietOrderDetailMapper;
-    @Autowired
-    private DietOrderDeliveryStateMapper dietOrderDeliveryStateMapper;
-
     /**
      * 添加门店
      *
@@ -50,9 +38,9 @@ public class AnubisService {
         BigInteger userId = chainStoreModel.getUserId();
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        Branch branch = branchMapper.find(searchModel);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         Validate.notNull(branch, "门店不存在！");
 
         Map<String, Object> data = new HashMap<String, Object>();
@@ -85,9 +73,9 @@ public class AnubisService {
         BigInteger userId = chainStoreUpdateModel.getUserId();
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        Branch branch = branchMapper.find(searchModel);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         Validate.notNull(branch, "门店不存在！");
 
         Map<String, Object> data = new HashMap<String, Object>();
@@ -119,9 +107,9 @@ public class AnubisService {
         BigInteger branchId = chainStoreDeliveryQueryModel.getBranchId();
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        Branch branch = branchMapper.find(searchModel);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         Validate.notNull(branch, "门店不存在！");
 
         Map<String, Object> data = new HashMap<String, Object>();
@@ -152,31 +140,31 @@ public class AnubisService {
 
         // 查询门店信息
         SearchModel branchSearchModel = new SearchModel(true);
-        branchSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        branchSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        Branch branch = branchMapper.find(branchSearchModel);
+        branchSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        branchSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        Branch branch = DatabaseHelper.find(Branch.class, branchSearchModel);
         Validate.notNull(branch, "门店不存在！");
 
         // 查询订单信息
         SearchModel dietOrderSearchModel = new SearchModel(true);
-        dietOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        dietOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        dietOrderSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, dietOrderId);
-        DietOrder dietOrder = dietOrderMapper.find(dietOrderSearchModel);
+        dietOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        dietOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        dietOrderSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, dietOrderSearchModel);
         Validate.notNull(dietOrder, "订单不存在！");
 
         SearchModel dietOrderGroupSearchModel = new SearchModel(true);
-        dietOrderGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        dietOrderGroupSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        dietOrderGroupSearchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, dietOrderId);
-        List<DietOrderGroup> dietOrderGroups = dietOrderGroupMapper.findAll(dietOrderGroupSearchModel);
+        dietOrderGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        dietOrderGroupSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        dietOrderGroupSearchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        List<DietOrderGroup> dietOrderGroups = DatabaseHelper.findAll(DietOrderGroup.class, dietOrderGroupSearchModel);
 
         // 查询出订单详情信息
         SearchModel dietOrderDetailSearchModel = new SearchModel(true);
-        dietOrderDetailSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        dietOrderDetailSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        dietOrderDetailSearchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, dietOrderId);
-        List<DietOrderDetail> dietOrderDetails = dietOrderDetailMapper.findAll(dietOrderDetailSearchModel);
+        dietOrderDetailSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        dietOrderDetailSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        dietOrderDetailSearchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        List<DietOrderDetail> dietOrderDetails = DatabaseHelper.findAll(DietOrderDetail.class, dietOrderDetailSearchModel);
 
         Map<String, Object> data = new HashMap<String, Object>();
         ApplicationHandler.ifNotNullPut(data, "partner_remark", orderModel.getPartnerRemark());
@@ -321,10 +309,10 @@ public class AnubisService {
      */
     private DietOrder findDietOrder(BigInteger tenantId, BigInteger branchId, BigInteger dietOrderId) {
         SearchModel dietOrderSearchModel = new SearchModel(true);
-        dietOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        dietOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        dietOrderSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, dietOrderId);
-        DietOrder dietOrder = dietOrderMapper.find(dietOrderSearchModel);
+        dietOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        dietOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        dietOrderSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, dietOrderSearchModel);
         Validate.notNull(dietOrder, "订单不存在！");
         return dietOrder;
     }
@@ -376,8 +364,8 @@ public class AnubisService {
 
         String orderNumber = dataJsonObject.getString("partner_order_code");
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("order_number", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderNumber);
-        DietOrder dietOrder = dietOrderMapper.find(searchModel);
+        searchModel.addSearchCondition("order_number", Constants.SQL_OPERATION_SYMBOL_EQUAL, orderNumber);
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
         Validate.notNull(dietOrder, "订单不存在！");
 
         DietOrderDeliveryState dietOrderDeliveryState = new DietOrderDeliveryState();
@@ -409,7 +397,7 @@ public class AnubisService {
         calendar.setTimeInMillis(pushTime);
 
         dietOrderDeliveryState.setPushTime(calendar.getTime());
-        dietOrderDeliveryStateMapper.insert(dietOrderDeliveryState);
+        DatabaseHelper.insert(dietOrderDeliveryState);
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("处理成功！");
@@ -430,11 +418,11 @@ public class AnubisService {
         BigInteger dietOrderId = obtainDeliveryStatesModel.getDietOrderId();
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        searchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, dietOrderId);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
 
-        List<DietOrderDeliveryState> dietOrderDeliveryStates = dietOrderDeliveryStateMapper.findAll(searchModel);
+        List<DietOrderDeliveryState> dietOrderDeliveryStates = DatabaseHelper.findAll(DietOrderDeliveryState.class, searchModel);
         return new ApiRest(dietOrderDeliveryStates, "获取订单配送记录成功！");
     }
 

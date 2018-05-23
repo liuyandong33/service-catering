@@ -31,8 +31,8 @@ public class UserService {
         Integer rows = listUsersModel.getRows();
 
         PagedSearchModel pagedSearchModel = new PagedSearchModel();
-        pagedSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        pagedSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        pagedSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        pagedSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         pagedSearchModel.setPage(page);
         pagedSearchModel.setRows(rows);
         List<BigInteger> userIds = branchMapper.findAllUserIds(pagedSearchModel);

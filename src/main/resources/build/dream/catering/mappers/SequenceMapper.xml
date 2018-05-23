@@ -4,4 +4,8 @@
     <select id="nextValue" resultType="java.lang.Integer">
         SELECT next_value(#{sequenceName})
     </select>
+
+    <select id="currentValue" resultType="java.lang.Integer">
+        SELECT current_value(#{sequenceName})
+    </select>
 </mapper>

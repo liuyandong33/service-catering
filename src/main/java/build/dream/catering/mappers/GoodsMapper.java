@@ -11,17 +11,5 @@ import java.util.Map;
 
 @Mapper
 public interface GoodsMapper {
-    long insert(Goods goods);
-
-    long insertAll(List<Goods> goodses);
-
-    long update(Goods goods);
-
-    Goods find(SearchModel searchModel);
-
-    List<Goods> findAll(SearchModel searchModel);
-
-    List<Goods> findAllPaged(SearchModel searchModel);
-
     List<Map<String, Object>> listPackageInfos(@Param("packageIds") List<BigInteger> packageIds);
 }

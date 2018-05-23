@@ -10,14 +10,11 @@ import java.util.List;
 
 @Mapper
 public interface BranchMapper {
-    long insert(Branch branch);
-    long insertAll(List<Branch> branches);
-    long update(Branch branch);
-    Branch find(SearchModel searchModel);
-    long count(SearchModel searchModel);
-    List<Branch> findAllPaged(SearchModel searchModel);
     long insertMergeUserBranch(@Param("userId") BigInteger userId, @Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId);
+
     List<BigInteger> findAllUserIds(SearchModel searchModel);
+
     long countUsers(SearchModel searchModel);
+
     Branch findByTenantIdAndUserId(@Param("tenantId") BigInteger tenantId, @Param("userId") BigInteger userId);
 }

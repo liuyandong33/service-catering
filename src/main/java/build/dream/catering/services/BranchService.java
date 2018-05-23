@@ -2,9 +2,9 @@ package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.BranchMapper;
-import build.dream.catering.mappers.SequenceMapper;
-import build.dream.catering.mappers.UniversalMapper;
 import build.dream.catering.models.branch.*;
+import build.dream.catering.utils.DatabaseHelper;
+import build.dream.catering.utils.SequenceUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.Branch;
 import build.dream.common.utils.*;
@@ -26,10 +26,6 @@ import java.util.Map;
 public class BranchService {
     @Autowired
     private BranchMapper branchMapper;
-    @Autowired
-    private SequenceMapper sequenceMapper;
-    @Autowired
-    private UniversalMapper universalMapper;
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest initializeBranch(InitializeBranchModel initializeBranchModel) {
@@ -37,7 +33,7 @@ public class BranchService {
         branch.setTenantId(initializeBranchModel.getTenantId());
         branch.setTenantCode(initializeBranchModel.getTenantCode());
 
-        String code = SerialNumberGenerator.nextSerialNumber(4, sequenceMapper.nextValue(initializeBranchModel.getTenantCode() + "_branch_count"));
+        String code = SerialNumberGenerator.nextSerialNumber(4, SequenceUtils.nextValue(initializeBranchModel.getTenantCode() + "_branch_count"));
         branch.setCode(code);
         branch.setName(initializeBranchModel.getName());
         branch.setType(initializeBranchModel.getType());
@@ -63,7 +59,7 @@ public class BranchService {
         BigInteger userId = initializeBranchModel.getUserId();
         branch.setCreateUserId(userId);
         branch.setLastUpdateUserId(userId);
-        branchMapper.insert(branch);
+        DatabaseHelper.insert(branch);
         branchMapper.insertMergeUserBranch(userId, initializeBranchModel.getTenantId(), branch.getId());
 
         ApiRest apiRest = new ApiRest();
@@ -77,21 +73,21 @@ public class BranchService {
     @Transactional(readOnly = true)
     public ApiRest listBranches(ListBranchesModel listBranchesModel) {
         List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
-        searchConditions.add(new SearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, listBranchesModel.getTenantId()));
+        searchConditions.add(new SearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, listBranchesModel.getTenantId()));
         if (StringUtils.isNotBlank(listBranchesModel.getName())) {
             searchConditions.add(new SearchCondition("name", Constants.SQL_OPERATION_SYMBOL_LIKE, "%" + listBranchesModel.getName() + "%"));
         }
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.setSearchConditions(searchConditions);
-        long total = branchMapper.count(searchModel);
+        long total = DatabaseHelper.count(Branch.class, searchModel);
         List<Branch> branches = new ArrayList<Branch>();
         if (total > 0) {
             PagedSearchModel pagedSearchModel = new PagedSearchModel(true);
             pagedSearchModel.setSearchConditions(searchConditions);
             pagedSearchModel.setPage(listBranchesModel.getPage());
             pagedSearchModel.setRows(listBranchesModel.getRows());
-            branches = branchMapper.findAllPaged(pagedSearchModel);
+            branches = DatabaseHelper.findAllPaged(Branch.class, pagedSearchModel);
         }
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("total", total);
@@ -110,22 +106,22 @@ public class BranchService {
     @Transactional(rollbackFor = Exception.class)
     public ApiRest deleteBranch(DeleteBranchModel deleteBranchModel) throws IOException {
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteBranchModel.getBranchId());
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, deleteBranchModel.getTenantId());
-        Branch branch = branchMapper.find(searchModel);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, deleteBranchModel.getBranchId());
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, deleteBranchModel.getTenantId());
+        Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         Validate.notNull(branch, "门店不存在！");
 
         branch.setDeleted(true);
         branch.setLastUpdateUserId(deleteBranchModel.getUserId());
         branch.setLastUpdateRemark("删除门店信息！");
-        branchMapper.update(branch);
+        DatabaseHelper.update(branch);
 
         String findUserIdsSql = "SELECT user_id FROM merge_user_branch WHERE tenant_id = #{tenantId} AND branch_id = #{branchId} AND deleted = 0";
         Map<String, Object> findUserIdsParameters = new HashMap<String, Object>();
         findUserIdsParameters.put("sql", findUserIdsSql);
         findUserIdsParameters.put("tenantId", deleteBranchModel.getTenantId());
         findUserIdsParameters.put("branchId", deleteBranchModel.getBranchId());
-        List<Map<String, Object>> results = universalMapper.executeQuery(findUserIdsParameters);
+        List<Map<String, Object>> results = DatabaseHelper.executeQuery(findUserIdsParameters);
         List<BigInteger> userIds = new ArrayList<BigInteger>();
         for (Map<String, Object> map : results) {
             userIds.add(BigInteger.valueOf(MapUtils.getLongValue(map, "userId")));
@@ -137,7 +133,7 @@ public class BranchService {
         deleteMergeUserBranchParameters.put("sql", deleteMergeUserBranchSql);
         deleteMergeUserBranchParameters.put("tenantId", deleteBranchModel.getTenantId());
         deleteMergeUserBranchParameters.put("branchId", deleteBranchModel.getBranchId());
-        universalMapper.executeUpdate(deleteMergeUserBranchParameters);
+        DatabaseHelper.executeUpdate(deleteMergeUserBranchParameters);
 
         Map<String, String> batchDeleteUserRequestParameters = new HashMap<String, String>();
         batchDeleteUserRequestParameters.put("userIds", StringUtils.join(userIds, ","));
@@ -161,7 +157,7 @@ public class BranchService {
         Map<String, Object> findInsertBranchParameters = new HashMap<String, Object>();
         findInsertBranchParameters.put("sql", findInsertBranchSql);
         findInsertBranchParameters.put("lastPullTime", pullBranchInfosModel.getLastPullTime());
-        List<Map<String, Object>> insertBranchInfos = universalMapper.executeQuery(findInsertBranchParameters);
+        List<Map<String, Object>> insertBranchInfos = DatabaseHelper.executeQuery(findInsertBranchParameters);
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("insertBranchInfos", insertBranchInfos);
@@ -170,7 +166,7 @@ public class BranchService {
             Map<String, Object> findUpdateBranchParameters = new HashMap<String, Object>();
             findUpdateBranchParameters.put("sql", findUpdateBranchSql);
             findUpdateBranchParameters.put("lastPullTime", pullBranchInfosModel.getLastPullTime());
-            List<Map<String, Object>> updateBranchInfos = universalMapper.executeQuery(findUpdateBranchParameters);
+            List<Map<String, Object>> updateBranchInfos = DatabaseHelper.executeQuery(findUpdateBranchParameters);
             data.put("updateBranchInfos", updateBranchInfos);
         }
 
@@ -189,7 +185,7 @@ public class BranchService {
         parameters.put("sql", disableGoodsModel.getDisableSql());
         parameters.put("tenantId", disableGoodsModel.getTenantId());
         parameters.put("branchId", disableGoodsModel.getBranchId());
-        universalMapper.executeUpdate(parameters);
+        DatabaseHelper.executeUpdate(parameters);
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("禁用门店产品成功！");
@@ -209,7 +205,7 @@ public class BranchService {
         parameters.put("sql", renewCallbackModel.getRenewSql());
         parameters.put("tenantId", renewCallbackModel.getTenantId());
         parameters.put("branchId", renewCallbackModel.getBranchId());
-        universalMapper.executeUpdate(parameters);
+        DatabaseHelper.executeUpdate(parameters);
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("处理门店续费回调成功！");

@@ -7,6 +7,7 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.*;
 import build.dream.catering.models.dietorder.ObtainDietOrderInfoModel;
 import build.dream.catering.models.dietorder.SaveDietOrderModel;
+import build.dream.catering.utils.DatabaseHelper;
 import build.dream.catering.utils.DietOrderUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.constants.DietOrderConstants;
@@ -28,28 +29,13 @@ import java.util.*;
 @Service
 public class DietOrderService {
     @Autowired
-    private DietOrderMapper dietOrderMapper;
-    @Autowired
-    private DietOrderDetailMapper dietOrderDetailMapper;
-    @Autowired
     private GoodsMapper goodsMapper;
     @Autowired
-    private GoodsSpecificationMapper goodsSpecificationMapper;
-    @Autowired
-    private GoodsFlavorMapper goodsFlavorMapper;
-    @Autowired
     private SequenceMapper sequenceMapper;
-    @Autowired
-    private GoodsFlavorGroupMapper goodsFlavorGroupMapper;
-    @Autowired
-    private DietOrderGroupMapper dietOrderGroupMapper;
-    @Autowired
-    private DietOrderDetailGoodsFlavorMapper dietOrderDetailGoodsFlavorMapper;
-    @Autowired
-    private DietOrderActivityMapper dietOrderActivityMapper;
 
     private static final BigDecimal HUNDRED = BigDecimal.valueOf(100L);
     private static final BigDecimal MINUS_ONE = BigDecimal.valueOf(-1L);
+
     /**
      * 获取订单明细
      *
@@ -63,38 +49,38 @@ public class DietOrderService {
         BigInteger branchId = obtainDietOrderInfoModel.getBranchId();
         BigInteger dietOrderId = obtainDietOrderInfoModel.getDietOrderId();
         SearchModel dietOrderSearchModel = new SearchModel(true);
-        dietOrderSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, dietOrderId);
-        dietOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        dietOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        DietOrder dietOrder = dietOrderMapper.find(dietOrderSearchModel);
+        dietOrderSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        dietOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        dietOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, dietOrderSearchModel);
         Validate.notNull(dietOrder, "订单不存在！");
 
         // 查询出订单组信息
         SearchModel dietOrderGroupSearchModel = new SearchModel(true);
-        dietOrderGroupSearchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, dietOrderId);
-        dietOrderGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        dietOrderGroupSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        List<DietOrderGroup> dietOrderGroups = dietOrderGroupMapper.findAll(dietOrderGroupSearchModel);
+        dietOrderGroupSearchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        dietOrderGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        dietOrderGroupSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        List<DietOrderGroup> dietOrderGroups = DatabaseHelper.findAll(DietOrderGroup.class, dietOrderGroupSearchModel);
 
         // 查询出订单详情信息
         SearchModel dietOrderDetailSearchModel = new SearchModel(true);
-        dietOrderDetailSearchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, dietOrderId);
-        dietOrderDetailSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        dietOrderDetailSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        List<DietOrderDetail> dietOrderDetails = dietOrderDetailMapper.findAll(dietOrderDetailSearchModel);
+        dietOrderDetailSearchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        dietOrderDetailSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        dietOrderDetailSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        List<DietOrderDetail> dietOrderDetails = DatabaseHelper.findAll(DietOrderDetail.class, dietOrderDetailSearchModel);
 
         // 查询出订单口味信息
         SearchModel dietOrderDetailGoodsFlavorSearchModel = new SearchModel(true);
-        dietOrderDetailGoodsFlavorSearchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, dietOrderId);
-        dietOrderDetailGoodsFlavorSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        dietOrderDetailGoodsFlavorSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        List<DietOrderDetailGoodsFlavor> dietOrderDetailGoodsFlavors = dietOrderDetailGoodsFlavorMapper.findAll(dietOrderDetailGoodsFlavorSearchModel);
+        dietOrderDetailGoodsFlavorSearchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        dietOrderDetailGoodsFlavorSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        dietOrderDetailGoodsFlavorSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        List<DietOrderDetailGoodsFlavor> dietOrderDetailGoodsFlavors = DatabaseHelper.findAll(DietOrderDetailGoodsFlavor.class, dietOrderDetailGoodsFlavorSearchModel);
 
         SearchModel dietOrderActivitySearchModel = new SearchModel(true);
-        dietOrderActivitySearchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, dietOrderId);
-        dietOrderActivitySearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        dietOrderActivitySearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        List<DietOrderActivity> dietOrderActivities = dietOrderActivityMapper.findAll(dietOrderActivitySearchModel);
+        dietOrderActivitySearchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        dietOrderActivitySearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        dietOrderActivitySearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        List<DietOrderActivity> dietOrderActivities = DatabaseHelper.findAll(DietOrderActivity.class, dietOrderActivitySearchModel);
 
         // 封装订单分组与订单详情之间的map
         Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap = new HashMap<BigInteger, List<DietOrderDetail>>();
@@ -268,36 +254,36 @@ public class DietOrderService {
 
         // 查询出订单中包含的所有商品
         SearchModel goodsSearchModel = new SearchModel(true);
-        goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
-        List<Goods> goodses = goodsMapper.findAll(goodsSearchModel);
+        List<Goods> goodses = DatabaseHelper.findAll(Goods.class, goodsSearchModel);
 
         // 查询出订单中包含的所有商品规格
         SearchModel goodsSpecificationSearchModel = new SearchModel(true);
-        goodsSpecificationSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        goodsSpecificationSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        goodsSpecificationSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        goodsSpecificationSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         goodsSpecificationSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsSpecificationIds);
-        List<GoodsSpecification> goodsSpecifications = goodsSpecificationMapper.findAll(goodsSpecificationSearchModel);
+        List<GoodsSpecification> goodsSpecifications = DatabaseHelper.findAll(GoodsSpecification.class, goodsSpecificationSearchModel);
 
         // 查询出订单中包含的所有口味组
         List<GoodsFlavorGroup> goodsFlavorGroups = new ArrayList<GoodsFlavorGroup>();
         if (CollectionUtils.isNotEmpty(goodsFlavorGroupIds)) {
             SearchModel goodsFlavorGroupSearchModel = new SearchModel(true);
-            goodsFlavorGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-            goodsFlavorGroupSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+            goodsFlavorGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+            goodsFlavorGroupSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
             goodsFlavorGroupSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsFlavorGroupIds);
-            goodsFlavorGroups = goodsFlavorGroupMapper.findAll(goodsFlavorGroupSearchModel);
+            goodsFlavorGroups = DatabaseHelper.findAll(GoodsFlavorGroup.class, goodsFlavorGroupSearchModel);
         }
 
         // 查询出订单中包含的所有口味
         List<GoodsFlavor> goodsFlavors = new ArrayList<GoodsFlavor>();
         if (CollectionUtils.isNotEmpty(goodsFlavorIds)) {
             SearchModel goodsFlavorSearchModel = new SearchModel(true);
-            goodsFlavorSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-            goodsFlavorSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+            goodsFlavorSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+            goodsFlavorSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
             goodsFlavorSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsFlavorIds);
-            goodsFlavors = goodsFlavorMapper.findAll(goodsFlavorSearchModel);
+            goodsFlavors = DatabaseHelper.findAll(GoodsFlavor.class, goodsFlavorSearchModel);
         }
 
         // 封装商品id与商品之间的map
@@ -353,7 +339,7 @@ public class DietOrderService {
         dietOrder.setCreateUserId(userId);
         dietOrder.setLastUpdateUserId(userId);
         dietOrder.setLastUpdateRemark("保存订单信息！");
-        dietOrderMapper.insert(dietOrder);
+        DatabaseHelper.insert(dietOrder);
 
         BigDecimal dietOrderTotalAmount = BigDecimal.ZERO;
         BigInteger dietOrderId = dietOrder.getId();
@@ -367,7 +353,7 @@ public class DietOrderService {
 
         for (SaveDietOrderModel.GroupInfo groupInfo : groupInfos) {
             DietOrderGroup dietOrderGroup = DietOrderUtils.constructDietOrderGroup(tenantId, tenantCode, branchId, dietOrderId, groupInfo.getName(), groupInfo.getType(), userId, "保存订单分组信息！");
-            dietOrderGroupMapper.insert(dietOrderGroup);
+            DatabaseHelper.insert(dietOrderGroup);
 
             List<SaveDietOrderModel.DetailInfo> detailInfos = groupInfo.getDetailInfos();
             for (SaveDietOrderModel.DetailInfo detailInfo : detailInfos) {
@@ -389,7 +375,7 @@ public class DietOrderService {
                         Validate.notNull(goodsFlavor, "口味不存在！");
                         flavorIncrease = flavorIncrease.add(goodsFlavor.getPrice());
 
-                        DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor = DietOrderUtils.constructDietOrderDetailGoodsFlavor(tenantId, tenantCode, branchId, dietOrderId, dietOrderGroup.getId(), null, goodsFlavorGroup.getId(), goodsFlavorGroup.getName(), goodsFlavor.getId(), goodsFlavor.getName(), goodsFlavor.getPrice(), userId,"保存订单口味信息！");
+                        DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor = DietOrderUtils.constructDietOrderDetailGoodsFlavor(tenantId, tenantCode, branchId, dietOrderId, dietOrderGroup.getId(), null, goodsFlavorGroup.getId(), goodsFlavorGroup.getName(), goodsFlavor.getId(), goodsFlavor.getName(), goodsFlavor.getPrice(), userId, "保存订单口味信息！");
                         dietOrderDetailGoodsFlavors.add(dietOrderDetailGoodsFlavor);
                     }
                 }
@@ -420,13 +406,13 @@ public class DietOrderService {
                 dietOrderDiscountAmount = dietOrderDiscountAmount.add(discountAmount);
                 BigDecimal payableAmount = totalAmount.subtract(discountAmount);
                 DietOrderDetail dietOrderDetail = DietOrderUtils.constructDietOrderDetail(tenantId, tenantCode, branchId, dietOrderId, dietOrderGroup.getId(), goods.getId(), goods.getName(), goodsSpecification.getId(), goodsSpecification.getName(), goods.getCategoryId(), goodsSpecification.getPrice(), flavorIncrease, detailInfo.getQuantity(), totalAmount, discountAmount, payableAmount, userId, "保存订单详情信息！");
-                dietOrderDetailMapper.insert(dietOrderDetail);
+                DatabaseHelper.insert(dietOrderDetail);
 
                 if (CollectionUtils.isNotEmpty(dietOrderDetailGoodsFlavors)) {
                     for (DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor : dietOrderDetailGoodsFlavors) {
                         dietOrderDetailGoodsFlavor.setDietOrderDetailId(dietOrderDetail.getId());
                     }
-                    dietOrderDetailGoodsFlavorMapper.insertAll(dietOrderDetailGoodsFlavors);
+                    DatabaseHelper.insertAll(dietOrderDetailGoodsFlavors);
                 }
                 dietOrderTotalAmount = dietOrderTotalAmount.add(totalAmount);
 
@@ -445,12 +431,12 @@ public class DietOrderService {
 
         if (CollectionUtils.isNotEmpty(giveDietOrderDetails)) {
             DietOrderGroup giveDietOrderGroup = DietOrderUtils.constructDietOrderGroup(tenantId, tenantCode, branchId, dietOrderId, "赠品", "discount", userId, "保存订单分组信息！");
-            dietOrderGroupMapper.insert(giveDietOrderGroup);
+            DatabaseHelper.insert(giveDietOrderGroup);
 
             for (DietOrderDetail giveDietOrderDetail : giveDietOrderDetails) {
                 giveDietOrderDetail.setDietOrderGroupId(giveDietOrderGroup.getId());
             }
-            dietOrderDetailMapper.insertAll(giveDietOrderDetails);
+            DatabaseHelper.insertAll(giveDietOrderDetails);
         }
 
         // 处理整单优惠活动
@@ -469,14 +455,14 @@ public class DietOrderService {
         }
 
         if (MapUtils.isNotEmpty(dietOrderActivityMap)) {
-            dietOrderActivityMapper.insertAll(new ArrayList<DietOrderActivity>(dietOrderActivityMap.values()));
+            DatabaseHelper.insertAll(new ArrayList<DietOrderActivity>(dietOrderActivityMap.values()));
         }
 
         dietOrder.setTotalAmount(dietOrderTotalAmount);
         dietOrder.setDiscountAmount(dietOrderDiscountAmount);
         dietOrder.setPayableAmount(dietOrderTotalAmount.subtract(dietOrderDiscountAmount));
         dietOrder.setPaidAmount(BigDecimal.ZERO);
-        dietOrderMapper.update(dietOrder);
+        DatabaseHelper.update(dietOrder);
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("id", dietOrder.getId());

@@ -8,8 +8,5 @@ import java.util.List;
 
 @Mapper
 public interface CanNotOperateReasonMapper {
-    long insert(CanNotOperateReason canNotOperateReason);
-    long insertAll(List<CanNotOperateReason> canNotOperateReasons);
-    CanNotOperateReason find(SearchModel searchModel);
     long delete(SearchModel searchModel);
 }

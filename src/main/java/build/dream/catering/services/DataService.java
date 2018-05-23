@@ -1,7 +1,7 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.mappers.*;
+import build.dream.catering.utils.DatabaseHelper;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.CacheUtils;
 import build.dream.common.utils.GsonUtils;
@@ -21,21 +21,6 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class DataService {
-    @Autowired
-    private DietOrderMapper dietOrderMapper;
-    @Autowired
-    private DietOrderGroupMapper dietOrderGroupMapper;
-    @Autowired
-    private DietOrderDetailMapper dietOrderDetailMapper;
-    @Autowired
-    private DietOrderDetailGoodsFlavorMapper dietOrderDetailGoodsFlavorMapper;
-    @Autowired
-    private DietOrderActivityMapper dietOrderActivityMapper;
-    @Autowired
-    private DietOrderPaymentMapper dietOrderPaymentMapper;
-    @Autowired
-    private DataHandleHistoryMapper dataHandleHistoryMapper;
-
     @Transactional(rollbackFor = Exception.class)
     public void saveDietOrder(String dietOrderData) {
         String signature = null;
@@ -51,14 +36,14 @@ public class DataService {
             dataHandleHistory.setDataType(Constants.DATA_TYPE_DIET_ORDER);
             dataHandleHistory.setDataContent(dietOrderData);
             dataHandleHistory.setHandleTime(new Date());
-            dataHandleHistoryMapper.insert(dataHandleHistory);
+            DatabaseHelper.insert(dataHandleHistory);
 
             JSONObject dietOrderJsonObject = JSONObject.fromObject(dietOrderData);
             JSONArray dietOrderGroupJsonArray = dietOrderJsonObject.getJSONArray("dietOrderGroups");
             dietOrderJsonObject.remove("dietOrderGroups");
 
             DietOrder dietOrder = GsonUtils.fromJson(dietOrderJsonObject, DietOrder.class);
-            dietOrderMapper.insert(dietOrder);
+            DatabaseHelper.insert(dietOrder);
 
             BigInteger dietOrderId = dietOrder.getId();
             int size = dietOrderGroupJsonArray.size();
@@ -68,7 +53,7 @@ public class DataService {
                 dietOrderGroupJsonObject.remove("dietOrderDetails");
                 DietOrderGroup dietOrderGroup = GsonUtils.fromJson(dietOrderGroupJsonObject, DietOrderGroup.class);
                 dietOrderGroup.setDietOrderId(dietOrderId);
-                dietOrderGroupMapper.insert(dietOrderGroup);
+                DatabaseHelper.insert(dietOrderGroup);
 
                 int dietOrderDetailJsonArraySize = dietOrderDetailJsonArray.size();
                 for (int dietOrderDetailJsonArrayIndex = 0; dietOrderDetailJsonArrayIndex < dietOrderDetailJsonArraySize; dietOrderDetailJsonArrayIndex++) {
@@ -83,7 +68,7 @@ public class DataService {
                     DietOrderDetail dietOrderDetail = GsonUtils.fromJson(dietOrderDetailJsonObject, DietOrderDetail.class);
                     dietOrderDetail.setDietOrderId(dietOrderId);
                     dietOrderDetail.setDietOrderGroupId(dietOrderGroup.getId());
-                    dietOrderDetailMapper.insert(dietOrderDetail);
+                    DatabaseHelper.insert(dietOrderDetail);
 
                     int dietOrderDetailGoodsFlavorJsonArraySize = dietOrderDetailGoodsFlavorJsonArray.size();
                     for (int dietOrderDetailGoodsFlavorJsonArrayIndex = 0; dietOrderDetailGoodsFlavorJsonArrayIndex < dietOrderDetailGoodsFlavorJsonArraySize; dietOrderDetailGoodsFlavorJsonArrayIndex++) {
@@ -92,7 +77,7 @@ public class DataService {
                         dietOrderDetailGoodsFlavor.setDietOrderId(dietOrder.getId());
                         dietOrderDetailGoodsFlavor.setDietOrderGroupId(dietOrderGroup.getId());
                         dietOrderDetailGoodsFlavor.setDietOrderDetailId(dietOrderDetail.getId());
-                        dietOrderDetailGoodsFlavorMapper.insert(dietOrderDetailGoodsFlavor);
+                        DatabaseHelper.insert(dietOrderDetailGoodsFlavor);
                     }
                 }
             }
@@ -106,7 +91,7 @@ public class DataService {
                     dietOrderActivity.setDietOrderId(dietOrderId);
                     dietOrderActivities.add(dietOrderActivity);
                 }
-                dietOrderActivityMapper.insertAll(dietOrderActivities);
+                DatabaseHelper.insertAll(dietOrderActivities);
             }
 
             JSONArray dietOrderPaymentJsonArray = dietOrderJsonObject.getJSONArray("dietOrderPayments");
@@ -117,7 +102,7 @@ public class DataService {
                 dietOrderPayment.setDietOrderId(dietOrderId);
                 dietOrderPayments.add(dietOrderPayment);
             }
-            dietOrderPaymentMapper.insertAll(dietOrderPayments);
+            DatabaseHelper.insertAll(dietOrderPayments);
         } catch (Exception e) {
             if (StringUtils.isNotBlank(signature)) {
                 CacheUtils.delete(signature);

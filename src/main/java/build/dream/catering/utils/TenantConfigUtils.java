@@ -20,8 +20,8 @@ public class TenantConfigUtils {
 
     public static TenantConfig obtainTenantConfig(BigInteger tenantId, String name) {
         SearchModel searchModel = new SearchModel();
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        searchModel.addSearchCondition("name", Constants.SQL_OPERATION_SYMBOL_EQUALS, name);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("name", Constants.SQL_OPERATION_SYMBOL_EQUAL, name);
         return obtainTenantConfigMapper().find(searchModel);
     }
 

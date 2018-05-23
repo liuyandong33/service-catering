@@ -1,11 +1,11 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.mappers.WeiXinMemberCardMapper;
 import build.dream.catering.models.weixin.CreateMemberCardModel;
 import build.dream.catering.models.weixin.DeleteWeiXinMemberCardModel;
 import build.dream.catering.models.weixin.ListWeiXinMemberCardsModel;
 import build.dream.catering.models.weixin.PayGiftCardModel;
+import build.dream.catering.utils.DatabaseHelper;
 import build.dream.catering.utils.WeiXinUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.WeiXinMemberCard;
@@ -29,9 +29,6 @@ import java.util.Map;
 
 @Service
 public class WeiXinService {
-    @Autowired
-    private WeiXinMemberCardMapper weiXinMemberCardMapper;
-
     @Transactional(rollbackFor = Exception.class)
     public ApiRest createMemberCard(CreateMemberCardModel createMemberCardModel, MultipartFile backgroundPicFile, MultipartFile logoFile) throws IOException {
         BigInteger tenantId = createMemberCardModel.getTenantId();
@@ -257,7 +254,7 @@ public class WeiXinService {
         weiXinMemberCard.setCreateUserId(userId);
         weiXinMemberCard.setLastUpdateUserId(userId);
         weiXinMemberCard.setLastUpdateRemark("创建微信会员卡！");
-        weiXinMemberCardMapper.insert(weiXinMemberCard);
+        DatabaseHelper.insert(weiXinMemberCard);
 
         ApiRest apiRest = new ApiRest();
         apiRest.setData(weiXinMemberCard);
@@ -275,9 +272,9 @@ public class WeiXinService {
         Validate.notNull(weiXinPublicAccount, "未配置微信公众号，不能开通支付即会员！");
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, weiXinCardId);
-        WeiXinMemberCard weiXinMemberCard = weiXinMemberCardMapper.find(searchModel);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, weiXinCardId);
+        WeiXinMemberCard weiXinMemberCard = DatabaseHelper.find(WeiXinMemberCard.class, searchModel);
         Validate.notNull(weiXinMemberCard, "微信会员卡不存在！");
 
         String appId = weiXinPublicAccount.getAppId();
@@ -329,9 +326,9 @@ public class WeiXinService {
         String accessToken = WeiXinUtils.obtainAccessToken(appId, appSecret);
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, weiXinCardId);
-        WeiXinMemberCard weiXinMemberCard = weiXinMemberCardMapper.find(searchModel);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, weiXinCardId);
+        WeiXinMemberCard weiXinMemberCard = DatabaseHelper.find(WeiXinMemberCard.class, searchModel);
         Validate.notNull(weiXinMemberCard, "微信会员卡不存在！");
 
         Map<String, Object> deleteCardRequestBody = new HashMap<String, Object>();
@@ -346,7 +343,7 @@ public class WeiXinService {
         weiXinMemberCard.setDeleted(true);
         weiXinMemberCard.setLastUpdateUserId(userId);
         weiXinMemberCard.setLastUpdateRemark("删除微信会员卡！");
-        weiXinMemberCardMapper.update(weiXinMemberCard);
+        DatabaseHelper.update(weiXinMemberCard);
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("删除微信会员卡成功！");
@@ -367,9 +364,9 @@ public class WeiXinService {
 
         SearchModel searchModel = new SearchModel(true);
         List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
-        searchConditions.add(new SearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId));
+        searchConditions.add(new SearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
         searchModel.setSearchConditions(searchConditions);
-        long count = weiXinMemberCardMapper.count(searchModel);
+        long count = DatabaseHelper.count(WeiXinMemberCard.class, searchModel);
 
         List<WeiXinMemberCard> weiXinMemberCards = new ArrayList<WeiXinMemberCard>();
         if (count > 0) {
@@ -377,7 +374,7 @@ public class WeiXinService {
             pagedSearchModel.setPage(listWeiXinMemberCardsModel.getPage());
             pagedSearchModel.setRows(listWeiXinMemberCardsModel.getRows());
             pagedSearchModel.setSearchConditions(searchConditions);
-            weiXinMemberCards = weiXinMemberCardMapper.findAllPaged(pagedSearchModel);
+            weiXinMemberCards = DatabaseHelper.findAllPaged(WeiXinMemberCard.class, pagedSearchModel);
         }
 
         Map<String, Object> data = new HashMap<String, Object>();

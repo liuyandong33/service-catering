@@ -1,11 +1,12 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.models.meituan.CheckIsBindingModel;
 import build.dream.catering.mappers.*;
+import build.dream.catering.models.meituan.CheckIsBindingModel;
 import build.dream.catering.models.meituan.GenerateBindingStoreLinkModel;
 import build.dream.catering.models.meituan.ObtainMeiTuanOrderModel;
 import build.dream.catering.tools.PushMessageThread;
+import build.dream.catering.utils.DatabaseHelper;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.*;
@@ -26,25 +27,6 @@ import java.util.*;
 
 @Service
 public class MeiTuanService {
-    @Autowired
-    private BranchMapper branchMapper;
-    @Autowired
-    private MeiTuanOrderMapper meiTuanOrderMapper;
-    @Autowired
-    private MeiTuanOrderDetailMapper meiTuanOrderDetailMapper;
-    @Autowired
-    private MeiTuanOrderExtraMapper meiTuanOrderExtraMapper;
-    @Autowired
-    private MeiTuanOrderPoiReceiveDetailMapper meiTuanOrderPoiReceiveDetailMapper;
-    @Autowired
-    private ActOrderChargeByMtMapper actOrderChargeByMtMapper;
-    @Autowired
-    private ActOrderChargeByPoiMapper actOrderChargeByPoiMapper;
-    @Autowired
-    private MeiTuanOrderCancelMessageMapper meiTuanOrderCancelMessageMapper;
-    @Autowired
-    private PosMapper posMapper;
-
     /**
      * 生成门店绑定链接
      *
@@ -58,9 +40,9 @@ public class MeiTuanService {
         BigInteger branchId = generateBindingStoreLinkModel.getBranchId();
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        Branch branch = branchMapper.find(searchModel);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         Validate.notNull(branch, "门店不存在！");
         String meiTuanErpServiceUrl = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_ERP_SERVICE_URL);
         String meiTuanDeveloperId = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_DEVELOPER_ID);
@@ -114,9 +96,9 @@ public class MeiTuanService {
         BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
         BigInteger branchId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[1]);
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        Branch branch = branchMapper.find(searchModel);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         Validate.notNull(branch, "门店不存在！");
 
         MeiTuanOrder meiTuanOrder = GsonUtils.fromJson(orderJsonObject.toString(), MeiTuanOrder.class);
@@ -142,7 +124,7 @@ public class MeiTuanService {
         meiTuanOrder.setCreateUserId(userId);
         meiTuanOrder.setLastUpdateUserId(userId);
         meiTuanOrder.setLastUpdateRemark("处理美团订单生效回调，保存新订单！");
-        meiTuanOrderMapper.insert(meiTuanOrder);
+        DatabaseHelper.insert(meiTuanOrder);
 
         BigDecimal hundred = NumberUtils.createBigDecimal("100");
         int detailJsonArraySize = detailJsonArray.size();
@@ -167,7 +149,7 @@ public class MeiTuanService {
             meiTuanOrderDetail.setCreateUserId(userId);
             meiTuanOrderDetail.setLastUpdateUserId(userId);
             meiTuanOrderDetail.setLastUpdateRemark("处理美团订单生效回调，保存订单明细！");
-            meiTuanOrderDetailMapper.insert(meiTuanOrderDetail);
+            DatabaseHelper.insert(meiTuanOrderDetail);
         }
 
         int extrasJsonArraySize = extrasJsonArray.size();
@@ -191,7 +173,7 @@ public class MeiTuanService {
             meiTuanOrderExtra.setCreateUserId(userId);
             meiTuanOrderExtra.setLastUpdateUserId(userId);
             meiTuanOrderExtra.setLastUpdateRemark("处理美团订单生效回调，保存订单扩展信息！");
-            meiTuanOrderExtraMapper.insert(meiTuanOrderExtra);
+            DatabaseHelper.insert(meiTuanOrderExtra);
         }
 
         MeiTuanOrderPoiReceiveDetail meiTuanOrderPoiReceiveDetail = new MeiTuanOrderPoiReceiveDetail();
@@ -203,7 +185,7 @@ public class MeiTuanService {
         meiTuanOrderPoiReceiveDetail.setCreateUserId(userId);
         meiTuanOrderPoiReceiveDetail.setLastUpdateUserId(userId);
         meiTuanOrderPoiReceiveDetail.setLastUpdateRemark("处理美团订单生效回调，保存商家对账信息！");
-        meiTuanOrderPoiReceiveDetailMapper.insert(meiTuanOrderPoiReceiveDetail);
+        DatabaseHelper.insert(meiTuanOrderPoiReceiveDetail);
 
         JSONArray actOrderChargeByMtJsonArray = poiReceiveDetailJsonObject.optJSONArray("actOrderChargeByMt");
         if (actOrderChargeByMtJsonArray != null) {
@@ -219,7 +201,7 @@ public class MeiTuanService {
                 actOrderChargeByMt.setCreateUserId(userId);
                 actOrderChargeByMt.setLastUpdateUserId(userId);
                 actOrderChargeByMt.setLastUpdateRemark("处理美团订单生效回调，保存美团承担明细！");
-                actOrderChargeByMtMapper.insert(actOrderChargeByMt);
+                DatabaseHelper.insert(actOrderChargeByMt);
             }
         }
 
@@ -237,7 +219,7 @@ public class MeiTuanService {
                 actOrderChargeByPoi.setCreateUserId(userId);
                 actOrderChargeByPoi.setLastUpdateUserId(userId);
                 actOrderChargeByPoi.setLastUpdateRemark("处理美团订单生效回调，保存美团承担明细！");
-                actOrderChargeByPoiMapper.insert(actOrderChargeByPoi);
+                DatabaseHelper.insert(actOrderChargeByPoi);
             }
         }
 //        publishMeiTuanOrderMessage(meiTuanOrder.getTenantCode(), meiTuanOrder.getBranchCode(), meiTuanOrder.getId(), 1);
@@ -280,10 +262,10 @@ public class MeiTuanService {
         meiTuanOrderCancelMessage.setCreateUserId(userId);
         meiTuanOrderCancelMessage.setLastUpdateUserId(userId);
         meiTuanOrderCancelMessage.setLastUpdateRemark("处理美团订单取消回调，保存美团订单取消消息！");
-        meiTuanOrderCancelMessageMapper.insert(meiTuanOrderCancelMessage);
+        DatabaseHelper.insert(meiTuanOrderCancelMessage);
 
         meiTuanOrder.setStatus(9);
-        meiTuanOrderMapper.update(meiTuanOrder);
+        DatabaseHelper.update(meiTuanOrder);
 //        publishMeiTuanOrderMessage(meiTuanOrder.getTenantCode(), meiTuanOrder.getBranchCode(), meiTuanOrder.getId(), 2);
         pushMeiTuanMessage(meiTuanOrder.getTenantId(), meiTuanOrder.getBranchId(), meiTuanOrder.getId(), type, uuid, 5, 60000);
 
@@ -318,7 +300,7 @@ public class MeiTuanService {
 
         }
         meiTuanOrder.setStatus(status);
-        meiTuanOrderMapper.update(meiTuanOrder);
+        DatabaseHelper.update(meiTuanOrder);
 //        publishMeiTuanOrderMessage(meiTuanOrder.getTenantCode(), meiTuanOrder.getBranchCode(), meiTuanOrder.getId(), 2);
         pushMeiTuanMessage(meiTuanOrder.getTenantId(), meiTuanOrder.getBranchId(), meiTuanOrder.getId(), type, uuid, 5, 60000);
 
@@ -340,16 +322,16 @@ public class MeiTuanService {
         BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
         BigInteger branchId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[1]);
         SearchModel branchSearchModel = new SearchModel(true);
-        branchSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        branchSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        Branch branch = branchMapper.find(branchSearchModel);
+        branchSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        branchSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        Branch branch = DatabaseHelper.find(Branch.class, branchSearchModel);
         Validate.notNull(branch, "门店不存在！");
 
         SearchModel meiTuanOrderSearchModel = new SearchModel(true);
-        meiTuanOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        meiTuanOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        meiTuanOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, orderId);
-        MeiTuanOrder meiTuanOrder = meiTuanOrderMapper.find(meiTuanOrderSearchModel);
+        meiTuanOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        meiTuanOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        meiTuanOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, orderId);
+        MeiTuanOrder meiTuanOrder = DatabaseHelper.find(MeiTuanOrder.class, meiTuanOrderSearchModel);
         Validate.notNull(meiTuanOrder, "订单不存在！");
         return meiTuanOrder;
     }
@@ -375,10 +357,10 @@ public class MeiTuanService {
     @Transactional(readOnly = true)
     public void pushMeiTuanMessage(BigInteger tenantId, BigInteger branchId, BigInteger meiTuanOrderId, Integer type, String uuid, final int count, int interval) {
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        searchModel.addSearchCondition("online", Constants.SQL_OPERATION_SYMBOL_EQUALS, 1);
-        List<Pos> poses = posMapper.findAll(searchModel);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition("online", Constants.SQL_OPERATION_SYMBOL_EQUAL, 1);
+        List<Pos> poses = DatabaseHelper.findAll(Pos.class, searchModel);
         if (CollectionUtils.isNotEmpty(poses)) {
             List<String> registrationIds = new ArrayList<String>();
             for (Pos pos : poses) {
@@ -428,33 +410,33 @@ public class MeiTuanService {
     @Transactional(readOnly = true)
     public ApiRest obtainMeiTuanOrder(ObtainMeiTuanOrderModel obtainMeiTuanOrderModel) {
         SearchModel meiTuanOrderSearchModel = new SearchModel(true);
-        meiTuanOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainMeiTuanOrderModel.getTenantId());
-        meiTuanOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainMeiTuanOrderModel.getBranchId());
-        meiTuanOrderSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainMeiTuanOrderModel.getMeiTuanOrderId());
-        MeiTuanOrder meiTuanOrder = meiTuanOrderMapper.find(meiTuanOrderSearchModel);
+        meiTuanOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainMeiTuanOrderModel.getTenantId());
+        meiTuanOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainMeiTuanOrderModel.getBranchId());
+        meiTuanOrderSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainMeiTuanOrderModel.getMeiTuanOrderId());
+        MeiTuanOrder meiTuanOrder = DatabaseHelper.find(MeiTuanOrder.class, meiTuanOrderSearchModel);
         Validate.notNull(meiTuanOrder, "订单不存在！");
 
         SearchModel meiTuanOrderDetailSearchModel = new SearchModel(true);
-        meiTuanOrderDetailSearchModel.addSearchCondition("mei_tuan_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, meiTuanOrder.getId());
-        List<MeiTuanOrderDetail> meiTuanOrderDetails = meiTuanOrderDetailMapper.findAll(meiTuanOrderDetailSearchModel);
+        meiTuanOrderDetailSearchModel.addSearchCondition("mei_tuan_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, meiTuanOrder.getId());
+        List<MeiTuanOrderDetail> meiTuanOrderDetails = DatabaseHelper.findAll(MeiTuanOrderDetail.class, meiTuanOrderDetailSearchModel);
 
         SearchModel meiTuanOrderExtraSearchModel = new SearchModel(true);
-        meiTuanOrderExtraSearchModel.addSearchCondition("mei_tuan_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, meiTuanOrder.getId());
-        List<MeiTuanOrderExtra> meiTuanOrderExtras = meiTuanOrderExtraMapper.findAll(meiTuanOrderExtraSearchModel);
+        meiTuanOrderExtraSearchModel.addSearchCondition("mei_tuan_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, meiTuanOrder.getId());
+        List<MeiTuanOrderExtra> meiTuanOrderExtras = DatabaseHelper.findAll(MeiTuanOrderExtra.class, meiTuanOrderExtraSearchModel);
 
         SearchModel meiTuanOrderPoiReceiveDetailSearchModel = new SearchModel(true);
-        meiTuanOrderPoiReceiveDetailSearchModel.addSearchCondition("mei_tuan_order_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, meiTuanOrder.getId());
-        MeiTuanOrderPoiReceiveDetail meiTuanOrderPoiReceiveDetail = meiTuanOrderPoiReceiveDetailMapper.find(meiTuanOrderPoiReceiveDetailSearchModel);
+        meiTuanOrderPoiReceiveDetailSearchModel.addSearchCondition("mei_tuan_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, meiTuanOrder.getId());
+        MeiTuanOrderPoiReceiveDetail meiTuanOrderPoiReceiveDetail = DatabaseHelper.find(MeiTuanOrderPoiReceiveDetail.class, meiTuanOrderPoiReceiveDetailSearchModel);
 
         Map<String, Object> poiReceiveDetail = new HashMap<String, Object>();
         if (meiTuanOrderPoiReceiveDetail != null) {
             SearchModel actOrderChargeByMtSearchModel = new SearchModel(true);
-            actOrderChargeByMtSearchModel.addSearchCondition("mei_tuan_order_poi_receive_detail_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, meiTuanOrderPoiReceiveDetail.getId());
-            List<ActOrderChargeByMt> actOrderChargeByMts = actOrderChargeByMtMapper.findAll(actOrderChargeByMtSearchModel);
+            actOrderChargeByMtSearchModel.addSearchCondition("mei_tuan_order_poi_receive_detail_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, meiTuanOrderPoiReceiveDetail.getId());
+            List<ActOrderChargeByMt> actOrderChargeByMts = DatabaseHelper.findAll(ActOrderChargeByMt.class, actOrderChargeByMtSearchModel);
 
             SearchModel actOrderChargeByPoiSearchModel = new SearchModel(true);
-            actOrderChargeByPoiSearchModel.addSearchCondition("mei_tuan_order_poi_receive_detail_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, meiTuanOrderPoiReceiveDetail.getId());
-            List<ActOrderChargeByPoi> actOrderChargeByPois = actOrderChargeByPoiMapper.findAll(actOrderChargeByPoiSearchModel);
+            actOrderChargeByPoiSearchModel.addSearchCondition("mei_tuan_order_poi_receive_detail_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, meiTuanOrderPoiReceiveDetail.getId());
+            List<ActOrderChargeByPoi> actOrderChargeByPois = DatabaseHelper.findAll(ActOrderChargeByPoi.class, actOrderChargeByPoiSearchModel);
 
             poiReceiveDetail.put("foodShareFeeChargeByPoi", meiTuanOrderPoiReceiveDetail.getFoodShareFeeChargeByPoi());
             poiReceiveDetail.put("logisticsFee", meiTuanOrderPoiReceiveDetail.getLogisticsFee());
@@ -545,15 +527,15 @@ public class MeiTuanService {
         BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
         BigInteger branchId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[1]);
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        Branch branch = branchMapper.find(searchModel);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         Validate.notNull(branch, "门店不存在！");
 
         branch.setAppAuthToken(appAuthToken);
         branch.setPoiId(poiId);
         branch.setPoiName(poiName);
-        branchMapper.update(branch);
+        DatabaseHelper.update(branch);
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("美团门店绑定回调处理成功！");
@@ -570,9 +552,9 @@ public class MeiTuanService {
     @Transactional(readOnly = true)
     public ApiRest checkIsBinding(CheckIsBindingModel checkIsBindingModel) {
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, checkIsBindingModel.getTenantId());
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, checkIsBindingModel.getTenantId());
-        Branch branch = branchMapper.find(searchModel);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, checkIsBindingModel.getTenantId());
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, checkIsBindingModel.getTenantId());
+        Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         Validate.notNull(branch, "门店不存在！");
 
         boolean isBinding = StringUtils.isNotBlank(branch.getAppAuthToken()) && StringUtils.isNotBlank(branch.getPoiId()) && StringUtils.isNotBlank(branch.getPoiName());

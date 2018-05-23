@@ -39,22 +39,22 @@ public class VipService {
     @Transactional(readOnly = true)
     public ApiRest obtainVipInfo(ObtainVipInfoModel obtainVipInfoModel) {
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainVipInfoModel.getTenantId());
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainVipInfoModel.getBranchId());
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainVipInfoModel.getTenantId());
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainVipInfoModel.getBranchId());
         if (obtainVipInfoModel.getVipId() != null) {
-            searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainVipInfoModel.getVipId());
+            searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainVipInfoModel.getVipId());
         }
         if (StringUtils.isNotBlank(obtainVipInfoModel.getVipCode())) {
-            searchModel.addSearchCondition("vip_code", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainVipInfoModel.getVipCode());
+            searchModel.addSearchCondition("vip_code", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainVipInfoModel.getVipCode());
         }
         if (StringUtils.isNotBlank(obtainVipInfoModel.getPhoneNumber())) {
-            searchModel.addSearchCondition("phone_number", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainVipInfoModel.getPhoneNumber());
+            searchModel.addSearchCondition("phone_number", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainVipInfoModel.getPhoneNumber());
         }
         if (StringUtils.isNotBlank(obtainVipInfoModel.getOpenId())) {
-            searchModel.addSearchCondition("open_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainVipInfoModel.getOpenId());
+            searchModel.addSearchCondition("open_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainVipInfoModel.getOpenId());
         }
         if (StringUtils.isNotBlank(obtainVipInfoModel.getAlipayUserId())) {
-            searchModel.addSearchCondition("alipay_user_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, obtainVipInfoModel.getAlipayUserId());
+            searchModel.addSearchCondition("alipay_user_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainVipInfoModel.getAlipayUserId());
         }
         Vip vip = VipUtils.find(searchModel);
         return new ApiRest(vip, "获取会员信息成功！");
@@ -75,9 +75,9 @@ public class VipService {
         Vip vip = null;
         if (saveVipInfoModel.getVipId() != null) {
             SearchModel searchModel = new SearchModel(true);
-            searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-            searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
-            searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUALS, saveVipInfoModel.getVipId());
+            searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+            searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+            searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, saveVipInfoModel.getVipId());
             vip = VipUtils.find(searchModel);
             Validate.notNull(vip, "会员不存在！");
 
@@ -97,8 +97,8 @@ public class VipService {
         } else {
             String phoneNumber = saveVipInfoModel.getPhoneNumber();
             SearchModel searchModel = new SearchModel(true);
-            searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-            searchModel.addSearchCondition("phone_number", Constants.SQL_OPERATION_SYMBOL_EQUALS, phoneNumber);
+            searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+            searchModel.addSearchCondition("phone_number", Constants.SQL_OPERATION_SYMBOL_EQUAL, phoneNumber);
             long count = VipUtils.count(searchModel);
             Validate.isTrue(count == 0, "手机号已存在！");
 
@@ -133,8 +133,8 @@ public class VipService {
         BigInteger tenantId = BigInteger.ONE;
         BigInteger branchId = BigInteger.ONE;
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUALS, branchId);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         Vip vip = VipUtils.find(searchModel);
         Validate.notNull(vip, "会员信息不存在！");
 

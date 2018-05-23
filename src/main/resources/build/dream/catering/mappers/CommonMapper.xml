@@ -12,11 +12,29 @@
                             #{item}
                         </foreach>
                     </when>
+                    <when test="@org.apache.commons.lang.StringUtils@equalsIgnoreCase(searchCondition.operationSymbol, 'NOT IN')">
+                        ${searchCondition.columnName} ${searchCondition.operationSymbol}
+                        <foreach collection="searchCondition.searchParameter" index="index" item="item" open="(" separator="," close=")">
+                            #{item}
+                        </foreach>
+                    </when>
                     <otherwise>
                         ${searchCondition.columnName} ${searchCondition.operationSymbol} #{searchCondition.searchParameter}
                     </otherwise>
                 </choose>
             </foreach>
+            <if test="@org.apache.commons.lang.StringUtils@isNotBlank(whereClause)">
+                AND ${@build.dream.common.utils.DatabaseUtils@obtainWhereClause(whereClause)}
+            </if>
+        </if>
+        <if test="@org.apache.commons.collections.CollectionUtils@isEmpty(searchConditions) and @org.apache.commons.lang.StringUtils@isNotBlank(whereClause)">
+            WHERE ${@build.dream.common.utils.DatabaseUtils@obtainWhereClause(whereClause)}
+        </if>
+        <if test="@org.apache.commons.lang.StringUtils@isNotBlank(groupBy)">
+            GROUP BY groupBy
+        </if>
+        <if test="@org.apache.commons.lang.StringUtils@isNotBlank(orderBy)">
+            GROUP BY orderBy
         </if>
     </sql>
 
