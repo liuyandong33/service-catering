@@ -2,10 +2,7 @@ package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.UniversalMapper;
-import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.DatabaseUtils;
-import build.dream.common.utils.SearchModel;
-import build.dream.common.utils.UpdateModel;
+import build.dream.common.utils.*;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.converters.BigDecimalConverter;
@@ -45,6 +42,18 @@ public class DatabaseHelper {
 
     public static long insertAll(List<?> domains) {
         return obtainUniversalMapper().insertAll(domains);
+    }
+
+    public static long delete(Class<?> domainClass, DeleteModel deleteModel) {
+        deleteModel.setTableName(DatabaseUtils.obtainTableName(null, domainClass));
+        return obtainUniversalMapper().delete(deleteModel);
+    }
+
+    public static long delete(String tableName, BigInteger id) {
+        DeleteModel deleteModel = new DeleteModel();
+        deleteModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, id);
+        deleteModel.setTableName(tableName);
+        return obtainUniversalMapper().delete(deleteModel);
     }
 
     public static long update(Object domain) {

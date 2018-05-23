@@ -1,5 +1,6 @@
 package build.dream.catering.mappers;
 
+import build.dream.common.utils.DeleteModel;
 import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.UpdateModel;
 import org.apache.ibatis.annotations.Mapper;
@@ -12,6 +13,8 @@ public interface UniversalMapper {
     long insert(Object domain);
 
     long insertAll(List<?> domains);
+
+    long delete(DeleteModel deleteModel);
 
     long update(Object domain);
 

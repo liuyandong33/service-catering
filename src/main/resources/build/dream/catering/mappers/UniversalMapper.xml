@@ -13,6 +13,10 @@
         </foreach>
     </insert>
 
+    <delete id="delete" parameterType="build.dream.common.utils.DeleteModel">
+        DELETE FROM ${tableName} <include refid="build.dream.platform.mappers.CommonMapper.searchConditionSql"></include>
+    </delete>
+
     <update id="update" parameterType="java.lang.Object">
         ${@build.dream.common.utils.DatabaseUtils@generateUpdateSql(class.name)}
     </update>
