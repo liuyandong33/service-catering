@@ -40,7 +40,7 @@ public class WeiXinUtils {
 
     public static void updateMemberBonus(String tenantId, String code, String cardId, Integer bonus, Integer addBonus, String recordBonus) throws IOException {
         WeiXinPublicAccount weiXinPublicAccount = obtainWeiXinPublicAccount(tenantId);
-        Validate.notNull(weiXinPublicAccount, "未配置微信公众号，不能开通支付即会员！");
+        Validate.notNull(weiXinPublicAccount, "未配置微信公众号，不能更新会员积分！");
 
         Map<String, Object> updateUserRequestBody = new HashMap<String, Object>();
         updateUserRequestBody.put("code", code);
