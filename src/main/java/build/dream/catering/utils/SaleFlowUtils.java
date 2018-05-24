@@ -2,7 +2,7 @@ package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
 import build.dream.common.erp.catering.domains.*;
-import build.dream.common.utils.ObjectUtils;
+import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.SearchModel;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.Validate;
@@ -39,14 +39,14 @@ public class SaleFlowUtils {
                     discountAmount = discountAmount.add(dietOrderDetail.getDiscountAmount());
                     payableAmount = payableAmount.add(dietOrderDetail.getPayableAmount());
                 }
-                DietOrderDetail mergedDietOrderDetail = ObjectUtils.clone(DietOrderDetail.class, dietOrderDetailList.get(0));
+                DietOrderDetail mergedDietOrderDetail = ApplicationHandler.clone(DietOrderDetail.class, dietOrderDetailList.get(0));
                 mergedDietOrderDetail.setQuantity(quantity);
                 mergedDietOrderDetail.setTotalAmount(totalAmount);
                 mergedDietOrderDetail.setDiscountAmount(discountAmount);
                 mergedDietOrderDetail.setPayableAmount(payableAmount);
                 mergedDietOrderDetails.add(mergedDietOrderDetail);
             } else {
-                mergedDietOrderDetails.add(dietOrderDetailList.get(0));
+                mergedDietOrderDetails.add(ApplicationHandler.clone(DietOrderDetail.class, dietOrderDetailList.get(0)));
             }
         }
 
@@ -81,45 +81,11 @@ public class SaleFlowUtils {
 
         BigInteger saleId = sale.getId();
 
-        List<SaleDetail> saleDetails = new ArrayList<SaleDetail>();
-        BigDecimal weightSum = BigDecimal.ZERO;
-        int size = mergedDietOrderDetails.size();
-        for (int index = 0; index < size; index++) {
-            DietOrderDetail dietOrderDetail = mergedDietOrderDetails.get(index);
-            BigDecimal weight = null;
-            if (index == size - 1) {
-                weight = BigDecimal.ONE.subtract(weightSum);
-            } else {
-                weight = dietOrderDetail.getTotalAmount().divide(totalAmount, 1, BigDecimal.ROUND_DOWN);
-                weightSum = weightSum.add(weight);
-            }
-            dietOrderDetail.setDiscountAmount(discountAmount.multiply(weight));
-            dietOrderDetail.setPayableAmount(payableAmount.multiply(weight));
-            dietOrderDetail.setPaidAmount(paidAmount.multiply(weight));
+        calculateShare(mergedDietOrderDetails, totalAmount, discountAmount, payableAmount, paidAmount);
 
-            SaleDetail saleDetail = new SaleDetail();
-            saleDetail.setSaleId(saleId);
-            saleDetail.setSaleTime(saleTime);
-            saleDetail.setTenantId(tenantId);
-            saleDetail.setTenantCode(tenantCode);
-            saleDetail.setBranchId(branchId);
-            saleDetail.setGoodsId(dietOrderDetail.getGoodsId());
-            saleDetail.setGoodsName(dietOrderDetail.getGoodsName());
-            saleDetail.setGoodsSpecificationId(dietOrderDetail.getGoodsSpecificationId());
-            saleDetail.setGoodsSpecificationName(dietOrderDetail.getGoodsSpecificationName());
-            saleDetail.setCategoryId(dietOrderDetail.getCategoryId());
-            saleDetail.setCategoryName(dietOrderDetail.getCategoryName());
-            saleDetail.setPrice(dietOrderDetail.getPrice());
-            saleDetail.setQuantity(dietOrderDetail.getQuantity());
-            saleDetail.setTotalAmount(dietOrderDetail.getTotalAmount());
-            saleDetail.setDiscountAmount(dietOrderDetail.getDiscountAmount());
-            saleDetail.setPayableAmount(dietOrderDetail.getPayableAmount());
-            saleDetail.setPaidAmount(null);
-            saleDetail.setCreateUserId(userId);
-            saleDetail.setLastUpdateUserId(userId);
-            saleDetail.setCreateTime(date);
-            saleDetail.setLastUpdateTime(date);
-            saleDetails.add(saleDetail);
+        List<SaleDetail> saleDetails = new ArrayList<SaleDetail>();
+        for (DietOrderDetail dietOrderDetail : mergedDietOrderDetails) {
+            saleDetails.add(buildSaleDetail(saleId, saleTime, tenantId, tenantCode, branchId, dietOrderDetail, userId));
         }
         DatabaseHelper.insertAll(saleDetails);
     }
@@ -134,6 +100,62 @@ public class SaleFlowUtils {
         List<DietOrderDetail> dietOrderDetails = DatabaseHelper.findAll(DietOrderDetail.class, searchModel);
         List<DietOrderPayment> dietOrderPayments = DatabaseHelper.findAll(DietOrderPayment.class, searchModel);
         writeSaleFlow(dietOrder, dietOrderDetails, dietOrderPayments);
+    }
+
+    public static void calculateShare(List<DietOrderDetail> dietOrderDetails, BigDecimal totalAmount, BigDecimal discountAmount, BigDecimal payableAmount, BigDecimal paidAmount) {
+        BigDecimal discountAmountShareSum = BigDecimal.ZERO;
+        BigDecimal payableAmountShareSum = BigDecimal.ZERO;
+        BigDecimal paidAmountShareSum = BigDecimal.ZERO;
+
+        int size = dietOrderDetails.size();
+        for (int index = 0; index < size; index++) {
+            DietOrderDetail dietOrderDetail = dietOrderDetails.get(index);
+
+            BigDecimal discountAmountShare = null;
+            BigDecimal payableAmountShare = null;
+            BigDecimal paidAmountShare = null;
+            if (index == size - 1) {
+                discountAmountShare = discountAmount.subtract(discountAmountShareSum);
+                payableAmountShare = payableAmount.subtract(payableAmountShareSum);
+                paidAmountShare = paidAmount.subtract(paidAmountShareSum);
+            } else {
+                BigDecimal weight = dietOrderDetail.getTotalAmount().divide(totalAmount, 1, BigDecimal.ROUND_DOWN);
+                discountAmountShare = discountAmount.multiply(weight).setScale(2, BigDecimal.ROUND_DOWN);
+                payableAmountShare = payableAmount.multiply(weight).setScale(2, BigDecimal.ROUND_DOWN);
+                paidAmountShare = paidAmount.multiply(weight).setScale(2, BigDecimal.ROUND_DOWN);
+
+                discountAmountShareSum = discountAmountShareSum.add(discountAmountShare);
+                payableAmountShareSum = payableAmountShareSum.add(payableAmountShare);
+                paidAmountShareSum = paidAmountShareSum.add(paidAmountShare);
+            }
+            dietOrderDetail.setDiscountAmount(discountAmountShare);
+            dietOrderDetail.setPayableAmount(payableAmountShare);
+            dietOrderDetail.setPaidAmount(paidAmountShare);
+        }
+    }
+
+    public static SaleDetail buildSaleDetail(BigInteger saleId, Date saleTime, BigInteger tenantId, String tenantCode, BigInteger branchId, DietOrderDetail dietOrderDetail, BigInteger userId) {
+        SaleDetail saleDetail = new SaleDetail();
+        saleDetail.setSaleId(saleId);
+        saleDetail.setSaleTime(saleTime);
+        saleDetail.setTenantId(tenantId);
+        saleDetail.setTenantCode(tenantCode);
+        saleDetail.setBranchId(branchId);
+        saleDetail.setGoodsId(dietOrderDetail.getGoodsId());
+        saleDetail.setGoodsName(dietOrderDetail.getGoodsName());
+        saleDetail.setGoodsSpecificationId(dietOrderDetail.getGoodsSpecificationId());
+        saleDetail.setGoodsSpecificationName(dietOrderDetail.getGoodsSpecificationName());
+        saleDetail.setCategoryId(dietOrderDetail.getCategoryId());
+        saleDetail.setCategoryName(dietOrderDetail.getCategoryName());
+        saleDetail.setPrice(dietOrderDetail.getPrice());
+        saleDetail.setQuantity(dietOrderDetail.getQuantity());
+        saleDetail.setTotalAmount(dietOrderDetail.getTotalAmount());
+        saleDetail.setDiscountAmount(dietOrderDetail.getDiscountAmount());
+        saleDetail.setPayableAmount(dietOrderDetail.getPayableAmount());
+        saleDetail.setPaidAmount(null);
+        saleDetail.setCreateUserId(userId);
+        saleDetail.setLastUpdateUserId(userId);
+        return saleDetail;
     }
 
     public static void main(String[] args) throws IllegalAccessException, InstantiationException, InvocationTargetException {
