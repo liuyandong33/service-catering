@@ -8,13 +8,12 @@ import build.dream.common.utils.SearchModel;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.Validate;
 
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
 public class SaleFlowUtils {
-    public static void writeSaleFlow(DietOrder dietOrder, List<DietOrderDetail> dietOrderDetails, List<DietOrderPayment> dietOrderPayments) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+    public static void writeSaleFlow(DietOrder dietOrder, List<DietOrderDetail> dietOrderDetails, List<DietOrderPayment> dietOrderPayments) {
         Map<String, List<DietOrderDetail>> dietOrderDetailListMap = new HashMap<String, List<DietOrderDetail>>();
         for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
             String key = dietOrderDetail.getGoodsId() + "_" + dietOrderDetail.getGoodsSpecificationId();
@@ -91,7 +90,7 @@ public class SaleFlowUtils {
         DatabaseHelper.insertAll(saleDetails);
     }
 
-    public static void writeSaleFlow(BigInteger dietOrderId) throws IllegalAccessException, InstantiationException, InvocationTargetException {
+    public static void writeSaleFlow(BigInteger dietOrderId) {
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, dietOrderId);
         Validate.notNull(dietOrder, "订单不存在！");
 
@@ -163,9 +162,5 @@ public class SaleFlowUtils {
         saleDetail.setCreateUserId(userId);
         saleDetail.setLastUpdateUserId(userId);
         return saleDetail;
-    }
-
-    public static void main(String[] args) throws IllegalAccessException, InstantiationException, InvocationTargetException {
-        writeSaleFlow(null, null, null);
     }
 }
