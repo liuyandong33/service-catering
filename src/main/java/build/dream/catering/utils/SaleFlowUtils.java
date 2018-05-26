@@ -3,6 +3,7 @@ package build.dream.catering.utils;
 import build.dream.catering.constants.Constants;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.ApplicationHandler;
+import build.dream.common.utils.SearchCondition;
 import build.dream.common.utils.SearchModel;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.Validate;
@@ -94,11 +95,17 @@ public class SaleFlowUtils {
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, dietOrderId);
         Validate.notNull(dietOrder, "订单不存在！");
 
-        SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
+        searchConditions.add(new SearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId));
 
-        List<DietOrderDetail> dietOrderDetails = DatabaseHelper.findAll(DietOrderDetail.class, searchModel);
-        List<DietOrderPayment> dietOrderPayments = DatabaseHelper.findAll(DietOrderPayment.class, searchModel);
+        SearchModel dietOrderDetailSearchModel = new SearchModel(true);
+        dietOrderDetailSearchModel.setSearchConditions(searchConditions);
+        List<DietOrderDetail> dietOrderDetails = DatabaseHelper.findAll(DietOrderDetail.class, dietOrderDetailSearchModel);
+
+        SearchModel dietOrderPaymentSearchModel = new SearchModel(true);
+        dietOrderPaymentSearchModel.setSearchConditions(searchConditions);
+        List<DietOrderPayment> dietOrderPayments = DatabaseHelper.findAll(DietOrderPayment.class, dietOrderPaymentSearchModel);
+
         writeSaleFlow(dietOrder, dietOrderDetails, dietOrderPayments);
     }
 
@@ -119,7 +126,7 @@ public class SaleFlowUtils {
                 payableAmountShare = payableAmount.subtract(payableAmountShareSum);
                 paidAmountShare = paidAmount.subtract(paidAmountShareSum);
             } else {
-                BigDecimal weight = dietOrderDetail.getTotalAmount().divide(totalAmount, 1, BigDecimal.ROUND_DOWN);
+                BigDecimal weight = dietOrderDetail.getTotalAmount().divide(totalAmount, 10, BigDecimal.ROUND_DOWN);
                 discountAmountShare = discountAmount.multiply(weight).setScale(2, BigDecimal.ROUND_DOWN);
                 payableAmountShare = payableAmount.multiply(weight).setScale(2, BigDecimal.ROUND_DOWN);
                 paidAmountShare = paidAmount.multiply(weight).setScale(2, BigDecimal.ROUND_DOWN);
