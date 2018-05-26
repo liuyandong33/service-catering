@@ -470,7 +470,7 @@ public class MeiTuanService {
             }
         }
 
-        Map<String, Object> meiTuanOrderMap = BeanUtils.beanToMap(meiTuanOrder);
+        Map<String, Object> meiTuanOrderMap = ApplicationHandler.toMap(meiTuanOrder);
         meiTuanOrderMap.put("poiReceiveDetail", poiReceiveDetail);
 
         List<Map<String, Object>> detail = new ArrayList<Map<String, Object>>();
