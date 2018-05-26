@@ -158,7 +158,7 @@ public class SaleFlowUtils {
         saleDetail.setTotalAmount(dietOrderDetail.getTotalAmount());
         saleDetail.setDiscountAmount(dietOrderDetail.getDiscountAmount());
         saleDetail.setPayableAmount(dietOrderDetail.getPayableAmount());
-        saleDetail.setPaidAmount(null);
+        saleDetail.setPaidAmount(dietOrderDetail.getPaidAmount());
         saleDetail.setCreateUserId(userId);
         saleDetail.setLastUpdateUserId(userId);
         return saleDetail;
