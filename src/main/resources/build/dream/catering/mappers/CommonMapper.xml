@@ -34,7 +34,7 @@
             GROUP BY groupBy
         </if>
         <if test="@org.apache.commons.lang.StringUtils@isNotBlank(orderBy)">
-            GROUP BY orderBy
+            ORDER BY orderBy
         </if>
     </sql>
 
