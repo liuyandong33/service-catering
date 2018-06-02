@@ -31,9 +31,6 @@ public class DietOrderService {
     @Autowired
     private SequenceMapper sequenceMapper;
 
-    private static final BigDecimal HUNDRED = BigDecimal.valueOf(100L);
-    private static final BigDecimal MINUS_ONE = BigDecimal.valueOf(-1L);
-
     /**
      * 获取订单明细
      *
@@ -389,15 +386,15 @@ public class DietOrderService {
                     if (discountType == 1) {
                         discountAmount = price.subtract(specialGoodsActivityBean.getSpecialPrice()).multiply(quantity);
                     } else {
-                        discountAmount = price.subtract(price.multiply(specialGoodsActivityBean.getDiscountRate()).divide(HUNDRED));
+                        discountAmount = price.subtract(price.multiply(specialGoodsActivityBean.getDiscountRate()).divide(Constants.BIG_DECIMAL_HUNDRED));
                     }
                     BigInteger activityId = specialGoodsActivityBean.getActivityId();
                     DietOrderActivity dietOrderActivity = dietOrderActivityMap.get(activityId);
                     if (dietOrderActivity == null) {
-                        dietOrderActivity = DietOrderUtils.constructDietOrderActivity(tenantId, tenantCode, branchId, dietOrderId, activityId, specialGoodsActivityBean.getActivityName(), specialGoodsActivityBean.getActivityType(), discountAmount.multiply(MINUS_ONE), userId, "保存订单活动信息！");
+                        dietOrderActivity = DietOrderUtils.constructDietOrderActivity(tenantId, tenantCode, branchId, dietOrderId, activityId, specialGoodsActivityBean.getActivityName(), specialGoodsActivityBean.getActivityType(), discountAmount.multiply(Constants.BIG_DECIMAL_MINUS_ONE), userId, "保存订单活动信息！");
                         dietOrderActivityMap.put(activityId, dietOrderActivity);
                     } else {
-                        dietOrderActivity.setAmount(dietOrderActivity.getAmount().multiply(discountAmount.multiply(MINUS_ONE)));
+                        dietOrderActivity.setAmount(dietOrderActivity.getAmount().multiply(discountAmount.multiply(Constants.BIG_DECIMAL_MINUS_ONE)));
                     }
                 }
 
@@ -445,10 +442,10 @@ public class DietOrderService {
             if (discountType == 1) {
                 fullReductionActivityDiscountAmount = fullReductionActivityBean.getDiscountAmount();
             } else if (discountType == 2) {
-                fullReductionActivityDiscountAmount = dietOrderTotalAmount.multiply(fullReductionActivityBean.getDiscountRate()).divide(HUNDRED);
+                fullReductionActivityDiscountAmount = dietOrderTotalAmount.multiply(fullReductionActivityBean.getDiscountRate()).divide(Constants.BIG_DECIMAL_HUNDRED);
             }
             dietOrderDiscountAmount = dietOrderDiscountAmount.add(fullReductionActivityDiscountAmount);
-            DietOrderActivity dietOrderActivity = DietOrderUtils.constructDietOrderActivity(tenantId, tenantCode, branchId, dietOrderId, fullReductionActivityBean.getActivityId(), fullReductionActivityBean.getActivityName(), fullReductionActivityBean.getActivityType(), fullReductionActivityDiscountAmount.multiply(MINUS_ONE), userId, "保存订单活动信息！");
+            DietOrderActivity dietOrderActivity = DietOrderUtils.constructDietOrderActivity(tenantId, tenantCode, branchId, dietOrderId, fullReductionActivityBean.getActivityId(), fullReductionActivityBean.getActivityName(), fullReductionActivityBean.getActivityType(), fullReductionActivityDiscountAmount.multiply(Constants.BIG_DECIMAL_MINUS_ONE), userId, "保存订单活动信息！");
             dietOrderActivityMap.put(fullReductionActivityBean.getActivityId(), dietOrderActivity);
         }
 
