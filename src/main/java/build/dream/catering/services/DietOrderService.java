@@ -4,7 +4,7 @@ import build.dream.catering.beans.BuyGiveActivityBean;
 import build.dream.catering.beans.FullReductionActivityBean;
 import build.dream.catering.beans.SpecialGoodsActivityBean;
 import build.dream.catering.constants.Constants;
-import build.dream.catering.mappers.*;
+import build.dream.catering.mappers.SequenceMapper;
 import build.dream.catering.models.dietorder.ObtainDietOrderInfoModel;
 import build.dream.catering.models.dietorder.SaveDietOrderModel;
 import build.dream.catering.utils.DatabaseHelper;
@@ -28,8 +28,6 @@ import java.util.*;
 
 @Service
 public class DietOrderService {
-    @Autowired
-    private GoodsMapper goodsMapper;
     @Autowired
     private SequenceMapper sequenceMapper;
 
