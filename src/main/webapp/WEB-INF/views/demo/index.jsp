@@ -13,11 +13,13 @@
     <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.4.3&key=fa275ed9080306f5c9d48d98cbbe1091"></script>
     <script type="text/javascript">
         $(function() {
-            var map = new AMap.Map("container", {
-                resizeEnable: true,
-                zoom: 20,
-                center: [116.397428, 39.90923]
-            });
+            var key = {
+                goodsInfo: {goodsId: 1, goodsName: "黄焖鸡米饭"},
+                goodsSpecificationInfo: {goodsSpecificationId: 1, goodsSpecificationName: "小份"},
+                flavorInfos: [{flavorGroupId: 1, flavorGroupName: "辣度", flavorId: 1, flavorName: "微辣"}],
+                quantity: 10
+            };
+            console.log(JSON.stringify(key));
         });
     </script>
 </head>
