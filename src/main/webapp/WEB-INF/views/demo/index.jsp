@@ -13,13 +13,22 @@
     <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.4.3&key=fa275ed9080306f5c9d48d98cbbe1091"></script>
     <script type="text/javascript">
         $(function() {
-            var key = {
+            var key = 'normal1_1_1_1';
+            var value = {
                 goodsInfo: {goodsId: 1, goodsName: "黄焖鸡米饭"},
                 goodsSpecificationInfo: {goodsSpecificationId: 1, goodsSpecificationName: "小份"},
                 flavorInfos: [{flavorGroupId: 1, flavorGroupName: "辣度", flavorId: 1, flavorName: "微辣"}],
                 quantity: 10
             };
-            console.log(JSON.stringify(key));
+
+            var shoppingCartInfo = {};
+            var shoppingCartGoodsInfo = shoppingCartInfo[key];
+            if (shoppingCartGoodsInfo) {
+                shoppingCartGoodsInfo["quantity"] = shoppingCartGoodsInfo["quantity"] + 1;
+            } else {
+                shoppingCartInfo[key] = value;
+            }
+            console.log(JSON.stringify(shoppingCartInfo));
         });
     </script>
 </head>
