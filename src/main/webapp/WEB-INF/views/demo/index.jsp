@@ -17,6 +17,7 @@
         var normalActivities = {};
         var categoryAndGoodsInfos = {};
         var goodsInfos = {};
+        var categories = [];
         $(function() {
             $.get("../goods/listGoodses", {tenantId: 1, branchId: 1}, function (result) {
                 if (result["successful"]) {
@@ -32,6 +33,7 @@
                         } else {
                             categoryAndGoodsInfos[categoryId] = [goodsInfo];
                         }
+                        categories.push({id: categoryId, name: goodsInfo["categoryName"]});
                     }
                 } else {
                     alert(result["error"]);
