@@ -2,13 +2,16 @@ package build.dream.catering.controllers;
 
 import build.dream.catering.models.goods.*;
 import build.dream.catering.services.GoodsService;
+import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.MethodCaller;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Map;
@@ -19,16 +22,11 @@ public class GoodsController extends BasicController {
     @Autowired
     private GoodsService goodsService;
 
-    @RequestMapping(value = "/listGoodses")
+    @RequestMapping(value = "/listGoodses", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @ApiRestAction(modelClass = ListGoodsesModel.class, serviceClass = GoodsService.class, serviceMethodName = "listGoodses", error = "查询菜品信息失败")
     public String listGoodses() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            ListGoodsesModel listGoodsesModel = ApplicationHandler.instantiateObject(ListGoodsesModel.class, requestParameters);
-            listGoodsesModel.validateAndThrow();
-            return goodsService.listGoodses(listGoodsesModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "查询菜品失败", requestParameters);
+        return null;
     }
 
     @RequestMapping(value = "/saveGoods")
