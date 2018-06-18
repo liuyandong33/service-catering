@@ -76,9 +76,6 @@
                 } else {
                     alert(result["error"]);
                 }
-
-                var totalAmount = 500;
-                alert(JSON.stringify(effectiveReductionActivity(totalAmount)));
             }, "json");
         });
         
@@ -103,29 +100,48 @@
         }
 
         function addGoods(goodsId) {
-            var key = 'normal1_1_1:1';
-            var value = {
-                goodsInfo: {goodsId: 1, goodsName: "黄焖鸡米饭"},
-                goodsSpecificationInfo: {goodsSpecificationId: 1, goodsSpecificationName: "小份"},
-                flavorInfos: [{flavorGroupId: 1, flavorGroupName: "辣度", flavorId: 1, flavorName: "微辣"}],
-                quantity: 10
-            };
+            var goodsInfo = goodsInfos[goodsId];
+            var goodsSpecifications = goodsInfo["goodsSpecifications"];
+            var flavorGroups = goodsInfo["flavorGroups"];
+            if (goodsSpecifications.length > 1 || (flavorGroups && flavorGroups.length > 0)) {
+                doAddGoods(goodsInfo, goodsSpecifications[0], undefined);
+            } else {
+                doAddGoods(goodsInfo, goodsSpecifications[0], undefined);
+            }
+        }
+        
+        function doAddGoods(goodsInfo, goodsSpecificationInfo, flavors) {
+            var pairs = [];
+            for (var index in flavors) {
+                var flavor = flavors[index];
+                pairs.push(flavor["flavorGroupId"] + ":" + flavor["flavorId"]);
+            }
+
+            var key = 'normal_' + goodsInfo["id"] + "_" + goodsSpecificationInfo["id"] + "_" + pairs.join("_");
 
             var shoppingCartInfo = {};
             var shoppingCartGoodsInfo = shoppingCartInfo[key];
             if (shoppingCartGoodsInfo) {
                 shoppingCartGoodsInfo["quantity"] = shoppingCartGoodsInfo["quantity"] + 1;
             } else {
-                shoppingCartInfo[key] = value;
+                shoppingCartInfo[key] = {
+                    goodsInfo: {goodsId: goodsInfo["id"], goodsName: goodsInfo["name"]},
+                    goodsSpecificationInfo: {goodsSpecificationId: goodsSpecificationInfo["id"], goodsSpecificationName: goodsSpecificationInfo["name"]},
+                    quantity: 1
+                };
+                if (flavors) {
+                    shoppingCartInfo[key]["flavors"] = flavors;
+                }
             }
             console.log(JSON.stringify(shoppingCartInfo));
         }
         
-        function subtractGoods() {
+        function subtractGoods(goodsId, goodsSpecificationId, flavors) {
             
         }
     </script>
 </head>
 <body>
+<button onclick="addGoods(1)">aa</button>
 </body>
 </html>
