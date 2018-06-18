@@ -15,24 +15,28 @@
         var fullReductionActivities = [];
         var paymentActivities = [];
         var normalActivities = {};
+        var categoryAndGoodsInfos = {};
+        var goodsInfos = {};
         $(function() {
-            var key = 'normal1_1_1_1';
-            var value = {
-                goodsInfo: {goodsId: 1, goodsName: "黄焖鸡米饭"},
-                goodsSpecificationInfo: {goodsSpecificationId: 1, goodsSpecificationName: "小份"},
-                flavorInfos: [{flavorGroupId: 1, flavorGroupName: "辣度", flavorId: 1, flavorName: "微辣"}],
-                quantity: 10
-            };
+            $.get("../goods/listGoodses", {tenantId: 1, branchId: 1}, function (result) {
+                if (result["successful"]) {
+                    var data = result["data"];
+                    for (var index in data) {
+                        var goodsInfo = data[index];
+                        goodsInfos[goodsInfo["id"]] = goodsInfo;
 
-            var shoppingCartInfo = {};
-            var shoppingCartGoodsInfo = shoppingCartInfo[key];
-            if (shoppingCartGoodsInfo) {
-                shoppingCartGoodsInfo["quantity"] = shoppingCartGoodsInfo["quantity"] + 1;
-            } else {
-                shoppingCartInfo[key] = value;
-            }
-            console.log(JSON.stringify(shoppingCartInfo));
-
+                        var categoryId = goodsInfo["categoryId"];
+                        var aa = categoryAndGoodsInfos[categoryId];
+                        if (aa) {
+                            categoryAndGoodsInfos[categoryId].push(goodsInfo);
+                        } else {
+                            categoryAndGoodsInfos[categoryId] = [goodsInfo];
+                        }
+                    }
+                } else {
+                    alert(result["error"]);
+                }
+            }, "json");
             $.get("../activity/listEffectiveActivities", {tenantId: 1, branchId: 1}, function (result) {
                 if (result["successful"]) {
                     var activities = result["data"];
@@ -95,6 +99,29 @@
                 }
             }
             return effectiveReductionActivity;
+        }
+
+        function addGoods(goodsId) {
+            var key = 'normal1_1_1:1';
+            var value = {
+                goodsInfo: {goodsId: 1, goodsName: "黄焖鸡米饭"},
+                goodsSpecificationInfo: {goodsSpecificationId: 1, goodsSpecificationName: "小份"},
+                flavorInfos: [{flavorGroupId: 1, flavorGroupName: "辣度", flavorId: 1, flavorName: "微辣"}],
+                quantity: 10
+            };
+
+            var shoppingCartInfo = {};
+            var shoppingCartGoodsInfo = shoppingCartInfo[key];
+            if (shoppingCartGoodsInfo) {
+                shoppingCartGoodsInfo["quantity"] = shoppingCartGoodsInfo["quantity"] + 1;
+            } else {
+                shoppingCartInfo[key] = value;
+            }
+            console.log(JSON.stringify(shoppingCartInfo));
+        }
+        
+        function subtractGoods() {
+            
         }
     </script>
 </head>
