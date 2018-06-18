@@ -347,6 +347,7 @@ public class ActivityService {
         ApiRest apiRest = new ApiRest();
         apiRest.setData(effectiveActivities);
         apiRest.setMessage("查询生效的活动成功！");
+        apiRest.setSuccessful(true);
         return apiRest;
     }
 
