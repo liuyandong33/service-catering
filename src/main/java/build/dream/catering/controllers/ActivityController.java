@@ -2,12 +2,15 @@ package build.dream.catering.controllers;
 
 import build.dream.catering.models.activity.*;
 import build.dream.catering.services.ActivityService;
+import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.MethodCaller;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Map;
@@ -81,16 +84,11 @@ public class ActivityController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/listEffectiveActivities")
+    @RequestMapping(value = "/listEffectiveActivities", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @ApiRestAction(modelClass = ListEffectiveActivitiesModel.class, serviceClass = ActivityService.class, serviceMethodName = "listEffectiveActivities", error = "查询生效的活动失败")
     public String listEffectiveActivities() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            ListEffectiveActivitiesModel listEffectiveActivitiesModel = ApplicationHandler.instantiateObject(ListEffectiveActivitiesModel.class, requestParameters);
-            listEffectiveActivitiesModel.validateAndThrow();
-            return activityService.listEffectiveActivities(listEffectiveActivitiesModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "查询生效的活动失败", requestParameters);
+        return null;
     }
 
     /**
