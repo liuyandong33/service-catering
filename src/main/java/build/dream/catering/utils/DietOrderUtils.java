@@ -48,7 +48,7 @@ public class DietOrderUtils {
         return dietOrderGroup;
     }
 
-    public static DietOrderDetail constructDietOrderDetail(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger dietOrderId, BigInteger dietOrderGroupId, BigInteger goodsId, String goodsName, BigInteger goodsSpecificationId, String goodsSpecificationName, BigInteger categoryId, BigDecimal price, BigDecimal flavorIncrease, Integer quantity, BigDecimal totalAmount, BigDecimal discountAmount, BigDecimal payableAmount, BigInteger userId, String lastUpdateRemark) {
+    public static DietOrderDetail constructDietOrderDetail(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger dietOrderId, BigInteger dietOrderGroupId, BigInteger goodsId, String goodsName, BigInteger goodsSpecificationId, String goodsSpecificationName, BigInteger categoryId, BigDecimal price, BigDecimal flavorIncrease, BigDecimal quantity, BigDecimal totalAmount, BigDecimal discountAmount, BigDecimal payableAmount, BigInteger userId, String lastUpdateRemark) {
         DietOrderDetail dietOrderDetail = new DietOrderDetail();
         dietOrderDetail.setTenantId(tenantId);
         dietOrderDetail.setTenantCode(tenantCode);
@@ -91,11 +91,11 @@ public class DietOrderUtils {
         return dietOrderDetailGoodsFlavor;
     }
 
-    public static BuyGiveActivityBean findBuyGiveActivityBean(BigInteger tenantId, BigInteger branchId, BigInteger goodsId, BigInteger goodsSpecificationId, Integer quantity) {
+    public static BuyGiveActivityBean findBuyGiveActivityBean(BigInteger tenantId, BigInteger branchId, BigInteger goodsId, BigInteger goodsSpecificationId, BigDecimal quantity) {
         String buyGiveActivityJson = CacheUtils.hget(Constants.KEY_BUY_GIVE_ACTIVITIES, tenantId + "_" + branchId + "_" + goodsId + "_" + goodsSpecificationId);
         if (StringUtils.isNotBlank(buyGiveActivityJson)) {
             BuyGiveActivityBean buyGiveActivityBean = GsonUtils.fromJson(buyGiveActivityJson, BuyGiveActivityBean.class);
-            if (quantity >= buyGiveActivityBean.getBuyQuantity()) {
+            if (quantity.compareTo(buyGiveActivityBean.getBuyQuantity()) > 0) {
                 return buyGiveActivityBean;
             }
         }

@@ -1,5 +1,6 @@
 package build.dream.catering.beans;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
 
@@ -59,7 +60,7 @@ public class BuyGiveActivityBean {
     /**
      * 购买数量
      */
-    private Integer buyQuantity;
+    private BigDecimal buyQuantity;
     /**
      * 赠送商品id
      */
@@ -79,7 +80,7 @@ public class BuyGiveActivityBean {
     /**
      * 赠送数量
      */
-    private Integer giveQuantity;
+    private BigDecimal giveQuantity;
 
     public BigInteger getTenantId() {
         return tenantId;
@@ -177,11 +178,11 @@ public class BuyGiveActivityBean {
         this.buyGoodsSpecificationName = buyGoodsSpecificationName;
     }
 
-    public Integer getBuyQuantity() {
+    public BigDecimal getBuyQuantity() {
         return buyQuantity;
     }
 
-    public void setBuyQuantity(Integer buyQuantity) {
+    public void setBuyQuantity(BigDecimal buyQuantity) {
         this.buyQuantity = buyQuantity;
     }
 
@@ -217,11 +218,11 @@ public class BuyGiveActivityBean {
         this.giveGoodsSpecificationName = giveGoodsSpecificationName;
     }
 
-    public Integer getGiveQuantity() {
+    public BigDecimal getGiveQuantity() {
         return giveQuantity;
     }
 
-    public void setGiveQuantity(Integer giveQuantity) {
+    public void setGiveQuantity(BigDecimal giveQuantity) {
         this.giveQuantity = giveQuantity;
     }
 }

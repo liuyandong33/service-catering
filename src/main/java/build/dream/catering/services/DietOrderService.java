@@ -375,7 +375,7 @@ public class DietOrderService {
                     }
                 }
 
-                BigDecimal quantity = BigDecimal.valueOf(detailInfo.getQuantity());
+                BigDecimal quantity = detailInfo.getQuantity();
                 BigDecimal price = goodsSpecification.getPrice();
                 BigDecimal totalAmount = price.add(flavorIncrease).multiply(quantity);
                 BigDecimal discountAmount = BigDecimal.ZERO;

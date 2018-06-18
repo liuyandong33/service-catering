@@ -8,6 +8,7 @@ import com.google.gson.annotations.SerializedName;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -159,7 +160,7 @@ public class SaveDietOrderModel extends BasicModel {
     public static class DetailInfo {
         private BigInteger goodsId;
         private BigInteger goodsSpecificationId;
-        private Integer quantity;
+        private BigDecimal quantity;
         @SerializedName(value = "flavors", alternate = "flavorInfos")
         private List<FlavorInfo> flavorInfos;
 
@@ -179,11 +180,11 @@ public class SaveDietOrderModel extends BasicModel {
             this.goodsSpecificationId = goodsSpecificationId;
         }
 
-        public Integer getQuantity() {
+        public BigDecimal getQuantity() {
             return quantity;
         }
 
-        public void setQuantity(Integer quantity) {
+        public void setQuantity(BigDecimal quantity) {
             this.quantity = quantity;
         }
 

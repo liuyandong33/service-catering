@@ -3,6 +3,7 @@ package build.dream.catering.utils;
 import build.dream.catering.constants.Constants;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.ApplicationHandler;
+import build.dream.common.utils.DatabaseUtils;
 import build.dream.common.utils.SearchCondition;
 import build.dream.common.utils.SearchModel;
 import org.apache.commons.collections.CollectionUtils;
@@ -13,40 +14,30 @@ import java.math.BigInteger;
 import java.util.*;
 
 public class SaleFlowUtils {
-    public static void writeSaleFlow(DietOrder dietOrder, List<DietOrderDetail> dietOrderDetails, List<DietOrderPayment> dietOrderPayments) {
-        Map<String, List<DietOrderDetail>> dietOrderDetailListMap = new HashMap<String, List<DietOrderDetail>>();
+    public static void writeSaleFlow(DietOrder dietOrder, List<DietOrderGroup> dietOrderGroups, List<DietOrderDetail> dietOrderDetails, List<DietOrderPayment> dietOrderPayments) {
+        Map<BigInteger, List<DietOrderDetail>> dietOrderDetailListMap = new HashMap<BigInteger, List<DietOrderDetail>>();
         for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
-            String key = dietOrderDetail.getGoodsId() + "_" + dietOrderDetail.getGoodsSpecificationId();
-            List<DietOrderDetail> dietOrderDetailList = dietOrderDetailListMap.get(key);
+            BigInteger dietOrderGroupId = dietOrderDetail.getDietOrderGroupId();
+            List<DietOrderDetail> dietOrderDetailList = dietOrderDetailListMap.get(dietOrderGroupId);
             if (CollectionUtils.isEmpty(dietOrderDetailList)) {
                 dietOrderDetailList = new ArrayList<DietOrderDetail>();
-                dietOrderDetailListMap.put(key, dietOrderDetailList);
+                dietOrderDetailListMap.put(dietOrderGroupId, dietOrderDetailList);
             }
             dietOrderDetailList.add(dietOrderDetail);
         }
 
-        List<DietOrderDetail> mergedDietOrderDetails = new ArrayList<DietOrderDetail>();
-        for (Map.Entry<String, List<DietOrderDetail>> entry : dietOrderDetailListMap.entrySet()) {
-            List<DietOrderDetail> dietOrderDetailList = entry.getValue();
-            if (dietOrderDetailList.size() > 1) {
-                BigDecimal quantity = BigDecimal.ZERO;
-                BigDecimal totalAmount = BigDecimal.ZERO;
-                BigDecimal discountAmount = BigDecimal.ZERO;
-                BigDecimal payableAmount = BigDecimal.ZERO;
-                for (DietOrderDetail dietOrderDetail : dietOrderDetailList) {
-                    quantity = quantity.add(dietOrderDetail.getQuantity());
-                    totalAmount = totalAmount.add(dietOrderDetail.getTotalAmount());
-                    discountAmount = discountAmount.add(dietOrderDetail.getDiscountAmount());
-                    payableAmount = payableAmount.add(dietOrderDetail.getPayableAmount());
-                }
-                DietOrderDetail mergedDietOrderDetail = ApplicationHandler.clone(DietOrderDetail.class, dietOrderDetailList.get(0));
-                mergedDietOrderDetail.setQuantity(quantity);
-                mergedDietOrderDetail.setTotalAmount(totalAmount);
-                mergedDietOrderDetail.setDiscountAmount(discountAmount);
-                mergedDietOrderDetail.setPayableAmount(payableAmount);
-                mergedDietOrderDetails.add(mergedDietOrderDetail);
-            } else {
-                mergedDietOrderDetails.add(ApplicationHandler.clone(DietOrderDetail.class, dietOrderDetailList.get(0)));
+        List<DietOrderDetail> normalDietOrderDetails = null;
+        List<DietOrderDetail> extraDietOrderDetails = null;
+        List<DietOrderDetail> discountDietOrderDetails = null;
+        for (DietOrderGroup dietOrderGroup : dietOrderGroups) {
+            String type = dietOrderGroup.getType();
+            BigInteger dietOrderGroupId = dietOrderGroup.getId();
+            if (Constants.NORMAL.equals(type)) {
+                normalDietOrderDetails = dietOrderDetailListMap.get(dietOrderGroupId);
+            } else if (Constants.EXTRA.equals(type)) {
+                extraDietOrderDetails = dietOrderDetailListMap.get(dietOrderGroupId);
+            } else if (Constants.DISCOUNT.equals(type)) {
+                discountDietOrderDetails = dietOrderDetailListMap.get(dietOrderGroupId);
             }
         }
 
@@ -81,10 +72,10 @@ public class SaleFlowUtils {
 
         BigInteger saleId = sale.getId();
 
-        calculateShare(mergedDietOrderDetails, totalAmount, discountAmount, payableAmount, paidAmount);
+        calculateShare(normalDietOrderDetails, totalAmount, discountAmount, payableAmount, paidAmount);
 
         List<SaleDetail> saleDetails = new ArrayList<SaleDetail>();
-        for (DietOrderDetail dietOrderDetail : mergedDietOrderDetails) {
+        for (DietOrderDetail dietOrderDetail : normalDietOrderDetails) {
             saleDetails.add(buildSaleDetail(saleId, saleTime, tenantId, tenantCode, branchId, dietOrderDetail, userId));
         }
         DatabaseHelper.insertAll(saleDetails);
@@ -96,16 +87,21 @@ public class SaleFlowUtils {
 
         List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
         searchConditions.add(new SearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId));
+        searchConditions.add(new SearchCondition("deleted", Constants.SQL_OPERATION_SYMBOL_EQUAL, 0));
 
-        SearchModel dietOrderDetailSearchModel = new SearchModel(true);
+        SearchModel dietOrderGroupSearchModel = new SearchModel();
+        dietOrderGroupSearchModel.setSearchConditions(searchConditions);
+        List<DietOrderGroup> dietOrderGroups = DatabaseHelper.findAll(DietOrderGroup.class, dietOrderGroupSearchModel);
+
+        SearchModel dietOrderDetailSearchModel = new SearchModel();
         dietOrderDetailSearchModel.setSearchConditions(searchConditions);
         List<DietOrderDetail> dietOrderDetails = DatabaseHelper.findAll(DietOrderDetail.class, dietOrderDetailSearchModel);
 
-        SearchModel dietOrderPaymentSearchModel = new SearchModel(true);
+        SearchModel dietOrderPaymentSearchModel = new SearchModel();
         dietOrderPaymentSearchModel.setSearchConditions(searchConditions);
         List<DietOrderPayment> dietOrderPayments = DatabaseHelper.findAll(DietOrderPayment.class, dietOrderPaymentSearchModel);
 
-        writeSaleFlow(dietOrder, dietOrderDetails, dietOrderPayments);
+        writeSaleFlow(dietOrder, dietOrderGroups, dietOrderDetails, dietOrderPayments);
     }
 
     public static void calculateShare(List<DietOrderDetail> dietOrderDetails, BigDecimal totalAmount, BigDecimal discountAmount, BigDecimal payableAmount, BigDecimal paidAmount) {
