@@ -13,6 +13,8 @@
     <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.4.3&key=fa275ed9080306f5c9d48d98cbbe1091"></script>
     <script type="text/javascript">
         var fullReductionActivities = [];
+        var paymentActivities = [];
+        var normalActivities = {};
         $(function() {
             var key = 'normal1_1_1_1';
             var value = {
@@ -40,43 +42,60 @@
                         var type = activity["type"];
                         if (type == 2) {
                             fullReductionActivities.push(activity);
+                        } else if (type == 4) {
+                            paymentActivities.push(activity);
+                        } else {
+                            normalActivities[activity["goodsId"] + "_" + activity["goodsSpecificationId"]] = activity;
                         }
                     }
+
+                    fullReductionActivities.sort(function (x, y) {
+                        if (x["totalAmount"] > y["totalAmount"]) {
+                            return 1;
+                        } else if ((x["totalAmount"] < y["totalAmount"])) {
+                            return -1;
+                        } else {
+                            return 0;
+                        }
+                    });
+
+                    paymentActivities.sort(function (x, y) {
+                        if (x["totalAmount"] > y["totalAmount"]) {
+                            return 1;
+                        } else if ((x["totalAmount"] < y["totalAmount"])) {
+                            return -1;
+                        } else {
+                            return 0;
+                        }
+                    });
                 } else {
                     alert(result["error"]);
                 }
 
-                fullReductionActivities.sort(function (x, y) {
-                    if (x["totalAmount"] > y["totalAmount"]) {
-                        return 1;
-                    } else if ((x["totalAmount"] < y["totalAmount"])) {
-                        return -1;
-                    } else {
-                        return 0;
-                    }
-                });
-
                 var totalAmount = 500;
-                var effectiveReductionActivity = undefined;
-                var length = fullReductionActivities.length;
+                alert(JSON.stringify(effectiveReductionActivity(totalAmount)));
+            }, "json");
+        });
+        
+        function effectiveReductionActivity(totalAmount) {
+            var effectiveReductionActivity = undefined;
+            var length = fullReductionActivities.length;
 
-                if (length > 0) {
-                    if (totalAmount < fullReductionActivities[0]["totalAmount"]) {
+            if (length > 0) {
+                if (totalAmount < fullReductionActivities[0]["totalAmount"]) {
 
-                    } else if (totalAmount >= fullReductionActivities[length - 1]["totalAmount"]) {
-                        effectiveReductionActivity = fullReductionActivities[length - 1];
-                    } else {
-                        for (var index = 0; index < length - 1; index++) {
-                            if (totalAmount >= fullReductionActivities[index]["totalAmount"] && totalAmount < fullReductionActivities[index + 1]["totalAmount"]) {
-                                effectiveReductionActivity = fullReductionActivities[index];
-                            }
+                } else if (totalAmount >= fullReductionActivities[length - 1]["totalAmount"]) {
+                    effectiveReductionActivity = fullReductionActivities[length - 1];
+                } else {
+                    for (var index = 0; index < length - 1; index++) {
+                        if (totalAmount >= fullReductionActivities[index]["totalAmount"] && totalAmount < fullReductionActivities[index + 1]["totalAmount"]) {
+                            effectiveReductionActivity = fullReductionActivities[index];
                         }
                     }
                 }
-
-                alert(JSON.stringify(effectiveReductionActivity));
-            }, "json");
-        });
+            }
+            return effectiveReductionActivity;
+        }
     </script>
 </head>
 <body>
