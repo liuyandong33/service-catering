@@ -10,7 +10,6 @@
 <head>
     <title>Title</title>
     <script type="text/javascript" src="../libraries/jquery/jquery-3.2.1.min.js"></script>
-    <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.4.3&key=fa275ed9080306f5c9d48d98cbbe1091"></script>
     <script type="text/javascript">
         var fullReductionActivities = [];
         var paymentActivities = [];
@@ -128,7 +127,5 @@
     </script>
 </head>
 <body>
-<div id="container" style="width: 800px;height: 400px;margin-left: auto;margin-right: auto;border-radius: 10px;">
-</div>
 </body>
 </html>
