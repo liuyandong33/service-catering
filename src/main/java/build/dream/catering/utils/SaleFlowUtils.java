@@ -2,8 +2,6 @@ package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
 import build.dream.common.erp.catering.domains.*;
-import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.DatabaseUtils;
 import build.dream.common.utils.SearchCondition;
 import build.dream.common.utils.SearchModel;
 import org.apache.commons.collections.CollectionUtils;
@@ -72,7 +70,7 @@ public class SaleFlowUtils {
 
         BigInteger saleId = sale.getId();
 
-        calculateShare(normalDietOrderDetails, totalAmount, discountAmount, payableAmount, paidAmount);
+        calculateShare(normalDietOrderDetails, discountAmount, payableAmount, paidAmount);
 
         List<SaleDetail> saleDetails = new ArrayList<SaleDetail>();
         for (DietOrderDetail dietOrderDetail : normalDietOrderDetails) {
@@ -104,10 +102,11 @@ public class SaleFlowUtils {
         writeSaleFlow(dietOrder, dietOrderGroups, dietOrderDetails, dietOrderPayments);
     }
 
-    public static void calculateShare(List<DietOrderDetail> dietOrderDetails, BigDecimal totalAmount, BigDecimal discountAmount, BigDecimal payableAmount, BigDecimal paidAmount) {
+    public static void calculateShare(List<DietOrderDetail> dietOrderDetails, BigDecimal discountAmount, BigDecimal payableAmount, BigDecimal paidAmount) {
         BigDecimal discountAmountShareSum = BigDecimal.ZERO;
         BigDecimal payableAmountShareSum = BigDecimal.ZERO;
         BigDecimal paidAmountShareSum = BigDecimal.ZERO;
+        BigDecimal denominator = obtainDenominator(dietOrderDetails);
 
         int size = dietOrderDetails.size();
         for (int index = 0; index < size; index++) {
@@ -121,7 +120,7 @@ public class SaleFlowUtils {
                 payableAmountShare = payableAmount.subtract(payableAmountShareSum);
                 paidAmountShare = paidAmount.subtract(paidAmountShareSum);
             } else {
-                BigDecimal weight = dietOrderDetail.getTotalAmount().divide(totalAmount, 10, BigDecimal.ROUND_DOWN);
+                BigDecimal weight = dietOrderDetail.getTotalAmount().divide(denominator, 10, BigDecimal.ROUND_DOWN);
                 discountAmountShare = discountAmount.multiply(weight).setScale(2, BigDecimal.ROUND_DOWN);
                 payableAmountShare = payableAmount.multiply(weight).setScale(2, BigDecimal.ROUND_DOWN);
                 paidAmountShare = paidAmount.multiply(weight).setScale(2, BigDecimal.ROUND_DOWN);
@@ -134,6 +133,14 @@ public class SaleFlowUtils {
             dietOrderDetail.setPayableAmount(payableAmountShare);
             dietOrderDetail.setPaidAmount(paidAmountShare);
         }
+    }
+
+    public static BigDecimal obtainDenominator(List<DietOrderDetail> dietOrderDetails) {
+        BigDecimal denominator = BigDecimal.ZERO;
+        for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
+            denominator = denominator.add(dietOrderDetail.getTotalAmount());
+        }
+        return denominator;
     }
 
     public static SaleDetail buildSaleDetail(BigInteger saleId, Date saleTime, BigInteger tenantId, String tenantCode, BigInteger branchId, DietOrderDetail dietOrderDetail, BigInteger userId) {
