@@ -4,6 +4,7 @@ import build.dream.catering.beans.BuyGiveActivityBean;
 import build.dream.catering.beans.FullReductionActivityBean;
 import build.dream.catering.beans.SpecialGoodsActivityBean;
 import build.dream.catering.constants.Constants;
+import build.dream.catering.mappers.ActivityMapper;
 import build.dream.catering.mappers.SequenceMapper;
 import build.dream.catering.models.dietorder.ObtainDietOrderInfoModel;
 import build.dream.catering.models.dietorder.SaveDietOrderModel;
@@ -12,6 +13,7 @@ import build.dream.catering.utils.DietOrderUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
+import build.dream.common.utils.DatabaseUtils;
 import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.SerialNumberGenerator;
 import org.apache.commons.collections.CollectionUtils;
@@ -30,6 +32,7 @@ import java.util.*;
 public class DietOrderService {
     @Autowired
     private SequenceMapper sequenceMapper;
+    private ActivityMapper activityMapper;
 
     /**
      * 获取订单明细
@@ -231,18 +234,16 @@ public class DietOrderService {
         List<BigInteger> goodsSpecificationIds = new ArrayList<BigInteger>();
         List<BigInteger> goodsFlavorGroupIds = new ArrayList<BigInteger>();
         List<BigInteger> goodsFlavorIds = new ArrayList<BigInteger>();
-        List<SaveDietOrderModel.GroupInfo> groupInfos = saveDietOrderModel.getGroupInfos();
-        for (SaveDietOrderModel.GroupInfo groupInfo : groupInfos) {
-            List<SaveDietOrderModel.DetailInfo> detailInfos = groupInfo.getDetailInfos();
-            for (SaveDietOrderModel.DetailInfo detailInfo : detailInfos) {
-                goodsIds.add(detailInfo.getGoodsId());
-                goodsSpecificationIds.add(detailInfo.getGoodsSpecificationId());
-                List<SaveDietOrderModel.FlavorInfo> flavorInfos = detailInfo.getFlavorInfos();
-                if (CollectionUtils.isNotEmpty(flavorInfos)) {
-                    for (SaveDietOrderModel.FlavorInfo flavorInfo : flavorInfos) {
-                        goodsFlavorGroupIds.add(flavorInfo.getFlavorGroupId());
-                        goodsFlavorIds.add(flavorInfo.getFlavorId());
-                    }
+        List<SaveDietOrderModel.GoodsInfo> goodsInfos = saveDietOrderModel.getGoodsInfos();
+        for (SaveDietOrderModel.GoodsInfo goodsInfo : goodsInfos) {
+            goodsIds.add(goodsInfo.getGoodsId());
+            goodsSpecificationIds.add(goodsInfo.getGoodsSpecificationId());
+
+            List<SaveDietOrderModel.FlavorInfo> flavorInfos = goodsInfo.getFlavorInfos();
+            if (CollectionUtils.isNotEmpty(flavorInfos)) {
+                for (SaveDietOrderModel.FlavorInfo flavorInfo : flavorInfos) {
+                    goodsFlavorGroupIds.add(flavorInfo.getFlavorGroupId());
+                    goodsFlavorIds.add(flavorInfo.getFlavorId());
                 }
             }
         }
@@ -346,82 +347,100 @@ public class DietOrderService {
         // 用来保存订单活动
         Map<BigInteger, DietOrderActivity> dietOrderActivityMap = new HashMap<BigInteger, DietOrderActivity>();
 
-        for (SaveDietOrderModel.GroupInfo groupInfo : groupInfos) {
-            DietOrderGroup dietOrderGroup = DietOrderUtils.constructDietOrderGroup(tenantId, tenantCode, branchId, dietOrderId, groupInfo.getName(), groupInfo.getType(), userId, "保存订单分组信息！");
+        List<EffectiveActivity> effectiveActivities = activityMapper.callProcedureEffectiveActivity(tenantId, branchId);
+        Map<String, EffectiveActivity> effectiveActivityMap = new HashMap<String, EffectiveActivity>();
+        for (EffectiveActivity effectiveActivity : effectiveActivities) {
+            int type = effectiveActivity.getType();
+            if (type == 1 || type == 3) {
+                effectiveActivityMap.put(effectiveActivity.getGoodsId() + "_" + effectiveActivity.getGoodsSpecificationId(), effectiveActivity);
+            }
+        }
+
+        DietOrderGroup discountDietOrderGroup = null;
+        for (SaveDietOrderModel.GoodsInfo goodsInfo : goodsInfos) {
+            DietOrderGroup dietOrderGroup = DietOrderGroup.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).name("正常的菜品").type(Constants.NORMAL).createUserId(userId).lastUpdateUserId(userId).lastUpdateRemark("保存订单分组信息！").build();
             DatabaseHelper.insert(dietOrderGroup);
 
-            List<SaveDietOrderModel.DetailInfo> detailInfos = groupInfo.getDetailInfos();
-            for (SaveDietOrderModel.DetailInfo detailInfo : detailInfos) {
-                Goods goods = goodsMap.get(detailInfo.getGoodsId());
-                Validate.notNull(goods, "商品不存在！");
+            Goods goods = goodsMap.get(goodsInfo.getGoodsId());
+            Validate.notNull(goods, "商品不存在！");
 
-                GoodsSpecification goodsSpecification = goodsSpecificationMap.get(detailInfo.getGoodsSpecificationId());
-                Validate.notNull(goodsSpecification, "商品规格不存在！");
+            GoodsSpecification goodsSpecification = goodsSpecificationMap.get(goodsInfo.getGoodsSpecificationId());
+            Validate.notNull(goodsSpecification, "商品规格不存在！");
 
-                BigDecimal flavorIncrease = BigDecimal.ZERO;
-                List<SaveDietOrderModel.FlavorInfo> flavorInfos = detailInfo.getFlavorInfos();
-                List<DietOrderDetailGoodsFlavor> dietOrderDetailGoodsFlavors = new ArrayList<DietOrderDetailGoodsFlavor>();
-                if (CollectionUtils.isNotEmpty(flavorInfos)) {
-                    for (SaveDietOrderModel.FlavorInfo flavorInfo : flavorInfos) {
-                        GoodsFlavorGroup goodsFlavorGroup = goodsFlavorGroupMap.get(flavorInfo.getFlavorGroupId());
-                        Validate.notNull(goodsFlavorGroup, "口味组不存在！");
+            BigDecimal flavorIncrease = BigDecimal.ZERO;
+            List<SaveDietOrderModel.FlavorInfo> flavorInfos = goodsInfo.getFlavorInfos();
+            List<DietOrderDetailGoodsFlavor> dietOrderDetailGoodsFlavors = new ArrayList<DietOrderDetailGoodsFlavor>();
+            if (CollectionUtils.isNotEmpty(flavorInfos)) {
+                for (SaveDietOrderModel.FlavorInfo flavorInfo : flavorInfos) {
+                    GoodsFlavorGroup goodsFlavorGroup = goodsFlavorGroupMap.get(flavorInfo.getFlavorGroupId());
+                    Validate.notNull(goodsFlavorGroup, "口味组不存在！");
 
-                        GoodsFlavor goodsFlavor = goodsFlavorMap.get(flavorInfo.getFlavorId());
-                        Validate.notNull(goodsFlavor, "口味不存在！");
-                        flavorIncrease = flavorIncrease.add(goodsFlavor.getPrice());
+                    GoodsFlavor goodsFlavor = goodsFlavorMap.get(flavorInfo.getFlavorId());
+                    Validate.notNull(goodsFlavor, "口味不存在！");
+                    flavorIncrease = flavorIncrease.add(goodsFlavor.getPrice());
 
-                        DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor = DietOrderUtils.constructDietOrderDetailGoodsFlavor(tenantId, tenantCode, branchId, dietOrderId, dietOrderGroup.getId(), null, goodsFlavorGroup.getId(), goodsFlavorGroup.getName(), goodsFlavor.getId(), goodsFlavor.getName(), goodsFlavor.getPrice(), userId, "保存订单口味信息！");
-                        dietOrderDetailGoodsFlavors.add(dietOrderDetailGoodsFlavor);
-                    }
+                    DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor = DietOrderDetailGoodsFlavor.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(dietOrderGroup.getId()).dietOrderDetailId(null).goodsFlavorGroupId(goodsFlavorGroup.getId()).goodsFlavorGroupName(goodsFlavorGroup.getName()).goodsFlavorId(goodsFlavor.getId()).goodsFlavorName(goodsFlavor.getName()).price(goodsFlavor.getPrice()).createUserId(userId).lastUpdateUserId(userId).build();
+                    dietOrderDetailGoodsFlavors.add(dietOrderDetailGoodsFlavor);
                 }
+            }
 
-                BigDecimal quantity = detailInfo.getQuantity();
-                BigDecimal price = goodsSpecification.getPrice();
-                BigDecimal totalAmount = price.add(flavorIncrease).multiply(quantity);
-                BigDecimal discountAmount = BigDecimal.ZERO;
-                // 处理特价商品
-                SpecialGoodsActivityBean specialGoodsActivityBean = DietOrderUtils.findSpecialGoodsActivityBean(tenantId, branchId, goods.getId(), goodsSpecification.getId());
-                if (specialGoodsActivityBean != null) {
-                    Integer discountType = specialGoodsActivityBean.getDiscountType();
-                    if (discountType == 1) {
-                        discountAmount = price.subtract(specialGoodsActivityBean.getSpecialPrice()).multiply(quantity);
-                    } else {
-                        discountAmount = price.subtract(price.multiply(specialGoodsActivityBean.getDiscountRate()).divide(Constants.BIG_DECIMAL_HUNDRED));
-                    }
-                    BigInteger activityId = specialGoodsActivityBean.getActivityId();
-                    DietOrderActivity dietOrderActivity = dietOrderActivityMap.get(activityId);
-                    if (dietOrderActivity == null) {
-                        dietOrderActivity = DietOrderUtils.constructDietOrderActivity(tenantId, tenantCode, branchId, dietOrderId, activityId, specialGoodsActivityBean.getActivityName(), specialGoodsActivityBean.getActivityType(), discountAmount.multiply(Constants.BIG_DECIMAL_MINUS_ONE), userId, "保存订单活动信息！");
-                        dietOrderActivityMap.put(activityId, dietOrderActivity);
-                    } else {
-                        dietOrderActivity.setAmount(dietOrderActivity.getAmount().multiply(discountAmount.multiply(Constants.BIG_DECIMAL_MINUS_ONE)));
-                    }
-                }
+            BigDecimal quantity = goodsInfo.getQuantity();
+            BigDecimal price = goodsSpecification.getPrice();
+            BigDecimal totalAmount = price.add(flavorIncrease).multiply(quantity);
+            BigDecimal discountAmount = BigDecimal.ZERO;
+            // 开始处理促销活动
+            EffectiveActivity effectiveActivity = effectiveActivityMap.get(goods.getId() + "_" + goodsSpecification.getId());
+            if (effectiveActivity != null) {
+                int type = effectiveActivity.getType();
 
-                dietOrderDiscountAmount = dietOrderDiscountAmount.add(discountAmount);
-                BigDecimal payableAmount = totalAmount.subtract(discountAmount);
-                DietOrderDetail dietOrderDetail = DietOrderUtils.constructDietOrderDetail(tenantId, tenantCode, branchId, dietOrderId, dietOrderGroup.getId(), goods.getId(), goods.getName(), goodsSpecification.getId(), goodsSpecification.getName(), goods.getCategoryId(), goodsSpecification.getPrice(), flavorIncrease, detailInfo.getQuantity(), totalAmount, discountAmount, payableAmount, userId, "保存订单详情信息！");
-                DatabaseHelper.insert(dietOrderDetail);
+                // 买A赠B活动
+                if (type == 1) {
+                    if (quantity.compareTo(effectiveActivity.getBuyQuantity()) >= 0) {
+                        if (discountDietOrderGroup == null) {
+                            discountDietOrderGroup = DietOrderGroup.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).name("赠送的菜品").type(Constants.DISCOUNT).createUserId(userId).lastUpdateUserId(userId).lastUpdateRemark("保存订单分组信息！").build();
+                            DatabaseHelper.insert(discountDietOrderGroup);
+                        }
 
-                if (CollectionUtils.isNotEmpty(dietOrderDetailGoodsFlavors)) {
-                    for (DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor : dietOrderDetailGoodsFlavors) {
-                        dietOrderDetailGoodsFlavor.setDietOrderDetailId(dietOrderDetail.getId());
-                    }
-                    DatabaseHelper.insertAll(dietOrderDetailGoodsFlavors);
-                }
-                dietOrderTotalAmount = dietOrderTotalAmount.add(totalAmount);
-
-                // 处理买A赠B活动
-                BuyGiveActivityBean buyGiveActivityBean = DietOrderUtils.findBuyGiveActivityBean(tenantId, branchId, goods.getId(), goodsSpecification.getId(), detailInfo.getQuantity());
-                if (buyGiveActivityBean != null) {
-                    DietOrderDetail giveDietOrderDetail = DietOrderUtils.constructDietOrderDetail(tenantId, tenantCode, branchId, dietOrderId, null, buyGiveActivityBean.getGiveGoodsId(), buyGiveActivityBean.getGiveGoodsName(), buyGiveActivityBean.getGiveGoodsSpecificationId(), buyGiveActivityBean.getGiveGoodsSpecificationName(), BigInteger.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, buyGiveActivityBean.getGiveQuantity(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, userId, "保存订单详情信息！");
-                    giveDietOrderDetails.add(giveDietOrderDetail);
-                    if (!dietOrderActivityMap.containsKey(buyGiveActivityBean.getActivityId())) {
-                        DietOrderActivity dietOrderActivity = DietOrderUtils.constructDietOrderActivity(tenantId, tenantCode, branchId, dietOrderId, buyGiveActivityBean.getActivityId(), buyGiveActivityBean.getActivityName(), buyGiveActivityBean.getActivityType(), BigDecimal.ZERO, userId, "保存订单活动信息！");
-                        dietOrderActivityMap.put(buyGiveActivityBean.getActivityId(), dietOrderActivity);
+                        BigDecimal giveTotalAmount = effectiveActivity.getSpecialPrice();
+                        DietOrderDetail giveDietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(discountDietOrderGroup.getId()).goodsId(effectiveActivity.getGiveGoodsId()).goodsName("").goodsSpecificationId(effectiveActivity.getGoodsSpecificationId()).goodsSpecificationName("").categoryId(BigInteger.ZERO).categoryName("").price(BigDecimal.ZERO).flavorIncrease(BigDecimal.ZERO).quantity(effectiveActivity.getGiveQuantity()).totalAmount().build()
+                        giveDietOrderDetails.add(giveDietOrderDetail);
+                        if (!dietOrderActivityMap.containsKey(buyGiveActivityBean.getActivityId())) {
+                            DietOrderActivity dietOrderActivity = DietOrderUtils.constructDietOrderActivity(tenantId, tenantCode, branchId, dietOrderId, buyGiveActivityBean.getActivityId(), buyGiveActivityBean.getActivityName(), buyGiveActivityBean.getActivityType(), BigDecimal.ZERO, userId, "保存订单活动信息！");
+                            dietOrderActivityMap.put(buyGiveActivityBean.getActivityId(), dietOrderActivity);
+                        }
                     }
                 }
             }
+            SpecialGoodsActivityBean specialGoodsActivityBean = DietOrderUtils.findSpecialGoodsActivityBean(tenantId, branchId, goods.getId(), goodsSpecification.getId());
+            if (specialGoodsActivityBean != null) {
+                Integer discountType = specialGoodsActivityBean.getDiscountType();
+                if (discountType == 1) {
+                    discountAmount = price.subtract(specialGoodsActivityBean.getSpecialPrice()).multiply(quantity);
+                } else {
+                    discountAmount = price.subtract(price.multiply(specialGoodsActivityBean.getDiscountRate()).divide(Constants.BIG_DECIMAL_HUNDRED));
+                }
+                BigInteger activityId = specialGoodsActivityBean.getActivityId();
+                DietOrderActivity dietOrderActivity = dietOrderActivityMap.get(activityId);
+                if (dietOrderActivity == null) {
+                    dietOrderActivity = DietOrderUtils.constructDietOrderActivity(tenantId, tenantCode, branchId, dietOrderId, activityId, specialGoodsActivityBean.getActivityName(), specialGoodsActivityBean.getActivityType(), discountAmount.multiply(Constants.BIG_DECIMAL_MINUS_ONE), userId, "保存订单活动信息！");
+                    dietOrderActivityMap.put(activityId, dietOrderActivity);
+                } else {
+                    dietOrderActivity.setAmount(dietOrderActivity.getAmount().multiply(discountAmount.multiply(Constants.BIG_DECIMAL_MINUS_ONE)));
+                }
+            }
+
+            dietOrderDiscountAmount = dietOrderDiscountAmount.add(discountAmount);
+            BigDecimal payableAmount = totalAmount.subtract(discountAmount);
+            DietOrderDetail dietOrderDetail = DietOrderUtils.constructDietOrderDetail(tenantId, tenantCode, branchId, dietOrderId, dietOrderGroup.getId(), goods.getId(), goods.getName(), goodsSpecification.getId(), goodsSpecification.getName(), goods.getCategoryId(), goodsSpecification.getPrice(), flavorIncrease, detailInfo.getQuantity(), totalAmount, discountAmount, payableAmount, userId, "保存订单详情信息！");
+            DatabaseHelper.insert(dietOrderDetail);
+
+            if (CollectionUtils.isNotEmpty(dietOrderDetailGoodsFlavors)) {
+                for (DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor : dietOrderDetailGoodsFlavors) {
+                    dietOrderDetailGoodsFlavor.setDietOrderDetailId(dietOrderDetail.getId());
+                }
+                DatabaseHelper.insertAll(dietOrderDetailGoodsFlavors);
+            }
+            dietOrderTotalAmount = dietOrderTotalAmount.add(totalAmount);
         }
 
         if (CollectionUtils.isNotEmpty(giveDietOrderDetails)) {

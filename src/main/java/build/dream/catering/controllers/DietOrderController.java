@@ -3,15 +3,14 @@ package build.dream.catering.controllers;
 import build.dream.catering.models.dietorder.ObtainDietOrderInfoModel;
 import build.dream.catering.models.dietorder.SaveDietOrderModel;
 import build.dream.catering.services.DietOrderService;
+import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.controllers.BasicController;
-import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.MethodCaller;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.util.Map;
 
 @Controller
 @RequestMapping(value = "/dietOrder")
@@ -24,16 +23,11 @@ public class DietOrderController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/obtainDietOrderInfo")
+    @RequestMapping(value = "/obtainDietOrderInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @ApiRestAction(modelClass = ObtainDietOrderInfoModel.class, serviceClass = DietOrderService.class, serviceMethodName = "obtainDietOrderInfo", error = "获取订单信息失败")
     public String obtainDietOrderInfo() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            ObtainDietOrderInfoModel obtainDietOrderInfoModel = ApplicationHandler.instantiateObject(ObtainDietOrderInfoModel.class, requestParameters);
-            obtainDietOrderInfoModel.validateAndThrow();
-            return dietOrderService.obtainDietOrderInfo(obtainDietOrderInfoModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "获取订单信息失败", requestParameters);
+        return null;
     }
 
     /**
@@ -41,18 +35,10 @@ public class DietOrderController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/saveDietOrder")
+    @RequestMapping(value = "/saveDietOrder", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @ApiRestAction(modelClass = SaveDietOrderModel.class, serviceClass = DietOrderService.class, serviceMethodName = "saveDietOrder", error = "保存订单失败")
     public String saveDietOrder() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            SaveDietOrderModel saveDietOrderModel = ApplicationHandler.instantiateObject(SaveDietOrderModel.class, requestParameters);
-            String groups = requestParameters.get("groups");
-            saveDietOrderModel.setGroupInfos(groups);
-            saveDietOrderModel.validateAndThrow();
-
-            return dietOrderService.saveDietOrder(saveDietOrderModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "保存订单失败", requestParameters);
+        return null;
     }
 }

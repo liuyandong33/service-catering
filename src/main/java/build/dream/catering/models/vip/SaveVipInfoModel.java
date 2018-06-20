@@ -1,5 +1,6 @@
 package build.dream.catering.models.vip;
 
+import build.dream.common.annotations.DateFormat;
 import build.dream.common.models.BasicModel;
 import build.dream.common.utils.ApplicationHandler;
 import org.apache.commons.lang.StringUtils;
@@ -25,6 +26,7 @@ public class SaveVipInfoModel extends BasicModel {
     @Length(max = 20)
     private String vipName;
 
+    @DateFormat(pattern = "yyyy-MM-dd")
     private Date birthday;
 
     @Length(max = 20)

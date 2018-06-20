@@ -41,7 +41,7 @@ public class CallActionAspect {
 
         Throwable throwable = null;
         try {
-            returnValue = callAction(proceedingJoinPoint, requestParameters, apiRestAction.modelClass(), apiRestAction.serviceClass(), apiRestAction.serviceMethodName(), apiRestAction.datePattern());
+            returnValue = callAction(proceedingJoinPoint, requestParameters, apiRestAction.modelClass(), apiRestAction.serviceClass(), apiRestAction.serviceMethodName());
         } catch (InvocationTargetException e) {
             throwable = e.getTargetException();
         } catch (Throwable t) {
@@ -59,10 +59,10 @@ public class CallActionAspect {
         return returnValue;
     }
 
-    public Object callAction(ProceedingJoinPoint proceedingJoinPoint, Map<String, String> requestParameters, Class<? extends BasicModel> modelClass, Class<?> serviceClass, String serviceMethodName, String datePattern) throws Throwable {
+    public Object callAction(ProceedingJoinPoint proceedingJoinPoint, Map<String, String> requestParameters, Class<? extends BasicModel> modelClass, Class<?> serviceClass, String serviceMethodName) throws Throwable {
         Object returnValue = null;
         if (modelClass != BasicModel.class && serviceClass != Object.class && StringUtils.isNotBlank(serviceMethodName)) {
-            BasicModel model = ApplicationHandler.instantiateObject(modelClass, requestParameters, datePattern, "");
+            BasicModel model = ApplicationHandler.instantiateObject(modelClass, requestParameters);
             model.validateAndThrow();
 
             Method method = serviceClass.getDeclaredMethod(serviceMethodName, modelClass);

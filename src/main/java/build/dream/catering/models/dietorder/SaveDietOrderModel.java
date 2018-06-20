@@ -38,7 +38,11 @@ public class SaveDietOrderModel extends BasicModel {
     @NotNull
     private BigInteger userId;
 
-    private List<GroupInfo> groupInfos;
+    private List<GoodsInfo> goodsInfos;
+
+    public static String[] getInvoiceTypes() {
+        return INVOICE_TYPES;
+    }
 
     public BigInteger getTenantId() {
         return tenantId;
@@ -72,27 +76,6 @@ public class SaveDietOrderModel extends BasicModel {
         this.orderType = orderType;
     }
 
-    public BigInteger getUserId() {
-        return userId;
-    }
-
-    public void setUserId(BigInteger userId) {
-        this.userId = userId;
-    }
-
-    public List<GroupInfo> getGroupInfos() {
-        return groupInfos;
-    }
-
-    public void setGroupInfos(List<GroupInfo> groupInfos) {
-        this.groupInfos = groupInfos;
-    }
-
-    public void setGroupInfos(String groups) {
-        ApplicationHandler.validateJson(groups, "build/dream/catering/schemas/groupsSchema.json", "groups");
-        this.groupInfos = GsonUtils.jsonToList(groups, GroupInfo.class);
-    }
-
     public Boolean getInvoiced() {
         return invoiced;
     }
@@ -109,59 +92,40 @@ public class SaveDietOrderModel extends BasicModel {
         this.invoiceType = invoiceType;
     }
 
-    public void setInvoice(String invoice) {
-        this.invoice = invoice;
-    }
-
     public String getInvoice() {
         return invoice;
     }
 
-    @Override
-    public void validateAndThrow() {
-        super.validateAndThrow();
-        if (invoiced) {
-            ApplicationHandler.inArray(INVOICE_TYPES, invoiceType, "invoiceType");
-            ApplicationHandler.notBlank(invoice, "invoice");
-        }
+    public void setInvoice(String invoice) {
+        this.invoice = invoice;
     }
 
-    public static class GroupInfo {
-        private String name;
-        private String type;
-        @SerializedName(value = "details", alternate = "detailInfos")
-        private List<DetailInfo> detailInfos;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
-        }
-
-        public List<DetailInfo> getDetailInfos() {
-            return detailInfos;
-        }
-
-        public void setDetailInfos(List<DetailInfo> detailInfos) {
-            this.detailInfos = detailInfos;
-        }
+    public BigInteger getUserId() {
+        return userId;
     }
 
-    public static class DetailInfo {
+    public void setUserId(BigInteger userId) {
+        this.userId = userId;
+    }
+
+    public List<GoodsInfo> getGoodsInfos() {
+        return goodsInfos;
+    }
+
+    public void setGoodsInfos(List<GoodsInfo> goodsInfos) {
+        this.goodsInfos = goodsInfos;
+    }
+
+    public static class GoodsInfo extends BasicModel {
+        @NotNull
         private BigInteger goodsId;
+
+        @NotNull
         private BigInteger goodsSpecificationId;
+
+        @NotNull
         private BigDecimal quantity;
-        @SerializedName(value = "flavors", alternate = "flavorInfos")
+
         private List<FlavorInfo> flavorInfos;
 
         public BigInteger getGoodsId() {
@@ -197,8 +161,11 @@ public class SaveDietOrderModel extends BasicModel {
         }
     }
 
-    public static class FlavorInfo {
+    public static class FlavorInfo extends BasicModel {
+        @NotNull
         private BigInteger flavorGroupId;
+
+        @NotNull
         private BigInteger flavorId;
 
         public BigInteger getFlavorGroupId() {

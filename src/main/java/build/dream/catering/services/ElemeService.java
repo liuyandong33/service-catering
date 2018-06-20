@@ -592,7 +592,7 @@ public class ElemeService {
             elemeGroupMap.put("items", items);
             groups.add(elemeGroupMap);
         }
-        Map<String, Object> elemeOrderMap = BeanUtils.beanToMap(elemeOrder);
+        Map<String, Object> elemeOrderMap = ApplicationHandler.toMap(elemeOrder);
         elemeOrderMap.put("groups", groups);
         List<Map<String, Object>> orderActivities = new ArrayList<Map<String, Object>>();
         if (CollectionUtils.isNotEmpty(elemeActivities)) {
