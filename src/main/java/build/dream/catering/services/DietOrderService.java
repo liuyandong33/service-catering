@@ -1,6 +1,5 @@
 package build.dream.catering.services;
 
-import build.dream.catering.beans.BuyGiveActivityBean;
 import build.dream.catering.beans.FullReductionActivityBean;
 import build.dream.catering.beans.SpecialGoodsActivityBean;
 import build.dream.catering.constants.Constants;
@@ -13,7 +12,6 @@ import build.dream.catering.utils.DietOrderUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
-import build.dream.common.utils.DatabaseUtils;
 import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.SerialNumberGenerator;
 import org.apache.commons.collections.CollectionUtils;
@@ -32,6 +30,7 @@ import java.util.*;
 public class DietOrderService {
     @Autowired
     private SequenceMapper sequenceMapper;
+    @Autowired
     private ActivityMapper activityMapper;
 
     /**
@@ -401,37 +400,35 @@ public class DietOrderService {
                             DatabaseHelper.insert(discountDietOrderGroup);
                         }
 
-                        BigDecimal giveTotalAmount = effectiveActivity.getSpecialPrice();
-                        DietOrderDetail giveDietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(discountDietOrderGroup.getId()).goodsId(effectiveActivity.getGiveGoodsId()).goodsName("").goodsSpecificationId(effectiveActivity.getGoodsSpecificationId()).goodsSpecificationName("").categoryId(BigInteger.ZERO).categoryName("").price(BigDecimal.ZERO).flavorIncrease(BigDecimal.ZERO).quantity(effectiveActivity.getGiveQuantity()).totalAmount().build()
-                        giveDietOrderDetails.add(giveDietOrderDetail);
-                        if (!dietOrderActivityMap.containsKey(buyGiveActivityBean.getActivityId())) {
-                            DietOrderActivity dietOrderActivity = DietOrderUtils.constructDietOrderActivity(tenantId, tenantCode, branchId, dietOrderId, buyGiveActivityBean.getActivityId(), buyGiveActivityBean.getActivityName(), buyGiveActivityBean.getActivityType(), BigDecimal.ZERO, userId, "保存订单活动信息！");
-                            dietOrderActivityMap.put(buyGiveActivityBean.getActivityId(), dietOrderActivity);
-                        }
+                        BigDecimal giveQuantity = quantity.divide(effectiveActivity.getBuyQuantity()).setScale(0, BigDecimal.ROUND_FLOOR).multiply(effectiveActivity.getGiveQuantity());
+                        BigDecimal giveTotalAmount = effectiveActivity.getGivePrice().multiply(giveQuantity);
+                        discountAmount = discountAmount.add(giveTotalAmount);
+
+                        DietOrderDetail giveDietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(discountDietOrderGroup.getId()).goodsId(effectiveActivity.getGiveGoodsId()).goodsName(effectiveActivity.getGiveGoodsName()).goodsSpecificationId(effectiveActivity.getGoodsSpecificationId()).goodsSpecificationName(effectiveActivity.getGiveGoodsSpecificationName()).categoryId(BigInteger.ZERO).categoryName("").price(effectiveActivity.getGivePrice()).flavorIncrease(BigDecimal.ZERO).quantity(giveQuantity).totalAmount(giveTotalAmount).discountAmount(giveTotalAmount).payableAmount(BigDecimal.ZERO).paidAmount(BigDecimal.ZERO).build();
+                        DatabaseHelper.insert(giveDietOrderDetail);
                     }
-                }
-            }
-            SpecialGoodsActivityBean specialGoodsActivityBean = DietOrderUtils.findSpecialGoodsActivityBean(tenantId, branchId, goods.getId(), goodsSpecification.getId());
-            if (specialGoodsActivityBean != null) {
-                Integer discountType = specialGoodsActivityBean.getDiscountType();
-                if (discountType == 1) {
-                    discountAmount = price.subtract(specialGoodsActivityBean.getSpecialPrice()).multiply(quantity);
-                } else {
-                    discountAmount = price.subtract(price.multiply(specialGoodsActivityBean.getDiscountRate()).divide(Constants.BIG_DECIMAL_HUNDRED));
-                }
-                BigInteger activityId = specialGoodsActivityBean.getActivityId();
-                DietOrderActivity dietOrderActivity = dietOrderActivityMap.get(activityId);
-                if (dietOrderActivity == null) {
-                    dietOrderActivity = DietOrderUtils.constructDietOrderActivity(tenantId, tenantCode, branchId, dietOrderId, activityId, specialGoodsActivityBean.getActivityName(), specialGoodsActivityBean.getActivityType(), discountAmount.multiply(Constants.BIG_DECIMAL_MINUS_ONE), userId, "保存订单活动信息！");
-                    dietOrderActivityMap.put(activityId, dietOrderActivity);
-                } else {
-                    dietOrderActivity.setAmount(dietOrderActivity.getAmount().multiply(discountAmount.multiply(Constants.BIG_DECIMAL_MINUS_ONE)));
+                    BigDecimal normalTotalAmount = goodsSpecification.getPrice().multiply(quantity);
+                    totalAmount = totalAmount.add(normalTotalAmount);
+                    DietOrderDetail dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(discountDietOrderGroup.getId()).goodsId(effectiveActivity.getGiveGoodsId()).goodsName(goods.getName()).goodsSpecificationId(effectiveActivity.getGoodsSpecificationId()).goodsSpecificationName(goodsSpecification.getName()).categoryId(goods.getCategoryId()).categoryName("").price(goodsSpecification.getPrice()).flavorIncrease(flavorIncrease).quantity(quantity).totalAmount(normalTotalAmount).discountAmount(BigDecimal.ZERO).payableAmount(normalTotalAmount).paidAmount(BigDecimal.ZERO).build();
+                    DatabaseHelper.insert(dietOrderDetail);
+                } else if (type == 3) {
+                    BigDecimal specialPrice = null;
+                    int discountType = effectiveActivity.getDiscountType();
+                    if (discountType == 1) {
+                        specialPrice = effectiveActivity.getSpecialPrice();
+                    } else if (discountType == 2) {
+                        specialPrice = goodsSpecification.getPrice().multiply(effectiveActivity.getDiscountRate()).divide(Constants.BIG_DECIMAL_HUNDRED);
+                    }
+                    BigDecimal specialTotalAmount = specialPrice.multiply(quantity);
+                    totalAmount = totalAmount.add(specialTotalAmount);
+                    DietOrderDetail dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(discountDietOrderGroup.getId()).goodsId(effectiveActivity.getGiveGoodsId()).goodsName(goods.getName()).goodsSpecificationId(effectiveActivity.getGoodsSpecificationId()).goodsSpecificationName(goodsSpecification.getName()).categoryId(goods.getCategoryId()).categoryName("").price(goodsSpecification.getPrice()).flavorIncrease(flavorIncrease).quantity(quantity).totalAmount(specialTotalAmount).discountAmount(BigDecimal.ZERO).payableAmount(specialTotalAmount).paidAmount(BigDecimal.ZERO).build();
+                    DatabaseHelper.insert(dietOrderDetail);
                 }
             }
 
             dietOrderDiscountAmount = dietOrderDiscountAmount.add(discountAmount);
             BigDecimal payableAmount = totalAmount.subtract(discountAmount);
-            DietOrderDetail dietOrderDetail = DietOrderUtils.constructDietOrderDetail(tenantId, tenantCode, branchId, dietOrderId, dietOrderGroup.getId(), goods.getId(), goods.getName(), goodsSpecification.getId(), goodsSpecification.getName(), goods.getCategoryId(), goodsSpecification.getPrice(), flavorIncrease, detailInfo.getQuantity(), totalAmount, discountAmount, payableAmount, userId, "保存订单详情信息！");
+            DietOrderDetail dietOrderDetail = DietOrderUtils.constructDietOrderDetail(tenantId, tenantCode, branchId, dietOrderId, dietOrderGroup.getId(), goods.getId(), goods.getName(), goodsSpecification.getId(), goodsSpecification.getName(), goods.getCategoryId(), goodsSpecification.getPrice(), flavorIncrease, goodsInfo.getQuantity(), totalAmount, discountAmount, payableAmount, userId, "保存订单详情信息！");
             DatabaseHelper.insert(dietOrderDetail);
 
             if (CollectionUtils.isNotEmpty(dietOrderDetailGoodsFlavors)) {
