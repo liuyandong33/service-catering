@@ -1,6 +1,5 @@
 package build.dream.catering.services;
 
-import build.dream.catering.beans.BuyGiveActivityBean;
 import build.dream.catering.beans.FullReductionActivityBean;
 import build.dream.catering.beans.SpecialGoodsActivityBean;
 import build.dream.catering.constants.Constants;
@@ -13,7 +12,6 @@ import build.dream.catering.utils.DietOrderUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
-import build.dream.common.utils.DatabaseUtils;
 import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.SerialNumberGenerator;
 import org.apache.commons.collections.CollectionUtils;
@@ -402,12 +400,8 @@ public class DietOrderService {
                         }
 
                         BigDecimal giveTotalAmount = effectiveActivity.getSpecialPrice();
-                        DietOrderDetail giveDietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(discountDietOrderGroup.getId()).goodsId(effectiveActivity.getGiveGoodsId()).goodsName("").goodsSpecificationId(effectiveActivity.getGoodsSpecificationId()).goodsSpecificationName("").categoryId(BigInteger.ZERO).categoryName("").price(BigDecimal.ZERO).flavorIncrease(BigDecimal.ZERO).quantity(effectiveActivity.getGiveQuantity()).totalAmount().build()
+                        DietOrderDetail giveDietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(discountDietOrderGroup.getId()).goodsId(effectiveActivity.getGiveGoodsId()).goodsName("").goodsSpecificationId(effectiveActivity.getGoodsSpecificationId()).goodsSpecificationName("").categoryId(BigInteger.ZERO).categoryName("").price(BigDecimal.ZERO).flavorIncrease(BigDecimal.ZERO).quantity(effectiveActivity.getGiveQuantity()).build();
                         giveDietOrderDetails.add(giveDietOrderDetail);
-                        if (!dietOrderActivityMap.containsKey(buyGiveActivityBean.getActivityId())) {
-                            DietOrderActivity dietOrderActivity = DietOrderUtils.constructDietOrderActivity(tenantId, tenantCode, branchId, dietOrderId, buyGiveActivityBean.getActivityId(), buyGiveActivityBean.getActivityName(), buyGiveActivityBean.getActivityType(), BigDecimal.ZERO, userId, "保存订单活动信息！");
-                            dietOrderActivityMap.put(buyGiveActivityBean.getActivityId(), dietOrderActivity);
-                        }
                     }
                 }
             }
@@ -431,7 +425,7 @@ public class DietOrderService {
 
             dietOrderDiscountAmount = dietOrderDiscountAmount.add(discountAmount);
             BigDecimal payableAmount = totalAmount.subtract(discountAmount);
-            DietOrderDetail dietOrderDetail = DietOrderUtils.constructDietOrderDetail(tenantId, tenantCode, branchId, dietOrderId, dietOrderGroup.getId(), goods.getId(), goods.getName(), goodsSpecification.getId(), goodsSpecification.getName(), goods.getCategoryId(), goodsSpecification.getPrice(), flavorIncrease, detailInfo.getQuantity(), totalAmount, discountAmount, payableAmount, userId, "保存订单详情信息！");
+            DietOrderDetail dietOrderDetail = DietOrderUtils.constructDietOrderDetail(tenantId, tenantCode, branchId, dietOrderId, dietOrderGroup.getId(), goods.getId(), goods.getName(), goodsSpecification.getId(), goodsSpecification.getName(), goods.getCategoryId(), goodsSpecification.getPrice(), flavorIncrease, quantity, totalAmount, discountAmount, payableAmount, userId, "保存订单详情信息！");
             DatabaseHelper.insert(dietOrderDetail);
 
             if (CollectionUtils.isNotEmpty(dietOrderDetailGoodsFlavors)) {
