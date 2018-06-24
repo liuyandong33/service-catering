@@ -7,6 +7,7 @@ import build.dream.common.utils.GsonUtils;
 import com.google.gson.annotations.SerializedName;
 import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -38,6 +39,7 @@ public class SaveDietOrderModel extends BasicModel {
     @NotNull
     private BigInteger userId;
 
+    @NotEmpty
     private List<GoodsInfo> goodsInfos;
 
     public static String[] getInvoiceTypes() {
