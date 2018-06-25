@@ -2,6 +2,7 @@ package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.ActivityMapper;
+import build.dream.catering.mappers.GoodsMapper;
 import build.dream.catering.mappers.SequenceMapper;
 import build.dream.catering.models.dietorder.ObtainDietOrderInfoModel;
 import build.dream.catering.models.dietorder.SaveDietOrderModel;
@@ -30,6 +31,8 @@ public class DietOrderService {
     private SequenceMapper sequenceMapper;
     @Autowired
     private ActivityMapper activityMapper;
+    @Autowired
+    private GoodsMapper goodsMapper;
 
     /**
      * 获取订单明细
@@ -250,11 +253,7 @@ public class DietOrderService {
         }
 
         // 查询出订单中包含的所有商品
-        SearchModel goodsSearchModel = new SearchModel(true);
-        goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
-        List<Goods> goodses = DatabaseHelper.findAll(Goods.class, goodsSearchModel);
+        List<Goods> goodses = goodsMapper.findAllGoodsInfos(tenantId, branchId, goodsIds);
 
         // 查询出订单中包含的所有商品规格
         SearchModel goodsSpecificationSearchModel = new SearchModel(true);
@@ -417,7 +416,7 @@ public class DietOrderService {
                     if (quantity.compareTo(effectiveActivity.getBuyQuantity()) >= 0) {
                         BigDecimal giveQuantity = quantity.divide(effectiveActivity.getBuyQuantity(), 0, BigDecimal.ROUND_DOWN).multiply(effectiveActivity.getGiveQuantity());
                         BigDecimal giveTotalAmount = giveQuantity.multiply(effectiveActivity.getSpecialPrice());
-                        DietOrderDetail giveDietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(discountDietOrderGroup.getId()).goodsType(1).goodsId(effectiveActivity.getGiveGoodsId()).goodsName("").goodsSpecificationId(effectiveActivity.getGoodsSpecificationId()).goodsSpecificationName("").categoryId(BigInteger.ZERO).categoryName("").price(BigDecimal.ZERO).flavorIncrease(BigDecimal.ZERO).quantity(effectiveActivity.getGiveQuantity()).totalAmount(giveTotalAmount).discountAmount(giveTotalAmount).payableAmount(BigDecimal.ZERO).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
+                        DietOrderDetail giveDietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(discountDietOrderGroup.getId()).goodsType(1).goodsId(effectiveActivity.getGiveGoodsId()).goodsName("").goodsSpecificationId(effectiveActivity.getGoodsSpecificationId()).goodsSpecificationName(effectiveActivity.getGoodsSpecificationName()).categoryId(BigInteger.ZERO).categoryName("").price(BigDecimal.ZERO).flavorIncrease(BigDecimal.ZERO).quantity(effectiveActivity.getGiveQuantity()).totalAmount(giveTotalAmount).discountAmount(giveTotalAmount).payableAmount(BigDecimal.ZERO).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
                         dietOrderDetails.add(giveDietOrderDetail);
 
                         BigInteger activityId = effectiveActivity.getActivityId();
@@ -431,7 +430,7 @@ public class DietOrderService {
                     }
 
                     BigDecimal dietOrderDetailTotalAmount = price.add(flavorIncrease).multiply(quantity);
-                    dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(normalDietOrderGroup.getId()).goodsType(goods.getType()).goodsId(goods.getId()).goodsName(goods.getName()).goodsSpecificationId(goodsSpecification.getId()).goodsSpecificationName(goodsSpecification.getName()).categoryId(goods.getCategoryId()).categoryName("").price(price).flavorIncrease(flavorIncrease).quantity(quantity).totalAmount(dietOrderDetailTotalAmount).discountAmount(BigDecimal.ZERO).payableAmount(dietOrderDetailTotalAmount).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
+                    dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(normalDietOrderGroup.getId()).goodsType(goods.getType()).goodsId(goods.getId()).goodsName(goods.getName()).goodsSpecificationId(goodsSpecification.getId()).goodsSpecificationName(goodsSpecification.getName()).categoryId(goods.getCategoryId()).categoryName(goods.getCategoryName()).price(price).flavorIncrease(flavorIncrease).quantity(quantity).totalAmount(dietOrderDetailTotalAmount).discountAmount(BigDecimal.ZERO).payableAmount(dietOrderDetailTotalAmount).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
                 }
 
                 if (type == 3) {
@@ -446,7 +445,7 @@ public class DietOrderService {
                     BigDecimal dietOrderDetailDiscountAmount = dietOrderDetailTotalAmount.subtract(dietOrderDetailPayableAmount);
                     dietOrderTotalAmount = dietOrderTotalAmount.add(dietOrderDetailTotalAmount);
                     dietOrderDiscountAmount = dietOrderDiscountAmount.add(dietOrderDetailDiscountAmount);
-                    dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(normalDietOrderGroup.getId()).goodsType(goods.getType()).goodsId(goods.getId()).goodsName(goods.getName()).goodsSpecificationId(goodsSpecification.getId()).goodsSpecificationName(goodsSpecification.getName()).categoryId(goods.getCategoryId()).categoryName("").price(price).flavorIncrease(flavorIncrease).quantity(quantity).totalAmount(dietOrderDetailTotalAmount).discountAmount(dietOrderDetailDiscountAmount).payableAmount(dietOrderDetailPayableAmount).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
+                    dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(normalDietOrderGroup.getId()).goodsType(goods.getType()).goodsId(goods.getId()).goodsName(goods.getName()).goodsSpecificationId(goodsSpecification.getId()).goodsSpecificationName(goodsSpecification.getName()).categoryId(goods.getCategoryId()).categoryName(goods.getCategoryName()).price(price).flavorIncrease(flavorIncrease).quantity(quantity).totalAmount(dietOrderDetailTotalAmount).discountAmount(dietOrderDetailDiscountAmount).payableAmount(dietOrderDetailPayableAmount).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
 
                     BigInteger activityId = effectiveActivity.getActivityId();
                     DietOrderActivity dietOrderActivity = dietOrderActivityMap.get(activityId);
@@ -461,7 +460,7 @@ public class DietOrderService {
             } else {
                 BigDecimal dietOrderDetailTotalAmount = price.add(flavorIncrease).multiply(quantity);
                 dietOrderTotalAmount = dietOrderTotalAmount.add(dietOrderDetailTotalAmount);
-                dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(normalDietOrderGroup.getId()).goodsType(goods.getType()).goodsId(goods.getId()).goodsName(goods.getName()).goodsSpecificationId(goodsSpecification.getId()).goodsSpecificationName(goodsSpecification.getName()).categoryId(goods.getCategoryId()).categoryName("").price(price).flavorIncrease(flavorIncrease).quantity(quantity).totalAmount(dietOrderDetailTotalAmount).discountAmount(BigDecimal.ZERO).payableAmount(dietOrderDetailTotalAmount).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
+                dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(normalDietOrderGroup.getId()).goodsType(goods.getType()).goodsId(goods.getId()).goodsName(goods.getName()).goodsSpecificationId(goodsSpecification.getId()).goodsSpecificationName(goodsSpecification.getName()).categoryId(goods.getCategoryId()).categoryName(goods.getCategoryName()).price(price).flavorIncrease(flavorIncrease).quantity(quantity).totalAmount(dietOrderDetailTotalAmount).discountAmount(BigDecimal.ZERO).payableAmount(dietOrderDetailTotalAmount).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
             }
 
             dietOrderDetails.add(dietOrderDetail);
@@ -477,7 +476,7 @@ public class DietOrderService {
                 DatabaseHelper.insert(extraDietOrderGroup);
             }
             dietOrderTotalAmount = dietOrderTotalAmount.add(deliverFee);
-            DietOrderDetail dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(extraDietOrderGroup.getId()).goodsType(3).goodsId(Constants.BIG_INTEGER_MINUS_ONE).goodsName("配送费").goodsSpecificationId(Constants.BIG_INTEGER_MINUS_ONE).goodsSpecificationName("").categoryId(BigInteger.ZERO).categoryName("").price(deliverFee).flavorIncrease(BigDecimal.ZERO).quantity(BigDecimal.ONE).totalAmount(deliverFee).discountAmount(BigDecimal.ZERO).payableAmount(deliverFee).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
+            DietOrderDetail dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(extraDietOrderGroup.getId()).goodsType(3).goodsId(Constants.BIG_INTEGER_MINUS_ONE).goodsName("配送费").goodsSpecificationId(Constants.BIG_INTEGER_MINUS_ONE).goodsSpecificationName("").categoryId(Constants.BIG_INTEGER_MINUS_ONE).categoryName("配送费").price(deliverFee).flavorIncrease(BigDecimal.ZERO).quantity(BigDecimal.ONE).totalAmount(deliverFee).discountAmount(BigDecimal.ZERO).payableAmount(deliverFee).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
             dietOrderDetails.add(dietOrderDetail);
         }
 
@@ -487,7 +486,7 @@ public class DietOrderService {
                 DatabaseHelper.insert(extraDietOrderGroup);
             }
             dietOrderTotalAmount = dietOrderTotalAmount.add(packageFee);
-            DietOrderDetail dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(extraDietOrderGroup.getId()).goodsType(4).goodsId(Constants.BIG_INTEGER_MINUS_TWO).goodsName("打包费").goodsSpecificationId(Constants.BIG_INTEGER_MINUS_TWO).goodsSpecificationName("").categoryId(BigInteger.ZERO).categoryName("").price(packageFee).flavorIncrease(BigDecimal.ZERO).quantity(BigDecimal.ONE).totalAmount(packageFee).discountAmount(BigDecimal.ZERO).payableAmount(packageFee).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
+            DietOrderDetail dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(extraDietOrderGroup.getId()).goodsType(4).goodsId(Constants.BIG_INTEGER_MINUS_TWO).goodsName("打包费").goodsSpecificationId(Constants.BIG_INTEGER_MINUS_TWO).goodsSpecificationName("").categoryId(Constants.BIG_INTEGER_MINUS_ONE).categoryName("打包费").price(packageFee).flavorIncrease(BigDecimal.ZERO).quantity(BigDecimal.ONE).totalAmount(packageFee).discountAmount(BigDecimal.ZERO).payableAmount(packageFee).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
             dietOrderDetails.add(dietOrderDetail);
         }
 

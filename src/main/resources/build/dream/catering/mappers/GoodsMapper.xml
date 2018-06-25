@@ -19,4 +19,21 @@
         </foreach>
         AND package_group_goods.deleted = 0;
     </select>
+
+    <select id="findAllGoodsInfos" resultType="build.dream.common.erp.catering.domains.Goods">
+        SELECT
+        goods.*,
+        goods_category.name AS category_name
+        FROM goods
+        INNER JOIN goods_category ON goods_category.id = goods.id AND goods_category.deleted = 0
+        WHERE goods.deleted = 0
+        AND goods.tenant_id = #{tenantId}
+        AND goods.branch_id = #{branchId}
+        <if test="@org.apache.commons.collections.CollectionUtils@isNotEmpty(goodsIds)">
+            AND goods.id IN
+            <foreach collection="goodsIds" index="index" item="goodsId" open="(" separator="," close=")">
+                #{goodsId}
+            </foreach>
+        </if>
+    </select>
 </mapper>
