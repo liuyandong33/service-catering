@@ -11,6 +11,7 @@ import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.SerialNumberGenerator;
+import build.dream.common.utils.ValidateUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.Validate;
@@ -226,6 +227,10 @@ public class DietOrderService {
         BigInteger branchId = saveDietOrderModel.getBranchId();
         BigInteger userId = saveDietOrderModel.getUserId();
 
+        // 查询出门店信息
+        Branch branch = DatabaseHelper.find(Branch.class, branchId);
+        ValidateUtils.notNull(branch, "门店不存在！");
+
         List<BigInteger> goodsIds = new ArrayList<BigInteger>();
         List<BigInteger> goodsSpecificationIds = new ArrayList<BigInteger>();
         List<BigInteger> goodsFlavorGroupIds = new ArrayList<BigInteger>();
@@ -334,6 +339,8 @@ public class DietOrderService {
         DatabaseHelper.insert(dietOrder);
 
         BigDecimal dietOrderTotalAmount = BigDecimal.ZERO;
+        BigDecimal deliverFee = BigDecimal.TEN;
+        BigDecimal packageFee = BigDecimal.TEN;
         BigInteger dietOrderId = dietOrder.getId();
 
         // 存放订单优惠金额
@@ -459,6 +466,29 @@ public class DietOrderService {
 
             dietOrderDetails.add(dietOrderDetail);
             dietOrderDetailMap.put(uuid, dietOrderDetail);
+            packageFee = packageFee.add(BigDecimal.ZERO);
+        }
+
+        // 开始处理配送费与打包费
+        DietOrderGroup extraDietOrderGroup = null;
+        if (deliverFee.compareTo(BigDecimal.ZERO) > 0) {
+            if (extraDietOrderGroup == null) {
+                extraDietOrderGroup = DietOrderGroup.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).name("其他费用").type(Constants.DISCOUNT).createUserId(userId).lastUpdateUserId(userId).lastUpdateRemark("保存订单分组信息！").build();
+                DatabaseHelper.insert(extraDietOrderGroup);
+            }
+            dietOrderTotalAmount = dietOrderTotalAmount.add(deliverFee);
+            DietOrderDetail dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(extraDietOrderGroup.getId()).goodsType(3).goodsId(Constants.BIG_INTEGER_MINUS_ONE).goodsName("配送费").goodsSpecificationId(Constants.BIG_INTEGER_MINUS_ONE).goodsSpecificationName("").categoryId(BigInteger.ZERO).categoryName("").price(deliverFee).flavorIncrease(BigDecimal.ZERO).quantity(BigDecimal.ONE).totalAmount(deliverFee).discountAmount(BigDecimal.ZERO).payableAmount(deliverFee).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
+            dietOrderDetails.add(dietOrderDetail);
+        }
+
+        if (packageFee.compareTo(BigDecimal.ZERO) > 0) {
+            if (extraDietOrderGroup == null) {
+                extraDietOrderGroup = DietOrderGroup.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).name("其他费用").type(Constants.DISCOUNT).createUserId(userId).lastUpdateUserId(userId).lastUpdateRemark("保存订单分组信息！").build();
+                DatabaseHelper.insert(extraDietOrderGroup);
+            }
+            dietOrderTotalAmount = dietOrderTotalAmount.add(packageFee);
+            DietOrderDetail dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(extraDietOrderGroup.getId()).goodsType(4).goodsId(Constants.BIG_INTEGER_MINUS_TWO).goodsName("打包费").goodsSpecificationId(Constants.BIG_INTEGER_MINUS_TWO).goodsSpecificationName("").categoryId(BigInteger.ZERO).categoryName("").price(packageFee).flavorIncrease(BigDecimal.ZERO).quantity(BigDecimal.ONE).totalAmount(packageFee).discountAmount(BigDecimal.ZERO).payableAmount(packageFee).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
+            dietOrderDetails.add(dietOrderDetail);
         }
 
         DatabaseHelper.insertAll(dietOrderDetails);
