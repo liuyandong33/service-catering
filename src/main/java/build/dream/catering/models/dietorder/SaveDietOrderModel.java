@@ -4,9 +4,12 @@ import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.models.BasicModel;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
+import build.dream.common.utils.ValidateUtils;
 import com.google.gson.annotations.SerializedName;
+import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -38,6 +41,7 @@ public class SaveDietOrderModel extends BasicModel {
     @NotNull
     private BigInteger userId;
 
+    @NotEmpty
     private List<GoodsInfo> goodsInfos;
 
     public static String[] getInvoiceTypes() {
@@ -159,6 +163,23 @@ public class SaveDietOrderModel extends BasicModel {
         public void setFlavorInfos(List<FlavorInfo> flavorInfos) {
             this.flavorInfos = flavorInfos;
         }
+
+        @Override
+        public boolean validate() {
+            boolean isValidate = super.validate();
+            if (!isValidate) {
+                return false;
+            }
+            if (CollectionUtils.isNotEmpty(flavorInfos)) {
+                for (FlavorInfo flavorInfo : flavorInfos) {
+                    isValidate = isValidate && flavorInfo.validate();
+                    if (!isValidate) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
     }
 
     public static class FlavorInfo extends BasicModel {
@@ -182,6 +203,14 @@ public class SaveDietOrderModel extends BasicModel {
 
         public void setFlavorId(BigInteger flavorId) {
             this.flavorId = flavorId;
+        }
+    }
+
+    @Override
+    public void validateAndThrow() {
+        super.validateAndThrow();
+        for (GoodsInfo goodsInfo : goodsInfos) {
+            ApplicationHandler.isTrue(goodsInfo.validate(), "goodsInfos");
         }
     }
 }
