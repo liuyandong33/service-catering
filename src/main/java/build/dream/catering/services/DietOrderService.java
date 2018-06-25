@@ -341,11 +341,17 @@ public class DietOrderService {
         // 用来保存订单活动
 
         List<EffectiveActivity> effectiveActivities = activityMapper.callProcedureEffectiveActivity(tenantId, branchId);
+        List<EffectiveActivity> fullReductionActivities = new ArrayList<EffectiveActivity>();
+        List<EffectiveActivity> paymentActivities = new ArrayList<EffectiveActivity>();
         Map<String, EffectiveActivity> effectiveActivityMap = new HashMap<String, EffectiveActivity>();
         for (EffectiveActivity effectiveActivity : effectiveActivities) {
             int type = effectiveActivity.getType();
             if (type == 1 || type == 3) {
                 effectiveActivityMap.put(effectiveActivity.getGoodsId() + "_" + effectiveActivity.getGoodsSpecificationId(), effectiveActivity);
+            } else if (type == 2) {
+                fullReductionActivities.add(effectiveActivity);
+            } else if (type == 4) {
+                paymentActivities.add(effectiveActivity);
             }
         }
 
@@ -473,8 +479,46 @@ public class DietOrderService {
             DatabaseHelper.insertAll(dietOrderDetailGoodsFlavors);
         }
 
+        // 整单优惠活动
+
+        BigDecimal dietOrderPayableAmount = dietOrderTotalAmount.subtract(dietOrderDiscountAmount);
+        List<DietOrderActivity> dietOrderActivities = new ArrayList<DietOrderActivity>();
+        if (CollectionUtils.isNotEmpty(fullReductionActivities)) {
+            Collections.sort(fullReductionActivities, (o1, o2) -> o1.getTotalAmount().compareTo(o2.getTotalAmount()));
+
+            EffectiveActivity fullReductionActivity = null;
+            int size = fullReductionActivities.size();
+            if (dietOrderPayableAmount.compareTo(fullReductionActivities.get(0).getTotalAmount()) < 0) {
+
+            } else if (dietOrderPayableAmount.compareTo(fullReductionActivities.get(size - 1).getTotalAmount()) >= 0) {
+                fullReductionActivity = fullReductionActivities.get(size - 1);
+            } else {
+                for (int index = 0; index < size - 1; index++) {
+                    EffectiveActivity prevEffectiveActivity = fullReductionActivities.get(index);
+                    EffectiveActivity nextEffectiveActivity = fullReductionActivities.get(index + 1);
+                    if (dietOrderPayableAmount.compareTo(prevEffectiveActivity.getTotalAmount()) >= 0 && dietOrderPayableAmount.compareTo(nextEffectiveActivity.getTotalAmount()) < 0) {
+                        fullReductionActivity = prevEffectiveActivity;
+                    }
+                }
+            }
+            if (fullReductionActivity != null) {
+                BigDecimal amount = null;
+                int discountType = fullReductionActivity.getDiscountType();
+                if (discountType == 1) {
+                    amount = fullReductionActivity.getDiscountAmount();
+                } else {
+                    amount = dietOrderPayableAmount.subtract(dietOrderPayableAmount.multiply(fullReductionActivity.getDiscountRate()).divide(Constants.BIG_DECIMAL_HUNDRED));
+                }
+                dietOrderDiscountAmount = dietOrderDiscountAmount.add(amount);
+                DietOrderActivity dietOrderActivity = DietOrderActivity.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).activityId(fullReductionActivity.getActivityId()).activityName(fullReductionActivity.getName()).activityType(fullReductionActivity.getType()).amount(amount).createUserId(userId).lastUpdateUserId(userId).build();
+                dietOrderActivities.add(dietOrderActivity);
+            }
+        }
         if (MapUtils.isNotEmpty(dietOrderActivityMap)) {
-            List<DietOrderActivity> dietOrderActivities = new ArrayList<DietOrderActivity>(dietOrderActivityMap.values());
+            dietOrderActivities.addAll(dietOrderActivityMap.values());
+        }
+
+        if (CollectionUtils.isNotEmpty(dietOrderActivities)) {
             DatabaseHelper.insertAll(dietOrderActivities);
         }
 
