@@ -404,22 +404,16 @@ public class DietOrderService {
                         BigInteger activityId = effectiveActivity.getActivityId();
                         DietOrderActivity dietOrderActivity = dietOrderActivityMap.get(activityId);
                         if (dietOrderActivity == null) {
-                            dietOrderActivity = new DietOrderActivity();
-                            dietOrderActivity.setTenantId(tenantId);
-                            dietOrderActivity.setTenantCode(tenantCode);
-                            dietOrderActivity.setBranchId(branchId);
-                            dietOrderActivity.setDietOrderId(dietOrderId);
-                            dietOrderActivity.setActivityId(activityId);
-                            dietOrderActivity.setActivityName(effectiveActivity.getName());
-                            dietOrderActivity.setActivityType(effectiveActivity.getType());
-                            dietOrderActivity.setAmount(giveDietOrderDetail.getDiscountAmount());
-                            dietOrderActivity.setCreateUserId(userId);
-                            dietOrderActivity.setLastUpdateUserId(userId);
+                            dietOrderActivity = DietOrderActivity.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).activityId(activityId).activityName(effectiveActivity.getName()).activityType(type).amount(giveDietOrderDetail.getDiscountAmount()).createUserId(userId).lastUpdateUserId(userId).build();
                             dietOrderActivityMap.put(activityId, dietOrderActivity);
                         } else {
                             dietOrderActivity.setAmount(dietOrderActivity.getAmount().add(giveDietOrderDetail.getDiscountAmount()));
                         }
                     }
+
+                    BigDecimal dietOrderDetailTotalAmount = price.add(flavorIncrease).multiply(quantity);
+                    DietOrderDetail dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(normalDietOrderGroup.getId()).goodsType(goods.getType()).goodsId(goods.getId()).goodsName(goods.getName()).goodsSpecificationId(goodsSpecification.getId()).goodsSpecificationName(goodsSpecification.getName()).categoryId(goods.getCategoryId()).categoryName("").price(price).flavorIncrease(flavorIncrease).quantity(quantity).totalAmount(dietOrderDetailTotalAmount).discountAmount(BigDecimal.ZERO).payableAmount(dietOrderDetailTotalAmount).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
+                    dietOrderDetails.add(dietOrderDetail);
                 }
 
                 if (type == 3) {
@@ -440,17 +434,8 @@ public class DietOrderService {
                     BigInteger activityId = effectiveActivity.getActivityId();
                     DietOrderActivity dietOrderActivity = dietOrderActivityMap.get(activityId);
                     if (dietOrderActivity == null) {
-                        dietOrderActivity = new DietOrderActivity();
-                        dietOrderActivity.setTenantId(tenantId);
-                        dietOrderActivity.setTenantCode(tenantCode);
-                        dietOrderActivity.setBranchId(branchId);
-                        dietOrderActivity.setDietOrderId(dietOrderId);
-                        dietOrderActivity.setActivityId(activityId);
-                        dietOrderActivity.setActivityName(effectiveActivity.getName());
-                        dietOrderActivity.setActivityType(effectiveActivity.getType());
-                        dietOrderActivity.setAmount(dietOrderDetailDiscountAmount);
-                        dietOrderActivity.setCreateUserId(userId);
-                        dietOrderActivity.setLastUpdateUserId(userId);
+                        dietOrderActivity = DietOrderActivity.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).activityId(activityId).activityName(effectiveActivity.getName()).activityType(type).amount(dietOrderDetailDiscountAmount).createUserId(userId).lastUpdateUserId(userId).build();
+
                         dietOrderActivityMap.put(activityId, dietOrderActivity);
                     } else {
                         dietOrderActivity.setAmount(dietOrderActivity.getAmount().add(dietOrderDetailDiscountAmount));
@@ -459,7 +444,7 @@ public class DietOrderService {
             } else {
                 BigDecimal dietOrderDetailTotalAmount = price.add(flavorIncrease).multiply(quantity);
                 dietOrderTotalAmount = dietOrderTotalAmount.add(dietOrderDetailTotalAmount);
-                DietOrderDetail dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(discountDietOrderGroup.getId()).goodsType(goods.getType()).goodsId(effectiveActivity.getGiveGoodsId()).goodsName("").goodsSpecificationId(effectiveActivity.getGoodsSpecificationId()).goodsSpecificationName(goodsSpecification.getName()).categoryId(goods.getCategoryId()).categoryName("").price(price).flavorIncrease(flavorIncrease).quantity(quantity).totalAmount(dietOrderDetailTotalAmount).discountAmount(BigDecimal.ZERO).payableAmount(dietOrderDetailTotalAmount).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
+                DietOrderDetail dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(normalDietOrderGroup.getId()).goodsType(goods.getType()).goodsId(goods.getId()).goodsName(goods.getName()).goodsSpecificationId(goodsSpecification.getId()).goodsSpecificationName(goodsSpecification.getName()).categoryId(goods.getCategoryId()).categoryName("").price(price).flavorIncrease(flavorIncrease).quantity(quantity).totalAmount(dietOrderDetailTotalAmount).discountAmount(BigDecimal.ZERO).payableAmount(dietOrderDetailTotalAmount).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
                 dietOrderDetails.add(dietOrderDetail);
             }
         }
