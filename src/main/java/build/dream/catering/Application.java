@@ -124,5 +124,8 @@ public class Application extends SpringBootServletInitializer {
             results.add(goods);
         }
         System.out.println(GsonUtils.toJson(results));
+        resultSet.close();
+        statement.close();
+        connection.close();
     }
 }
