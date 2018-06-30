@@ -7,7 +7,6 @@ import build.dream.catering.models.dietorder.SaveDietOrderModel;
 import build.dream.catering.services.DietOrderService;
 import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.controllers.BasicController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,9 +16,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping(value = "/dietOrder")
 public class DietOrderController extends BasicController {
-    @Autowired
-    private DietOrderService dietOrderService;
-
     /**
      * 获取订单明细
      *

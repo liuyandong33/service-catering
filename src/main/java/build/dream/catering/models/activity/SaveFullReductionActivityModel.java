@@ -8,10 +8,10 @@ import org.hibernate.validator.constraints.Length;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Date;
 import java.util.List;
 
 public class SaveFullReductionActivityModel extends BasicModel {
+    private static Integer[] DISCOUNT_TYPES = new Integer[]{1, 2};
     @NotNull
     private BigInteger tenantId;
 
@@ -173,7 +173,7 @@ public class SaveFullReductionActivityModel extends BasicModel {
         if (!super.validate()) {
             return false;
         }
-        if (!ArrayUtils.contains(new int[]{1, 2}, discountType)) {
+        if (!ArrayUtils.contains(DISCOUNT_TYPES, discountType)) {
             return false;
         }
         if (discountType == 1 && discountAmount == null) {

@@ -1,9 +1,8 @@
 package build.dream.catering.models.activity;
 
 import build.dream.catering.constants.Constants;
+import build.dream.common.annotations.JsonSchema;
 import build.dream.common.models.BasicModel;
-import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.GsonUtils;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotEmpty;
@@ -48,6 +47,7 @@ public class SaveBuyGiveActivityModel extends BasicModel {
     @NotNull
     private Integer weekSign;
 
+    @JsonSchema(value = Constants.BUY_GIVE_ACTIVITY_INFOS_SCHEMA_FILE_PATH)
     private List<BuyGiveActivityInfo> buyGiveActivityInfos;
 
     public BigInteger getTenantId() {
@@ -136,11 +136,6 @@ public class SaveBuyGiveActivityModel extends BasicModel {
 
     public void setBuyGiveActivityInfos(List<BuyGiveActivityInfo> buyGiveActivityInfos) {
         this.buyGiveActivityInfos = buyGiveActivityInfos;
-    }
-
-    public void setBuyGiveActivityInfos(String buyGiveActivityInfos) {
-        ApplicationHandler.validateJson(buyGiveActivityInfos, Constants.BUY_GIVE_ACTIVITY_INFOS_SCHEMA_FILE_PATH, "buyGiveActivityInfos");
-        this.buyGiveActivityInfos = GsonUtils.jsonToList(buyGiveActivityInfos, BuyGiveActivityInfo.class);
     }
 
     public static class BuyGiveActivityInfo {

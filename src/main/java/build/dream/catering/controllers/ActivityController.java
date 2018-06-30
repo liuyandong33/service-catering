@@ -28,17 +28,9 @@ public class ActivityController extends BasicController {
      */
     @RequestMapping(value = "/saveBuyGiveActivity")
     @ResponseBody
+    @ApiRestAction(modelClass = SaveBuyGiveActivityModel.class, serviceClass = ActivityService.class, serviceMethodName = "saveBuyGiveActivity", error = "保存买A赠B活动失败")
     public String saveBuyGiveActivity() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            SaveBuyGiveActivityModel saveBuyGiveActivityModel = ApplicationHandler.instantiateObject(SaveBuyGiveActivityModel.class, requestParameters);
-            String buyGiveActivityInfos = requestParameters.get("buyGiveActivityInfos");
-            saveBuyGiveActivityModel.setBuyGiveActivityInfos(buyGiveActivityInfos);
-            saveBuyGiveActivityModel.validateAndThrow();
-
-            return activityService.saveBuyGiveActivity(saveBuyGiveActivityModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "保存买A赠B活动失败", requestParameters);
+        return null;
     }
 
     /**
@@ -48,15 +40,9 @@ public class ActivityController extends BasicController {
      */
     @RequestMapping(value = "/saveFullReductionActivity")
     @ResponseBody
+    @ApiRestAction(modelClass = SaveBuyGiveActivityModel.class, serviceClass = ActivityService.class, serviceMethodName = "saveBuyGiveActivity", error = "保存买A赠B活动失败")
     public String saveFullReductionActivity() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            SaveFullReductionActivityModel saveFullReductionActivityModel = ApplicationHandler.instantiateObject(SaveFullReductionActivityModel.class, requestParameters);
-            saveFullReductionActivityModel.validateAndThrow();
-
-            return activityService.saveFullReductionActivity(saveFullReductionActivityModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "保存满减活动失败", requestParameters);
+        return null;
     }
 
     /**
@@ -66,17 +52,9 @@ public class ActivityController extends BasicController {
      */
     @RequestMapping(value = "/saveSpecialGoodsActivity")
     @ResponseBody
+    @ApiRestAction(modelClass = SaveSpecialGoodsActivityModel.class, serviceClass = ActivityService.class, serviceMethodName = "saveSpecialGoodsActivity", error = "保存特价商品活动失败")
     public String saveSpecialGoodsActivity() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            SaveSpecialGoodsActivityModel saveSpecialGoodsActivityModel = ApplicationHandler.instantiateObject(SaveSpecialGoodsActivityModel.class, requestParameters);
-            String specialGoodsActivityInfos = requestParameters.get("specialGoodsActivityInfos");
-            saveSpecialGoodsActivityModel.setSpecialGoodsActivityInfos(specialGoodsActivityInfos);
-
-            saveSpecialGoodsActivityModel.validateAndThrow();
-            return activityService.saveSpecialGoodsActivity(saveSpecialGoodsActivityModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "保存特价商品活动失败", requestParameters);
+        return null;
     }
 
     /**
@@ -98,14 +76,9 @@ public class ActivityController extends BasicController {
      */
     @RequestMapping(value = "/listFullReductionActivities")
     @ResponseBody
+    @ApiRestAction(modelClass = ListFullReductionActivitiesModel.class, serviceClass = ActivityService.class, serviceMethodName = "listFullReductionActivities", error = "查询所有生效的整单满减活动失败")
     public String listFullReductionActivities() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            ListFullReductionActivitiesModel listFullReductionActivitiesModel = ApplicationHandler.instantiateObject(ListFullReductionActivitiesModel.class, requestParameters);
-            listFullReductionActivitiesModel.validateAndThrow();
-            return activityService.listFullReductionActivities(listFullReductionActivitiesModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "查询所有生效的整单满减活动失败", requestParameters);
+        return null;
     }
 
     /**
@@ -115,13 +88,8 @@ public class ActivityController extends BasicController {
      */
     @RequestMapping(value = "/listPaymentActivities")
     @ResponseBody
+    @ApiRestAction(modelClass = ListPaymentActivitiesModel.class, serviceClass = ActivityService.class, serviceMethodName = "listPaymentActivities", error = "查询所有生效的支付促销活动失败")
     public String listPaymentActivities() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            ListPaymentActivitiesModel listPaymentActivitiesModel = ApplicationHandler.instantiateObject(ListPaymentActivitiesModel.class, requestParameters);
-            listPaymentActivitiesModel.validateAndThrow();
-            return activityService.listPaymentActivities(listPaymentActivitiesModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "查询所有生效的支付促销活动失败", requestParameters);
+        return null;
     }
 }
