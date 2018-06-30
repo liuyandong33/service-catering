@@ -1,9 +1,9 @@
 package build.dream.catering.models.goods;
 
 import build.dream.catering.constants.Constants;
+import build.dream.common.annotations.JsonSchema;
 import build.dream.common.models.BasicModel;
 import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.GsonUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.hibernate.validator.constraints.Length;
 
@@ -13,6 +13,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 public class SaveGoodsModel extends BasicModel {
+    private static final Integer[] TYPES = {Constants.GOODS_TYPE_ORDINARY_GOODS, Constants.GOODS_TYPE_PACKAGE};
     @NotNull
     private BigInteger tenantId;
 
@@ -39,8 +40,10 @@ public class SaveGoodsModel extends BasicModel {
 
     private String imageUrl;
 
+    @JsonSchema(value = Constants.GOODS_SPECIFICATION_INFOS_SCHEMA_FILE_PATH)
     private List<GoodsSpecificationInfo> goodsSpecificationInfos;
 
+    @JsonSchema(value = Constants.FLAVOR_GROUP_INFOS_SCHEMA_FILE_PATH)
     private List<FlavorGroupInfo> flavorGroupInfos;
 
     private List<BigInteger> deleteGoodsSpecificationIds;
@@ -127,22 +130,12 @@ public class SaveGoodsModel extends BasicModel {
         this.goodsSpecificationInfos = goodsSpecificationInfos;
     }
 
-    public void setGoodsSpecificationInfos(String goodsSpecificationInfos) {
-        ApplicationHandler.validateJson(goodsSpecificationInfos, Constants.GOODS_SPECIFICATION_INFOS_SCHEMA_FILE_PATH, "goodsSpecificationInfos");
-        this.goodsSpecificationInfos = GsonUtils.jsonToList(goodsSpecificationInfos, GoodsSpecificationInfo.class);
-    }
-
     public List<FlavorGroupInfo> getFlavorGroupInfos() {
         return flavorGroupInfos;
     }
 
     public void setFlavorGroupInfos(List<FlavorGroupInfo> flavorGroupInfos) {
         this.flavorGroupInfos = flavorGroupInfos;
-    }
-
-    public void setFlavorGroupInfos(String flavorGroupInfos) {
-        ApplicationHandler.validateJson(flavorGroupInfos, Constants.FLAVOR_GROUP_INFOS_SCHEMA_FILE_PATH, "flavorGroupInfos");
-        this.flavorGroupInfos = GsonUtils.jsonToList(flavorGroupInfos, FlavorGroupInfo.class);
     }
 
     public List<BigInteger> getDeleteGoodsSpecificationIds() {
@@ -166,7 +159,7 @@ public class SaveGoodsModel extends BasicModel {
         if (!super.validate()) {
             return false;
         }
-        if (!ArrayUtils.contains(new Object[]{Constants.GOODS_TYPE_ORDINARY_GOODS, Constants.GOODS_TYPE_PACKAGE}, type)) {
+        if (!ArrayUtils.contains(TYPES, type)) {
             return false;
         }
         return true;
@@ -176,7 +169,7 @@ public class SaveGoodsModel extends BasicModel {
     public void validateAndThrow() {
         super.validateAndThrow();
         ApplicationHandler.notNull(type, "type");
-        ApplicationHandler.inArray(new Object[]{Constants.GOODS_TYPE_ORDINARY_GOODS, Constants.GOODS_TYPE_PACKAGE}, type, "type");
+        ApplicationHandler.inArray(TYPES, type, "type");
     }
 
     public static class GoodsSpecificationInfo {

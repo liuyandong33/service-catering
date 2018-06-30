@@ -4,24 +4,20 @@ import build.dream.catering.models.goods.*;
 import build.dream.catering.services.GoodsService;
 import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.controllers.BasicController;
-import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.MethodCaller;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Map;
-
 @Controller
 @RequestMapping(value = "/goods")
 public class GoodsController extends BasicController {
-    @Autowired
-    private GoodsService goodsService;
-
+    /**
+     * 查询菜品信息
+     *
+     * @return
+     */
     @RequestMapping(value = "/listGoodses", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ListGoodsesModel.class, serviceClass = GoodsService.class, serviceMethodName = "listGoodses", error = "查询菜品信息失败")
@@ -29,26 +25,16 @@ public class GoodsController extends BasicController {
         return null;
     }
 
+    /**
+     * 保存菜品信息
+     *
+     * @return
+     */
     @RequestMapping(value = "/saveGoods")
     @ResponseBody
+    @ApiRestAction(modelClass = SaveGoodsModel.class, serviceClass = GoodsService.class, serviceMethodName = "saveGoods", error = "保存菜品失败")
     public String saveGoods() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            SaveGoodsModel saveGoodsModel = ApplicationHandler.instantiateObject(SaveGoodsModel.class, requestParameters);
-
-            String goodsSpecificationInfos = requestParameters.get("goodsSpecificationInfos");
-            ApplicationHandler.notEmpty(goodsSpecificationInfos, "goodsSpecificationInfos");
-            saveGoodsModel.setGoodsSpecificationInfos(goodsSpecificationInfos);
-
-            String flavorGroupInfos = requestParameters.get("flavorGroupInfos");
-            if (StringUtils.isNotBlank(flavorGroupInfos)) {
-                saveGoodsModel.setFlavorGroupInfos(flavorGroupInfos);
-            }
-
-            saveGoodsModel.validateAndThrow();
-            return goodsService.saveGoods(saveGoodsModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "保存菜品失败", requestParameters);
+        return null;
     }
 
     /**
@@ -58,14 +44,9 @@ public class GoodsController extends BasicController {
      */
     @RequestMapping(value = "/deleteGoodsSpecification")
     @ResponseBody
+    @ApiRestAction(modelClass = DeleteGoodsSpecificationModel.class, serviceClass = GoodsService.class, serviceMethodName = "deleteGoodsSpecification", error = "删除菜品规格失败")
     public String deleteGoodsSpecification() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            DeleteGoodsSpecificationModel deleteGoodsSpecificationModel = ApplicationHandler.instantiateObject(DeleteGoodsSpecificationModel.class, requestParameters);
-            deleteGoodsSpecificationModel.validateAndThrow();
-            return goodsService.deleteGoodsSpecification(deleteGoodsSpecificationModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "删除菜品规格失败", requestParameters);
+        return null;
     }
 
     /**
@@ -75,14 +56,9 @@ public class GoodsController extends BasicController {
      */
     @RequestMapping(value = "/savePackage")
     @ResponseBody
+    @ApiRestAction(modelClass = SavePackageModel.class, serviceClass = GoodsService.class, serviceMethodName = "savePackage", error = "保存套餐失败")
     public String savePackage() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            SavePackageModel savePackageModel = ApplicationHandler.instantiateObject(SavePackageModel.class, requestParameters);
-            savePackageModel.validateAndThrow();
-            return goodsService.savePackage(savePackageModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "保存套餐失败", requestParameters);
+        return null;
     }
 
     /**
@@ -92,15 +68,9 @@ public class GoodsController extends BasicController {
      */
     @RequestMapping(value = "/listCategories")
     @ResponseBody
+    @ApiRestAction(modelClass = ListCategoriesModel.class, serviceClass = GoodsService.class, serviceMethodName = "listCategories", error = "查询菜品分类失败")
     public String listCategories() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            ListCategoriesModel listCategoriesModel = ApplicationHandler.instantiateObject(ListCategoriesModel.class, requestParameters);
-            listCategoriesModel.validateAndThrow();
-
-            return goodsService.listCategories(listCategoriesModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "查询菜品分类失败", requestParameters);
+        return null;
     }
 
     /**
@@ -110,14 +80,9 @@ public class GoodsController extends BasicController {
      */
     @RequestMapping(value = "/deleteGoods")
     @ResponseBody
+    @ApiRestAction(modelClass = DeleteGoodsModel.class, serviceClass = GoodsService.class, serviceMethodName = "deleteGoods", error = "删除菜品失败")
     public String deleteGoods() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            DeleteGoodsModel deleteGoodsModel = ApplicationHandler.instantiateObject(DeleteGoodsModel.class, requestParameters);
-            deleteGoodsModel.validateAndThrow();
-            return goodsService.deleteGoods(deleteGoodsModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "删除菜品失败", requestParameters);
+        return null;
     }
 
     /**
@@ -127,13 +92,8 @@ public class GoodsController extends BasicController {
      */
     @RequestMapping(value = "/importGoods")
     @ResponseBody
+    @ApiRestAction(modelClass = ImportGoodsModel.class, serviceClass = GoodsService.class, serviceMethodName = "importGoods", error = "导入商品失败")
     public String importGoods() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            ImportGoodsModel importGoodsModel = ApplicationHandler.instantiateObject(ImportGoodsModel.class, requestParameters);
-            importGoodsModel.validateAndThrow();
-            return goodsService.importGoods(importGoodsModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "导入商品失败", requestParameters);
+        return null;
     }
 }
