@@ -4,6 +4,8 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.ActivityMapper;
 import build.dream.catering.mappers.GoodsMapper;
 import build.dream.catering.mappers.SequenceMapper;
+import build.dream.catering.models.dietorder.CancelOrderModel;
+import build.dream.catering.models.dietorder.ConfirmOrderModel;
 import build.dream.catering.models.dietorder.ObtainDietOrderInfoModel;
 import build.dream.catering.models.dietorder.SaveDietOrderModel;
 import build.dream.catering.utils.DatabaseHelper;
@@ -558,5 +560,51 @@ public class DietOrderService {
         DatabaseHelper.update(dietOrder);
 
         return new ApiRest(dietOrder, "保存订单成功！");
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest confirmOrder(ConfirmOrderModel confirmOrderModel) {
+        BigInteger tenantId = confirmOrderModel.getTenantId();
+        BigInteger branchId = confirmOrderModel.getBranchId();
+        BigInteger orderId = confirmOrderModel.getOrderId();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, orderId);
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
+        ValidateUtils.isTrue(dietOrder.getOrderStatus() == DietOrderConstants.ORDER_STATUS_UNPROCESSED, "只有未处理的订单才能进行接单操作！");
+
+        dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_VALID);
+        DatabaseHelper.update(dietOrder);
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("接单成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest cancelOrder(CancelOrderModel cancelOrderModel) {
+        BigInteger tenantId = cancelOrderModel.getTenantId();
+        BigInteger branchId = cancelOrderModel.getBranchId();
+        BigInteger orderId = cancelOrderModel.getOrderId();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, orderId);
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
+        ValidateUtils.isTrue(dietOrder.getOrderStatus() == DietOrderConstants.ORDER_STATUS_UNPROCESSED, "只有未处理的订单才能进取消订单操作！");
+
+        dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_INVALID);
+        DatabaseHelper.update(dietOrder);
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("取消订单成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
     }
 }
