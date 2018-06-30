@@ -1,21 +1,17 @@
 package build.dream.catering.controllers;
 
-import build.dream.catering.constants.Constants;
 import build.dream.catering.models.anubis.*;
 import build.dream.catering.services.AnubisService;
-import build.dream.catering.utils.AnubisUtils;
+import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.ConfigurationUtils;
-import build.dream.common.utils.MethodCaller;
+import build.dream.common.utils.GsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.io.IOException;
 import java.util.Map;
 
 @Controller
@@ -31,15 +27,9 @@ public class AnubisController extends BasicController {
      */
     @RequestMapping(value = "/chainStore")
     @ResponseBody
+    @ApiRestAction(modelClass = ChainStoreModel.class, serviceClass = AnubisService.class, serviceMethodName = "chainStore", error = "添加门店失败")
     public String chainStore() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            ChainStoreModel chainStoreModel = ApplicationHandler.instantiateObject(ChainStoreModel.class, requestParameters);
-            chainStoreModel.validateAndThrow();
-
-            return anubisService.chainStore(chainStoreModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "添加门店失败", requestParameters);
+        return null;
     }
 
     /**
@@ -49,21 +39,9 @@ public class AnubisController extends BasicController {
      */
     @RequestMapping(value = "/chainStoreQuery")
     @ResponseBody
+    @ApiRestAction(modelClass = ChainStoreQueryModel.class, serviceClass = AnubisService.class, serviceMethodName = "chainStoreQuery", error = "查询门店信息失败")
     public String chainStoreQuery() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            List<String> chainStoreCodes = new ArrayList<String>();
-            chainStoreCodes.add("A001");
-            chainStoreCodes.add("A002");
-
-            Map<String, Object> data = new HashMap<String, Object>();
-            data.put("chain_store_code", chainStoreCodes);
-
-            String url = ConfigurationUtils.getConfiguration(Constants.ANUBIS_SERVICE_URL) + Constants.ANUBIS_CHAIN_STORE_QUERY_URI;
-            String appId = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_ID);
-            return AnubisUtils.callAnubisSystem(url, appId, data);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "查询门店信息失败", requestParameters);
+        return null;
     }
 
     /**
@@ -73,15 +51,9 @@ public class AnubisController extends BasicController {
      */
     @RequestMapping(value = "/chainStoreUpdate")
     @ResponseBody
+    @ApiRestAction(modelClass = ChainStoreUpdateModel.class, serviceClass = AnubisService.class, serviceMethodName = "chainStoreUpdate", error = "更新门店信息失败")
     public String chainStoreUpdate() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            ChainStoreUpdateModel chainStoreUpdateModel = ApplicationHandler.instantiateObject(ChainStoreUpdateModel.class, requestParameters);
-            chainStoreUpdateModel.validateAndThrow();
-
-            return anubisService.chainStoreUpdate(chainStoreUpdateModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "更新门店信息失败", requestParameters);
+        return null;
     }
 
     /**
@@ -91,15 +63,9 @@ public class AnubisController extends BasicController {
      */
     @RequestMapping(value = "/chainStoreDeliveryQuery")
     @ResponseBody
+    @ApiRestAction(modelClass = ChainStoreDeliveryQueryModel.class, serviceClass = AnubisService.class, serviceMethodName = "chainStoreDeliveryQuery", error = "查询配送服务失败")
     public String chainStoreDeliveryQuery() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            ChainStoreDeliveryQueryModel chainStoreDeliveryQueryModel = ApplicationHandler.instantiateObject(ChainStoreDeliveryQueryModel.class, requestParameters);
-            chainStoreDeliveryQueryModel.validateAndThrow();
-
-            return anubisService.chainStoreDeliveryQuery(chainStoreDeliveryQueryModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "查询配送服务失败", requestParameters);
+        return null;
     }
 
     /**
@@ -109,15 +75,9 @@ public class AnubisController extends BasicController {
      */
     @RequestMapping(value = "/order")
     @ResponseBody
+    @ApiRestAction(modelClass = OrderModel.class, serviceClass = AnubisService.class, serviceMethodName = "order", error = "蜂鸟配送失败")
     public String order() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            OrderModel orderModel = ApplicationHandler.instantiateObject(OrderModel.class, requestParameters);
-            orderModel.validateAndThrow();
-
-            return anubisService.order(orderModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "蜂鸟配送失败", requestParameters);
+        return null;
     }
 
     /**
@@ -127,15 +87,9 @@ public class AnubisController extends BasicController {
      */
     @RequestMapping(value = "/orderCancel")
     @ResponseBody
+    @ApiRestAction(modelClass = OrderCancelModel.class, serviceClass = AnubisService.class, serviceMethodName = "orderCancel", error = "同步取消订单失败")
     public String orderCancel() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            OrderCancelModel orderCancelModel = ApplicationHandler.instantiateObject(OrderCancelModel.class, requestParameters);
-            orderCancelModel.validateAndThrow();
-
-            return anubisService.orderCancel(orderCancelModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "同步取消订单失败", requestParameters);
+        return null;
     }
 
     /**
@@ -145,15 +99,9 @@ public class AnubisController extends BasicController {
      */
     @RequestMapping(value = "/orderQuery")
     @ResponseBody
+    @ApiRestAction(modelClass = OrderQueryModel.class, serviceClass = AnubisService.class, serviceMethodName = "orderQuery", error = "订单查询失败")
     public String orderQuery() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            OrderQueryModel orderQueryModel = ApplicationHandler.instantiateObject(OrderQueryModel.class, requestParameters);
-            orderQueryModel.validateAndThrow();
-
-            return anubisService.orderQuery(orderQueryModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "订单查询失败", requestParameters);
+        return null;
     }
 
     /**
@@ -163,15 +111,9 @@ public class AnubisController extends BasicController {
      */
     @RequestMapping(value = "/orderComplaint")
     @ResponseBody
+    @ApiRestAction(modelClass = OrderComplaintModel.class, serviceClass = AnubisService.class, serviceMethodName = "orderComplaint", error = "订单查询失败")
     public String orderComplaint() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            OrderComplaintModel orderComplaintModel = ApplicationHandler.instantiateObject(OrderComplaintModel.class, requestParameters);
-            orderComplaintModel.validateAndThrow();
-
-            return anubisService.orderComplaint(orderComplaintModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "订单查询失败", requestParameters);
+        return null;
     }
 
     /**
@@ -181,15 +123,13 @@ public class AnubisController extends BasicController {
      */
     @RequestMapping(value = "/anubisCallback")
     @ResponseBody
-    public String anubisCallback() {
+    @ApiRestAction(error = "处理蜂鸟系统回调失败")
+    public String anubisCallback() throws IOException {
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            String callbackRequestBody = requestParameters.get("callbackRequestBody");
-            ApplicationHandler.notBlank(callbackRequestBody, "callbackRequestBody");
+        String callbackRequestBody = requestParameters.get("callbackRequestBody");
+        ApplicationHandler.notBlank(callbackRequestBody, "callbackRequestBody");
 
-            return anubisService.handleAnubisCallback(callbackRequestBody);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "处理蜂鸟系统回调失败", requestParameters);
+        return GsonUtils.toJson(anubisService.handleAnubisCallback(callbackRequestBody));
     }
 
     /**
@@ -199,15 +139,9 @@ public class AnubisController extends BasicController {
      */
     @RequestMapping(value = "/obtainDeliveryStates")
     @ResponseBody
+    @ApiRestAction(modelClass = ObtainDeliveryStatesModel.class, serviceClass = AnubisService.class, serviceMethodName = "obtainDeliveryStates", error = "获取配送记录失败")
     public String obtainDeliveryStates() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            ObtainDeliveryStatesModel obtainDeliveryStatesModel = ApplicationHandler.instantiateObject(ObtainDeliveryStatesModel.class, requestParameters);
-            obtainDeliveryStatesModel.validateAndThrow();
-
-            return anubisService.obtainDeliveryStates(obtainDeliveryStatesModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "获取配送记录失败", requestParameters);
+        return null;
     }
 
     /**
@@ -217,14 +151,8 @@ public class AnubisController extends BasicController {
      */
     @RequestMapping(value = "/orderCarrier")
     @ResponseBody
+    @ApiRestAction(modelClass = OrderCarrierModel.class, serviceClass = AnubisService.class, serviceMethodName = "orderCarrier", error = "订单骑手位置查询失败")
     public String orderCarrier() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        MethodCaller methodCaller = () -> {
-            OrderCarrierModel orderCarrierModel = ApplicationHandler.instantiateObject(OrderCarrierModel.class, requestParameters);
-            orderCarrierModel.validateAndThrow();
-
-            return anubisService.orderCarrier(orderCarrierModel);
-        };
-        return ApplicationHandler.callMethod(methodCaller, "订单骑手位置查询失败", requestParameters);
+        return null;
     }
 }

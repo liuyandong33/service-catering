@@ -4,23 +4,15 @@ import build.dream.catering.models.activity.*;
 import build.dream.catering.services.ActivityService;
 import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.controllers.BasicController;
-import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.MethodCaller;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Map;
-
 @Controller
 @RequestMapping(value = "/activity")
 public class ActivityController extends BasicController {
-    @Autowired
-    private ActivityService activityService;
-
     /**
      * 保存买A赠B活动
      *
