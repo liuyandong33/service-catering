@@ -4,7 +4,6 @@ import build.dream.catering.models.user.ListUsersModel;
 import build.dream.catering.services.UserService;
 import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.controllers.BasicController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
