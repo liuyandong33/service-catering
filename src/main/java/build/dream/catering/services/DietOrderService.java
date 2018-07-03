@@ -465,7 +465,7 @@ public class DietOrderService {
         DietOrderGroup extraDietOrderGroup = null;
         if (deliverFee.compareTo(BigDecimal.ZERO) > 0) {
             if (extraDietOrderGroup == null) {
-                extraDietOrderGroup = DietOrderGroup.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).name("其他费用").type(Constants.DISCOUNT).createUserId(userId).lastUpdateUserId(userId).lastUpdateRemark("保存订单分组信息！").build();
+                extraDietOrderGroup = DietOrderGroup.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).name("其他费用").type(Constants.EXTRA).createUserId(userId).lastUpdateUserId(userId).lastUpdateRemark("保存订单分组信息！").build();
                 DatabaseHelper.insert(extraDietOrderGroup);
             }
             dietOrderTotalAmount = dietOrderTotalAmount.add(deliverFee);
@@ -475,7 +475,7 @@ public class DietOrderService {
 
         if (packageFee.compareTo(BigDecimal.ZERO) > 0) {
             if (extraDietOrderGroup == null) {
-                extraDietOrderGroup = DietOrderGroup.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).name("其他费用").type(Constants.DISCOUNT).createUserId(userId).lastUpdateUserId(userId).lastUpdateRemark("保存订单分组信息！").build();
+                extraDietOrderGroup = DietOrderGroup.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).name("其他费用").type(Constants.EXTRA).createUserId(userId).lastUpdateUserId(userId).lastUpdateRemark("保存订单分组信息！").build();
                 DatabaseHelper.insert(extraDietOrderGroup);
             }
             dietOrderTotalAmount = dietOrderTotalAmount.add(packageFee);
