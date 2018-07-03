@@ -18,10 +18,10 @@ public class GoodsController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/listGoodses", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/listGoodsInfos", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ApiRestAction(modelClass = ListGoodsesModel.class, serviceClass = GoodsService.class, serviceMethodName = "listGoodses", error = "查询菜品信息失败")
-    public String listGoodses() {
+    @ApiRestAction(modelClass = ListGoodsInfosModel.class, serviceClass = GoodsService.class, serviceMethodName = "listGoodsInfos", error = "查询菜品信息失败")
+    public String listGoodsInfos() {
         return null;
     }
 

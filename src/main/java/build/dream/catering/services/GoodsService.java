@@ -2,7 +2,7 @@ package build.dream.catering.services;
 
 import build.dream.catering.beans.ZTreeNode;
 import build.dream.catering.constants.Constants;
-import build.dream.catering.mappers.*;
+import build.dream.catering.mappers.GoodsMapper;
 import build.dream.catering.models.goods.*;
 import build.dream.catering.utils.DatabaseHelper;
 import build.dream.catering.utils.TenantConfigUtils;
@@ -32,16 +32,12 @@ public class GoodsService extends BasicService {
     private static final String SELECT_GOODS_TABLE_COLUMN_NAMES = StringUtils.join(new String[]{"goods.id", "goods.name", "goods.tenant_id", "goods.tenant_code", "goods.branch_id", "goods.type", "goods.category_id"}, ", ");
 
     @Transactional(readOnly = true)
-    public ApiRest listGoodses(ListGoodsesModel listGoodsesModel) {
-        BigInteger tenantId = listGoodsesModel.getTenantId();
-        BigInteger branchId = listGoodsesModel.getBranchId();
-        String queryGoodsInfosSql = "SELECT " + SELECT_GOODS_TABLE_COLUMN_NAMES + ", goods_category.name AS category_name, goods_category.description FROM goods LEFT OUTER JOIN goods_category ON goods_category.id = goods.category_id WHERE goods.tenant_id = #{tenantId} AND goods.branch_id = #{branchId} AND goods.deleted = 0";
-        Map<String, Object> queryGoodsInfosParameters = new HashMap<String, Object>();
-        queryGoodsInfosParameters.put("sql", queryGoodsInfosSql);
-        queryGoodsInfosParameters.put("tenantId", tenantId);
-        queryGoodsInfosParameters.put("branchId", branchId);
-        List<Map<String, Object>> goodsInfos = DatabaseHelper.executeQuery(queryGoodsInfosParameters);
+    public ApiRest listGoodsInfos(ListGoodsInfosModel listGoodsInfosModel) {
+        BigInteger tenantId = listGoodsInfosModel.getTenantId();
+        BigInteger branchId = listGoodsInfosModel.getBranchId();
+        List<Goods> goodsInfos = goodsMapper.findAllGoodsInfos(tenantId, branchId, null);
 
+        List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
         if (CollectionUtils.isNotEmpty(goodsInfos)) {
             SearchModel goodsSpecificationSearchModel = new SearchModel(true);
             goodsSpecificationSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -84,17 +80,16 @@ public class GoodsService extends BasicService {
 
             List<BigInteger> packageIds = new ArrayList<BigInteger>();
 
-            for (Map<String, Object> goodsInfo : goodsInfos) {
-                int type = MapUtils.getIntValue(goodsInfo, "type");
+            for (Goods goods : goodsInfos) {
+                int type = goods.getType();
                 if (type == 2) {
-                    BigInteger goodsId = BigInteger.valueOf(MapUtils.getLongValue(goodsInfo, "id"));
-                    packageIds.add(goodsId);
+                    packageIds.add(goods.getId());
                 }
             }
 
-            Map<BigInteger, List<Map<String, Object>>> packageGroupMap = new HashMap<BigInteger, List<Map<String,Object>>>();
+            Map<BigInteger, List<Map<String, Object>>> packageGroupMap = new HashMap<BigInteger, List<Map<String, Object>>>();
             if (CollectionUtils.isNotEmpty(packageIds)) {
-                Map<BigInteger, List<Map<String, Object>>> packageInfoMap = new HashMap<BigInteger, List<Map<String,Object>>>();
+                Map<BigInteger, List<Map<String, Object>>> packageInfoMap = new HashMap<BigInteger, List<Map<String, Object>>>();
 
                 List<Map<String, Object>> packageInfos = goodsMapper.listPackageInfos(packageIds);
                 for (Map<String, Object> packageInfo : packageInfos) {
@@ -126,18 +121,29 @@ public class GoodsService extends BasicService {
                 }
             }
 
-            for (Map<String, Object> goodsInfo : goodsInfos) {
-                BigInteger goodsId = BigInteger.valueOf(MapUtils.getLongValue(goodsInfo, "id"));
-                int type = MapUtils.getIntValue(goodsInfo, "type");
+            for (Goods goods : goodsInfos) {
+                BigInteger goodsId = goods.getId();
+                int type = goods.getType();
+
+                Map<String, Object> goodsInfo = new HashMap<String, Object>();
+                goodsInfo.put("id", goodsId);
+                goodsInfo.put("name", goods.getName());
+                goodsInfo.put("tenantId", goods.getTenantId());
+                goodsInfo.put("tenantCode", goods.getTenantCode());
+                goodsInfo.put("branchId", goods.getBranchId());
+                goodsInfo.put("type", type);
+                goodsInfo.put("categoryId", goods.getCategoryId());
+                goodsInfo.put("categoryName", goods.getCategoryName());
                 if (type == 1) {
                     goodsInfo.put("goodsSpecifications", buildGoodsSpecificationInfos(goodsSpecificationMap.get(goodsId)));
                     goodsInfo.put("flavorGroups", goodsFlavorGroupMap.get(goodsId));
                 } else if (type == 2) {
                     goodsInfo.put("groups", packageGroupMap.get(goodsId));
                 }
+                data.add(goodsInfo);
             }
         }
-        return new ApiRest(goodsInfos, "查询菜品信息成功！");
+        return new ApiRest(data, "查询菜品信息成功！");
     }
 
     public List<Map<String, Object>> buildGoodsSpecificationInfos(List<GoodsSpecification> goodsSpecifications) {

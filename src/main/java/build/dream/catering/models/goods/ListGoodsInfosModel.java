@@ -5,7 +5,7 @@ import build.dream.common.models.BasicModel;
 import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
 
-public class ListGoodsesModel extends BasicModel {
+public class ListGoodsInfosModel extends BasicModel {
     @NotNull
     private BigInteger tenantId;
     @NotNull
