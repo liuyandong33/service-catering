@@ -308,11 +308,6 @@ public class DietOrderService {
             goodsFlavorMap.put(goodsFlavor.getId(), goodsFlavor);
         }
 
-        DietOrder dietOrder = new DietOrder();
-        dietOrder.setTenantId(tenantId);
-        dietOrder.setTenantCode(tenantCode);
-        dietOrder.setBranchId(branchId);
-
         String orderNumberPrefix = null;
         Integer orderType = saveDietOrderModel.getOrderType();
         if (orderType == DietOrderConstants.ORDER_TYPE_SCAN_CODE_ORDER) {
@@ -321,22 +316,18 @@ public class DietOrderService {
         Integer daySerialNumber = sequenceMapper.nextValue(SerialNumberGenerator.generatorTodaySequenceName(tenantId, branchId, "diet_order_number"));
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
         String orderNumber = orderNumberPrefix + simpleDateFormat.format(new Date()) + SerialNumberGenerator.nextSerialNumber(8, daySerialNumber);
-        dietOrder.setOrderNumber(orderNumber);
-        dietOrder.setOrderType(orderType);
-        dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_PENDING);
-        dietOrder.setPayStatus(DietOrderConstants.PAY_STATUS_UNPAID);
-        dietOrder.setRefundStatus(DietOrderConstants.REFUND_STATUS_NO_REFUND);
-        dietOrder.setDaySerialNumber(daySerialNumber.toString());
+
+        DietOrder.Builder builder = DietOrder.builder();
+        builder.tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).orderNumber(orderNumber).orderType(orderType).orderStatus(DietOrderConstants.ORDER_STATUS_PENDING).payStatus(DietOrderConstants.PAY_STATUS_UNPAID).refundStatus(DietOrderConstants.REFUND_STATUS_NO_REFUND).daySerialNumber(daySerialNumber.toString());
 
         boolean invoiced = saveDietOrderModel.getInvoiced();
-        dietOrder.setInvoiced(invoiced);
+        builder.invoiced(invoiced);
         if (invoiced) {
-            dietOrder.setInvoiceType(saveDietOrderModel.getInvoiceType());
-            dietOrder.setInvoice(saveDietOrderModel.getInvoice());
+            builder.invoiceType(saveDietOrderModel.getInvoiceType()).invoice(saveDietOrderModel.getInvoice());
         }
-        dietOrder.setCreateUserId(userId);
-        dietOrder.setLastUpdateUserId(userId);
-        dietOrder.setLastUpdateRemark("保存订单信息！");
+        builder.createUserId(userId).lastUpdateUserId(userId).lastUpdateRemark("保存订单信息！");
+
+        DietOrder dietOrder = builder.build();
         DatabaseHelper.insert(dietOrder);
 
         BigDecimal dietOrderTotalAmount = BigDecimal.ZERO;
