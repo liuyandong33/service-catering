@@ -1,6 +1,7 @@
 package build.dream.catering.utils;
 
 import build.dream.common.erp.catering.domains.Vip;
+import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SearchModel;
 import org.apache.commons.lang.StringUtils;
 

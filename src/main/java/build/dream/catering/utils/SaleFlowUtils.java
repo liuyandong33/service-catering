@@ -2,6 +2,7 @@ package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
 import build.dream.common.erp.catering.domains.*;
+import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SearchCondition;
 import build.dream.common.utils.SearchModel;
 import org.apache.commons.collections.CollectionUtils;

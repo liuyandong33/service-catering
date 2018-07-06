@@ -3,7 +3,6 @@ package build.dream.catering.services;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.eleme.*;
 import build.dream.catering.tools.PushMessageThread;
-import build.dream.catering.utils.DatabaseHelper;
 import build.dream.catering.utils.ElemeUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
@@ -52,12 +51,12 @@ public class ElemeService {
         String data = null;
         if (isAuthorize) {
             String serviceName = ConfigurationUtils.getConfiguration(Constants.SERVICE_NAME);
-            data = SystemPartitionUtils.getOutsideUrl(Constants.SERVICE_NAME_POSAPI, "eleme", "bindingStore") + "?serviceName=" + serviceName + "&controllerName=eleme&actionName=bindingStore" + "&tenantId=" + tenantId + "&branchId=" + branchId + "&userId=" + userId;
+            data = CommonUtils.getOutsideUrl(Constants.SERVICE_NAME_POSAPI, "eleme", "bindingStore") + "?serviceName=" + serviceName + "&controllerName=eleme&actionName=bindingStore" + "&tenantId=" + tenantId + "&branchId=" + branchId + "&userId=" + userId;
         } else {
             String elemeUrl = ConfigurationUtils.getConfiguration(Constants.ELEME_SERVICE_URL);
             String elemeAppKey = ConfigurationUtils.getConfiguration(Constants.ELEME_APP_KEY);
 
-            String outServiceOutsideServiceDomain = SystemPartitionUtils.getOutsideServiceDomain(Constants.SERVICE_NAME_OUT);
+            String outServiceOutsideServiceDomain = CommonUtils.getOutsideServiceDomain(Constants.SERVICE_NAME_OUT);
             data = String.format(Constants.ELEME_TENANT_AUTHORIZE_URL_FORMAT, elemeUrl + "/" + "authorize", "code", elemeAppKey, URLEncoder.encode(outServiceOutsideServiceDomain + "/eleme/tenantAuthorizeCallback", Constants.CHARSET_NAME_UTF_8), tenantId + "Z" + branchId + "Z" + userId + "Z" + elemeAccountType, "all");
         }
         ApiRest apiRest = new ApiRest(data, "生成授权链接成功！");

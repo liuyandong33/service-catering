@@ -6,7 +6,7 @@ import build.dream.catering.models.meituan.CheckIsBindingModel;
 import build.dream.catering.models.meituan.GenerateBindingStoreLinkModel;
 import build.dream.catering.models.meituan.ObtainMeiTuanOrderModel;
 import build.dream.catering.tools.PushMessageThread;
-import build.dream.catering.utils.DatabaseHelper;
+import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.*;

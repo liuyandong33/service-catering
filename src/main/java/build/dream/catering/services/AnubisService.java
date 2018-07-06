@@ -3,13 +3,9 @@ package build.dream.catering.services;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.anubis.*;
 import build.dream.catering.utils.AnubisUtils;
-import build.dream.catering.utils.DatabaseHelper;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
-import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.ConfigurationUtils;
-import build.dream.common.utils.SearchModel;
-import build.dream.common.utils.SystemPartitionUtils;
+import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
@@ -170,7 +166,7 @@ public class AnubisService {
         ApplicationHandler.ifNotNullPut(data, "partner_remark", orderModel.getPartnerRemark());
         data.put("partner_order_code", dietOrder.getOrderNumber());
 
-        String notifyUrl = SystemPartitionUtils.getUrl(ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE), Constants.SERVICE_NAME_CATERING, "anubis", "anubisCallback");
+        String notifyUrl = CommonUtils.getUrl(ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE), Constants.SERVICE_NAME_CATERING, "anubis", "anubisCallback");
 
         data.put("notify_url", notifyUrl);
         data.put("order_type", 1);

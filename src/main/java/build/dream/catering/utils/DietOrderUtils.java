@@ -107,7 +107,7 @@ public class DietOrderUtils {
         if (StringUtils.isBlank(fullReductionActivitiesJson)) {
             return null;
         }
-        List<FullReductionActivityBean> fullReductionActivityBeans = GsonUtils.jsonToList(fullReductionActivitiesJson, FullReductionActivityBean.class);
+        List<FullReductionActivityBean> fullReductionActivityBeans = GsonUtils.fromJsonToList(fullReductionActivitiesJson, FullReductionActivityBean.class);
         Map<Integer, FullReductionActivityBean> fullReductionActivityBeanMap = new HashMap<Integer, FullReductionActivityBean>();
         Map<BigDecimal, Integer> totalAmountAndHashCodeMap = new HashMap<BigDecimal, Integer>();
         List<BigDecimal> keys = new ArrayList<BigDecimal>();

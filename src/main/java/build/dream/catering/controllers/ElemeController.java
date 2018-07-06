@@ -80,7 +80,7 @@ public class ElemeController extends BasicController {
             params.put("shopId", branch.getShopId());
             apiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.product.category.getShopCategories", params);
         } catch (Exception e) {
-            LogUtils.error("查询店铺商品分类失败", controllerSimpleName, "getShopCategories", e, requestParameters);
+            LogUtils.error("查询店铺商品分类失败", className, "getShopCategories", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -103,7 +103,7 @@ public class ElemeController extends BasicController {
             params.put("shopId", branch.getShopId());
             apiRest = ElemeUtils.callElemeSystem(tenantId, branchId, branch.getElemeAccountType(), "eleme.product.category.getShopCategoriesWithChildren", params);
         } catch (Exception e) {
-            LogUtils.error("查询店铺商品分类失败", controllerSimpleName, "getShopCategoriesWithChildren", e, requestParameters);
+            LogUtils.error("查询店铺商品分类失败", className, "getShopCategoriesWithChildren", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -121,7 +121,7 @@ public class ElemeController extends BasicController {
             String branchId = requestParameters.get("branchId");
             Validate.notNull(branchId, "参数(branchId)不能为空！");
         } catch (Exception e) {
-            LogUtils.error("查询商品分类详情失败", controllerSimpleName, "getCategory", e, requestParameters);
+            LogUtils.error("查询商品分类详情失败", className, "getCategory", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -144,7 +144,7 @@ public class ElemeController extends BasicController {
             params.put("shopId", branch.getShopId());
             apiRest = ElemeUtils.callElemeSystem(tenantId, branchId, branch.getElemeAccountType(), "eleme.product.category.getShopCategoriesWithChildren", params);
         } catch (Exception e) {
-            LogUtils.error("查询商品分类详情失败", controllerSimpleName, "getCategoryWithChildren", e, requestParameters);
+            LogUtils.error("查询商品分类详情失败", className, "getCategoryWithChildren", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -177,7 +177,7 @@ public class ElemeController extends BasicController {
             params.put("description", goodsCategory.getDescription());
             apiRest = ElemeUtils.callElemeSystem(tenantId, branchId, branch.getElemeAccountType(), "eleme.product.category.createCategory", params);
         } catch (Exception e) {
-            LogUtils.error("添加商品分类失败", controllerSimpleName, "createCategory", e, requestParameters);
+            LogUtils.error("添加商品分类失败", className, "createCategory", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -211,7 +211,7 @@ public class ElemeController extends BasicController {
             params.put("description", goodsCategory.getDescription());
             apiRest = ElemeUtils.callElemeSystem(tenantId, branchId, branch.getElemeAccountType(), "eleme.product.category.createCategoryWithChildren", params);
         } catch (Exception e) {
-            LogUtils.error("添加商品分类失败", controllerSimpleName, "createCategoryWithChildren", e, requestParameters);
+            LogUtils.error("添加商品分类失败", className, "createCategoryWithChildren", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -244,7 +244,7 @@ public class ElemeController extends BasicController {
             params.put("description", goodsCategory.getDescription());
             apiRest = ElemeUtils.callElemeSystem(tenantId, branchId, branch.getElemeAccountType(), "eleme.product.category.updateCategory", params);
         } catch (Exception e) {
-            LogUtils.error("更新商品分类失败", controllerSimpleName, "updateCategory", e, requestParameters);
+            LogUtils.error("更新商品分类失败", className, "updateCategory", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -278,7 +278,7 @@ public class ElemeController extends BasicController {
             params.put("description", goodsCategory.getDescription());
             apiRest = ElemeUtils.callElemeSystem(tenantId, branchId, branch.getElemeAccountType(), "eleme.product.category.updateCategoryWithChildren", params);
         } catch (Exception e) {
-            LogUtils.error("更新商品分类失败", controllerSimpleName, "updateCategoryWithChildren", e, requestParameters);
+            LogUtils.error("更新商品分类失败", className, "updateCategoryWithChildren", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -309,7 +309,7 @@ public class ElemeController extends BasicController {
             params.put("categoryId", goodsCategory.getId());
             apiRest = ElemeUtils.callElemeSystem(tenantId, branchId, branch.getElemeAccountType(), "eleme.product.category.removeCategory", params);
         } catch (Exception e) {
-            LogUtils.error("删除商品分类失败", controllerSimpleName, "removeCategory", e, requestParameters);
+            LogUtils.error("删除商品分类失败", className, "removeCategory", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -351,7 +351,7 @@ public class ElemeController extends BasicController {
         result = result.replaceAll("\\$\\{branchId}", requestParameters.get("branchId"));
         result = result.replaceAll("\\$\\{userId}", requestParameters.get("userId"));
         result = result.replaceAll("\\$\\{partitionCode}", ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE));
-        result = result.replaceAll("\\$\\{doBindingStoreUrl}", SystemPartitionUtils.getOutsideUrl(Constants.SERVICE_NAME_POSAPI, "proxy", "doPostPermit"));
+        result = result.replaceAll("\\$\\{doBindingStoreUrl}", CommonUtils.getOutsideUrl(Constants.SERVICE_NAME_POSAPI, "proxy", "doPostPermit"));
         result = StringUtils.join(result.split("\\$\\{jquery-3\\.2\\.1\\.min.js}"), readResource("jquery-3.2.1.min.js"));
         return result;
     }
@@ -414,7 +414,7 @@ public class ElemeController extends BasicController {
 
             apiRest = ElemeUtils.callElemeSystem(queryItemByPageModel.getTenantId().toString(), queryItemByPageModel.getBranchId().toString(), branch.getElemeAccountType(), "eleme.product.item.queryItemByPage", params);
         } catch (Exception e) {
-            LogUtils.error("分页获取店铺下的商品失败", controllerSimpleName, "queryItemByPage", e, requestParameters);
+            LogUtils.error("分页获取店铺下的商品失败", className, "queryItemByPage", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -447,7 +447,7 @@ public class ElemeController extends BasicController {
             apiRest.setMessage("设置订单餐盒费成功！");
             apiRest.setSuccessful(true);
         } catch (Exception e) {
-            LogUtils.error("设置订单餐盒费失败", controllerSimpleName, "setOrderPackingFee", e, requestParameters);
+            LogUtils.error("设置订单餐盒费失败", className, "setOrderPackingFee", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -479,7 +479,7 @@ public class ElemeController extends BasicController {
             apiRest.setMessage("查询店铺活动商品成功！");
             apiRest.setSuccessful(true);
         } catch (Exception e) {
-            LogUtils.error("查询店铺活动商品失败", controllerSimpleName, "getShopSalesItems", e, requestParameters);
+            LogUtils.error("查询店铺活动商品失败", className, "getShopSalesItems", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -496,7 +496,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.getOrder(getOrderModel);
         } catch (Exception e) {
-            LogUtils.error("获取订单失败", controllerSimpleName, "getOrder", e, requestParameters);
+            LogUtils.error("获取订单失败", className, "getOrder", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -513,7 +513,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.batchGetOrders(batchGetOrdersModel);
         } catch (Exception e) {
-            LogUtils.error("批量获取订单失败", controllerSimpleName, "batchGetOrders", e, requestParameters);
+            LogUtils.error("批量获取订单失败", className, "batchGetOrders", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -535,7 +535,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.confirmOrderLite(confirmOrderLiteModel);
         } catch (Exception e) {
-            LogUtils.error("确认订单失败", controllerSimpleName, "confirmOrderLite", e, requestParameters);
+            LogUtils.error("确认订单失败", className, "confirmOrderLite", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -557,7 +557,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.cancelOrderLite(cancelOrderLiteModel);
         } catch (Exception e) {
-            LogUtils.error("取消订单失败", controllerSimpleName, "cancelOrderLite", e, requestParameters);
+            LogUtils.error("取消订单失败", className, "cancelOrderLite", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -579,7 +579,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.agreeRefundLite(agreeRefundLiteModel);
         } catch (Exception e) {
-            LogUtils.error("同意退单/同意取消单失败", controllerSimpleName, "agreeRefundLite", e, requestParameters);
+            LogUtils.error("同意退单/同意取消单失败", className, "agreeRefundLite", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -600,7 +600,7 @@ public class ElemeController extends BasicController {
             disagreeRefundLiteModel.validateAndThrow();
             apiRest = elemeService.disagreeRefundLite(disagreeRefundLiteModel);
         } catch (Exception e) {
-            LogUtils.error("不同意退单/不同意取消单失败", controllerSimpleName, "disagreeRefundLite", e, requestParameters);
+            LogUtils.error("不同意退单/不同意取消单失败", className, "disagreeRefundLite", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -621,7 +621,7 @@ public class ElemeController extends BasicController {
             getDeliveryStateRecordModel.validateAndThrow();
             apiRest = elemeService.getDeliveryStateRecord(getDeliveryStateRecordModel);
         } catch (Exception e) {
-            LogUtils.error("获取订单配送记录失败", controllerSimpleName, "getDeliveryStateRecord", e, requestParameters);
+            LogUtils.error("获取订单配送记录失败", className, "getDeliveryStateRecord", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -643,7 +643,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.batchGetDeliveryStates(batchGetDeliveryStatesModel);
         } catch (Exception e) {
-            LogUtils.error("批量获取订单最新配送记录失败", controllerSimpleName, "batchGetDeliveryStates", e, requestParameters);
+            LogUtils.error("批量获取订单最新配送记录失败", className, "batchGetDeliveryStates", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -665,7 +665,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.deliveryBySelfLite(deliveryBySelfLiteModel);
         } catch (Exception e) {
-            LogUtils.error("配送异常或者物流拒单后选择自行配送失败", controllerSimpleName, "deliveryBySelfLite", e, requestParameters);
+            LogUtils.error("配送异常或者物流拒单后选择自行配送失败", className, "deliveryBySelfLite", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -687,7 +687,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.noMoreDeliveryLite(noMoreDeliveryLiteModel);
         } catch (Exception e) {
-            LogUtils.error("配送异常或者物流拒单后选择不再配送失败", controllerSimpleName, "noMoreDeliveryLite", e, requestParameters);
+            LogUtils.error("配送异常或者物流拒单后选择不再配送失败", className, "noMoreDeliveryLite", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -709,7 +709,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.receivedOrderLite(receivedOrderLiteModel);
         } catch (Exception e) {
-            LogUtils.error("订单确认送达失败", controllerSimpleName, "receivedOrderLite", e, requestParameters);
+            LogUtils.error("订单确认送达失败", className, "receivedOrderLite", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -731,7 +731,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.replyReminder(replyReminderModel);
         } catch (Exception e) {
-            LogUtils.error("回复催单失败", controllerSimpleName, "replyReminder", e, requestParameters);
+            LogUtils.error("回复催单失败", className, "replyReminder", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -753,7 +753,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.getCommodities(getCommoditiesModel);
         } catch (Exception e) {
-            LogUtils.error("获取指定订单菜品活动价格失败", controllerSimpleName, "getCommodities", e, requestParameters);
+            LogUtils.error("获取指定订单菜品活动价格失败", className, "getCommodities", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -775,7 +775,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.batchGetCommodities(batchGetCommoditiesModel);
         } catch (Exception e) {
-            LogUtils.error("批量获取订单菜品活动价格失败", controllerSimpleName, "batchGetCommodities", e, requestParameters);
+            LogUtils.error("批量获取订单菜品活动价格失败", className, "batchGetCommodities", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -797,7 +797,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.getRefundOrder(getRefundOrderModel);
         } catch (Exception e) {
-            LogUtils.error("获取订单退款信息失败", controllerSimpleName, "getRefundOrder", e, requestParameters);
+            LogUtils.error("获取订单退款信息失败", className, "getRefundOrder", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -819,7 +819,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.batchGetRefundOrders(batchGetRefundOrdersModel);
         } catch (Exception e) {
-            LogUtils.error("批量获取订单退款信息失败", controllerSimpleName, "batchGetRefundOrders", e, requestParameters);
+            LogUtils.error("批量获取订单退款信息失败", className, "batchGetRefundOrders", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -841,7 +841,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.cancelDelivery(cancelDeliveryModel);
         } catch (Exception e) {
-            LogUtils.error("取消呼叫配送失败", controllerSimpleName, "cancelDelivery", e, requestParameters);
+            LogUtils.error("取消呼叫配送失败", className, "cancelDelivery", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -863,7 +863,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.callDelivery(callDeliveryModel);
         } catch (Exception e) {
-            LogUtils.error("呼叫配送失败", controllerSimpleName, "callDelivery", e, requestParameters);
+            LogUtils.error("呼叫配送失败", className, "callDelivery", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -885,7 +885,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.getUnreplyReminders(getUnreplyRemindersModel);
         } catch (Exception e) {
-            LogUtils.error("获取店铺未回复的催单失败", controllerSimpleName, "getUnreplyReminders", e, requestParameters);
+            LogUtils.error("获取店铺未回复的催单失败", className, "getUnreplyReminders", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -907,7 +907,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.getUnprocessOrders(getUnprocessOrdersModel);
         } catch (Exception e) {
-            LogUtils.error("查询店铺未处理订单失败", controllerSimpleName, "getUnprocessOrders", e, requestParameters);
+            LogUtils.error("查询店铺未处理订单失败", className, "getUnprocessOrders", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -929,7 +929,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.getCancelOrders(getCancelOrdersModel);
         } catch (Exception e) {
-            LogUtils.error("查询店铺未处理的取消单失败", controllerSimpleName, "getCancelOrders", e, requestParameters);
+            LogUtils.error("查询店铺未处理的取消单失败", className, "getCancelOrders", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -951,7 +951,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.getRefundOrders(getRefundOrdersModel);
         } catch (Exception e) {
-            LogUtils.error("查询店铺未处理的退单失败", controllerSimpleName, "getRefundOrders", e, requestParameters);
+            LogUtils.error("查询店铺未处理的退单失败", className, "getRefundOrders", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -973,7 +973,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.getAllOrders(getAllOrdersModel);
         } catch (Exception e) {
-            LogUtils.error("查询全部订单失败", controllerSimpleName, "getAllOrders", e, requestParameters);
+            LogUtils.error("查询全部订单失败", className, "getAllOrders", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -995,7 +995,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.querySupportedCompensationOrders(querySupportedCompensationOrdersModel);
         } catch (Exception e) {
-            LogUtils.error("批量查询订单是否支持索赔失败", controllerSimpleName, "querySupportedCompensationOrders", e, requestParameters);
+            LogUtils.error("批量查询订单是否支持索赔失败", className, "querySupportedCompensationOrders", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -1019,7 +1019,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.batchApplyCompensations(batchApplyCompensationsModel);
         } catch (Exception e) {
-            LogUtils.error("批量申请索赔失败", controllerSimpleName, "batchApplyCompensations", e, requestParameters);
+            LogUtils.error("批量申请索赔失败", className, "batchApplyCompensations", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -1041,7 +1041,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.queryCompensationOrders(queryCompensationOrdersModel);
         } catch (Exception e) {
-            LogUtils.error("批量查询索赔结果失败", controllerSimpleName, "queryCompensationOrders", e, requestParameters);
+            LogUtils.error("批量查询索赔结果失败", className, "queryCompensationOrders", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -1063,7 +1063,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.getDeliveryFeeForCrowd(getDeliveryFeeForCrowdModel);
         } catch (Exception e) {
-            LogUtils.error("众包订单询价，获取配送费失败", controllerSimpleName, "getDeliveryFeeForCrowd", e, requestParameters);
+            LogUtils.error("众包订单询价，获取配送费失败", className, "getDeliveryFeeForCrowd", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -1085,7 +1085,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.evaluateRider(evaluateRiderModel);
         } catch (Exception e) {
-            LogUtils.error("评价骑手失败", controllerSimpleName, "evaluateRider", e, requestParameters);
+            LogUtils.error("评价骑手失败", className, "evaluateRider", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -1107,7 +1107,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.batchGetEvaluationInfos(batchGetEvaluationInfosModel);
         } catch (Exception e) {
-            LogUtils.error("批量获取骑手评价信息失败", controllerSimpleName, "batchGetEvaluationInfos", e, requestParameters);
+            LogUtils.error("批量获取骑手评价信息失败", className, "batchGetEvaluationInfos", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -1129,7 +1129,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.batchGetEvaluationStatus(batchGetEvaluationStatusModel);
         } catch (Exception e) {
-            LogUtils.error("批量获取骑手评价信息失败", controllerSimpleName, "batchGetEvaluationStatus", e, requestParameters);
+            LogUtils.error("批量获取骑手评价信息失败", className, "batchGetEvaluationStatus", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -1151,7 +1151,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.batchGetDeliveryTipInfos(batchGetDeliveryTipInfosModel);
         } catch (Exception e) {
-            LogUtils.error("批量获取订单加小费信息失败", controllerSimpleName, "batchGetDeliveryTipInfos", e, requestParameters);
+            LogUtils.error("批量获取订单加小费信息失败", className, "batchGetDeliveryTipInfos", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -1173,7 +1173,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.addDeliveryTipByOrderId(addDeliveryTipByOrderIdModel);
         } catch (Exception e) {
-            LogUtils.error("订单加小费失败", controllerSimpleName, "addDeliveryTipByOrderId", e, requestParameters);
+            LogUtils.error("订单加小费失败", className, "addDeliveryTipByOrderId", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -1195,7 +1195,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.setOrderPrepared(setOrderPreparedModel);
         } catch (Exception e) {
-            LogUtils.error("非自配送餐厅标记已出餐失败", controllerSimpleName, "setOrderPrepared", e, requestParameters);
+            LogUtils.error("非自配送餐厅标记已出餐失败", className, "setOrderPrepared", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -1217,7 +1217,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.getPreparedTimesByOrderIds(getPreparedTimesByOrderIdsModel);
         } catch (Exception e) {
-            LogUtils.error("查询已出餐列表失败", controllerSimpleName, "getPreparedTimesByOrderIds", e, requestParameters);
+            LogUtils.error("查询已出餐列表失败", className, "getPreparedTimesByOrderIds", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -1239,7 +1239,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.getShop(getShopModel);
         } catch (Exception e) {
-            LogUtils.error("查询店铺信息失败", controllerSimpleName, "getShop", e, requestParameters);
+            LogUtils.error("查询店铺信息失败", className, "getShop", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -1261,7 +1261,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.updateShop(updateShopModel);
         } catch (Exception e) {
-            LogUtils.error("查询店铺信息失败", controllerSimpleName, "updateShop", e, requestParameters);
+            LogUtils.error("查询店铺信息失败", className, "updateShop", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -1283,7 +1283,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.batchGetShopStatus(batchGetShopStatusModel);
         } catch (Exception e) {
-            LogUtils.error("批量获取店铺简要失败", controllerSimpleName, "batchGetShopStatus", e, requestParameters);
+            LogUtils.error("批量获取店铺简要失败", className, "batchGetShopStatus", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -1305,7 +1305,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.setDeliveryTime(setDeliveryTimeModel);
         } catch (Exception e) {
-            LogUtils.error("设置送达时间失败", controllerSimpleName, "setDeliveryTime", e, requestParameters);
+            LogUtils.error("设置送达时间失败", className, "setDeliveryTime", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -1327,7 +1327,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.setOnlineRefund(setOnlineRefundModel);
         } catch (Exception e) {
-            LogUtils.error("设置是否支持在线退单失败", controllerSimpleName, "setOnlineRefund", e, requestParameters);
+            LogUtils.error("设置是否支持在线退单失败", className, "setOnlineRefund", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -1349,7 +1349,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.setBookingStatus(setBookingStatusModel);
         } catch (Exception e) {
-            LogUtils.error("设置是否支持预定单及预定天数失败", controllerSimpleName, "setBookingStatus", e, requestParameters);
+            LogUtils.error("设置是否支持预定单及预定天数失败", className, "setBookingStatus", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -1371,7 +1371,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.getUser(getUserModel);
         } catch (Exception e) {
-            LogUtils.error("获取商户账号信息失败", controllerSimpleName, "getUser", e, requestParameters);
+            LogUtils.error("获取商户账号信息失败", className, "getUser", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -1393,7 +1393,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.getEffectServicePackContract(getEffectServicePackContractModel);
         } catch (Exception e) {
-            LogUtils.error("查询店铺当前生效合同类型失败", controllerSimpleName, "getEffectServicePackContract", e, requestParameters);
+            LogUtils.error("查询店铺当前生效合同类型失败", className, "getEffectServicePackContract", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);
@@ -1415,7 +1415,7 @@ public class ElemeController extends BasicController {
 
             apiRest = elemeService.getOrderRateByOrderId(getOrderRateByOrderIdModel);
         } catch (Exception e) {
-            LogUtils.error("获取指定订单的评论失败", controllerSimpleName, "getOrderRateByOrderId", e, requestParameters);
+            LogUtils.error("获取指定订单的评论失败", className, "getOrderRateByOrderId", e, requestParameters);
             apiRest = new ApiRest(e);
         }
         return GsonUtils.toJson(apiRest);

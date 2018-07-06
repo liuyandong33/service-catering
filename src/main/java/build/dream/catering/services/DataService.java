@@ -1,15 +1,14 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.utils.DatabaseHelper;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.CacheUtils;
+import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.GsonUtils;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

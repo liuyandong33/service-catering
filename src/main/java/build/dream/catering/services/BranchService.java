@@ -3,7 +3,6 @@ package build.dream.catering.services;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.BranchMapper;
 import build.dream.catering.models.branch.*;
-import build.dream.catering.utils.DatabaseHelper;
 import build.dream.catering.utils.SequenceUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.Branch;

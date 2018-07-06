@@ -47,7 +47,7 @@ public class BatchApplyCompensationsModel extends BasicModel {
 
     public void setRequests(String requests) {
         ApplicationHandler.isJson(requests, "requests");
-        this.requests = GsonUtils.jsonToList(requests, CompensationRequest.class);
+        this.requests = GsonUtils.fromJsonToList(requests, CompensationRequest.class);
     }
 
     @Override
