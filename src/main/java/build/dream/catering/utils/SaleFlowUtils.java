@@ -13,7 +13,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 public class SaleFlowUtils {
-    public static void writeSaleFlow(DietOrder dietOrder, List<DietOrderGroup> dietOrderGroups, List<DietOrderDetail> dietOrderDetails, List<DietOrderPayment> dietOrderPayments) {
+    public static void writeSaleFlow(DietOrder dietOrder, List<DietOrderGroup> dietOrderGroups, List<DietOrderDetail> dietOrderDetails, List<DietOrderActivity> dietOrderActivities, List<DietOrderPayment> dietOrderPayments) {
         Map<BigInteger, List<DietOrderDetail>> dietOrderDetailListMap = new HashMap<BigInteger, List<DietOrderDetail>>();
         for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
             BigInteger dietOrderGroupId = dietOrderDetail.getDietOrderGroupId();
@@ -40,11 +40,6 @@ public class SaleFlowUtils {
             }
         }
 
-        BigDecimal totalAmount = dietOrder.getTotalAmount();
-        BigDecimal discountAmount = dietOrder.getDiscountAmount();
-        BigDecimal payableAmount = dietOrder.getPayableAmount();
-        BigDecimal paidAmount = dietOrder.getPaidAmount();
-
         BigInteger tenantId = dietOrder.getTenantId();
         String tenantCode = dietOrder.getTenantCode();
         BigInteger branchId = dietOrder.getBranchId();
@@ -59,10 +54,10 @@ public class SaleFlowUtils {
         sale.setBranchId(branchId);
         sale.setSaleCode(dietOrder.getOrderNumber());
         sale.setSaleTime(saleTime);
-        sale.setTotalAmount(totalAmount);
-        sale.setDiscountAmount(discountAmount);
-        sale.setPayableAmount(payableAmount);
-        sale.setPaidAmount(paidAmount);
+        sale.setTotalAmount(dietOrder.getTotalAmount());
+        sale.setDiscountAmount(dietOrder.getDiscountAmount());
+        sale.setPayableAmount(dietOrder.getPayableAmount());
+        sale.setPaidAmount(dietOrder.getPaidAmount());
         sale.setCreateTime(date);
         sale.setLastUpdateTime(date);
         sale.setCreateUserId(userId);
@@ -71,7 +66,17 @@ public class SaleFlowUtils {
 
         BigInteger saleId = sale.getId();
 
-        calculateShare(normalDietOrderDetails, discountAmount, payableAmount, paidAmount);
+        // 保存订单中整单优惠活动（包括整单优惠，支付促销）的优惠金额
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        for (DietOrderActivity dietOrderActivity : dietOrderActivities) {
+            int activityType = dietOrderActivity.getActivityType();
+            if (activityType == 2 || activityType == 4) {
+                discountAmount = discountAmount.add(dietOrderActivity.getAmount());
+            }
+        }
+        if (discountAmount.compareTo(BigDecimal.ZERO) > 0) {
+            calculateShare(normalDietOrderDetails, discountAmount);
+        }
 
         List<SaleDetail> saleDetails = new ArrayList<SaleDetail>();
         for (DietOrderDetail dietOrderDetail : normalDietOrderDetails) {
@@ -96,17 +101,19 @@ public class SaleFlowUtils {
         dietOrderDetailSearchModel.setSearchConditions(searchConditions);
         List<DietOrderDetail> dietOrderDetails = DatabaseHelper.findAll(DietOrderDetail.class, dietOrderDetailSearchModel);
 
+        SearchModel dietOrderActivitySearchModel = new SearchModel();
+        dietOrderActivitySearchModel.setSearchConditions(searchConditions);
+        List<DietOrderActivity> dietOrderActivities = DatabaseHelper.findAll(DietOrderActivity.class, dietOrderActivitySearchModel);
+
         SearchModel dietOrderPaymentSearchModel = new SearchModel();
         dietOrderPaymentSearchModel.setSearchConditions(searchConditions);
         List<DietOrderPayment> dietOrderPayments = DatabaseHelper.findAll(DietOrderPayment.class, dietOrderPaymentSearchModel);
 
-        writeSaleFlow(dietOrder, dietOrderGroups, dietOrderDetails, dietOrderPayments);
+        writeSaleFlow(dietOrder, dietOrderGroups, dietOrderDetails, dietOrderActivities, dietOrderPayments);
     }
 
-    public static void calculateShare(List<DietOrderDetail> dietOrderDetails, BigDecimal discountAmount, BigDecimal payableAmount, BigDecimal paidAmount) {
+    public static void calculateShare(List<DietOrderDetail> dietOrderDetails, BigDecimal discountAmount) {
         BigDecimal discountAmountShareSum = BigDecimal.ZERO;
-        BigDecimal payableAmountShareSum = BigDecimal.ZERO;
-        BigDecimal paidAmountShareSum = BigDecimal.ZERO;
         BigDecimal denominator = obtainDenominator(dietOrderDetails);
 
         int size = dietOrderDetails.size();
@@ -114,25 +121,14 @@ public class SaleFlowUtils {
             DietOrderDetail dietOrderDetail = dietOrderDetails.get(index);
 
             BigDecimal discountAmountShare = null;
-            BigDecimal payableAmountShare = null;
-            BigDecimal paidAmountShare = null;
             if (index == size - 1) {
                 discountAmountShare = discountAmount.subtract(discountAmountShareSum);
-                payableAmountShare = payableAmount.subtract(payableAmountShareSum);
-                paidAmountShare = paidAmount.subtract(paidAmountShareSum);
             } else {
                 BigDecimal weight = dietOrderDetail.getTotalAmount().divide(denominator, 10, BigDecimal.ROUND_DOWN);
                 discountAmountShare = discountAmount.multiply(weight).setScale(2, BigDecimal.ROUND_DOWN);
-                payableAmountShare = payableAmount.multiply(weight).setScale(2, BigDecimal.ROUND_DOWN);
-                paidAmountShare = paidAmount.multiply(weight).setScale(2, BigDecimal.ROUND_DOWN);
-
                 discountAmountShareSum = discountAmountShareSum.add(discountAmountShare);
-                payableAmountShareSum = payableAmountShareSum.add(payableAmountShare);
-                paidAmountShareSum = paidAmountShareSum.add(paidAmountShare);
             }
-            dietOrderDetail.setDiscountAmount(discountAmountShare);
-            dietOrderDetail.setPayableAmount(payableAmountShare);
-            dietOrderDetail.setPaidAmount(paidAmountShare);
+            dietOrderDetail.setDiscountShare(discountAmountShare);
         }
     }
 
@@ -163,6 +159,10 @@ public class SaleFlowUtils {
         saleDetail.setDiscountAmount(dietOrderDetail.getDiscountAmount());
         saleDetail.setPayableAmount(dietOrderDetail.getPayableAmount());
         saleDetail.setPaidAmount(dietOrderDetail.getPaidAmount());
+
+        BigDecimal discountShare = dietOrderDetail.getDiscountShare();
+        saleDetail.setDiscountShare(discountShare != null ? discountShare : BigDecimal.ZERO);
+
         saleDetail.setCreateUserId(userId);
         saleDetail.setLastUpdateUserId(userId);
         return saleDetail;
