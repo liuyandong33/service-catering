@@ -82,6 +82,12 @@ public class SaleFlowUtils {
         for (DietOrderDetail dietOrderDetail : normalDietOrderDetails) {
             saleDetails.add(buildSaleDetail(saleId, saleTime, tenantId, tenantCode, branchId, dietOrderDetail, userId));
         }
+        for (DietOrderDetail dietOrderDetail : extraDietOrderDetails) {
+            saleDetails.add(buildSaleDetail(saleId, saleTime, tenantId, tenantCode, branchId, dietOrderDetail, userId));
+        }
+        for (DietOrderDetail dietOrderDetail : discountDietOrderDetails) {
+            saleDetails.add(buildSaleDetail(saleId, saleTime, tenantId, tenantCode, branchId, dietOrderDetail, userId));
+        }
         DatabaseHelper.insertAll(saleDetails);
     }
 
