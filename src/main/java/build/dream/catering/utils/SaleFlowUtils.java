@@ -82,13 +82,25 @@ public class SaleFlowUtils {
         for (DietOrderDetail dietOrderDetail : normalDietOrderDetails) {
             saleDetails.add(buildSaleDetail(saleId, saleTime, tenantId, tenantCode, branchId, dietOrderDetail, userId));
         }
-        for (DietOrderDetail dietOrderDetail : extraDietOrderDetails) {
-            saleDetails.add(buildSaleDetail(saleId, saleTime, tenantId, tenantCode, branchId, dietOrderDetail, userId));
+
+        if (CollectionUtils.isNotEmpty(extraDietOrderDetails)) {
+            for (DietOrderDetail dietOrderDetail : extraDietOrderDetails) {
+                saleDetails.add(buildSaleDetail(saleId, saleTime, tenantId, tenantCode, branchId, dietOrderDetail, userId));
+            }
         }
-        for (DietOrderDetail dietOrderDetail : discountDietOrderDetails) {
-            saleDetails.add(buildSaleDetail(saleId, saleTime, tenantId, tenantCode, branchId, dietOrderDetail, userId));
+
+        if (CollectionUtils.isNotEmpty(discountDietOrderDetails)) {
+            for (DietOrderDetail dietOrderDetail : discountDietOrderDetails) {
+                saleDetails.add(buildSaleDetail(saleId, saleTime, tenantId, tenantCode, branchId, dietOrderDetail, userId));
+            }
         }
         DatabaseHelper.insertAll(saleDetails);
+
+        List<SalePayment> salePayments = new ArrayList<SalePayment>();
+        for (DietOrderPayment dietOrderPayment : dietOrderPayments) {
+            salePayments.add(buildSalePayment(saleId, saleTime, tenantId, tenantCode, branchId, dietOrderPayment, userId));
+        }
+        DatabaseHelper.insertAll(salePayments);
     }
 
     public static void writeSaleFlow(BigInteger dietOrderId) {
@@ -172,5 +184,21 @@ public class SaleFlowUtils {
         saleDetail.setCreateUserId(userId);
         saleDetail.setLastUpdateUserId(userId);
         return saleDetail;
+    }
+
+    public static SalePayment buildSalePayment(BigInteger saleId, Date saleTime, BigInteger tenantId, String tenantCode, BigInteger branchId, DietOrderPayment dietOrderPayment, BigInteger userId) {
+        SalePayment salePayment = new SalePayment();
+        salePayment.setSaleId(saleId);
+        salePayment.setSaleTime(saleTime);
+        salePayment.setTenantId(tenantId);
+        salePayment.setTenantCode(tenantCode);
+        salePayment.setBranchId(branchId);
+        salePayment.setPaymentId(dietOrderPayment.getPaymentId());
+        salePayment.setPaymentCode(dietOrderPayment.getPaymentCode());
+        salePayment.setPaymentName(dietOrderPayment.getPaymentName());
+        salePayment.setPaidAmount(dietOrderPayment.getPaidAmount());
+        salePayment.setCreateUserId(userId);
+        salePayment.setLastUpdateUserId(userId);
+        return salePayment;
     }
 }
