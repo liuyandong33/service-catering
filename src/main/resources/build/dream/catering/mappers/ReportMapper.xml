@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="build.dream.catering.mappers.ReportMapper">
+    <select id="countSingleSummary" resultType="java.lang.Long">
+        SELECT SUM(sign) FROM (SELECT
+        1 AS sign
+        FROM sale_detail
+        WHERE tenant_id = #{tenantId}
+        AND branch_id = #{branchId}
+        AND sale_time &gt;= #{startTime}
+        AND sale_time &lt;= #{endTime}
+        AND deleted = 0
+        GROUP BY goods_name, goods_specification_name) AS t
+    </select>
+
+    <select id="singleSummary" resultType="build.dream.common.utils.UnderscoreToCamelCaseMap">
+        SELECT
+        MIN(goods_id) AS goods_id,
+        MIN(goods_name) AS goods_name,
+        MIN(goods_specification_id) AS goods_specification_id,
+        MIN(goods_specification_name) AS goods_specification_name,
+        SUM(total_amount) AS total_amount,
+        SUM(discount_amount) AS discount_amount,
+        SUM(discount_share) AS discount_share
+        FROM sale_detail
+        WHERE tenant_id = #{tenantId}
+        AND branch_id = #{branchId}
+        AND sale_time &gt;= #{startTime}
+        AND sale_time &lt;= #{endTime}
+        AND deleted = 0
+        GROUP BY goods_name, goods_specification_name
+        ORDER BY total_amount DESC
+        LIMIT #{offset}, #{rows}
+    </select>
+
+    <select id="countCategorySummary" resultType="java.lang.Long">
+        SELECT SUM(sign) FROM (SELECT
+        1 AS sign
+        FROM sale_detail
+        WHERE tenant_id = #{tenantId}
+        AND branch_id = #{branchId}
+        AND sale_time &gt;= #{startTime}
+        AND sale_time &lt;= #{endTime}
+        AND deleted = 0
+        GROUP BY category_name) AS t
+    </select>
+
+    <select id="categorySummary" resultType="build.dream.common.utils.UnderscoreToCamelCaseMap">
+        SELECT
+        MIN(category_name) AS category_name,
+        SUM(total_amount) AS total_amount,
+        SUM(discount_amount) AS discount_amount,
+        SUM(discount_share) AS discount_share
+        FROM sale_detail
+        WHERE tenant_id = #{tenantId}
+        AND branch_id = #{branchId}
+        AND sale_time &gt;= #{startTime}
+        AND sale_time &lt;= #{endTime}
+        AND deleted = 0
+        GROUP BY category_name
+        ORDER BY total_amount DESC
+        LIMIT #{offset}, #{rows}
+    </select>
+</mapper>
