@@ -17,4 +17,8 @@ public interface ReportMapper {
     Long countCategorySummary(@Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId, @Param("startTime") Date startTime, @Param("endTime") Date endTime);
 
     List<Map<String, Object>> categorySummary(@Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId, @Param("startTime") Date startTime, @Param("endTime") Date endTime, @Param("offset") int offset, @Param("rows") int rows);
+
+    Long countPaymentSummary(@Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId, @Param("startTime") Date startTime, @Param("endTime") Date endTime);
+
+    List<Map<String, Object>> paymentSummary(@Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId, @Param("startTime") Date startTime, @Param("endTime") Date endTime, @Param("offset") int offset, @Param("rows") int rows);
 }
