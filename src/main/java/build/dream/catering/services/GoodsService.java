@@ -10,7 +10,6 @@ import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +24,82 @@ public class GoodsService extends BasicService {
     @Autowired
     private GoodsMapper goodsMapper;
 
-    private static final String SELECT_GOODS_TABLE_COLUMN_NAMES = StringUtils.join(new String[]{"goods.id", "goods.name", "goods.tenant_id", "goods.tenant_code", "goods.branch_id", "goods.type", "goods.category_id"}, ", ");
+    @Transactional(readOnly = true)
+    public ApiRest list(ListModel listModel) {
+        BigInteger tenantId = listModel.getTenantId();
+        BigInteger branchId = listModel.getBranchId();
+        int page = listModel.getPage();
+        int rows = listModel.getRows();
+
+        List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
+        searchConditions.add(new SearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
+        searchConditions.add(new SearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId));
+        searchConditions.add(new SearchCondition("deleted", Constants.SQL_OPERATION_SYMBOL_EQUAL, 0));
+
+        SearchModel searchModel = new SearchModel(searchConditions);
+        long count = DatabaseHelper.count(Goods.class, searchModel);
+
+        List<Goods> goodsList = new ArrayList<Goods>();
+        if (count > 0) {
+            PagedSearchModel pagedSearchModel = new PagedSearchModel(searchConditions, page, rows);
+            goodsList = DatabaseHelper.findAllPaged(Goods.class, pagedSearchModel);
+        }
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("total", count);
+        data.put("rows", goodsList);
+        return new ApiRest(data, "查询商品列表成功！");
+    }
+
+
+    @Transactional(readOnly = true)
+    public ApiRest obtainGoodsInfo(ObtainGoodsInfoModel obtainGoodsInfoModel) {
+        BigInteger tenantId = obtainGoodsInfoModel.getTenantId();
+        BigInteger branchId = obtainGoodsInfoModel.getBranchId();
+        BigInteger goodsId = obtainGoodsInfoModel.getBranchId();
+
+        SearchModel goodsSearchModel = new SearchModel(true);
+        goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
+        Goods goods = DatabaseHelper.find(Goods.class, goodsSearchModel);
+        ValidateUtils.notNull(goods, "商品不存在！");
+
+        SearchModel goodsSpecificationSearchModel = new SearchModel(true);
+        goodsSpecificationSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
+        List<GoodsSpecification> goodsSpecifications = DatabaseHelper.findAll(GoodsSpecification.class, goodsSpecificationSearchModel);
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("goods", goods);
+        data.put("goodsSpecifications", goodsSpecifications);
+        SearchModel goodsFlavorGroupSearchModel = new SearchModel(true);
+        goodsFlavorGroupSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
+        List<GoodsFlavorGroup> goodsFlavorGroups = DatabaseHelper.findAll(GoodsFlavorGroup.class, goodsFlavorGroupSearchModel);
+        if (CollectionUtils.isNotEmpty(goodsFlavorGroups)) {
+            SearchModel goodsFlavorSearchModel = new SearchModel(true);
+            goodsFlavorSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
+            List<GoodsFlavor> goodsFlavors = DatabaseHelper.findAll(GoodsFlavor.class, goodsFlavorSearchModel);
+            Map<BigInteger, List<GoodsFlavor>> goodsFlavorMap = new HashMap<BigInteger, List<GoodsFlavor>>();
+            for (GoodsFlavor goodsFlavor : goodsFlavors) {
+                BigInteger goodsFlavorGroupId = goodsFlavor.getGoodsFlavorGroupId();
+                List<GoodsFlavor> goodsFlavorList = goodsFlavorMap.get(goodsFlavorGroupId);
+                if (CollectionUtils.isEmpty(goodsFlavorList)) {
+                    goodsFlavorList = new ArrayList<GoodsFlavor>();
+                    goodsFlavorMap.put(goodsFlavorGroupId, goodsFlavorList);
+                }
+                goodsFlavorList.add(goodsFlavor);
+            }
+            List<Map<String, Object>> flavorGroups = new ArrayList<Map<String, Object>>();
+            for (GoodsFlavorGroup goodsFlavorGroup : goodsFlavorGroups) {
+                Map<String, Object> flavorGroup = new HashMap<String, Object>();
+                flavorGroup.put("flavorGroup", goodsFlavorGroup);
+                flavorGroup.put("flavors", goodsFlavorMap.get(goodsFlavorGroup.getId()));
+                flavorGroups.add(flavorGroup);
+            }
+            data.put("flavorGroups", flavorGroups);
+        }
+        return new ApiRest(data, "获取商品信息成功！");
+    }
 
     @Transactional(readOnly = true)
     public ApiRest listGoodsInfos(ListGoodsInfosModel listGoodsInfosModel) {

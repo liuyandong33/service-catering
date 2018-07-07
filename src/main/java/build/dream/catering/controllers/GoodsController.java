@@ -14,13 +14,32 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(value = "/goods")
 public class GoodsController extends BasicController {
     /**
+     * 查询商品列表
+     *
+     * @return
+     */
+    @RequestMapping(value = "/list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = ListModel.class, serviceClass = GoodsService.class, serviceMethodName = "list", error = "查询商品列表失败")
+    public String list() {
+        return null;
+    }
+
+    @RequestMapping(value = "/obtainGoodsInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = ObtainGoodsInfoModel.class, serviceClass = GoodsService.class, serviceMethodName = "obtainGoodsInfo", error = "获取商品信息失败")
+    public String obtainGoodsInfo() {
+        return null;
+    }
+
+    /**
      * 查询菜品信息
      *
      * @return
      */
     @RequestMapping(value = "/listGoodsInfos", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ApiRestAction(modelClass = ListGoodsInfosModel.class, serviceClass = GoodsService.class, serviceMethodName = "listGoodsInfos", error = "查询菜品信息失败")
+    @ApiRestAction(modelClass = ListGoodsInfosModel.class, serviceClass = GoodsService.class, serviceMethodName = "listGoodsInfos", error = "查询商品信息失败")
     public String listGoodsInfos() {
         return null;
     }
@@ -32,7 +51,7 @@ public class GoodsController extends BasicController {
      */
     @RequestMapping(value = "/saveGoods")
     @ResponseBody
-    @ApiRestAction(modelClass = SaveGoodsModel.class, serviceClass = GoodsService.class, serviceMethodName = "saveGoods", error = "保存菜品失败")
+    @ApiRestAction(modelClass = SaveGoodsModel.class, serviceClass = GoodsService.class, serviceMethodName = "saveGoods", error = "保存商品失败")
     public String saveGoods() {
         return null;
     }
@@ -44,7 +63,7 @@ public class GoodsController extends BasicController {
      */
     @RequestMapping(value = "/deleteGoodsSpecification")
     @ResponseBody
-    @ApiRestAction(modelClass = DeleteGoodsSpecificationModel.class, serviceClass = GoodsService.class, serviceMethodName = "deleteGoodsSpecification", error = "删除菜品规格失败")
+    @ApiRestAction(modelClass = DeleteGoodsSpecificationModel.class, serviceClass = GoodsService.class, serviceMethodName = "deleteGoodsSpecification", error = "删除商品规格失败")
     public String deleteGoodsSpecification() {
         return null;
     }
@@ -68,7 +87,7 @@ public class GoodsController extends BasicController {
      */
     @RequestMapping(value = "/listCategories")
     @ResponseBody
-    @ApiRestAction(modelClass = ListCategoriesModel.class, serviceClass = GoodsService.class, serviceMethodName = "listCategories", error = "查询菜品分类失败")
+    @ApiRestAction(modelClass = ListCategoriesModel.class, serviceClass = GoodsService.class, serviceMethodName = "listCategories", error = "查询商品分类失败")
     public String listCategories() {
         return null;
     }
@@ -80,7 +99,7 @@ public class GoodsController extends BasicController {
      */
     @RequestMapping(value = "/deleteGoods")
     @ResponseBody
-    @ApiRestAction(modelClass = DeleteGoodsModel.class, serviceClass = GoodsService.class, serviceMethodName = "deleteGoods", error = "删除菜品失败")
+    @ApiRestAction(modelClass = DeleteGoodsModel.class, serviceClass = GoodsService.class, serviceMethodName = "deleteGoods", error = "删除商品失败")
     public String deleteGoods() {
         return null;
     }
