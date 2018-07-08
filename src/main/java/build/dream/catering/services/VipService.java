@@ -54,9 +54,9 @@ public class VipService {
 
             vipType.setName(name);
             vipType.setDiscountPolicy(discountPolicy);
-            vipType.setDiscountRate(discountRate);
+            vipType.setDiscountRate(discountRate != null ? discountRate : Constants.DECIMAL_DEFAULT_VALUE);
             vipType.setEnableBonus(enableBonus);
-            vipType.setBonusCoefficient(bonusCoefficient);
+            vipType.setBonusCoefficient(bonusCoefficient != null ? bonusCoefficient : Constants.INT_DEFAULT_VALUE);
             vipType.setLastUpdateUserId(userId);
             DatabaseHelper.update(vipType);
         } else {
@@ -66,9 +66,9 @@ public class VipService {
             vipType.setBranchId(branchId);
             vipType.setName(name);
             vipType.setDiscountPolicy(discountPolicy);
-            vipType.setDiscountRate(discountRate);
+            vipType.setDiscountRate(discountRate != null ? discountRate : Constants.DECIMAL_DEFAULT_VALUE);
             vipType.setEnableBonus(enableBonus);
-            vipType.setBonusCoefficient(bonusCoefficient);
+            vipType.setBonusCoefficient(bonusCoefficient != null ? bonusCoefficient : Constants.INT_DEFAULT_VALUE);
             vipType.setCreateUserId(userId);
             vipType.setLastUpdateUserId(userId);
             DatabaseHelper.insert(vipType);

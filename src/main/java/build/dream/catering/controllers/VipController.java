@@ -2,6 +2,7 @@ package build.dream.catering.controllers;
 
 import build.dream.catering.models.vip.ObtainVipInfoModel;
 import build.dream.catering.models.vip.SaveVipInfoModel;
+import build.dream.catering.models.vip.SaveVipTypeModel;
 import build.dream.catering.services.VipService;
 import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.controllers.BasicController;
@@ -20,10 +21,10 @@ public class VipController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/saveVipType", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/saveVipType", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ApiRestAction(modelClass = ObtainVipInfoModel.class, serviceClass = VipService.class, serviceMethodName = "saveVipType", error = "保存会员类型失败")
-    private String saveVipType() {
+    @ApiRestAction(modelClass = SaveVipTypeModel.class, serviceClass = VipService.class, serviceMethodName = "saveVipType", error = "保存会员类型失败")
+    public String saveVipType() {
         return null;
     }
 
