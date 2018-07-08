@@ -17,7 +17,6 @@ import build.dream.common.utils.SerialNumberGenerator;
 import build.dream.common.utils.ValidateUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +52,7 @@ public class DietOrderService {
         dietOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         dietOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, dietOrderSearchModel);
-        Validate.notNull(dietOrder, "订单不存在！");
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
 
         // 查询出订单组信息
         SearchModel dietOrderGroupSearchModel = new SearchModel(true);
@@ -366,10 +365,10 @@ public class DietOrderService {
         for (SaveDietOrderModel.GoodsInfo goodsInfo : goodsInfos) {
 
             Goods goods = goodsMap.get(goodsInfo.getGoodsId());
-            Validate.notNull(goods, "商品不存在！");
+            ValidateUtils.notNull(goods, "商品不存在！");
 
             GoodsSpecification goodsSpecification = goodsSpecificationMap.get(goodsInfo.getGoodsSpecificationId());
-            Validate.notNull(goodsSpecification, "商品规格不存在！");
+            ValidateUtils.notNull(goodsSpecification, "商品规格不存在！");
 
             String uuid = UUID.randomUUID().toString();
             BigDecimal flavorIncrease = BigDecimal.ZERO;
@@ -379,10 +378,10 @@ public class DietOrderService {
             if (CollectionUtils.isNotEmpty(flavorInfos)) {
                 for (SaveDietOrderModel.FlavorInfo flavorInfo : flavorInfos) {
                     GoodsFlavorGroup goodsFlavorGroup = goodsFlavorGroupMap.get(flavorInfo.getFlavorGroupId());
-                    Validate.notNull(goodsFlavorGroup, "口味组不存在！");
+                    ValidateUtils.notNull(goodsFlavorGroup, "口味组不存在！");
 
                     GoodsFlavor goodsFlavor = goodsFlavorMap.get(flavorInfo.getFlavorId());
-                    Validate.notNull(goodsFlavor, "口味不存在！");
+                    ValidateUtils.notNull(goodsFlavor, "口味不存在！");
                     flavorIncrease = flavorIncrease.add(goodsFlavor.getPrice());
 
                     DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor = DietOrderDetailGoodsFlavor.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(normalDietOrderGroup.getId()).dietOrderDetailId(null).goodsFlavorGroupId(goodsFlavorGroup.getId()).goodsFlavorGroupName(goodsFlavorGroup.getName()).goodsFlavorId(goodsFlavor.getId()).goodsFlavorName(goodsFlavor.getName()).price(goodsFlavor.getPrice()).createUserId(userId).lastUpdateUserId(userId).build();

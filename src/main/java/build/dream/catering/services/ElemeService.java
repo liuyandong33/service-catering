@@ -8,6 +8,7 @@ import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.*;
 import net.sf.json.JSONArray;
+import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -99,14 +100,12 @@ public class ElemeService {
         messageJsonObject.remove("orderActivities");
 
         BigInteger userId = CommonUtils.getServiceSystemUserId();
-
-        ElemeOrder elemeOrder = GsonUtils.fromJson(messageJsonObject.toString(), ElemeOrder.class, "yyyy-MM-dd'T'HH:mm:ss");
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         int orderType = 0;
         int orderStatus = 0;
         int payStatus = 0;
         int refundStatus = 0;
-        BigDecimal discountAmount = BigDecimal.ZERO;
+        BigDecimal discountAmount = BigDecimal.valueOf(messageJsonObject.getDouble("shopPart"));
         BigDecimal payableAmount = BigDecimal.ZERO;
         BigDecimal paidAmount = BigDecimal.ZERO;
         int paidType = 0;
@@ -117,9 +116,9 @@ public class ElemeService {
         String deliveryLongitude = geolocation[0];
         String deliveryLatitude = geolocation[1];
         Date deliverTime = Constants.DATETIME_DEFAULT_VALUE;
-        String aa = messageJsonObject.getString("deliverTime");
-        if (StringUtils.isNotBlank(aa) && !"null".equals(aa)) {
-            deliverTime = simpleDateFormat.parse(aa);
+        Object deliverTimeObject = messageJsonObject.opt("deliverTime");
+        if (deliverTimeObject != null && !(deliverTimeObject instanceof JSONNull)) {
+            deliverTime = simpleDateFormat.parse(deliverTimeObject.toString());
         }
         Date activeTime = simpleDateFormat.parse(messageJsonObject.getString("activeAt"));
         boolean invoiced = messageJsonObject.getBoolean("invoiced");
@@ -135,7 +134,7 @@ public class ElemeService {
                 .tenantId(tenantId)
                 .tenantCode(tenantCode)
                 .branchId(branchId)
-                .orderNumber("E" + elemeOrder.getId())
+                .orderNumber("E" + messageJsonObject.get("id"))
                 .orderType(orderType)
                 .orderStatus(orderStatus)
                 .payStatus(payStatus)
