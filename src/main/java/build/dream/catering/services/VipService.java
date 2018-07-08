@@ -1,10 +1,10 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.mappers.SequenceMapper;
 import build.dream.catering.models.vip.ObtainVipInfoModel;
 import build.dream.catering.models.vip.SaveVipInfoModel;
 import build.dream.catering.models.vip.SaveVipTypeModel;
+import build.dream.catering.utils.SequenceUtils;
 import build.dream.catering.utils.VipUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.Vip;
@@ -15,11 +15,9 @@ import build.dream.common.utils.SerialNumberGenerator;
 import build.dream.common.utils.ValidateUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
@@ -27,9 +25,12 @@ import java.util.Date;
 
 @Service
 public class VipService {
-    @Autowired
-    private SequenceMapper sequenceMapper;
-
+    /**
+     * 保存会员类型
+     *
+     * @param saveVipTypeModel
+     * @return
+     */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveVipType(SaveVipTypeModel saveVipTypeModel) {
         BigInteger id = saveVipTypeModel.getId();
@@ -85,23 +86,31 @@ public class VipService {
      */
     @Transactional(readOnly = true)
     public ApiRest obtainVipInfo(ObtainVipInfoModel obtainVipInfoModel) {
+        BigInteger tenantId = obtainVipInfoModel.getTenantId();
+        BigInteger branchId = obtainVipInfoModel.getBranchId();
+        BigInteger vipId = obtainVipInfoModel.getVipId();
+        String vipCode = obtainVipInfoModel.getVipCode();
+        String phoneNumber = obtainVipInfoModel.getPhoneNumber();
+        String openId = obtainVipInfoModel.getOpenId();
+        String alipayUserId = obtainVipInfoModel.getAlipayUserId();
+
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainVipInfoModel.getTenantId());
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainVipInfoModel.getBranchId());
-        if (obtainVipInfoModel.getVipId() != null) {
-            searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainVipInfoModel.getVipId());
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        if (vipId != null) {
+            searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, vipId);
         }
-        if (StringUtils.isNotBlank(obtainVipInfoModel.getVipCode())) {
-            searchModel.addSearchCondition("vip_code", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainVipInfoModel.getVipCode());
+        if (StringUtils.isNotBlank(vipCode)) {
+            searchModel.addSearchCondition("vip_code", Constants.SQL_OPERATION_SYMBOL_EQUAL, vipCode);
         }
-        if (StringUtils.isNotBlank(obtainVipInfoModel.getPhoneNumber())) {
-            searchModel.addSearchCondition("phone_number", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainVipInfoModel.getPhoneNumber());
+        if (StringUtils.isNotBlank(phoneNumber)) {
+            searchModel.addSearchCondition("phone_number", Constants.SQL_OPERATION_SYMBOL_EQUAL, phoneNumber);
         }
-        if (StringUtils.isNotBlank(obtainVipInfoModel.getOpenId())) {
-            searchModel.addSearchCondition("open_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainVipInfoModel.getOpenId());
+        if (StringUtils.isNotBlank(openId)) {
+            searchModel.addSearchCondition("open_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, openId);
         }
-        if (StringUtils.isNotBlank(obtainVipInfoModel.getAlipayUserId())) {
-            searchModel.addSearchCondition("alipay_user_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainVipInfoModel.getAlipayUserId());
+        if (StringUtils.isNotBlank(alipayUserId)) {
+            searchModel.addSearchCondition("alipay_user_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, alipayUserId);
         }
         Vip vip = VipUtils.find(searchModel);
         return new ApiRest(vip, "获取会员信息成功！");
@@ -161,7 +170,7 @@ public class VipService {
             vip.setTenantCode(tenantCode);
             vip.setBranchId(branchId);
             vip.setVipTypeId(vipTypeId);
-            String vipCode = new SimpleDateFormat("yyyyMMdd").format(new Date()) + SerialNumberGenerator.nextSerialNumber(8, sequenceMapper.nextValue("vip_number"));
+            String vipCode = new SimpleDateFormat("yyyyMMdd").format(new Date()) + SerialNumberGenerator.nextSerialNumber(8, SequenceUtils.nextValue("vip_number"));
             vip.setVipCode(vipCode);
             vip.setVipName(vipName);
             vip.setBirthday(birthday);

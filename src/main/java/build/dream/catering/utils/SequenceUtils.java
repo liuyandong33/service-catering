@@ -4,13 +4,13 @@ import build.dream.catering.mappers.SequenceMapper;
 import build.dream.common.utils.ApplicationHandler;
 
 public class SequenceUtils {
-    private static SequenceMapper SEQUENCE_MAPPER = null;
+    private static SequenceMapper sequenceMapper = null;
 
     private static SequenceMapper obtainSequenceMapper() {
-        if (SEQUENCE_MAPPER == null) {
-            SEQUENCE_MAPPER = ApplicationHandler.getBean(SequenceMapper.class);
+        if (sequenceMapper == null) {
+            sequenceMapper = ApplicationHandler.getBean(SequenceMapper.class);
         }
-        return SEQUENCE_MAPPER;
+        return sequenceMapper;
     }
 
     public static Integer nextValue(String sequenceName) {

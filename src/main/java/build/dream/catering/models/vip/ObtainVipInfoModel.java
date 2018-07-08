@@ -80,11 +80,6 @@ public class ObtainVipInfoModel extends BasicModel {
     }
 
     @Override
-    public boolean validate() {
-        return super.validate() && (vipId != null || StringUtils.isNotBlank(vipCode) || StringUtils.isNotBlank(phoneNumber));
-    }
-
-    @Override
     public void validateAndThrow() {
         super.validateAndThrow();
         Validate.isTrue(vipId != null || StringUtils.isNotBlank(vipCode) || StringUtils.isNotBlank(phoneNumber) || StringUtils.isNotBlank(openId) || StringUtils.isNotBlank(alipayUserId), "参数【vipId、vipCode、phoneNumber、openId、alipayUserId】不能同时为空！");
