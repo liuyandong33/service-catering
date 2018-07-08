@@ -10,6 +10,7 @@ import build.dream.common.utils.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.stereotype.Service;
@@ -102,22 +103,18 @@ public class ElemeService {
         messageJsonObject.remove("orderActivities");
 
         BigInteger userId = CommonUtils.getServiceSystemUserId();
-        // TODO 上线之前删除
-        userId = BigInteger.ONE;
-
 
         ElemeOrder elemeOrder = GsonUtils.fromJson(messageJsonObject.toString(), ElemeOrder.class, "yyyy-MM-dd'T'HH:mm:ss");
         elemeOrder.setTenantId(tenantId);
         elemeOrder.setTenantCode(tenantCode);
         elemeOrder.setBranchId(branchId);
+        elemeOrder.setPhoneList(StringUtils.join(phoneList, ","));
         elemeOrder.setCreateUserId(userId);
         elemeOrder.setLastUpdateUserId(userId);
         elemeOrder.setLastUpdateRemark("饿了么系统推送新订单，保存订单！");
         DatabaseHelper.insert(elemeOrder);
 
         BigInteger elemeOrderId = elemeOrder.getId();
-
-        List<ElemeOrderItem> elemeOrderItems = new ArrayList<ElemeOrderItem>();
 
         int elemeGroupJsonArraySize = elemeGroupJsonArray.size();
         for (int index = 0; index < elemeGroupJsonArraySize; index++) {
