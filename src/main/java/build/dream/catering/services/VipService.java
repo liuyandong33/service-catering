@@ -116,62 +116,73 @@ public class VipService {
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveVipInfo(SaveVipInfoModel saveVipInfoModel) {
         BigInteger tenantId = saveVipInfoModel.getTenantId();
+        String tenantCode = saveVipInfoModel.getTenantCode();
         BigInteger branchId = saveVipInfoModel.getBranchId();
+        BigInteger vipId = saveVipInfoModel.getVipId();
+        BigInteger vipTypeId = saveVipInfoModel.getVipTypeId();
+        String vipName = saveVipInfoModel.getVipName();
+        Date birthday = saveVipInfoModel.getBirthday();
+        String phoneNumber = saveVipInfoModel.getPhoneNumber();
+        String openId = saveVipInfoModel.getOpenId();
+        String mainOpenId = saveVipInfoModel.getMainOpenId();
+        String alipayUserId = saveVipInfoModel.getAlipayUserId();
         BigInteger userId = saveVipInfoModel.getUserId();
+
 
         Vip vip = null;
         if (saveVipInfoModel.getVipId() != null) {
             SearchModel searchModel = new SearchModel(true);
             searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
             searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-            searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, saveVipInfoModel.getVipId());
+            searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, vipId);
             vip = VipUtils.find(searchModel);
             Validate.notNull(vip, "会员不存在！");
 
-            if (StringUtils.isNotBlank(saveVipInfoModel.getVipName())) {
-                vip.setVipName(saveVipInfoModel.getVipName());
-            }
-
-            if (saveVipInfoModel.getBirthday() != null) {
-                vip.setBirthday(saveVipInfoModel.getBirthday());
-            }
-            vip.setOpenId(saveVipInfoModel.getOpenId());
-            vip.setMainOpenId(saveVipInfoModel.getMainOpenId());
-            vip.setAlipayUserId(saveVipInfoModel.getAlipayUserId());
+            vip.setVipTypeId(vipTypeId);
+            vip.setVipName(vipName);
+            vip.setBirthday(birthday);
+            vip.setPhoneNumber(phoneNumber);
+            vip.setOpenId(StringUtils.isNotBlank(openId) ? openId : Constants.VARCHAR_DEFAULT_VALUE);
+            vip.setMainOpenId(StringUtils.isNotBlank(mainOpenId) ? mainOpenId : Constants.VARCHAR_DEFAULT_VALUE);
+            vip.setAlipayUserId(StringUtils.isNotBlank(alipayUserId) ? alipayUserId : Constants.VARCHAR_DEFAULT_VALUE);
             vip.setLastUpdateUserId(userId);
             vip.setLastUpdateRemark("修改会员信息！");
             VipUtils.update(vip);
         } else {
-            String phoneNumber = saveVipInfoModel.getPhoneNumber();
             SearchModel searchModel = new SearchModel(true);
             searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+            searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
             searchModel.addSearchCondition("phone_number", Constants.SQL_OPERATION_SYMBOL_EQUAL, phoneNumber);
             long count = VipUtils.count(searchModel);
             Validate.isTrue(count == 0, "手机号已存在！");
 
             vip = new Vip();
-            vip.setTenantId(saveVipInfoModel.getTenantId());
-            vip.setTenantCode(saveVipInfoModel.getTenantCode());
-            vip.setBranchId(saveVipInfoModel.getBranchId());
+            vip.setTenantId(tenantId);
+            vip.setTenantCode(tenantCode);
+            vip.setBranchId(branchId);
+            vip.setVipTypeId(vipTypeId);
             String vipCode = new SimpleDateFormat("yyyyMMdd").format(new Date()) + SerialNumberGenerator.nextSerialNumber(8, sequenceMapper.nextValue("vip_number"));
             vip.setVipCode(vipCode);
-            vip.setVipName(saveVipInfoModel.getVipName());
-            vip.setBirthday(saveVipInfoModel.getBirthday());
+            vip.setVipName(vipName);
+            vip.setBirthday(birthday);
             vip.setPhoneNumber(phoneNumber);
-            vip.setOpenId(saveVipInfoModel.getOpenId());
-            vip.setMainOpenId(saveVipInfoModel.getMainOpenId());
-            vip.setAlipayUserId(saveVipInfoModel.getAlipayUserId());
+            if (StringUtils.isNotBlank(openId)) {
+                vip.setOpenId(openId);
+            }
+
+            if (StringUtils.isNotBlank(mainOpenId)) {
+                vip.setMainOpenId(mainOpenId);
+            }
+
+            if (StringUtils.isNotBlank(alipayUserId)) {
+                vip.setAlipayUserId(alipayUserId);
+            }
             vip.setBonus(0);
-            vip.setLastUpdateUserId(saveVipInfoModel.getUserId());
             vip.setCreateUserId(userId);
             vip.setLastUpdateUserId(userId);
             vip.setLastUpdateRemark("新增会员信息！");
             VipUtils.insert(vip);
         }
-        ApiRest apiRest = new ApiRest();
-        apiRest.setData(vip);
-        apiRest.setMessage("保存会员信息成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return new ApiRest(vip, "保存会员信息成功！");
     }
 }

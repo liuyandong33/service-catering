@@ -23,12 +23,18 @@ public class SaveVipInfoModel extends BasicModel {
 
     private BigInteger vipId;
 
+    @NotNull
+    private BigInteger vipTypeId;
+
+    @NotNull
     @Length(max = 20)
     private String vipName;
 
+    @NotNull
     @DateFormat(pattern = "yyyy-MM-dd")
     private Date birthday;
 
+    @NotNull
     @Length(max = 20)
     private String phoneNumber;
 
@@ -74,6 +80,14 @@ public class SaveVipInfoModel extends BasicModel {
 
     public void setVipId(BigInteger vipId) {
         this.vipId = vipId;
+    }
+
+    public BigInteger getVipTypeId() {
+        return vipTypeId;
+    }
+
+    public void setVipTypeId(BigInteger vipTypeId) {
+        this.vipTypeId = vipTypeId;
     }
 
     public String getVipName() {
