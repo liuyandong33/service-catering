@@ -15,8 +15,17 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping(value = "/vip")
 public class VipController extends BasicController {
-    @Autowired
-    private VipService vipService;
+    /**
+     * 保存会员类型
+     *
+     * @return
+     */
+    @RequestMapping(value = "/saveVipType", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = ObtainVipInfoModel.class, serviceClass = VipService.class, serviceMethodName = "saveVipType", error = "保存会员类型失败")
+    private String saveVipType() {
+        return null;
+    }
 
     /**
      * 获取会员信息
@@ -25,7 +34,7 @@ public class VipController extends BasicController {
      */
     @RequestMapping(value = "/obtainVipInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ApiRestAction(modelClass = ObtainVipInfoModel.class, serviceClass = VipService.class, serviceMethodName = "获取会员信息失败", error = "获取会员信息失败")
+    @ApiRestAction(modelClass = ObtainVipInfoModel.class, serviceClass = VipService.class, serviceMethodName = "obtainVipInfo", error = "获取会员信息失败")
     public String obtainVipInfo() {
         return null;
     }

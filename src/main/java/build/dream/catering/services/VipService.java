@@ -4,17 +4,23 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.SequenceMapper;
 import build.dream.catering.models.vip.ObtainVipInfoModel;
 import build.dream.catering.models.vip.SaveVipInfoModel;
+import build.dream.catering.models.vip.SaveVipTypeModel;
 import build.dream.catering.utils.VipUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.Vip;
+import build.dream.common.erp.catering.domains.VipType;
+import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.SerialNumberGenerator;
+import build.dream.common.utils.ValidateUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -23,6 +29,53 @@ import java.util.Date;
 public class VipService {
     @Autowired
     private SequenceMapper sequenceMapper;
+
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest saveVipType(SaveVipTypeModel saveVipTypeModel) {
+        BigInteger id = saveVipTypeModel.getId();
+        BigInteger tenantId = saveVipTypeModel.getTenantId();
+        String tenantCode = saveVipTypeModel.getTenantCode();
+        BigInteger branchId = saveVipTypeModel.getBranchId();
+        String name = saveVipTypeModel.getName();
+        Integer discountPolicy = saveVipTypeModel.getDiscountPolicy();
+        BigDecimal discountRate = saveVipTypeModel.getDiscountRate();
+        Boolean enableBonus = saveVipTypeModel.getEnableBonus();
+        Integer bonusCoefficient = saveVipTypeModel.getBonusCoefficient();
+        BigInteger userId = saveVipTypeModel.getUserId();
+
+        VipType vipType = null;
+        if (id != null) {
+            SearchModel searchModel = new SearchModel(true);
+            searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+            searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+            searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, id);
+            vipType = DatabaseHelper.find(VipType.class, searchModel);
+            ValidateUtils.notNull(vipType, "会员类型不存在！");
+
+            vipType.setName(name);
+            vipType.setDiscountPolicy(discountPolicy);
+            vipType.setDiscountRate(discountRate);
+            vipType.setEnableBonus(enableBonus);
+            vipType.setBonusCoefficient(bonusCoefficient);
+            vipType.setLastUpdateUserId(userId);
+            DatabaseHelper.update(vipType);
+        } else {
+            vipType = new VipType();
+            vipType.setTenantId(tenantId);
+            vipType.setTenantCode(tenantCode);
+            vipType.setBranchId(branchId);
+            vipType.setName(name);
+            vipType.setDiscountPolicy(discountPolicy);
+            vipType.setDiscountRate(discountRate);
+            vipType.setEnableBonus(enableBonus);
+            vipType.setBonusCoefficient(bonusCoefficient);
+            vipType.setCreateUserId(userId);
+            vipType.setLastUpdateUserId(userId);
+            DatabaseHelper.insert(vipType);
+        }
+
+        return new ApiRest(vipType, "保存会员类型成功！");
+    }
 
     /**
      * 获取会员信息
