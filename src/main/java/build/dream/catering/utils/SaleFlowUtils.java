@@ -2,18 +2,20 @@ package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
 import build.dream.common.erp.catering.domains.*;
+import build.dream.common.utils.CommonUtils;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SearchCondition;
 import build.dream.common.utils.SearchModel;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.Validate;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
 public class SaleFlowUtils {
-    public static void writeSaleFlow(DietOrder dietOrder, List<DietOrderGroup> dietOrderGroups, List<DietOrderDetail> dietOrderDetails, List<DietOrderActivity> dietOrderActivities, List<DietOrderPayment> dietOrderPayments) {
+    public static void writeSaleFlow(DietOrder dietOrder, List<DietOrderGroup> dietOrderGroups, List<DietOrderDetail> dietOrderDetails, List<DietOrderActivity> dietOrderActivities, List<DietOrderPayment> dietOrderPayments) throws IOException {
         Map<BigInteger, List<DietOrderDetail>> dietOrderDetailListMap = new HashMap<BigInteger, List<DietOrderDetail>>();
         for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
             BigInteger dietOrderGroupId = dietOrderDetail.getDietOrderGroupId();
@@ -45,8 +47,7 @@ public class SaleFlowUtils {
         BigInteger branchId = dietOrder.getBranchId();
         Date saleTime = dietOrder.getActiveTime();
 
-        BigInteger userId = BigInteger.ZERO;
-        Date date = new Date();
+        BigInteger userId = CommonUtils.getServiceSystemUserId();
 
         Sale sale = new Sale();
         sale.setTenantId(tenantId);
@@ -58,8 +59,6 @@ public class SaleFlowUtils {
         sale.setDiscountAmount(dietOrder.getDiscountAmount());
         sale.setPayableAmount(dietOrder.getPayableAmount());
         sale.setPaidAmount(dietOrder.getPaidAmount());
-        sale.setCreateTime(date);
-        sale.setLastUpdateTime(date);
         sale.setCreateUserId(userId);
         sale.setLastUpdateUserId(userId);
         DatabaseHelper.insert(sale);
@@ -103,7 +102,7 @@ public class SaleFlowUtils {
         DatabaseHelper.insertAll(salePayments);
     }
 
-    public static void writeSaleFlow(BigInteger dietOrderId) {
+    public static void writeSaleFlow(BigInteger dietOrderId) throws IOException {
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, dietOrderId);
         Validate.notNull(dietOrder, "订单不存在！");
 
