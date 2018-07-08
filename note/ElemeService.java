@@ -20,9 +20,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URLEncoder;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class ElemeService {
@@ -71,7 +72,7 @@ public class ElemeService {
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public void saveElemeOrder(ElemeCallbackMessage elemeCallbackMessage, String uuid) throws IOException, ParseException {
+    public void saveElemeOrder(ElemeCallbackMessage elemeCallbackMessage, String uuid) throws IOException {
         JSONObject messageJsonObject = JSONObject.fromObject(elemeCallbackMessage.getMessage());
 
         String openId = messageJsonObject.getString("openId");
@@ -89,181 +90,151 @@ public class ElemeService {
         String tenantCode = branch.getTenantCode();
 
         // 开始保存饿了么订单
+        String id = messageJsonObject.getString("id");
+        messageJsonObject.remove("id");
+
         JSONArray phoneList = messageJsonObject.optJSONArray("phoneList");
         messageJsonObject.remove("phoneList");
 
-        JSONArray groupsJsonArray = messageJsonObject.optJSONArray("groups");
+        JSONArray elemeGroupJsonArray = messageJsonObject.optJSONArray("groups");
         messageJsonObject.remove("groups");
 
-        JSONArray orderActivitiesJsonArray = messageJsonObject.optJSONArray("orderActivities");
+        JSONArray orderActivityJsonArray = messageJsonObject.optJSONArray("orderActivities");
         messageJsonObject.remove("orderActivities");
 
         BigInteger userId = CommonUtils.getServiceSystemUserId();
 
         ElemeOrder elemeOrder = GsonUtils.fromJson(messageJsonObject.toString(), ElemeOrder.class, "yyyy-MM-dd'T'HH:mm:ss");
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        int orderType = 0;
-        int orderStatus = 0;
-        int payStatus = 0;
-        int refundStatus = 0;
-        BigDecimal discountAmount = BigDecimal.ZERO;
-        BigDecimal payableAmount = BigDecimal.ZERO;
-        BigDecimal paidAmount = BigDecimal.ZERO;
-        int paidType = 0;
+        elemeOrder.setTenantId(tenantId);
+        elemeOrder.setTenantCode(tenantCode);
+        elemeOrder.setBranchId(branchId);
+        elemeOrder.setPhoneList(StringUtils.join(phoneList, ","));
+        elemeOrder.setCreateUserId(userId);
+        elemeOrder.setLastUpdateUserId(userId);
+        elemeOrder.setLastUpdateRemark("饿了么系统推送新订单，保存订单！");
+        DatabaseHelper.insert(elemeOrder);
 
-        String description = messageJsonObject.getString("description");
-        String deliveryGeo = messageJsonObject.getString("deliveryGeo");
-        String[] geolocation = deliveryGeo.split(",");
-        String deliveryLongitude = geolocation[0];
-        String deliveryLatitude = geolocation[1];
-        Date deliverTime = Constants.DATETIME_DEFAULT_VALUE;
-        String aa = messageJsonObject.getString("deliverTime");
-        if (StringUtils.isNotBlank(aa) && !"null".equals(aa)) {
-            deliverTime = simpleDateFormat.parse(aa);
-        }
-        Date activeTime = simpleDateFormat.parse(messageJsonObject.getString("activeAt"));
-        boolean invoiced = messageJsonObject.getBoolean("invoiced");
-        String invoiceType = Constants.VARCHAR_DEFAULT_VALUE;
-        String invoice = Constants.VARCHAR_DEFAULT_VALUE;
-        if (invoiced) {
-            invoiceType = messageJsonObject.getString("invoiceType");
-            invoice = messageJsonObject.getString("invoice");
-        }
+        BigInteger elemeOrderId = elemeOrder.getId();
 
+        int elemeGroupJsonArraySize = elemeGroupJsonArray.size();
+        for (int index = 0; index < elemeGroupJsonArraySize; index++) {
+            JSONObject elemeGroupJsonObject = elemeGroupJsonArray.getJSONObject(index);
+            ElemeOrderGroup elemeOrderGroup = new ElemeOrderGroup();
+            elemeOrderGroup.setTenantId(tenantId);
+            elemeOrderGroup.setTenantCode(tenantCode);
+            elemeOrderGroup.setBranchId(branchId);
+            elemeOrderGroup.setElemeOrderId(elemeOrderId);
+            elemeOrderGroup.setOrderId(id);
+            elemeOrderGroup.setName(elemeGroupJsonObject.optString("name"));
+            elemeOrderGroup.setType(elemeGroupJsonObject.optString("type"));
+            elemeOrderGroup.setCreateUserId(userId);
+            elemeOrderGroup.setLastUpdateUserId(userId);
+            elemeOrderGroup.setLastUpdateRemark("饿了么系统推送新订单，保存订单分组！");
+            DatabaseHelper.insert(elemeOrderGroup);
 
-        DietOrder dietOrder = DietOrder.builder()
-                .tenantId(tenantId)
-                .tenantCode(tenantCode)
-                .branchId(branchId)
-                .orderNumber("E" + elemeOrder.getId())
-                .orderType(orderType)
-                .orderStatus(orderStatus)
-                .payStatus(payStatus)
-                .refundStatus(refundStatus)
-                .totalAmount(BigDecimal.valueOf(messageJsonObject.getDouble("originalPrice")))
-                .discountAmount(discountAmount)
-                .payableAmount(payableAmount)
-                .paidAmount(paidAmount)
-                .paidType(paidType)
-                .remark(StringUtils.isNotBlank(description) ? description : Constants.VARCHAR_DEFAULT_VALUE)
-                .deliveryAddress(messageJsonObject.getString("address"))
-                .deliveryLongitude(deliveryLongitude)
-                .deliveryLatitude(deliveryLatitude)
-                .deliverTime(deliverTime)
-                .activeTime(activeTime)
-                .deliverFee(BigDecimal.valueOf(messageJsonObject.getDouble("deliverFee")))
-                .telephoneNumber(StringUtils.join(phoneList, ","))
-                .daySerialNumber(messageJsonObject.getString("daySn"))
-                .consignee(messageJsonObject.getString("consignee"))
-                .invoiced(invoiced)
-                .invoiceType(invoiceType)
-                .invoice(invoice)
-                .createUserId(userId)
-                .lastUpdateUserId(userId)
-                .build();
-        DatabaseHelper.insert(dietOrder);
-        BigInteger dietOrderId = dietOrder.getId();
+            JSONArray elemeOrderItemJsonArray = elemeGroupJsonObject.optJSONArray("items");
+            int elemeOrderItemJsonArraySize = elemeOrderItemJsonArray.size();
+            for (int elemeOrderItemJsonArrayIndex = 0; elemeOrderItemJsonArrayIndex < elemeOrderItemJsonArraySize; elemeOrderItemJsonArrayIndex++) {
+                JSONObject elemeOrderItemJsonObject = elemeOrderItemJsonArray.optJSONObject(elemeOrderItemJsonArrayIndex);
+                ElemeOrderItem elemeOrderItem = new ElemeOrderItem();
+                elemeOrderItem.setTenantId(tenantId);
+                elemeOrderItem.setTenantCode(tenantCode);
+                elemeOrderItem.setBranchId(branchId);
+                elemeOrderItem.setElemeOrderId(elemeOrderId);
+                elemeOrderItem.setOrderId(id);
+                elemeOrderItem.setElemeOrderGroupId(elemeOrderGroup.getId());
+                elemeOrderItem.setElemeItemId(BigInteger.valueOf(elemeOrderItemJsonObject.getLong("id")));
+                elemeOrderItem.setSkuId(BigInteger.valueOf(elemeOrderItemJsonObject.getLong("skuId")));
+                elemeOrderItem.setName(elemeOrderItemJsonObject.getString("name"));
+                elemeOrderItem.setCategoryId(BigInteger.valueOf(elemeOrderItemJsonObject.getLong("categoryId")));
+                elemeOrderItem.setPrice(BigDecimal.valueOf(elemeOrderItemJsonObject.optDouble("price")));
+                elemeOrderItem.setQuantity(elemeOrderItemJsonObject.optInt("quantity"));
+                elemeOrderItem.setTotal(BigDecimal.valueOf(elemeOrderItemJsonObject.optDouble("total")));
+                elemeOrderItem.setExtendCode(elemeOrderItemJsonObject.optString("extendCode"));
+                elemeOrderItem.setBarCode(elemeOrderItemJsonObject.optString("barCode"));
+                elemeOrderItem.setUserPrice(BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("userPrice")));
+                elemeOrderItem.setShopPrice(BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("shopPrice")));
+                elemeOrderItem.setVfoodId(BigInteger.valueOf(elemeOrderItemJsonObject.getLong("vfoodId")));
 
-        int groupsSize = groupsJsonArray.size();
-        for (int groupsIndex = 0; groupsIndex < groupsSize; groupsIndex++) {
-            JSONObject elemeGroupJsonObject = groupsJsonArray.getJSONObject(groupsIndex);
-            DietOrderGroup dietOrderGroup = DietOrderGroup.builder()
-                    .tenantId(tenantId)
-                    .tenantCode(tenantCode)
-                    .branchId(branchId)
-                    .dietOrderId(dietOrderId)
-                    .name(elemeGroupJsonObject.getString("name"))
-                    .type(elemeGroupJsonObject.getString("type"))
-                    .createUserId(userId)
-                    .lastUpdateUserId(userId)
-                    .build();
-            DatabaseHelper.insert(dietOrderGroup);
-
-            BigInteger dietOrderGroupId = dietOrderGroup.getId();
-
-            JSONArray itemsJsonArray = elemeGroupJsonObject.optJSONArray("items");
-            int itemsSize = itemsJsonArray.size();
-            for (int itemsIndex = 0; itemsIndex < itemsSize; itemsIndex++) {
-                JSONObject elemeOrderItemJsonObject = itemsJsonArray.optJSONObject(itemsIndex);
-                JSONArray newSpecsJsonArray = elemeOrderItemJsonObject.optJSONArray("newSpecs");
-                String goodsSpecificationName = "";
-                BigInteger categoryId = Constants.BIGINT_DEFAULT_VALUE;
-                String categoryName = Constants.VARCHAR_DEFAULT_VALUE;
-                if (CollectionUtils.isNotEmpty(newSpecsJsonArray)) {
-                    goodsSpecificationName = newSpecsJsonArray.getJSONObject(0).getString("value");
+                Double weight = elemeOrderItemJsonObject.optDouble("weight");
+                if (!Double.isNaN(weight)) {
+                    elemeOrderItem.setWeight(BigDecimal.valueOf(Double.valueOf(weight.toString())));
                 }
-                DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
-                        .tenantId(tenantId)
-                        .tenantCode(tenantCode)
-                        .branchId(branchId)
-                        .dietOrderId(dietOrderId)
-                        .dietOrderGroupId(dietOrderGroupId)
-                        .goodsType(Constants.GOODS_TYPE_ORDINARY_GOODS)
-                        .goodsId(BigInteger.valueOf(elemeOrderItemJsonObject.getLong("id")))
-                        .goodsName(elemeOrderItemJsonObject.getString("name"))
-                        .goodsSpecificationId(BigInteger.valueOf(elemeOrderItemJsonObject.getLong("skuId")))
-                        .goodsSpecificationName(goodsSpecificationName)
-                        .categoryId(categoryId)
-                        .categoryName(categoryName)
-                        .price(BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("price")))
-                        .flavorIncrease(BigDecimal.ZERO)
-                        .quantity(BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("quantity")))
-                        .totalAmount(BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("total")))
-                        .discountAmount(BigDecimal.ZERO)
-                        .payableAmount(BigDecimal.ZERO)
-                        .paidAmount(BigDecimal.ZERO)
-                        .createUserId(userId)
-                        .lastUpdateUserId(userId)
-                        .build();
-                DatabaseHelper.insert(dietOrderDetail);
+                elemeOrderItem.setCreateUserId(userId);
+                elemeOrderItem.setLastUpdateUserId(userId);
+                elemeOrderItem.setLastUpdateRemark("饿了么系统推送新订单，保存菜品信息！");
+                DatabaseHelper.insert(elemeOrderItem);
 
-                BigInteger dietOrderDetailId = dietOrderDetail.getId();
-                JSONArray attributesJsonArray = elemeOrderItemJsonObject.optJSONArray("attributes");
-                if (CollectionUtils.isNotEmpty(attributesJsonArray)) {
-                    int attributesSize = attributesJsonArray.size();
-                    for (int attributesIndex = 0; attributesIndex < attributesSize; attributesIndex++) {
-                        JSONObject attributeJsonObject = attributesJsonArray.optJSONObject(attributesIndex);
-                        DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor = DietOrderDetailGoodsFlavor.builder()
-                                .tenantId(tenantId)
-                                .tenantCode(tenantCode)
-                                .branchId(branchId)
-                                .dietOrderId(dietOrderId)
-                                .dietOrderGroupId(dietOrderGroupId)
-                                .dietOrderDetailId(dietOrderDetailId)
-                                .goodsFlavorGroupId(BigInteger.ZERO)
-                                .goodsFlavorGroupName(attributeJsonObject.getString("name"))
-                                .goodsFlavorId(BigInteger.ZERO)
-                                .goodsFlavorName(attributeJsonObject.getString("value"))
-                                .price(BigDecimal.ZERO)
-                                .createUserId(userId)
-                                .lastUpdateUserId(userId)
-                                .build();
-                        DatabaseHelper.insert(dietOrderDetailGoodsFlavor);
+                JSONArray elemeOrderItemAttributeJsonArray = elemeOrderItemJsonObject.optJSONArray("attributes");
+                if (elemeOrderItemAttributeJsonArray != null) {
+                    int elemeOrderItemAttributeJsonArraySize = elemeOrderItemAttributeJsonArray.size();
+                    for (int elemeOrderItemAttributeJsonArrayIndex = 0; elemeOrderItemAttributeJsonArrayIndex < elemeOrderItemAttributeJsonArraySize; elemeOrderItemAttributeJsonArrayIndex++) {
+                        JSONObject elemeOrderItemAttributeJsonObject = elemeOrderItemAttributeJsonArray.optJSONObject(index);
+                        ElemeOrderItemAttribute elemeOrderItemAttribute = new ElemeOrderItemAttribute();
+                        elemeOrderItemAttribute.setTenantId(tenantId);
+                        elemeOrderItemAttribute.setTenantCode(tenantCode);
+                        elemeOrderItemAttribute.setBranchId(branchId);
+                        elemeOrderItemAttribute.setElemeOrderId(elemeOrderId);
+                        elemeOrderItemAttribute.setOrderId(id);
+                        elemeOrderItemAttribute.setElemeOrderItemId(elemeOrderItem.getId());
+                        elemeOrderItemAttribute.setName(elemeOrderItemAttributeJsonObject.optString("name"));
+                        elemeOrderItemAttribute.setValue(elemeOrderItemAttributeJsonObject.optString("value"));
+                        elemeOrderItemAttribute.setCreateUserId(userId);
+                        elemeOrderItemAttribute.setLastUpdateUserId(userId);
+                        elemeOrderItemAttribute.setLastUpdateRemark("饿了么系统推送新订单，保存菜品属性！");
+                        DatabaseHelper.insert(elemeOrderItemAttribute);
+                    }
+                }
+
+                JSONArray elemeOrderItemNewSpecJsonArray = elemeOrderItemJsonObject.optJSONArray("newSpecs");
+                if (elemeOrderItemNewSpecJsonArray != null) {
+                    int elemeOrderItemNewSpecJsonArraySize = elemeOrderItemNewSpecJsonArray.size();
+                    for (int elemeOrderItemNewSpecJsonArrayIndex = 0; elemeOrderItemNewSpecJsonArrayIndex < elemeOrderItemNewSpecJsonArraySize; elemeOrderItemNewSpecJsonArrayIndex++) {
+                        JSONObject elemeOrderItemNewSpecJsonObject = elemeOrderItemNewSpecJsonArray.optJSONObject(index);
+                        ElemeOrderItemNewSpec elemeOrderItemNewSpec = new ElemeOrderItemNewSpec();
+                        elemeOrderItemNewSpec.setTenantId(tenantId);
+                        elemeOrderItemNewSpec.setTenantCode(tenantCode);
+                        elemeOrderItemNewSpec.setBranchId(branchId);
+                        elemeOrderItemNewSpec.setElemeOrderId(elemeOrderId);
+                        elemeOrderItemNewSpec.setOrderId(id);
+                        elemeOrderItemNewSpec.setElemeOrderItemId(elemeOrderItem.getId());
+                        elemeOrderItemNewSpec.setName(elemeOrderItemNewSpecJsonObject.optString("name"));
+                        elemeOrderItemNewSpec.setValue(elemeOrderItemNewSpecJsonObject.optString("value"));
+                        elemeOrderItemNewSpec.setCreateUserId(userId);
+                        elemeOrderItemNewSpec.setLastUpdateUserId(userId);
+                        elemeOrderItemNewSpec.setLastUpdateRemark("饿了么系统推送新订单，保存菜品规格！");
+                        DatabaseHelper.insert(elemeOrderItemNewSpec);
                     }
                 }
             }
         }
 
-        if (orderActivitiesJsonArray != null) {
-            int orderActivitiesSize = orderActivitiesJsonArray.size();
-            for (int orderActivitiesIndex = 0; orderActivitiesIndex < orderActivitiesSize; orderActivitiesIndex++) {
-                JSONObject elemeActivityJsonObject = orderActivitiesJsonArray.optJSONObject(orderActivitiesIndex);
-                DietOrderActivity dietOrderActivity = DietOrderActivity.builder()
-                        .tenantId(tenantId)
-                        .tenantCode(tenantCode)
-                        .branchId(branchId)
-                        .dietOrderId(dietOrderId)
-                        .activityId(BigInteger.valueOf(elemeActivityJsonObject.getLong("id")))
-                        .activityName(elemeActivityJsonObject.getString("name"))
-                        .activityType(elemeActivityJsonObject.getInt("categoryId"))
-                        .amount(BigDecimal.valueOf(elemeActivityJsonObject.getDouble("restaurantPart")))
-                        .createUserId(userId)
-                        .lastUpdateUserId(userId)
-                        .build();
-                DatabaseHelper.insert(dietOrderActivity);
+        if (orderActivityJsonArray != null) {
+            int orderActivityJsonArraySize = orderActivityJsonArray.size();
+            for (int orderActivityJsonArrayIndex = 0; orderActivityJsonArrayIndex < orderActivityJsonArraySize; orderActivityJsonArrayIndex++) {
+                JSONObject elemeActivityJsonObject = orderActivityJsonArray.optJSONObject(orderActivityJsonArrayIndex);
+                ElemeOrderActivity elemeOrderActivity = new ElemeOrderActivity();
+                elemeOrderActivity.setTenantId(tenantId);
+                elemeOrderActivity.setTenantCode(tenantCode);
+                elemeOrderActivity.setBranchId(branchId);
+                elemeOrderActivity.setElemeOrderId(elemeOrderId);
+                elemeOrderActivity.setOrderId(id);
+                elemeOrderActivity.setElemeActivityId(BigInteger.valueOf(elemeActivityJsonObject.optLong("id")));
+                elemeOrderActivity.setName(elemeActivityJsonObject.optString("name"));
+                elemeOrderActivity.setCategoryId(elemeActivityJsonObject.optInt("categoryId"));
+                elemeOrderActivity.setElemePart(BigDecimal.valueOf(elemeActivityJsonObject.optDouble("elemePart")));
+                elemeOrderActivity.setRestaurantPart(BigDecimal.valueOf(elemeActivityJsonObject.optDouble("restaurantPart")));
+                elemeOrderActivity.setAmount(BigDecimal.valueOf(elemeActivityJsonObject.optDouble("amount")));
+                elemeOrderActivity.setCreateUserId(userId);
+                elemeOrderActivity.setLastUpdateUserId(userId);
+                elemeOrderActivity.setLastUpdateRemark("饿了么系统推送新订单，保存饿了么订单活动！");
+                DatabaseHelper.insert(elemeOrderActivity);
             }
         }
+        elemeCallbackMessage.setOrderId(id);
         DatabaseHelper.insert(elemeCallbackMessage);
+//        publishElemeOrderMessage(elemeOrder.getTenantId(), elemeOrder.getBranchId(), elemeOrderId, elemeCallbackMessage.getType(), uuid);
+        pushElemeMessage(tenantId, branchId, elemeOrderId, elemeCallbackMessage.getType(), uuid, 5, 60000);
     }
 
     /**

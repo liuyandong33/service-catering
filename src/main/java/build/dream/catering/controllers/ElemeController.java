@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
@@ -221,7 +222,7 @@ public class ElemeController extends BasicController {
 
     @RequestMapping(value = "/test")
     @ResponseBody
-    public String test() throws IOException {
+    public String test() throws IOException, ParseException {
         ElemeCallbackMessage elemeCallbackMessage = new ElemeCallbackMessage();
         elemeCallbackMessage.setRequestId("200017223099345201");
         elemeCallbackMessage.setType(10);
