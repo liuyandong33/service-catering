@@ -27,18 +27,18 @@ public class SaleFlowUtils {
             dietOrderDetailList.add(dietOrderDetail);
         }
 
-        List<DietOrderDetail> normalDietOrderDetails = null;
-        List<DietOrderDetail> extraDietOrderDetails = null;
-        List<DietOrderDetail> discountDietOrderDetails = null;
+        List<DietOrderDetail> normalDietOrderDetails = new ArrayList<DietOrderDetail>();
+        List<DietOrderDetail> extraDietOrderDetails = new ArrayList<DietOrderDetail>();
+        List<DietOrderDetail> discountDietOrderDetails = new ArrayList<DietOrderDetail>();
         for (DietOrderGroup dietOrderGroup : dietOrderGroups) {
             String type = dietOrderGroup.getType();
             BigInteger dietOrderGroupId = dietOrderGroup.getId();
             if (Constants.NORMAL.equals(type)) {
-                normalDietOrderDetails = dietOrderDetailListMap.get(dietOrderGroupId);
+                normalDietOrderDetails.addAll(dietOrderDetailListMap.get(dietOrderGroupId));
             } else if (Constants.EXTRA.equals(type)) {
-                extraDietOrderDetails = dietOrderDetailListMap.get(dietOrderGroupId);
+                extraDietOrderDetails.addAll(dietOrderDetailListMap.get(dietOrderGroupId));
             } else if (Constants.DISCOUNT.equals(type)) {
-                discountDietOrderDetails = dietOrderDetailListMap.get(dietOrderGroupId);
+                discountDietOrderDetails.addAll(dietOrderDetailListMap.get(dietOrderGroupId));
             }
         }
 
@@ -82,16 +82,12 @@ public class SaleFlowUtils {
             saleDetails.add(buildSaleDetail(saleId, saleTime, tenantId, tenantCode, branchId, dietOrderDetail, userId));
         }
 
-        if (CollectionUtils.isNotEmpty(extraDietOrderDetails)) {
-            for (DietOrderDetail dietOrderDetail : extraDietOrderDetails) {
-                saleDetails.add(buildSaleDetail(saleId, saleTime, tenantId, tenantCode, branchId, dietOrderDetail, userId));
-            }
+        for (DietOrderDetail dietOrderDetail : extraDietOrderDetails) {
+            saleDetails.add(buildSaleDetail(saleId, saleTime, tenantId, tenantCode, branchId, dietOrderDetail, userId));
         }
 
-        if (CollectionUtils.isNotEmpty(discountDietOrderDetails)) {
-            for (DietOrderDetail dietOrderDetail : discountDietOrderDetails) {
-                saleDetails.add(buildSaleDetail(saleId, saleTime, tenantId, tenantCode, branchId, dietOrderDetail, userId));
-            }
+        for (DietOrderDetail dietOrderDetail : discountDietOrderDetails) {
+            saleDetails.add(buildSaleDetail(saleId, saleTime, tenantId, tenantCode, branchId, dietOrderDetail, userId));
         }
         DatabaseHelper.insertAll(saleDetails);
 

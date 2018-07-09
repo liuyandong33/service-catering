@@ -120,7 +120,7 @@ public class ElemeService {
         }
         int payStatus = 0;
         int refundStatus = 0;
-        BigDecimal discountAmount = BigDecimal.valueOf(messageJsonObject.getDouble("shopPart"));
+        BigDecimal discountAmount = BigDecimal.valueOf(messageJsonObject.getDouble("shopPart")).abs();
         BigDecimal payableAmount = BigDecimal.ZERO;
         BigDecimal paidAmount = BigDecimal.ZERO;
         int paidType = 0;
