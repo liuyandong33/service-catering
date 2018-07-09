@@ -120,10 +120,15 @@ public class ElemeService {
         }
         int payStatus = 0;
         int paidType = 0;
+        BigDecimal totalAmount = BigDecimal.valueOf(messageJsonObject.getDouble("originalPrice"));
+        BigDecimal discountAmount = BigDecimal.valueOf(messageJsonObject.getDouble("shopPart")).abs();
+        BigDecimal payableAmount = totalAmount.subtract(discountAmount);
+        BigDecimal paidAmount = BigDecimal.ZERO;
         boolean onlinePaid = messageJsonObject.getBoolean("onlinePaid");
         if (onlinePaid) {
             payStatus = DietOrderConstants.PAY_STATUS_PAID;
             paidType = Constants.PAID_TYPE_ALIPAY;
+            paidAmount = payableAmount;
         } else {
             payStatus = DietOrderConstants.PAY_STATUS_UNPAID;
         }
@@ -142,9 +147,6 @@ public class ElemeService {
         } else if (DietOrderConstants.SUCCESSFUL.equals(elemeOrderStatus)) {
             refundStatus = DietOrderConstants.REFUND_STATUS_SUCCESSFUL;
         }
-        BigDecimal discountAmount = BigDecimal.valueOf(messageJsonObject.getDouble("shopPart")).abs();
-        BigDecimal payableAmount = BigDecimal.ZERO;
-        BigDecimal paidAmount = BigDecimal.ZERO;
 
         String description = messageJsonObject.getString("description");
         String deliveryGeo = messageJsonObject.getString("deliveryGeo");
@@ -174,7 +176,7 @@ public class ElemeService {
                 .orderStatus(orderStatus)
                 .payStatus(payStatus)
                 .refundStatus(refundStatus)
-                .totalAmount(BigDecimal.valueOf(messageJsonObject.getDouble("originalPrice")))
+                .totalAmount(totalAmount)
                 .discountAmount(discountAmount)
                 .payableAmount(payableAmount)
                 .paidAmount(paidAmount)
