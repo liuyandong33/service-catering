@@ -1,13 +1,11 @@
 package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
-import build.dream.common.api.ApiRest;
-import build.dream.common.utils.CacheUtils;
-import build.dream.common.utils.ConfigurationUtils;
-import build.dream.common.utils.GsonUtils;
-import build.dream.common.utils.ProxyUtils;
+import build.dream.common.beans.WebResponse;
+import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.Validate;
 
 import java.io.IOException;
@@ -72,11 +70,20 @@ public class ElemeUtils {
         return GsonUtils.toJson(requestBody);
     }
 
-    public static ApiRest callElemeSystem(String tenantId, String branchId, Integer elemeAccountType, String action, Map<String, Object> params) throws IOException {
+    public static Map<String, Object> callElemeSystem(String tenantId, String branchId, Integer elemeAccountType, String action, Map<String, Object> params) throws IOException {
         String requestBody = constructRequestBody(tenantId, branchId, elemeAccountType, action, params);
         Map<String, String> callElemeSystemRequestParameters = new HashMap<String, String>();
         callElemeSystemRequestParameters.put("requestBody", requestBody);
-        return ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "eleme", "callElemeSystem", callElemeSystemRequestParameters);
+
+        String url = ConfigurationUtils.getConfiguration(Constants.ELEME_SERVICE_URL) + "/api/v1/";
+        WebResponse webResponse = OutUtils.doPost(url, requestBody, HEADERS);
+        String result = webResponse.getResult();
+        Map<String, Object> resultMap = JacksonUtils.readValueAsMap(result, String.class, Object.class);
+        Map<String, Object> errorMap = MapUtils.getMap(resultMap, "error");
+        if (MapUtils.isNotEmpty(errorMap)) {
+            ValidateUtils.isTrue(false, MapUtils.getString(errorMap, "message"));
+        }
+        return MapUtils.getMap(resultMap, "result");
     }
 
     public static boolean checkSignature(JSONObject callbackJsonObject, String appSecret) {

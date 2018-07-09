@@ -468,31 +468,31 @@ public class ElemeService {
     }
 
     @Transactional(readOnly = true)
-    public ElemeOrder findElemeOrder(BigInteger tenantId, BigInteger branchId, BigInteger elemeOrderId) {
+    public DietOrder findElemeOrder(BigInteger tenantId, BigInteger branchId, BigInteger elemeOrderId) {
         SearchModel searchModel = new SearchModel();
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, elemeOrderId);
-        ElemeOrder elemeOrder = DatabaseHelper.find(ElemeOrder.class, searchModel);
-        Validate.notNull(elemeOrder, "订单不存在！");
-        return elemeOrder;
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
+        return dietOrder;
     }
 
     @Transactional(readOnly = true)
-    public List<ElemeOrder> findAllElemeOrders(BigInteger tenantId, BigInteger branchId, List<BigInteger> elemeOrderIds) {
+    public List<DietOrder> findAllElemeOrders(BigInteger tenantId, BigInteger branchId, List<BigInteger> elemeOrderIds) {
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, elemeOrderIds);
-        List<ElemeOrder> elemeOrders = DatabaseHelper.findAll(ElemeOrder.class, searchModel);
-        Validate.notEmpty(elemeOrders, "订单不存在！");
-        return elemeOrders;
+        List<DietOrder> dietOrders = DatabaseHelper.findAll(DietOrder.class, searchModel);
+        ValidateUtils.notEmpty(dietOrders, "订单不存在！");
+        return dietOrders;
     }
 
-    public List<String> obtainOrderIds(List<ElemeOrder> elemeOrders) {
+    public List<String> obtainOrderIds(List<DietOrder> dietOrders) {
         List<String> orderIds = new ArrayList<String>();
-        for (ElemeOrder elemeOrder : elemeOrders) {
-            orderIds.add(elemeOrder.getOrderId());
+        for (DietOrder dietOrder : dietOrders) {
+            orderIds.add(dietOrder.getOrderNumber().substring(1));
         }
         return orderIds;
     }
@@ -795,14 +795,13 @@ public class ElemeService {
 
 
         Branch branch = findBranch(tenantId, branchId);
-        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
+        DietOrder dietOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("orderId", elemeOrder.getOrderId());
+        params.put("orderId", dietOrder.getOrderNumber().substring(1));
 
-        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.getOrder", params);
-        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.getOrder", params);
 
-        return new ApiRest(callElemeSystemApiRest.getData(), "获取订单成功！");
+        return new ApiRest(result, "获取订单成功！");
     }
 
     /**
@@ -818,16 +817,15 @@ public class ElemeService {
         BigInteger branchId = batchGetOrdersModel.getBranchId();
 
         Branch branch = findBranch(tenantId, branchId);
-        List<ElemeOrder> elemeOrders = findAllElemeOrders(tenantId, branchId, batchGetOrdersModel.getElemeOrderIds());
-        List<String> orderIds = obtainOrderIds(elemeOrders);
+        List<DietOrder> dietOrders = findAllElemeOrders(tenantId, branchId, batchGetOrdersModel.getElemeOrderIds());
+        List<String> orderIds = obtainOrderIds(dietOrders);
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("orderIds", orderIds);
 
-        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.mgetOrders", params);
-        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.mgetOrders", params);
 
-        return new ApiRest(callElemeSystemApiRest.getData(), "批量查询订单成功！");
+        return new ApiRest(result, "批量查询订单成功！");
     }
 
     /**
@@ -843,14 +841,13 @@ public class ElemeService {
         BigInteger elemeOrderId = confirmOrderLiteModel.getElemeOrderId();
 
         Branch branch = findBranch(tenantId, branchId);
-        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
+        DietOrder dietOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
 
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("orderId", elemeOrder.getOrderId());
-        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.confirmOrderLite", params);
-        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+        params.put("orderId", dietOrder.getOrderNumber().substring(1));
+        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.confirmOrderLite", params);
 
-        return new ApiRest(callElemeSystemApiRest.getData(), "确认订单成功！");
+        return new ApiRest(result, "确认订单成功！");
     }
 
     /**
@@ -866,17 +863,16 @@ public class ElemeService {
         BigInteger elemeOrderId = cancelOrderLiteModel.getElemeOrderId();
 
         Branch branch = findBranch(tenantId, branchId);
-        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
+        DietOrder dietOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
 
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("orderId", elemeOrder.getOrderId());
+        params.put("orderId", dietOrder.getOrderNumber().substring(1));
         params.put("type", cancelOrderLiteModel.getType());
         ApplicationHandler.ifNotNullPut(params, "remark", cancelOrderLiteModel.getRemark());
 
-        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.cancelOrderLite", params);
-        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.cancelOrderLite", params);
 
-        return new ApiRest(callElemeSystemApiRest.getData(), "取消订单成功！");
+        return new ApiRest(result, "取消订单成功！");
     }
 
     /**
@@ -892,14 +888,13 @@ public class ElemeService {
         BigInteger elemeOrderId = agreeRefundLiteModel.getElemeOrderId();
 
         Branch branch = findBranch(tenantId, branchId);
-        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
+        DietOrder dietOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
 
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("orderId", elemeOrder.getOrderId());
-        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.agreeRefundLite", params);
-        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+        params.put("orderId", dietOrder.getOrderNumber().substring(1));
+        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.agreeRefundLite", params);
 
-        return new ApiRest(callElemeSystemApiRest.getData(), "同意退单/同意取消单成功！");
+        return new ApiRest(result, "同意退单/同意取消单成功！");
     }
 
     /**
@@ -914,14 +909,13 @@ public class ElemeService {
         BigInteger branchId = disagreeRefundLiteModel.getBranchId();
 
         Branch branch = findBranch(tenantId, branchId);
-        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, disagreeRefundLiteModel.getElemeOrderId());
+        DietOrder dietOrder = findElemeOrder(tenantId, branchId, disagreeRefundLiteModel.getElemeOrderId());
 
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("orderId", elemeOrder.getOrderId());
-        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.disagreeRefundLite", params);
-        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+        params.put("orderId", dietOrder.getOrderNumber().substring(1));
+        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.disagreeRefundLite", params);
 
-        return new ApiRest(callElemeSystemApiRest.getData(), "不同意退单/不同意取消单成功！");
+        return new ApiRest(result, "不同意退单/不同意取消单成功！");
     }
 
     /**
@@ -937,14 +931,13 @@ public class ElemeService {
         BigInteger elemeOrderId = deliveryBySelfLiteModel.getElemeOrderId();
 
         Branch branch = findBranch(tenantId, branchId);
-        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
+        DietOrder dietOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
 
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("orderId", elemeOrder.getOrderId());
-        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.deliveryBySelfLite", params);
-        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+        params.put("orderId", dietOrder.getOrderNumber().substring(1));
+        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.deliveryBySelfLite", params);
 
-        return new ApiRest(callElemeSystemApiRest.getData(), "配送异常或者物流拒单后选择自行配送成功！");
+        return new ApiRest(result, "配送异常或者物流拒单后选择自行配送成功！");
     }
 
     /**
@@ -959,14 +952,13 @@ public class ElemeService {
         BigInteger branchId = noMoreDeliveryLiteModel.getBranchId();
 
         Branch branch = findBranch(tenantId, branchId);
-        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, noMoreDeliveryLiteModel.getElemeOrderId());
+        DietOrder dietOrder = findElemeOrder(tenantId, branchId, noMoreDeliveryLiteModel.getElemeOrderId());
 
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("orderId", elemeOrder.getOrderId());
-        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.noMoreDeliveryLite", params);
-        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+        params.put("orderId", dietOrder.getOrderNumber().substring(1));
+        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.noMoreDeliveryLite", params);
 
-        return new ApiRest(callElemeSystemApiRest.getData(), "配送异常或者物流拒单后选择不再配送成功！");
+        return new ApiRest(result, "配送异常或者物流拒单后选择不再配送成功！");
     }
 
     /**
@@ -981,14 +973,13 @@ public class ElemeService {
         BigInteger branchId = receivedOrderLiteModel.getBranchId();
 
         Branch branch = findBranch(tenantId, branchId);
-        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, receivedOrderLiteModel.getElemeOrderId());
+        DietOrder dietOrder = findElemeOrder(tenantId, branchId, receivedOrderLiteModel.getElemeOrderId());
 
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("orderId", elemeOrder.getOrderId());
-        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.receivedOrderLite", params);
-        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+        params.put("orderId", dietOrder.getOrderNumber().substring(1));
+        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.receivedOrderLite", params);
 
-        return new ApiRest(callElemeSystemApiRest.getData(), "订单确认送达成功！");
+        return new ApiRest(result, "订单确认送达成功！");
     }
 
     /**
@@ -1003,16 +994,15 @@ public class ElemeService {
         BigInteger branchId = replyReminderModel.getBranchId();
 
         Branch branch = findBranch(tenantId, branchId);
-        ElemeOrder elemeOrder = findElemeOrder(tenantId, branchId, replyReminderModel.getElemeOrderId());
+        DietOrder dietOrder = findElemeOrder(tenantId, branchId, replyReminderModel.getElemeOrderId());
 
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("orderId", elemeOrder.getOrderId());
+        params.put("orderId", dietOrder.getOrderNumber().substring(1));
         params.put("type", replyReminderModel.getType());
         ApplicationHandler.ifNotNullPut(params, "content", replyReminderModel.getContent());
-        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.replyReminder", params);
-        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.replyReminder", params);
 
-        return new ApiRest(callElemeSystemApiRest.getData(), "回复催单成功！");
+        return new ApiRest(result, "回复催单成功！");
     }
 
     /**
@@ -1028,9 +1018,8 @@ public class ElemeService {
 
         Branch branch = findBranch(tenantId, branchId);
 
-        ApiRest callElemeSystemApiRest = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.user.getUser", null);
-        Validate.isTrue(callElemeSystemApiRest.isSuccessful(), callElemeSystemApiRest.getError());
+        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.user.getUser", null);
 
-        return new ApiRest(callElemeSystemApiRest.getData(), "获取商户账号信息成功！");
+        return new ApiRest(result, "获取商户账号信息成功！");
     }
 }
