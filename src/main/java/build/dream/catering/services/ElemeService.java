@@ -5,6 +5,7 @@ import build.dream.catering.models.eleme.*;
 import build.dream.catering.tools.PushMessageThread;
 import build.dream.catering.utils.ElemeUtils;
 import build.dream.common.api.ApiRest;
+import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.*;
 import net.sf.json.JSONArray;
@@ -101,8 +102,22 @@ public class ElemeService {
 
         BigInteger userId = CommonUtils.getServiceSystemUserId();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        int orderType = 0;
-        int orderStatus = 0;
+        int orderType = DietOrderConstants.ORDER_TYPE_ELEME_ORDER;
+        int orderStatus = Constants.INT_DEFAULT_VALUE;
+        String status = messageJsonObject.getString("status");
+        if (Constants.PENDING.equals(status)) {
+            orderStatus = 1;
+        } else if (Constants.UNPROCESSED.equals(status)) {
+            orderStatus = 2;
+        } else if (Constants.REFUNDING.equals(status)) {
+            orderStatus = 3;
+        } else if (Constants.VALID.equals(status)) {
+            orderStatus = 4;
+        } else if (Constants.INVALID.equals(status)) {
+            orderStatus = 5;
+        } else if (Constants.SETTLED.equals(status)) {
+            orderStatus = 6;
+        }
         int payStatus = 0;
         int refundStatus = 0;
         BigDecimal discountAmount = BigDecimal.valueOf(messageJsonObject.getDouble("shopPart"));

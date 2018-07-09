@@ -95,4 +95,11 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String NORMAL = "normal";
     public static final String EXTRA = "extra";
     public static final String DISCOUNT = "discount";
+
+    public static final String PENDING = "pending";
+    public static final String UNPROCESSED = "unprocessed";
+    public static final String REFUNDING = "refunding";
+    public static final String VALID = "valid";
+    public static final String INVALID = "invalid";
+    public static final String SETTLED = "valid";
 }
