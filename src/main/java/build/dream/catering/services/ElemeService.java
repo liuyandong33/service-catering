@@ -104,22 +104,36 @@ public class ElemeService {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         int orderType = DietOrderConstants.ORDER_TYPE_ELEME_ORDER;
         int orderStatus = Constants.INT_DEFAULT_VALUE;
-        String status = messageJsonObject.getString("status");
-        if (Constants.PENDING.equals(status)) {
-            orderStatus = 1;
-        } else if (Constants.UNPROCESSED.equals(status)) {
-            orderStatus = 2;
-        } else if (Constants.REFUNDING.equals(status)) {
-            orderStatus = 3;
-        } else if (Constants.VALID.equals(status)) {
-            orderStatus = 4;
-        } else if (Constants.INVALID.equals(status)) {
-            orderStatus = 5;
-        } else if (Constants.SETTLED.equals(status)) {
-            orderStatus = 6;
+        String elemeOrderStatus = messageJsonObject.getString("status");
+        if (DietOrderConstants.PENDING.equals(elemeOrderStatus)) {
+            orderStatus = DietOrderConstants.ORDER_STATUS_PENDING;
+        } else if (DietOrderConstants.UNPROCESSED.equals(elemeOrderStatus)) {
+            orderStatus = DietOrderConstants.ORDER_STATUS_UNPROCESSED;
+        } else if (DietOrderConstants.REFUNDING.equals(elemeOrderStatus)) {
+            orderStatus = DietOrderConstants.ORDER_STATUS_REFUNDING;
+        } else if (DietOrderConstants.VALID.equals(elemeOrderStatus)) {
+            orderStatus = DietOrderConstants.ORDER_STATUS_VALID;
+        } else if (DietOrderConstants.INVALID.equals(elemeOrderStatus)) {
+            orderStatus = DietOrderConstants.ORDER_STATUS_INVALID;
+        } else if (DietOrderConstants.SETTLED.equals(elemeOrderStatus)) {
+            orderStatus = DietOrderConstants.ORDER_STATUS_INVALID;
         }
         int payStatus = 0;
         int refundStatus = 0;
+        String elemeRefundStatus = messageJsonObject.getString("refundStatus");
+        if (DietOrderConstants.NO_REFUND.equals(elemeRefundStatus)) {
+            refundStatus = DietOrderConstants.REFUND_STATUS_NO_REFUND;
+        } else if (DietOrderConstants.APPLIED.equals(elemeOrderStatus)) {
+            refundStatus = DietOrderConstants.REFUND_STATUS_APPLIED;
+        } else if (DietOrderConstants.REJECTED.equals(elemeOrderStatus)) {
+            refundStatus = DietOrderConstants.REFUND_STATUS_REJECTED;
+        } else if (DietOrderConstants.ARBITRATING.equals(elemeOrderStatus)) {
+            refundStatus = DietOrderConstants.REFUND_STATUS_ARBITRATING;
+        } else if (DietOrderConstants.FAILED.equals(elemeOrderStatus)) {
+            refundStatus = DietOrderConstants.REFUND_STATUS_FAILED;
+        } else if (DietOrderConstants.SUCCESSFUL.equals(elemeOrderStatus)) {
+            refundStatus = DietOrderConstants.REFUND_STATUS_SUCCESSFUL;
+        }
         BigDecimal discountAmount = BigDecimal.valueOf(messageJsonObject.getDouble("shopPart")).abs();
         BigDecimal payableAmount = BigDecimal.ZERO;
         BigDecimal paidAmount = BigDecimal.ZERO;
@@ -143,7 +157,6 @@ public class ElemeService {
             invoiceType = messageJsonObject.getString("invoiceType");
             invoice = messageJsonObject.getString("invoice");
         }
-
 
         DietOrder dietOrder = DietOrder.builder()
                 .tenantId(tenantId)
@@ -270,7 +283,7 @@ public class ElemeService {
                         .activityId(BigInteger.valueOf(elemeActivityJsonObject.getLong("id")))
                         .activityName(elemeActivityJsonObject.getString("name"))
                         .activityType(elemeActivityJsonObject.getInt("categoryId"))
-                        .amount(BigDecimal.valueOf(elemeActivityJsonObject.getDouble("restaurantPart")))
+                        .amount(BigDecimal.valueOf(elemeActivityJsonObject.getDouble("restaurantPart")).abs())
                         .createUserId(userId)
                         .lastUpdateUserId(userId)
                         .build();

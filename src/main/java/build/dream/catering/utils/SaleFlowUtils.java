@@ -1,6 +1,7 @@
 package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
+import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.CommonUtils;
 import build.dream.common.utils.DatabaseHelper;
@@ -33,11 +34,11 @@ public class SaleFlowUtils {
         for (DietOrderGroup dietOrderGroup : dietOrderGroups) {
             String type = dietOrderGroup.getType();
             BigInteger dietOrderGroupId = dietOrderGroup.getId();
-            if (Constants.NORMAL.equals(type)) {
+            if (DietOrderConstants.GROUP_TYPE_NORMAL.equals(type)) {
                 normalDietOrderDetails.addAll(dietOrderDetailListMap.get(dietOrderGroupId));
-            } else if (Constants.EXTRA.equals(type)) {
+            } else if (DietOrderConstants.GROUP_TYPE_EXTRA.equals(type)) {
                 extraDietOrderDetails.addAll(dietOrderDetailListMap.get(dietOrderGroupId));
-            } else if (Constants.DISCOUNT.equals(type)) {
+            } else if (DietOrderConstants.GROUP_TYPE_DISCOUNT.equals(type)) {
                 discountDietOrderDetails.addAll(dietOrderDetailListMap.get(dietOrderGroupId));
             }
         }
