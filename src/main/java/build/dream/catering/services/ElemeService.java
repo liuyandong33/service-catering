@@ -200,6 +200,23 @@ public class ElemeService {
         DatabaseHelper.insert(dietOrder);
         BigInteger dietOrderId = dietOrder.getId();
 
+        if (onlinePaid) {
+            DietOrderPayment dietOrderPayment = DietOrderPayment.builder()
+                    .tenantId(tenantId)
+                    .tenantCode(tenantCode)
+                    .branchId(branchId)
+                    .dietOrderId(dietOrderId)
+                    .paymentId(BigInteger.ZERO)
+                    .paymentCode("ELM")
+                    .paymentName("饿了么线上支付")
+                    .occurrenceTime(activeTime)
+                    .createUserId(userId)
+                    .lastUpdateUserId(userId)
+                    .paidAmount(paidAmount)
+                    .build();
+            DatabaseHelper.insert(dietOrderPayment);
+        }
+
         int groupsSize = groupsJsonArray.size();
         for (int groupsIndex = 0; groupsIndex < groupsSize; groupsIndex++) {
             JSONObject elemeGroupJsonObject = groupsJsonArray.getJSONObject(groupsIndex);
