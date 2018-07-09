@@ -95,7 +95,9 @@ public class SaleFlowUtils {
         for (DietOrderPayment dietOrderPayment : dietOrderPayments) {
             salePayments.add(buildSalePayment(saleId, saleTime, tenantId, tenantCode, branchId, dietOrderPayment, userId));
         }
-        DatabaseHelper.insertAll(salePayments);
+        if (CollectionUtils.isNotEmpty(salePayments)) {
+            DatabaseHelper.insertAll(salePayments);
+        }
     }
 
     public static void writeSaleFlow(BigInteger dietOrderId) throws IOException {
