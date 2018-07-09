@@ -576,16 +576,14 @@ public class MeiTuanService {
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         Validate.notNull(branch, "门店不存在！");
 
-        String appAuthToken = "9e89b39a681bdad1878e7d62440b9f8aca05cf6bb89b36206a3dbae10acc3a3c68888f67820a0c0faeba07afaf080bae";
-
         String charset = Constants.CHARSET_NAME_UTF_8;
         String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
 
         Map<String, String> requestParameters = new HashMap<String, String>();
-        requestParameters.put("appAuthToken", appAuthToken);
+        requestParameters.put("appAuthToken", branch.getAppAuthToken());
         requestParameters.put("charset", charset);
         requestParameters.put("timestamp", timestamp);
-        requestParameters.put("ePoiIds", "7080Z100005033");
+        requestParameters.put("ePoiIds", branch.getTenantId() + "Z" + branch.getId());
         String sign = MeiTuanUtils.generateSignature("01b7d2lgmdylgiee", requestParameters);
         requestParameters.put("sign", sign);
         String url = "http://api.open.cater.meituan.com/waimai/poi/queryPoiInfo";
