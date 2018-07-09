@@ -5,7 +5,10 @@ import build.dream.catering.mappers.*;
 import build.dream.catering.models.meituan.CheckIsBindingModel;
 import build.dream.catering.models.meituan.GenerateBindingStoreLinkModel;
 import build.dream.catering.models.meituan.ObtainMeiTuanOrderModel;
+import build.dream.catering.models.meituan.QueryPoiInfoModel;
 import build.dream.catering.tools.PushMessageThread;
+import build.dream.catering.utils.MeiTuanUtils;
+import build.dream.common.beans.WebResponse;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.*;
@@ -20,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -551,9 +554,11 @@ public class MeiTuanService {
      */
     @Transactional(readOnly = true)
     public ApiRest checkIsBinding(CheckIsBindingModel checkIsBindingModel) {
+        BigInteger tenantId = checkIsBindingModel.getTenantId();
+        BigInteger branchId = checkIsBindingModel.getBranchId();
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, checkIsBindingModel.getTenantId());
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, checkIsBindingModel.getTenantId());
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         Validate.notNull(branch, "门店不存在！");
 
@@ -562,5 +567,46 @@ public class MeiTuanService {
         data.put("isBinding", isBinding);
 
         return new ApiRest(data, "查询门店是否绑定美团成功！");
+    }
+
+    @Transactional(readOnly = true)
+    public ApiRest queryPoiInfo(QueryPoiInfoModel queryPoiInfoModel) throws IOException {
+        BigInteger tenantId = queryPoiInfoModel.getTenantId();
+        BigInteger branchId = queryPoiInfoModel.getBranchId();
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        Branch branch = DatabaseHelper.find(Branch.class, searchModel);
+        Validate.notNull(branch, "门店不存在！");
+
+        List<String> appAuthTokens = new ArrayList<String>();
+
+        InputStream inputStream = new FileInputStream("C:\\Users\\liuyandong\\Desktop\\meituan.txt");
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        String line = null;
+        while ((line = bufferedReader.readLine()) != null) {
+//            appAuthTokens.add(line);
+        }
+
+        appAuthTokens.add("9e89b39a681bdad1878e7d62440b9f8aca05cf6bb89b36206a3dbae10acc3a3c68888f67820a0c0faeba07afaf080bae");
+
+        for (String appAuthToken : appAuthTokens) {
+            String charset = Constants.CHARSET_NAME_UTF_8;
+            String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
+
+            Map<String, String> requestParameters = new HashMap<String, String>();
+            requestParameters.put("appAuthToken", appAuthToken);
+            requestParameters.put("charset", charset);
+            requestParameters.put("timestamp", timestamp);
+            requestParameters.put("ePoiIds", "7080Z100005033");
+            String sign = MeiTuanUtils.generateSignature("01b7d2lgmdylgiee", requestParameters);
+            requestParameters.put("sign", sign);
+            String url = "http://api.open.cater.meituan.com/waimai/poi/queryPoiInfo";
+            System.out.println(WebUtils.buildQueryString(requestParameters, Constants.CHARSET_NAME_UTF_8));
+            WebResponse webResponse = WebUtils.doGetWithRequestParameters(url, requestParameters);
+            System.out.println(webResponse.getResult());
+        }
+        return new ApiRest();
     }
 }

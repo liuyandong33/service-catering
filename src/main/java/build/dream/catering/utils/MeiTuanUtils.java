@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class MeiTuanUtils {
-    private static String generateSignature(String signKey, Map<String, String> requestParameters) {
+    public static String generateSignature(String signKey, Map<String, String> requestParameters) {
         Map<String, String> sortedRequestParameters = new TreeMap<String, String>(requestParameters);
         StringBuffer finalData = new StringBuffer(signKey);
         for (Map.Entry<String, String> sortedRequestParameter : sortedRequestParameters.entrySet()) {

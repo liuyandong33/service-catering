@@ -2,6 +2,7 @@ package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
 import build.dream.common.api.ApiRest;
+import build.dream.common.beans.WebResponse;
 import build.dream.common.beans.WeiXinAccessToken;
 import build.dream.common.saas.domains.WeiXinPublicAccount;
 import build.dream.common.utils.GsonUtils;
@@ -57,8 +58,8 @@ public class WeiXinUtils {
 
         String accessToken = obtainAccessToken(weiXinPublicAccount.getAppId(), weiXinPublicAccount.getAppSecret());
         String url = "https://api.weixin.qq.com/card/membercard/updateuser?access_token=" + accessToken;
-        String result = OutUtils.doPost(url, GsonUtils.toJson(updateUserRequestBody, false), null);
-        JSONObject resultJsonObject = JSONObject.fromObject(result);
+        WebResponse webResponse = OutUtils.doPost(url, GsonUtils.toJson(updateUserRequestBody, false), null);
+        JSONObject resultJsonObject = JSONObject.fromObject(webResponse.getResult());
 
         Validate.isTrue(resultJsonObject.getInt("errcode") == 0, resultJsonObject.getString("errmsg"));
     }

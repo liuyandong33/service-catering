@@ -3,6 +3,7 @@ package build.dream.catering.controllers;
 import build.dream.catering.models.miniprogram.ObtainSessionWithJsCodeModel;
 import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.api.ApiRest;
+import build.dream.common.beans.WebResponse;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
@@ -35,8 +36,8 @@ public class MiniProgramController extends BasicController {
         obtainSessionRequestParameters.put("grant_type", "authorization_code");
 
         String url = "https://api.weixin.qq.com/sns/jscode2session?" + WebUtils.buildQueryString(obtainSessionRequestParameters);
-        String obtainSessionResult = OutUtils.doGet(url, null);
-        JSONObject obtainSessionResultJsonObject = JSONObject.fromObject(obtainSessionResult);
+        WebResponse webResponse = OutUtils.doGet(url, null);
+        JSONObject obtainSessionResultJsonObject = JSONObject.fromObject(webResponse.getResult());
         Validate.isTrue(!obtainSessionResultJsonObject.has("errcode"), obtainSessionResultJsonObject.optString("errmsg"));
 
         ApiRest apiRest = new ApiRest();
