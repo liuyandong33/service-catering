@@ -119,6 +119,14 @@ public class ElemeService {
             orderStatus = DietOrderConstants.ORDER_STATUS_INVALID;
         }
         int payStatus = 0;
+        int paidType = 0;
+        boolean onlinePaid = messageJsonObject.getBoolean("onlinePaid");
+        if (onlinePaid) {
+            payStatus = DietOrderConstants.PAY_STATUS_PAID;
+            paidType = Constants.PAID_TYPE_ALIPAY;
+        } else {
+            payStatus = DietOrderConstants.PAY_STATUS_UNPAID;
+        }
         int refundStatus = 0;
         String elemeRefundStatus = messageJsonObject.getString("refundStatus");
         if (DietOrderConstants.NO_REFUND.equals(elemeRefundStatus)) {
@@ -137,7 +145,6 @@ public class ElemeService {
         BigDecimal discountAmount = BigDecimal.valueOf(messageJsonObject.getDouble("shopPart")).abs();
         BigDecimal payableAmount = BigDecimal.ZERO;
         BigDecimal paidAmount = BigDecimal.ZERO;
-        int paidType = 0;
 
         String description = messageJsonObject.getString("description");
         String deliveryGeo = messageJsonObject.getString("deliveryGeo");
