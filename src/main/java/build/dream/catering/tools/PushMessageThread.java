@@ -41,11 +41,7 @@ public class PushMessageThread implements Runnable {
                     CacheUtils.delete(uuid);
                     continued = false;
                 } else {
-                    try {
-                        Thread.sleep(interval);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    ThreadUtils.sleepSafe(interval);
                 }
             }
         }

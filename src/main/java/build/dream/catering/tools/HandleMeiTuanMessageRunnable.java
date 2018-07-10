@@ -3,6 +3,7 @@ package build.dream.catering.tools;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.services.MeiTuanService;
 import build.dream.catering.utils.DingtalkUtils;
+import build.dream.catering.utils.ThreadUtils;
 import build.dream.common.utils.GsonUtils;
 import net.sf.json.JSONObject;
 
@@ -27,6 +28,7 @@ public class HandleMeiTuanMessageRunnable implements Runnable {
     @Override
     public void run() {
         while (continued) {
+            boolean isNormal = true;
             try {
                 if (type == Constants.MEI_TUAN_CALLBACK_TYPE_ORDER_EFFECTIVE) {
                     meiTuanService.handleOrderEffectiveCallback(callbackParametersJsonObject, uuid, type);
@@ -38,18 +40,19 @@ public class HandleMeiTuanMessageRunnable implements Runnable {
                     meiTuanService.handleBindingStoreCallback(callbackParametersJsonObject, uuid, type);
                 }
             } catch (Exception e) {
+                isNormal = false;
                 if (count == 1) {
                     DingtalkUtils.send(String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "饿了么消息处理失败", GsonUtils.toJson(callbackParametersJsonObject), e.getClass().getName(), e.getMessage()));
                 }
             }
-            count = count - 1;
-            if (count <= 0) {
+            if (isNormal) {
                 continued = false;
             } else {
-                try {
-                    Thread.sleep(interval);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                count = count - 1;
+                if (count <= 0) {
+                    continued = false;
+                } else {
+                    ThreadUtils.sleepSafe(interval);
                 }
             }
         }

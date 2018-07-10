@@ -22,11 +22,6 @@ public class ElemeMessageListener implements MessageListener<String, String> {
     private ElemeService elemeService;
 
     @KafkaListener(topics = "${eleme.message.topic}")
-    public void listenElemeMessage(String elemeMessage) {
-
-    }
-
-    @KafkaListener(topics = "${eleme.message.topic}")
     @Override
     public void onMessage(ConsumerRecord<String, String> data) {
         String elemeMessage = data.value();
