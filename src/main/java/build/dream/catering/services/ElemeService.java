@@ -3,7 +3,6 @@ package build.dream.catering.services;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.eleme.*;
 import build.dream.catering.tools.PushMessageThread;
-import build.dream.catering.utils.ElemeUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
@@ -92,13 +91,6 @@ public class ElemeService {
 
         // 开始保存饿了么订单
         JSONArray phoneList = messageJsonObject.optJSONArray("phoneList");
-        messageJsonObject.remove("phoneList");
-
-        JSONArray groupsJsonArray = messageJsonObject.optJSONArray("groups");
-        messageJsonObject.remove("groups");
-
-        JSONArray orderActivitiesJsonArray = messageJsonObject.optJSONArray("orderActivities");
-        messageJsonObject.remove("orderActivities");
 
         BigInteger userId = CommonUtils.getServiceSystemUserId();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -201,6 +193,28 @@ public class ElemeService {
         DatabaseHelper.insert(dietOrder);
         BigInteger dietOrderId = dietOrder.getId();
 
+        JSONArray orderActivitiesJsonArray = messageJsonObject.optJSONArray("orderActivities");
+        if (orderActivitiesJsonArray != null) {
+            int orderActivitiesSize = orderActivitiesJsonArray.size();
+            for (int orderActivitiesIndex = 0; orderActivitiesIndex < orderActivitiesSize; orderActivitiesIndex++) {
+                JSONObject elemeActivityJsonObject = orderActivitiesJsonArray.optJSONObject(orderActivitiesIndex);
+                int categoryId = elemeActivityJsonObject.getInt("categoryId");
+                DietOrderActivity dietOrderActivity = DietOrderActivity.builder()
+                        .tenantId(tenantId)
+                        .tenantCode(tenantCode)
+                        .branchId(branchId)
+                        .dietOrderId(dietOrderId)
+                        .activityId(BigInteger.valueOf(elemeActivityJsonObject.getLong("id")))
+                        .activityName(elemeActivityJsonObject.getString("name"))
+                        .activityType(categoryId)
+                        .amount(BigDecimal.valueOf(elemeActivityJsonObject.getDouble("restaurantPart")).abs())
+                        .createUserId(userId)
+                        .lastUpdateUserId(userId)
+                        .build();
+                DatabaseHelper.insert(dietOrderActivity);
+            }
+        }
+
         if (onlinePaid) {
             DietOrderPayment dietOrderPayment = DietOrderPayment.builder()
                     .tenantId(tenantId)
@@ -218,6 +232,7 @@ public class ElemeService {
             DatabaseHelper.insert(dietOrderPayment);
         }
 
+        JSONArray groupsJsonArray = messageJsonObject.optJSONArray("groups");
         DietOrderGroup extraDietOrderGroup = null;
         int groupsSize = groupsJsonArray.size();
         BigInteger packageFeeItemId = BigInteger.valueOf(-70000);
@@ -360,26 +375,6 @@ public class ElemeService {
                     .lastUpdateUserId(userId)
                     .build();
             DatabaseHelper.insert(dietOrderDetail);
-        }
-
-        if (orderActivitiesJsonArray != null) {
-            int orderActivitiesSize = orderActivitiesJsonArray.size();
-            for (int orderActivitiesIndex = 0; orderActivitiesIndex < orderActivitiesSize; orderActivitiesIndex++) {
-                JSONObject elemeActivityJsonObject = orderActivitiesJsonArray.optJSONObject(orderActivitiesIndex);
-                DietOrderActivity dietOrderActivity = DietOrderActivity.builder()
-                        .tenantId(tenantId)
-                        .tenantCode(tenantCode)
-                        .branchId(branchId)
-                        .dietOrderId(dietOrderId)
-                        .activityId(BigInteger.valueOf(elemeActivityJsonObject.getLong("id")))
-                        .activityName(elemeActivityJsonObject.getString("name"))
-                        .activityType(elemeActivityJsonObject.getInt("categoryId"))
-                        .amount(BigDecimal.valueOf(elemeActivityJsonObject.getDouble("restaurantPart")).abs())
-                        .createUserId(userId)
-                        .lastUpdateUserId(userId)
-                        .build();
-                DatabaseHelper.insert(dietOrderActivity);
-            }
         }
         DatabaseHelper.insert(elemeCallbackMessage);
     }
