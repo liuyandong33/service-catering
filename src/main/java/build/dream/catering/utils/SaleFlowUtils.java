@@ -68,11 +68,20 @@ public class SaleFlowUtils {
 
         // 保存订单中整单优惠活动（包括整单优惠，支付促销）的优惠金额
         BigDecimal discountAmount = BigDecimal.ZERO;
-        for (DietOrderActivity dietOrderActivity : dietOrderActivities) {
-            int activityType = dietOrderActivity.getActivityType();
-            if (activityType == 2 || activityType == 4) {
+        int orderType = dietOrder.getOrderType();
+        if (orderType == DietOrderConstants.ORDER_TYPE_SCAN_CODE_ORDER || orderType == DietOrderConstants.ORDER_TYPE_WEI_XIN_ORDER) {
+            for (DietOrderActivity dietOrderActivity : dietOrderActivities) {
+                int activityType = dietOrderActivity.getActivityType();
+                if (activityType == 2 || activityType == 4) {
+                    discountAmount = discountAmount.add(dietOrderActivity.getAmount());
+                }
+            }
+        } else if (orderType == DietOrderConstants.ORDER_TYPE_ELEME_ORDER) {
+            for (DietOrderActivity dietOrderActivity : dietOrderActivities) {
                 discountAmount = discountAmount.add(dietOrderActivity.getAmount());
             }
+        } else if (orderType == DietOrderConstants.ORDER_TYPE_MEI_TUAN_ORDER) {
+
         }
         if (discountAmount.compareTo(BigDecimal.ZERO) > 0) {
             calculateShare(normalDietOrderDetails, discountAmount);

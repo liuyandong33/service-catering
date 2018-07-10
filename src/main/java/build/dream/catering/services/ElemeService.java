@@ -261,8 +261,8 @@ public class ElemeService {
                 JSONObject elemeOrderItemJsonObject = itemsJsonArray.optJSONObject(itemsIndex);
                 JSONArray newSpecsJsonArray = elemeOrderItemJsonObject.optJSONArray("newSpecs");
                 String goodsSpecificationName = "";
-                BigInteger categoryId = Constants.BIGINT_DEFAULT_VALUE;
-                String categoryName = Constants.VARCHAR_DEFAULT_VALUE;
+                BigInteger categoryId = Constants.ELEME_GOODS_CATEGORY_ID;
+                String categoryName = Constants.ELEME_GOODS_CATEGORY_NAME;
                 if (CollectionUtils.isNotEmpty(newSpecsJsonArray)) {
                     goodsSpecificationName = newSpecsJsonArray.getJSONObject(0).getString("value");
                 }
