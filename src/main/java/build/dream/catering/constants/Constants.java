@@ -30,8 +30,10 @@ public class Constants extends build.dream.common.constants.Constants {
 
     public static final String DATA_JOB_CRON_EXPRESSION = "data.job.cron.expression";
 
-    public static Integer GOODS_TYPE_ORDINARY_GOODS = 1;
-    public static Integer GOODS_TYPE_PACKAGE = 2;
+    public static final Integer GOODS_TYPE_ORDINARY_GOODS = 1;
+    public static final Integer GOODS_TYPE_PACKAGE = 2;
+    public static final Integer GOODS_TYPE_DELIVER_FEE = 3;
+    public static final Integer GOODS_TYPE_PACKAGE_FEE = 4;
 
     public static final String KEY_DATA_HANDLE_SIGNATURES = "_data_handle_signatures";
 

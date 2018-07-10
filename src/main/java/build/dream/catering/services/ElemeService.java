@@ -166,6 +166,7 @@ public class ElemeService {
             invoiceType = messageJsonObject.getString("invoiceType");
             invoice = messageJsonObject.getString("invoice");
         }
+        BigDecimal deliverFee = BigDecimal.valueOf(messageJsonObject.getDouble("deliverFee"));
 
         DietOrder dietOrder = DietOrder.builder()
                 .tenantId(tenantId)
@@ -187,7 +188,7 @@ public class ElemeService {
                 .deliveryLatitude(deliveryLatitude)
                 .deliverTime(deliverTime)
                 .activeTime(activeTime)
-                .deliverFee(BigDecimal.valueOf(messageJsonObject.getDouble("deliverFee")))
+                .deliverFee(deliverFee)
                 .telephoneNumber(StringUtils.join(phoneList, ","))
                 .daySerialNumber(messageJsonObject.getString("daySn"))
                 .consignee(messageJsonObject.getString("consignee"))
@@ -217,16 +218,19 @@ public class ElemeService {
             DatabaseHelper.insert(dietOrderPayment);
         }
 
+        DietOrderGroup extraDietOrderGroup = null;
         int groupsSize = groupsJsonArray.size();
         for (int groupsIndex = 0; groupsIndex < groupsSize; groupsIndex++) {
             JSONObject elemeGroupJsonObject = groupsJsonArray.getJSONObject(groupsIndex);
+            String name = elemeGroupJsonObject.getString("name");
+            String type = elemeGroupJsonObject.getString("type");
             DietOrderGroup dietOrderGroup = DietOrderGroup.builder()
                     .tenantId(tenantId)
                     .tenantCode(tenantCode)
                     .branchId(branchId)
                     .dietOrderId(dietOrderId)
-                    .name(elemeGroupJsonObject.getString("name"))
-                    .type(elemeGroupJsonObject.getString("type"))
+                    .name(name)
+                    .type(type)
                     .createUserId(userId)
                     .lastUpdateUserId(userId)
                     .build();
@@ -295,6 +299,50 @@ public class ElemeService {
                     }
                 }
             }
+
+            if (DietOrderConstants.GROUP_TYPE_EXTRA.equals(type)) {
+                extraDietOrderGroup = dietOrderGroup;
+            }
+        }
+
+        if (deliverFee.compareTo(BigDecimal.ZERO) > 0) {
+            if (extraDietOrderGroup == null) {
+                extraDietOrderGroup = DietOrderGroup.builder()
+                        .tenantId(tenantId)
+                        .tenantCode(tenantCode)
+                        .branchId(branchId)
+                        .dietOrderId(dietOrderId)
+                        .name("其他费用")
+                        .type(DietOrderConstants.GROUP_TYPE_EXTRA)
+                        .createUserId(userId)
+                        .lastUpdateUserId(userId)
+                        .build();
+                DatabaseHelper.insert(extraDietOrderGroup);
+            }
+            DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
+                    .tenantId(tenantId)
+                    .tenantCode(tenantCode)
+                    .branchId(branchId)
+                    .dietOrderId(dietOrderId)
+                    .dietOrderGroupId(extraDietOrderGroup.getId())
+                    .goodsType(Constants.GOODS_TYPE_DELIVER_FEE)
+                    .goodsId(Constants.BIG_INTEGER_MINUS_ONE)
+                    .goodsName("配送费")
+                    .goodsSpecificationId(Constants.BIG_INTEGER_MINUS_ONE)
+                    .goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE)
+                    .categoryId(Constants.BIGINT_DEFAULT_VALUE)
+                    .categoryName(Constants.VARCHAR_DEFAULT_VALUE)
+                    .price(deliverFee)
+                    .flavorIncrease(Constants.DECIMAL_DEFAULT_VALUE)
+                    .quantity(BigDecimal.ONE)
+                    .totalAmount(deliverFee)
+                    .discountAmount(BigDecimal.ZERO)
+                    .payableAmount(BigDecimal.ZERO)
+                    .paidAmount(BigDecimal.ZERO)
+                    .createUserId(userId)
+                    .lastUpdateUserId(userId)
+                    .build();
+            DatabaseHelper.insert(dietOrderDetail);
         }
 
         if (orderActivitiesJsonArray != null) {
