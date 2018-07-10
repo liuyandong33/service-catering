@@ -11,6 +11,7 @@ import build.dream.common.erp.catering.domains.ElemeCallbackMessage;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.CommonUtils;
 import build.dream.common.utils.ConfigurationUtils;
+import build.dream.common.utils.ThreadUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -240,5 +241,12 @@ public class ElemeController extends BasicController {
             returnValue = e.getMessage();
         }
         return returnValue;
+    }
+
+    @RequestMapping(value = "/demo")
+    @ResponseBody
+    public String demo() {
+        ThreadUtils.sleepSafe(3000);
+        return Constants.SUCCESS;
     }
 }
