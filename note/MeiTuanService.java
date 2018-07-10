@@ -9,13 +9,13 @@ import build.dream.catering.tools.PushMessageThread;
 import build.dream.catering.utils.MeiTuanUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.beans.WebResponse;
-import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +43,7 @@ public class MeiTuanService {
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
-        ValidateUtils.notNull(branch, "门店不存在！");
+        Validate.notNull(branch, "门店不存在！");
         String meiTuanErpServiceUrl = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_ERP_SERVICE_URL);
         String meiTuanDeveloperId = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_DEVELOPER_ID);
         String meiTuanSignKey = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_SIGN_KEY);
@@ -70,9 +70,27 @@ public class MeiTuanService {
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleOrderEffectiveCallback(JSONObject callbackParametersJsonObject, String uuid, Integer type) throws IOException {
+    public ApiRest handleOrderEffectiveCallback(JSONObject callbackParametersJsonObject, String uuid, Integer type) throws IOException {
+        String developerId = callbackParametersJsonObject.getString("developerId");
         String ePoiId = callbackParametersJsonObject.getString("ePoiId");
+        String sign = callbackParametersJsonObject.getString("sign");
         JSONObject orderJsonObject = callbackParametersJsonObject.getJSONObject("order");
+        JSONArray detailJsonArray = orderJsonObject.optJSONArray("detail");
+        JSONArray extrasJsonArray = orderJsonObject.optJSONArray("extras");
+        JSONObject poiReceiveDetailJsonObject = orderJsonObject.optJSONObject("poiReceiveDetail");
+        long ctime = orderJsonObject.optLong("ctime");
+        long utime = orderJsonObject.optLong("utime");
+        long deliveryTime = orderJsonObject.optLong("deliveryTime");
+        int hasInvoiced = orderJsonObject.optInt("hasInvoiced");
+        int isThirdShipping = orderJsonObject.optInt("isThirdShipping");
+        orderJsonObject.remove("detail");
+        orderJsonObject.remove("extras");
+        orderJsonObject.remove("poiReceiveDetail");
+        orderJsonObject.remove("ctime");
+        orderJsonObject.remove("utime");
+        orderJsonObject.remove("deliveryTime");
+        orderJsonObject.remove("hasInvoiced");
+        orderJsonObject.remove("isThirdShipping");
 
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
         BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
@@ -81,132 +99,136 @@ public class MeiTuanService {
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
-        ValidateUtils.notNull(branch, "门店不存在！");
+        Validate.notNull(branch, "门店不存在！");
 
-        String tenantCode = branch.getTenantCode();
+        MeiTuanOrder meiTuanOrder = GsonUtils.fromJson(orderJsonObject.toString(), MeiTuanOrder.class);
+        Calendar ctimeCalendar = Calendar.getInstance();
+        ctimeCalendar.setTimeInMillis(ctime * 1000);
+        meiTuanOrder.setCtime(ctimeCalendar.getTime());
 
-        int status = orderJsonObject.getInt("status");
-        int orderStatus = Constants.INT_DEFAULT_VALUE;
-        if (status == 1) {
-            orderStatus = DietOrderConstants.ORDER_STATUS_PENDING;
-        } else if (status == 2) {
-            orderStatus = DietOrderConstants.ORDER_STATUS_UNPROCESSED;
-        } else if (status == 4) {
-            orderStatus = DietOrderConstants.ORDER_STATUS_VALID;
-        } else if (status == 8) {
-            orderStatus = DietOrderConstants.ORDER_STATUS_SETTLED;
-        } else if (status == 9) {
-            orderStatus = DietOrderConstants.ORDER_STATUS_INVALID;
-        }
+        Calendar utimeCalendar = Calendar.getInstance();
+        utimeCalendar.setTimeInMillis(utime * 1000);
+        meiTuanOrder.setUtime(utimeCalendar.getTime());
 
-        int payType = orderJsonObject.getInt("payType");
-        int payStatus = Constants.INT_DEFAULT_VALUE;
-        int paidType = Constants.INT_DEFAULT_VALUE;
-        if (payType == 1) {
-            payStatus = DietOrderConstants.PAY_STATUS_UNPAID;
-            paidType = Constants.PAID_TYPE_ALIPAY;
-        } else if (payType == 2) {
-            payStatus = DietOrderConstants.PAY_STATUS_PAID;
-        }
-
-        int refundStatus = Constants.INT_DEFAULT_VALUE;
-        BigDecimal totalAmount = Constants.DECIMAL_DEFAULT_VALUE;
-        BigDecimal discountAmount = Constants.DECIMAL_DEFAULT_VALUE;
-        BigDecimal payableAmount = Constants.DECIMAL_DEFAULT_VALUE;
-        BigDecimal paidAmount = Constants.DECIMAL_DEFAULT_VALUE;
-        String caution = orderJsonObject.getString("caution");
-
-        long deliveryTime = orderJsonObject.optLong("deliveryTime");
         Calendar deliveryTimeCalendar = Calendar.getInstance();
-        deliveryTimeCalendar.setTimeInMillis(deliveryTime * 1000);
+        deliveryTimeCalendar.setTimeInMillis(deliveryTime);
+        meiTuanOrder.setDeliveryTime(deliveryTimeCalendar.getTime());
+        meiTuanOrder.setHasInvoiced(hasInvoiced == 1);
+        meiTuanOrder.setThirdShipping(isThirdShipping == 1);
+        meiTuanOrder.setTenantId(tenantId);
+        meiTuanOrder.setTenantCode(branch.getTenantCode());
+        meiTuanOrder.setBranchId(branchId);
+        meiTuanOrder.setBranchCode(branch.getCode());
 
-        long orderSendTime = orderJsonObject.getLong("orderSendTime");
-        Calendar orderSendTimeCalendar = Calendar.getInstance();
-        orderSendTimeCalendar.setTimeInMillis(orderSendTime * 1000);
+        BigInteger userId = BigInteger.TEN;
+        meiTuanOrder.setCreateUserId(userId);
+        meiTuanOrder.setLastUpdateUserId(userId);
+        meiTuanOrder.setLastUpdateRemark("处理美团订单生效回调，保存新订单！");
+        DatabaseHelper.insert(meiTuanOrder);
 
-        BigDecimal shippingFee = BigDecimal.valueOf(orderJsonObject.getDouble("shippingFee"));
-
-        int hasInvoiced = orderJsonObject.optInt("hasInvoiced");
-        boolean invoiced = false;
-        String invoiceType = Constants.VARCHAR_DEFAULT_VALUE;
-        String invoice = Constants.VARCHAR_DEFAULT_VALUE;
-        if (hasInvoiced == 0) {
-            invoiced = false;
-        } else {
-            invoiced = true;
-            invoice = orderJsonObject.getString("invoiceTitle");
-        }
-
-        BigInteger userId = CommonUtils.getServiceSystemUserId();
-        DietOrder dietOrder = DietOrder.builder()
-                .tenantId(tenantId)
-                .tenantCode(tenantCode)
-                .branchId(branchId)
-                .orderNumber("M" + orderJsonObject.get("orderId"))
-                .orderType(DietOrderConstants.ORDER_TYPE_MEI_TUAN_ORDER)
-                .orderStatus(orderStatus)
-                .payStatus(payStatus)
-                .refundStatus(refundStatus)
-                .totalAmount(totalAmount)
-                .discountAmount(discountAmount)
-                .payableAmount(payableAmount)
-                .paidAmount(paidAmount)
-                .paidType(paidType)
-                .remark(StringUtils.isNotBlank(caution) ? caution : Constants.VARCHAR_DEFAULT_VALUE)
-                .deliveryAddress(orderJsonObject.getString("recipientAddress"))
-                .deliveryLongitude(orderJsonObject.getString("longitude"))
-                .deliveryLatitude(orderJsonObject.getString("latitude"))
-                .deliverTime(deliveryTimeCalendar.getTime())
-                .activeTime(orderSendTimeCalendar.getTime())
-                .deliverFee(shippingFee)
-                .telephoneNumber(orderJsonObject.getString("recipientPhone"))
-                .daySerialNumber(orderJsonObject.getString("daySeq"))
-                .consignee(orderJsonObject.getString("recipientPhone"))
-                .invoiced(invoiced)
-                .invoiceType(invoiceType)
-                .invoice(invoice)
-                .createUserId(userId)
-                .lastUpdateUserId(userId)
-                .lastUpdateRemark("接受美团订单生效回调，保存订单信息！")
-                .build();
-        DatabaseHelper.insert(dietOrder);
-        BigInteger dietOrderId = dietOrder.getId();
-
-//        JSONArray extrasJsonArray = orderJsonObject.optJSONArray("extras");
-//        JSONObject poiReceiveDetailJsonObject = orderJsonObject.optJSONObject("poiReceiveDetail");
-        JSONArray detailJsonArray = orderJsonObject.optJSONArray("detail");
-        int detailSize = detailJsonArray.size();
-
-        Map<Integer, DietOrderGroup> dietOrderGroupMap = new HashMap<Integer, DietOrderGroup>();
-        for (int index = 0; index < detailSize; index++) {
+        BigDecimal hundred = NumberUtils.createBigDecimal("100");
+        int detailJsonArraySize = detailJsonArray.size();
+        for (int index = 0; index < detailJsonArraySize; index++) {
             JSONObject detailJsonObject = detailJsonArray.getJSONObject(index);
-            int cartId = detailJsonObject.getInt("cart_id");
-            DietOrderGroup dietOrderGroup = dietOrderGroupMap.get(cartId);
-            if (dietOrderGroup == null) {
-                dietOrderGroup = DietOrderGroup.builder()
-                        .tenantId(tenantId)
-                        .tenantCode(tenantCode)
-                        .branchId(branchId)
-                        .name(cartId - 1 + "号口袋")
-                        .type(DietOrderConstants.GROUP_TYPE_NORMAL)
-                        .createUserId(userId)
-                        .lastUpdateUserId(userId)
-                        .build();
-                DatabaseHelper.insert(dietOrderGroup);
+            MeiTuanOrderDetail meiTuanOrderDetail = new MeiTuanOrderDetail();
+            meiTuanOrderDetail.setMeiTuanOrderId(meiTuanOrder.getId());
+            meiTuanOrderDetail.setAppFoodCode(detailJsonObject.optString("app_food_code"));
+            meiTuanOrderDetail.setBoxNum(detailJsonObject.optInt("box_num"));
+            meiTuanOrderDetail.setBoxPrice(BigDecimal.valueOf(detailJsonObject.optDouble("box_price")));
+            meiTuanOrderDetail.setFoodName(detailJsonObject.optString("food_name"));
+            meiTuanOrderDetail.setPrice(BigDecimal.valueOf(detailJsonObject.optDouble("price")));
+            meiTuanOrderDetail.setSkuId(detailJsonObject.optString("sku_id"));
+            meiTuanOrderDetail.setQuantity(detailJsonObject.optInt("quantity"));
+            meiTuanOrderDetail.setUnit(detailJsonObject.optString("unit"));
+            meiTuanOrderDetail.setFoodDiscount(BigDecimal.valueOf(detailJsonObject.optDouble("food_discount")));
+            meiTuanOrderDetail.setFoodProperty(detailJsonObject.optString("food_property"));
+            if (detailJsonObject.has("foodShareFeeChargeByPoi")) {
+                meiTuanOrderDetail.setFoodShareFeeChargeByPoi(BigDecimal.valueOf(detailJsonObject.optDouble("foodShareFeeChargeByPoi")).divide(hundred));
             }
-            DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
-                    .tenantId(tenantId)
-                    .tenantCode(tenantCode)
-                    .branchId(branchId)
-                    .dietOrderId(dietOrderId)
-                    .dietOrderGroupId(dietOrderGroup.getId())
-                    .goodsType(Constants.GOODS_TYPE_ORDINARY_GOODS)
-                    .goodsId(Constants.BIGINT_DEFAULT_VALUE)
-                    .goodsName(detailJsonObject.getString("food_name"))
-                    .goodsSpecificationId(Constants.BIGINT_DEFAULT_VALUE)
-                    .goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE)
-                    .build();
+            meiTuanOrderDetail.setCartId(detailJsonObject.optInt("cart_id"));
+            meiTuanOrderDetail.setCreateUserId(userId);
+            meiTuanOrderDetail.setLastUpdateUserId(userId);
+            meiTuanOrderDetail.setLastUpdateRemark("处理美团订单生效回调，保存订单明细！");
+            DatabaseHelper.insert(meiTuanOrderDetail);
         }
+
+        int extrasJsonArraySize = extrasJsonArray.size();
+        for (int index = 0; index < extrasJsonArraySize; index++) {
+            JSONObject extraJsonObject = extrasJsonArray.getJSONObject(index);
+            MeiTuanOrderExtra meiTuanOrderExtra = new MeiTuanOrderExtra();
+            meiTuanOrderExtra.setMeiTuanOrderId(meiTuanOrder.getId());
+            if (extraJsonObject.has("mt_charge")) {
+                meiTuanOrderExtra.setMtCharge(BigDecimal.valueOf(extraJsonObject.getDouble("mt_charge")));
+            }
+
+            if (extraJsonObject.has("poi_charge")) {
+                meiTuanOrderExtra.setPoiCharge(BigDecimal.valueOf(extraJsonObject.getDouble("poi_charge")));
+            }
+
+            if (extraJsonObject.has("reduce_fee")) {
+                meiTuanOrderExtra.setReduceFee(BigDecimal.valueOf(extraJsonObject.getDouble("reduce_fee")));
+            }
+            meiTuanOrderExtra.setRemark(extraJsonObject.optString("remark"));
+            meiTuanOrderExtra.setType(extraJsonObject.optInt("type"));
+            meiTuanOrderExtra.setCreateUserId(userId);
+            meiTuanOrderExtra.setLastUpdateUserId(userId);
+            meiTuanOrderExtra.setLastUpdateRemark("处理美团订单生效回调，保存订单扩展信息！");
+            DatabaseHelper.insert(meiTuanOrderExtra);
+        }
+
+        MeiTuanOrderPoiReceiveDetail meiTuanOrderPoiReceiveDetail = new MeiTuanOrderPoiReceiveDetail();
+        meiTuanOrderPoiReceiveDetail.setMeiTuanOrderId(meiTuanOrder.getId());
+        meiTuanOrderPoiReceiveDetail.setFoodShareFeeChargeByPoi(BigDecimal.valueOf(poiReceiveDetailJsonObject.optDouble("foodShareFeeChargeByPoi")).divide(hundred));
+        meiTuanOrderPoiReceiveDetail.setLogisticsFee(BigDecimal.valueOf(poiReceiveDetailJsonObject.optDouble("logisticsFee")).divide(hundred));
+        meiTuanOrderPoiReceiveDetail.setOnlinePayment(BigDecimal.valueOf(poiReceiveDetailJsonObject.optDouble("onlinePayment")).divide(hundred));
+        meiTuanOrderPoiReceiveDetail.setWmPoiReceiveCent(BigDecimal.valueOf(poiReceiveDetailJsonObject.optDouble("wmPoiReceiveCent")).divide(hundred));
+        meiTuanOrderPoiReceiveDetail.setCreateUserId(userId);
+        meiTuanOrderPoiReceiveDetail.setLastUpdateUserId(userId);
+        meiTuanOrderPoiReceiveDetail.setLastUpdateRemark("处理美团订单生效回调，保存商家对账信息！");
+        DatabaseHelper.insert(meiTuanOrderPoiReceiveDetail);
+
+        JSONArray actOrderChargeByMtJsonArray = poiReceiveDetailJsonObject.optJSONArray("actOrderChargeByMt");
+        if (actOrderChargeByMtJsonArray != null) {
+            int size = actOrderChargeByMtJsonArray.size();
+            for (int index = 0; index < size; index++) {
+                JSONObject actOrderChargeByMtJsonObject = actOrderChargeByMtJsonArray.getJSONObject(index);
+                ActOrderChargeByMt actOrderChargeByMt = new ActOrderChargeByMt();
+                actOrderChargeByMt.setMeiTuanOrderPoiReceiveDetailId(meiTuanOrderPoiReceiveDetail.getId());
+                actOrderChargeByMt.setComment(actOrderChargeByMtJsonObject.optString("comment"));
+                actOrderChargeByMt.setFeeTypeDesc(actOrderChargeByMtJsonObject.optString("feeTypeDesc"));
+                actOrderChargeByMt.setFeeTypeId(BigInteger.valueOf(actOrderChargeByMtJsonObject.optLong("feeTypeId")));
+                actOrderChargeByMt.setMoneyCent(BigDecimal.valueOf(actOrderChargeByMtJsonObject.optDouble("moneyCent")).divide(hundred));
+                actOrderChargeByMt.setCreateUserId(userId);
+                actOrderChargeByMt.setLastUpdateUserId(userId);
+                actOrderChargeByMt.setLastUpdateRemark("处理美团订单生效回调，保存美团承担明细！");
+                DatabaseHelper.insert(actOrderChargeByMt);
+            }
+        }
+
+        JSONArray actOrderChargeByPoiJsonArray = poiReceiveDetailJsonObject.optJSONArray("actOrderChargeByPoi");
+        if (actOrderChargeByPoiJsonArray != null) {
+            int size = actOrderChargeByPoiJsonArray.size();
+            for (int index = 0; index < size; index++) {
+                JSONObject actOrderChargeByPoiJsonObject = actOrderChargeByPoiJsonArray.getJSONObject(index);
+                ActOrderChargeByPoi actOrderChargeByPoi = new ActOrderChargeByPoi();
+                actOrderChargeByPoi.setMeiTuanOrderPoiReceiveDetailId(meiTuanOrderPoiReceiveDetail.getId());
+                actOrderChargeByPoi.setComment(actOrderChargeByPoiJsonObject.optString("comment"));
+                actOrderChargeByPoi.setFeeTypeDesc(actOrderChargeByPoiJsonObject.optString("feeTypeDesc"));
+                actOrderChargeByPoi.setFeeTypeId(BigInteger.valueOf(actOrderChargeByPoiJsonObject.optLong("feeTypeId")));
+                actOrderChargeByPoi.setMoneyCent(BigDecimal.valueOf(actOrderChargeByPoiJsonObject.optDouble("moneyCent")).divide(hundred));
+                actOrderChargeByPoi.setCreateUserId(userId);
+                actOrderChargeByPoi.setLastUpdateUserId(userId);
+                actOrderChargeByPoi.setLastUpdateRemark("处理美团订单生效回调，保存美团承担明细！");
+                DatabaseHelper.insert(actOrderChargeByPoi);
+            }
+        }
+//        publishMeiTuanOrderMessage(meiTuanOrder.getTenantCode(), meiTuanOrder.getBranchCode(), meiTuanOrder.getId(), 1);
+        pushMeiTuanMessage(tenantId, branchId, meiTuanOrder.getId(), type, uuid, 5, 600000);
+
+        ApiRest apiRest = new ApiRest();
+        apiRest.setMessage("美团订单生效回调处理成功！");
+        apiRest.setSuccessful(true);
+        return apiRest;
     }
 
     /**
@@ -303,14 +325,14 @@ public class MeiTuanService {
         branchSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         branchSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         Branch branch = DatabaseHelper.find(Branch.class, branchSearchModel);
-        ValidateUtils.notNull(branch, "门店不存在！");
+        Validate.notNull(branch, "门店不存在！");
 
         SearchModel meiTuanOrderSearchModel = new SearchModel(true);
         meiTuanOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         meiTuanOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         meiTuanOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, orderId);
         MeiTuanOrder meiTuanOrder = DatabaseHelper.find(MeiTuanOrder.class, meiTuanOrderSearchModel);
-        ValidateUtils.notNull(meiTuanOrder, "订单不存在！");
+        Validate.notNull(meiTuanOrder, "订单不存在！");
         return meiTuanOrder;
     }
 
@@ -392,7 +414,7 @@ public class MeiTuanService {
         meiTuanOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainMeiTuanOrderModel.getBranchId());
         meiTuanOrderSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainMeiTuanOrderModel.getMeiTuanOrderId());
         MeiTuanOrder meiTuanOrder = DatabaseHelper.find(MeiTuanOrder.class, meiTuanOrderSearchModel);
-        ValidateUtils.notNull(meiTuanOrder, "订单不存在！");
+        Validate.notNull(meiTuanOrder, "订单不存在！");
 
         SearchModel meiTuanOrderDetailSearchModel = new SearchModel(true);
         meiTuanOrderDetailSearchModel.addSearchCondition("mei_tuan_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, meiTuanOrder.getId());
@@ -508,7 +530,7 @@ public class MeiTuanService {
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
-        ValidateUtils.notNull(branch, "门店不存在！");
+        Validate.notNull(branch, "门店不存在！");
 
         branch.setAppAuthToken(appAuthToken);
         branch.setPoiId(poiId);
@@ -535,7 +557,7 @@ public class MeiTuanService {
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
-        ValidateUtils.notNull(branch, "门店不存在！");
+        Validate.notNull(branch, "门店不存在！");
 
         boolean isBinding = StringUtils.isNotBlank(branch.getAppAuthToken()) && StringUtils.isNotBlank(branch.getPoiId()) && StringUtils.isNotBlank(branch.getPoiName());
         Map<String, Object> data = new HashMap<String, Object>();
@@ -552,7 +574,7 @@ public class MeiTuanService {
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
-        ValidateUtils.notNull(branch, "门店不存在！");
+        Validate.notNull(branch, "门店不存在！");
 
         String charset = Constants.CHARSET_NAME_UTF_8;
         String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
