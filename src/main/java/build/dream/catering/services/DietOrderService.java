@@ -468,7 +468,7 @@ public class DietOrderService {
                 DatabaseHelper.insert(extraDietOrderGroup);
             }
             dietOrderTotalAmount = dietOrderTotalAmount.add(deliverFee);
-            DietOrderDetail dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(extraDietOrderGroup.getId()).goodsType(Constants.GOODS_TYPE_DELIVER_FEE).goodsId(Constants.BIG_INTEGER_MINUS_ONE).goodsName("配送费").goodsSpecificationId(Constants.BIG_INTEGER_MINUS_ONE).goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE).categoryId(Constants.BIG_INTEGER_MINUS_ONE).categoryName("配送费").price(deliverFee).flavorIncrease(BigDecimal.ZERO).quantity(BigDecimal.ONE).totalAmount(deliverFee).discountAmount(BigDecimal.ZERO).payableAmount(deliverFee).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
+            DietOrderDetail dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(extraDietOrderGroup.getId()).goodsType(Constants.GOODS_TYPE_DELIVER_FEE).goodsId(Constants.BIG_INTEGER_MINUS_ONE).goodsName("配送费").goodsSpecificationId(Constants.BIG_INTEGER_MINUS_ONE).goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE).categoryId(Constants.FICTITIOUS_GOODS_CATEGORY_ID).categoryName(Constants.FICTITIOUS_GOODS_CATEGORY_NAME).price(deliverFee).flavorIncrease(BigDecimal.ZERO).quantity(BigDecimal.ONE).totalAmount(deliverFee).discountAmount(BigDecimal.ZERO).payableAmount(deliverFee).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
             dietOrderDetails.add(dietOrderDetail);
         }
 
@@ -478,7 +478,7 @@ public class DietOrderService {
                 DatabaseHelper.insert(extraDietOrderGroup);
             }
             dietOrderTotalAmount = dietOrderTotalAmount.add(packageFee);
-            DietOrderDetail dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(extraDietOrderGroup.getId()).goodsType(Constants.GOODS_TYPE_PACKAGE_FEE).goodsId(Constants.BIG_INTEGER_MINUS_TWO).goodsName("打包费").goodsSpecificationId(Constants.BIG_INTEGER_MINUS_TWO).goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE).categoryId(Constants.BIG_INTEGER_MINUS_ONE).categoryName("打包费").price(packageFee).flavorIncrease(BigDecimal.ZERO).quantity(BigDecimal.ONE).totalAmount(packageFee).discountAmount(BigDecimal.ZERO).payableAmount(packageFee).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
+            DietOrderDetail dietOrderDetail = DietOrderDetail.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).dietOrderGroupId(extraDietOrderGroup.getId()).goodsType(Constants.GOODS_TYPE_PACKAGE_FEE).goodsId(Constants.BIG_INTEGER_MINUS_TWO).goodsName("打包费").goodsSpecificationId(Constants.BIG_INTEGER_MINUS_TWO).goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE).categoryId(Constants.FICTITIOUS_GOODS_CATEGORY_ID).categoryName(Constants.FICTITIOUS_GOODS_CATEGORY_NAME).price(packageFee).flavorIncrease(BigDecimal.ZERO).quantity(BigDecimal.ONE).totalAmount(packageFee).discountAmount(BigDecimal.ZERO).payableAmount(packageFee).paidAmount(BigDecimal.ZERO).createUserId(userId).lastUpdateUserId(userId).build();
             dietOrderDetails.add(dietOrderDetail);
         }
 

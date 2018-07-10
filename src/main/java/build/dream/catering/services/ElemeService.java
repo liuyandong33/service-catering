@@ -220,6 +220,8 @@ public class ElemeService {
 
         DietOrderGroup extraDietOrderGroup = null;
         int groupsSize = groupsJsonArray.size();
+        BigInteger packageFeeItemId = BigInteger.valueOf(-70000);
+        BigInteger packageFeeSkuId = Constants.BIG_INTEGER_MINUS_ONE;
         for (int groupsIndex = 0; groupsIndex < groupsSize; groupsIndex++) {
             JSONObject elemeGroupJsonObject = groupsJsonArray.getJSONObject(groupsIndex);
             String name = elemeGroupJsonObject.getString("name");
@@ -249,19 +251,16 @@ public class ElemeService {
                 if (CollectionUtils.isNotEmpty(newSpecsJsonArray)) {
                     goodsSpecificationName = newSpecsJsonArray.getJSONObject(0).getString("value");
                 }
-                DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
+
+                DietOrderDetail.Builder dietOrderDetailBuilder = DietOrderDetail.builder()
                         .tenantId(tenantId)
                         .tenantCode(tenantCode)
                         .branchId(branchId)
                         .dietOrderId(dietOrderId)
                         .dietOrderGroupId(dietOrderGroupId)
                         .goodsType(Constants.GOODS_TYPE_ORDINARY_GOODS)
-                        .goodsId(BigInteger.valueOf(elemeOrderItemJsonObject.getLong("id")))
                         .goodsName(elemeOrderItemJsonObject.getString("name"))
-                        .goodsSpecificationId(BigInteger.valueOf(elemeOrderItemJsonObject.getLong("skuId")))
                         .goodsSpecificationName(goodsSpecificationName)
-                        .categoryId(categoryId)
-                        .categoryName(categoryName)
                         .price(BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("price")))
                         .flavorIncrease(BigDecimal.ZERO)
                         .quantity(BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("quantity")))
@@ -270,8 +269,26 @@ public class ElemeService {
                         .payableAmount(BigDecimal.ZERO)
                         .paidAmount(BigDecimal.ZERO)
                         .createUserId(userId)
-                        .lastUpdateUserId(userId)
-                        .build();
+                        .lastUpdateUserId(userId);
+
+                BigInteger id = BigInteger.valueOf(elemeOrderItemJsonObject.getLong("id"));
+                BigInteger skuId = BigInteger.valueOf(elemeOrderItemJsonObject.getLong("skuId"));
+                boolean isPackageFee = packageFeeItemId.compareTo(id) == 0 && packageFeeSkuId.compareTo(skuId) == 0;
+
+                DietOrderDetail dietOrderDetail = null;
+                if (isPackageFee) {
+                    dietOrderDetail = dietOrderDetailBuilder.goodsId(Constants.BIG_INTEGER_MINUS_TWO)
+                            .goodsSpecificationId(Constants.BIG_INTEGER_MINUS_TWO)
+                            .categoryId(Constants.FICTITIOUS_GOODS_CATEGORY_ID)
+                            .categoryName(Constants.FICTITIOUS_GOODS_CATEGORY_NAME)
+                            .build();
+                } else {
+                    dietOrderDetail = dietOrderDetailBuilder.goodsId(id)
+                            .goodsSpecificationId(skuId)
+                            .categoryId(categoryId)
+                            .categoryName(categoryName)
+                            .build();
+                }
                 DatabaseHelper.insert(dietOrderDetail);
 
                 BigInteger dietOrderDetailId = dietOrderDetail.getId();
@@ -330,8 +347,8 @@ public class ElemeService {
                     .goodsName("配送费")
                     .goodsSpecificationId(Constants.BIG_INTEGER_MINUS_ONE)
                     .goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE)
-                    .categoryId(Constants.BIGINT_DEFAULT_VALUE)
-                    .categoryName(Constants.VARCHAR_DEFAULT_VALUE)
+                    .categoryId(Constants.FICTITIOUS_GOODS_CATEGORY_ID)
+                    .categoryName(Constants.FICTITIOUS_GOODS_CATEGORY_NAME)
                     .price(deliverFee)
                     .flavorIncrease(Constants.DECIMAL_DEFAULT_VALUE)
                     .quantity(BigDecimal.ONE)
