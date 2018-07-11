@@ -15,7 +15,6 @@ import build.dream.common.utils.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.stereotype.Service;
@@ -398,40 +397,54 @@ public class MeiTuanService {
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleOrderCancelCallback(JSONObject callbackParametersJsonObject, String uuid, int type) throws IOException {
+    public void handleOrderCancelCallback(JSONObject callbackParametersJsonObject, String uuid, int type) throws IOException {
         String developerId = callbackParametersJsonObject.getString("developerId");
         String ePoiId = callbackParametersJsonObject.getString("ePoiId");
         String sign = callbackParametersJsonObject.getString("sign");
         JSONObject orderCancelJsonObject = callbackParametersJsonObject.getJSONObject("orderCancel");
         BigInteger orderId = BigInteger.valueOf(orderCancelJsonObject.getLong("orderId"));
 
-        MeiTuanOrder meiTuanOrder = findMeiTuanOrder(ePoiId, orderId);
+        String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
+        BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
+        BigInteger branchId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[1]);
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition("order_number", Constants.SQL_OPERATION_SYMBOL_EQUAL, "M" + orderCancelJsonObject.get("orderId"));
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
+
+        BigInteger userId = CommonUtils.getServiceSystemUserId();
+
+        dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_INVALID);
+        dietOrder.setLastUpdateUserId(userId);
+        dietOrder.setLastUpdateRemark("取消订单！");
+        DatabaseHelper.update(dietOrder);
+
         MeiTuanOrderCancelMessage meiTuanOrderCancelMessage = new MeiTuanOrderCancelMessage();
-        meiTuanOrderCancelMessage.setMeiOrderId(meiTuanOrder.getId());
+        meiTuanOrderCancelMessage.setDietOrderId(dietOrder.getId());
         meiTuanOrderCancelMessage.setDeveloperId(NumberUtils.createBigInteger(developerId));
         meiTuanOrderCancelMessage.setePoiId(ePoiId);
         meiTuanOrderCancelMessage.setSign(sign);
         meiTuanOrderCancelMessage.setOrderId(orderId);
-        meiTuanOrderCancelMessage.setReasonCode(orderCancelJsonObject.optString("reasonCode"));
-        meiTuanOrderCancelMessage.setReason(orderCancelJsonObject.optString("reason"));
 
-        BigInteger userId = CommonUtils.getServiceSystemUserId();
-        // TODO 删除
-        userId = BigInteger.ZERO;
+        String reasonCode = orderCancelJsonObject.optString("reasonCode");
+        if (StringUtils.isNotBlank(reasonCode)) {
+            meiTuanOrderCancelMessage.setReasonCode(reasonCode);
+        }
+
+        String reason = orderCancelJsonObject.optString("reason");
+        if (StringUtils.isNotBlank(reason)) {
+            meiTuanOrderCancelMessage.setReason(reason);
+        }
+
         meiTuanOrderCancelMessage.setCreateUserId(userId);
         meiTuanOrderCancelMessage.setLastUpdateUserId(userId);
         meiTuanOrderCancelMessage.setLastUpdateRemark("处理美团订单取消回调，保存美团订单取消消息！");
         DatabaseHelper.insert(meiTuanOrderCancelMessage);
 
-        meiTuanOrder.setStatus(9);
-        DatabaseHelper.update(meiTuanOrder);
-//        publishMeiTuanOrderMessage(meiTuanOrder.getTenantCode(), meiTuanOrder.getBranchCode(), meiTuanOrder.getId(), 2);
-        pushMeiTuanMessage(meiTuanOrder.getTenantId(), meiTuanOrder.getBranchId(), meiTuanOrder.getId(), type, uuid, 5, 60000);
-
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("美团订单取消回调处理成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        pushMeiTuanMessage(tenantId, branchId, dietOrder.getId(), type, uuid, 5, 60000);
     }
 
     /**
