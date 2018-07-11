@@ -10,6 +10,7 @@ import build.dream.common.api.ApiRest;
 import build.dream.common.beans.WebResponse;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
+import build.dream.common.models.jpush.PushModel;
 import build.dream.common.utils.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -523,37 +524,8 @@ public class MeiTuanService {
             for (Pos pos : poses) {
                 registrationIds.add(pos.getRegistrationId());
             }
-            Map<String, Object> audience = new HashMap<String, Object>();
-            audience.put("registrationId", registrationIds);
-
-            Map<String, Object> extras = new HashMap<String, Object>();
-            extras.put("meiTuanOrderId", meiTuanOrderId);
-            extras.put("type", type);
-            extras.put("uuid", uuid);
-            extras.put("code", Constants.MESSAGE_CODE_MEI_TUAN_MESSAGE);
-
-            Map<String, Object> android = new HashMap<String, Object>();
-            android.put("alert", "");
-            android.put("title", "Send to Android");
-            android.put("builderId", 1);
-            android.put("extras", extras);
-
-            Map<String, Object> ios = new HashMap<String, Object>();
-            ios.put("alert", "Send to Ios");
-            ios.put("sound", "default");
-            ios.put("badge", "+1");
-            ios.put("extras", extras);
-
-            Map<String, Object> notification = new HashMap<String, Object>();
-            notification.put("alert", "饿了么新订单消息！");
-            notification.put("android", android);
-            notification.put("ios", ios);
-
-            Map<String, Object> message = new HashMap<String, Object>();
-            message.put("platform", "all");
-            message.put("audience", audience);
-            message.put("notification", notification);
-            PushMessageThread pushMessageThread = new PushMessageThread(GsonUtils.toJson(message), uuid, count, interval);
+            PushModel pushModel = new PushModel();
+            PushMessageThread pushMessageThread = new PushMessageThread(pushModel, uuid, count, interval);
             new Thread(pushMessageThread).start();
         }
     }
@@ -599,7 +571,7 @@ public class MeiTuanService {
     public ApiRest checkIsBinding(CheckIsBindingModel checkIsBindingModel) {
         BigInteger tenantId = checkIsBindingModel.getTenantId();
         BigInteger branchId = checkIsBindingModel.getBranchId();
-        
+
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
