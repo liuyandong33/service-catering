@@ -71,10 +71,14 @@ public class BranchService {
 
     @Transactional(readOnly = true)
     public ApiRest listBranches(ListBranchesModel listBranchesModel) {
+        BigInteger tenantId = listBranchesModel.getTenantId();
+        String searchString = listBranchesModel.getSearchString();
+        int page = listBranchesModel.getPage();
+        int rows = listBranchesModel.getRows();
         List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
-        searchConditions.add(new SearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, listBranchesModel.getTenantId()));
-        if (StringUtils.isNotBlank(listBranchesModel.getName())) {
-            searchConditions.add(new SearchCondition("name", Constants.SQL_OPERATION_SYMBOL_LIKE, "%" + listBranchesModel.getName() + "%"));
+        searchConditions.add(new SearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
+        if (StringUtils.isNotBlank(searchString)) {
+            searchConditions.add(new SearchCondition("name", Constants.SQL_OPERATION_SYMBOL_LIKE, "%" + searchString + "%"));
         }
 
         SearchModel searchModel = new SearchModel(true);
@@ -84,8 +88,8 @@ public class BranchService {
         if (total > 0) {
             PagedSearchModel pagedSearchModel = new PagedSearchModel(true);
             pagedSearchModel.setSearchConditions(searchConditions);
-            pagedSearchModel.setPage(listBranchesModel.getPage());
-            pagedSearchModel.setRows(listBranchesModel.getRows());
+            pagedSearchModel.setPage(page);
+            pagedSearchModel.setRows(rows);
             branches = DatabaseHelper.findAllPaged(Branch.class, pagedSearchModel);
         }
         Map<String, Object> data = new HashMap<String, Object>();
