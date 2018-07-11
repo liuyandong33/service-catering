@@ -119,7 +119,7 @@ public class ElemeService {
         boolean onlinePaid = messageJsonObject.getBoolean("onlinePaid");
         if (onlinePaid) {
             payStatus = DietOrderConstants.PAY_STATUS_PAID;
-            paidType = Constants.PAID_TYPE_ALIPAY;
+            paidType = Constants.PAID_TYPE_ELM;
             paidAmount = payableAmount;
         } else {
             payStatus = DietOrderConstants.PAY_STATUS_UNPAID;
@@ -221,9 +221,9 @@ public class ElemeService {
                     .tenantCode(tenantCode)
                     .branchId(branchId)
                     .dietOrderId(dietOrderId)
-                    .paymentId(BigInteger.ZERO)
-                    .paymentCode("ELM")
-                    .paymentName("饿了么线上支付")
+                    .paymentId(Constants.ELM_PAYMENT_ID)
+                    .paymentCode(Constants.ELM_PAYMENT_CODE)
+                    .paymentName(Constants.ELM_PAYMENT_NAME)
                     .occurrenceTime(activeTime)
                     .createUserId(userId)
                     .lastUpdateUserId(userId)

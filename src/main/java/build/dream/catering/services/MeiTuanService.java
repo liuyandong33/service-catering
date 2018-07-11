@@ -144,7 +144,7 @@ public class MeiTuanService {
             payStatus = DietOrderConstants.PAY_STATUS_UNPAID;
         } else if (payType == 2) {
             payStatus = DietOrderConstants.PAY_STATUS_PAID;
-            paidType = Constants.PAID_TYPE_ALIPAY;
+            paidType = Constants.PAID_TYPE_MT;
             paidAmount = payableAmount;
         }
 
@@ -216,6 +216,23 @@ public class MeiTuanService {
         DatabaseHelper.insert(dietOrder);
         BigInteger dietOrderId = dietOrder.getId();
 
+        if (payStatus == DietOrderConstants.PAY_STATUS_PAID) {
+            DietOrderPayment dietOrderPayment = DietOrderPayment.builder()
+                    .tenantId(tenantId)
+                    .tenantCode(tenantCode)
+                    .branchId(branchId)
+                    .dietOrderId(dietOrderId)
+                    .paymentId(Constants.MT_PAYMENT_ID)
+                    .paymentCode(Constants.MT_PAYMENT_CODE)
+                    .paymentName(Constants.MT_PAYMENT_NAME)
+                    .occurrenceTime(activeTime)
+                    .createUserId(userId)
+                    .lastUpdateUserId(userId)
+                    .paidAmount(paidAmount)
+                    .build();
+            DatabaseHelper.insert(dietOrderPayment);
+        }
+
         if (CollectionUtils.isNotEmpty(dietOrderActivities)) {
             for (DietOrderActivity dietOrderActivity : dietOrderActivities) {
                 dietOrderActivity.setDietOrderId(dietOrderId);
@@ -258,6 +275,7 @@ public class MeiTuanService {
 
             BigDecimal price = BigDecimal.valueOf(detailJsonObject.getDouble("price"));
             BigDecimal quantity = BigDecimal.valueOf(detailJsonObject.getDouble("quantity"));
+            BigDecimal dietOrderDetailTotalAmount = price.multiply(quantity);
             DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
                     .tenantId(tenantId)
                     .tenantCode(tenantCode)
@@ -274,9 +292,9 @@ public class MeiTuanService {
                     .price(price)
                     .flavorIncrease(Constants.DECIMAL_DEFAULT_VALUE)
                     .quantity(quantity)
-                    .totalAmount(price.multiply(quantity))
+                    .totalAmount(dietOrderDetailTotalAmount)
                     .discountAmount(BigDecimal.ZERO)
-                    .payableAmount(BigDecimal.ZERO)
+                    .payableAmount(dietOrderDetailTotalAmount)
                     .paidAmount(BigDecimal.ZERO)
                     .createUserId(userId)
                     .lastUpdateUserId(userId)
@@ -339,7 +357,7 @@ public class MeiTuanService {
                         .quantity(boxQuantity)
                         .totalAmount(packageFee)
                         .discountAmount(BigDecimal.ZERO)
-                        .payableAmount(BigDecimal.ZERO)
+                        .payableAmount(packageFee)
                         .paidAmount(BigDecimal.ZERO)
                         .createUserId(userId)
                         .lastUpdateUserId(userId)
@@ -365,7 +383,7 @@ public class MeiTuanService {
                         .quantity(BigDecimal.ONE)
                         .totalAmount(shippingFee)
                         .discountAmount(BigDecimal.ZERO)
-                        .payableAmount(BigDecimal.ZERO)
+                        .payableAmount(shippingFee)
                         .paidAmount(BigDecimal.ZERO)
                         .createUserId(userId)
                         .lastUpdateUserId(userId)

@@ -46,6 +46,14 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final BigInteger MEI_TUAN_GOODS_CATEGORY_ID = BIG_INTEGER_MINUS_THREE;
     public static final String MEI_TUAN_GOODS_CATEGORY_NAME = "美团商品";
 
+    public static final BigInteger ELM_PAYMENT_ID = BIG_INTEGER_MINUS_ONE;
+    public static final String ELM_PAYMENT_CODE = "ELM";
+    public static final String ELM_PAYMENT_NAME = "饿了么线上支付";
+
+    public static final BigInteger MT_PAYMENT_ID = BIG_INTEGER_MINUS_TWO;
+    public static final String MT_PAYMENT_CODE = "MT";
+    public static final String MT_PAYMENT_NAME = "美团线上支付";
+
     public static final String KEY_DATA_HANDLE_SIGNATURES = "_data_handle_signatures";
 
     public static final String GOODS_SPECIFICATION_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/goodsSpecificationInfosSchema.json";
