@@ -15,6 +15,7 @@ import build.dream.common.utils.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.stereotype.Service;
@@ -71,8 +72,11 @@ public class MeiTuanService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void handleOrderEffectiveCallback(JSONObject callbackParametersJsonObject, String uuid, Integer type) throws IOException {
-        String ePoiId = callbackParametersJsonObject.getString("ePoiId");
-        JSONObject orderJsonObject = callbackParametersJsonObject.getJSONObject("order");
+//        String ePoiId = callbackParametersJsonObject.getString("ePoiId");
+//        JSONObject orderJsonObject = callbackParametersJsonObject.getJSONObject("order");
+
+        String ePoiId = "1Z1";
+        JSONObject orderJsonObject = callbackParametersJsonObject;
 
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
         BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
@@ -99,30 +103,71 @@ public class MeiTuanService {
             orderStatus = DietOrderConstants.ORDER_STATUS_INVALID;
         }
 
+        BigInteger userId = CommonUtils.getServiceSystemUserId();
+
+        BigDecimal totalAmount = BigDecimal.valueOf(orderJsonObject.getDouble("originalPrice"));
+        BigDecimal discountAmount = Constants.DECIMAL_DEFAULT_VALUE;
+
+        String extras = orderJsonObject.getString("extras");
+        List<DietOrderActivity> dietOrderActivities = new ArrayList<DietOrderActivity>();
+        if (StringUtils.isNotBlank(extras)) {
+            JSONArray extrasJsonArray = JSONArray.fromObject(extras);
+            int extrasSize = extrasJsonArray.size();
+            for (int index = 0; index < extrasSize; index++) {
+                JSONObject extraJsonObject = extrasJsonArray.getJSONObject(index);
+                BigDecimal poiCharge = BigDecimal.valueOf(extraJsonObject.optDouble("poi_charge", 0));
+                if (poiCharge.compareTo(BigDecimal.ZERO) > 0) {
+                    discountAmount = discountAmount.add(poiCharge);
+                    DietOrderActivity dietOrderActivity = DietOrderActivity.builder()
+                            .tenantId(tenantId)
+                            .tenantCode(tenantCode)
+                            .branchId(branchId)
+                            .activityId(Constants.BIGINT_DEFAULT_VALUE)
+                            .activityName(extraJsonObject.getString("remark"))
+                            .activityType(extraJsonObject.getInt("type"))
+                            .amount(poiCharge)
+                            .createUserId(userId)
+                            .lastUpdateUserId(userId)
+                            .build();
+                    dietOrderActivities.add(dietOrderActivity);
+                }
+            }
+        }
+
+        BigDecimal payableAmount = totalAmount.subtract(discountAmount);
+        BigDecimal paidAmount = Constants.DECIMAL_DEFAULT_VALUE;
+
         int payType = orderJsonObject.getInt("payType");
         int payStatus = Constants.INT_DEFAULT_VALUE;
         int paidType = Constants.INT_DEFAULT_VALUE;
         if (payType == 1) {
             payStatus = DietOrderConstants.PAY_STATUS_UNPAID;
-            paidType = Constants.PAID_TYPE_ALIPAY;
         } else if (payType == 2) {
             payStatus = DietOrderConstants.PAY_STATUS_PAID;
+            paidType = Constants.PAID_TYPE_ALIPAY;
+            paidAmount = payableAmount;
         }
 
         int refundStatus = Constants.INT_DEFAULT_VALUE;
-        BigDecimal totalAmount = Constants.DECIMAL_DEFAULT_VALUE;
-        BigDecimal discountAmount = Constants.DECIMAL_DEFAULT_VALUE;
-        BigDecimal payableAmount = Constants.DECIMAL_DEFAULT_VALUE;
-        BigDecimal paidAmount = Constants.DECIMAL_DEFAULT_VALUE;
+
         String caution = orderJsonObject.getString("caution");
 
         long deliveryTime = orderJsonObject.optLong("deliveryTime");
         Calendar deliveryTimeCalendar = Calendar.getInstance();
         deliveryTimeCalendar.setTimeInMillis(deliveryTime * 1000);
 
-        long orderSendTime = orderJsonObject.getLong("orderSendTime");
-        Calendar orderSendTimeCalendar = Calendar.getInstance();
-        orderSendTimeCalendar.setTimeInMillis(orderSendTime * 1000);
+        Date activeTime = null;
+        if (orderJsonObject.has("orderSendTime")) {
+            long orderSendTime = orderJsonObject.getLong("orderSendTime");
+            Calendar orderSendTimeCalendar = Calendar.getInstance();
+            orderSendTimeCalendar.setTimeInMillis(orderSendTime * 1000);
+            activeTime = orderSendTimeCalendar.getTime();
+        } else {
+            long ctime = orderJsonObject.getLong("ctime");
+            Calendar ctimeCalendar = Calendar.getInstance();
+            ctimeCalendar.setTimeInMillis(ctime * 1000);
+            activeTime = ctimeCalendar.getTime();
+        }
 
         BigDecimal shippingFee = BigDecimal.valueOf(orderJsonObject.getDouble("shippingFee"));
 
@@ -137,7 +182,6 @@ public class MeiTuanService {
             invoice = orderJsonObject.getString("invoiceTitle");
         }
 
-        BigInteger userId = CommonUtils.getServiceSystemUserId();
         DietOrder dietOrder = DietOrder.builder()
                 .tenantId(tenantId)
                 .tenantCode(tenantCode)
@@ -157,7 +201,7 @@ public class MeiTuanService {
                 .deliveryLongitude(orderJsonObject.getString("longitude"))
                 .deliveryLatitude(orderJsonObject.getString("latitude"))
                 .deliverTime(deliveryTimeCalendar.getTime())
-                .activeTime(orderSendTimeCalendar.getTime())
+                .activeTime(activeTime)
                 .deliverFee(shippingFee)
                 .telephoneNumber(orderJsonObject.getString("recipientPhone"))
                 .daySerialNumber(orderJsonObject.getString("daySeq"))
@@ -172,12 +216,23 @@ public class MeiTuanService {
         DatabaseHelper.insert(dietOrder);
         BigInteger dietOrderId = dietOrder.getId();
 
-//        JSONArray extrasJsonArray = orderJsonObject.optJSONArray("extras");
+        if (CollectionUtils.isNotEmpty(dietOrderActivities)) {
+            for (DietOrderActivity dietOrderActivity : dietOrderActivities) {
+                dietOrderActivity.setDietOrderId(dietOrderId);
+            }
+            DatabaseHelper.insertAll(dietOrderActivities);
+        }
+
 //        JSONObject poiReceiveDetailJsonObject = orderJsonObject.optJSONObject("poiReceiveDetail");
-        JSONArray detailJsonArray = orderJsonObject.optJSONArray("detail");
+
+        String detail = orderJsonObject.getString("detail");
+        JSONArray detailJsonArray = JSONArray.fromObject(detail);
         int detailSize = detailJsonArray.size();
 
         Map<Integer, DietOrderGroup> dietOrderGroupMap = new HashMap<Integer, DietOrderGroup>();
+        BigDecimal packageFee = BigDecimal.ZERO;
+        BigDecimal boxQuantity = BigDecimal.ZERO;
+
         for (int index = 0; index < detailSize; index++) {
             JSONObject detailJsonObject = detailJsonArray.getJSONObject(index);
             int cartId = detailJsonObject.getInt("cart_id");
@@ -187,13 +242,22 @@ public class MeiTuanService {
                         .tenantId(tenantId)
                         .tenantCode(tenantCode)
                         .branchId(branchId)
-                        .name(cartId - 1 + "号口袋")
+                        .dietOrderId(dietOrderId)
+                        .name(cartId + 1 + "号口袋")
                         .type(DietOrderConstants.GROUP_TYPE_NORMAL)
                         .createUserId(userId)
                         .lastUpdateUserId(userId)
                         .build();
                 DatabaseHelper.insert(dietOrderGroup);
+                dietOrderGroupMap.put(cartId, dietOrderGroup);
             }
+            BigDecimal boxNum = BigDecimal.valueOf(detailJsonObject.getDouble("box_num"));
+            BigDecimal boxPrice = BigDecimal.valueOf(detailJsonObject.getDouble("box_price"));
+            packageFee = packageFee.add(boxNum.multiply(boxPrice));
+            boxQuantity = boxQuantity.add(boxNum);
+
+            BigDecimal price = BigDecimal.valueOf(detailJsonObject.getDouble("price"));
+            BigDecimal quantity = BigDecimal.valueOf(detailJsonObject.getDouble("quantity"));
             DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
                     .tenantId(tenantId)
                     .tenantCode(tenantCode)
@@ -205,7 +269,109 @@ public class MeiTuanService {
                     .goodsName(detailJsonObject.getString("food_name"))
                     .goodsSpecificationId(Constants.BIGINT_DEFAULT_VALUE)
                     .goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE)
+                    .categoryId(Constants.MEI_TUAN_GOODS_CATEGORY_ID)
+                    .categoryName(Constants.MEI_TUAN_GOODS_CATEGORY_NAME)
+                    .price(price)
+                    .flavorIncrease(Constants.DECIMAL_DEFAULT_VALUE)
+                    .quantity(quantity)
+                    .totalAmount(price.multiply(quantity))
+                    .discountAmount(BigDecimal.ZERO)
+                    .payableAmount(BigDecimal.ZERO)
+                    .paidAmount(BigDecimal.ZERO)
+                    .createUserId(userId)
+                    .lastUpdateUserId(userId)
                     .build();
+            DatabaseHelper.insert(dietOrderDetail);
+
+            String foodProperty = detailJsonObject.getString("food_property");
+            if (StringUtils.isNotBlank(foodProperty)) {
+                String[] foodProperties = foodProperty.split(",");
+                List<DietOrderDetailGoodsFlavor> dietOrderDetailGoodsFlavors = new ArrayList<DietOrderDetailGoodsFlavor>();
+                for (String property : foodProperties) {
+                    DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor = DietOrderDetailGoodsFlavor.builder()
+                            .tenantId(tenantId)
+                            .tenantCode(tenantCode)
+                            .branchId(branchId)
+                            .dietOrderId(dietOrderId)
+                            .dietOrderGroupId(dietOrderGroup.getId())
+                            .dietOrderDetailId(dietOrderDetail.getId())
+                            .goodsFlavorGroupId(Constants.BIGINT_DEFAULT_VALUE)
+                            .goodsFlavorName(Constants.VARCHAR_DEFAULT_VALUE)
+                            .goodsFlavorId(Constants.BIGINT_DEFAULT_VALUE)
+                            .goodsFlavorName(property)
+                            .price(Constants.DECIMAL_DEFAULT_VALUE)
+                            .createUserId(userId)
+                            .lastUpdateUserId(userId)
+                            .build();
+                    dietOrderDetailGoodsFlavors.add(dietOrderDetailGoodsFlavor);
+                }
+                DatabaseHelper.insertAll(dietOrderDetailGoodsFlavors);
+            }
+        }
+        if (packageFee.compareTo(BigDecimal.ZERO) > 0 || shippingFee.compareTo(BigDecimal.ZERO) > 0) {
+            DietOrderGroup dietOrderGroup = DietOrderGroup.builder()
+                    .tenantId(tenantId)
+                    .tenantCode(tenantCode)
+                    .branchId(branchId)
+                    .dietOrderId(dietOrderId)
+                    .name("其他费用")
+                    .type(DietOrderConstants.GROUP_TYPE_EXTRA)
+                    .createUserId(userId)
+                    .lastUpdateUserId(userId)
+                    .build();
+            DatabaseHelper.insert(dietOrderGroup);
+            if (packageFee.compareTo(BigDecimal.ZERO) > 0) {
+                DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
+                        .tenantId(tenantId)
+                        .tenantCode(tenantCode)
+                        .branchId(branchId)
+                        .dietOrderId(dietOrderId)
+                        .dietOrderGroupId(dietOrderGroup.getId())
+                        .goodsType(Constants.GOODS_TYPE_PACKAGE_FEE)
+                        .goodsId(Constants.BIG_INTEGER_MINUS_TWO)
+                        .goodsName("餐盒")
+                        .goodsSpecificationId(Constants.BIG_INTEGER_MINUS_TWO)
+                        .goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE)
+                        .categoryId(Constants.FICTITIOUS_GOODS_CATEGORY_ID)
+                        .categoryName(Constants.FICTITIOUS_GOODS_CATEGORY_NAME)
+                        .price(Constants.DECIMAL_DEFAULT_VALUE)
+                        .flavorIncrease(Constants.DECIMAL_DEFAULT_VALUE)
+                        .quantity(boxQuantity)
+                        .totalAmount(packageFee)
+                        .discountAmount(BigDecimal.ZERO)
+                        .payableAmount(BigDecimal.ZERO)
+                        .paidAmount(BigDecimal.ZERO)
+                        .createUserId(userId)
+                        .lastUpdateUserId(userId)
+                        .build();
+                DatabaseHelper.insert(dietOrderDetail);
+            }
+            if (shippingFee.compareTo(BigDecimal.ZERO) > 0) {
+                DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
+                        .tenantId(tenantId)
+                        .tenantCode(tenantCode)
+                        .branchId(branchId)
+                        .dietOrderId(dietOrderId)
+                        .dietOrderGroupId(dietOrderGroup.getId())
+                        .goodsType(Constants.GOODS_TYPE_DELIVER_FEE)
+                        .goodsId(Constants.BIG_INTEGER_MINUS_ONE)
+                        .goodsName("配送费")
+                        .goodsSpecificationId(Constants.BIG_INTEGER_MINUS_ONE)
+                        .goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE)
+                        .categoryId(Constants.FICTITIOUS_GOODS_CATEGORY_ID)
+                        .categoryName(Constants.FICTITIOUS_GOODS_CATEGORY_NAME)
+                        .price(shippingFee)
+                        .flavorIncrease(Constants.DECIMAL_DEFAULT_VALUE)
+                        .quantity(BigDecimal.ONE)
+                        .totalAmount(shippingFee)
+                        .discountAmount(BigDecimal.ZERO)
+                        .payableAmount(BigDecimal.ZERO)
+                        .paidAmount(BigDecimal.ZERO)
+                        .createUserId(userId)
+                        .lastUpdateUserId(userId)
+                        .build();
+                DatabaseHelper.insert(dietOrderDetail);
+            }
         }
     }
 
