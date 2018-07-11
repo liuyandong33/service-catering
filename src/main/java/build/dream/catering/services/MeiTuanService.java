@@ -3,7 +3,6 @@ package build.dream.catering.services;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.meituan.CheckIsBindingModel;
 import build.dream.catering.models.meituan.GenerateBindingStoreLinkModel;
-import build.dream.catering.models.meituan.ObtainMeiTuanOrderModel;
 import build.dream.catering.models.meituan.QueryPoiInfoModel;
 import build.dream.catering.tools.PushMessageThread;
 import build.dream.catering.utils.MeiTuanUtils;
@@ -147,7 +146,7 @@ public class MeiTuanService {
             paidAmount = payableAmount;
         }
 
-        int refundStatus = Constants.INT_DEFAULT_VALUE;
+        int refundStatus = DietOrderConstants.REFUND_STATUS_NO_REFUND;
 
         String caution = orderJsonObject.getString("caution");
 
@@ -422,8 +421,10 @@ public class MeiTuanService {
         dietOrder.setLastUpdateRemark("取消订单！");
         DatabaseHelper.update(dietOrder);
 
+        BigInteger dietOrderId = dietOrder.getId();
+
         MeiTuanOrderCancelMessage meiTuanOrderCancelMessage = new MeiTuanOrderCancelMessage();
-        meiTuanOrderCancelMessage.setDietOrderId(dietOrder.getId());
+        meiTuanOrderCancelMessage.setDietOrderId(dietOrderId);
         meiTuanOrderCancelMessage.setDeveloperId(NumberUtils.createBigInteger(developerId));
         meiTuanOrderCancelMessage.setePoiId(ePoiId);
         meiTuanOrderCancelMessage.setSign(sign);
@@ -444,7 +445,7 @@ public class MeiTuanService {
         meiTuanOrderCancelMessage.setLastUpdateRemark("处理美团订单取消回调，保存美团订单取消消息！");
         DatabaseHelper.insert(meiTuanOrderCancelMessage);
 
-        pushMeiTuanMessage(tenantId, branchId, dietOrder.getId(), type, uuid, 5, 60000);
+        pushMeiTuanMessage(tenantId, branchId, dietOrderId, type, uuid, 5, 60000);
     }
 
     /**
@@ -455,75 +456,59 @@ public class MeiTuanService {
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleOrderRefundCallback(JSONObject callbackParametersJsonObject, String uuid, int type) throws IOException {
+    public void handleOrderRefundCallback(JSONObject callbackParametersJsonObject, String uuid, int type) throws IOException {
         String developerId = callbackParametersJsonObject.getString("developerId");
         String ePoiId = callbackParametersJsonObject.getString("ePoiId");
         String sign = callbackParametersJsonObject.getString("sign");
         JSONObject orderRefundJsonObject = callbackParametersJsonObject.getJSONObject("orderCancel");
         BigInteger orderId = BigInteger.valueOf(orderRefundJsonObject.getLong("orderId"));
 
-        MeiTuanOrder meiTuanOrder = findMeiTuanOrder(ePoiId, orderId);
-
-        String notifyType = orderRefundJsonObject.getString("notifyType");
-        int status = 0;
-        if ("agree".equals(notifyType)) {
-
-        } else if ("".equals(notifyType)) {
-
-        }
-        meiTuanOrder.setStatus(status);
-        DatabaseHelper.update(meiTuanOrder);
-//        publishMeiTuanOrderMessage(meiTuanOrder.getTenantCode(), meiTuanOrder.getBranchCode(), meiTuanOrder.getId(), 2);
-        pushMeiTuanMessage(meiTuanOrder.getTenantId(), meiTuanOrder.getBranchId(), meiTuanOrder.getId(), type, uuid, 5, 60000);
-
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("美团订单退款回调处理成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
-    }
-
-    /**
-     * 查询美团订单
-     *
-     * @param ePoiId
-     * @param orderId
-     * @return
-     */
-    private MeiTuanOrder findMeiTuanOrder(String ePoiId, BigInteger orderId) {
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
         BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
         BigInteger branchId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[1]);
-        SearchModel branchSearchModel = new SearchModel(true);
-        branchSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        branchSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        Branch branch = DatabaseHelper.find(Branch.class, branchSearchModel);
-        ValidateUtils.notNull(branch, "门店不存在！");
 
-        SearchModel meiTuanOrderSearchModel = new SearchModel(true);
-        meiTuanOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        meiTuanOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        meiTuanOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, orderId);
-        MeiTuanOrder meiTuanOrder = DatabaseHelper.find(MeiTuanOrder.class, meiTuanOrderSearchModel);
-        ValidateUtils.notNull(meiTuanOrder, "订单不存在！");
-        return meiTuanOrder;
-    }
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition("order_number", Constants.SQL_OPERATION_SYMBOL_EQUAL, "M" + orderId);
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
 
-    /**
-     * 发布饿了么订单消息
-     *
-     * @param tenantCode：商户编码
-     * @param branchCode：门店编码
-     * @param meiTuanOrderId：订单ID
-     * @param type：消息类型
-     * @return
-     */
-    private void publishMeiTuanOrderMessage(String tenantCode, String branchCode, BigInteger meiTuanOrderId, Integer type) throws IOException {
-        String meiTuanMessageChannelTopic = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_MESSAGE_CHANNEL_TOPIC);
-        JSONObject messageJsonObject = new JSONObject();
-        messageJsonObject.put("tenantCodeAndBranchCode", tenantCode + "_" + branchCode);
-        messageJsonObject.put("type", type);
-        messageJsonObject.put("elemeOrderId", meiTuanOrderId);
-        QueueUtils.convertAndSend(meiTuanMessageChannelTopic, messageJsonObject.toString());
+        BigInteger userId = CommonUtils.getServiceSystemUserId();
+
+        BigInteger dietOrderId = dietOrder.getId();
+
+        String notifyType = orderRefundJsonObject.getString("notifyType");
+        int refundStatus = Constants.INT_DEFAULT_VALUE;
+        if (DietOrderConstants.APPLY.equals(notifyType)) {
+            refundStatus = DietOrderConstants.REFUND_STATUS_APPLIED;
+        } else if (DietOrderConstants.AGREE.equals(notifyType)) {
+            refundStatus = DietOrderConstants.REFUND_STATUS_SUCCESSFUL;
+        } else if (DietOrderConstants.REJECT.equals(notifyType)) {
+            refundStatus = DietOrderConstants.REFUND_STATUS_REJECTED;
+        } else if (DietOrderConstants.CANCEL_REFUND.equals(notifyType)) {
+            refundStatus = DietOrderConstants.REFUND_STATUS_NO_REFUND;
+        } else if (DietOrderConstants.CANCEL_REFUND_COMPLAINT.equals(notifyType)) {
+            refundStatus = DietOrderConstants.REFUND_STATUS_NO_REFUND;
+        }
+
+        dietOrder.setRefundStatus(refundStatus);
+        dietOrder.setLastUpdateUserId(userId);
+        DatabaseHelper.update(dietOrder);
+
+        MeiTuanOrderRefundMessage meiTuanOrderRefundMessage = new MeiTuanOrderRefundMessage();
+        meiTuanOrderRefundMessage.setDietOrderId(dietOrderId);
+        meiTuanOrderRefundMessage.setDeveloperId(NumberUtils.createBigInteger(developerId));
+        meiTuanOrderRefundMessage.setePoiId(ePoiId);
+        meiTuanOrderRefundMessage.setSign(sign);
+        meiTuanOrderRefundMessage.setOrderId(orderId);
+        meiTuanOrderRefundMessage.setNotifyType(notifyType);
+        String reason = orderRefundJsonObject.getString("reason");
+        if (StringUtils.isNotBlank(reason)) {
+            meiTuanOrderRefundMessage.setReason(reason);
+        }
+        DatabaseHelper.insert(meiTuanOrderRefundMessage);
+        pushMeiTuanMessage(tenantId, branchId, dietOrderId, type, uuid, 5, 60000);
     }
 
     @Transactional(readOnly = true)
@@ -574,145 +559,34 @@ public class MeiTuanService {
     }
 
     /**
-     * 拉取美团订单
-     *
-     * @param obtainMeiTuanOrderModel
-     * @return
-     */
-    @Transactional(readOnly = true)
-    public ApiRest obtainMeiTuanOrder(ObtainMeiTuanOrderModel obtainMeiTuanOrderModel) {
-        SearchModel meiTuanOrderSearchModel = new SearchModel(true);
-        meiTuanOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainMeiTuanOrderModel.getTenantId());
-        meiTuanOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainMeiTuanOrderModel.getBranchId());
-        meiTuanOrderSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainMeiTuanOrderModel.getMeiTuanOrderId());
-        MeiTuanOrder meiTuanOrder = DatabaseHelper.find(MeiTuanOrder.class, meiTuanOrderSearchModel);
-        ValidateUtils.notNull(meiTuanOrder, "订单不存在！");
-
-        SearchModel meiTuanOrderDetailSearchModel = new SearchModel(true);
-        meiTuanOrderDetailSearchModel.addSearchCondition("mei_tuan_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, meiTuanOrder.getId());
-        List<MeiTuanOrderDetail> meiTuanOrderDetails = DatabaseHelper.findAll(MeiTuanOrderDetail.class, meiTuanOrderDetailSearchModel);
-
-        SearchModel meiTuanOrderExtraSearchModel = new SearchModel(true);
-        meiTuanOrderExtraSearchModel.addSearchCondition("mei_tuan_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, meiTuanOrder.getId());
-        List<MeiTuanOrderExtra> meiTuanOrderExtras = DatabaseHelper.findAll(MeiTuanOrderExtra.class, meiTuanOrderExtraSearchModel);
-
-        SearchModel meiTuanOrderPoiReceiveDetailSearchModel = new SearchModel(true);
-        meiTuanOrderPoiReceiveDetailSearchModel.addSearchCondition("mei_tuan_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, meiTuanOrder.getId());
-        MeiTuanOrderPoiReceiveDetail meiTuanOrderPoiReceiveDetail = DatabaseHelper.find(MeiTuanOrderPoiReceiveDetail.class, meiTuanOrderPoiReceiveDetailSearchModel);
-
-        Map<String, Object> poiReceiveDetail = new HashMap<String, Object>();
-        if (meiTuanOrderPoiReceiveDetail != null) {
-            SearchModel actOrderChargeByMtSearchModel = new SearchModel(true);
-            actOrderChargeByMtSearchModel.addSearchCondition("mei_tuan_order_poi_receive_detail_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, meiTuanOrderPoiReceiveDetail.getId());
-            List<ActOrderChargeByMt> actOrderChargeByMts = DatabaseHelper.findAll(ActOrderChargeByMt.class, actOrderChargeByMtSearchModel);
-
-            SearchModel actOrderChargeByPoiSearchModel = new SearchModel(true);
-            actOrderChargeByPoiSearchModel.addSearchCondition("mei_tuan_order_poi_receive_detail_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, meiTuanOrderPoiReceiveDetail.getId());
-            List<ActOrderChargeByPoi> actOrderChargeByPois = DatabaseHelper.findAll(ActOrderChargeByPoi.class, actOrderChargeByPoiSearchModel);
-
-            poiReceiveDetail.put("foodShareFeeChargeByPoi", meiTuanOrderPoiReceiveDetail.getFoodShareFeeChargeByPoi());
-            poiReceiveDetail.put("logisticsFee", meiTuanOrderPoiReceiveDetail.getLogisticsFee());
-            poiReceiveDetail.put("onlinePayment", meiTuanOrderPoiReceiveDetail.getOnlinePayment());
-            poiReceiveDetail.put("wmPoiReceiveCent", meiTuanOrderPoiReceiveDetail.getWmPoiReceiveCent());
-
-            List<Map<String, Object>> actOrderChargeByMtData = new ArrayList<Map<String, Object>>();
-            if (CollectionUtils.isNotEmpty(actOrderChargeByMts)) {
-                for (ActOrderChargeByMt actOrderChargeByMt : actOrderChargeByMts) {
-                    Map<String, Object> actOrderChargeByMtMap = new HashMap<String, Object>();
-                    actOrderChargeByMtMap.put("comment", actOrderChargeByMt.getComment());
-                    actOrderChargeByMtMap.put("feeTypeDesc", actOrderChargeByMt.getFeeTypeDesc());
-                    actOrderChargeByMtMap.put("feeTypeId", actOrderChargeByMt.getFeeTypeId());
-                    actOrderChargeByMtMap.put("moneyCent", actOrderChargeByMt.getMoneyCent());
-                    actOrderChargeByMtData.add(actOrderChargeByMtMap);
-                }
-                poiReceiveDetail.put("actOrderChargeByMt", actOrderChargeByMtData);
-            }
-
-            List<Map<String, Object>> actOrderChargeByPoiData = new ArrayList<Map<String, Object>>();
-            if (CollectionUtils.isNotEmpty(actOrderChargeByPois)) {
-                for (ActOrderChargeByPoi actOrderChargeByPoi : actOrderChargeByPois) {
-                    Map<String, Object> actOrderChargeByPoiMap = new HashMap<String, Object>();
-                    actOrderChargeByPoiMap.put("comment", actOrderChargeByPoi.getComment());
-                    actOrderChargeByPoiMap.put("feeTypeDesc", actOrderChargeByPoi.getFeeTypeDesc());
-                    actOrderChargeByPoiMap.put("feeTypeId", actOrderChargeByPoi.getFeeTypeId());
-                    actOrderChargeByPoiMap.put("moneyCent", actOrderChargeByPoi.getMoneyCent());
-                    actOrderChargeByPoiData.add(actOrderChargeByPoiMap);
-                }
-                poiReceiveDetail.put("actOrderChargeByPoi", actOrderChargeByPoiData);
-            }
-        }
-
-        Map<String, Object> meiTuanOrderMap = ApplicationHandler.toMap(meiTuanOrder);
-        meiTuanOrderMap.put("poiReceiveDetail", poiReceiveDetail);
-
-        List<Map<String, Object>> detail = new ArrayList<Map<String, Object>>();
-        for (MeiTuanOrderDetail meiTuanOrderDetail : meiTuanOrderDetails) {
-            Map<String, Object> meiTuanDetailMap = new HashMap<String, Object>();
-            meiTuanDetailMap.put("app_food_code", meiTuanOrderDetail.getAppFoodCode());
-            meiTuanDetailMap.put("box_num", meiTuanOrderDetail.getBoxNum());
-            meiTuanDetailMap.put("box_price", meiTuanOrderDetail.getBoxPrice());
-            meiTuanDetailMap.put("food_name", meiTuanOrderDetail.getFoodName());
-            meiTuanDetailMap.put("price", meiTuanOrderDetail.getPrice());
-            meiTuanDetailMap.put("sku_id", meiTuanOrderDetail.getSkuId());
-            meiTuanDetailMap.put("quantity", meiTuanOrderDetail.getQuantity());
-            meiTuanDetailMap.put("unit", meiTuanOrderDetail.getUnit());
-            meiTuanDetailMap.put("food_discount", meiTuanOrderDetail.getFoodDiscount());
-            meiTuanDetailMap.put("food_property", meiTuanOrderDetail.getFoodProperty());
-            meiTuanDetailMap.put("foodShareFeeChargeByPoi", meiTuanOrderDetail.getFoodShareFeeChargeByPoi());
-            meiTuanDetailMap.put("cart_id", meiTuanOrderDetail.getCartId());
-            detail.add(meiTuanDetailMap);
-        }
-        meiTuanOrderMap.put("detail", detail);
-
-        List<Map<String, Object>> extras = new ArrayList<Map<String, Object>>();
-        for (MeiTuanOrderExtra meiTuanOrderExtra : meiTuanOrderExtras) {
-            Map<String, Object> meiTuanOrderExtraMap = new HashMap<String, Object>();
-            meiTuanOrderExtraMap.put("mt_charge", meiTuanOrderExtra.getMtCharge());
-            meiTuanOrderExtraMap.put("poi_charge", meiTuanOrderExtra.getPoiCharge());
-            meiTuanOrderExtraMap.put("reduce_fee", meiTuanOrderExtra.getReduceFee());
-            meiTuanOrderExtraMap.put("remark", meiTuanOrderExtra.getRemark());
-            meiTuanOrderExtraMap.put("type", meiTuanOrderExtra.getType());
-            extras.add(meiTuanOrderExtraMap);
-        }
-        meiTuanOrderMap.put("extras", extras);
-
-        ApiRest apiRest = new ApiRest();
-        apiRest.setData(meiTuanOrderMap);
-        apiRest.setMessage("获取美团订单成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
-    }
-
-    /**
      * 处理门店绑定回调
      *
      * @param callbackParametersJsonObject
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleBindingStoreCallback(JSONObject callbackParametersJsonObject, String uuid, int type) {
+    public void handleBindingStoreCallback(JSONObject callbackParametersJsonObject, String uuid, int type) throws IOException {
         String ePoiId = callbackParametersJsonObject.getString("ePoiId");
         String appAuthToken = callbackParametersJsonObject.getString("appAuthToken");
         String poiId = callbackParametersJsonObject.getString("poiId");
         String poiName = callbackParametersJsonObject.getString("poiName");
+
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
         BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
         BigInteger branchId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[1]);
+
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         ValidateUtils.notNull(branch, "门店不存在！");
 
+        BigInteger userId = CommonUtils.getServiceSystemUserId();
         branch.setAppAuthToken(appAuthToken);
         branch.setPoiId(poiId);
         branch.setPoiName(poiName);
+        branch.setLastUpdateUserId(userId);
         DatabaseHelper.update(branch);
-
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("美团门店绑定回调处理成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
     }
 
     /**
@@ -725,6 +599,7 @@ public class MeiTuanService {
     public ApiRest checkIsBinding(CheckIsBindingModel checkIsBindingModel) {
         BigInteger tenantId = checkIsBindingModel.getTenantId();
         BigInteger branchId = checkIsBindingModel.getBranchId();
+        
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);

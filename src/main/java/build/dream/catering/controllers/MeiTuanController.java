@@ -3,7 +3,6 @@ package build.dream.catering.controllers;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.meituan.CheckIsBindingModel;
 import build.dream.catering.models.meituan.GenerateBindingStoreLinkModel;
-import build.dream.catering.models.meituan.ObtainMeiTuanOrderModel;
 import build.dream.catering.models.meituan.QueryPoiInfoModel;
 import build.dream.catering.services.MeiTuanService;
 import build.dream.common.annotations.ApiRestAction;
@@ -31,18 +30,6 @@ public class MeiTuanController extends BasicController {
     @ResponseBody
     @ApiRestAction(modelClass = GenerateBindingStoreLinkModel.class, serviceClass = MeiTuanService.class, serviceMethodName = "generateBindingStoreLink", error = "生成门店绑定链接失败")
     public String generateBindingStoreLink() {
-        return null;
-    }
-
-    /**
-     * 拉取美团订单
-     *
-     * @return
-     */
-    @RequestMapping(value = "/obtainMeiTuanOrder")
-    @ResponseBody
-    @ApiRestAction(modelClass = ObtainMeiTuanOrderModel.class, serviceClass = MeiTuanService.class, serviceMethodName = "obtainMeiTuanOrder", error = "拉取美团订单失败")
-    public String obtainMeiTuanOrder() {
         return null;
     }
 
