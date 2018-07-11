@@ -295,7 +295,6 @@ public class MeiTuanService {
                     .totalAmount(dietOrderDetailTotalAmount)
                     .discountAmount(BigDecimal.ZERO)
                     .payableAmount(dietOrderDetailTotalAmount)
-                    .paidAmount(BigDecimal.ZERO)
                     .createUserId(userId)
                     .lastUpdateUserId(userId)
                     .build();
@@ -358,7 +357,6 @@ public class MeiTuanService {
                         .totalAmount(packageFee)
                         .discountAmount(BigDecimal.ZERO)
                         .payableAmount(packageFee)
-                        .paidAmount(BigDecimal.ZERO)
                         .createUserId(userId)
                         .lastUpdateUserId(userId)
                         .build();
@@ -384,7 +382,6 @@ public class MeiTuanService {
                         .totalAmount(shippingFee)
                         .discountAmount(BigDecimal.ZERO)
                         .payableAmount(shippingFee)
-                        .paidAmount(BigDecimal.ZERO)
                         .createUserId(userId)
                         .lastUpdateUserId(userId)
                         .build();

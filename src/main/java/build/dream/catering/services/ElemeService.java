@@ -282,7 +282,6 @@ public class ElemeService {
                         .totalAmount(BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("total")))
                         .discountAmount(BigDecimal.ZERO)
                         .payableAmount(BigDecimal.ZERO)
-                        .paidAmount(BigDecimal.ZERO)
                         .createUserId(userId)
                         .lastUpdateUserId(userId);
 
@@ -370,7 +369,6 @@ public class ElemeService {
                     .totalAmount(deliverFee)
                     .discountAmount(BigDecimal.ZERO)
                     .payableAmount(BigDecimal.ZERO)
-                    .paidAmount(BigDecimal.ZERO)
                     .createUserId(userId)
                     .lastUpdateUserId(userId)
                     .build();

@@ -183,7 +183,6 @@ public class SaleFlowUtils {
         saleDetail.setTotalAmount(dietOrderDetail.getTotalAmount());
         saleDetail.setDiscountAmount(dietOrderDetail.getDiscountAmount());
         saleDetail.setPayableAmount(dietOrderDetail.getPayableAmount());
-        saleDetail.setPaidAmount(dietOrderDetail.getPaidAmount());
 
         BigDecimal discountShare = dietOrderDetail.getDiscountShare();
         saleDetail.setDiscountShare(discountShare != null ? discountShare : BigDecimal.ZERO);
