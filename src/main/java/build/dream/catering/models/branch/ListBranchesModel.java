@@ -22,8 +22,6 @@ public class ListBranchesModel extends BasicModel {
     @Max(value = 500)
     private Integer rows;
 
-    public int type;
-
     public BigInteger getTenantId() {
         return tenantId;
     }
@@ -54,13 +52,5 @@ public class ListBranchesModel extends BasicModel {
 
     public void setRows(Integer rows) {
         this.rows = rows;
-    }
-
-    public int getType() {
-        return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
     }
 }
