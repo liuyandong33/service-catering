@@ -53,4 +53,6 @@ dependencies {
     compile("org.apache.poi:poi-ooxml:3.17")
     compile("org.quartz-scheduler:quartz:2.3.0")
     compile("com.networknt:json-schema-validator:0.1.13")
+
+    compile("org.springframework.boot:spring-boot-starter-data-elasticsearch")
 }
