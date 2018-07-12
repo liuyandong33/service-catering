@@ -54,5 +54,5 @@ dependencies {
     compile("org.quartz-scheduler:quartz:2.3.0")
     compile("com.networknt:json-schema-validator:0.1.13")
 
-    compile("org.springframework.boot:spring-boot-starter-data-elasticsearch")
+    compile group: 'org.elasticsearch.client', name: 'transport', version: '6.3.1'
 }

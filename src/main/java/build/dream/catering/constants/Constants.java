@@ -112,4 +112,7 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String WEI_XIN_CARD_QRCODE_CREATE_URI = "/card/qrcode/create";
     public static final String WEI_XIN_CARD_PAY_GIFT_CARD_ADD_URI = "/card/paygiftcard/add";
     public static final String WEI_XIN_CARD_DELETE_URI = "/card/delete";
+
+    public static final String ELASTICSEARCH_CLUSTER_NAME = "elasticsearch.cluster-name";
+    public static final String ELASTICSEARCH_CLUSTER_NODES = "elasticsearch.cluster-nodes";
 }
