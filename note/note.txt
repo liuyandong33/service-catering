@@ -1,1 +1,28 @@
 {"id":"1222507828638127147","orderId":"1222507828638127147","address":"上海交通大学(闵行校区)1001","createdAt":"2018-07-10T21:25:21","activeAt":"2018-07-10T21:25:21","deliverFee":5.3,"deliverTime":null,"description":"","groups":[{"name":"1号篮子","type":"normal","items":[{"id":1364161354,"skuId":200000168101182637,"name":"中辣","categoryId":1,"price":10.0,"quantity":2,"total":20.0,"additions":[],"newSpecs":[],"attributes":[],"extendCode":"","barCode":"","weight":1.0,"userPrice":0.0,"shopPrice":0.0,"vfoodId":1343931759}]}],"invoice":null,"book":false,"onlinePaid":true,"railwayAddress":null,"phoneList":["13789871965"],"shopId":150894532,"shopName":"智汇_饿了么订单测试店铺","daySn":2,"status":"unprocessed","refundStatus":"noRefund","userId":195365009,"userIdStr":"195365009","totalPrice":15.31,"originalPrice":25.3,"consignee":"刘**","deliveryGeo":"121.43521942,31.01870991","deliveryPoiAddress":"上海交通大学(闵行校区)1001","invoiced":false,"income":5.01,"serviceRate":0.18,"serviceFee":-5.0,"hongbao":0.0,"packageFee":0.0,"activityTotal":-9.99,"shopPart":-9.99,"elemePart":-0.0,"downgraded":false,"vipDeliveryFeeDiscount":0.0,"openId":"201234Z1398","secretPhoneExpireTime":"2018-07-11T00:25:20","orderActivities":[{"categoryId":11,"name":"单品定价","amount":-9.99,"elemePart":0.0,"restaurantPart":-9.99,"familyPart":0.0,"id":1293759106,"orderAllPartiesPartList":[{"partName":"商家补贴","partAmount":"9.99"}]}],"invoiceType":null,"taxpayerId":"","coldBoxFee":0.0,"cancelOrderDescription":null,"cancelOrderCreatedAt":null,"orderCommissions":[],"baiduWaimai":false,"userExtraInfo":{"giverPhone":"","greeting":"","remark":"","invoiceTitle":null},"consigneePhones":[]}
+
+master 节点
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+
+cluster.name: wali
+node.name: master
+node.master: true
+network.host: 127.0.0.1
+
+slave1 节点
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+
+cluster.name: wali
+node.name: slave1
+network.host: 127.0.0.1
+discovery.zen.ping.unicast.hosts: ["127.0.0.1"]
+
+slave2 节点
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+
+cluster.name: wali
+node.name: slave1
+network.host: 127.0.0.1
+discovery.zen.ping.unicast.hosts: ["127.0.0.1"]
