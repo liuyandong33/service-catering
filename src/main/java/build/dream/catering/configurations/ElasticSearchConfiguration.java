@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 @Configuration
 public class ElasticSearchConfiguration {
