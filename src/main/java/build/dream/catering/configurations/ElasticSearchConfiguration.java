@@ -32,14 +32,13 @@ public class ElasticSearchConfiguration {
             String ipAddress = array[0];
             int port = Integer.parseInt(array[1]);
 
-            String[] addresses = ipAddress.split(".");
+            String[] addresses = ipAddress.split("\\.");
             byte[] addr = new byte[4];
             for (int index = 0; index < addresses.length; index++) {
                 addr[index] = (byte) (Integer.parseInt(addresses[index]) & 0xff);
-
-                InetSocketTransportAddress inetSocketTransportAddress = new InetSocketTransportAddress(InetAddress.getByAddress(addr), port);
-                transportClient.addTransportAddress(inetSocketTransportAddress);
             }
+            InetSocketTransportAddress inetSocketTransportAddress = new InetSocketTransportAddress(InetAddress.getByAddress(addr), port);
+            transportClient.addTransportAddress(inetSocketTransportAddress);
         }
         return transportClient;
     }
