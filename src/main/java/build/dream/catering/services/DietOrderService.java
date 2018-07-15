@@ -316,8 +316,16 @@ public class DietOrderService {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
         String orderNumber = orderNumberPrefix + simpleDateFormat.format(new Date()) + SerialNumberGenerator.nextSerialNumber(8, daySerialNumber);
 
-        DietOrder.Builder builder = DietOrder.builder();
-        builder.tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).orderNumber(orderNumber).orderType(orderType).orderStatus(DietOrderConstants.ORDER_STATUS_PENDING).payStatus(DietOrderConstants.PAY_STATUS_UNPAID).refundStatus(DietOrderConstants.REFUND_STATUS_NO_REFUND).daySerialNumber(daySerialNumber.toString());
+        DietOrder.Builder builder = DietOrder.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .orderNumber(orderNumber)
+                .orderType(orderType)
+                .orderStatus(DietOrderConstants.ORDER_STATUS_PENDING)
+                .payStatus(DietOrderConstants.PAY_STATUS_UNPAID)
+                .refundStatus(DietOrderConstants.REFUND_STATUS_NO_REFUND)
+                .daySerialNumber(daySerialNumber.toString());
 
         boolean invoiced = saveDietOrderModel.getInvoiced();
         builder.invoiced(invoiced);
@@ -359,7 +367,17 @@ public class DietOrderService {
         Map<BigInteger, DietOrderActivity> dietOrderActivityMap = new HashMap<BigInteger, DietOrderActivity>();
 
         DietOrderGroup discountDietOrderGroup = null;
-        DietOrderGroup normalDietOrderGroup = DietOrderGroup.builder().tenantId(tenantId).tenantCode(tenantCode).branchId(branchId).dietOrderId(dietOrderId).name("正常的菜品").type(DietOrderConstants.GROUP_TYPE_NORMAL).createUserId(userId).lastUpdateUserId(userId).lastUpdateRemark("保存订单分组信息！").build();
+        DietOrderGroup normalDietOrderGroup = DietOrderGroup.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .dietOrderId(dietOrderId)
+                .name("正常的菜品")
+                .type(DietOrderConstants.GROUP_TYPE_NORMAL)
+                .createUserId(userId)
+                .lastUpdateUserId(userId)
+                .lastUpdateRemark("保存订单分组信息！")
+                .build();
         DatabaseHelper.insert(normalDietOrderGroup);
 
         for (SaveDietOrderModel.GoodsInfo goodsInfo : goodsInfos) {
@@ -443,7 +461,8 @@ public class DietOrderService {
                                 .goodsName(Constants.VARCHAR_DEFAULT_VALUE)
                                 .goodsSpecificationId(effectiveActivity.getGoodsSpecificationId())
                                 .goodsSpecificationName(effectiveActivity.getGoodsSpecificationName())
-                                .categoryId(BigInteger.ZERO).categoryName("")
+                                .categoryId(effectiveActivity.getCategoryId())
+                                .categoryName(effectiveActivity.getCategoryName())
                                 .price(BigDecimal.ZERO)
                                 .attributeIncrease(BigDecimal.ZERO)
                                 .quantity(effectiveActivity.getGiveQuantity())

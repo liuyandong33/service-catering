@@ -54,6 +54,5 @@ dependencies {
     compile("org.quartz-scheduler:quartz:2.3.0")
     compile("com.networknt:json-schema-validator:0.1.13")
 
-    compile group: 'org.elasticsearch.client', name: 'transport', version: '6.3.1'
-//    compile group: 'com.dangdang', name: 'elastic-job-lite-spring', version: '2.1.5'
+    compile("org.elasticsearch.client:transport:6.3.1")
 }
