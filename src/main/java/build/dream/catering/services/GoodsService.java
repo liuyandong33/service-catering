@@ -92,9 +92,14 @@ public class GoodsService extends BasicService {
         goodsSpecificationSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
         List<GoodsSpecification> goodsSpecifications = DatabaseHelper.findAll(GoodsSpecification.class, goodsSpecificationSearchModel);
 
+        SearchModel goodsUnitSearchModel = new SearchModel(true);
+        goodsUnitSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
+        List<GoodsUnit> goodsUnits = DatabaseHelper.findAll(GoodsUnit.class, goodsUnitSearchModel);
+
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("goods", goods);
         data.put("goodsSpecifications", goodsSpecifications);
+        data.put("goodsUnits", goodsUnits);
         SearchModel goodsAttributeGroupSearchModel = new SearchModel(true);
         goodsAttributeGroupSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
         List<GoodsAttributeGroup> goodsAttributeGroups = DatabaseHelper.findAll(GoodsAttributeGroup.class, goodsAttributeGroupSearchModel);
