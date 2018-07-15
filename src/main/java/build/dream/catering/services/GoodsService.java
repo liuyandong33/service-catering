@@ -24,6 +24,29 @@ public class GoodsService extends BasicService {
     @Autowired
     private GoodsMapper goodsMapper;
 
+    /**
+     * 查询商品数量
+     * @param countModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest count(CountModel countModel) {
+        BigInteger tenantId = countModel.getTenantId();
+        BigInteger branchId = countModel.getBranchId();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        long count = DatabaseHelper.count(Goods.class, searchModel);
+
+        return new ApiRest(count, "查询商品数量成功！");
+    }
+
+    /**
+     * 查询商品列表
+     * @param listModel
+     * @return
+     */
     @Transactional(readOnly = true)
     public ApiRest list(ListModel listModel) {
         BigInteger tenantId = listModel.getTenantId();

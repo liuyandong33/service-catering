@@ -14,6 +14,17 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(value = "/goods")
 public class GoodsController extends BasicController {
     /**
+     * 查询商品数量
+     *
+     * @return
+     */
+    @RequestMapping(value = "/count", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = CountModel.class, serviceClass = GoodsService.class, serviceMethodName = "count", error = "查询商品列表失败")
+    public String count() {
+        return null;
+    }
+    /**
      * 查询商品列表
      *
      * @return
