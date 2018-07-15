@@ -69,11 +69,11 @@ public class DietOrderService {
         List<DietOrderDetail> dietOrderDetails = DatabaseHelper.findAll(DietOrderDetail.class, dietOrderDetailSearchModel);
 
         // 查询出订单口味信息
-        SearchModel dietOrderDetailGoodsFlavorSearchModel = new SearchModel(true);
-        dietOrderDetailGoodsFlavorSearchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
-        dietOrderDetailGoodsFlavorSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        dietOrderDetailGoodsFlavorSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        List<DietOrderDetailGoodsFlavor> dietOrderDetailGoodsFlavors = DatabaseHelper.findAll(DietOrderDetailGoodsFlavor.class, dietOrderDetailGoodsFlavorSearchModel);
+        SearchModel dietOrderDetailGoodsAttributeSearchModel = new SearchModel(true);
+        dietOrderDetailGoodsAttributeSearchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        dietOrderDetailGoodsAttributeSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        dietOrderDetailGoodsAttributeSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        List<DietOrderDetailGoodsAttribute> dietOrderDetailGoodsAttributes = DatabaseHelper.findAll(DietOrderDetailGoodsAttribute.class, dietOrderDetailGoodsAttributeSearchModel);
 
         SearchModel dietOrderActivitySearchModel = new SearchModel(true);
         dietOrderActivitySearchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
@@ -93,17 +93,17 @@ public class DietOrderService {
         }
 
         // 封装订单详情与订单口味之间的map
-        Map<BigInteger, List<DietOrderDetailGoodsFlavor>> dietOrderDetailGoodsFlavorMap = new HashMap<BigInteger, List<DietOrderDetailGoodsFlavor>>();
-        for (DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor : dietOrderDetailGoodsFlavors) {
-            List<DietOrderDetailGoodsFlavor> dietOrderDetailGoodsFlavorList = dietOrderDetailGoodsFlavorMap.get(dietOrderDetailGoodsFlavor.getDietOrderDetailId());
-            if (dietOrderDetailGoodsFlavorList == null) {
-                dietOrderDetailGoodsFlavorList = new ArrayList<DietOrderDetailGoodsFlavor>();
-                dietOrderDetailGoodsFlavorMap.put(dietOrderDetailGoodsFlavor.getDietOrderDetailId(), dietOrderDetailGoodsFlavorList);
+        Map<BigInteger, List<DietOrderDetailGoodsAttribute>> dietOrderDetailGoodsAttributeMap = new HashMap<BigInteger, List<DietOrderDetailGoodsAttribute>>();
+        for (DietOrderDetailGoodsAttribute dietOrderDetailGoodsAttribute : dietOrderDetailGoodsAttributes) {
+            List<DietOrderDetailGoodsAttribute> dietOrderDetailGoodsAttributeList = dietOrderDetailGoodsAttributeMap.get(dietOrderDetailGoodsAttribute.getDietOrderDetailId());
+            if (dietOrderDetailGoodsAttributeList == null) {
+                dietOrderDetailGoodsAttributeList = new ArrayList<DietOrderDetailGoodsAttribute>();
+                dietOrderDetailGoodsAttributeMap.put(dietOrderDetailGoodsAttribute.getDietOrderDetailId(), dietOrderDetailGoodsAttributeList);
             }
-            dietOrderDetailGoodsFlavorList.add(dietOrderDetailGoodsFlavor);
+            dietOrderDetailGoodsAttributeList.add(dietOrderDetailGoodsAttribute);
         }
 
-        ApiRest apiRest = new ApiRest(buildDietOrderInfo(dietOrder, dietOrderGroups, dietOrderDetailMap, dietOrderDetailGoodsFlavorMap, dietOrderActivities), "获取订单信息成功！");
+        ApiRest apiRest = new ApiRest(buildDietOrderInfo(dietOrder, dietOrderGroups, dietOrderDetailMap, dietOrderDetailGoodsAttributeMap, dietOrderActivities), "获取订单信息成功！");
         return apiRest;
     }
 
@@ -113,10 +113,10 @@ public class DietOrderService {
      * @param dietOrder
      * @param dietOrderGroups
      * @param dietOrderDetailMap
-     * @param dietOrderDetailGoodsFlavorMap
+     * @param dietOrderDetailGoodsAttributeMap
      * @return
      */
-    private Map<String, Object> buildDietOrderInfo(DietOrder dietOrder, List<DietOrderGroup> dietOrderGroups, Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap, Map<BigInteger, List<DietOrderDetailGoodsFlavor>> dietOrderDetailGoodsFlavorMap, List<DietOrderActivity> dietOrderActivities) {
+    private Map<String, Object> buildDietOrderInfo(DietOrder dietOrder, List<DietOrderGroup> dietOrderGroups, Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap, Map<BigInteger, List<DietOrderDetailGoodsAttribute>> dietOrderDetailGoodsAttributeMap, List<DietOrderActivity> dietOrderActivities) {
         Map<String, Object> dietOrderInfo = new HashMap<String, Object>();
         dietOrderInfo.put("id", dietOrder.getId());
         dietOrderInfo.put("orderNumber", dietOrder.getOrderNumber());
@@ -142,7 +142,7 @@ public class DietOrderService {
         dietOrderInfo.put("telephoneNumber", dietOrder.getTelephoneNumber());
         dietOrderInfo.put("daySerialNumber", dietOrder.getDaySerialNumber());
         dietOrderInfo.put("consignee", dietOrder.getConsignee());
-        dietOrderInfo.put("groups", buildGroups(dietOrderGroups, dietOrderDetailMap, dietOrderDetailGoodsFlavorMap));
+        dietOrderInfo.put("groups", buildGroups(dietOrderGroups, dietOrderDetailMap, dietOrderDetailGoodsAttributeMap));
         List<Map<String, Object>> orderActivities = new ArrayList<Map<String, Object>>();
         for (DietOrderActivity dietOrderActivity : dietOrderActivities) {
             Map<String, Object> orderActivity = new HashMap<String, Object>();
@@ -161,17 +161,17 @@ public class DietOrderService {
      *
      * @param dietOrderGroups
      * @param dietOrderDetailMap
-     * @param dietOrderDetailGoodsFlavorMap
+     * @param dietOrderDetailGoodsAttributeMap
      * @return
      */
-    private List<Map<String, Object>> buildGroups(List<DietOrderGroup> dietOrderGroups, Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap, Map<BigInteger, List<DietOrderDetailGoodsFlavor>> dietOrderDetailGoodsFlavorMap) {
+    private List<Map<String, Object>> buildGroups(List<DietOrderGroup> dietOrderGroups, Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap, Map<BigInteger, List<DietOrderDetailGoodsAttribute>> dietOrderDetailGoodsAttributeMap) {
         List<Map<String, Object>> groups = new ArrayList<Map<String, Object>>();
         for (DietOrderGroup dietOrderGroup : dietOrderGroups) {
             Map<String, Object> group = new HashMap<String, Object>();
             group.put("id", dietOrderGroup.getId());
             group.put("name", dietOrderGroup.getName());
             group.put("type", dietOrderGroup.getType());
-            group.put("details", buildDetails(dietOrderDetailMap.get(dietOrderGroup.getId()), dietOrderDetailGoodsFlavorMap));
+            group.put("details", buildDetails(dietOrderDetailMap.get(dietOrderGroup.getId()), dietOrderDetailGoodsAttributeMap));
             groups.add(group);
         }
         return groups;
@@ -181,10 +181,10 @@ public class DietOrderService {
      * 构建订单详情信息
      *
      * @param dietOrderDetails
-     * @param dietOrderDetailGoodsFlavorMap
+     * @param dietOrderDetailGoodsAttributeMap
      * @return
      */
-    private List<Map<String, Object>> buildDetails(List<DietOrderDetail> dietOrderDetails, Map<BigInteger, List<DietOrderDetailGoodsFlavor>> dietOrderDetailGoodsFlavorMap) {
+    private List<Map<String, Object>> buildDetails(List<DietOrderDetail> dietOrderDetails, Map<BigInteger, List<DietOrderDetailGoodsAttribute>> dietOrderDetailGoodsAttributeMap) {
         List<Map<String, Object>> dietOrderDetailInfos = new ArrayList<Map<String, Object>>();
         for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
             Map<String, Object> dietOrderDetailInfo = new HashMap<String, Object>();
@@ -193,25 +193,25 @@ public class DietOrderService {
             dietOrderDetailInfo.put("goodsSpecificationId", dietOrderDetail.getGoodsSpecificationId());
             dietOrderDetailInfo.put("goodsSpecificationName", dietOrderDetail.getGoodsSpecificationName());
             dietOrderDetailInfo.put("price", dietOrderDetail.getPrice());
-            dietOrderDetailInfo.put("flavorIncrease", dietOrderDetail.getFlavorIncrease());
+            dietOrderDetailInfo.put("attributeIncrease", dietOrderDetail.getAttributeIncrease());
             dietOrderDetailInfo.put("quantity", dietOrderDetail.getQuantity());
             dietOrderDetailInfo.put("totalAmount", dietOrderDetail.getTotalAmount());
             dietOrderDetailInfo.put("discountAmount", dietOrderDetail.getDiscountAmount());
             dietOrderDetailInfo.put("payableAmount", dietOrderDetail.getPayableAmount());
 
-            List<DietOrderDetailGoodsFlavor> dietOrderDetailGoodsFlavors = dietOrderDetailGoodsFlavorMap.get(dietOrderDetail.getId());
-            if (CollectionUtils.isNotEmpty(dietOrderDetailGoodsFlavors)) {
-                List<Map<String, Object>> flavors = new ArrayList<Map<String, Object>>();
-                for (DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor : dietOrderDetailGoodsFlavors) {
-                    Map<String, Object> flavor = new HashMap<String, Object>();
-                    flavor.put("flavorGroupId", dietOrderDetailGoodsFlavor.getGoodsFlavorGroupId());
-                    flavor.put("flavorGroupName", dietOrderDetailGoodsFlavor.getGoodsFlavorGroupName());
-                    flavor.put("flavorId", dietOrderDetailGoodsFlavor.getGoodsFlavorId());
-                    flavor.put("flavorName", dietOrderDetailGoodsFlavor.getGoodsFlavorName());
-                    flavor.put("price", dietOrderDetailGoodsFlavor.getPrice());
-                    flavors.add(flavor);
+            List<DietOrderDetailGoodsAttribute> dietOrderDetailGoodsAttributes = dietOrderDetailGoodsAttributeMap.get(dietOrderDetail.getId());
+            if (CollectionUtils.isNotEmpty(dietOrderDetailGoodsAttributes)) {
+                List<Map<String, Object>> attributes = new ArrayList<Map<String, Object>>();
+                for (DietOrderDetailGoodsAttribute dietOrderDetailGoodsAttribute : dietOrderDetailGoodsAttributes) {
+                    Map<String, Object> attribute = new HashMap<String, Object>();
+                    attribute.put("attributeGroupId", dietOrderDetailGoodsAttribute.getGoodsAttributeGroupId());
+                    attribute.put("attributeGroupName", dietOrderDetailGoodsAttribute.getGoodsAttributeGroupName());
+                    attribute.put("attributeId", dietOrderDetailGoodsAttribute.getGoodsAttributeId());
+                    attribute.put("attributeName", dietOrderDetailGoodsAttribute.getGoodsAttributeName());
+                    attribute.put("price", dietOrderDetailGoodsAttribute.getPrice());
+                    attributes.add(attribute);
                 }
-                dietOrderDetailInfo.put("flavors", flavors);
+                dietOrderDetailInfo.put("attributes", attributes);
             }
             dietOrderDetailInfos.add(dietOrderDetailInfo);
         }
@@ -237,18 +237,18 @@ public class DietOrderService {
 
         List<BigInteger> goodsIds = new ArrayList<BigInteger>();
         List<BigInteger> goodsSpecificationIds = new ArrayList<BigInteger>();
-        List<BigInteger> goodsFlavorGroupIds = new ArrayList<BigInteger>();
-        List<BigInteger> goodsFlavorIds = new ArrayList<BigInteger>();
+        List<BigInteger> goodsAttributeGroupIds = new ArrayList<BigInteger>();
+        List<BigInteger> goodsAttributeIds = new ArrayList<BigInteger>();
         List<SaveDietOrderModel.GoodsInfo> goodsInfos = saveDietOrderModel.getGoodsInfos();
         for (SaveDietOrderModel.GoodsInfo goodsInfo : goodsInfos) {
             goodsIds.add(goodsInfo.getGoodsId());
             goodsSpecificationIds.add(goodsInfo.getGoodsSpecificationId());
 
-            List<SaveDietOrderModel.FlavorInfo> flavorInfos = goodsInfo.getFlavorInfos();
-            if (CollectionUtils.isNotEmpty(flavorInfos)) {
-                for (SaveDietOrderModel.FlavorInfo flavorInfo : flavorInfos) {
-                    goodsFlavorGroupIds.add(flavorInfo.getFlavorGroupId());
-                    goodsFlavorIds.add(flavorInfo.getFlavorId());
+            List<SaveDietOrderModel.AttributeInfo> attributeInfos = goodsInfo.getAttributeInfos();
+            if (CollectionUtils.isNotEmpty(attributeInfos)) {
+                for (SaveDietOrderModel.AttributeInfo attributeInfo : attributeInfos) {
+                    goodsAttributeGroupIds.add(attributeInfo.getAttributeGroupId());
+                    goodsAttributeIds.add(attributeInfo.getAttributeId());
                 }
             }
         }
@@ -264,23 +264,23 @@ public class DietOrderService {
         List<GoodsSpecification> goodsSpecifications = DatabaseHelper.findAll(GoodsSpecification.class, goodsSpecificationSearchModel);
 
         // 查询出订单中包含的所有口味组
-        List<GoodsFlavorGroup> goodsFlavorGroups = new ArrayList<GoodsFlavorGroup>();
-        if (CollectionUtils.isNotEmpty(goodsFlavorGroupIds)) {
-            SearchModel goodsFlavorGroupSearchModel = new SearchModel(true);
-            goodsFlavorGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-            goodsFlavorGroupSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-            goodsFlavorGroupSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsFlavorGroupIds);
-            goodsFlavorGroups = DatabaseHelper.findAll(GoodsFlavorGroup.class, goodsFlavorGroupSearchModel);
+        List<GoodsAttributeGroup> goodsAttributeGroups = new ArrayList<GoodsAttributeGroup>();
+        if (CollectionUtils.isNotEmpty(goodsAttributeGroupIds)) {
+            SearchModel goodsAttributeGroupSearchModel = new SearchModel(true);
+            goodsAttributeGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+            goodsAttributeGroupSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+            goodsAttributeGroupSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsAttributeGroupIds);
+            goodsAttributeGroups = DatabaseHelper.findAll(GoodsAttributeGroup.class, goodsAttributeGroupSearchModel);
         }
 
         // 查询出订单中包含的所有口味
-        List<GoodsFlavor> goodsFlavors = new ArrayList<GoodsFlavor>();
-        if (CollectionUtils.isNotEmpty(goodsFlavorIds)) {
-            SearchModel goodsFlavorSearchModel = new SearchModel(true);
-            goodsFlavorSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-            goodsFlavorSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-            goodsFlavorSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsFlavorIds);
-            goodsFlavors = DatabaseHelper.findAll(GoodsFlavor.class, goodsFlavorSearchModel);
+        List<GoodsAttribute> goodsAttributes = new ArrayList<GoodsAttribute>();
+        if (CollectionUtils.isNotEmpty(goodsAttributeIds)) {
+            SearchModel goodsAttributeSearchModel = new SearchModel(true);
+            goodsAttributeSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+            goodsAttributeSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+            goodsAttributeSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsAttributeIds);
+            goodsAttributes = DatabaseHelper.findAll(GoodsAttribute.class, goodsAttributeSearchModel);
         }
 
         // 封装商品id与商品之间的map
@@ -296,15 +296,15 @@ public class DietOrderService {
         }
 
         // 封装商品口味组id与商品口味组之间的map
-        Map<BigInteger, GoodsFlavorGroup> goodsFlavorGroupMap = new HashMap<BigInteger, GoodsFlavorGroup>();
-        for (GoodsFlavorGroup goodsFlavorGroup : goodsFlavorGroups) {
-            goodsFlavorGroupMap.put(goodsFlavorGroup.getId(), goodsFlavorGroup);
+        Map<BigInteger, GoodsAttributeGroup> goodsAttributeGroupMap = new HashMap<BigInteger, GoodsAttributeGroup>();
+        for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroups) {
+            goodsAttributeGroupMap.put(goodsAttributeGroup.getId(), goodsAttributeGroup);
         }
 
         // 封装商品口味id与商品口味之间的map
-        Map<BigInteger, GoodsFlavor> goodsFlavorMap = new HashMap<BigInteger, GoodsFlavor>();
-        for (GoodsFlavor goodsFlavor : goodsFlavors) {
-            goodsFlavorMap.put(goodsFlavor.getId(), goodsFlavor);
+        Map<BigInteger, GoodsAttribute> goodsAttributeMap = new HashMap<BigInteger, GoodsAttribute>();
+        for (GoodsAttribute goodsAttribute : goodsAttributes) {
+            goodsAttributeMap.put(goodsAttribute.getId(), goodsAttribute);
         }
 
         String orderNumberPrefix = null;
@@ -355,7 +355,7 @@ public class DietOrderService {
 
         List<DietOrderDetail> dietOrderDetails = new ArrayList<DietOrderDetail>();
         Map<String, DietOrderDetail> dietOrderDetailMap = new HashMap<String, DietOrderDetail>();
-        Map<String, List<DietOrderDetailGoodsFlavor>> dietOrderDetailGoodsFlavorMap = new HashMap<String, List<DietOrderDetailGoodsFlavor>>();
+        Map<String, List<DietOrderDetailGoodsAttribute>> dietOrderDetailGoodsAttributeMap = new HashMap<String, List<DietOrderDetailGoodsAttribute>>();
         Map<BigInteger, DietOrderActivity> dietOrderActivityMap = new HashMap<BigInteger, DietOrderActivity>();
 
         DietOrderGroup discountDietOrderGroup = null;
@@ -371,36 +371,36 @@ public class DietOrderService {
             ValidateUtils.notNull(goodsSpecification, "商品规格不存在！");
 
             String uuid = UUID.randomUUID().toString();
-            BigDecimal flavorIncrease = BigDecimal.ZERO;
-            List<SaveDietOrderModel.FlavorInfo> flavorInfos = goodsInfo.getFlavorInfos();
+            BigDecimal attributeIncrease = BigDecimal.ZERO;
+            List<SaveDietOrderModel.AttributeInfo> attributeInfos = goodsInfo.getAttributeInfos();
 
-            List<DietOrderDetailGoodsFlavor> dietOrderDetailGoodsFlavors = new ArrayList<DietOrderDetailGoodsFlavor>();
-            if (CollectionUtils.isNotEmpty(flavorInfos)) {
-                for (SaveDietOrderModel.FlavorInfo flavorInfo : flavorInfos) {
-                    GoodsFlavorGroup goodsFlavorGroup = goodsFlavorGroupMap.get(flavorInfo.getFlavorGroupId());
-                    ValidateUtils.notNull(goodsFlavorGroup, "口味组不存在！");
+            List<DietOrderDetailGoodsAttribute> dietOrderDetailGoodsAttributes = new ArrayList<DietOrderDetailGoodsAttribute>();
+            if (CollectionUtils.isNotEmpty(attributeInfos)) {
+                for (SaveDietOrderModel.AttributeInfo attributeInfo : attributeInfos) {
+                    GoodsAttributeGroup goodsAttributeGroup = goodsAttributeGroupMap.get(attributeInfo.getAttributeGroupId());
+                    ValidateUtils.notNull(goodsAttributeGroup, "口味组不存在！");
 
-                    GoodsFlavor goodsFlavor = goodsFlavorMap.get(flavorInfo.getFlavorId());
-                    ValidateUtils.notNull(goodsFlavor, "口味不存在！");
-                    flavorIncrease = flavorIncrease.add(goodsFlavor.getPrice());
+                    GoodsAttribute goodsAttribute = goodsAttributeMap.get(attributeInfo.getAttributeId());
+                    ValidateUtils.notNull(goodsAttribute, "口味不存在！");
+                    attributeIncrease = attributeIncrease.add(goodsAttribute.getPrice());
 
-                    DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor = DietOrderDetailGoodsFlavor.builder()
+                    DietOrderDetailGoodsAttribute dietOrderDetailGoodsAttribute = DietOrderDetailGoodsAttribute.builder()
                             .tenantId(tenantId)
                             .tenantCode(tenantCode)
                             .branchId(branchId)
                             .dietOrderId(dietOrderId)
                             .dietOrderGroupId(normalDietOrderGroup.getId())
                             .dietOrderDetailId(null)
-                            .goodsFlavorGroupId(goodsFlavorGroup.getId())
-                            .goodsFlavorGroupName(goodsFlavorGroup.getName())
-                            .goodsFlavorId(goodsFlavor.getId())
-                            .goodsFlavorName(goodsFlavor.getName())
-                            .price(goodsFlavor.getPrice())
+                            .goodsAttributeGroupId(goodsAttributeGroup.getId())
+                            .goodsAttributeGroupName(goodsAttributeGroup.getName())
+                            .goodsAttributeId(goodsAttribute.getId())
+                            .goodsAttributeName(goodsAttribute.getName())
+                            .price(goodsAttribute.getPrice())
                             .createUserId(userId)
                             .lastUpdateUserId(userId)
                             .build();
-                    dietOrderDetailGoodsFlavors.add(dietOrderDetailGoodsFlavor);
-                    dietOrderDetailGoodsFlavorMap.put(uuid, dietOrderDetailGoodsFlavors);
+                    dietOrderDetailGoodsAttributes.add(dietOrderDetailGoodsAttribute);
+                    dietOrderDetailGoodsAttributeMap.put(uuid, dietOrderDetailGoodsAttributes);
                 }
             }
 
@@ -445,7 +445,7 @@ public class DietOrderService {
                                 .goodsSpecificationName(effectiveActivity.getGoodsSpecificationName())
                                 .categoryId(BigInteger.ZERO).categoryName("")
                                 .price(BigDecimal.ZERO)
-                                .flavorIncrease(BigDecimal.ZERO)
+                                .attributeIncrease(BigDecimal.ZERO)
                                 .quantity(effectiveActivity.getGiveQuantity())
                                 .totalAmount(giveTotalAmount)
                                 .discountAmount(giveTotalAmount)
@@ -476,7 +476,7 @@ public class DietOrderService {
                         }
                     }
 
-                    BigDecimal dietOrderDetailTotalAmount = price.add(flavorIncrease).multiply(quantity);
+                    BigDecimal dietOrderDetailTotalAmount = price.add(attributeIncrease).multiply(quantity);
                     dietOrderDetail = DietOrderDetail.builder()
                             .tenantId(tenantId)
                             .tenantCode(tenantCode)
@@ -491,7 +491,7 @@ public class DietOrderService {
                             .categoryId(goods.getCategoryId())
                             .categoryName(goods.getCategoryName())
                             .price(price)
-                            .flavorIncrease(flavorIncrease)
+                            .attributeIncrease(attributeIncrease)
                             .quantity(quantity)
                             .totalAmount(dietOrderDetailTotalAmount)
                             .discountAmount(BigDecimal.ZERO)
@@ -503,12 +503,12 @@ public class DietOrderService {
 
                 if (type == 3) {
                     Integer discountType = effectiveActivity.getDiscountType();
-                    BigDecimal dietOrderDetailTotalAmount = price.add(flavorIncrease).multiply(quantity);
+                    BigDecimal dietOrderDetailTotalAmount = price.add(attributeIncrease).multiply(quantity);
                     BigDecimal dietOrderDetailPayableAmount = null;
                     if (discountType == 1) {
-                        dietOrderDetailPayableAmount = effectiveActivity.getSpecialPrice().add(flavorIncrease).multiply(quantity);
+                        dietOrderDetailPayableAmount = effectiveActivity.getSpecialPrice().add(attributeIncrease).multiply(quantity);
                     } else {
-                        dietOrderDetailPayableAmount = price.subtract(price.multiply(effectiveActivity.getDiscountRate()).add(flavorIncrease).divide(Constants.BIG_DECIMAL_HUNDRED));
+                        dietOrderDetailPayableAmount = price.subtract(price.multiply(effectiveActivity.getDiscountRate()).add(attributeIncrease).divide(Constants.BIG_DECIMAL_HUNDRED));
                     }
                     BigDecimal dietOrderDetailDiscountAmount = dietOrderDetailTotalAmount.subtract(dietOrderDetailPayableAmount);
                     dietOrderTotalAmount = dietOrderTotalAmount.add(dietOrderDetailTotalAmount);
@@ -527,7 +527,7 @@ public class DietOrderService {
                             .categoryId(goods.getCategoryId())
                             .categoryName(goods.getCategoryName())
                             .price(price)
-                            .flavorIncrease(flavorIncrease)
+                            .attributeIncrease(attributeIncrease)
                             .quantity(quantity)
                             .totalAmount(dietOrderDetailTotalAmount)
                             .discountAmount(dietOrderDetailDiscountAmount)
@@ -558,7 +558,7 @@ public class DietOrderService {
                     }
                 }
             } else {
-                BigDecimal dietOrderDetailTotalAmount = price.add(flavorIncrease).multiply(quantity);
+                BigDecimal dietOrderDetailTotalAmount = price.add(attributeIncrease).multiply(quantity);
                 dietOrderTotalAmount = dietOrderTotalAmount.add(dietOrderDetailTotalAmount);
                 dietOrderDetail = DietOrderDetail.builder()
                         .tenantId(tenantId)
@@ -574,7 +574,7 @@ public class DietOrderService {
                         .categoryId(goods.getCategoryId())
                         .categoryName(goods.getCategoryName())
                         .price(price)
-                        .flavorIncrease(flavorIncrease)
+                        .attributeIncrease(attributeIncrease)
                         .quantity(quantity)
                         .totalAmount(dietOrderDetailTotalAmount)
                         .discountAmount(BigDecimal.ZERO)
@@ -621,7 +621,7 @@ public class DietOrderService {
                     .categoryId(Constants.FICTITIOUS_GOODS_CATEGORY_ID)
                     .categoryName(Constants.FICTITIOUS_GOODS_CATEGORY_NAME)
                     .price(deliverFee)
-                    .flavorIncrease(BigDecimal.ZERO)
+                    .attributeIncrease(BigDecimal.ZERO)
                     .quantity(BigDecimal.ONE)
                     .totalAmount(deliverFee)
                     .discountAmount(BigDecimal.ZERO)
@@ -662,7 +662,7 @@ public class DietOrderService {
                     .categoryId(Constants.FICTITIOUS_GOODS_CATEGORY_ID)
                     .categoryName(Constants.FICTITIOUS_GOODS_CATEGORY_NAME)
                     .price(packageFee)
-                    .flavorIncrease(BigDecimal.ZERO)
+                    .attributeIncrease(BigDecimal.ZERO)
                     .quantity(BigDecimal.ONE)
                     .totalAmount(packageFee)
                     .discountAmount(BigDecimal.ZERO)
@@ -675,20 +675,20 @@ public class DietOrderService {
 
         DatabaseHelper.insertAll(dietOrderDetails);
 
-        if (MapUtils.isNotEmpty(dietOrderDetailGoodsFlavorMap)) {
-            List<DietOrderDetailGoodsFlavor> dietOrderDetailGoodsFlavors = new ArrayList<DietOrderDetailGoodsFlavor>();
-            for (Map.Entry<String, List<DietOrderDetailGoodsFlavor>> entry : dietOrderDetailGoodsFlavorMap.entrySet()) {
+        if (MapUtils.isNotEmpty(dietOrderDetailGoodsAttributeMap)) {
+            List<DietOrderDetailGoodsAttribute> dietOrderDetailGoodsAttributes = new ArrayList<DietOrderDetailGoodsAttribute>();
+            for (Map.Entry<String, List<DietOrderDetailGoodsAttribute>> entry : dietOrderDetailGoodsAttributeMap.entrySet()) {
                 String key = entry.getKey();
                 DietOrderDetail dietOrderDetail = dietOrderDetailMap.get(key);
                 BigInteger dietOrderDetailId = dietOrderDetail.getId();
 
-                List<DietOrderDetailGoodsFlavor> value = entry.getValue();
-                for (DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor : value) {
-                    dietOrderDetailGoodsFlavor.setDietOrderDetailId(dietOrderDetailId);
-                    dietOrderDetailGoodsFlavors.add(dietOrderDetailGoodsFlavor);
+                List<DietOrderDetailGoodsAttribute> value = entry.getValue();
+                for (DietOrderDetailGoodsAttribute dietOrderDetailGoodsAttribute : value) {
+                    dietOrderDetailGoodsAttribute.setDietOrderDetailId(dietOrderDetailId);
+                    dietOrderDetailGoodsAttributes.add(dietOrderDetailGoodsAttribute);
                 }
             }
-            DatabaseHelper.insertAll(dietOrderDetailGoodsFlavors);
+            DatabaseHelper.insertAll(dietOrderDetailGoodsAttributes);
         }
 
         // 整单优惠活动

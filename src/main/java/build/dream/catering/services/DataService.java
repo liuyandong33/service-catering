@@ -58,10 +58,10 @@ public class DataService {
                 for (int dietOrderDetailJsonArrayIndex = 0; dietOrderDetailJsonArrayIndex < dietOrderDetailJsonArraySize; dietOrderDetailJsonArrayIndex++) {
                     JSONObject dietOrderDetailJsonObject = dietOrderDetailJsonArray.getJSONObject(dietOrderDetailJsonArrayIndex);
 
-                    JSONArray dietOrderDetailGoodsFlavorJsonArray = null;
-                    if (dietOrderDetailJsonObject.containsKey("dietOrderDetailGoodsFlavors")) {
-                        dietOrderDetailGoodsFlavorJsonArray = dietOrderDetailJsonObject.getJSONArray("dietOrderDetailGoodsFlavors");
-                        dietOrderDetailJsonObject.remove("dietOrderDetailGoodsFlavors");
+                    JSONArray dietOrderDetailGoodsAttributeJsonArray = null;
+                    if (dietOrderDetailJsonObject.containsKey("dietOrderDetailGoodsAttributes")) {
+                        dietOrderDetailGoodsAttributeJsonArray = dietOrderDetailJsonObject.getJSONArray("dietOrderDetailGoodsAttributes");
+                        dietOrderDetailJsonObject.remove("dietOrderDetailGoodsAttributes");
                     }
 
                     DietOrderDetail dietOrderDetail = GsonUtils.fromJson(dietOrderDetailJsonObject, DietOrderDetail.class);
@@ -69,14 +69,14 @@ public class DataService {
                     dietOrderDetail.setDietOrderGroupId(dietOrderGroup.getId());
                     DatabaseHelper.insert(dietOrderDetail);
 
-                    int dietOrderDetailGoodsFlavorJsonArraySize = dietOrderDetailGoodsFlavorJsonArray.size();
-                    for (int dietOrderDetailGoodsFlavorJsonArrayIndex = 0; dietOrderDetailGoodsFlavorJsonArrayIndex < dietOrderDetailGoodsFlavorJsonArraySize; dietOrderDetailGoodsFlavorJsonArrayIndex++) {
-                        JSONObject dietOrderDetailGoodsFlavorJsonObject = dietOrderDetailGoodsFlavorJsonArray.getJSONObject(dietOrderDetailGoodsFlavorJsonArrayIndex);
-                        DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor = GsonUtils.fromJson(dietOrderDetailGoodsFlavorJsonObject, DietOrderDetailGoodsFlavor.class);
-                        dietOrderDetailGoodsFlavor.setDietOrderId(dietOrder.getId());
-                        dietOrderDetailGoodsFlavor.setDietOrderGroupId(dietOrderGroup.getId());
-                        dietOrderDetailGoodsFlavor.setDietOrderDetailId(dietOrderDetail.getId());
-                        DatabaseHelper.insert(dietOrderDetailGoodsFlavor);
+                    int dietOrderDetailGoodsAttributeJsonArraySize = dietOrderDetailGoodsAttributeJsonArray.size();
+                    for (int dietOrderDetailGoodsAttributeJsonArrayIndex = 0; dietOrderDetailGoodsAttributeJsonArrayIndex < dietOrderDetailGoodsAttributeJsonArraySize; dietOrderDetailGoodsAttributeJsonArrayIndex++) {
+                        JSONObject dietOrderDetailGoodsAttributeJsonObject = dietOrderDetailGoodsAttributeJsonArray.getJSONObject(dietOrderDetailGoodsAttributeJsonArrayIndex);
+                        DietOrderDetailGoodsAttribute dietOrderDetailGoodsAttribute = GsonUtils.fromJson(dietOrderDetailGoodsAttributeJsonObject, DietOrderDetailGoodsAttribute.class);
+                        dietOrderDetailGoodsAttribute.setDietOrderId(dietOrder.getId());
+                        dietOrderDetailGoodsAttribute.setDietOrderGroupId(dietOrderGroup.getId());
+                        dietOrderDetailGoodsAttribute.setDietOrderDetailId(dietOrderDetail.getId());
+                        DatabaseHelper.insert(dietOrderDetailGoodsAttribute);
                     }
                 }
             }

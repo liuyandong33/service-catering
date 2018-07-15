@@ -3,9 +3,6 @@ package build.dream.catering.models.dietorder;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.models.BasicModel;
 import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.GsonUtils;
-import build.dream.common.utils.ValidateUtils;
-import com.google.gson.annotations.SerializedName;
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.validator.constraints.Length;
 
@@ -130,7 +127,7 @@ public class SaveDietOrderModel extends BasicModel {
         @NotNull
         private BigDecimal quantity;
 
-        private List<FlavorInfo> flavorInfos;
+        private List<AttributeInfo> attributeInfos;
 
         public BigInteger getGoodsId() {
             return goodsId;
@@ -156,12 +153,12 @@ public class SaveDietOrderModel extends BasicModel {
             this.quantity = quantity;
         }
 
-        public List<FlavorInfo> getFlavorInfos() {
-            return flavorInfos;
+        public List<AttributeInfo> getAttributeInfos() {
+            return attributeInfos;
         }
 
-        public void setFlavorInfos(List<FlavorInfo> flavorInfos) {
-            this.flavorInfos = flavorInfos;
+        public void setAttributeInfos(List<AttributeInfo> attributeInfos) {
+            this.attributeInfos = attributeInfos;
         }
 
         @Override
@@ -170,9 +167,9 @@ public class SaveDietOrderModel extends BasicModel {
             if (!isValidate) {
                 return false;
             }
-            if (CollectionUtils.isNotEmpty(flavorInfos)) {
-                for (FlavorInfo flavorInfo : flavorInfos) {
-                    isValidate = isValidate && flavorInfo.validate();
+            if (CollectionUtils.isNotEmpty(attributeInfos)) {
+                for (AttributeInfo attributeInfo : attributeInfos) {
+                    isValidate = isValidate && attributeInfo.validate();
                     if (!isValidate) {
                         return false;
                     }
@@ -182,27 +179,27 @@ public class SaveDietOrderModel extends BasicModel {
         }
     }
 
-    public static class FlavorInfo extends BasicModel {
+    public static class AttributeInfo extends BasicModel {
         @NotNull
-        private BigInteger flavorGroupId;
+        private BigInteger attributeGroupId;
 
         @NotNull
-        private BigInteger flavorId;
+        private BigInteger attributeId;
 
-        public BigInteger getFlavorGroupId() {
-            return flavorGroupId;
+        public BigInteger getAttributeGroupId() {
+            return attributeGroupId;
         }
 
-        public void setFlavorGroupId(BigInteger flavorGroupId) {
-            this.flavorGroupId = flavorGroupId;
+        public void setAttributeGroupId(BigInteger attributeGroupId) {
+            this.attributeGroupId = attributeGroupId;
         }
 
-        public BigInteger getFlavorId() {
-            return flavorId;
+        public BigInteger getAttributeId() {
+            return attributeId;
         }
 
-        public void setFlavorId(BigInteger flavorId) {
-            this.flavorId = flavorId;
+        public void setAttributeId(BigInteger attributeId) {
+            this.attributeId = attributeId;
         }
     }
 

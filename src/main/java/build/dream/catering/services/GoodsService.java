@@ -72,31 +72,31 @@ public class GoodsService extends BasicService {
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("goods", goods);
         data.put("goodsSpecifications", goodsSpecifications);
-        SearchModel goodsFlavorGroupSearchModel = new SearchModel(true);
-        goodsFlavorGroupSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
-        List<GoodsFlavorGroup> goodsFlavorGroups = DatabaseHelper.findAll(GoodsFlavorGroup.class, goodsFlavorGroupSearchModel);
-        if (CollectionUtils.isNotEmpty(goodsFlavorGroups)) {
-            SearchModel goodsFlavorSearchModel = new SearchModel(true);
-            goodsFlavorSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
-            List<GoodsFlavor> goodsFlavors = DatabaseHelper.findAll(GoodsFlavor.class, goodsFlavorSearchModel);
-            Map<BigInteger, List<GoodsFlavor>> goodsFlavorMap = new HashMap<BigInteger, List<GoodsFlavor>>();
-            for (GoodsFlavor goodsFlavor : goodsFlavors) {
-                BigInteger goodsFlavorGroupId = goodsFlavor.getGoodsFlavorGroupId();
-                List<GoodsFlavor> goodsFlavorList = goodsFlavorMap.get(goodsFlavorGroupId);
-                if (CollectionUtils.isEmpty(goodsFlavorList)) {
-                    goodsFlavorList = new ArrayList<GoodsFlavor>();
-                    goodsFlavorMap.put(goodsFlavorGroupId, goodsFlavorList);
+        SearchModel goodsAttributeGroupSearchModel = new SearchModel(true);
+        goodsAttributeGroupSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
+        List<GoodsAttributeGroup> goodsAttributeGroups = DatabaseHelper.findAll(GoodsAttributeGroup.class, goodsAttributeGroupSearchModel);
+        if (CollectionUtils.isNotEmpty(goodsAttributeGroups)) {
+            SearchModel goodsAttributeSearchModel = new SearchModel(true);
+            goodsAttributeSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
+            List<GoodsAttribute> goodsAttributes = DatabaseHelper.findAll(GoodsAttribute.class, goodsAttributeSearchModel);
+            Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = new HashMap<BigInteger, List<GoodsAttribute>>();
+            for (GoodsAttribute goodsAttribute : goodsAttributes) {
+                BigInteger goodsAttributeGroupId = goodsAttribute.getGoodsAttributeGroupId();
+                List<GoodsAttribute> goodsAttributeList = goodsAttributeMap.get(goodsAttributeGroupId);
+                if (CollectionUtils.isEmpty(goodsAttributeList)) {
+                    goodsAttributeList = new ArrayList<GoodsAttribute>();
+                    goodsAttributeMap.put(goodsAttributeGroupId, goodsAttributeList);
                 }
-                goodsFlavorList.add(goodsFlavor);
+                goodsAttributeList.add(goodsAttribute);
             }
-            List<Map<String, Object>> flavorGroups = new ArrayList<Map<String, Object>>();
-            for (GoodsFlavorGroup goodsFlavorGroup : goodsFlavorGroups) {
-                Map<String, Object> flavorGroup = new HashMap<String, Object>();
-                flavorGroup.put("flavorGroup", goodsFlavorGroup);
-                flavorGroup.put("flavors", goodsFlavorMap.get(goodsFlavorGroup.getId()));
-                flavorGroups.add(flavorGroup);
+            List<Map<String, Object>> attributeGroups = new ArrayList<Map<String, Object>>();
+            for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroups) {
+                Map<String, Object> attributeGroup = new HashMap<String, Object>();
+                attributeGroup.put("attributeGroup", goodsAttributeGroup);
+                attributeGroup.put("attributes", goodsAttributeMap.get(goodsAttributeGroup.getId()));
+                attributeGroups.add(attributeGroup);
             }
-            data.put("flavorGroups", flavorGroups);
+            data.put("attributeGroups", attributeGroups);
         }
         return new ApiRest(data, "获取商品信息成功！");
     }
@@ -124,28 +124,28 @@ public class GoodsService extends BasicService {
                 goodsSpecificationList.add(goodsSpecification);
             }
 
-            SearchModel goodsFlavorGroupSearchModel = new SearchModel(true);
-            goodsFlavorGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-            goodsFlavorGroupSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-            List<GoodsFlavorGroup> goodsFlavorGroups = DatabaseHelper.findAll(GoodsFlavorGroup.class, goodsFlavorGroupSearchModel);
+            SearchModel goodsAttributeGroupSearchModel = new SearchModel(true);
+            goodsAttributeGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+            goodsAttributeGroupSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+            List<GoodsAttributeGroup> goodsAttributeGroups = DatabaseHelper.findAll(GoodsAttributeGroup.class, goodsAttributeGroupSearchModel);
 
-            Map<BigInteger, List<Map<String, Object>>> goodsFlavorGroupMap = new HashMap<BigInteger, List<Map<String, Object>>>();
-            if (CollectionUtils.isNotEmpty(goodsFlavorGroups)) {
-                SearchModel goodsFlavorSearchModel = new SearchModel(true);
-                goodsFlavorSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-                goodsFlavorSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-                List<GoodsFlavor> goodsFlavors = DatabaseHelper.findAll(GoodsFlavor.class, goodsFlavorSearchModel);
+            Map<BigInteger, List<Map<String, Object>>> goodsAttributeGroupMap = new HashMap<BigInteger, List<Map<String, Object>>>();
+            if (CollectionUtils.isNotEmpty(goodsAttributeGroups)) {
+                SearchModel goodsAttributeSearchModel = new SearchModel(true);
+                goodsAttributeSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+                goodsAttributeSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+                List<GoodsAttribute> goodsAttributes = DatabaseHelper.findAll(GoodsAttribute.class, goodsAttributeSearchModel);
 
-                Map<BigInteger, List<GoodsFlavor>> goodsFlavorMap = new HashMap<BigInteger, List<GoodsFlavor>>();
-                for (GoodsFlavor goodsFlavor : goodsFlavors) {
-                    List<GoodsFlavor> goodsFlavorList = goodsFlavorMap.get(goodsFlavor.getGoodsFlavorGroupId());
-                    if (goodsFlavorList == null) {
-                        goodsFlavorList = new ArrayList<GoodsFlavor>();
-                        goodsFlavorMap.put(goodsFlavor.getGoodsFlavorGroupId(), goodsFlavorList);
+                Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = new HashMap<BigInteger, List<GoodsAttribute>>();
+                for (GoodsAttribute goodsAttribute : goodsAttributes) {
+                    List<GoodsAttribute> goodsAttributeList = goodsAttributeMap.get(goodsAttribute.getGoodsAttributeGroupId());
+                    if (goodsAttributeList == null) {
+                        goodsAttributeList = new ArrayList<GoodsAttribute>();
+                        goodsAttributeMap.put(goodsAttribute.getGoodsAttributeGroupId(), goodsAttributeList);
                     }
-                    goodsFlavorList.add(goodsFlavor);
+                    goodsAttributeList.add(goodsAttribute);
                 }
-                goodsFlavorGroupMap = buildFlavorGroups(goodsFlavorGroups, goodsFlavorMap);
+                goodsAttributeGroupMap = buildAttributeGroups(goodsAttributeGroups, goodsAttributeMap);
             }
 
             List<BigInteger> packageIds = new ArrayList<BigInteger>();
@@ -206,7 +206,7 @@ public class GoodsService extends BasicService {
                 goodsInfo.put("categoryName", goods.getCategoryName());
                 if (type == 1) {
                     goodsInfo.put("goodsSpecifications", buildGoodsSpecificationInfos(goodsSpecificationMap.get(goodsId)));
-                    goodsInfo.put("flavorGroups", goodsFlavorGroupMap.get(goodsId));
+                    goodsInfo.put("attributeGroups", goodsAttributeGroupMap.get(goodsId));
                 } else if (type == 2) {
                     goodsInfo.put("groups", packageGroupMap.get(goodsId));
                 }
@@ -228,31 +228,31 @@ public class GoodsService extends BasicService {
         return goodsSpecificationInfos;
     }
 
-    public Map<BigInteger, List<Map<String, Object>>> buildFlavorGroups(List<GoodsFlavorGroup> goodsFlavorGroups, Map<BigInteger, List<GoodsFlavor>> goodsFlavorMap) {
-        Map<BigInteger, List<Map<String, Object>>> flavorGroups = new HashMap<BigInteger, List<Map<String, Object>>>();
-        for (GoodsFlavorGroup goodsFlavorGroup : goodsFlavorGroups) {
-            Map<String, Object> goodsFlavorGroupInfo = new HashMap<String, Object>();
-            goodsFlavorGroupInfo.put("id", goodsFlavorGroup.getId());
-            goodsFlavorGroupInfo.put("name", goodsFlavorGroup.getName());
+    public Map<BigInteger, List<Map<String, Object>>> buildAttributeGroups(List<GoodsAttributeGroup> goodsAttributeGroups, Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap) {
+        Map<BigInteger, List<Map<String, Object>>> attributeGroups = new HashMap<BigInteger, List<Map<String, Object>>>();
+        for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroups) {
+            Map<String, Object> goodsAttributeGroupInfo = new HashMap<String, Object>();
+            goodsAttributeGroupInfo.put("id", goodsAttributeGroup.getId());
+            goodsAttributeGroupInfo.put("name", goodsAttributeGroup.getName());
 
-            List<Map<String, Object>> goodsFlavorInfos = new ArrayList<Map<String, Object>>();
-            List<GoodsFlavor> goodsFlavors = goodsFlavorMap.get(goodsFlavorGroup.getId());
-            for (GoodsFlavor goodsFlavor : goodsFlavors) {
-                Map<String, Object> goodsFlavorInfo = new HashMap<String, Object>();
-                goodsFlavorInfo.put("id", goodsFlavor.getId());
-                goodsFlavorInfo.put("name", goodsFlavor.getName());
-                goodsFlavorInfo.put("price", goodsFlavor.getPrice());
-                goodsFlavorInfos.add(goodsFlavorInfo);
+            List<Map<String, Object>> goodsAttributeInfos = new ArrayList<Map<String, Object>>();
+            List<GoodsAttribute> goodsAttributes = goodsAttributeMap.get(goodsAttributeGroup.getId());
+            for (GoodsAttribute goodsAttribute : goodsAttributes) {
+                Map<String, Object> goodsAttributeInfo = new HashMap<String, Object>();
+                goodsAttributeInfo.put("id", goodsAttribute.getId());
+                goodsAttributeInfo.put("name", goodsAttribute.getName());
+                goodsAttributeInfo.put("price", goodsAttribute.getPrice());
+                goodsAttributeInfos.add(goodsAttributeInfo);
             }
-            goodsFlavorGroupInfo.put("flavors", goodsFlavorInfos);
-            List<Map<String, Object>> goodsFlavorGroupInfos = flavorGroups.get(goodsFlavorGroup.getGoodsId());
-            if (goodsFlavorGroupInfos == null) {
-                goodsFlavorGroupInfos = new ArrayList<Map<String, Object>>();
-                flavorGroups.put(goodsFlavorGroup.getGoodsId(), goodsFlavorGroupInfos);
+            goodsAttributeGroupInfo.put("attributes", goodsAttributeInfos);
+            List<Map<String, Object>> goodsAttributeGroupInfos = attributeGroups.get(goodsAttributeGroup.getGoodsId());
+            if (goodsAttributeGroupInfos == null) {
+                goodsAttributeGroupInfos = new ArrayList<Map<String, Object>>();
+                attributeGroups.put(goodsAttributeGroup.getGoodsId(), goodsAttributeGroupInfos);
             }
-            goodsFlavorGroupInfos.add(goodsFlavorGroupInfo);
+            goodsAttributeGroupInfos.add(goodsAttributeGroupInfo);
         }
-        return flavorGroups;
+        return attributeGroups;
     }
 
     /**
@@ -300,26 +300,26 @@ public class GoodsService extends BasicService {
             }
 
             // 删除需要删除的口味组及其下的口味
-            if (CollectionUtils.isNotEmpty(saveGoodsModel.getDeleteGoodsFlavorGroupIds())) {
-                UpdateModel deleteGoodsFlavorGroupUpdateModel = new UpdateModel(true);
-                deleteGoodsFlavorGroupUpdateModel.setTableName("goods_flavor_group");
-                deleteGoodsFlavorGroupUpdateModel.addContentValue("last_update_user_id", userId);
-                deleteGoodsFlavorGroupUpdateModel.addContentValue("last_update_remark", "删除商品口味组信息！");
-                deleteGoodsFlavorGroupUpdateModel.addContentValue("delete", 1);
-                deleteGoodsFlavorGroupUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-                deleteGoodsFlavorGroupUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-                deleteGoodsFlavorGroupUpdateModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, saveGoodsModel.getDeleteGoodsFlavorGroupIds());
-                DatabaseHelper.universalUpdate(deleteGoodsFlavorGroupUpdateModel);
+            if (CollectionUtils.isNotEmpty(saveGoodsModel.getDeleteGoodsAttributeGroupIds())) {
+                UpdateModel deleteGoodsAttributeGroupUpdateModel = new UpdateModel(true);
+                deleteGoodsAttributeGroupUpdateModel.setTableName("goods_attribute_group");
+                deleteGoodsAttributeGroupUpdateModel.addContentValue("last_update_user_id", userId);
+                deleteGoodsAttributeGroupUpdateModel.addContentValue("last_update_remark", "删除商品口味组信息！");
+                deleteGoodsAttributeGroupUpdateModel.addContentValue("delete", 1);
+                deleteGoodsAttributeGroupUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+                deleteGoodsAttributeGroupUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+                deleteGoodsAttributeGroupUpdateModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, saveGoodsModel.getDeleteGoodsAttributeGroupIds());
+                DatabaseHelper.universalUpdate(deleteGoodsAttributeGroupUpdateModel);
 
-                UpdateModel deleteGoodsFlavorUpdateModel = new UpdateModel(true);
-                deleteGoodsFlavorUpdateModel.setTableName("goods_flavor");
-                deleteGoodsFlavorUpdateModel.addContentValue("last_update_user_id", userId);
-                deleteGoodsFlavorUpdateModel.addContentValue("last_update_remark", "删除商品口味信息！");
-                deleteGoodsFlavorUpdateModel.addContentValue("delete", 1);
-                deleteGoodsFlavorUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-                deleteGoodsFlavorUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-                deleteGoodsFlavorUpdateModel.addSearchCondition("goods_flavor_group_id", Constants.SQL_OPERATION_SYMBOL_IN, saveGoodsModel.getDeleteGoodsFlavorGroupIds());
-                DatabaseHelper.universalUpdate(deleteGoodsFlavorUpdateModel);
+                UpdateModel deleteGoodsAttributeUpdateModel = new UpdateModel(true);
+                deleteGoodsAttributeUpdateModel.setTableName("goods_attribute");
+                deleteGoodsAttributeUpdateModel.addContentValue("last_update_user_id", userId);
+                deleteGoodsAttributeUpdateModel.addContentValue("last_update_remark", "删除商品口味信息！");
+                deleteGoodsAttributeUpdateModel.addContentValue("delete", 1);
+                deleteGoodsAttributeUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+                deleteGoodsAttributeUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+                deleteGoodsAttributeUpdateModel.addSearchCondition("goods_attribute_group_id", Constants.SQL_OPERATION_SYMBOL_IN, saveGoodsModel.getDeleteGoodsAttributeGroupIds());
+                DatabaseHelper.universalUpdate(deleteGoodsAttributeUpdateModel);
             }
 
             // 查询出需要修改的商品规格
@@ -362,105 +362,103 @@ public class GoodsService extends BasicService {
                 }
             }
 
-            List<SaveGoodsModel.FlavorGroupInfo> flavorGroupInfos = saveGoodsModel.getFlavorGroupInfos();
-            if (CollectionUtils.isNotEmpty(flavorGroupInfos)) {
+            List<SaveGoodsModel.AttributeGroupInfo> attributeGroupInfos = saveGoodsModel.getAttributeGroupInfos();
+            if (CollectionUtils.isNotEmpty(attributeGroupInfos)) {
                 // 用来保存需要修改的口味组id
-                List<BigInteger> goodsFlavorGroupIds = new ArrayList<BigInteger>();
+                List<BigInteger> goodsAttributeGroupIds = new ArrayList<BigInteger>();
                 // 用来保存需要删除的口味id
-                List<BigInteger> deleteGoodsFlavorIds = new ArrayList<BigInteger>();
+                List<BigInteger> deleteGoodsAttributeIds = new ArrayList<BigInteger>();
                 // 用来保存需要修改的口味id
-                List<BigInteger> goodsFlavorIds = new ArrayList<BigInteger>();
-                for (SaveGoodsModel.FlavorGroupInfo goodsFlavorGroupInfo : flavorGroupInfos) {
-                    if (goodsFlavorGroupInfo.getId() != null) {
-                        goodsFlavorGroupIds.add(goodsFlavorGroupInfo.getId());
+                List<BigInteger> goodsAttributeIds = new ArrayList<BigInteger>();
+                for (SaveGoodsModel.AttributeGroupInfo attributeGroupInfo : attributeGroupInfos) {
+                    if (attributeGroupInfo.getId() != null) {
+                        goodsAttributeGroupIds.add(attributeGroupInfo.getId());
 
-                        if (CollectionUtils.isNotEmpty(goodsFlavorGroupInfo.getDeleteGoodsFlavorIds())) {
-                            deleteGoodsFlavorIds.addAll(goodsFlavorGroupInfo.getDeleteGoodsFlavorIds());
+                        if (CollectionUtils.isNotEmpty(attributeGroupInfo.getDeleteGoodsAttributeIds())) {
+                            deleteGoodsAttributeIds.addAll(attributeGroupInfo.getDeleteGoodsAttributeIds());
                         }
 
-                        for (SaveGoodsModel.FlavorInfo flavorGroupInfo : goodsFlavorGroupInfo.getFlavorInfos()) {
-                            if (flavorGroupInfo.getId() != null) {
-                                goodsFlavorIds.add(flavorGroupInfo.getId());
+                        for (SaveGoodsModel.AttributeInfo attributeInfo : attributeGroupInfo.getAttributeInfos()) {
+                            if (attributeInfo.getId() != null) {
+                                goodsAttributeIds.add(attributeInfo.getId());
                             }
                         }
                     }
                 }
 
                 // 删除需要删除的口味
-                if (CollectionUtils.isNotEmpty(deleteGoodsFlavorIds)) {
-                    UpdateModel deleteGoodsFlavorUpdateModel = new UpdateModel(true);
-                    deleteGoodsFlavorUpdateModel.setTableName("goods_flavor");
-                    deleteGoodsFlavorUpdateModel.addContentValue("last_update_user_id", userId);
-                    deleteGoodsFlavorUpdateModel.addContentValue("last_update_remark", "删除商品口味信息！");
-                    deleteGoodsFlavorUpdateModel.addContentValue("delete", 1);
-                    deleteGoodsFlavorUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-                    deleteGoodsFlavorUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-                    deleteGoodsFlavorUpdateModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, deleteGoodsFlavorIds);
-                    DatabaseHelper.universalUpdate(deleteGoodsFlavorUpdateModel);
+                if (CollectionUtils.isNotEmpty(deleteGoodsAttributeIds)) {
+                    UpdateModel deleteGoodsAttributeUpdateModel = new UpdateModel(true);
+                    deleteGoodsAttributeUpdateModel.setTableName("goods_attribute");
+                    deleteGoodsAttributeUpdateModel.addContentValue("last_update_user_id", userId);
+                    deleteGoodsAttributeUpdateModel.addContentValue("last_update_remark", "删除商品口味信息！");
+                    deleteGoodsAttributeUpdateModel.addContentValue("delete", 1);
+                    deleteGoodsAttributeUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+                    deleteGoodsAttributeUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+                    deleteGoodsAttributeUpdateModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, deleteGoodsAttributeIds);
+                    DatabaseHelper.universalUpdate(deleteGoodsAttributeUpdateModel);
                 }
 
                 // 查询出需要修改的口味组
-                SearchModel goodsFlavorGroupSearchModel = new SearchModel(true);
-                goodsFlavorGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-                goodsFlavorGroupSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-                goodsFlavorGroupSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
-                goodsFlavorGroupSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsFlavorGroupIds);
-                List<GoodsFlavorGroup> goodsFlavorGroups = DatabaseHelper.findAll(GoodsFlavorGroup.class, goodsFlavorGroupSearchModel);
-                Map<BigInteger, GoodsFlavorGroup> goodsFlavorGroupMap = new HashMap<BigInteger, GoodsFlavorGroup>();
-                for (GoodsFlavorGroup goodsFlavorGroup : goodsFlavorGroups) {
-                    goodsFlavorGroupMap.put(goodsFlavorGroup.getId(), goodsFlavorGroup);
+                SearchModel goodsAttributeGroupSearchModel = new SearchModel(true);
+                goodsAttributeGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+                goodsAttributeGroupSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+                goodsAttributeGroupSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
+                goodsAttributeGroupSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsAttributeGroupIds);
+                List<GoodsAttributeGroup> goodsAttributeGroups = DatabaseHelper.findAll(GoodsAttributeGroup.class, goodsAttributeGroupSearchModel);
+                Map<BigInteger, GoodsAttributeGroup> goodsAttributeGroupMap = new HashMap<BigInteger, GoodsAttributeGroup>();
+                for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroups) {
+                    goodsAttributeGroupMap.put(goodsAttributeGroup.getId(), goodsAttributeGroup);
                 }
 
                 // 查询出需要修改的口味
-                SearchModel goodsFlavorSearchModel = new SearchModel(true);
-                goodsFlavorSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-                goodsFlavorSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-                goodsFlavorSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
-                goodsFlavorSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsFlavorIds);
-                List<GoodsFlavor> goodsFlavors = DatabaseHelper.findAll(GoodsFlavor.class, goodsFlavorSearchModel);
-                Map<BigInteger, GoodsFlavor> goodsFlavorMap = new HashMap<BigInteger, GoodsFlavor>();
-                for (GoodsFlavor goodsFlavor : goodsFlavors) {
-                    goodsFlavorMap.put(goodsFlavor.getId(), goodsFlavor);
+                SearchModel goodsAttributeSearchModel = new SearchModel(true);
+                goodsAttributeSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+                goodsAttributeSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+                goodsAttributeSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
+                goodsAttributeSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsAttributeIds);
+                List<GoodsAttribute> goodsAttributes = DatabaseHelper.findAll(GoodsAttribute.class, goodsAttributeSearchModel);
+                Map<BigInteger, GoodsAttribute> goodsAttributeMap = new HashMap<BigInteger, GoodsAttribute>();
+                for (GoodsAttribute goodsAttribute : goodsAttributes) {
+                    goodsAttributeMap.put(goodsAttribute.getId(), goodsAttribute);
                 }
 
-                for (SaveGoodsModel.FlavorGroupInfo flavorGroupInfo : flavorGroupInfos) {
+                for (SaveGoodsModel.AttributeGroupInfo attributeGroupInfo : attributeGroupInfos) {
                     // 用来保存需要新增的口味，便于批量插入
-                    List<GoodsFlavor> insertGoodsFlavors = new ArrayList<GoodsFlavor>();
-                    if (flavorGroupInfo.getId() != null) {
-                        GoodsFlavorGroup goodsFlavorGroup = goodsFlavorGroupMap.get(flavorGroupInfo.getId());
-                        Validate.notNull(goodsFlavorGroup, "口味组不存在！");
-                        goodsFlavorGroup.setName(flavorGroupInfo.getName());
-                        goodsFlavorGroup.setLastUpdateUserId(userId);
-                        goodsFlavorGroup.setLastUpdateRemark("修改口味组信息！");
-                        DatabaseHelper.update(goodsFlavorGroup);
+                    List<GoodsAttribute> insertGoodsAttributes = new ArrayList<GoodsAttribute>();
+                    if (attributeGroupInfo.getId() != null) {
+                        GoodsAttributeGroup goodsAttributeGroup = goodsAttributeGroupMap.get(attributeGroupInfo.getId());
+                        Validate.notNull(goodsAttributeGroup, "口味组不存在！");
+                        goodsAttributeGroup.setName(attributeGroupInfo.getName());
+                        goodsAttributeGroup.setLastUpdateUserId(userId);
+                        goodsAttributeGroup.setLastUpdateRemark("修改口味组信息！");
+                        DatabaseHelper.update(goodsAttributeGroup);
 
-                        for (SaveGoodsModel.FlavorInfo flavorInfo : flavorGroupInfo.getFlavorInfos()) {
-                            if (flavorInfo.getId() != null) {
-                                GoodsFlavor goodsFlavor = goodsFlavorMap.get(flavorInfo.getId());
-                                Validate.notNull(goodsFlavor, "商品口味不存在！");
-                                goodsFlavor.setName(flavorInfo.getName());
-                                goodsFlavor.setPrice(flavorInfo.getPrice() == null ? BigDecimal.ZERO : flavorInfo.getPrice());
-                                goodsFlavor.setLastUpdateUserId(userId);
-                                goodsFlavor.setLastUpdateRemark("修改口味信息！");
-                                DatabaseHelper.update(goodsFlavor);
+                        for (SaveGoodsModel.AttributeInfo attributeInfo : attributeGroupInfo.getAttributeInfos()) {
+                            if (attributeInfo.getId() != null) {
+                                GoodsAttribute goodsAttribute = goodsAttributeMap.get(attributeInfo.getId());
+                                Validate.notNull(goodsAttribute, "商品口味不存在！");
+                                goodsAttribute.setName(attributeInfo.getName());
+                                goodsAttribute.setPrice(attributeInfo.getPrice() == null ? BigDecimal.ZERO : attributeInfo.getPrice());
+                                goodsAttribute.setLastUpdateUserId(userId);
+                                goodsAttribute.setLastUpdateRemark("修改口味信息！");
+                                DatabaseHelper.update(goodsAttribute);
                             } else {
-                                GoodsFlavor goodsFlavor = buildGoodsFlavor(flavorInfo, tenantId, tenantCode, branchId, goodsId, goodsFlavorGroup.getId(), userId);
-                                insertGoodsFlavors.add(goodsFlavor);
-//                                goodsFlavorMapper.insert(goodsFlavor);
+                                GoodsAttribute goodsAttribute = buildGoodsAttribute(attributeInfo, tenantId, tenantCode, branchId, goodsId, goodsAttributeGroup.getId(), userId);
+                                insertGoodsAttributes.add(goodsAttribute);
                             }
                         }
                     } else {
-                        GoodsFlavorGroup goodsFlavorGroup = buildGoodsFlavorGroup(tenantId, tenantCode, branchId, goodsId, flavorGroupInfo, userId);
-                        DatabaseHelper.insert(goodsFlavorGroup);
+                        GoodsAttributeGroup goodsAttributeGroup = buildGoodsAttributeGroup(tenantId, tenantCode, branchId, goodsId, attributeGroupInfo, userId);
+                        DatabaseHelper.insert(goodsAttributeGroup);
 
-                        for (SaveGoodsModel.FlavorInfo flavorInfo : flavorGroupInfo.getFlavorInfos()) {
-                            GoodsFlavor goodsFlavor = buildGoodsFlavor(flavorInfo, tenantId, tenantCode, branchId, goodsId, goodsFlavorGroup.getId(), userId);
-                            insertGoodsFlavors.add(goodsFlavor);
-//                            goodsFlavorMapper.insert(goodsFlavor);
+                        for (SaveGoodsModel.AttributeInfo attributeInfo : attributeGroupInfo.getAttributeInfos()) {
+                            GoodsAttribute goodsAttribute = buildGoodsAttribute(attributeInfo, tenantId, tenantCode, branchId, goodsId, goodsAttributeGroup.getId(), userId);
+                            insertGoodsAttributes.add(goodsAttribute);
                         }
                     }
-                    if (CollectionUtils.isNotEmpty(insertGoodsFlavors)) {
-                        DatabaseHelper.insertAll(insertGoodsFlavors);
+                    if (CollectionUtils.isNotEmpty(insertGoodsAttributes)) {
+                        DatabaseHelper.insertAll(insertGoodsAttributes);
                     }
                 }
             }
@@ -489,19 +487,19 @@ public class GoodsService extends BasicService {
             }
             DatabaseHelper.insertAll(insertGoodsSpecifications);
 
-            List<SaveGoodsModel.FlavorGroupInfo> flavorGroupInfos = saveGoodsModel.getFlavorGroupInfos();
-            if (CollectionUtils.isNotEmpty(flavorGroupInfos)) {
-                List<GoodsFlavor> insertGoodsFlavors = new ArrayList<GoodsFlavor>();
-                for (SaveGoodsModel.FlavorGroupInfo flavorGroupInfo : flavorGroupInfos) {
-                    GoodsFlavorGroup goodsFlavorGroup = buildGoodsFlavorGroup(tenantId, tenantCode, branchId, goodsId, flavorGroupInfo, userId);
-                    DatabaseHelper.insert(goodsFlavorGroup);
+            List<SaveGoodsModel.AttributeGroupInfo> attributeGroupInfos = saveGoodsModel.getAttributeGroupInfos();
+            if (CollectionUtils.isNotEmpty(attributeGroupInfos)) {
+                List<GoodsAttribute> insertGoodsAttributes = new ArrayList<GoodsAttribute>();
+                for (SaveGoodsModel.AttributeGroupInfo attributeGroupInfo : attributeGroupInfos) {
+                    GoodsAttributeGroup goodsAttributeGroup = buildGoodsAttributeGroup(tenantId, tenantCode, branchId, goodsId, attributeGroupInfo, userId);
+                    DatabaseHelper.insert(goodsAttributeGroup);
 
-                    for (SaveGoodsModel.FlavorInfo flavorInfo : flavorGroupInfo.getFlavorInfos()) {
-                        GoodsFlavor goodsFlavor = buildGoodsFlavor(flavorInfo, tenantId, tenantCode, branchId, goodsId, goodsFlavorGroup.getId(), userId);
-                        insertGoodsFlavors.add(goodsFlavor);
+                    for (SaveGoodsModel.AttributeInfo attributeInfo : attributeGroupInfo.getAttributeInfos()) {
+                        GoodsAttribute goodsAttribute = buildGoodsAttribute(attributeInfo, tenantId, tenantCode, branchId, goodsId, goodsAttributeGroup.getId(), userId);
+                        insertGoodsAttributes.add(goodsAttribute);
                     }
                 }
-                DatabaseHelper.insertAll(insertGoodsFlavors);
+                DatabaseHelper.insertAll(insertGoodsAttributes);
             }
         }
         ApiRest apiRest = new ApiRest();
@@ -510,32 +508,32 @@ public class GoodsService extends BasicService {
         return apiRest;
     }
 
-    private GoodsFlavorGroup buildGoodsFlavorGroup(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, SaveGoodsModel.FlavorGroupInfo flavorGroupInfo, BigInteger userId) {
-        GoodsFlavorGroup goodsFlavorGroup = new GoodsFlavorGroup();
-        goodsFlavorGroup.setTenantId(tenantId);
-        goodsFlavorGroup.setTenantCode(tenantCode);
-        goodsFlavorGroup.setBranchId(branchId);
-        goodsFlavorGroup.setGoodsId(goodsId);
-        goodsFlavorGroup.setName(flavorGroupInfo.getName());
-        goodsFlavorGroup.setCreateUserId(userId);
-        goodsFlavorGroup.setLastUpdateUserId(userId);
-        goodsFlavorGroup.setLastUpdateRemark("新增口味组信息！");
-        return goodsFlavorGroup;
+    private GoodsAttributeGroup buildGoodsAttributeGroup(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, SaveGoodsModel.AttributeGroupInfo attributeGroupInfo, BigInteger userId) {
+        GoodsAttributeGroup goodsAttributeGroup = new GoodsAttributeGroup();
+        goodsAttributeGroup.setTenantId(tenantId);
+        goodsAttributeGroup.setTenantCode(tenantCode);
+        goodsAttributeGroup.setBranchId(branchId);
+        goodsAttributeGroup.setGoodsId(goodsId);
+        goodsAttributeGroup.setName(attributeGroupInfo.getName());
+        goodsAttributeGroup.setCreateUserId(userId);
+        goodsAttributeGroup.setLastUpdateUserId(userId);
+        goodsAttributeGroup.setLastUpdateRemark("新增口味组信息！");
+        return goodsAttributeGroup;
     }
 
-    private GoodsFlavor buildGoodsFlavor(SaveGoodsModel.FlavorInfo flavorInfo, BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, BigInteger goodsFlavorGroupId, BigInteger userId) {
-        GoodsFlavor goodsFlavor = new GoodsFlavor();
-        goodsFlavor.setTenantId(tenantId);
-        goodsFlavor.setTenantCode(tenantCode);
-        goodsFlavor.setBranchId(branchId);
-        goodsFlavor.setGoodsId(goodsId);
-        goodsFlavor.setGoodsFlavorGroupId(goodsFlavorGroupId);
-        goodsFlavor.setName(flavorInfo.getName());
-        goodsFlavor.setPrice(flavorInfo.getPrice() == null ? BigDecimal.ZERO : flavorInfo.getPrice());
-        goodsFlavor.setCreateUserId(userId);
-        goodsFlavor.setLastUpdateUserId(userId);
-        goodsFlavor.setLastUpdateRemark("新增口味信息！");
-        return goodsFlavor;
+    private GoodsAttribute buildGoodsAttribute(SaveGoodsModel.AttributeInfo attributeInfo, BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, BigInteger goodsAttributeGroupId, BigInteger userId) {
+        GoodsAttribute goodsAttribute = new GoodsAttribute();
+        goodsAttribute.setTenantId(tenantId);
+        goodsAttribute.setTenantCode(tenantCode);
+        goodsAttribute.setBranchId(branchId);
+        goodsAttribute.setGoodsId(goodsId);
+        goodsAttribute.setGoodsAttributeGroupId(goodsAttributeGroupId);
+        goodsAttribute.setName(attributeInfo.getName());
+        goodsAttribute.setPrice(attributeInfo.getPrice() == null ? BigDecimal.ZERO : attributeInfo.getPrice());
+        goodsAttribute.setCreateUserId(userId);
+        goodsAttribute.setLastUpdateUserId(userId);
+        goodsAttribute.setLastUpdateRemark("新增属性信息！");
+        return goodsAttribute;
     }
 
     private GoodsSpecification buildGoodsSpecification(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, SaveGoodsModel.GoodsSpecificationInfo goodsSpecificationInfo, BigInteger userId) {
@@ -640,26 +638,26 @@ public class GoodsService extends BasicService {
         DatabaseHelper.universalUpdate(goodsSpecificationUpdateModel);
 
         // 删除该商品的所有口味组
-        UpdateModel goodsFlavorGroupUpdateModel = new UpdateModel(true);
-        goodsFlavorGroupUpdateModel.setTableName("goods_flavor_group");
-        goodsFlavorGroupUpdateModel.addContentValue("deleted", 1);
-        goodsFlavorGroupUpdateModel.addContentValue("last_update_user_id", userId);
-        goodsFlavorGroupUpdateModel.addContentValue("last_update_remark", "删除商品口味组信息！");
-        goodsFlavorGroupUpdateModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
-        goodsFlavorGroupUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        goodsFlavorGroupUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        DatabaseHelper.universalUpdate(goodsFlavorGroupUpdateModel);
+        UpdateModel goodsAttributeGroupUpdateModel = new UpdateModel(true);
+        goodsAttributeGroupUpdateModel.setTableName("goods_attribute_group");
+        goodsAttributeGroupUpdateModel.addContentValue("deleted", 1);
+        goodsAttributeGroupUpdateModel.addContentValue("last_update_user_id", userId);
+        goodsAttributeGroupUpdateModel.addContentValue("last_update_remark", "删除商品口味组信息！");
+        goodsAttributeGroupUpdateModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
+        goodsAttributeGroupUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        goodsAttributeGroupUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        DatabaseHelper.universalUpdate(goodsAttributeGroupUpdateModel);
 
         // 删除该商品的所有口味
-        UpdateModel goodsFlavorUpdateModel = new UpdateModel(true);
-        goodsFlavorUpdateModel.setTableName("goods_flavor");
-        goodsFlavorUpdateModel.addContentValue("deleted", 1);
-        goodsFlavorUpdateModel.addContentValue("last_update_user_id", userId);
-        goodsFlavorUpdateModel.addContentValue("last_update_remark", "删除商品口味组信息！");
-        goodsFlavorUpdateModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
-        goodsFlavorUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        goodsFlavorUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        DatabaseHelper.universalUpdate(goodsFlavorUpdateModel);
+        UpdateModel goodsAttributeUpdateModel = new UpdateModel(true);
+        goodsAttributeUpdateModel.setTableName("goods_attribute");
+        goodsAttributeUpdateModel.addContentValue("deleted", 1);
+        goodsAttributeUpdateModel.addContentValue("last_update_user_id", userId);
+        goodsAttributeUpdateModel.addContentValue("last_update_remark", "删除商品口味组信息！");
+        goodsAttributeUpdateModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
+        goodsAttributeUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        goodsAttributeUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        DatabaseHelper.universalUpdate(goodsAttributeUpdateModel);
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("删除商品信息成功！");

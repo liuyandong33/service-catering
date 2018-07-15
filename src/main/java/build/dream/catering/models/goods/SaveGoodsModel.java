@@ -43,12 +43,12 @@ public class SaveGoodsModel extends BasicModel {
     @JsonSchema(value = Constants.GOODS_SPECIFICATION_INFOS_SCHEMA_FILE_PATH)
     private List<GoodsSpecificationInfo> goodsSpecificationInfos;
 
-    @JsonSchema(value = Constants.FLAVOR_GROUP_INFOS_SCHEMA_FILE_PATH)
-    private List<FlavorGroupInfo> flavorGroupInfos;
+    @JsonSchema(value = Constants.ATTRIBUTE_GROUP_INFOS_SCHEMA_FILE_PATH)
+    private List<AttributeGroupInfo> attributeGroupInfos;
 
     private List<BigInteger> deleteGoodsSpecificationIds;
 
-    private List<BigInteger> deleteGoodsFlavorGroupIds;
+    private List<BigInteger> deleteGoodsAttributeGroupIds;
 
     public BigInteger getTenantId() {
         return tenantId;
@@ -130,12 +130,12 @@ public class SaveGoodsModel extends BasicModel {
         this.goodsSpecificationInfos = goodsSpecificationInfos;
     }
 
-    public List<FlavorGroupInfo> getFlavorGroupInfos() {
-        return flavorGroupInfos;
+    public List<AttributeGroupInfo> getAttributeGroupInfos() {
+        return attributeGroupInfos;
     }
 
-    public void setFlavorGroupInfos(List<FlavorGroupInfo> flavorGroupInfos) {
-        this.flavorGroupInfos = flavorGroupInfos;
+    public void setAttributeGroupInfos(List<AttributeGroupInfo> attributeGroupInfos) {
+        this.attributeGroupInfos = attributeGroupInfos;
     }
 
     public List<BigInteger> getDeleteGoodsSpecificationIds() {
@@ -146,12 +146,12 @@ public class SaveGoodsModel extends BasicModel {
         this.deleteGoodsSpecificationIds = deleteGoodsSpecificationIds;
     }
 
-    public List<BigInteger> getDeleteGoodsFlavorGroupIds() {
-        return deleteGoodsFlavorGroupIds;
+    public List<BigInteger> getDeleteGoodsAttributeGroupIds() {
+        return deleteGoodsAttributeGroupIds;
     }
 
-    public void setDeleteGoodsFlavorGroupIds(List<BigInteger> deleteGoodsFlavorGroupIds) {
-        this.deleteGoodsFlavorGroupIds = deleteGoodsFlavorGroupIds;
+    public void setDeleteGoodsAttributeGroupIds(List<BigInteger> deleteGoodsAttributeGroupIds) {
+        this.deleteGoodsAttributeGroupIds = deleteGoodsAttributeGroupIds;
     }
 
     @Override
@@ -202,15 +202,15 @@ public class SaveGoodsModel extends BasicModel {
         }
     }
 
-    public static class FlavorGroupInfo {
+    public static class AttributeGroupInfo {
         private BigInteger id;
         @NotNull
         @Length(max = 20)
         private String name;
 
-        private List<FlavorInfo> flavorInfos;
+        private List<AttributeInfo> attributeInfos;
 
-        private List<BigInteger> deleteGoodsFlavorIds;
+        private List<BigInteger> deleteGoodsAttributeIds;
 
         public BigInteger getId() {
             return id;
@@ -228,20 +228,24 @@ public class SaveGoodsModel extends BasicModel {
             this.name = name;
         }
 
-        public List<FlavorInfo> getFlavorInfos() {
-            return flavorInfos;
+        public List<AttributeInfo> getAttributeInfos() {
+            return attributeInfos;
         }
 
-        public List<BigInteger> getDeleteGoodsFlavorIds() {
-            return deleteGoodsFlavorIds;
+        public void setAttributeInfos(List<AttributeInfo> attributeInfos) {
+            this.attributeInfos = attributeInfos;
         }
 
-        public void setDeleteGoodsFlavorIds(List<BigInteger> deleteGoodsFlavorIds) {
-            this.deleteGoodsFlavorIds = deleteGoodsFlavorIds;
+        public List<BigInteger> getDeleteGoodsAttributeIds() {
+            return deleteGoodsAttributeIds;
+        }
+
+        public void setDeleteGoodsAttributeIds(List<BigInteger> deleteGoodsAttributeIds) {
+            this.deleteGoodsAttributeIds = deleteGoodsAttributeIds;
         }
     }
 
-    public static class FlavorInfo {
+    public static class AttributeInfo {
         private BigInteger id;
 
         @NotNull

@@ -57,7 +57,7 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String KEY_DATA_HANDLE_SIGNATURES = "_data_handle_signatures";
 
     public static final String GOODS_SPECIFICATION_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/goodsSpecificationInfosSchema.json";
-    public static final String FLAVOR_GROUP_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/flavorGroupInfosSchema.json";
+    public static final String ATTRIBUTE_GROUP_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/attributeGroupInfosSchema.json";
     public static final String BUY_GIVE_ACTIVITY_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/buyGiveActivityInfosSchema.json";
     public static final String SPECIAL_GOODS_ACTIVITY_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/specialGoodsActivityInfosSchema.json";
     public static final String ELEME_MESSAGE_SCHEMA_FILE_PATH = "build/dream/catering/schemas/elemeMessageSchema.json";

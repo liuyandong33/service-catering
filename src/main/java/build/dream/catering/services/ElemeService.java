@@ -278,7 +278,7 @@ public class ElemeService {
                         .goodsName(elemeOrderItemJsonObject.getString("name"))
                         .goodsSpecificationName(goodsSpecificationName)
                         .price(BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("price")))
-                        .flavorIncrease(BigDecimal.ZERO)
+                        .attributeIncrease(BigDecimal.ZERO)
                         .quantity(BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("quantity")))
                         .totalAmount(BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("total")))
                         .discountAmount(BigDecimal.ZERO)
@@ -312,22 +312,22 @@ public class ElemeService {
                     int attributesSize = attributesJsonArray.size();
                     for (int attributesIndex = 0; attributesIndex < attributesSize; attributesIndex++) {
                         JSONObject attributeJsonObject = attributesJsonArray.optJSONObject(attributesIndex);
-                        DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor = DietOrderDetailGoodsFlavor.builder()
+                        DietOrderDetailGoodsAttribute dietOrderDetailGoodsAttribute = DietOrderDetailGoodsAttribute.builder()
                                 .tenantId(tenantId)
                                 .tenantCode(tenantCode)
                                 .branchId(branchId)
                                 .dietOrderId(dietOrderId)
                                 .dietOrderGroupId(dietOrderGroupId)
                                 .dietOrderDetailId(dietOrderDetailId)
-                                .goodsFlavorGroupId(BigInteger.ZERO)
-                                .goodsFlavorGroupName(attributeJsonObject.getString("name"))
-                                .goodsFlavorId(BigInteger.ZERO)
-                                .goodsFlavorName(attributeJsonObject.getString("value"))
+                                .goodsAttributeGroupId(BigInteger.ZERO)
+                                .goodsAttributeGroupName(attributeJsonObject.getString("name"))
+                                .goodsAttributeId(BigInteger.ZERO)
+                                .goodsAttributeName(attributeJsonObject.getString("value"))
                                 .price(BigDecimal.ZERO)
                                 .createUserId(userId)
                                 .lastUpdateUserId(userId)
                                 .build();
-                        DatabaseHelper.insert(dietOrderDetailGoodsFlavor);
+                        DatabaseHelper.insert(dietOrderDetailGoodsAttribute);
                     }
                 }
             }
@@ -365,7 +365,7 @@ public class ElemeService {
                     .categoryId(Constants.FICTITIOUS_GOODS_CATEGORY_ID)
                     .categoryName(Constants.FICTITIOUS_GOODS_CATEGORY_NAME)
                     .price(deliverFee)
-                    .flavorIncrease(Constants.DECIMAL_DEFAULT_VALUE)
+                    .attributeIncrease(Constants.DECIMAL_DEFAULT_VALUE)
                     .quantity(BigDecimal.ONE)
                     .totalAmount(deliverFee)
                     .discountAmount(BigDecimal.ZERO)

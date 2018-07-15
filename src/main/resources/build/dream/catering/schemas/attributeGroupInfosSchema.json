@@ -10,7 +10,7 @@
                 "type": "string",
                 "maxLength": 20
             },
-            "flavorInfos": {
+            "attributeInfos": {
                 "type": "array",
                 "items": {
                     "type": "object",
@@ -31,7 +31,7 @@
                     ]
                 }
             },
-            "deleteGoodsFlavorIds": {
+            "deleteGoodsAttributeIds": {
                 "type": "array",
                 "items": {
                     "type": "integer"

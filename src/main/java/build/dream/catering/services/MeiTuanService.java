@@ -289,7 +289,7 @@ public class MeiTuanService {
                     .categoryId(Constants.MEI_TUAN_GOODS_CATEGORY_ID)
                     .categoryName(Constants.MEI_TUAN_GOODS_CATEGORY_NAME)
                     .price(price)
-                    .flavorIncrease(Constants.DECIMAL_DEFAULT_VALUE)
+                    .attributeIncrease(Constants.DECIMAL_DEFAULT_VALUE)
                     .quantity(quantity)
                     .totalAmount(dietOrderDetailTotalAmount)
                     .discountAmount(BigDecimal.ZERO)
@@ -302,26 +302,26 @@ public class MeiTuanService {
             String foodProperty = detailJsonObject.getString("food_property");
             if (StringUtils.isNotBlank(foodProperty)) {
                 String[] foodProperties = foodProperty.split(",");
-                List<DietOrderDetailGoodsFlavor> dietOrderDetailGoodsFlavors = new ArrayList<DietOrderDetailGoodsFlavor>();
+                List<DietOrderDetailGoodsAttribute> dietOrderDetailGoodsAttributes = new ArrayList<DietOrderDetailGoodsAttribute>();
                 for (String property : foodProperties) {
-                    DietOrderDetailGoodsFlavor dietOrderDetailGoodsFlavor = DietOrderDetailGoodsFlavor.builder()
+                    DietOrderDetailGoodsAttribute dietOrderDetailGoodsAttribute = DietOrderDetailGoodsAttribute.builder()
                             .tenantId(tenantId)
                             .tenantCode(tenantCode)
                             .branchId(branchId)
                             .dietOrderId(dietOrderId)
                             .dietOrderGroupId(dietOrderGroup.getId())
                             .dietOrderDetailId(dietOrderDetail.getId())
-                            .goodsFlavorGroupId(Constants.BIGINT_DEFAULT_VALUE)
-                            .goodsFlavorName(Constants.VARCHAR_DEFAULT_VALUE)
-                            .goodsFlavorId(Constants.BIGINT_DEFAULT_VALUE)
-                            .goodsFlavorName(property)
+                            .goodsAttributeGroupId(Constants.BIGINT_DEFAULT_VALUE)
+                            .goodsAttributeName(Constants.VARCHAR_DEFAULT_VALUE)
+                            .goodsAttributeId(Constants.BIGINT_DEFAULT_VALUE)
+                            .goodsAttributeName(property)
                             .price(Constants.DECIMAL_DEFAULT_VALUE)
                             .createUserId(userId)
                             .lastUpdateUserId(userId)
                             .build();
-                    dietOrderDetailGoodsFlavors.add(dietOrderDetailGoodsFlavor);
+                    dietOrderDetailGoodsAttributes.add(dietOrderDetailGoodsAttribute);
                 }
-                DatabaseHelper.insertAll(dietOrderDetailGoodsFlavors);
+                DatabaseHelper.insertAll(dietOrderDetailGoodsAttributes);
             }
         }
         if (packageFee.compareTo(BigDecimal.ZERO) > 0 || shippingFee.compareTo(BigDecimal.ZERO) > 0) {
@@ -351,7 +351,7 @@ public class MeiTuanService {
                         .categoryId(Constants.FICTITIOUS_GOODS_CATEGORY_ID)
                         .categoryName(Constants.FICTITIOUS_GOODS_CATEGORY_NAME)
                         .price(Constants.DECIMAL_DEFAULT_VALUE)
-                        .flavorIncrease(Constants.DECIMAL_DEFAULT_VALUE)
+                        .attributeIncrease(Constants.DECIMAL_DEFAULT_VALUE)
                         .quantity(boxQuantity)
                         .totalAmount(packageFee)
                         .discountAmount(BigDecimal.ZERO)
@@ -376,7 +376,7 @@ public class MeiTuanService {
                         .categoryId(Constants.FICTITIOUS_GOODS_CATEGORY_ID)
                         .categoryName(Constants.FICTITIOUS_GOODS_CATEGORY_NAME)
                         .price(shippingFee)
-                        .flavorIncrease(Constants.DECIMAL_DEFAULT_VALUE)
+                        .attributeIncrease(Constants.DECIMAL_DEFAULT_VALUE)
                         .quantity(BigDecimal.ONE)
                         .totalAmount(shippingFee)
                         .discountAmount(BigDecimal.ZERO)
