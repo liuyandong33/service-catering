@@ -35,6 +35,7 @@ dependencyManagement {
 dependencies {
     compile fileTree(include: ["*.jar"], dir: "libs")
     compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.springframework.boot:spring-boot-starter-actuator")
     compile("org.mybatis.spring.boot:mybatis-spring-boot-starter:1.3.0")
     compile("org.springframework.boot:spring-boot-starter-data-redis")
     compile("org.springframework.boot:spring-boot-devtools")
@@ -55,4 +56,8 @@ dependencies {
     compile("com.networknt:json-schema-validator:0.1.13")
 
     compile("org.elasticsearch.client:transport:6.3.1")
+    compile("io.springfox:springfox-swagger2:2.9.2")
+    compile("io.springfox:springfox-swagger-ui:2.9.2")
+    compile("com.dangdang:elastic-job-lite-core:2.1.5")
+    compile("com.dangdang:elastic-job-lite-spring:2.1.5")
 }

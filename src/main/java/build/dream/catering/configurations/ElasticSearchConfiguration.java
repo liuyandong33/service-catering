@@ -6,17 +6,21 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 
 import java.io.IOException;
 import java.net.InetAddress;
 
 @Configuration
+@AutoConfigureOrder(value = Integer.MAX_VALUE)
 public class ElasticSearchConfiguration {
     @Bean
+    @Order
     public TransportClient transportClient() throws IOException {
-        System.setProperty("es.set.netty.runtime.available.processors", "false");
+        /*System.setProperty("es.set.netty.runtime.available.processors", "false");
 
         String clusterName = ConfigurationUtils.getConfiguration(Constants.ELASTICSEARCH_CLUSTER_NAME);
         String clusterNodes = ConfigurationUtils.getConfiguration(Constants.ELASTICSEARCH_CLUSTER_NODES);
@@ -39,6 +43,7 @@ public class ElasticSearchConfiguration {
             InetSocketTransportAddress inetSocketTransportAddress = new InetSocketTransportAddress(InetAddress.getByAddress(addr), port);
             transportClient.addTransportAddress(inetSocketTransportAddress);
         }
-        return transportClient;
+        return transportClient;*/
+        return null;
     }
 }

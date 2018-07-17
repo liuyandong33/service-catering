@@ -21,7 +21,6 @@ import java.io.IOException;
 @Controller
 @RequestMapping(value = "/elastic")
 public class ElasticController {
-    @Autowired
     private TransportClient transportClient;
 
     @RequestMapping(value = "/createIndex", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
