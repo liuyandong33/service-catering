@@ -1,9 +1,6 @@
 package build.dream.catering.controllers;
 
-import build.dream.catering.models.dietorder.CancelOrderModel;
-import build.dream.catering.models.dietorder.ConfirmOrderModel;
-import build.dream.catering.models.dietorder.ObtainDietOrderInfoModel;
-import build.dream.catering.models.dietorder.SaveDietOrderModel;
+import build.dream.catering.models.dietorder.*;
 import build.dream.catering.services.DietOrderService;
 import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.controllers.BasicController;
@@ -61,6 +58,18 @@ public class DietOrderController extends BasicController {
     @ResponseBody
     @ApiRestAction(modelClass = CancelOrderModel.class, serviceClass = DietOrderService.class, serviceMethodName = "cancelOrder", error = "取消订单失败")
     public String cancelOrder() {
+        return null;
+    }
+
+    /**
+     * 取消订单
+     *
+     * @return
+     */
+    @RequestMapping(value = "/doPay", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = DoPayModel.class, serviceClass = DietOrderService.class, serviceMethodName = "doPay", error = "发起支付失败")
+    public String doPay() {
         return null;
     }
 }

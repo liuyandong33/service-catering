@@ -1,6 +1,9 @@
 package build.dream.catering.models.dietorder;
 
+import build.dream.catering.constants.Constants;
 import build.dream.common.models.BasicModel;
+import build.dream.common.utils.ApplicationHandler;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
@@ -16,14 +19,16 @@ public class DoPayModel extends BasicModel {
     private BigInteger dietOrderId;
 
     @NotNull
-    private Integer paidType;
-
-    @NotNull
     private Integer paidScene;
+
+    @Length(max = 16)
     private String spbillCreateIp;
+
+    @Length(max = 128)
     private String openId;
+
+    @Length(max = 128)
     private String subOpenId;
-    private String productCode;
 
     @NotNull
     private String userId;
@@ -50,14 +55,6 @@ public class DoPayModel extends BasicModel {
 
     public void setDietOrderId(BigInteger dietOrderId) {
         this.dietOrderId = dietOrderId;
-    }
-
-    public Integer getPaidType() {
-        return paidType;
-    }
-
-    public void setPaidType(Integer paidType) {
-        this.paidType = paidType;
     }
 
     public Integer getPaidScene() {
@@ -92,19 +89,17 @@ public class DoPayModel extends BasicModel {
         this.subOpenId = subOpenId;
     }
 
-    public String getProductCode() {
-        return productCode;
-    }
-
-    public void setProductCode(String productCode) {
-        this.productCode = productCode;
-    }
-
     public String getUserId() {
         return userId;
     }
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    @Override
+    public void validateAndThrow() {
+        super.validateAndThrow();
+        ApplicationHandler.inArray(Constants.PAID_SCENES, paidScene, "paidScene");
     }
 }

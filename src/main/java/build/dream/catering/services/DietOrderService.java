@@ -4,25 +4,29 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.ActivityMapper;
 import build.dream.catering.mappers.GoodsMapper;
 import build.dream.catering.mappers.SequenceMapper;
-import build.dream.catering.models.dietorder.CancelOrderModel;
-import build.dream.catering.models.dietorder.ConfirmOrderModel;
-import build.dream.catering.models.dietorder.ObtainDietOrderInfoModel;
-import build.dream.catering.models.dietorder.SaveDietOrderModel;
+import build.dream.catering.models.dietorder.*;
 import build.dream.common.api.ApiRest;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
-import build.dream.common.utils.DatabaseHelper;
-import build.dream.common.utils.SearchModel;
-import build.dream.common.utils.SerialNumberGenerator;
-import build.dream.common.utils.ValidateUtils;
+import build.dream.common.models.alipay.AlipayTradePagePayModel;
+import build.dream.common.models.alipay.AlipayTradePayModel;
+import build.dream.common.models.alipay.AlipayTradeWapPayModel;
+import build.dream.common.models.weixin.MicroPayModel;
+import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -813,9 +817,53 @@ public class DietOrderService {
         dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_INVALID);
         DatabaseHelper.update(dietOrder);
 
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("取消订单成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().message("").successful(true).build();
+    }
+
+    @Transactional(readOnly = true)
+    public ApiRest doPay(DoPayModel doPayModel) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        BigInteger tenantId = doPayModel.getTenantId();
+        BigInteger branchId = doPayModel.getBranchId();
+        BigInteger dietOrderId = doPayModel.getDietOrderId();
+        Integer paidScene = doPayModel.getPaidScene();
+        String spbillCreateIp = doPayModel.getSpbillCreateIp();
+        String openId = doPayModel.getOpenId();
+        String subOpenId = doPayModel.getSubOpenId();
+        String userId = doPayModel.getUserId();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
+        ValidateUtils.isTrue(dietOrder.getOrderStatus() == DietOrderConstants.ORDER_STATUS_PENDING, "订单状态异常！");
+
+        Object result = null;
+        if (ArrayUtils.contains(Constants.WEI_XIN_PAID_SCENES, paidScene)) {
+            if (paidScene == Constants.PAID_SCENE_WEI_XIN_MICROPAY) {
+                MicroPayModel microPayModel = new MicroPayModel();
+                result = WeiXinPayUtils.microPay(tenantId.toString(), branchId.toString(), microPayModel);
+            } else {
+
+            }
+        } else if (paidScene == Constants.PAID_SCENE_ALIPAY_MOBILE_WEBSITE) {
+            String returnUrl = "";
+            String notifyUrl = "";
+            AlipayTradeWapPayModel alipayTradeWapPayModel = new AlipayTradeWapPayModel();
+            result = AlipayUtils.alipayTradeWapPay(tenantId.toString(), branchId.toString(), returnUrl, notifyUrl, alipayTradeWapPayModel);
+        } else if (paidScene == Constants.PAID_SCENE_ALIPAY_PC_WEBSITE) {
+            String returnUrl = "";
+            String notifyUrl = "";
+            AlipayTradePagePayModel alipayTradePagePayModel = new AlipayTradePagePayModel();
+            result = AlipayUtils.alipayTradePagePay(tenantId.toString(), branchId.toString(), returnUrl, notifyUrl, alipayTradePagePayModel);
+        } else if (paidScene == Constants.PAID_SCENE_ALIPAY_APP) {
+            String notifyUrl = "";
+            String appAuthToken = "";
+            AlipayTradePayModel alipayTradePayModel = new AlipayTradePayModel();
+            result = AlipayUtils.alipayTradePay(tenantId.toString(), branchId.toString(), notifyUrl, appAuthToken, alipayTradePayModel);
+        }
+
+        return ApiRest.builder().data(result).message("发起支付成功！").successful(true).build();
     }
 }
