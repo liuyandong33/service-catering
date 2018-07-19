@@ -14,46 +14,25 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class StockJobConfiguration {
     @Autowired
-    private ZookeeperRegistryCenter regCenter;
-
-    public StockJobConfiguration() {
-    }
+    private ZookeeperRegistryCenter zookeeperRegistryCenter;
 
     @Bean
     public SimpleJob simpleJob() {
         return new StockSimpleJob();
     }
 
-
     @Bean(initMethod = "init")
-    public JobScheduler simpleJobScheduler(final SimpleJob simpleJob) {
-        String cron = "* * */1 * * ?";
+    public JobScheduler simpleJobScheduler(SimpleJob simpleJob) {
+        String cron = "*/1 * * * * ?";
         int shardingTotalCount = 2;
-        String shardingItemParameters = "";
-        return new SpringJobScheduler(simpleJob, regCenter, getLiteJobConfiguration(simpleJob.getClass(), cron, shardingTotalCount, shardingItemParameters));
+        String shardingItemParameters = "0=aa,1=bb";
+        return new SpringJobScheduler(simpleJob, zookeeperRegistryCenter, buildLiteJobConfiguration(simpleJob.getClass(), cron, shardingTotalCount, shardingItemParameters));
     }
 
-    /**
-     * @Description 任务配置类
-     */
-    private LiteJobConfiguration getLiteJobConfiguration(final Class<? extends SimpleJob> jobClass,
-                                                         final String cron,
-                                                         final int shardingTotalCount,
-                                                         final String shardingItemParameters) {
-
-
-        return LiteJobConfiguration
-                .newBuilder(
-                        new SimpleJobConfiguration(
-                                JobCoreConfiguration.newBuilder(
-                                        jobClass.getName(), cron, shardingTotalCount)
-                                        .shardingItemParameters(shardingItemParameters)
-                                        .build()
-                                , jobClass.getCanonicalName()
-                        )
-                )
-                .overwrite(true)
-                .build();
-
+    private LiteJobConfiguration buildLiteJobConfiguration(Class<? extends SimpleJob> jobClass, String cron, int shardingTotalCount, String shardingItemParameters) {
+        JobCoreConfiguration jobCoreConfiguration = JobCoreConfiguration.newBuilder(jobClass.getName(), cron, shardingTotalCount).shardingItemParameters(shardingItemParameters).build();
+        SimpleJobConfiguration simpleJobConfiguration = new SimpleJobConfiguration(jobCoreConfiguration, jobClass.getCanonicalName());
+        LiteJobConfiguration liteJobConfiguration = LiteJobConfiguration.newBuilder(simpleJobConfiguration).overwrite(true).build();
+        return liteJobConfiguration;
     }
 }
