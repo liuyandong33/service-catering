@@ -17,4 +17,14 @@ public interface VipMapper {
                                                 @Param("branchId") BigInteger branchId,
                                                 @Param("vipId") BigInteger vipId,
                                                 @Param("balance") BigDecimal balance);
+
+    BigDecimal callProcedureAddVipPoint(@Param("tenantId") BigInteger tenantId,
+                                        @Param("branchId") BigInteger branchId,
+                                        @Param("vipId") BigInteger vipId,
+                                        @Param("point") BigDecimal point);
+
+    BigDecimal callProcedureAddVipBalance(@Param("tenantId") BigInteger tenantId,
+                                          @Param("branchId") BigInteger branchId,
+                                          @Param("vipId") BigInteger vipId,
+                                          @Param("balance") BigDecimal balance);
 }

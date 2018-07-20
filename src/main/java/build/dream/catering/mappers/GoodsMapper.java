@@ -18,4 +18,8 @@ public interface GoodsMapper {
     BigDecimal callProcedureDeductingGoodsStock(@Param("goodsId") BigInteger goodsId,
                                                 @Param("goodsSpecificationId") BigInteger goodsSpecificationId,
                                                 @Param("quantity") BigDecimal quantity);
+
+    BigDecimal callProcedureAddGoodsStock(@Param("goodsId") BigInteger goodsId,
+                                          @Param("goodsSpecificationId") BigInteger goodsSpecificationId,
+                                          @Param("quantity") BigDecimal quantity);
 }

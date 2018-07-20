@@ -5,6 +5,7 @@ import build.dream.catering.mappers.ActivityMapper;
 import build.dream.catering.mappers.GoodsMapper;
 import build.dream.catering.mappers.SequenceMapper;
 import build.dream.catering.models.dietorder.*;
+import build.dream.catering.utils.GoodsUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
@@ -817,14 +818,15 @@ public class DietOrderService {
         dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_INVALID);
         DatabaseHelper.update(dietOrder);
 
+        recoveryStock(orderId);
+
         return ApiRest.builder().message("").successful(true).build();
     }
 
-    private void recoveryStock(DietOrder dietOrder) {
-        BigInteger dietOrderId = dietOrder.getId();
+    private void recoveryStock(BigInteger orderId) {
         List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
         searchConditions.add(new SearchCondition("deleted", Constants.SQL_OPERATION_SYMBOL_EQUAL, 0));
-        searchConditions.add(new SearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId));
+        searchConditions.add(new SearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, orderId));
         SearchModel dietOrderGroupSearchModel = new SearchModel();
         dietOrderGroupSearchModel.setSearchConditions(searchConditions);
         List<DietOrderGroup> dietOrderGroups = DatabaseHelper.findAll(DietOrderGroup.class, dietOrderGroupSearchModel);
@@ -832,6 +834,9 @@ public class DietOrderService {
         SearchModel dietOrderDetailSearchModel = new SearchModel();
         dietOrderDetailSearchModel.setSearchConditions(searchConditions);
         List<DietOrderDetail> dietOrderDetails = DatabaseHelper.findAll(DietOrderDetail.class, dietOrderDetailSearchModel);
+        for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
+            GoodsUtils.addGoodsStock(dietOrderDetail.getGoodsId(), dietOrderDetail.getGoodsSpecificationId(), dietOrderDetail.getQuantity());
+        }
     }
 
     @Transactional(readOnly = true)

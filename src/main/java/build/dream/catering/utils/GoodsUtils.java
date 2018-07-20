@@ -22,4 +22,9 @@ public class GoodsUtils {
         ValidateUtils.isTrue(stock.compareTo(BigDecimal.ZERO) >= 0, "库存不足！");
         return stock;
     }
+
+    public static BigDecimal addGoodsStock(BigInteger goodsId, BigInteger goodsSpecificationId, BigDecimal quantity) {
+        BigDecimal stock = obtainGoodsMapper().callProcedureAddGoodsStock(goodsId, goodsSpecificationId, quantity);
+        return stock;
+    }
 }

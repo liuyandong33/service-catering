@@ -40,4 +40,8 @@
     <select id="callProcedureDeductingGoodsStock" resultType="java.math.BigDecimal">
         call procedure_deducting_goods_stock(#{goodsId}, #{goodsSpecificationId}, #{quantity});
     </select>
+
+    <select id="callProcedureAddGoodsStock" resultType="java.math.BigDecimal">
+        call procedure_add_goods_stock(#{goodsId}, #{goodsSpecificationId}, #{quantity});
+    </select>
 </mapper>

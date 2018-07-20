@@ -66,4 +66,14 @@ public class VipUtils {
         ValidateUtils.isTrue(surplusBalance.compareTo(BigDecimal.ZERO) >= 0, "余额不足！");
         return surplusBalance;
     }
+
+    public static BigDecimal addVipPoint(BigInteger tenantId, BigInteger branchId, BigInteger vipId, BigDecimal point) {
+        BigDecimal surplusPoint = vipMapper.callProcedureAddVipPoint(tenantId, branchId, vipId, point);
+        return surplusPoint;
+    }
+
+    public static BigDecimal addVipBalance(BigInteger tenantId, BigInteger branchId, BigInteger vipId, BigDecimal balance) {
+        BigDecimal surplusBalance = vipMapper.callProcedureAddVipBalance(tenantId, branchId, vipId, balance);
+        return surplusBalance;
+    }
 }
