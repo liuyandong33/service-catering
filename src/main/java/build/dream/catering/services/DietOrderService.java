@@ -820,6 +820,20 @@ public class DietOrderService {
         return ApiRest.builder().message("").successful(true).build();
     }
 
+    private void recoveryStock(DietOrder dietOrder) {
+        BigInteger dietOrderId = dietOrder.getId();
+        List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
+        searchConditions.add(new SearchCondition("deleted", Constants.SQL_OPERATION_SYMBOL_EQUAL, 0));
+        searchConditions.add(new SearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId));
+        SearchModel dietOrderGroupSearchModel = new SearchModel();
+        dietOrderGroupSearchModel.setSearchConditions(searchConditions);
+        List<DietOrderGroup> dietOrderGroups = DatabaseHelper.findAll(DietOrderGroup.class, dietOrderGroupSearchModel);
+
+        SearchModel dietOrderDetailSearchModel = new SearchModel();
+        dietOrderDetailSearchModel.setSearchConditions(searchConditions);
+        List<DietOrderDetail> dietOrderDetails = DatabaseHelper.findAll(DietOrderDetail.class, dietOrderDetailSearchModel);
+    }
+
     @Transactional(readOnly = true)
     public ApiRest doPay(DoPayModel doPayModel) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         BigInteger tenantId = doPayModel.getTenantId();
