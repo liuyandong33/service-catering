@@ -41,7 +41,7 @@ public class DemoController {
         return modelAndView;
     }
 
-    @RequestMapping(value = "/doRefund", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/doRefund", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String doRefund() {
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
