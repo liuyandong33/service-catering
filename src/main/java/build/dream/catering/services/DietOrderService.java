@@ -5,6 +5,7 @@ import build.dream.catering.mappers.ActivityMapper;
 import build.dream.catering.mappers.GoodsMapper;
 import build.dream.catering.mappers.SequenceMapper;
 import build.dream.catering.models.dietorder.*;
+import build.dream.catering.utils.DietOrderUtils;
 import build.dream.catering.utils.GoodsUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.constants.DietOrderConstants;
@@ -393,6 +394,15 @@ public class DietOrderService {
             GoodsSpecification goodsSpecification = goodsSpecificationMap.get(goodsInfo.getGoodsSpecificationId());
             ValidateUtils.notNull(goodsSpecification, "商品规格不存在！");
 
+            BigInteger goodsId = goods.getId();
+            BigInteger goodsSpecificationId = goodsSpecification.getId();
+            BigDecimal quantity = goodsInfo.getQuantity();
+            BigDecimal price = goodsSpecification.getPrice();
+
+            if (goods.isStocked()) {
+                GoodsUtils.deductingGoodsStock(goodsId, goodsSpecificationId, quantity);
+            }
+
             String uuid = UUID.randomUUID().toString();
             BigDecimal attributeIncrease = BigDecimal.ZERO;
             List<SaveDietOrderModel.AttributeInfo> attributeInfos = goodsInfo.getAttributeInfos();
@@ -427,32 +437,28 @@ public class DietOrderService {
                 }
             }
 
-            BigDecimal quantity = goodsInfo.getQuantity();
-            BigDecimal price = goodsSpecification.getPrice();
-
             DietOrderDetail dietOrderDetail = null;
             // 开始处理促销活动
-            EffectiveActivity effectiveActivity = effectiveActivityMap.get(goods.getId() + "_" + goodsSpecification.getId());
+            EffectiveActivity effectiveActivity = effectiveActivityMap.get(goodsId + "_" + goodsSpecificationId);
             if (effectiveActivity != null) {
                 int type = effectiveActivity.getType();
                 // 买A赠B活动
                 if (type == 1) {
-                    if (discountDietOrderGroup == null) {
-                        discountDietOrderGroup = DietOrderGroup.builder()
-                                .tenantId(tenantId)
-                                .tenantCode(tenantCode)
-                                .branchId(branchId)
-                                .dietOrderId(dietOrderId)
-                                .name("赠送的菜品")
-                                .type(DietOrderConstants.GROUP_TYPE_DISCOUNT)
-                                .createUserId(userId)
-                                .lastUpdateUserId(userId)
-                                .lastUpdateRemark("保存订单分组信息！")
-                                .build();
-                        DatabaseHelper.insert(discountDietOrderGroup);
-                    }
-
                     if (quantity.compareTo(effectiveActivity.getBuyQuantity()) >= 0) {
+                        if (discountDietOrderGroup == null) {
+                            discountDietOrderGroup = DietOrderGroup.builder()
+                                    .tenantId(tenantId)
+                                    .tenantCode(tenantCode)
+                                    .branchId(branchId)
+                                    .dietOrderId(dietOrderId)
+                                    .name("赠送的菜品")
+                                    .type(DietOrderConstants.GROUP_TYPE_DISCOUNT)
+                                    .createUserId(userId)
+                                    .lastUpdateUserId(userId)
+                                    .lastUpdateRemark("保存订单分组信息！")
+                                    .build();
+                            DatabaseHelper.insert(discountDietOrderGroup);
+                        }
                         BigDecimal giveQuantity = quantity.divide(effectiveActivity.getBuyQuantity(), 0, BigDecimal.ROUND_DOWN).multiply(effectiveActivity.getGiveQuantity());
                         BigDecimal giveTotalAmount = giveQuantity.multiply(effectiveActivity.getSpecialPrice());
                         DietOrderDetail giveDietOrderDetail = DietOrderDetail.builder()
@@ -508,9 +514,9 @@ public class DietOrderService {
                             .dietOrderId(dietOrderId)
                             .dietOrderGroupId(normalDietOrderGroup.getId())
                             .goodsType(goods.getType())
-                            .goodsId(goods.getId())
+                            .goodsId(goodsId)
                             .goodsName(goods.getName())
-                            .goodsSpecificationId(goodsSpecification.getId())
+                            .goodsSpecificationId(goodsSpecificationId)
                             .goodsSpecificationName(goodsSpecification.getName())
                             .categoryId(goods.getCategoryId())
                             .categoryName(goods.getCategoryName())
@@ -544,9 +550,9 @@ public class DietOrderService {
                             .dietOrderId(dietOrderId)
                             .dietOrderGroupId(normalDietOrderGroup.getId())
                             .goodsType(goods.getType())
-                            .goodsId(goods.getId())
+                            .goodsId(goodsId)
                             .goodsName(goods.getName())
-                            .goodsSpecificationId(goodsSpecification.getId())
+                            .goodsSpecificationId(goodsSpecificationId)
                             .goodsSpecificationName(goodsSpecification.getName())
                             .categoryId(goods.getCategoryId())
                             .categoryName(goods.getCategoryName())
@@ -591,9 +597,9 @@ public class DietOrderService {
                         .dietOrderId(dietOrderId)
                         .dietOrderGroupId(normalDietOrderGroup.getId())
                         .goodsType(goods.getType())
-                        .goodsId(goods.getId())
+                        .goodsId(goodsId)
                         .goodsName(goods.getName())
-                        .goodsSpecificationId(goodsSpecification.getId())
+                        .goodsSpecificationId(goodsSpecificationId)
                         .goodsSpecificationName(goodsSpecification.getName())
                         .categoryId(goods.getCategoryId())
                         .categoryName(goods.getCategoryName())
@@ -815,6 +821,8 @@ public class DietOrderService {
         ValidateUtils.notNull(dietOrder, "订单不存在！");
         ValidateUtils.isTrue(dietOrder.getOrderStatus() == DietOrderConstants.ORDER_STATUS_UNPROCESSED, "只有未处理的订单才能进取消订单操作！");
 
+        recoveryStock(orderId);
+
         dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_INVALID);
         DatabaseHelper.update(dietOrder);
 
@@ -823,10 +831,10 @@ public class DietOrderService {
         return ApiRest.builder().message("").successful(true).build();
     }
 
-    private void recoveryStock(BigInteger orderId) {
+    private void recoveryStock(BigInteger dietOrderId) {
         List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
         searchConditions.add(new SearchCondition("deleted", Constants.SQL_OPERATION_SYMBOL_EQUAL, 0));
-        searchConditions.add(new SearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, orderId));
+        searchConditions.add(new SearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId));
         SearchModel dietOrderGroupSearchModel = new SearchModel();
         dietOrderGroupSearchModel.setSearchConditions(searchConditions);
         List<DietOrderGroup> dietOrderGroups = DatabaseHelper.findAll(DietOrderGroup.class, dietOrderGroupSearchModel);
@@ -834,8 +842,37 @@ public class DietOrderService {
         SearchModel dietOrderDetailSearchModel = new SearchModel();
         dietOrderDetailSearchModel.setSearchConditions(searchConditions);
         List<DietOrderDetail> dietOrderDetails = DatabaseHelper.findAll(DietOrderDetail.class, dietOrderDetailSearchModel);
-        for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
-            GoodsUtils.addGoodsStock(dietOrderDetail.getGoodsId(), dietOrderDetail.getGoodsSpecificationId(), dietOrderDetail.getQuantity());
+
+        Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap = DietOrderUtils.splitDietOrderDetails(dietOrderDetails);
+
+        List<DietOrderDetail> normalDietOrderDetails = new ArrayList<DietOrderDetail>();
+        for (DietOrderGroup dietOrderGroup : dietOrderGroups) {
+            String type = dietOrderGroup.getType();
+            BigInteger dietOrderGroupId = dietOrderGroup.getId();
+            if (DietOrderConstants.GROUP_TYPE_NORMAL.equals(type)) {
+                normalDietOrderDetails.addAll(dietOrderDetailMap.get(dietOrderGroupId));
+            }
+        }
+
+        List<BigInteger> goodsIds = new ArrayList<BigInteger>();
+        for (DietOrderDetail normalDietOrderDetail : normalDietOrderDetails) {
+            goodsIds.add(normalDietOrderDetail.getGoodsId());
+        }
+
+        SearchModel goodsSearchModel = new SearchModel(true);
+        goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
+        List<Goods> goodsList = DatabaseHelper.findAll(Goods.class, goodsSearchModel);
+        Map<BigInteger, Goods> goodsMap = new HashMap<BigInteger, Goods>();
+        for (Goods goods : goodsList) {
+            goodsMap.put(goods.getId(), goods);
+        }
+
+        for (DietOrderDetail normalDietOrderDetail : normalDietOrderDetails) {
+            BigInteger goodsId = normalDietOrderDetail.getGoodsId();
+            Goods goods = goodsMap.get(goodsId);
+            if (goods.isStocked()) {
+                GoodsUtils.addGoodsStock(goodsId, normalDietOrderDetail.getGoodsSpecificationId(), normalDietOrderDetail.getQuantity());
+            }
         }
     }
 

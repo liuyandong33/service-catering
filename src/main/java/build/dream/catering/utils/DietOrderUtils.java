@@ -1,7 +1,10 @@
 package build.dream.catering.utils;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import build.dream.common.erp.catering.domains.DietOrderDetail;
+import org.apache.commons.collections.CollectionUtils;
+
+import java.math.BigInteger;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DietOrderUtils {
@@ -24,5 +27,19 @@ public class DietOrderUtils {
         if (timer != null) {
             timer.cancel();
         }
+    }
+
+    public static Map<BigInteger, List<DietOrderDetail>> splitDietOrderDetails(List<DietOrderDetail> dietOrderDetails) {
+        Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap = new HashMap<BigInteger, List<DietOrderDetail>>();
+        for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
+            BigInteger dietOrderGroupId = dietOrderDetail.getDietOrderGroupId();
+            List<DietOrderDetail> dietOrderDetailList = dietOrderDetailMap.get(dietOrderGroupId);
+            if (CollectionUtils.isEmpty(dietOrderDetailList)) {
+                dietOrderDetailList = new ArrayList<DietOrderDetail>();
+                dietOrderDetailMap.put(dietOrderGroupId, dietOrderDetailList);
+            }
+            dietOrderDetailList.add(dietOrderDetail);
+        }
+        return dietOrderDetailMap;
     }
 }

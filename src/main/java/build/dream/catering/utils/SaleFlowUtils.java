@@ -17,16 +17,7 @@ import java.util.*;
 
 public class SaleFlowUtils {
     public static void writeSaleFlow(DietOrder dietOrder, List<DietOrderGroup> dietOrderGroups, List<DietOrderDetail> dietOrderDetails, List<DietOrderActivity> dietOrderActivities, List<DietOrderPayment> dietOrderPayments) throws IOException {
-        Map<BigInteger, List<DietOrderDetail>> dietOrderDetailListMap = new HashMap<BigInteger, List<DietOrderDetail>>();
-        for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
-            BigInteger dietOrderGroupId = dietOrderDetail.getDietOrderGroupId();
-            List<DietOrderDetail> dietOrderDetailList = dietOrderDetailListMap.get(dietOrderGroupId);
-            if (CollectionUtils.isEmpty(dietOrderDetailList)) {
-                dietOrderDetailList = new ArrayList<DietOrderDetail>();
-                dietOrderDetailListMap.put(dietOrderGroupId, dietOrderDetailList);
-            }
-            dietOrderDetailList.add(dietOrderDetail);
-        }
+        Map<BigInteger, List<DietOrderDetail>> dietOrderDetailListMap = DietOrderUtils.splitDietOrderDetails(dietOrderDetails);
 
         List<DietOrderDetail> normalDietOrderDetails = new ArrayList<DietOrderDetail>();
         List<DietOrderDetail> extraDietOrderDetails = new ArrayList<DietOrderDetail>();
