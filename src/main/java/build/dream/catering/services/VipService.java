@@ -186,7 +186,6 @@ public class VipService {
             if (StringUtils.isNotBlank(alipayUserId)) {
                 vip.setAlipayUserId(alipayUserId);
             }
-            vip.setBonus(0);
             vip.setCreateUserId(userId);
             vip.setLastUpdateUserId(userId);
             vip.setLastUpdateRemark("新增会员信息！");

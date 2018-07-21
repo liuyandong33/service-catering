@@ -6,7 +6,6 @@ import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.ValidateUtils;
-import org.apache.commons.lang.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -27,15 +26,6 @@ public class VipUtils {
     }
 
     public static long update(Vip vip) {
-        return DatabaseHelper.update(vip);
-    }
-
-    public static long update(Vip vip, String recordBonus) {
-        String userCardCode = vip.getUserCardCode();
-        String cardId = vip.getCardId();
-        if (StringUtils.isNotBlank(userCardCode) && StringUtils.isNotBlank(cardId)) {
-            WeiXinUtils.updateMemberBonusSafe(vip.getTenantId().toString(), userCardCode, cardId, vip.getBonus(), null, recordBonus);
-        }
         return DatabaseHelper.update(vip);
     }
 

@@ -60,4 +60,6 @@ dependencies {
     compile("io.springfox:springfox-swagger-ui:2.9.2")
     compile("com.dangdang:elastic-job-lite-core:2.1.5")
     compile("com.dangdang:elastic-job-lite-spring:2.1.5")
+
+    compile("dom4j:dom4j:1.6.1")
 }

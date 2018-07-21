@@ -18,6 +18,7 @@ import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.dom4j.DocumentException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -877,7 +878,7 @@ public class DietOrderService {
     }
 
     @Transactional(readOnly = true)
-    public ApiRest doPay(DoPayModel doPayModel) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public ApiRest doPay(DoPayModel doPayModel) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, DocumentException {
         BigInteger tenantId = doPayModel.getTenantId();
         BigInteger branchId = doPayModel.getBranchId();
         BigInteger dietOrderId = doPayModel.getDietOrderId();
