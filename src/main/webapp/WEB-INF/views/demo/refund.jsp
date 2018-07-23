@@ -72,7 +72,9 @@
                 return;
             }
 
-            var requestParameters = {tenantId: tenantId, branchId: branchId, totalFee: totalFee, refundFee: refundFee};
+            var tradeType = $("#trade_type").val();
+
+            var requestParameters = {tenantId: tenantId, branchId: branchId, totalFee: totalFee, refundFee: refundFee, tradeType: tradeType};
             if (transactionId) {
                 requestParameters["transactionId"] = transactionId;
             }
@@ -94,10 +96,10 @@
 <body>
 <div style="text-align: center">
     <h1>微信退款接口</h1>
-    商户ID：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" id="tenant_id" class="common_input">
+    商户ID：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" id="tenant_id" class="common_input">
     <br>
     <br>
-    门店ID：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" id="branch_id" class="common_input">
+    门店ID：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" id="branch_id" class="common_input">
     <br>
     <br>
     微信订单号：&nbsp;&nbsp;&nbsp;<input type="text" id="transaction_id" class="common_input">
@@ -110,6 +112,16 @@
     <br>
     <br>
     申请退款金额：<input type="text" id="refund_fee" class="common_input">
+    <br>
+    <br>
+    交易类型:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <select style="height: 30px;width: 200px;border-radius: 4px;border: 1px solid #00AAEE;" id="trade_type">
+        <option value="JSAPI">JSAPI</option>
+        <option value="NATIVE">NATIVE</option>
+        <option value="APP">APP</option>
+        <option value="MWEB">MWEB</option>
+        <option value="MICROPAY">MICROPAY</option>
+    </select>
     <br>
     <br>
     <input type="button" value="确定" class="common_button" onclick="doRefund();">
