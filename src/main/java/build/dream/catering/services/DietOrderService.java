@@ -886,26 +886,16 @@ public class DietOrderService {
             return;
         }
 
-        BigInteger tenantId = dietOrder.getTenantId();
-        BigInteger branchId = dietOrder.getBranchId();
-        BigInteger dietOrderId = dietOrder.getId();
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrder.getTenantId());
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrder.getBranchId());
+        searchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrder.getId());
         searchModel.addSearchCondition("payment_code", Constants.SQL_OPERATION_SYMBOL_EQUAL, "HYJF");
         DietOrderPayment dietOrderPayment = DatabaseHelper.find(DietOrderPayment.class, searchModel);
         if (dietOrderPayment != null) {
             Vip vip = VipUtils.find(vipId);
-            if (vip == null) {
-                return;
-            }
-
             VipType vipType = DatabaseHelper.find(VipType.class, vip.getVipTypeId());
-            if (vipType == null) {
-                return;
-            }
-            VipUtils.addVipPoint(tenantId, branchId, vipId, dietOrderPayment.getPaidAmount().multiply(BigDecimal.valueOf(vipType.getBonusCoefficient())));
+            VipUtils.addVipPoint(vip.getTenantId(), vip.getBranchId(), vipId, dietOrderPayment.getPaidAmount().multiply(BigDecimal.valueOf(vipType.getBonusCoefficient())));
         }
     }
 
@@ -914,17 +904,15 @@ public class DietOrderService {
         if (vipId == null) {
             return;
         }
-        BigInteger tenantId = dietOrder.getTenantId();
-        BigInteger branchId = dietOrder.getBranchId();
-        BigInteger dietOrderId = dietOrder.getId();
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrder.getTenantId());
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrder.getBranchId());
+        searchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrder.getId());
         searchModel.addSearchCondition("payment_code", Constants.SQL_OPERATION_SYMBOL_EQUAL, "HYQB");
         DietOrderPayment dietOrderPayment = DatabaseHelper.find(DietOrderPayment.class, searchModel);
         if (dietOrderPayment != null) {
-            VipUtils.addVipBalance(tenantId, branchId, vipId, dietOrderPayment.getPaidAmount());
+            Vip vip = VipUtils.find(vipId);
+            VipUtils.addVipBalance(vip.getTenantId(), vip.getBranchId(), vipId, dietOrderPayment.getPaidAmount());
         }
     }
 
