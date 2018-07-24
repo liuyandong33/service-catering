@@ -821,7 +821,6 @@ public class DietOrderService {
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, orderId);
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
         ValidateUtils.notNull(dietOrder, "订单不存在！");
-        ValidateUtils.isTrue(dietOrder.getOrderStatus() == DietOrderConstants.ORDER_STATUS_UNPROCESSED, "只有未处理的订单才能进取消订单操作！");
 
         recoveryStock(orderId);
         recoveryVipPoint(dietOrder);
@@ -829,8 +828,6 @@ public class DietOrderService {
 
         dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_INVALID);
         DatabaseHelper.update(dietOrder);
-
-        recoveryStock(orderId);
 
         return ApiRest.builder().message("").successful(true).build();
     }
