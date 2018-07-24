@@ -7,6 +7,7 @@ import build.dream.catering.mappers.SequenceMapper;
 import build.dream.catering.models.dietorder.*;
 import build.dream.catering.utils.DietOrderUtils;
 import build.dream.catering.utils.GoodsUtils;
+import build.dream.catering.utils.VipUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
@@ -823,6 +824,8 @@ public class DietOrderService {
         ValidateUtils.isTrue(dietOrder.getOrderStatus() == DietOrderConstants.ORDER_STATUS_UNPROCESSED, "只有未处理的订单才能进取消订单操作！");
 
         recoveryStock(orderId);
+        recoveryVipPoint(dietOrder);
+        recoveryVipBalance(dietOrder);
 
         dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_INVALID);
         DatabaseHelper.update(dietOrder);
@@ -874,6 +877,54 @@ public class DietOrderService {
             if (goods.isStocked()) {
                 GoodsUtils.addGoodsStock(goodsId, normalDietOrderDetail.getGoodsSpecificationId(), normalDietOrderDetail.getQuantity());
             }
+        }
+    }
+
+    private void recoveryVipPoint(DietOrder dietOrder) {
+        BigInteger vipId = dietOrder.getVipId();
+        if (vipId == null) {
+            return;
+        }
+
+        BigInteger tenantId = dietOrder.getTenantId();
+        BigInteger branchId = dietOrder.getBranchId();
+        BigInteger dietOrderId = dietOrder.getId();
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        searchModel.addSearchCondition("payment_code", Constants.SQL_OPERATION_SYMBOL_EQUAL, "HYJF");
+        DietOrderPayment dietOrderPayment = DatabaseHelper.find(DietOrderPayment.class, searchModel);
+        if (dietOrderPayment != null) {
+            Vip vip = VipUtils.find(vipId);
+            if (vip == null) {
+                return;
+            }
+
+            VipType vipType = DatabaseHelper.find(VipType.class, vip.getVipTypeId());
+            if (vipType == null) {
+                return;
+            }
+            VipUtils.addVipPoint(tenantId, branchId, vipId, dietOrderPayment.getPaidAmount().multiply(BigDecimal.valueOf(vipType.getBonusCoefficient())));
+        }
+    }
+
+    private void recoveryVipBalance(DietOrder dietOrder) {
+        BigInteger vipId = dietOrder.getVipId();
+        if (vipId == null) {
+            return;
+        }
+        BigInteger tenantId = dietOrder.getTenantId();
+        BigInteger branchId = dietOrder.getBranchId();
+        BigInteger dietOrderId = dietOrder.getId();
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        searchModel.addSearchCondition("payment_code", Constants.SQL_OPERATION_SYMBOL_EQUAL, "HYQB");
+        DietOrderPayment dietOrderPayment = DatabaseHelper.find(DietOrderPayment.class, searchModel);
+        if (dietOrderPayment != null) {
+            VipUtils.addVipBalance(tenantId, branchId, vipId, dietOrderPayment.getPaidAmount());
         }
     }
 

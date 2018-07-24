@@ -29,6 +29,12 @@ public class VipUtils {
         return DatabaseHelper.update(vip);
     }
 
+    public static Vip find(BigInteger id) {
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("id", "=", id);
+        return find(searchModel);
+    }
+
     public static Vip find(SearchModel searchModel) {
         return DatabaseHelper.find(Vip.class, searchModel);
     }
