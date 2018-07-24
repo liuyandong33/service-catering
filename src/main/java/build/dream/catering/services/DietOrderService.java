@@ -829,7 +829,7 @@ public class DietOrderService {
         dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_INVALID);
         DatabaseHelper.update(dietOrder);
 
-        return ApiRest.builder().message("").successful(true).build();
+        return ApiRest.builder().message("取消订单成功").successful(true).build();
     }
 
     private void recoveryStock(BigInteger dietOrderId) {
