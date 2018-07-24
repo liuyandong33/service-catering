@@ -40,7 +40,7 @@ public class DingtalkUtils {
             String corpId = ConfigurationUtils.getConfiguration(Constants.DINGTALK_CORP_ID);
             String corpSecret = ConfigurationUtils.getConfiguration(Constants.DINGTALK_CORP_SECRET);
             String url = ConfigurationUtils.getConfiguration(Constants.DINGTALK_SERVICE_URL) + Constants.DINGTALK_GET_TOKEN_URI + "?corpid=" + corpId + "&corpsecret=" + corpSecret;
-            WebResponse webResponse = OutUtils.doGet(url, null);
+            WebResponse webResponse = OutUtils.doGetWithRequestParameters(url, null, null);
             JSONObject resultJsonObject = JSONObject.fromObject(webResponse.getResult());
             int errcode = resultJsonObject.getInt("errcode");
             Validate.isTrue(errcode == 0, resultJsonObject.optString("errmsg"));
@@ -64,7 +64,7 @@ public class DingtalkUtils {
         textMap.put("content", content);
         sendRequestBody.put("text", textMap);
         String url = ConfigurationUtils.getConfiguration(Constants.DINGTALK_SERVICE_URL) + Constants.DINGTALK_CHAT_SEND_URI + "?access_token=" + obtainAccessToken();
-        WebResponse webResponse = OutUtils.doPost(url, GsonUtils.toJson(sendRequestBody), HEADERS);
+        WebResponse webResponse = OutUtils.doPostWithRequestBody(url, GsonUtils.toJson(sendRequestBody), HEADERS);
         JSONObject resultJsonObject = JSONObject.fromObject(webResponse.getResult());
         int errcode = resultJsonObject.getInt("errcode");
         Validate.isTrue(errcode == 0, resultJsonObject.optString("errmsg"));

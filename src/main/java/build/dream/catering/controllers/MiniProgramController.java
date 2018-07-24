@@ -8,7 +8,6 @@ import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.OutUtils;
-import build.dream.common.utils.WebUtils;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.Validate;
 import org.springframework.stereotype.Controller;
@@ -35,8 +34,8 @@ public class MiniProgramController extends BasicController {
         obtainSessionRequestParameters.put("js_code", obtainSessionWithJsCodeModel.getCode());
         obtainSessionRequestParameters.put("grant_type", "authorization_code");
 
-        String url = "https://api.weixin.qq.com/sns/jscode2session?" + WebUtils.buildQueryString(obtainSessionRequestParameters);
-        WebResponse webResponse = OutUtils.doGet(url, null);
+        String url = "https://api.weixin.qq.com/sns/jscode2session";
+        WebResponse webResponse = OutUtils.doGetWithRequestParameters(url, null, obtainSessionRequestParameters);
         JSONObject obtainSessionResultJsonObject = JSONObject.fromObject(webResponse.getResult());
         Validate.isTrue(!obtainSessionResultJsonObject.has("errcode"), obtainSessionResultJsonObject.optString("errmsg"));
 

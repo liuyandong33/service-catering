@@ -58,7 +58,7 @@ public class WeiXinUtils {
 
         String accessToken = obtainAccessToken(weiXinPublicAccount.getAppId(), weiXinPublicAccount.getAppSecret());
         String url = "https://api.weixin.qq.com/card/membercard/updateuser?access_token=" + accessToken;
-        WebResponse webResponse = OutUtils.doPost(url, GsonUtils.toJson(updateUserRequestBody, false), null);
+        WebResponse webResponse = OutUtils.doPostWithRequestBody(url, GsonUtils.toJson(updateUserRequestBody, false), null);
         JSONObject resultJsonObject = JSONObject.fromObject(webResponse.getResult());
 
         Validate.isTrue(resultJsonObject.getInt("errcode") == 0, resultJsonObject.getString("errmsg"));
