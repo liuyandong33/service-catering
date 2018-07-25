@@ -104,6 +104,11 @@ public class DietOrderUtils {
                 VipUtils.addVipBalance(vip.getTenantId(), vip.getBranchId(), vipId, dietOrderPayment.getPaidAmount());
             } else if (Constants.PAYMENT_CODE_WX.equals(paymentCode)) {
                 RefundModel refundModel = new RefundModel();
+                refundModel.setOutTradeNo(dietOrder.getOrderNumber());
+                refundModel.setOutRefundNo(dietOrder.getOrderNumber());
+                refundModel.setTotalFee(dietOrder.getPayableAmount().multiply(Constants.BIG_DECIMAL_HUNDRED).intValue());
+                refundModel.setRefundFee(dietOrder.getPayableAmount().multiply(Constants.BIG_DECIMAL_HUNDRED).intValue());
+                refundModel.setTradeType(WeiXinPayUtils.obtainTradeType(Integer.valueOf(extraInfo)));
                 WeiXinPayUtils.refund(tenantId.toString(), branchId.toString(), refundModel);
             } else if (Constants.PAYMENT_CODE_ALIPAY.equals(paymentCode)) {
 
