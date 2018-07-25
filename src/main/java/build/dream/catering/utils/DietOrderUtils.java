@@ -97,9 +97,9 @@ public class DietOrderUtils {
 
         for (DietOrderPayment dietOrderPayment : dietOrderPayments) {
             String paymentCode = dietOrderPayment.getPaymentCode();
+            String extraInfo = dietOrderPayment.getExtraInfo();
             if (Constants.PAYMENT_CODE_HYJF.equals(paymentCode)) {
-                VipType vipType = DatabaseHelper.find(VipType.class, vip.getVipTypeId());
-                VipUtils.addVipPoint(vip.getTenantId(), vip.getBranchId(), vipId, dietOrderPayment.getPaidAmount().multiply(BigDecimal.valueOf(vipType.getBonusCoefficient())));
+                VipUtils.addVipPoint(vip.getTenantId(), vip.getBranchId(), vipId, dietOrderPayment.getPaidAmount().multiply(BigDecimal.valueOf(Double.valueOf(extraInfo))));
             } else if (Constants.PAYMENT_CODE_HYQB.equals(paymentCode)) {
                 VipUtils.addVipBalance(vip.getTenantId(), vip.getBranchId(), vipId, dietOrderPayment.getPaidAmount());
             } else if (Constants.PAYMENT_CODE_WX.equals(paymentCode)) {
