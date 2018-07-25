@@ -1,34 +1,21 @@
 package build.dream.catering.utils;
 
-import build.dream.common.erp.catering.domains.DietOrderDetail;
+import build.dream.catering.constants.Constants;
+import build.dream.common.constants.DietOrderConstants;
+import build.dream.common.erp.catering.domains.*;
+import build.dream.common.utils.DatabaseHelper;
+import build.dream.common.utils.SearchCondition;
+import build.dream.common.utils.SearchModel;
 import org.apache.commons.collections.CollectionUtils;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DietOrderUtils {
-    private static final ConcurrentHashMap<String, Timer> CONCURRENT_HASH_MAP = new ConcurrentHashMap<String, Timer>();
-
-    public static void startTimer(String orderNumber) {
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                CONCURRENT_HASH_MAP.remove(orderNumber);
-                timer.cancel();
-            }
-        }, 0, 1000);
-        CONCURRENT_HASH_MAP.put(orderNumber, timer);
-    }
-
-    public static void stopTimer(String orderNumber) {
-        Timer timer = CONCURRENT_HASH_MAP.remove(orderNumber);
-        if (timer != null) {
-            timer.cancel();
-        }
-    }
-
     public static Map<BigInteger, List<DietOrderDetail>> splitDietOrderDetails(List<DietOrderDetail> dietOrderDetails) {
         Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap = new HashMap<BigInteger, List<DietOrderDetail>>();
         for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
@@ -41,5 +28,75 @@ public class DietOrderUtils {
             dietOrderDetailList.add(dietOrderDetail);
         }
         return dietOrderDetailMap;
+    }
+
+    public static void recoveryStock(DietOrder dietOrder) {
+        BigInteger dietOrderId = dietOrder.getId();
+
+        List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
+        searchConditions.add(new SearchCondition("deleted", Constants.SQL_OPERATION_SYMBOL_EQUAL, 0));
+        searchConditions.add(new SearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId));
+        SearchModel dietOrderGroupSearchModel = new SearchModel();
+        dietOrderGroupSearchModel.setSearchConditions(searchConditions);
+        List<DietOrderGroup> dietOrderGroups = DatabaseHelper.findAll(DietOrderGroup.class, dietOrderGroupSearchModel);
+
+        SearchModel dietOrderDetailSearchModel = new SearchModel();
+        dietOrderDetailSearchModel.setSearchConditions(searchConditions);
+        List<DietOrderDetail> dietOrderDetails = DatabaseHelper.findAll(DietOrderDetail.class, dietOrderDetailSearchModel);
+
+        Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap = DietOrderUtils.splitDietOrderDetails(dietOrderDetails);
+
+        List<DietOrderDetail> normalDietOrderDetails = new ArrayList<DietOrderDetail>();
+        for (DietOrderGroup dietOrderGroup : dietOrderGroups) {
+            String type = dietOrderGroup.getType();
+            BigInteger dietOrderGroupId = dietOrderGroup.getId();
+            if (DietOrderConstants.GROUP_TYPE_NORMAL.equals(type)) {
+                normalDietOrderDetails.addAll(dietOrderDetailMap.get(dietOrderGroupId));
+            }
+        }
+
+        List<BigInteger> goodsIds = new ArrayList<BigInteger>();
+        for (DietOrderDetail normalDietOrderDetail : normalDietOrderDetails) {
+            goodsIds.add(normalDietOrderDetail.getGoodsId());
+        }
+
+        SearchModel goodsSearchModel = new SearchModel(true);
+        goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
+        List<Goods> goodsList = DatabaseHelper.findAll(Goods.class, goodsSearchModel);
+        Map<BigInteger, Goods> goodsMap = new HashMap<BigInteger, Goods>();
+        for (Goods goods : goodsList) {
+            goodsMap.put(goods.getId(), goods);
+        }
+
+        for (DietOrderDetail normalDietOrderDetail : normalDietOrderDetails) {
+            BigInteger goodsId = normalDietOrderDetail.getGoodsId();
+            Goods goods = goodsMap.get(goodsId);
+            if (goods.isStocked()) {
+                GoodsUtils.addGoodsStock(goodsId, normalDietOrderDetail.getGoodsSpecificationId(), normalDietOrderDetail.getQuantity());
+            }
+        }
+    }
+
+    public static void refund(DietOrder dietOrder) {
+        BigInteger dietOrderId = dietOrder.getId();
+        BigInteger vipId = dietOrder.getVipId();
+        Vip vip = null;
+        if (vipId != null) {
+            vip = VipUtils.find(vipId);
+        }
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        List<DietOrderPayment> dietOrderPayments = DatabaseHelper.findAll(DietOrderPayment.class, searchModel);
+
+        for (DietOrderPayment dietOrderPayment : dietOrderPayments) {
+            String paymentCode = dietOrderPayment.getPaymentCode();
+            if ("HYJF".equals(paymentCode)) {
+                VipType vipType = DatabaseHelper.find(VipType.class, vip.getVipTypeId());
+                VipUtils.addVipPoint(vip.getTenantId(), vip.getBranchId(), vipId, dietOrderPayment.getPaidAmount().multiply(BigDecimal.valueOf(vipType.getBonusCoefficient())));
+            } else if ("HYQB".equals(paymentCode)) {
+                VipUtils.addVipBalance(vip.getTenantId(), vip.getBranchId(), vipId, dietOrderPayment.getPaidAmount());
+            }
+        }
     }
 }

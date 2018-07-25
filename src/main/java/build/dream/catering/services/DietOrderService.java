@@ -822,95 +822,13 @@ public class DietOrderService {
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
         ValidateUtils.notNull(dietOrder, "订单不存在！");
 
-        recoveryStock(orderId);
-        recoveryVipPoint(dietOrder);
-        recoveryVipBalance(dietOrder);
+        DietOrderUtils.recoveryStock(dietOrder);
+        DietOrderUtils.refund(dietOrder);
 
         dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_INVALID);
         DatabaseHelper.update(dietOrder);
 
         return ApiRest.builder().message("取消订单成功").successful(true).build();
-    }
-
-    private void recoveryStock(BigInteger dietOrderId) {
-        List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
-        searchConditions.add(new SearchCondition("deleted", Constants.SQL_OPERATION_SYMBOL_EQUAL, 0));
-        searchConditions.add(new SearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId));
-        SearchModel dietOrderGroupSearchModel = new SearchModel();
-        dietOrderGroupSearchModel.setSearchConditions(searchConditions);
-        List<DietOrderGroup> dietOrderGroups = DatabaseHelper.findAll(DietOrderGroup.class, dietOrderGroupSearchModel);
-
-        SearchModel dietOrderDetailSearchModel = new SearchModel();
-        dietOrderDetailSearchModel.setSearchConditions(searchConditions);
-        List<DietOrderDetail> dietOrderDetails = DatabaseHelper.findAll(DietOrderDetail.class, dietOrderDetailSearchModel);
-
-        Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap = DietOrderUtils.splitDietOrderDetails(dietOrderDetails);
-
-        List<DietOrderDetail> normalDietOrderDetails = new ArrayList<DietOrderDetail>();
-        for (DietOrderGroup dietOrderGroup : dietOrderGroups) {
-            String type = dietOrderGroup.getType();
-            BigInteger dietOrderGroupId = dietOrderGroup.getId();
-            if (DietOrderConstants.GROUP_TYPE_NORMAL.equals(type)) {
-                normalDietOrderDetails.addAll(dietOrderDetailMap.get(dietOrderGroupId));
-            }
-        }
-
-        List<BigInteger> goodsIds = new ArrayList<BigInteger>();
-        for (DietOrderDetail normalDietOrderDetail : normalDietOrderDetails) {
-            goodsIds.add(normalDietOrderDetail.getGoodsId());
-        }
-
-        SearchModel goodsSearchModel = new SearchModel(true);
-        goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
-        List<Goods> goodsList = DatabaseHelper.findAll(Goods.class, goodsSearchModel);
-        Map<BigInteger, Goods> goodsMap = new HashMap<BigInteger, Goods>();
-        for (Goods goods : goodsList) {
-            goodsMap.put(goods.getId(), goods);
-        }
-
-        for (DietOrderDetail normalDietOrderDetail : normalDietOrderDetails) {
-            BigInteger goodsId = normalDietOrderDetail.getGoodsId();
-            Goods goods = goodsMap.get(goodsId);
-            if (goods.isStocked()) {
-                GoodsUtils.addGoodsStock(goodsId, normalDietOrderDetail.getGoodsSpecificationId(), normalDietOrderDetail.getQuantity());
-            }
-        }
-    }
-
-    private void recoveryVipPoint(DietOrder dietOrder) {
-        BigInteger vipId = dietOrder.getVipId();
-        if (vipId == null) {
-            return;
-        }
-
-        SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrder.getTenantId());
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrder.getBranchId());
-        searchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrder.getId());
-        searchModel.addSearchCondition("payment_code", Constants.SQL_OPERATION_SYMBOL_EQUAL, "HYJF");
-        DietOrderPayment dietOrderPayment = DatabaseHelper.find(DietOrderPayment.class, searchModel);
-        if (dietOrderPayment != null) {
-            Vip vip = VipUtils.find(vipId);
-            VipType vipType = DatabaseHelper.find(VipType.class, vip.getVipTypeId());
-            VipUtils.addVipPoint(vip.getTenantId(), vip.getBranchId(), vipId, dietOrderPayment.getPaidAmount().multiply(BigDecimal.valueOf(vipType.getBonusCoefficient())));
-        }
-    }
-
-    private void recoveryVipBalance(DietOrder dietOrder) {
-        BigInteger vipId = dietOrder.getVipId();
-        if (vipId == null) {
-            return;
-        }
-        SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrder.getTenantId());
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrder.getBranchId());
-        searchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrder.getId());
-        searchModel.addSearchCondition("payment_code", Constants.SQL_OPERATION_SYMBOL_EQUAL, "HYQB");
-        DietOrderPayment dietOrderPayment = DatabaseHelper.find(DietOrderPayment.class, searchModel);
-        if (dietOrderPayment != null) {
-            Vip vip = VipUtils.find(vipId);
-            VipUtils.addVipBalance(vip.getTenantId(), vip.getBranchId(), vipId, dietOrderPayment.getPaidAmount());
-        }
     }
 
     @Transactional(readOnly = true)
