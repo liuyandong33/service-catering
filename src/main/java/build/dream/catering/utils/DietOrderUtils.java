@@ -85,7 +85,7 @@ public class DietOrderUtils {
         BigInteger dietOrderId = dietOrder.getId();
         BigInteger vipId = dietOrder.getVipId();
         Vip vip = null;
-        if (vipId != null) {
+        if (vipId.compareTo(Constants.BIGINT_DEFAULT_VALUE) != 0) {
             vip = VipUtils.find(vipId);
         }
 

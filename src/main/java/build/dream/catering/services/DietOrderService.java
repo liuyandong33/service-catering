@@ -7,7 +7,6 @@ import build.dream.catering.mappers.SequenceMapper;
 import build.dream.catering.models.dietorder.*;
 import build.dream.catering.utils.DietOrderUtils;
 import build.dream.catering.utils.GoodsUtils;
-import build.dream.catering.utils.VipUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
@@ -27,10 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -832,7 +827,7 @@ public class DietOrderService {
     }
 
     @Transactional(readOnly = true)
-    public ApiRest doPay(DoPayModel doPayModel) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, DocumentException {
+    public ApiRest doPay(DoPayModel doPayModel) throws IOException, DocumentException {
         BigInteger tenantId = doPayModel.getTenantId();
         BigInteger branchId = doPayModel.getBranchId();
         BigInteger dietOrderId = doPayModel.getDietOrderId();
