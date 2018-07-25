@@ -3,11 +3,9 @@ package build.dream.catering.utils;
 import build.dream.catering.constants.Constants;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
+import build.dream.common.models.alipay.AlipayTradeRefundModel;
 import build.dream.common.models.weixin.RefundModel;
-import build.dream.common.utils.DatabaseHelper;
-import build.dream.common.utils.SearchCondition;
-import build.dream.common.utils.SearchModel;
-import build.dream.common.utils.WeiXinPayUtils;
+import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.dom4j.DocumentException;
 
@@ -111,7 +109,8 @@ public class DietOrderUtils {
                 refundModel.setTradeType(WeiXinPayUtils.obtainTradeType(Integer.valueOf(extraInfo)));
                 WeiXinPayUtils.refund(tenantId.toString(), branchId.toString(), refundModel);
             } else if (Constants.PAYMENT_CODE_ALIPAY.equals(paymentCode)) {
-
+                AlipayTradeRefundModel alipayTradeRefundModel = new AlipayTradeRefundModel();
+                AlipayUtils.alipayTradeRefund(tenantId.toString(), branchId.toString(), null, alipayTradeRefundModel);
             }
         }
     }
