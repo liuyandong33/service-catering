@@ -810,7 +810,7 @@ public class DietOrderService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest cancelOrder(CancelOrderModel cancelOrderModel) {
+    public ApiRest cancelOrder(CancelOrderModel cancelOrderModel) throws IOException, DocumentException {
         BigInteger tenantId = cancelOrderModel.getTenantId();
         BigInteger branchId = cancelOrderModel.getBranchId();
         BigInteger orderId = cancelOrderModel.getOrderId();

@@ -3,11 +3,15 @@ package build.dream.catering.utils;
 import build.dream.catering.constants.Constants;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
+import build.dream.common.models.weixin.RefundModel;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SearchCondition;
 import build.dream.common.utils.SearchModel;
+import build.dream.common.utils.WeiXinPayUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.dom4j.DocumentException;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -77,7 +81,9 @@ public class DietOrderUtils {
         }
     }
 
-    public static void refund(DietOrder dietOrder) {
+    public static void refund(DietOrder dietOrder) throws IOException, DocumentException {
+        BigInteger tenantId = dietOrder.getTenantId();
+        BigInteger branchId = dietOrder.getBranchId();
         BigInteger dietOrderId = dietOrder.getId();
         BigInteger vipId = dietOrder.getVipId();
         Vip vip = null;
@@ -91,11 +97,16 @@ public class DietOrderUtils {
 
         for (DietOrderPayment dietOrderPayment : dietOrderPayments) {
             String paymentCode = dietOrderPayment.getPaymentCode();
-            if ("HYJF".equals(paymentCode)) {
+            if (Constants.PAYMENT_CODE_HYJF.equals(paymentCode)) {
                 VipType vipType = DatabaseHelper.find(VipType.class, vip.getVipTypeId());
                 VipUtils.addVipPoint(vip.getTenantId(), vip.getBranchId(), vipId, dietOrderPayment.getPaidAmount().multiply(BigDecimal.valueOf(vipType.getBonusCoefficient())));
-            } else if ("HYQB".equals(paymentCode)) {
+            } else if (Constants.PAYMENT_CODE_HYQB.equals(paymentCode)) {
                 VipUtils.addVipBalance(vip.getTenantId(), vip.getBranchId(), vipId, dietOrderPayment.getPaidAmount());
+            } else if (Constants.PAYMENT_CODE_WX.equals(paymentCode)) {
+                RefundModel refundModel = new RefundModel();
+                WeiXinPayUtils.refund(tenantId.toString(), branchId.toString(), refundModel);
+            } else if (Constants.PAYMENT_CODE_ALIPAY.equals(paymentCode)) {
+
             }
         }
     }
