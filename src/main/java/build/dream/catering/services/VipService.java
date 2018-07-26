@@ -1,12 +1,14 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
+import build.dream.catering.models.vip.ChangeVipIsolationLevelModel;
 import build.dream.catering.models.vip.ObtainVipInfoModel;
 import build.dream.catering.models.vip.SaveVipInfoModel;
 import build.dream.catering.models.vip.SaveVipTypeModel;
 import build.dream.catering.utils.SequenceUtils;
 import build.dream.catering.utils.VipUtils;
 import build.dream.common.api.ApiRest;
+import build.dream.common.erp.catering.domains.Branch;
 import build.dream.common.erp.catering.domains.Vip;
 import build.dream.common.erp.catering.domains.VipType;
 import build.dream.common.utils.DatabaseHelper;
@@ -192,5 +194,22 @@ public class VipService {
             VipUtils.insert(vip);
         }
         return new ApiRest(vip, "保存会员信息成功！");
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest changeVipIsolationLevel(ChangeVipIsolationLevelModel changeVipIsolationLevelModel) {
+        BigInteger tenantId = changeVipIsolationLevelModel.getTenantId();
+        int vipIsolationLevel = changeVipIsolationLevelModel.getVipIsolationLevel();
+        if (vipIsolationLevel == 1) {
+            SearchModel searchModel = new SearchModel(true);
+            searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+            searchModel.addSearchCondition("type", Constants.SQL_OPERATION_SYMBOL_EQUAL, Constants.BRANCH_TYPE_HEADQUARTERS);
+            Branch branch = DatabaseHelper.find(Branch.class, searchModel);
+
+        } else if (vipIsolationLevel == 2) {
+
+        }
+
+        return ApiRest.builder().message("会员隔离级别修改成功！").successful(true).build();
     }
 }

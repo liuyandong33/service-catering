@@ -1,12 +1,12 @@
 package build.dream.catering.controllers;
 
+import build.dream.catering.models.vip.ChangeVipIsolationLevelModel;
 import build.dream.catering.models.vip.ObtainVipInfoModel;
 import build.dream.catering.models.vip.SaveVipInfoModel;
 import build.dream.catering.models.vip.SaveVipTypeModel;
 import build.dream.catering.services.VipService;
 import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.controllers.BasicController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,6 +49,18 @@ public class VipController extends BasicController {
     @ResponseBody
     @ApiRestAction(modelClass = SaveVipInfoModel.class, serviceClass = VipService.class, serviceMethodName = "saveVipInfo", error = "获取会员信息失败")
     public String saveVipInfo() {
+        return null;
+    }
+
+    /**
+     * 修改会员隔离级别
+     *
+     * @return
+     */
+    @RequestMapping(value = "/changeVipIsolationLevel", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = ChangeVipIsolationLevelModel.class, serviceClass = VipService.class, serviceMethodName = "changeVipIsolationLevel", error = "获取会员信息失败")
+    public String changeVipIsolationLevel() {
         return null;
     }
 }
