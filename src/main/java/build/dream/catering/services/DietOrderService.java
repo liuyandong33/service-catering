@@ -11,13 +11,13 @@ import build.dream.common.api.ApiRest;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.models.alipay.AlipayTradePagePayModel;
-import build.dream.common.models.alipay.AlipayTradePayModel;
 import build.dream.common.models.alipay.AlipayTradeWapPayModel;
 import build.dream.common.models.weixin.MicroPayModel;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.Validate;
 import org.dom4j.DocumentException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URLEncoder;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -856,20 +858,79 @@ public class DietOrderService {
         } else if (paidScene == Constants.PAID_SCENE_ALIPAY_MOBILE_WEBSITE) {
             String returnUrl = "";
             String notifyUrl = "";
+
             AlipayTradeWapPayModel alipayTradeWapPayModel = new AlipayTradeWapPayModel();
+            Map<String, Object> passBackParams = new HashMap<String, Object>();
+            passBackParams.put("paidScene", paidScene);
+            alipayTradeWapPayModel.setPassbackParams(URLEncoder.encode(GsonUtils.toJson(passBackParams), Constants.CHARSET_NAME_UTF_8));
+
             result = AlipayUtils.alipayTradeWapPay(tenantId.toString(), branchId.toString(), returnUrl, notifyUrl, alipayTradeWapPayModel);
         } else if (paidScene == Constants.PAID_SCENE_ALIPAY_PC_WEBSITE) {
             String returnUrl = "";
             String notifyUrl = "";
+
             AlipayTradePagePayModel alipayTradePagePayModel = new AlipayTradePagePayModel();
+            Map<String, Object> passBackParams = new HashMap<String, Object>();
+            passBackParams.put("paidScene", paidScene);
+            alipayTradePagePayModel.setPassbackParams(URLEncoder.encode(GsonUtils.toJson(passBackParams), Constants.CHARSET_NAME_UTF_8));
+
             result = AlipayUtils.alipayTradePagePay(tenantId.toString(), branchId.toString(), returnUrl, notifyUrl, alipayTradePagePayModel);
         } else if (paidScene == Constants.PAID_SCENE_ALIPAY_APP) {
             String notifyUrl = "";
             String appAuthToken = "";
-            AlipayTradePayModel alipayTradePayModel = new AlipayTradePayModel();
-            result = AlipayUtils.alipayTradePay(tenantId.toString(), branchId.toString(), notifyUrl, appAuthToken, alipayTradePayModel);
         }
 
         return ApiRest.builder().data(result).message("发起支付成功！").successful(true).build();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void handleCallback(Map<String, String> parameters, String paymentCode) throws ParseException {
+        String orderNumber = null;
+        Date occurrenceTime = null;
+        BigDecimal totalAmount = null;
+        if (Constants.PAYMENT_CODE_ALIPAY.equals(paymentCode)) {
+            orderNumber = parameters.get("out_trade_no");
+            occurrenceTime = new SimpleDateFormat(Constants.DEFAULT_DATE_PATTERN).parse(parameters.get("gmt_payment"));
+            totalAmount = BigDecimal.valueOf(Double.valueOf(parameters.get("total_amount")));
+        } else if (Constants.PAYMENT_CODE_WX.equals(paymentCode)) {
+            orderNumber = "";
+        }
+
+        SearchModel dietOrderSearchModel = new SearchModel(true);
+        dietOrderSearchModel.addSearchCondition("order_number", Constants.SQL_OPERATION_SYMBOL_EQUAL, orderNumber);
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, dietOrderSearchModel);
+        Validate.notNull(dietOrder, "订单不存在！");
+        if (dietOrder.getOrderStatus() == DietOrderConstants.PAY_STATUS_PAID) {
+            return;
+        }
+
+        BigInteger tenantId = dietOrder.getTenantId();
+        String tenantCode = dietOrder.getTenantCode();
+        BigInteger branchId = dietOrder.getBranchId();
+
+        SearchModel paymentSearchModel = new SearchModel(true);
+        paymentSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        paymentSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        paymentSearchModel.addSearchCondition("code", Constants.SQL_OPERATION_SYMBOL_EQUAL, paymentCode);
+        Payment payment = DatabaseHelper.find(Payment.class, paymentSearchModel);
+
+        DietOrderPayment dietOrderPayment = DietOrderPayment.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .dietOrderId(dietOrder.getId())
+                .paymentId(payment.getId())
+                .paymentCode(payment.getCode())
+                .paymentName(payment.getName())
+                .occurrenceTime(occurrenceTime)
+                .extraInfo(GsonUtils.toJson(parameters))
+                .build();
+        DatabaseHelper.insert(dietOrderPayment);
+
+        dietOrder.setPaidAmount(dietOrder.getPaidAmount().add(totalAmount));
+        dietOrder.setPayStatus(DietOrderConstants.PAY_STATUS_PAID);
+        dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_UNPROCESSED);
+        dietOrder.setActiveTime(occurrenceTime);
+        DatabaseHelper.update(dietOrder);
     }
 }

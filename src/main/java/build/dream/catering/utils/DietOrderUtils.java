@@ -6,6 +6,7 @@ import build.dream.common.erp.catering.domains.*;
 import build.dream.common.models.alipay.AlipayTradeRefundModel;
 import build.dream.common.models.weixin.RefundModel;
 import build.dream.common.utils.*;
+import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.dom4j.DocumentException;
 
@@ -106,7 +107,10 @@ public class DietOrderUtils {
                 refundModel.setOutRefundNo(dietOrder.getOrderNumber());
                 refundModel.setTotalFee(dietOrder.getPayableAmount().multiply(Constants.BIG_DECIMAL_HUNDRED).intValue());
                 refundModel.setRefundFee(dietOrder.getPayableAmount().multiply(Constants.BIG_DECIMAL_HUNDRED).intValue());
-                refundModel.setTradeType(WeiXinPayUtils.obtainTradeType(Integer.valueOf(extraInfo)));
+                JSONObject extraInfoJsonObject = JSONObject.fromObject(extraInfo);
+                JSONObject attachJsonObject = JSONObject.fromObject(extraInfoJsonObject.getString("attach"));
+
+                refundModel.setTradeType(WeiXinPayUtils.obtainTradeType(attachJsonObject.getInt("paidScene")));
                 WeiXinPayUtils.refund(tenantId.toString(), branchId.toString(), refundModel);
             } else if (Constants.PAYMENT_CODE_ALIPAY.equals(paymentCode)) {
                 AlipayTradeRefundModel alipayTradeRefundModel = new AlipayTradeRefundModel();

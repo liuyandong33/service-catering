@@ -168,7 +168,7 @@ public class WeiXinService {
 
         String weiXinApiUrl = ConfigurationUtils.getConfiguration(Constants.WEI_XIN_API_URL);
         String createMemberCardUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_CREATE_URI + "?access_token=" + accessToken;
-        String createMemberCardResult = OutUtils.doPostWithRequestBody(createMemberCardUrl, GsonUtils.toJson(createMemberCardRequestBody), null).getResult();
+        String createMemberCardResult = OutUtils.doPostWithRequestBody(createMemberCardUrl, null, GsonUtils.toJson(createMemberCardRequestBody)).getResult();
         JSONObject createMemberCardResultJsonObject = JSONObject.fromObject(createMemberCardResult);
         Validate.isTrue(createMemberCardResultJsonObject.getInt("errcode") == 0, createMemberCardResultJsonObject.getString("errmsg"));
 
@@ -221,7 +221,7 @@ public class WeiXinService {
         activateUserFormRequestBody.put("optional_form", optionalForm);
 
         String activateUserFormUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_MEMBER_CARD_ACTIVATE_USER_FORM_SET_URI + "?access_token=" + accessToken;
-        String activateUserFormResult = OutUtils.doPostWithRequestBody(activateUserFormUrl, GsonUtils.toJson(activateUserFormRequestBody), null).getResult();
+        String activateUserFormResult = OutUtils.doPostWithRequestBody(activateUserFormUrl, null, GsonUtils.toJson(activateUserFormRequestBody)).getResult();
         JSONObject activateUserFormResultJsonObject = JSONObject.fromObject(activateUserFormResult);
         Validate.isTrue(activateUserFormResultJsonObject.getInt("errcode") == 0, activateUserFormResultJsonObject.getString("errmsg"));
 
@@ -236,7 +236,7 @@ public class WeiXinService {
         createQRcodeRequestBody.put("action_info", actionInfo);
 
         String createQrCodeUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_QRCODE_CREATE_URI + "?access_token=" + accessToken;
-        String createQrCodeResult = OutUtils.doPostWithRequestBody(createQrCodeUrl, GsonUtils.toJson(createQRcodeRequestBody), null).getResult();
+        String createQrCodeResult = OutUtils.doPostWithRequestBody(createQrCodeUrl, null, GsonUtils.toJson(createQRcodeRequestBody)).getResult();
         JSONObject createQrCodeResultJsonObject = JSONObject.fromObject(createQrCodeResult);
         Validate.isTrue(createQrCodeResultJsonObject.getInt("errcode") == 0, createQrCodeResultJsonObject.getString("errmsg"));
 
@@ -299,7 +299,7 @@ public class WeiXinService {
 
         String weiXinApiUrl = ConfigurationUtils.getConfiguration(Constants.WEI_XIN_API_URL);
         String weiXinAddPayGiftCardUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_PAY_GIFT_CARD_ADD_URI + "?access_token=" + accessToken;
-        String payGiftCardResult = OutUtils.doPostWithRequestBody(weiXinAddPayGiftCardUrl, GsonUtils.toJson(payGiftCardRequestBody), null).getResult();
+        String payGiftCardResult = OutUtils.doPostWithRequestBody(weiXinAddPayGiftCardUrl, null, GsonUtils.toJson(payGiftCardRequestBody)).getResult();
         JSONObject payGiftCardResultJsonObject = JSONObject.fromObject(payGiftCardResult);
         Validate.isTrue(payGiftCardResultJsonObject.getInt("errcode") == 0, payGiftCardResultJsonObject.getString("errmsg"));
 
@@ -334,7 +334,7 @@ public class WeiXinService {
 
         String weiXinApiUrl = ConfigurationUtils.getConfiguration(Constants.WEI_XIN_API_URL);
         String deleteCardUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_DELETE_URI + "?access_token=" + accessToken;
-        String deleteCardResult = OutUtils.doPostWithRequestBody(deleteCardUrl, GsonUtils.toJson(deleteCardRequestBody), null).getResult();
+        String deleteCardResult = OutUtils.doPostWithRequestBody(deleteCardUrl, null, GsonUtils.toJson(deleteCardRequestBody)).getResult();
         JSONObject deleteCardResultJsonObject = JSONObject.fromObject(deleteCardResult);
         Validate.isTrue(deleteCardResultJsonObject.getInt("errcode") == 0, deleteCardResultJsonObject.getString("errmsg"));
 
