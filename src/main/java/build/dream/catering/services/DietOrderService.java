@@ -834,7 +834,6 @@ public class DietOrderService {
         BigInteger branchId = doPayModel.getBranchId();
         BigInteger dietOrderId = doPayModel.getDietOrderId();
         Integer paidScene = doPayModel.getPaidScene();
-        String spbillCreateIp = doPayModel.getSpbillCreateIp();
         String openId = doPayModel.getOpenId();
         String subOpenId = doPayModel.getSubOpenId();
         String userId = doPayModel.getUserId();

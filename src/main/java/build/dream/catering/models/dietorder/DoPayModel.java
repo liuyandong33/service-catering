@@ -21,9 +21,6 @@ public class DoPayModel extends BasicModel {
     @NotNull
     private Integer paidScene;
 
-    @Length(max = 16)
-    private String spbillCreateIp;
-
     @Length(max = 128)
     private String openId;
 
@@ -63,14 +60,6 @@ public class DoPayModel extends BasicModel {
 
     public void setPaidScene(Integer paidScene) {
         this.paidScene = paidScene;
-    }
-
-    public String getSpbillCreateIp() {
-        return spbillCreateIp;
-    }
-
-    public void setSpbillCreateIp(String spbillCreateIp) {
-        this.spbillCreateIp = spbillCreateIp;
     }
 
     public String getOpenId() {
