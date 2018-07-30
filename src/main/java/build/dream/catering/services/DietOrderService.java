@@ -147,6 +147,13 @@ public class DietOrderService {
         dietOrderInfo.put("telephoneNumber", dietOrder.getTelephoneNumber());
         dietOrderInfo.put("daySerialNumber", dietOrder.getDaySerialNumber());
         dietOrderInfo.put("consignee", dietOrder.getConsignee());
+        dietOrderInfo.put("invoiced", dietOrder.isInvoiced());
+        dietOrderInfo.put("invoiceType", dietOrder.getInvoiceType());
+        dietOrderInfo.put("invoice", dietOrder.getInvoice());
+        dietOrderInfo.put("vipId", dietOrder.getVipId());
+        dietOrderInfo.put("createTime", dietOrder.getCreateTime());
+        dietOrderInfo.put("lastUpdateTime", dietOrder.getLastUpdateTime());
+        dietOrderInfo.put("lastUpdateRemark", dietOrder.getLastUpdateRemark());
         dietOrderInfo.put("groups", buildGroups(dietOrderGroups, dietOrderDetailMap, dietOrderDetailGoodsAttributeMap));
         List<Map<String, Object>> orderActivities = new ArrayList<Map<String, Object>>();
         for (DietOrderActivity dietOrderActivity : dietOrderActivities) {
