@@ -20,7 +20,7 @@ public class GoodsController extends BasicController {
      */
     @RequestMapping(value = "/count", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ApiRestAction(modelClass = CountModel.class, serviceClass = GoodsService.class, serviceMethodName = "count", error = "查询商品列表失败")
+    @ApiRestAction(modelClass = CountModel.class, serviceClass = GoodsService.class, serviceMethodName = "count", error = "查询商品数量失败")
     public String count() {
         return null;
     }
