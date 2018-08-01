@@ -26,6 +26,7 @@ public class GoodsService extends BasicService {
 
     /**
      * 查询商品数量
+     *
      * @param countModel
      * @return
      */
@@ -44,6 +45,7 @@ public class GoodsService extends BasicService {
 
     /**
      * 查询商品列表
+     *
      * @param listModel
      * @return
      */
@@ -610,7 +612,187 @@ public class GoodsService extends BasicService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest savePackage(SavePackageModel savePackageModel) {
-        return new ApiRest();
+        BigInteger tenantId = savePackageModel.getTenantId();
+        String tenantCode = savePackageModel.getTenantCode();
+        BigInteger branchId = savePackageModel.getBranchId();
+        BigInteger userId = savePackageModel.getUserId();
+        BigInteger id = savePackageModel.getId();
+        String name = savePackageModel.getName();
+        Integer type = savePackageModel.getType();
+        BigInteger categoryId = savePackageModel.getCategoryId();
+        String imageUrl = savePackageModel.getImageUrl();
+        List<BigInteger> deleteGroupIds = savePackageModel.getDeleteGroupIds();
+        List<SavePackageModel.Group> groups = savePackageModel.getGroups();
+
+        Goods goods = null;
+        if (id != null) {
+            SearchModel goodsSearchModel = new SearchModel();
+            goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+            goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+            goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, id);
+            goods = DatabaseHelper.find(Goods.class, goodsSearchModel);
+            ValidateUtils.notNull(goods, "商品不存在！");
+
+            if (CollectionUtils.isNotEmpty(deleteGroupIds)) {
+                UpdateModel packageGroupUpdateModel = new UpdateModel(true);
+                packageGroupUpdateModel.setTableName("package_group");
+                packageGroupUpdateModel.addContentValue("deleted", 1);
+                packageGroupUpdateModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, deleteGroupIds);
+                DatabaseHelper.universalUpdate(packageGroupUpdateModel);
+
+                UpdateModel packageGroupDetailUpdateModel = new UpdateModel();
+                packageGroupDetailUpdateModel.setTableName("package_group_detail");
+                packageGroupDetailUpdateModel.addContentValue("deleted", 1);
+                packageGroupDetailUpdateModel.addSearchCondition("package_group_id", Constants.SQL_OPERATION_SYMBOL_IN, deleteGroupIds);
+                DatabaseHelper.universalUpdate(packageGroupDetailUpdateModel);
+            }
+            SearchModel packageGroupSearchModel = new SearchModel(true);
+            packageGroupSearchModel.addSearchCondition("package_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, id);
+            List<PackageGroup> packageGroups = DatabaseHelper.findAll(PackageGroup.class, packageGroupSearchModel);
+
+            List<BigInteger> packageGroupIds = new ArrayList<BigInteger>();
+            Map<BigInteger, PackageGroup> packageGroupMap = new HashMap<BigInteger, PackageGroup>();
+            for (PackageGroup packageGroup : packageGroups) {
+                BigInteger packageGroupId = packageGroup.getId();
+                packageGroupIds.add(packageGroupId);
+                packageGroupMap.put(packageGroupId, packageGroup);
+            }
+
+            Map<String, PackageGroupDetail> packageGroupDetailMap = new HashMap<String, PackageGroupDetail>();
+            if (CollectionUtils.isNotEmpty(packageGroupIds)) {
+                SearchModel packageGroupDetailSearchModel = new SearchModel(true);
+                packageGroupDetailSearchModel.addSearchCondition("package_group_id", Constants.SQL_OPERATION_SYMBOL_IN, packageGroupIds);
+                List<PackageGroupDetail> packageGroupDetails = DatabaseHelper.findAll(PackageGroupDetail.class, packageGroupDetailSearchModel);
+                for (PackageGroupDetail packageGroupDetail : packageGroupDetails) {
+                    packageGroupDetailMap.put(packageGroupDetail.getGoodsId() + "_" + packageGroupDetail.getGoodsSpecificationId(), packageGroupDetail);
+                }
+            }
+
+            for (SavePackageModel.Group group : groups) {
+                BigInteger groupId = group.getId();
+                String groupName = group.getGroupName();
+                int groupType = group.getGroupType();
+                int optionalQuantity = group.getOptionalQuantity();
+                List<BigInteger> deleteGroupDetailIds = group.getDeleteGroupDetailIds();
+                List<SavePackageModel.GroupDetail> groupDetails = group.getGroupDetails();
+
+                if (CollectionUtils.isNotEmpty(deleteGroupDetailIds)) {
+                    UpdateModel packageGroupDetailUpdateModel = new UpdateModel();
+                    packageGroupDetailUpdateModel.setTableName("package_group_detail");
+                    packageGroupDetailUpdateModel.addContentValue("deleted", 1);
+                    packageGroupDetailUpdateModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, deleteGroupDetailIds);
+                    DatabaseHelper.universalUpdate(packageGroupDetailUpdateModel);
+                }
+
+                PackageGroup packageGroup = null;
+                if (groupId == null) {
+                    packageGroup = new PackageGroup();
+                    packageGroup.setPackageId(id);
+                    packageGroup.setGroupName(groupName);
+                    packageGroup.setGroupType(groupType);
+                    if (groupType == 1) {
+                        packageGroup.setOptionalQuantity(optionalQuantity);
+                    }
+                    DatabaseHelper.insert(packageGroup);
+                } else {
+                    packageGroup = packageGroupMap.get(groupId);
+                    ValidateUtils.notNull(packageGroup, "套餐组不存在！");
+                    packageGroup.setGroupName(groupName);
+                    packageGroup.setGroupType(groupType);
+                    if (groupType == 1) {
+                        packageGroup.setOptionalQuantity(optionalQuantity);
+                    }
+                    DatabaseHelper.update(packageGroup);
+                }
+
+                for (SavePackageModel.GroupDetail groupDetail : groupDetails) {
+                    BigInteger goodsId = groupDetail.getGoodsId();
+                    BigInteger goodsSpecificationId = groupDetail.getGoodsSpecificationId();
+                    Integer quantity = groupDetail.getQuantity();
+                    String key = goodsId + "_" + goodsSpecificationId;
+                    PackageGroupDetail packageGroupDetail = packageGroupDetailMap.get(key);
+                    if (packageGroupDetail == null) {
+                        packageGroupDetail = new PackageGroupDetail();
+                        packageGroupDetail.setPackageGroupId(packageGroup.getId());
+                        packageGroupDetail.setGoodsId(goodsId);
+                        packageGroupDetail.setGoodsSpecificationId(goodsSpecificationId);
+                        if (quantity != null) {
+                            packageGroupDetail.setQuantity(quantity);
+                        }
+                        packageGroupDetail.setCreateUserId(userId);
+                        packageGroupDetail.setLastUpdateUserId(userId);
+                        DatabaseHelper.insert(packageGroupDetail);
+                    } else {
+                        packageGroupDetail.setGoodsId(goodsId);
+                        packageGroupDetail.setGoodsSpecificationId(goodsSpecificationId);
+                        if (quantity != null) {
+                            packageGroupDetail.setQuantity(quantity);
+                        }
+                        packageGroupDetail.setLastUpdateUserId(userId);
+                        DatabaseHelper.update(packageGroupDetail);
+                    }
+                }
+            }
+            goods.setName(name);
+            goods.setCategoryId(categoryId);
+            goods.setImageUrl(imageUrl);
+        } else {
+            goods = new Goods();
+            goods.setTenantId(tenantId);
+            goods.setTenantCode(tenantCode);
+            goods.setBranchId(branchId);
+            goods.setName(name);
+            goods.setType(type);
+            goods.setCategoryId(categoryId);
+            goods.setImageUrl(imageUrl);
+            goods.setStocked(false);
+            goods.setCreateUserId(userId);
+            goods.setLastUpdateUserId(userId);
+            DatabaseHelper.insert(goods);
+
+            BigInteger packageId = goods.getId();
+            for (SavePackageModel.Group group : groups) {
+                String groupName = group.getGroupName();
+                int groupType = group.getGroupType();
+                int optionalQuantity = group.getOptionalQuantity();
+                List<SavePackageModel.GroupDetail> groupDetails = group.getGroupDetails();
+
+                PackageGroup packageGroup = new PackageGroup();
+                packageGroup.setTenantId(tenantId);
+                packageGroup.setTenantCode(tenantCode);
+                packageGroup.setBranchId(branchId);
+                packageGroup.setPackageId(packageId);
+                packageGroup.setGroupName(groupName);
+                packageGroup.setGroupType(groupType);
+                if (groupType == 1) {
+                    packageGroup.setOptionalQuantity(optionalQuantity);
+                }
+                packageGroup.setCreateUserId(userId);
+                packageGroup.setLastUpdateUserId(userId);
+                DatabaseHelper.insert(packageGroup);
+
+                for (SavePackageModel.GroupDetail groupDetail : groupDetails) {
+                    BigInteger goodsId = groupDetail.getGoodsId();
+                    BigInteger goodsSpecificationId = groupDetail.getGoodsSpecificationId();
+                    Integer quantity = groupDetail.getQuantity();
+                    PackageGroupDetail packageGroupDetail = new PackageGroupDetail();
+                    packageGroupDetail.setTenantId(tenantId);
+                    packageGroupDetail.setTenantCode(tenantCode);
+                    packageGroupDetail.setBranchId(branchId);
+                    packageGroupDetail.setPackageId(packageId);
+                    packageGroupDetail.setPackageGroupId(packageGroup.getId());
+                    packageGroupDetail.setGoodsId(goodsId);
+                    packageGroupDetail.setGoodsSpecificationId(goodsSpecificationId);
+                    if (quantity != null) {
+                        packageGroupDetail.setQuantity(quantity);
+                    }
+                    packageGroupDetail.setCreateUserId(userId);
+                    packageGroupDetail.setLastUpdateUserId(userId);
+                    DatabaseHelper.insert(packageGroupDetail);
+                }
+            }
+        }
+        return ApiRest.builder().data(goods).message("保存套餐成功！").successful(true).build();
     }
 
     @Transactional(readOnly = true)

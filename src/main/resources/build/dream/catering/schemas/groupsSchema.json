@@ -2,56 +2,114 @@
     "type": "array",
     "items": {
         "type": "object",
-        "properties": {
-            "name": {
-                "type": "string",
-                "maxLength": 20
+        "oneOf": [
+            {
+                "$ref": "#/definitions/optionalGroupSchema"
             },
-            "type": {
-                "type": "string"
-            },
-            "details": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "goodsId": {
-                            "type": "integer"
-                        },
-                        "goodsSpecificationId": {
-                            "type": "integer"
-                        },
-                        "quantity": {
-                            "type": "integer"
-                        },
-                        "flavors": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "flavorGroupId": {
-                                        "type": "integer"
-                                    },
-                                    "flavorId": {
-                                        "type": "integer"
-                                    }
-                                },
-                                "required": [
-                                    "flavorGroupId",
-                                    "flavorId"
-                                ]
-                            }
-                        }
-                    },
-                    "required": [
-                        "goodsId",
-                        "goodsSpecificationId",
-                        "quantity"
+            {
+                "$ref": "#/definitions/requiredGroupSchema"
+            }
+        ]
+    },
+    "minItems": 1,
+    "definitions": {
+        "optionalGroupSchema": {
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "groupName": {
+                    "type": "string",
+                    "maxLength": 20
+                },
+                "groupType": {
+                    "enum": [
+                        1
                     ]
                 },
-                "minItems": 1
+                "optionalQuantity": {
+                    "type": "integer"
+                },
+                "deleteGroupDetailIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "groupDetails": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "goodsId": {
+                                "type": "integer"
+                            },
+                            "goodsSpecificationId": {
+                                "type": "integer"
+                            },
+                            "quantity": {
+                                "type": "integer"
+                            }
+                        },
+                        "required": [
+                            "goodsId",
+                            "goodsSpecificationId",
+                            "quantity"
+                        ]
+                    },
+                    "minItems": 1
+                },
+                "required": [
+                    "groupName",
+                    "groupType",
+                    "optionalQuantity"
+                ]
+            }
+        },
+        "requiredGroupSchema": {
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "groupName": {
+                    "type": "string",
+                    "maxLength": 20
+                },
+                "groupType": {
+                    "enum": [
+                        2
+                    ]
+                },
+                "deleteGroupDetailIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "groupDetails": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "goodsId": {
+                                "type": "integer"
+                            },
+                            "goodsSpecificationId": {
+                                "type": "integer"
+                            }
+                        },
+                        "required": [
+                            "goodsId",
+                            "goodsSpecificationId"
+                        ]
+                    },
+                    "minItems": 1
+                },
+                "required": [
+                    "groupName",
+                    "groupType"
+                ]
             }
         }
-    },
-    "minItems": 1
+    }
 }
