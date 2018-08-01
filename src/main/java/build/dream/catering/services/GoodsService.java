@@ -737,17 +737,18 @@ public class GoodsService extends BasicService {
             goods.setCategoryId(categoryId);
             goods.setImageUrl(imageUrl);
         } else {
-            goods = new Goods();
-            goods.setTenantId(tenantId);
-            goods.setTenantCode(tenantCode);
-            goods.setBranchId(branchId);
-            goods.setName(name);
-            goods.setType(type);
-            goods.setCategoryId(categoryId);
-            goods.setImageUrl(imageUrl);
-            goods.setStocked(false);
-            goods.setCreateUserId(userId);
-            goods.setLastUpdateUserId(userId);
+            goods = Goods.builder()
+                    .tenantId(tenantId)
+                    .tenantCode(tenantCode)
+                    .branchId(branchId)
+                    .name(name)
+                    .type(type)
+                    .categoryId(categoryId)
+                    .imageUrl(imageUrl)
+                    .stocked(false)
+                    .createUserId(userId)
+                    .lastUpdateUserId(userId)
+                    .build();
             DatabaseHelper.insert(goods);
 
             BigInteger packageId = goods.getId();
@@ -757,37 +758,36 @@ public class GoodsService extends BasicService {
                 int optionalQuantity = group.getOptionalQuantity();
                 List<SavePackageModel.GroupDetail> groupDetails = group.getGroupDetails();
 
-                PackageGroup packageGroup = new PackageGroup();
-                packageGroup.setTenantId(tenantId);
-                packageGroup.setTenantCode(tenantCode);
-                packageGroup.setBranchId(branchId);
-                packageGroup.setPackageId(packageId);
-                packageGroup.setGroupName(groupName);
-                packageGroup.setGroupType(groupType);
+                PackageGroup.Builder packageGroupBuilder = PackageGroup.builder()
+                        .tenantId(tenantId)
+                        .tenantCode(tenantCode)
+                        .branchId(branchId)
+                        .packageId(packageId)
+                        .groupName(groupName)
+                        .groupType(groupType);
                 if (groupType == 1) {
-                    packageGroup.setOptionalQuantity(optionalQuantity);
+                    packageGroupBuilder.optionalQuantity(optionalQuantity);
                 }
-                packageGroup.setCreateUserId(userId);
-                packageGroup.setLastUpdateUserId(userId);
+                PackageGroup packageGroup = packageGroupBuilder.createUserId(userId).lastUpdateUserId(userId).build();
                 DatabaseHelper.insert(packageGroup);
 
                 for (SavePackageModel.GroupDetail groupDetail : groupDetails) {
                     BigInteger goodsId = groupDetail.getGoodsId();
                     BigInteger goodsSpecificationId = groupDetail.getGoodsSpecificationId();
                     Integer quantity = groupDetail.getQuantity();
-                    PackageGroupDetail packageGroupDetail = new PackageGroupDetail();
-                    packageGroupDetail.setTenantId(tenantId);
-                    packageGroupDetail.setTenantCode(tenantCode);
-                    packageGroupDetail.setBranchId(branchId);
-                    packageGroupDetail.setPackageId(packageId);
-                    packageGroupDetail.setPackageGroupId(packageGroup.getId());
-                    packageGroupDetail.setGoodsId(goodsId);
-                    packageGroupDetail.setGoodsSpecificationId(goodsSpecificationId);
+                    PackageGroupDetail.Builder packageGroupDetailBuilder = PackageGroupDetail.builder()
+                            .tenantId(tenantId)
+                            .tenantCode(tenantCode)
+                            .branchId(branchId)
+                            .packageId(packageId)
+                            .packageGroupId(packageGroup.getId())
+                            .goodsId(goodsId)
+                            .goodsSpecificationId(goodsSpecificationId);
+
                     if (quantity != null) {
-                        packageGroupDetail.setQuantity(quantity);
+                        packageGroupDetailBuilder.quantity(quantity);
                     }
-                    packageGroupDetail.setCreateUserId(userId);
-                    packageGroupDetail.setLastUpdateUserId(userId);
+                    PackageGroupDetail packageGroupDetail = packageGroupDetailBuilder.createUserId(userId).lastUpdateUserId(userId).build();
                     DatabaseHelper.insert(packageGroupDetail);
                 }
             }
