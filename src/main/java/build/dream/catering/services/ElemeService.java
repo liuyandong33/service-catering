@@ -56,8 +56,7 @@ public class ElemeService {
             String outServiceOutsideServiceDomain = CommonUtils.getOutsideServiceDomain(Constants.SERVICE_NAME_OUT);
             data = String.format(Constants.ELEME_TENANT_AUTHORIZE_URL_FORMAT, elemeUrl + "/" + "authorize", "code", elemeAppKey, URLEncoder.encode(outServiceOutsideServiceDomain + "/eleme/tenantAuthorizeCallback", Constants.CHARSET_NAME_UTF_8), tenantId + "Z" + branchId + "Z" + userId + "Z" + elemeAccountType, "all");
         }
-        ApiRest apiRest = new ApiRest(data, "生成授权链接成功！");
-        return apiRest;
+        return ApiRest.builder().data(data).message("生成授权链接成功！").successful(true).build();
     }
 
     /**
@@ -588,7 +587,7 @@ public class ElemeService {
         data.put("signature", elemeCallbackMessage.getSignature());
         data.put("userId", elemeCallbackMessage.getUserId());
 
-        return new ApiRest(data, "获取饿了么回调消息成功！");
+        return ApiRest.builder().data(data).message("获取饿了么回调消息成功！").successful(true).build();
     }
 
     @Transactional(readOnly = true)
@@ -741,11 +740,7 @@ public class ElemeService {
         }
         elemeOrderMap.put("orderActivities", orderActivities);
 
-        ApiRest apiRest = new ApiRest();
-        apiRest.setData(elemeOrderMap);
-        apiRest.setMessage("获取饿了么订单成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().data(elemeOrderMap).message("获取饿了么订单成功！").successful(true).build();
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -781,10 +776,7 @@ public class ElemeService {
         ApiRest saveElemeBranchMappingApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "eleme", "saveElemeBranchMapping", saveElemeBranchMappingRequestParameters);
         Validate.isTrue(saveElemeBranchMappingApiRest.isSuccessful(), saveElemeBranchMappingApiRest.getError());
 
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("饿了么门店绑定成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().message("饿了么门店绑定成功！").successful(true).build();
     }
 
     /**
@@ -845,7 +837,7 @@ public class ElemeService {
 
         Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.getOrder", params);
 
-        return new ApiRest(result, "获取订单成功！");
+        return ApiRest.builder().data(result).message("获取订单成功！").successful(true).build();
     }
 
     /**
@@ -869,7 +861,7 @@ public class ElemeService {
 
         Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.mgetOrders", params);
 
-        return new ApiRest(result, "批量查询订单成功！");
+        return ApiRest.builder().data(result).message("批量查询订单成功！").successful(true).build();
     }
 
     /**
@@ -891,7 +883,7 @@ public class ElemeService {
         params.put("orderId", dietOrder.getOrderNumber().substring(1));
         Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.confirmOrderLite", params);
 
-        return new ApiRest(result, "确认订单成功！");
+        return ApiRest.builder().data(result).message("确认订单成功！").successful(true).build();
     }
 
     /**
@@ -916,7 +908,7 @@ public class ElemeService {
 
         Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.cancelOrderLite", params);
 
-        return new ApiRest(result, "取消订单成功！");
+        return ApiRest.builder().data(result).message("取消订单成功！").successful(true).build();
     }
 
     /**
@@ -938,7 +930,7 @@ public class ElemeService {
         params.put("orderId", dietOrder.getOrderNumber().substring(1));
         Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.agreeRefundLite", params);
 
-        return new ApiRest(result, "同意退单/同意取消单成功！");
+        return ApiRest.builder().data(result).message("同意退单/同意取消单成功！").successful(true).build();
     }
 
     /**
@@ -959,7 +951,7 @@ public class ElemeService {
         params.put("orderId", dietOrder.getOrderNumber().substring(1));
         Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.disagreeRefundLite", params);
 
-        return new ApiRest(result, "不同意退单/不同意取消单成功！");
+        return ApiRest.builder().data(result).message("不同意退单/不同意取消单成功！").successful(true).build();
     }
 
     /**
@@ -981,7 +973,7 @@ public class ElemeService {
         params.put("orderId", dietOrder.getOrderNumber().substring(1));
         Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.deliveryBySelfLite", params);
 
-        return new ApiRest(result, "配送异常或者物流拒单后选择自行配送成功！");
+        return ApiRest.builder().data(result).message("配送异常或者物流拒单后选择自行配送成功！").successful(true).build();
     }
 
     /**
@@ -1002,7 +994,7 @@ public class ElemeService {
         params.put("orderId", dietOrder.getOrderNumber().substring(1));
         Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.noMoreDeliveryLite", params);
 
-        return new ApiRest(result, "配送异常或者物流拒单后选择不再配送成功！");
+        return ApiRest.builder().data(result).message("配送异常或者物流拒单后选择不再配送成功！").build();
     }
 
     /**
@@ -1023,7 +1015,7 @@ public class ElemeService {
         params.put("orderId", dietOrder.getOrderNumber().substring(1));
         Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.receivedOrderLite", params);
 
-        return new ApiRest(result, "订单确认送达成功！");
+        return ApiRest.builder().data(result).message("订单确认送达成功！").build();
     }
 
     /**
@@ -1046,7 +1038,7 @@ public class ElemeService {
         ApplicationHandler.ifNotNullPut(params, "content", replyReminderModel.getContent());
         Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.replyReminder", params);
 
-        return new ApiRest(result, "回复催单成功！");
+        return ApiRest.builder().data(result).message("回复催单成功！").successful(true).build();
     }
 
     /**
@@ -1064,6 +1056,6 @@ public class ElemeService {
 
         Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.user.getUser", null);
 
-        return new ApiRest(result, "获取商户账号信息成功！");
+        return ApiRest.builder().data(result).message("获取商户账号信息成功！").successful(true).build();
     }
 }
