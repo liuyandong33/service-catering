@@ -214,8 +214,8 @@ public class GoodsService extends BasicService {
                     }
 
                     Map<String, Object> map = new HashMap<String, Object>();
-                    map.put("packageGroup", packageGroup);
-                    map.put("packageGroupGoodses", packageInfoMap.get(packageGroup.getId()));
+                    map.put("group", packageGroup);
+                    map.put("details", packageInfoMap.get(packageGroup.getId()));
 
                     packageGroupList.add(map);
                 }
@@ -686,13 +686,18 @@ public class GoodsService extends BasicService {
 
                 PackageGroup packageGroup = null;
                 if (groupId == null) {
-                    packageGroup = new PackageGroup();
-                    packageGroup.setPackageId(id);
-                    packageGroup.setGroupName(groupName);
-                    packageGroup.setGroupType(groupType);
+                    PackageGroup.Builder packageGroupBuilder = PackageGroup.builder()
+                            .tenantId(tenantId)
+                            .tenantCode(tenantCode)
+                            .branchId(branchId)
+                            .packageId(id)
+                            .groupName(groupName)
+                            .groupType(groupType);
+
                     if (groupType == 1) {
-                        packageGroup.setOptionalQuantity(optionalQuantity);
+                        packageGroupBuilder.optionalQuantity(optionalQuantity);
                     }
+                    packageGroup = packageGroupBuilder.createUserId(userId).lastUpdateUserId(userId).build();
                     DatabaseHelper.insert(packageGroup);
                 } else {
                     packageGroup = packageGroupMap.get(groupId);
@@ -702,6 +707,7 @@ public class GoodsService extends BasicService {
                     if (groupType == 1) {
                         packageGroup.setOptionalQuantity(optionalQuantity);
                     }
+                    packageGroup.setLastUpdateUserId(userId);
                     DatabaseHelper.update(packageGroup);
                 }
 
@@ -712,15 +718,18 @@ public class GoodsService extends BasicService {
                     String key = goodsId + "_" + goodsSpecificationId;
                     PackageGroupDetail packageGroupDetail = packageGroupDetailMap.get(key);
                     if (packageGroupDetail == null) {
-                        packageGroupDetail = new PackageGroupDetail();
-                        packageGroupDetail.setPackageGroupId(packageGroup.getId());
-                        packageGroupDetail.setGoodsId(goodsId);
-                        packageGroupDetail.setGoodsSpecificationId(goodsSpecificationId);
+                        PackageGroupDetail.Builder packageGroupDetailBuilder = PackageGroupDetail.builder()
+                                .tenantId(tenantId)
+                                .tenantCode(tenantCode)
+                                .branchId(branchId)
+                                .packageId(id)
+                                .packageGroupId(packageGroup.getId())
+                                .goodsId(goodsId)
+                                .goodsSpecificationId(goodsSpecificationId);
                         if (quantity != null) {
-                            packageGroupDetail.setQuantity(quantity);
+                            packageGroupDetailBuilder.quantity(quantity);
                         }
-                        packageGroupDetail.setCreateUserId(userId);
-                        packageGroupDetail.setLastUpdateUserId(userId);
+                        packageGroupDetail = packageGroupDetailBuilder.lastUpdateUserId(userId).build();
                         DatabaseHelper.insert(packageGroupDetail);
                     } else {
                         packageGroupDetail.setGoodsId(goodsId);
@@ -755,7 +764,7 @@ public class GoodsService extends BasicService {
             for (SavePackageModel.Group group : groups) {
                 String groupName = group.getGroupName();
                 int groupType = group.getGroupType();
-                int optionalQuantity = group.getOptionalQuantity();
+                Integer optionalQuantity = group.getOptionalQuantity();
                 List<SavePackageModel.GroupDetail> groupDetails = group.getGroupDetails();
 
                 PackageGroup.Builder packageGroupBuilder = PackageGroup.builder()

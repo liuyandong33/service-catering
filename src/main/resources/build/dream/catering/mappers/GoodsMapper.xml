@@ -8,16 +8,16 @@
         goods_specification.id AS goods_specification_id,
         goods_specification.name AS goods_specification_name,
         goods_specification.price,
-        package_group_goods.quantity,
-        package_group_goods.package_group_id
-        FROM package_group_goods
-        INNER JOIN goods ON goods.id = package_group_goods.goods_id AND goods.deleted = 0
-        INNER JOIN goods_specification ON goods_specification.id = package_group_goods.goods_specification_id AND goods_specification.deleted = 0
-        WHERE package_group_goods.package_id IN
+        package_group_detail.quantity,
+        package_group_detail.package_group_id
+        FROM package_group_detail
+        INNER JOIN goods ON goods.id = package_group_detail.goods_id AND goods.deleted = 0
+        INNER JOIN goods_specification ON goods_specification.id = package_group_detail.goods_specification_id AND goods_specification.deleted = 0
+        WHERE package_group_detail.package_id IN
         <foreach collection="packageIds" index="index" item="packageId" open="(" separator="," close=")">
             #{packageId}
         </foreach>
-        AND package_group_goods.deleted = 0;
+        AND package_group_detail.deleted = 0;
     </select>
 
     <select id="findAllGoodsInfos" resultType="build.dream.common.erp.catering.domains.Goods">
@@ -25,7 +25,7 @@
         goods.*,
         goods_category.name AS category_name
         FROM goods
-        INNER JOIN goods_category ON goods_category.id = goods.id AND goods_category.deleted = 0
+        INNER JOIN goods_category ON goods_category.id = goods.category_id AND goods_category.deleted = 0
         WHERE goods.deleted = 0
         AND goods.tenant_id = #{tenantId}
         AND goods.branch_id = #{branchId}

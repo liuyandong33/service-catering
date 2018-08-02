@@ -393,7 +393,6 @@ public class DietOrderService {
         DatabaseHelper.insert(normalDietOrderGroup);
 
         for (SaveDietOrderModel.GoodsInfo goodsInfo : goodsInfos) {
-
             Goods goods = goodsMap.get(goodsInfo.getGoodsId());
             ValidateUtils.notNull(goods, "商品不存在！");
 
