@@ -414,7 +414,7 @@ public class ElemeService {
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleElemeReminderMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) throws IOException {
+    public void handleElemeReminderMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
         JSONObject messageJsonObject = JSONObject.fromObject(elemeCallbackMessage.getMessage());
         String orderId = messageJsonObject.optString("orderId");
         SearchModel elemeOrderSearchModel = new SearchModel(true);
@@ -440,7 +440,7 @@ public class ElemeService {
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleElemeCancelOrderMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) throws IOException {
+    public void handleElemeCancelOrderMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
         JSONObject messageJsonObject = JSONObject.fromObject(elemeCallbackMessage.getMessage());
         String orderId = messageJsonObject.optString("orderId");
         SearchModel elemeOrderSearchModel = new SearchModel(true);
@@ -496,7 +496,7 @@ public class ElemeService {
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleElemeDeliveryOrderStateChangeMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) throws IOException {
+    public void handleElemeDeliveryOrderStateChangeMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
         JSONObject messageJsonObject = JSONObject.fromObject(elemeCallbackMessage.getMessage());
         String orderId = messageJsonObject.optString("orderId");
         SearchModel elemeOrderSearchModel = new SearchModel(true);
