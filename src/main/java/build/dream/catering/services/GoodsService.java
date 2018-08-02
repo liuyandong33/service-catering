@@ -81,7 +81,7 @@ public class GoodsService extends BasicService {
     public ApiRest obtainGoodsInfo(ObtainGoodsInfoModel obtainGoodsInfoModel) {
         BigInteger tenantId = obtainGoodsInfoModel.getTenantId();
         BigInteger branchId = obtainGoodsInfoModel.getBranchId();
-        BigInteger goodsId = obtainGoodsInfoModel.getBranchId();
+        BigInteger goodsId = obtainGoodsInfoModel.getGoodsId();
 
         SearchModel goodsSearchModel = new SearchModel(true);
         goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -90,43 +90,75 @@ public class GoodsService extends BasicService {
         Goods goods = DatabaseHelper.find(Goods.class, goodsSearchModel);
         ValidateUtils.notNull(goods, "商品不存在！");
 
-        SearchModel goodsSpecificationSearchModel = new SearchModel(true);
-        goodsSpecificationSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
-        List<GoodsSpecification> goodsSpecifications = DatabaseHelper.findAll(GoodsSpecification.class, goodsSpecificationSearchModel);
-
-        SearchModel goodsUnitSearchModel = new SearchModel(true);
-        goodsUnitSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
-        List<GoodsUnit> goodsUnits = DatabaseHelper.findAll(GoodsUnit.class, goodsUnitSearchModel);
-
         Map<String, Object> data = new HashMap<String, Object>();
-        data.put("goods", goods);
-        data.put("goodsSpecifications", goodsSpecifications);
-        data.put("goodsUnits", goodsUnits);
-        SearchModel goodsAttributeGroupSearchModel = new SearchModel(true);
-        goodsAttributeGroupSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
-        List<GoodsAttributeGroup> goodsAttributeGroups = DatabaseHelper.findAll(GoodsAttributeGroup.class, goodsAttributeGroupSearchModel);
-        if (CollectionUtils.isNotEmpty(goodsAttributeGroups)) {
-            SearchModel goodsAttributeSearchModel = new SearchModel(true);
-            goodsAttributeSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
-            List<GoodsAttribute> goodsAttributes = DatabaseHelper.findAll(GoodsAttribute.class, goodsAttributeSearchModel);
-            Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = new HashMap<BigInteger, List<GoodsAttribute>>();
-            for (GoodsAttribute goodsAttribute : goodsAttributes) {
-                BigInteger goodsAttributeGroupId = goodsAttribute.getGoodsAttributeGroupId();
-                List<GoodsAttribute> goodsAttributeList = goodsAttributeMap.get(goodsAttributeGroupId);
-                if (CollectionUtils.isEmpty(goodsAttributeList)) {
-                    goodsAttributeList = new ArrayList<GoodsAttribute>();
-                    goodsAttributeMap.put(goodsAttributeGroupId, goodsAttributeList);
+        int type = goods.getType();
+        if (type == 1) {
+            SearchModel goodsSpecificationSearchModel = new SearchModel(true);
+            goodsSpecificationSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
+            List<GoodsSpecification> goodsSpecifications = DatabaseHelper.findAll(GoodsSpecification.class, goodsSpecificationSearchModel);
+
+            SearchModel goodsUnitSearchModel = new SearchModel(true);
+            goodsUnitSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
+            List<GoodsUnit> goodsUnits = DatabaseHelper.findAll(GoodsUnit.class, goodsUnitSearchModel);
+
+            data.put("goods", goods);
+            data.put("goodsSpecifications", goodsSpecifications);
+            data.put("goodsUnits", goodsUnits);
+            SearchModel goodsAttributeGroupSearchModel = new SearchModel(true);
+            goodsAttributeGroupSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
+            List<GoodsAttributeGroup> goodsAttributeGroups = DatabaseHelper.findAll(GoodsAttributeGroup.class, goodsAttributeGroupSearchModel);
+            if (CollectionUtils.isNotEmpty(goodsAttributeGroups)) {
+                SearchModel goodsAttributeSearchModel = new SearchModel(true);
+                goodsAttributeSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
+                List<GoodsAttribute> goodsAttributes = DatabaseHelper.findAll(GoodsAttribute.class, goodsAttributeSearchModel);
+                Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = new HashMap<BigInteger, List<GoodsAttribute>>();
+                for (GoodsAttribute goodsAttribute : goodsAttributes) {
+                    BigInteger goodsAttributeGroupId = goodsAttribute.getGoodsAttributeGroupId();
+                    List<GoodsAttribute> goodsAttributeList = goodsAttributeMap.get(goodsAttributeGroupId);
+                    if (CollectionUtils.isEmpty(goodsAttributeList)) {
+                        goodsAttributeList = new ArrayList<GoodsAttribute>();
+                        goodsAttributeMap.put(goodsAttributeGroupId, goodsAttributeList);
+                    }
+                    goodsAttributeList.add(goodsAttribute);
                 }
-                goodsAttributeList.add(goodsAttribute);
+                List<Map<String, Object>> attributeGroups = new ArrayList<Map<String, Object>>();
+                for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroups) {
+                    Map<String, Object> attributeGroup = new HashMap<String, Object>();
+                    attributeGroup.put("attributeGroup", goodsAttributeGroup);
+                    attributeGroup.put("attributes", goodsAttributeMap.get(goodsAttributeGroup.getId()));
+                    attributeGroups.add(attributeGroup);
+                }
+                data.put("attributeGroups", attributeGroups);
             }
-            List<Map<String, Object>> attributeGroups = new ArrayList<Map<String, Object>>();
-            for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroups) {
-                Map<String, Object> attributeGroup = new HashMap<String, Object>();
-                attributeGroup.put("attributeGroup", goodsAttributeGroup);
-                attributeGroup.put("attributes", goodsAttributeMap.get(goodsAttributeGroup.getId()));
-                attributeGroups.add(attributeGroup);
+        } else if (type == 2) {
+            SearchModel searchModel = new SearchModel(true);
+            searchModel.addSearchCondition("package_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
+            List<PackageGroup> packageGroups = DatabaseHelper.findAll(PackageGroup.class, searchModel);
+
+            List<BigInteger> packageIds = new ArrayList<BigInteger>();
+            packageIds.add(goodsId);
+            List<Map<String, Object>> packageInfos = goodsMapper.listPackageInfos(packageIds);
+
+            Map<BigInteger, List<Map<String, Object>>> packageInfoMap = new HashMap<BigInteger, List<Map<String, Object>>>();
+            for (Map<String, Object> packageInfo : packageInfos) {
+                BigInteger packageGroupId = BigInteger.valueOf(MapUtils.getLong(packageInfo, "packageGroupId"));
+                List<Map<String, Object>> packageInfoList = packageInfoMap.get(packageGroupId);
+                if (CollectionUtils.isEmpty(packageInfoList)) {
+                    packageInfoList = new ArrayList<Map<String, Object>>();
+                    packageInfoMap.put(packageGroupId, packageInfoList);
+                }
+                packageInfoList.add(packageInfo);
             }
-            data.put("attributeGroups", attributeGroups);
+
+            List<Map<String, Object>> groups = new ArrayList<Map<String, Object>>();
+            for (PackageGroup packageGroup : packageGroups) {
+                Map<String, Object> item = new HashMap<String, Object>();
+                item.put("group", packageGroup);
+                item.put("details", packageInfoMap.get(packageGroup.getId()));
+                groups.add(item);
+            }
+            data.put("goods", goods);
+            data.put("groups", groups);
         }
         return new ApiRest(data, "获取商品信息成功！");
     }

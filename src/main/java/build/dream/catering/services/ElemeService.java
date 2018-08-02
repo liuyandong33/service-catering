@@ -42,18 +42,13 @@ public class ElemeService {
         checkIsAuthorizeRequestParameters.put("tenantId", tenantId.toString());
         checkIsAuthorizeRequestParameters.put("branchId", branchId.toString());
 
-        String elemeAccountType = branch.getElemeAccountType().toString();
-        checkIsAuthorizeRequestParameters.put("elemeAccountType", elemeAccountType);
-        String checkIsAuthorizeResult = ProxyUtils.doGetOriginalWithRequestParameters(Constants.SERVICE_NAME_OUT, "eleme", "checkIsAuthorize", checkIsAuthorizeRequestParameters);
-        ApiRest checkIsAuthorizeApiRest = ApiRest.fromJson(checkIsAuthorizeResult);
-        Validate.isTrue(checkIsAuthorizeApiRest.isSuccessful(), checkIsAuthorizeApiRest.getError());
-        Map<String, Object> checkIsAuthorizeApiRestData = (Map<String, Object>) checkIsAuthorizeApiRest.getData();
-        boolean isAuthorize = (boolean) checkIsAuthorizeApiRestData.get("isAuthorize");
+        int elemeAccountType = branch.getElemeAccountType();
+        boolean isAuthorize = branch.getShopId().compareTo(Constants.BIGINT_DEFAULT_VALUE) != 0;
 
         String data = null;
         if (isAuthorize) {
             String serviceName = ConfigurationUtils.getConfiguration(Constants.SERVICE_NAME);
-            data = CommonUtils.getOutsideUrl(Constants.SERVICE_NAME_POSAPI, "eleme", "bindingStore") + "?serviceName=" + serviceName + "&controllerName=eleme&actionName=bindingStore" + "&tenantId=" + tenantId + "&branchId=" + branchId + "&userId=" + userId;
+            data = CommonUtils.getOutsideUrl(Constants.SERVICE_NAME_POSAPI, "proxy", "doGetPermit") + "?serviceName=" + serviceName + "&controllerName=eleme&actionName=bindingStore" + "&tenantId=" + tenantId + "&branchId=" + branchId + "&userId=" + userId;
         } else {
             String elemeUrl = ConfigurationUtils.getConfiguration(Constants.ELEME_SERVICE_URL);
             String elemeAppKey = ConfigurationUtils.getConfiguration(Constants.ELEME_APP_KEY);
