@@ -37,7 +37,7 @@ public class ElemeService {
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
-        Validate.notNull(branch, "门店不存在！");
+        ValidateUtils.notNull(branch, "门店不存在！");
         Map<String, String> checkIsAuthorizeRequestParameters = new HashMap<String, String>();
         checkIsAuthorizeRequestParameters.put("tenantId", tenantId.toString());
         checkIsAuthorizeRequestParameters.put("branchId", branchId.toString());
@@ -80,7 +80,7 @@ public class ElemeService {
         branchSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         branchSearchModel.addSearchCondition("shop_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, elemeCallbackMessage.getShopId());
         Branch branch = DatabaseHelper.find(Branch.class, branchSearchModel);
-        Validate.notNull(branch, "门店不存在！");
+        ValidateUtils.notNull(branch, "门店不存在！");
 
         String tenantCode = branch.getTenantCode();
 
@@ -386,7 +386,7 @@ public class ElemeService {
         SearchModel elemeOrderSearchModel = new SearchModel(true);
         elemeOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, orderId);
         ElemeOrder elemeOrder = DatabaseHelper.find(ElemeOrder.class, elemeOrderSearchModel);
-        Validate.notNull(elemeOrder, "饿了么订单不存在！");
+        ValidateUtils.notNull(elemeOrder, "饿了么订单不存在！");
 
         String refundStatus = messageJsonObject.optString("refundStatus");
         elemeOrder.setRefundStatus(refundStatus);
@@ -420,7 +420,7 @@ public class ElemeService {
         SearchModel elemeOrderSearchModel = new SearchModel(true);
         elemeOrderSearchModel.addSearchCondition("order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, orderId);
         ElemeOrder elemeOrder = DatabaseHelper.find(ElemeOrder.class, elemeOrderSearchModel);
-        Validate.notNull(elemeOrder, "饿了么订单不存在！");
+        ValidateUtils.notNull(elemeOrder, "饿了么订单不存在！");
 
         elemeCallbackMessage.setOrderId(orderId);
         DatabaseHelper.insert(elemeCallbackMessage);
