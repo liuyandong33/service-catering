@@ -96,7 +96,8 @@
                                     },
                                     "required": [
                                         "goodsId",
-                                        "goodsSpecificationId"
+                                        "goodsSpecificationId",
+                                        "quantity"
                                     ]
                                 },
                                 "minItems": 1
