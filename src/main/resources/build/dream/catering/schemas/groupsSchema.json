@@ -58,13 +58,13 @@
                         ]
                     },
                     "minItems": 1
-                },
-                "required": [
-                    "groupName",
-                    "groupType",
-                    "optionalQuantity"
-                ]
-            }
+                }
+            },
+            "required": [
+                "groupName",
+                "groupType",
+                "optionalQuantity"
+            ]
         },
         "requiredGroupSchema": {
             "properties": {
@@ -104,12 +104,12 @@
                         ]
                     },
                     "minItems": 1
-                },
-                "required": [
-                    "groupName",
-                    "groupType"
-                ]
-            }
+                }
+            },
+            "required": [
+                "groupName",
+                "groupType"
+            ]
         }
     }
 }

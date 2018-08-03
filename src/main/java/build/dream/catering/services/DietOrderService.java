@@ -242,19 +242,25 @@ public class DietOrderService {
         String tenantCode = saveDietOrderModel.getTenantCode();
         BigInteger branchId = saveDietOrderModel.getBranchId();
         BigInteger userId = saveDietOrderModel.getUserId();
+        BigInteger vipId = saveDietOrderModel.getVipId();
 
         // 查询出门店信息
         Branch branch = DatabaseHelper.find(Branch.class, branchId);
         ValidateUtils.notNull(branch, "门店不存在！");
 
         List<BigInteger> goodsIds = new ArrayList<BigInteger>();
+        List<BigInteger> packageIds = new ArrayList<BigInteger>();
         List<BigInteger> goodsSpecificationIds = new ArrayList<BigInteger>();
         List<BigInteger> goodsAttributeGroupIds = new ArrayList<BigInteger>();
         List<BigInteger> goodsAttributeIds = new ArrayList<BigInteger>();
         List<SaveDietOrderModel.GoodsInfo> goodsInfos = saveDietOrderModel.getGoodsInfos();
         for (SaveDietOrderModel.GoodsInfo goodsInfo : goodsInfos) {
             goodsIds.add(goodsInfo.getGoodsId());
-            goodsSpecificationIds.add(goodsInfo.getGoodsSpecificationId());
+            if (goodsInfo.isOrdinaryGoods()) {
+                goodsSpecificationIds.add(goodsInfo.getGoodsSpecificationId());
+            } else {
+                packageIds.add(goodsInfo.getGoodsId());
+            }
 
             List<SaveDietOrderModel.AttributeInfo> attributeInfos = goodsInfo.getAttributeInfos();
             if (CollectionUtils.isNotEmpty(attributeInfos)) {
@@ -265,15 +271,32 @@ public class DietOrderService {
             }
         }
 
+        List<Map<String, Object>> packageInfos = new ArrayList<Map<String, Object>>();
+        if (CollectionUtils.isNotEmpty(packageIds)) {
+            packageInfos = goodsMapper.listPackageInfos(packageIds);
+        }
+
+        Map<String, Map<String, Object>> packageInfoMap = new HashMap<String, Map<String, Object>>();
+        for (Map<String, Object> packageInfo : packageInfos) {
+            String key = MapUtils.getString(packageInfo, "packageId") + "_" + MapUtils.getString(packageInfo, "packageGroupId") + "_" + MapUtils.getString(packageInfo, "goodsId") + "_" + MapUtils.getString(packageInfo, "goodsSpecificationId");
+            packageInfoMap.put(key, packageInfo);
+        }
+
         // 查询出订单中包含的所有商品
-        List<Goods> goodses = goodsMapper.findAllGoodsInfos(tenantId, branchId, goodsIds);
+        List<Goods> goodses = new ArrayList<Goods>();
+        if (CollectionUtils.isNotEmpty(goodsIds)) {
+            goodses = goodsMapper.findAllGoodsInfos(tenantId, branchId, goodsIds);
+        }
 
         // 查询出订单中包含的所有商品规格
-        SearchModel goodsSpecificationSearchModel = new SearchModel(true);
-        goodsSpecificationSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        goodsSpecificationSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        goodsSpecificationSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsSpecificationIds);
-        List<GoodsSpecification> goodsSpecifications = DatabaseHelper.findAll(GoodsSpecification.class, goodsSpecificationSearchModel);
+        List<GoodsSpecification> goodsSpecifications = new ArrayList<GoodsSpecification>();
+        if (CollectionUtils.isNotEmpty(goodsSpecificationIds)) {
+            SearchModel goodsSpecificationSearchModel = new SearchModel(true);
+            goodsSpecificationSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+            goodsSpecificationSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+            goodsSpecificationSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsSpecificationIds);
+            goodsSpecifications = DatabaseHelper.findAll(GoodsSpecification.class, goodsSpecificationSearchModel);
+        }
 
         // 查询出订单中包含的所有口味组
         List<GoodsAttributeGroup> goodsAttributeGroups = new ArrayList<GoodsAttributeGroup>();
@@ -344,6 +367,11 @@ public class DietOrderService {
         if (invoiced) {
             builder.invoiceType(saveDietOrderModel.getInvoiceType()).invoice(saveDietOrderModel.getInvoice());
         }
+        if (vipId != null) {
+            builder.vipId(vipId);
+        } else {
+            builder.vipId(Constants.BIGINT_DEFAULT_VALUE);
+        }
         builder.createUserId(userId).lastUpdateUserId(userId).lastUpdateRemark("保存订单信息！");
 
         DietOrder dietOrder = builder.build();
@@ -396,11 +424,16 @@ public class DietOrderService {
             Goods goods = goodsMap.get(goodsInfo.getGoodsId());
             ValidateUtils.notNull(goods, "商品不存在！");
 
+            if (goodsInfo.isOrdinaryGoods()) {
+
+            }
+
             GoodsSpecification goodsSpecification = goodsSpecificationMap.get(goodsInfo.getGoodsSpecificationId());
             ValidateUtils.notNull(goodsSpecification, "商品规格不存在！");
 
             BigInteger goodsId = goods.getId();
             BigInteger goodsSpecificationId = goodsSpecification.getId();
+            String goodsSpecificationName = goodsSpecification.getName();
             BigDecimal quantity = goodsInfo.getQuantity();
             BigDecimal price = goodsSpecification.getPrice();
 
@@ -522,7 +555,7 @@ public class DietOrderService {
                             .goodsId(goodsId)
                             .goodsName(goods.getName())
                             .goodsSpecificationId(goodsSpecificationId)
-                            .goodsSpecificationName(goodsSpecification.getName())
+                            .goodsSpecificationName(goodsSpecificationName)
                             .categoryId(goods.getCategoryId())
                             .categoryName(goods.getCategoryName())
                             .price(price)
@@ -558,7 +591,7 @@ public class DietOrderService {
                             .goodsId(goodsId)
                             .goodsName(goods.getName())
                             .goodsSpecificationId(goodsSpecificationId)
-                            .goodsSpecificationName(goodsSpecification.getName())
+                            .goodsSpecificationName(goodsSpecificationName)
                             .categoryId(goods.getCategoryId())
                             .categoryName(goods.getCategoryName())
                             .price(price)
@@ -605,7 +638,7 @@ public class DietOrderService {
                         .goodsId(goodsId)
                         .goodsName(goods.getName())
                         .goodsSpecificationId(goodsSpecificationId)
-                        .goodsSpecificationName(goodsSpecification.getName())
+                        .goodsSpecificationName(goodsSpecificationName)
                         .categoryId(goods.getCategoryId())
                         .categoryName(goods.getCategoryName())
                         .price(price)

@@ -63,6 +63,7 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String ELEME_MESSAGE_SCHEMA_FILE_PATH = "build/dream/catering/schemas/elemeMessageSchema.json";
     public static final String MEI_TUAN_MESSAGE_SCHEMA_FILE_PATH = "build/dream/catering/schemas/meiTuanMessageSchema.json";
     public static final String GROUPS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/groupsSchema.json";
+    public static final String GOODS_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/goodsInfosSchema.json";
 
     public static final String KEY_BUY_GIVE_ACTIVITIES = "_buy_give_activities";
     public static final String KEY_FULL_REDUCTION_ACTIVITIES = "_full_reduction_activities";

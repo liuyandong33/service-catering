@@ -5,10 +5,12 @@
         SELECT
         goods.id AS goods_id,
         goods.name AS goods_name,
+        goods.stocked,
         goods_specification.id AS goods_specification_id,
         goods_specification.name AS goods_specification_name,
         goods_specification.price,
         package_group_detail.quantity,
+        package_group_detail.package_id,
         package_group_detail.package_group_id
         FROM package_group_detail
         INNER JOIN goods ON goods.id = package_group_detail.goods_id AND goods.deleted = 0

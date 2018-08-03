@@ -1,5 +1,7 @@
 package build.dream.catering.models.dietorder;
 
+import build.dream.catering.constants.Constants;
+import build.dream.common.annotations.JsonSchema;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.models.BasicModel;
 import build.dream.common.utils.ApplicationHandler;
@@ -34,16 +36,14 @@ public class SaveDietOrderModel extends BasicModel {
 
     @Length(max = 30)
     private String invoice;
+    private BigInteger vipId;
 
     @NotNull
     private BigInteger userId;
 
     @NotEmpty
+    @JsonSchema(value = Constants.GOODS_INFOS_SCHEMA_FILE_PATH)
     private List<GoodsInfo> goodsInfos;
-
-    public static String[] getInvoiceTypes() {
-        return INVOICE_TYPES;
-    }
 
     public BigInteger getTenantId() {
         return tenantId;
@@ -101,6 +101,14 @@ public class SaveDietOrderModel extends BasicModel {
         this.invoice = invoice;
     }
 
+    public BigInteger getVipId() {
+        return vipId;
+    }
+
+    public void setVipId(BigInteger vipId) {
+        this.vipId = vipId;
+    }
+
     public BigInteger getUserId() {
         return userId;
     }
@@ -117,17 +125,23 @@ public class SaveDietOrderModel extends BasicModel {
         this.goodsInfos = goodsInfos;
     }
 
-    public static class GoodsInfo extends BasicModel {
-        @NotNull
+    @Override
+    public void validateAndThrow() {
+        super.validateAndThrow();
+        if (invoiced) {
+            ApplicationHandler.inArray(INVOICE_TYPES, invoiceType, "invoiceType");
+            ApplicationHandler.notBlank(invoice, "invoice");
+        }
+    }
+
+    public static class GoodsInfo {
         private BigInteger goodsId;
-
-        @NotNull
         private BigInteger goodsSpecificationId;
-
-        @NotNull
         private BigDecimal quantity;
 
         private List<AttributeInfo> attributeInfos;
+
+        private List<PackageInfo> packageInfos;
 
         public BigInteger getGoodsId() {
             return goodsId;
@@ -161,29 +175,25 @@ public class SaveDietOrderModel extends BasicModel {
             this.attributeInfos = attributeInfos;
         }
 
-        @Override
-        public boolean validate() {
-            boolean isValidate = super.validate();
-            if (!isValidate) {
-                return false;
-            }
-            if (CollectionUtils.isNotEmpty(attributeInfos)) {
-                for (AttributeInfo attributeInfo : attributeInfos) {
-                    isValidate = isValidate && attributeInfo.validate();
-                    if (!isValidate) {
-                        return false;
-                    }
-                }
-            }
-            return true;
+        public List<PackageInfo> getPackageInfos() {
+            return packageInfos;
+        }
+
+        public void setPackageInfos(List<PackageInfo> packageInfos) {
+            this.packageInfos = packageInfos;
+        }
+
+        public boolean isPackage() {
+            return CollectionUtils.isNotEmpty(packageInfos);
+        }
+
+        public boolean isOrdinaryGoods() {
+            return CollectionUtils.isEmpty(packageInfos);
         }
     }
 
-    public static class AttributeInfo extends BasicModel {
-        @NotNull
+    public static class AttributeInfo {
         private BigInteger attributeGroupId;
-
-        @NotNull
         private BigInteger attributeId;
 
         public BigInteger getAttributeGroupId() {
@@ -203,11 +213,45 @@ public class SaveDietOrderModel extends BasicModel {
         }
     }
 
-    @Override
-    public void validateAndThrow() {
-        super.validateAndThrow();
-        for (GoodsInfo goodsInfo : goodsInfos) {
-            ApplicationHandler.isTrue(goodsInfo.validate(), "goodsInfos");
+    public static class PackageInfo {
+        private BigInteger groupId;
+        private List<Detail> details;
+
+        public BigInteger getGroupId() {
+            return groupId;
+        }
+
+        public void setGroupId(BigInteger groupId) {
+            this.groupId = groupId;
+        }
+
+        public List<Detail> getDetails() {
+            return details;
+        }
+
+        public void setDetails(List<Detail> details) {
+            this.details = details;
+        }
+    }
+
+    public static class Detail {
+        private BigInteger goodsId;
+        private BigInteger goodsSpecificationId;
+
+        public BigInteger getGoodsId() {
+            return goodsId;
+        }
+
+        public BigInteger getGoodsSpecificationId() {
+            return goodsSpecificationId;
+        }
+
+        public void setGoodsId(BigInteger goodsId) {
+            this.goodsId = goodsId;
+        }
+
+        public void setGoodsSpecificationId(BigInteger goodsSpecificationId) {
+            this.goodsSpecificationId = goodsSpecificationId;
         }
     }
 }

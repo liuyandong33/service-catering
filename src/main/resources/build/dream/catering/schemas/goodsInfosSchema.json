@@ -1,0 +1,103 @@
+{
+    "type": "array",
+    "items": {
+        "type": "object",
+        "oneOf": [
+            {
+                "$ref": "#/definitions/ordinaryGoodsInfoSchema"
+            },
+            {
+                "$ref": "#/definitions/packageInfoSchema"
+            }
+        ]
+    },
+    "minItems": 1,
+    "definitions": {
+        "ordinaryGoodsInfoSchema": {
+            "properties": {
+                "goodsId": {
+                    "type": "integer"
+                },
+                "goodsSpecificationId": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "number"
+                },
+                "attributeInfos": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "attributeGroupId": {
+                                "type": "integer"
+                            },
+                            "attributeId": {
+                                "type": "integer"
+                            }
+                        },
+                        "required": [
+                            "attributeGroupId",
+                            "attributeId"
+                        ]
+                    }
+                }
+            },
+            "required": [
+                "goodsId",
+                "goodsSpecificationId",
+                "quantity"
+            ]
+        },
+        "packageInfoSchema": {
+            "properties": {
+                "goodsId": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "number"
+                },
+                "packageInfos": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "groupId": {
+                                "type": "integer"
+                            },
+                            "details": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "goodsId": {
+                                            "type": "integer"
+                                        },
+                                        "goodsSpecificationId": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "goodsId",
+                                        "goodsSpecificationId"
+                                    ]
+                                },
+                                "minItems": 1
+                            }
+                        },
+                        "required": [
+                            "groupId",
+                            "details"
+                        ]
+                    },
+                    "minItems": 1
+                }
+            },
+            "required": [
+                "goodsId",
+                "quantity",
+                "packageInfos"
+            ]
+        }
+    }
+}
