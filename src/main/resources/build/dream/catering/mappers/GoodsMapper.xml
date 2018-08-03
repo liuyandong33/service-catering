@@ -12,9 +12,14 @@
         package_group_detail.quantity,
         package_group_detail.package_id,
         package_group_detail.package_group_id,
-        package_group.group_name AS package_group_name
+        package_group.group_name AS package_group_name,
+        package_group.group_type AS package_group_type
         FROM package_group_detail
-        INNER JOIN package_group ON package_group.id = package_group_detail.package_group_id AND package_group.deleted = 0
+        INNER JOIN package_group ON package_group.id = package_group_detail.package_group_id
+        <if test="groupType != null">
+            AND package_group.group_type = #{groupType}
+        </if>
+        AND package_group.deleted = 0
         INNER JOIN goods ON goods.id = package_group_detail.goods_id AND goods.deleted = 0
         INNER JOIN goods_specification ON goods_specification.id = package_group_detail.goods_specification_id AND goods_specification.deleted = 0
         WHERE package_group_detail.package_id IN

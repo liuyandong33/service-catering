@@ -89,6 +89,9 @@
                                         },
                                         "goodsSpecificationId": {
                                             "type": "integer"
+                                        },
+                                        "quantity": {
+                                            "type": "number"
                                         }
                                     },
                                     "required": [

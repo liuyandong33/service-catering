@@ -246,6 +246,7 @@ public class SaveDietOrderModel extends BasicModel {
     public static class Detail {
         private BigInteger goodsId;
         private BigInteger goodsSpecificationId;
+        private BigDecimal quantity;
 
         public BigInteger getGoodsId() {
             return goodsId;
@@ -261,6 +262,14 @@ public class SaveDietOrderModel extends BasicModel {
 
         public void setGoodsSpecificationId(BigInteger goodsSpecificationId) {
             this.goodsSpecificationId = goodsSpecificationId;
+        }
+
+        public BigDecimal getQuantity() {
+            return quantity;
+        }
+
+        public void setQuantity(BigDecimal quantity) {
+            this.quantity = quantity;
         }
     }
 }

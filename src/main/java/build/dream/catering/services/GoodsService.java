@@ -137,7 +137,7 @@ public class GoodsService extends BasicService {
 
             List<BigInteger> packageIds = new ArrayList<BigInteger>();
             packageIds.add(goodsId);
-            List<Map<String, Object>> packageInfos = goodsMapper.listPackageInfos(packageIds);
+            List<Map<String, Object>> packageInfos = goodsMapper.listPackageInfos(packageIds, null);
 
             Map<BigInteger, List<Map<String, Object>>> packageInfoMap = new HashMap<BigInteger, List<Map<String, Object>>>();
             for (Map<String, Object> packageInfo : packageInfos) {
@@ -223,7 +223,7 @@ public class GoodsService extends BasicService {
             if (CollectionUtils.isNotEmpty(packageIds)) {
                 Map<BigInteger, List<Map<String, Object>>> packageInfoMap = new HashMap<BigInteger, List<Map<String, Object>>>();
 
-                List<Map<String, Object>> packageInfos = goodsMapper.listPackageInfos(packageIds);
+                List<Map<String, Object>> packageInfos = goodsMapper.listPackageInfos(packageIds, null);
                 for (Map<String, Object> packageInfo : packageInfos) {
                     BigInteger packageGroupId = BigInteger.valueOf(MapUtils.getLongValue(packageInfo, "packageGroupId"));
                     List<Map<String, Object>> packageInfoList = packageInfoMap.get(packageGroupId);

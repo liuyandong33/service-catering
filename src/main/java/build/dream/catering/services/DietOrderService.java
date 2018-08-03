@@ -344,15 +344,28 @@ public class DietOrderService {
             }
         }
 
-        List<Map<String, Object>> packageInfos = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> optionalGroupInfos = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> requiredGroupInfos = new ArrayList<Map<String, Object>>();
         if (CollectionUtils.isNotEmpty(packageIds)) {
-            packageInfos = goodsMapper.listPackageInfos(packageIds);
+            optionalGroupInfos = goodsMapper.listPackageInfos(packageIds, 1);
+            requiredGroupInfos = goodsMapper.listPackageInfos(packageIds, 2);
         }
 
-        Map<String, Map<String, Object>> packageInfoMap = new HashMap<String, Map<String, Object>>();
-        for (Map<String, Object> packageInfo : packageInfos) {
+        Map<String, Map<String, Object>> optionalGroupInfoMap = new HashMap<String, Map<String, Object>>();
+        for (Map<String, Object> packageInfo : optionalGroupInfos) {
             String key = MapUtils.getString(packageInfo, "packageId") + "_" + MapUtils.getString(packageInfo, "packageGroupId") + "_" + MapUtils.getString(packageInfo, "goodsId") + "_" + MapUtils.getString(packageInfo, "goodsSpecificationId");
-            packageInfoMap.put(key, packageInfo);
+            optionalGroupInfoMap.put(key, packageInfo);
+        }
+
+        Map<BigInteger, List<Map<String, Object>>> requiredGroupInfoMap = new HashMap<BigInteger, List<Map<String, Object>>>();
+        for (Map<String, Object> packageInfo : requiredGroupInfos) {
+            BigInteger packageId = BigInteger.valueOf(MapUtils.getLongValue(packageInfo, "packageId"));
+            List<Map<String, Object>> packageInfos = requiredGroupInfoMap.get(packageId);
+            if (CollectionUtils.isEmpty(packageInfos)) {
+                packageInfos = new ArrayList<Map<String, Object>>();
+                requiredGroupInfoMap.put(packageId, packageInfos);
+            }
+            packageInfos.add(packageInfo);
         }
 
         // 查询出订单中包含的所有商品
@@ -513,7 +526,8 @@ public class DietOrderService {
                 List<SaveDietOrderModel.PackageInfo> infos = goodsInfo.getPackageInfos();
                 for (SaveDietOrderModel.PackageInfo info : infos) {
                     for (SaveDietOrderModel.Detail detail : info.getDetails()) {
-                        Map<String, Object> packageInfo = packageInfoMap.get(goodsId + "_" + info.getGroupId() + "_" + detail.getGoodsId() + "_" + detail.getGoodsSpecificationId());
+                        Map<String, Object> packageInfo = optionalGroupInfoMap.get(goodsId + "_" + info.getGroupId() + "_" + detail.getGoodsId() + "_" + detail.getGoodsSpecificationId());
+                        ValidateUtils.notNull(packageInfo, "套餐明细不存在！");
                         DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
                                 .tenantId(tenantId)
                                 .tenantCode(tenantCode)
@@ -532,7 +546,7 @@ public class DietOrderService {
                                 .categoryName(goods.getCategoryName())
                                 .price(price)
                                 .attributeIncrease(BigDecimal.ZERO)
-                                .quantity(quantity)
+                                .quantity(detail.getQuantity().multiply(quantity))
                                 .totalAmount(BigDecimal.ZERO)
                                 .discountAmount(BigDecimal.ZERO)
                                 .payableAmount(BigDecimal.ZERO)
@@ -541,6 +555,35 @@ public class DietOrderService {
                                 .build();
                         dietOrderDetails.add(dietOrderDetail);
                     }
+                }
+                List<Map<String, Object>> packageInfos = requiredGroupInfoMap.get(goodsId);
+                for (Map<String, Object> packageInfo : packageInfos) {
+                    DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
+                            .tenantId(tenantId)
+                            .tenantCode(tenantCode)
+                            .branchId(branchId)
+                            .dietOrderId(dietOrderId)
+                            .dietOrderGroupId(normalDietOrderGroup.getId())
+                            .goodsType(Constants.GOODS_TYPE_PACKAGE_DETAIL)
+                            .goodsId(BigInteger.valueOf(MapUtils.getLongValue(packageInfo, "goodsId")))
+                            .goodsName(MapUtils.getString(packageInfo, "goodsName"))
+                            .goodsSpecificationId(BigInteger.valueOf(MapUtils.getLong(packageInfo, "goodsSpecificationId")))
+                            .goodsSpecificationName(MapUtils.getString(packageInfo, "goodsSpecificationName"))
+                            .packageId(BigInteger.valueOf(MapUtils.getLongValue(packageInfo, "packageId")))
+                            .packageGroupId(BigInteger.valueOf(MapUtils.getLongValue(packageInfo, "packageGroupId")))
+                            .packageGroupName(MapUtils.getString(packageInfo, "packageGroupName"))
+                            .categoryId(goods.getCategoryId())
+                            .categoryName(goods.getCategoryName())
+                            .price(price)
+                            .attributeIncrease(BigDecimal.ZERO)
+                            .quantity(quantity.multiply(BigDecimal.valueOf(MapUtils.getDoubleValue(packageInfo, "quantity"))))
+                            .totalAmount(BigDecimal.ZERO)
+                            .discountAmount(BigDecimal.ZERO)
+                            .payableAmount(BigDecimal.ZERO)
+                            .createUserId(userId)
+                            .lastUpdateUserId(userId)
+                            .build();
+                    dietOrderDetails.add(dietOrderDetail);
                 }
             }
 

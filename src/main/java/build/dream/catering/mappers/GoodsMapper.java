@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Mapper
 public interface GoodsMapper {
-    List<Map<String, Object>> listPackageInfos(@Param("packageIds") List<BigInteger> packageIds);
+    List<Map<String, Object>> listPackageInfos(@Param("packageIds") List<BigInteger> packageIds, @Param("groupType") Integer groupType);
 
     List<Goods> findAllGoodsInfos(@Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId, @Param("goodsIds") List<BigInteger> goodsIds);
 
