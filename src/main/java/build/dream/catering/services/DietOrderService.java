@@ -1,5 +1,6 @@
 package build.dream.catering.services;
 
+import build.dream.catering.beans.PackageGroupDietOrderDetail;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.ActivityMapper;
 import build.dream.catering.mappers.GoodsMapper;
@@ -197,9 +198,49 @@ public class DietOrderService {
      * @return
      */
     private List<Map<String, Object>> buildDetails(List<DietOrderDetail> dietOrderDetails, Map<BigInteger, List<DietOrderDetailGoodsAttribute>> dietOrderDetailGoodsAttributeMap) {
-        List<Map<String, Object>> dietOrderDetailInfos = new ArrayList<Map<String, Object>>();
+        List<DietOrderDetail> ordinaryGoodsDietOrderDetail = new ArrayList<DietOrderDetail>();
+        Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap = new HashMap<BigInteger, List<DietOrderDetail>>();
         for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
+            if (dietOrderDetail.getGoodsType() == Constants.GOODS_TYPE_PACKAGE_DETAIL) {
+                BigInteger packageGroupId = dietOrderDetail.getPackageGroupId();
+                List<DietOrderDetail> dietOrderDetailList = dietOrderDetailMap.get(packageGroupId);
+                if (CollectionUtils.isEmpty(dietOrderDetailList)) {
+                    dietOrderDetailList = new ArrayList<DietOrderDetail>();
+                    dietOrderDetailMap.put(packageGroupId, dietOrderDetailList);
+                }
+                dietOrderDetailList.add(dietOrderDetail);
+            } else {
+                ordinaryGoodsDietOrderDetail.add(dietOrderDetail);
+            }
+        }
+        List<PackageGroupDietOrderDetail> packageGroupDietOrderDetails = new ArrayList<PackageGroupDietOrderDetail>();
+        for (Map.Entry<BigInteger, List<DietOrderDetail>> entry : dietOrderDetailMap.entrySet()) {
+            PackageGroupDietOrderDetail packageGroupDietOrderDetail = new PackageGroupDietOrderDetail();
+            List<DietOrderDetail> value = entry.getValue();
+            DietOrderDetail dietOrderDetail = value.get(0);
+            packageGroupDietOrderDetail.setPackageId(dietOrderDetail.getPackageId());
+            packageGroupDietOrderDetail.setPackageGroupId(dietOrderDetail.getPackageGroupId());
+            packageGroupDietOrderDetail.setPackageGroupName(dietOrderDetail.getPackageGroupName());
+            packageGroupDietOrderDetail.setDietOrderDetails(value);
+            packageGroupDietOrderDetails.add(packageGroupDietOrderDetail);
+        }
+
+        Map<BigInteger, List<PackageGroupDietOrderDetail>> packageGroupDietOrderDetailMap = new HashMap<BigInteger, List<PackageGroupDietOrderDetail>>();
+        for (PackageGroupDietOrderDetail packageGroupDietOrderDetail : packageGroupDietOrderDetails) {
+            BigInteger packageId = packageGroupDietOrderDetail.getPackageId();
+            List<PackageGroupDietOrderDetail> packageGroupDietOrderDetailList = packageGroupDietOrderDetailMap.get(packageId);
+            if (CollectionUtils.isEmpty(packageGroupDietOrderDetailList)) {
+                packageGroupDietOrderDetailList = new ArrayList<PackageGroupDietOrderDetail>();
+                packageGroupDietOrderDetailMap.put(packageId, packageGroupDietOrderDetailList);
+            }
+            packageGroupDietOrderDetailList.add(packageGroupDietOrderDetail);
+        }
+
+        List<Map<String, Object>> dietOrderDetailInfos = new ArrayList<Map<String, Object>>();
+        for (DietOrderDetail dietOrderDetail : ordinaryGoodsDietOrderDetail) {
             Map<String, Object> dietOrderDetailInfo = new HashMap<String, Object>();
+            int goodsType = dietOrderDetail.getGoodsType();
+            dietOrderDetailInfo.put("goodsType", goodsType);
             dietOrderDetailInfo.put("goodsId", dietOrderDetail.getGoodsId());
             dietOrderDetailInfo.put("goodsName", dietOrderDetail.getGoodsName());
             dietOrderDetailInfo.put("goodsSpecificationId", dietOrderDetail.getGoodsSpecificationId());
@@ -226,8 +267,40 @@ public class DietOrderService {
                 dietOrderDetailInfo.put("attributes", attributes);
             }
             dietOrderDetailInfos.add(dietOrderDetailInfo);
+            if (goodsType == Constants.GOODS_TYPE_PACKAGE) {
+                dietOrderDetailInfo.put("packageGroups", buildPackageGroups(packageGroupDietOrderDetailMap.get(dietOrderDetail.getGoodsId())));
+            }
         }
         return dietOrderDetailInfos;
+    }
+
+    public List<Map<String, Object>> buildPackageGroups(List<PackageGroupDietOrderDetail> packageGroupDietOrderDetails) {
+        List<Map<String, Object>> packageGroups = new ArrayList<Map<String, Object>>();
+        for (PackageGroupDietOrderDetail packageGroupDietOrderDetail : packageGroupDietOrderDetails) {
+            Map<String, Object> packageGroup = new HashMap<String, Object>();
+            packageGroup.put("id", packageGroupDietOrderDetail.getPackageGroupId());
+            packageGroup.put("name", packageGroupDietOrderDetail.getPackageGroupName());
+            List<Map<String, Object>> details = new ArrayList<Map<String, Object>>();
+            List<DietOrderDetail> dietOrderDetails = packageGroupDietOrderDetail.getDietOrderDetails();
+            for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
+                Map<String, Object> detail = new HashMap<String, Object>();
+                detail.put("goodsType", dietOrderDetail.getGoodsType());
+                detail.put("goodsId", dietOrderDetail.getGoodsId());
+                detail.put("goodsName", dietOrderDetail.getGoodsName());
+                detail.put("goodsSpecificationId", dietOrderDetail.getGoodsSpecificationId());
+                detail.put("goodsSpecificationName", dietOrderDetail.getGoodsSpecificationName());
+                detail.put("price", dietOrderDetail.getPrice());
+                detail.put("attributeIncrease", dietOrderDetail.getAttributeIncrease());
+                detail.put("quantity", dietOrderDetail.getQuantity());
+                detail.put("totalAmount", dietOrderDetail.getTotalAmount());
+                detail.put("discountAmount", dietOrderDetail.getDiscountAmount());
+                detail.put("payableAmount", dietOrderDetail.getPayableAmount());
+                details.add(detail);
+            }
+            packageGroup.put("details", details);
+            packageGroups.add(packageGroup);
+        }
+        return packageGroups;
     }
 
     /**
