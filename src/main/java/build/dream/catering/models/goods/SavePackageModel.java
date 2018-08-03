@@ -36,6 +36,9 @@ public class SavePackageModel extends BasicModel {
     private Integer type;
 
     @NotNull
+    private BigDecimal price;
+
+    @NotNull
     private BigInteger categoryId;
 
     @NotNull
@@ -101,6 +104,14 @@ public class SavePackageModel extends BasicModel {
 
     public void setType(Integer type) {
         this.type = type;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
     }
 
     public BigInteger getCategoryId() {

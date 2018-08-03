@@ -34,8 +34,9 @@ public class Constants extends build.dream.common.constants.Constants {
 
     public static final Integer GOODS_TYPE_ORDINARY_GOODS = 1;
     public static final Integer GOODS_TYPE_PACKAGE = 2;
-    public static final Integer GOODS_TYPE_DELIVER_FEE = 3;
-    public static final Integer GOODS_TYPE_PACKAGE_FEE = 4;
+    public static final Integer GOODS_TYPE_PACKAGE_DETAIL = 3;
+    public static final Integer GOODS_TYPE_DELIVER_FEE = 4;
+    public static final Integer GOODS_TYPE_PACKAGE_FEE = 5;
 
     public static final BigInteger FICTITIOUS_GOODS_CATEGORY_ID = BIG_INTEGER_MINUS_ONE;
     public static final String FICTITIOUS_GOODS_CATEGORY_NAME = "虚拟商品";

@@ -655,6 +655,7 @@ public class GoodsService extends BasicService {
         String imageUrl = savePackageModel.getImageUrl();
         List<BigInteger> deleteGroupIds = savePackageModel.getDeleteGroupIds();
         List<SavePackageModel.Group> groups = savePackageModel.getGroups();
+        BigDecimal price = savePackageModel.getPrice();
 
         Goods goods = null;
         if (id != null) {
@@ -664,6 +665,11 @@ public class GoodsService extends BasicService {
             goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, id);
             goods = DatabaseHelper.find(Goods.class, goodsSearchModel);
             ValidateUtils.notNull(goods, "商品不存在！");
+
+            SearchModel goodsSpecificationSearchModel = new SearchModel(true);
+            goodsSpecificationSearchModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, id);
+            GoodsSpecification goodsSpecification = DatabaseHelper.find(GoodsSpecification.class, goodsSpecificationSearchModel);
+            ValidateUtils.notNull(goodsSpecification, "商品规格不存在！");
 
             if (CollectionUtils.isNotEmpty(deleteGroupIds)) {
                 UpdateModel packageGroupUpdateModel = new UpdateModel(true);
@@ -777,6 +783,12 @@ public class GoodsService extends BasicService {
             goods.setName(name);
             goods.setCategoryId(categoryId);
             goods.setImageUrl(imageUrl);
+            goods.setLastUpdateUserId(userId);
+            DatabaseHelper.update(goods);
+
+            goodsSpecification.setPrice(price);
+            goodsSpecification.setLastUpdateUserId(userId);
+            DatabaseHelper.update(goodsSpecification);
         } else {
             goods = Goods.builder()
                     .tenantId(tenantId)
@@ -793,6 +805,20 @@ public class GoodsService extends BasicService {
             DatabaseHelper.insert(goods);
 
             BigInteger packageId = goods.getId();
+
+            GoodsSpecification goodsSpecification = GoodsSpecification.builder()
+                    .tenantId(tenantId)
+                    .tenantCode(tenantCode)
+                    .branchId(branchId)
+                    .goodsId(packageId)
+                    .name(Constants.VARCHAR_DEFAULT_VALUE)
+                    .price(price)
+                    .stock(Constants.DECIMAL_DEFAULT_VALUE)
+                    .createUserId(userId)
+                    .lastUpdateUserId(userId)
+                    .build();
+            DatabaseHelper.insert(goodsSpecification);
+
             for (SavePackageModel.Group group : groups) {
                 String groupName = group.getGroupName();
                 int groupType = group.getGroupType();

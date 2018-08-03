@@ -255,11 +255,11 @@ public class DietOrderService {
         List<BigInteger> goodsAttributeIds = new ArrayList<BigInteger>();
         List<SaveDietOrderModel.GoodsInfo> goodsInfos = saveDietOrderModel.getGoodsInfos();
         for (SaveDietOrderModel.GoodsInfo goodsInfo : goodsInfos) {
+            BigInteger goodsId = goodsInfo.getGoodsId();
             goodsIds.add(goodsInfo.getGoodsId());
-            if (goodsInfo.isOrdinaryGoods()) {
-                goodsSpecificationIds.add(goodsInfo.getGoodsSpecificationId());
-            } else {
-                packageIds.add(goodsInfo.getGoodsId());
+            goodsSpecificationIds.add(goodsInfo.getGoodsSpecificationId());
+            if (goodsInfo.isPackage()) {
+                packageIds.add(goodsId);
             }
 
             List<SaveDietOrderModel.AttributeInfo> attributeInfos = goodsInfo.getAttributeInfos();
@@ -424,10 +424,6 @@ public class DietOrderService {
             Goods goods = goodsMap.get(goodsInfo.getGoodsId());
             ValidateUtils.notNull(goods, "商品不存在！");
 
-            if (goodsInfo.isOrdinaryGoods()) {
-
-            }
-
             GoodsSpecification goodsSpecification = goodsSpecificationMap.get(goodsInfo.getGoodsSpecificationId());
             ValidateUtils.notNull(goodsSpecification, "商品规格不存在！");
 
@@ -436,9 +432,43 @@ public class DietOrderService {
             String goodsSpecificationName = goodsSpecification.getName();
             BigDecimal quantity = goodsInfo.getQuantity();
             BigDecimal price = goodsSpecification.getPrice();
-
             if (goods.isStocked()) {
                 GoodsUtils.deductingGoodsStock(goodsId, goodsSpecificationId, quantity);
+            }
+
+            if (goodsInfo.isPackage()) {
+                List<SaveDietOrderModel.PackageInfo> infos = goodsInfo.getPackageInfos();
+                for (SaveDietOrderModel.PackageInfo info : infos) {
+                    for (SaveDietOrderModel.Detail detail : info.getDetails()) {
+                        Map<String, Object> packageInfo = packageInfoMap.get(goodsId + "_" + info.getGroupId() + "_" + detail.getGoodsId() + "_" + detail.getGoodsSpecificationId());
+                        DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
+                                .tenantId(tenantId)
+                                .tenantCode(tenantCode)
+                                .branchId(branchId)
+                                .dietOrderId(dietOrderId)
+                                .dietOrderGroupId(normalDietOrderGroup.getId())
+                                .goodsType(Constants.GOODS_TYPE_PACKAGE_DETAIL)
+                                .goodsId(BigInteger.valueOf(MapUtils.getLongValue(packageInfo, "goodsId")))
+                                .goodsName(MapUtils.getString(packageInfo, "goodsName"))
+                                .goodsSpecificationId(BigInteger.valueOf(MapUtils.getLong(packageInfo, "goodsSpecificationId")))
+                                .goodsSpecificationName(MapUtils.getString(packageInfo, "goodsSpecificationName"))
+                                .packageId(BigInteger.valueOf(MapUtils.getLongValue(packageInfo, "packageId")))
+                                .packageGroupId(BigInteger.valueOf(MapUtils.getLongValue(packageInfo, "packageGroupId")))
+                                .packageGroupName(MapUtils.getString(packageInfo, "packageGroupName"))
+                                .categoryId(goods.getCategoryId())
+                                .categoryName(goods.getCategoryName())
+                                .price(price)
+                                .attributeIncrease(BigDecimal.ZERO)
+                                .quantity(quantity)
+                                .totalAmount(BigDecimal.ZERO)
+                                .discountAmount(BigDecimal.ZERO)
+                                .payableAmount(BigDecimal.ZERO)
+                                .createUserId(userId)
+                                .lastUpdateUserId(userId)
+                                .build();
+                        dietOrderDetails.add(dietOrderDetail);
+                    }
+                }
             }
 
             String uuid = UUID.randomUUID().toString();

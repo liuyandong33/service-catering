@@ -21,6 +21,11 @@
                 "goodsSpecificationId": {
                     "type": "integer"
                 },
+                "goodsType": {
+                    "enum": [
+                        1
+                    ]
+                },
                 "quantity": {
                     "type": "number"
                 },
@@ -46,6 +51,7 @@
             "required": [
                 "goodsId",
                 "goodsSpecificationId",
+                "goodsType",
                 "quantity"
             ]
         },
@@ -53,6 +59,14 @@
             "properties": {
                 "goodsId": {
                     "type": "integer"
+                },
+                "goodsSpecificationId": {
+                    "type": "integer"
+                },
+                "goodsType": {
+                    "enum": [
+                        2
+                    ]
                 },
                 "quantity": {
                     "type": "number"
@@ -95,6 +109,8 @@
             },
             "required": [
                 "goodsId",
+                "goodsSpecificationId",
+                "goodsType",
                 "quantity",
                 "packageInfos"
             ]

@@ -137,6 +137,7 @@ public class SaveDietOrderModel extends BasicModel {
     public static class GoodsInfo {
         private BigInteger goodsId;
         private BigInteger goodsSpecificationId;
+        private Integer goodsType;
         private BigDecimal quantity;
 
         private List<AttributeInfo> attributeInfos;
@@ -157,6 +158,14 @@ public class SaveDietOrderModel extends BasicModel {
 
         public void setGoodsSpecificationId(BigInteger goodsSpecificationId) {
             this.goodsSpecificationId = goodsSpecificationId;
+        }
+
+        public Integer getGoodsType() {
+            return goodsType;
+        }
+
+        public void setGoodsType(Integer goodsType) {
+            this.goodsType = goodsType;
         }
 
         public BigDecimal getQuantity() {
@@ -184,11 +193,11 @@ public class SaveDietOrderModel extends BasicModel {
         }
 
         public boolean isPackage() {
-            return CollectionUtils.isNotEmpty(packageInfos);
+            return goodsType == Constants.GOODS_TYPE_PACKAGE;
         }
 
         public boolean isOrdinaryGoods() {
-            return CollectionUtils.isEmpty(packageInfos);
+            return goodsType == Constants.GOODS_TYPE_ORDINARY_GOODS;
         }
     }
 
