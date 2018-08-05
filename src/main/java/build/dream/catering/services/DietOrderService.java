@@ -1036,7 +1036,15 @@ public class DietOrderService {
             if (paidScene == Constants.PAID_SCENE_WEI_XIN_MICROPAY) {
                 MicroPayModel microPayModel = new MicroPayModel();
                 result = WeiXinPayUtils.microPay(tenantId.toString(), branchId.toString(), microPayModel);
-            } else {
+            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_JSAPI_PUBLIC_ACCOUNT) {
+
+            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_NATIVE) {
+
+            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_APP) {
+
+            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_MWEB) {
+
+            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_JSAPI_MINI_PROGRAM) {
 
             }
         } else if (paidScene == Constants.PAID_SCENE_ALIPAY_MOBILE_WEBSITE) {
