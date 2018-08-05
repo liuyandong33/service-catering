@@ -354,6 +354,7 @@ public class GoodsService extends BasicService {
                 updateModel.setTableName("goods_specification");
                 updateModel.addContentValue("last_update_user_id", userId);
                 updateModel.addContentValue("last_update_remark", "删除商品规格信息！");
+                updateModel.addContentValue("delete_time", new Date());
                 updateModel.addContentValue("deleted", 1);
                 updateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
                 updateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -367,6 +368,7 @@ public class GoodsService extends BasicService {
                 deleteGoodsAttributeGroupUpdateModel.setTableName("goods_attribute_group");
                 deleteGoodsAttributeGroupUpdateModel.addContentValue("last_update_user_id", userId);
                 deleteGoodsAttributeGroupUpdateModel.addContentValue("last_update_remark", "删除商品口味组信息！");
+                deleteGoodsAttributeGroupUpdateModel.addContentValue("delete_time", new Date());
                 deleteGoodsAttributeGroupUpdateModel.addContentValue("delete", 1);
                 deleteGoodsAttributeGroupUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
                 deleteGoodsAttributeGroupUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -377,6 +379,7 @@ public class GoodsService extends BasicService {
                 deleteGoodsAttributeUpdateModel.setTableName("goods_attribute");
                 deleteGoodsAttributeUpdateModel.addContentValue("last_update_user_id", userId);
                 deleteGoodsAttributeUpdateModel.addContentValue("last_update_remark", "删除商品口味信息！");
+                deleteGoodsAttributeUpdateModel.addContentValue("delete_time", new Date());
                 deleteGoodsAttributeUpdateModel.addContentValue("delete", 1);
                 deleteGoodsAttributeUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
                 deleteGoodsAttributeUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -454,6 +457,7 @@ public class GoodsService extends BasicService {
                     deleteGoodsAttributeUpdateModel.setTableName("goods_attribute");
                     deleteGoodsAttributeUpdateModel.addContentValue("last_update_user_id", userId);
                     deleteGoodsAttributeUpdateModel.addContentValue("last_update_remark", "删除商品口味信息！");
+                    deleteGoodsAttributeUpdateModel.addContentValue("delete_time", new Date());
                     deleteGoodsAttributeUpdateModel.addContentValue("delete", 1);
                     deleteGoodsAttributeUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
                     deleteGoodsAttributeUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -674,12 +678,14 @@ public class GoodsService extends BasicService {
             if (CollectionUtils.isNotEmpty(deleteGroupIds)) {
                 UpdateModel packageGroupUpdateModel = new UpdateModel(true);
                 packageGroupUpdateModel.setTableName("package_group");
+                packageGroupUpdateModel.addContentValue("delete_time", new Date());
                 packageGroupUpdateModel.addContentValue("deleted", 1);
                 packageGroupUpdateModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, deleteGroupIds);
                 DatabaseHelper.universalUpdate(packageGroupUpdateModel);
 
                 UpdateModel packageGroupDetailUpdateModel = new UpdateModel();
                 packageGroupDetailUpdateModel.setTableName("package_group_detail");
+                packageGroupDetailUpdateModel.addContentValue("delete_time", new Date());
                 packageGroupDetailUpdateModel.addContentValue("deleted", 1);
                 packageGroupDetailUpdateModel.addSearchCondition("package_group_id", Constants.SQL_OPERATION_SYMBOL_IN, deleteGroupIds);
                 DatabaseHelper.universalUpdate(packageGroupDetailUpdateModel);
@@ -717,6 +723,7 @@ public class GoodsService extends BasicService {
                 if (CollectionUtils.isNotEmpty(deleteGroupDetailIds)) {
                     UpdateModel packageGroupDetailUpdateModel = new UpdateModel();
                     packageGroupDetailUpdateModel.setTableName("package_group_detail");
+                    packageGroupDetailUpdateModel.addContentValue("delete_time", new Date());
                     packageGroupDetailUpdateModel.addContentValue("deleted", 1);
                     packageGroupDetailUpdateModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, deleteGroupDetailIds);
                     DatabaseHelper.universalUpdate(packageGroupDetailUpdateModel);
@@ -898,14 +905,17 @@ public class GoodsService extends BasicService {
 
         validateCanNotOperate(tenantId, branchId, "goods", goodsId, 2);
 
+        Date currentTime = new Date();
         goods.setLastUpdateUserId(userId);
         goods.setLastUpdateRemark("删除商品信息！");
+        goods.setDeleteTime(currentTime);
         goods.setDeleted(true);
         DatabaseHelper.update(goods);
 
         // 删除该商品的所有规格
         UpdateModel goodsSpecificationUpdateModel = new UpdateModel(true);
         goodsSpecificationUpdateModel.setTableName("goods_specification");
+        goodsSpecificationUpdateModel.addContentValue("delete_time", currentTime);
         goodsSpecificationUpdateModel.addContentValue("deleted", 1);
         goodsSpecificationUpdateModel.addContentValue("last_update_user_id", userId);
         goodsSpecificationUpdateModel.addContentValue("last_update_remark", "删除商品规格信息！");
@@ -917,6 +927,7 @@ public class GoodsService extends BasicService {
         // 删除该商品的所有口味组
         UpdateModel goodsAttributeGroupUpdateModel = new UpdateModel(true);
         goodsAttributeGroupUpdateModel.setTableName("goods_attribute_group");
+        goodsAttributeGroupUpdateModel.addContentValue("delete_time", currentTime);
         goodsAttributeGroupUpdateModel.addContentValue("deleted", 1);
         goodsAttributeGroupUpdateModel.addContentValue("last_update_user_id", userId);
         goodsAttributeGroupUpdateModel.addContentValue("last_update_remark", "删除商品口味组信息！");
@@ -928,6 +939,7 @@ public class GoodsService extends BasicService {
         // 删除该商品的所有口味
         UpdateModel goodsAttributeUpdateModel = new UpdateModel(true);
         goodsAttributeUpdateModel.setTableName("goods_attribute");
+        goodsAttributeUpdateModel.addContentValue("delete_time", currentTime);
         goodsAttributeUpdateModel.addContentValue("deleted", 1);
         goodsAttributeUpdateModel.addContentValue("last_update_user_id", userId);
         goodsAttributeUpdateModel.addContentValue("last_update_remark", "删除商品口味组信息！");
