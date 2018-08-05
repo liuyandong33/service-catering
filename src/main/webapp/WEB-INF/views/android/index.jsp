@@ -16,9 +16,7 @@
         }
     </style>
 </head>
-<body>
-<div style="width: 100%;height: 100%;text-align: center;padding-top: 20px;">
-    <button style="width: 80%;height: 40px;background-color: #00AAEE;color: #FFFFFF;border: none;font-size: 16px;">登录</button>
-</div>
+<body style="background-color: yellow">
+<button style="width: 100%;height: 40px;background-color: #00AAEE;color: #FFFFFF;border: none;font-size: 16px;">登录</button>
 </body>
 </html>
