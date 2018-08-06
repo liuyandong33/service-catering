@@ -8,7 +8,6 @@ import build.dream.common.utils.MethodCaller;
 import build.dream.common.utils.WeiXinPayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -24,8 +23,6 @@ import java.util.UUID;
 public class DemoController {
     @Autowired
     private DemoService demoService;
-    @Autowired
-    private SchedulerFactoryBean schedulerFactoryBean;
 
     @RequestMapping(value = "/writeSaleFlow", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
