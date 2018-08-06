@@ -1,15 +1,11 @@
 package build.dream.catering.controllers;
 
-import build.dream.catering.constants.Constants;
-import build.dream.catering.jobs.OrderInvalidJob;
-import build.dream.catering.models.demo.DemoModel;
 import build.dream.catering.services.DemoService;
 import build.dream.common.api.ApiRest;
 import build.dream.common.models.weixinpay.RefundModel;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.MethodCaller;
 import build.dream.common.utils.WeiXinPayUtils;
-import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
@@ -20,8 +16,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.math.BigInteger;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.UUID;
 
@@ -67,13 +61,5 @@ public class DemoController {
             return ApiRest.builder().data(WeiXinPayUtils.refund(tenantId, branchId, refundModel)).message("退款成功！").successful(true).build();
         };
         return ApplicationHandler.callMethod(methodCaller, "退款失败", requestParameters);
-    }
-
-    @RequestMapping(value = "/demo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    public String demo() throws Exception {
-        DemoModel demoModel = ApplicationHandler.instantiateObject(DemoModel.class, ApplicationHandler.getRequestParameters());
-        demoModel.validateAndThrow();
-        return UUID.randomUUID().toString();
     }
 }
