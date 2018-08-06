@@ -13,7 +13,7 @@ import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.models.alipay.AlipayTradePagePayModel;
 import build.dream.common.models.alipay.AlipayTradeWapPayModel;
-import build.dream.common.models.weixin.MicroPayModel;
+import build.dream.common.models.weixinpay.MicroPayModel;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
