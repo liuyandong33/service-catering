@@ -653,7 +653,7 @@ public class DietOrderService {
                                 .dietOrderGroupId(discountDietOrderGroup.getId())
                                 .goodsType(Constants.GOODS_TYPE_ORDINARY_GOODS)
                                 .goodsId(effectiveActivity.getGiveGoodsId())
-                                .goodsName(Constants.VARCHAR_DEFAULT_VALUE)
+                                .goodsName(effectiveActivity.getGiveGoodsName())
                                 .goodsSpecificationId(effectiveActivity.getGoodsSpecificationId())
                                 .goodsSpecificationName(effectiveActivity.getGoodsSpecificationName())
                                 .categoryId(effectiveActivity.getCategoryId())
