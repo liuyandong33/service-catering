@@ -14,10 +14,12 @@ import build.dream.common.erp.catering.domains.*;
 import build.dream.common.models.alipay.AlipayTradePagePayModel;
 import build.dream.common.models.alipay.AlipayTradeWapPayModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
+import build.dream.common.models.weixinpay.UnifiedOrderModel;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.dom4j.DocumentException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1031,21 +1033,40 @@ public class DietOrderService {
         ValidateUtils.notNull(dietOrder, "订单不存在！");
         ValidateUtils.isTrue(dietOrder.getOrderStatus() == DietOrderConstants.ORDER_STATUS_PENDING, "订单状态异常！");
 
+        String orderNumber = dietOrder.getOrderNumber();
+        BigDecimal payableAmount = dietOrder.getPayableAmount();
+
         Object result = null;
         if (ArrayUtils.contains(Constants.WEI_XIN_PAID_SCENES, paidScene)) {
             if (paidScene == Constants.PAID_SCENE_WEI_XIN_MICROPAY) {
                 MicroPayModel microPayModel = new MicroPayModel();
                 result = WeiXinPayUtils.microPay(tenantId.toString(), branchId.toString(), microPayModel);
-            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_JSAPI_PUBLIC_ACCOUNT) {
-
-            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_NATIVE) {
-
-            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_APP) {
-
-            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_MWEB) {
-
-            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_JSAPI_MINI_PROGRAM) {
-
+            } else {
+                UnifiedOrderModel unifiedOrderModel = new UnifiedOrderModel();
+                unifiedOrderModel.setSignType(Constants.MD5);
+                unifiedOrderModel.setBody("订单支付");
+                unifiedOrderModel.setOutTradeNo(orderNumber);
+                unifiedOrderModel.setTotalFee(payableAmount.multiply(Constants.BIG_DECIMAL_HUNDRED).intValue());
+                unifiedOrderModel.setSpbillCreateIp(ApplicationHandler.getRemoteAddress());
+                unifiedOrderModel.setNotifyUrl("");
+                if (StringUtils.isNotBlank(openId)) {
+                    unifiedOrderModel.setOpenId(openId);
+                }
+                if (StringUtils.isNotBlank(subOpenId)) {
+                    unifiedOrderModel.setSubOpenId(subOpenId);
+                }
+                if (paidScene == Constants.PAID_SCENE_WEI_XIN_JSAPI_PUBLIC_ACCOUNT) {
+                    unifiedOrderModel.setTradeType(Constants.WEI_XIN_PAY_TRADE_TYPE_JSAPI);
+                } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_NATIVE) {
+                    unifiedOrderModel.setTradeType(Constants.WEI_XIN_PAY_TRADE_TYPE_NATIVE);
+                } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_APP) {
+                    unifiedOrderModel.setTradeType(Constants.WEI_XIN_PAY_TRADE_TYPE_APP);
+                } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_MWEB) {
+                    unifiedOrderModel.setTradeType(Constants.WEI_XIN_PAY_TRADE_TYPE_MWEB);
+                } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_JSAPI_MINI_PROGRAM) {
+                    unifiedOrderModel.setTradeType(Constants.WEI_XIN_PAY_TRADE_TYPE_MINI_PROGRAM);
+                }
+                result = WeiXinPayUtils.unifiedOrder(tenantId.toString(), branchId.toString(), unifiedOrderModel);
             }
         } else if (paidScene == Constants.PAID_SCENE_ALIPAY_MOBILE_WEBSITE) {
             String returnUrl = "";
