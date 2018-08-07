@@ -4,7 +4,7 @@ import build.dream.catering.constants.Constants;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.models.alipay.AlipayTradeRefundModel;
-import build.dream.common.models.weixin.RefundModel;
+import build.dream.common.models.weixinpay.RefundModel;
 import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
