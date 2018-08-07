@@ -341,7 +341,7 @@ public class GoodsService extends BasicService {
             Validate.notNull(goods, "商品不存在！");
 
             // 验证商品是否可以编辑
-            validateCanNotOperate(tenantId, branchId, "goods", goodsId, 1);
+            validateCanNotOperate(tenantId, branchId, "goods", goodsId, 2);
 
             goods.setName(saveGoodsModel.getName());
             goods.setCategoryId(saveGoodsModel.getCategoryId());
