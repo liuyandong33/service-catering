@@ -22,6 +22,9 @@ public class DoPayModel extends BasicModel {
     private Integer paidScene;
 
     @Length(max = 128)
+    private String authCode;
+
+    @Length(max = 128)
     private String openId;
 
     @Length(max = 128)
@@ -60,6 +63,14 @@ public class DoPayModel extends BasicModel {
 
     public void setPaidScene(Integer paidScene) {
         this.paidScene = paidScene;
+    }
+
+    public String getAuthCode() {
+        return authCode;
+    }
+
+    public void setAuthCode(String authCode) {
+        this.authCode = authCode;
     }
 
     public String getOpenId() {

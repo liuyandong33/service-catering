@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -1021,6 +1022,7 @@ public class DietOrderService {
         BigInteger branchId = doPayModel.getBranchId();
         BigInteger dietOrderId = doPayModel.getDietOrderId();
         Integer paidScene = doPayModel.getPaidScene();
+        String authCode = doPayModel.getAuthCode();
         String openId = doPayModel.getOpenId();
         String subOpenId = doPayModel.getSubOpenId();
         String userId = doPayModel.getUserId();
@@ -1035,20 +1037,30 @@ public class DietOrderService {
 
         String orderNumber = dietOrder.getOrderNumber();
         BigDecimal payableAmount = dietOrder.getPayableAmount();
+        String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
 
         Object result = null;
         if (ArrayUtils.contains(Constants.WEI_XIN_PAID_SCENES, paidScene)) {
+            int totalFee = payableAmount.multiply(Constants.BIG_DECIMAL_HUNDRED).intValue();
+            String spbillCreateIp = ApplicationHandler.getRemoteAddress();
             if (paidScene == Constants.PAID_SCENE_WEI_XIN_MICROPAY) {
                 MicroPayModel microPayModel = new MicroPayModel();
+                microPayModel.setSignType(Constants.MD5);
+                microPayModel.setBody("订单支付");
+                microPayModel.setOutTradeNo(orderNumber);
+                microPayModel.setTotalFee(totalFee);
+                microPayModel.setSpbillCreateIp(spbillCreateIp);
+                microPayModel.setAuthCode(authCode);
                 result = WeiXinPayUtils.microPay(tenantId.toString(), branchId.toString(), microPayModel);
             } else {
+                String notifyUrl = CommonUtils.getUrl(partitionCode, Constants.SERVICE_NAME_CATERING, "dietOrder", "weiXinPayCallback");
                 UnifiedOrderModel unifiedOrderModel = new UnifiedOrderModel();
                 unifiedOrderModel.setSignType(Constants.MD5);
                 unifiedOrderModel.setBody("订单支付");
                 unifiedOrderModel.setOutTradeNo(orderNumber);
-                unifiedOrderModel.setTotalFee(payableAmount.multiply(Constants.BIG_DECIMAL_HUNDRED).intValue());
-                unifiedOrderModel.setSpbillCreateIp(ApplicationHandler.getRemoteAddress());
-                unifiedOrderModel.setNotifyUrl("");
+                unifiedOrderModel.setTotalFee(totalFee);
+                unifiedOrderModel.setSpbillCreateIp(spbillCreateIp);
+                unifiedOrderModel.setNotifyUrl(notifyUrl);
                 if (StringUtils.isNotBlank(openId)) {
                     unifiedOrderModel.setOpenId(openId);
                 }
@@ -1072,7 +1084,12 @@ public class DietOrderService {
             String returnUrl = "";
             String notifyUrl = "";
 
+            DecimalFormat decimalFormat = new DecimalFormat("0.00");
             AlipayTradeWapPayModel alipayTradeWapPayModel = new AlipayTradeWapPayModel();
+            alipayTradeWapPayModel.setSubject("订单支付");
+            alipayTradeWapPayModel.setOutTradeNo(orderNumber);
+            alipayTradeWapPayModel.setTotalAmount(decimalFormat.format(dietOrder.getPayableAmount()));
+            alipayTradeWapPayModel.setProductCode("");
             Map<String, Object> passBackParams = new HashMap<String, Object>();
             passBackParams.put("paidScene", paidScene);
             alipayTradeWapPayModel.setPassbackParams(URLEncoder.encode(GsonUtils.toJson(passBackParams), Constants.CHARSET_NAME_UTF_8));
