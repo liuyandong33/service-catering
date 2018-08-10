@@ -5,7 +5,9 @@ import build.dream.common.api.ApiRest;
 import build.dream.common.models.weixinpay.RefundModel;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.MethodCaller;
+import build.dream.common.utils.MiyaUtils;
 import build.dream.common.utils.WeiXinPayUtils;
+import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -52,10 +54,26 @@ public class DemoController {
 
             String branchId = requestParameters.get("branchId");
             ApplicationHandler.notBlank(branchId, "branchId");
-            RefundModel refundModel = ApplicationHandler.instantiateObject(RefundModel.class, requestParameters);
 
-            refundModel.setOutRefundNo(UUID.randomUUID().toString());
-            return ApiRest.builder().data(WeiXinPayUtils.refund(tenantId, branchId, refundModel)).message("退款成功！").successful(true).build();
+            String paymentChannel = requestParameters.get("paymentChannel");
+
+            Object data = null;
+            if ("1".equals(paymentChannel)) {
+                RefundModel refundModel = ApplicationHandler.instantiateObject(RefundModel.class, requestParameters);
+                refundModel.setOutRefundNo(UUID.randomUUID().toString());
+                data = WeiXinPayUtils.refund(tenantId, branchId, refundModel);
+            } else if ("2".equals(paymentChannel)) {
+
+            } else if ("3".equals(paymentChannel)) {
+                build.dream.common.models.miya.RefundModel refundModel = ApplicationHandler.instantiateObject(build.dream.common.models.miya.RefundModel.class, requestParameters);
+                refundModel.setRefundNumber(RandomStringUtils.randomAlphanumeric(32));
+                refundModel.setPosId(BigInteger.ONE);
+                refundModel.setCashierId(BigInteger.TEN);
+                data = MiyaUtils.refund(tenantId, branchId, refundModel);
+            } else if ("4".equals(paymentChannel)) {
+
+            }
+            return ApiRest.builder().data(data).message("退款成功！").successful(true).build();
         };
         return ApplicationHandler.callMethod(methodCaller, "退款失败", requestParameters);
     }
