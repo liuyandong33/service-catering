@@ -1,10 +1,7 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.models.weixin.CreateMemberCardModel;
-import build.dream.catering.models.weixin.DeleteWeiXinMemberCardModel;
-import build.dream.catering.models.weixin.ListWeiXinMemberCardsModel;
-import build.dream.catering.models.weixin.PayGiftCardModel;
+import build.dream.catering.models.weixin.*;
 import build.dream.catering.utils.WeiXinUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.WeiXinMemberCard;
@@ -379,5 +376,25 @@ public class WeiXinService {
         data.put("total", count);
         data.put("rows", weiXinMemberCards);
         return new ApiRest(data, "查询会员卡列表成功！");
+    }
+
+    /**
+     * 获取微信授权信息
+     *
+     * @param obtainWeiXinAuthorizerInfoModel
+     * @return
+     * @throws IOException
+     */
+    public ApiRest obtainWeiXinAuthorizerInfo(ObtainWeiXinAuthorizerInfoModel obtainWeiXinAuthorizerInfoModel) throws IOException {
+        BigInteger tenantId = obtainWeiXinAuthorizerInfoModel.getTenantId();
+        BigInteger branchId = obtainWeiXinAuthorizerInfoModel.getBranchId();
+
+        Map<String, String> obtainWeiXinAuthorizerInfoRequestParameters = new HashMap<String, String>();
+        obtainWeiXinAuthorizerInfoRequestParameters.put("tenantId", tenantId.toString());
+        obtainWeiXinAuthorizerInfoRequestParameters.put("branchId", branchId.toString());
+
+        ApiRest obtainWeiXinAuthorizerInfoResult = ProxyUtils.doGetWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "weiXin", "obtainWeiXinAuthorizerInfo", obtainWeiXinAuthorizerInfoRequestParameters);
+        ValidateUtils.isTrue(obtainWeiXinAuthorizerInfoResult.isSuccessful(), obtainWeiXinAuthorizerInfoResult.getError());
+        return ApiRest.builder().data(obtainWeiXinAuthorizerInfoResult.getData()).message("获取微信授权信息成功！").successful(true).build();
     }
 }

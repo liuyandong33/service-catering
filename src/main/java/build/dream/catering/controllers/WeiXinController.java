@@ -1,9 +1,6 @@
 package build.dream.catering.controllers;
 
-import build.dream.catering.models.weixin.CreateMemberCardModel;
-import build.dream.catering.models.weixin.DeleteWeiXinMemberCardModel;
-import build.dream.catering.models.weixin.ListWeiXinMemberCardsModel;
-import build.dream.catering.models.weixin.PayGiftCardModel;
+import build.dream.catering.models.weixin.*;
 import build.dream.catering.services.WeiXinService;
 import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.api.ApiRest;
@@ -86,6 +83,18 @@ public class WeiXinController extends BasicController {
     @ResponseBody
     @ApiRestAction(modelClass = ListWeiXinMemberCardsModel.class, serviceClass = WeiXinService.class, serviceMethodName = "listWeiXinMemberCards", error = "查询会员卡列表失败")
     public String listWeiXinMemberCards() {
+        return null;
+    }
+
+    /**
+     * 获取微信授权信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "/obtainWeiXinAuthorizerInfo")
+    @ResponseBody
+    @ApiRestAction(modelClass = ObtainWeiXinAuthorizerInfoModel.class, serviceClass = WeiXinService.class, serviceMethodName = "obtainWeiXinAuthorizerInfo", error = "获取微信授权信息失败")
+    public String obtainWeiXinAuthorizerInfo() {
         return null;
     }
 }
