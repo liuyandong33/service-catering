@@ -10,7 +10,7 @@ public class ChangeVipSharedTypeModel extends BasicModel {
     private BigInteger tenantId;
 
     /**
-     * 会员隔离级别，1-全部共享，2-全部独立
+     * 会员共享类型，1-全部共享，2-全部独立，3-分组共享
      */
     @NotNull
     private Integer vipSharedType;

@@ -6,11 +6,13 @@ import build.dream.catering.models.vip.ObtainVipInfoModel;
 import build.dream.catering.models.vip.SaveVipInfoModel;
 import build.dream.catering.models.vip.SaveVipTypeModel;
 import build.dream.catering.utils.SequenceUtils;
+import build.dream.catering.utils.TenantUtils;
 import build.dream.catering.utils.VipUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.Branch;
 import build.dream.common.erp.catering.domains.Vip;
 import build.dream.common.erp.catering.domains.VipType;
+import build.dream.common.saas.domains.Tenant;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.SerialNumberGenerator;
@@ -20,6 +22,7 @@ import org.apache.commons.lang.Validate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
@@ -203,17 +206,38 @@ public class VipService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest changeVipSharedType(ChangeVipSharedTypeModel changeVipSharedTypeModel) {
+    public ApiRest changeVipSharedType(ChangeVipSharedTypeModel changeVipSharedTypeModel) throws IOException {
         BigInteger tenantId = changeVipSharedTypeModel.getTenantId();
         int vipSharedType = changeVipSharedTypeModel.getVipSharedType();
+        Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
+        int oldVipSharedType = tenant.getVipSharedType();
+        if (vipSharedType == oldVipSharedType) {
+            return ApiRest.builder().message("修改会员共享类型修改成功！").successful(true).build();
+        }
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("type", Constants.SQL_OPERATION_SYMBOL_EQUAL, Constants.BRANCH_TYPE_HEADQUARTERS);
+        Branch branch = DatabaseHelper.find(Branch.class, searchModel);
+
         if (vipSharedType == 1) {
-            SearchModel searchModel = new SearchModel(true);
-            searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-            searchModel.addSearchCondition("type", Constants.SQL_OPERATION_SYMBOL_EQUAL, Constants.BRANCH_TYPE_HEADQUARTERS);
-            Branch branch = DatabaseHelper.find(Branch.class, searchModel);
+            if (oldVipSharedType == 2) {
 
+            } else if (oldVipSharedType == 3) {
+
+            }
         } else if (vipSharedType == 2) {
+            if (oldVipSharedType == 1) {
 
+            } else if (oldVipSharedType == 3) {
+
+            }
+        } else if (vipSharedType == 3) {
+            if (oldVipSharedType == 1) {
+
+            } else if (oldVipSharedType == 2) {
+
+            }
         }
 
         return ApiRest.builder().message("修改会员共享类型修改成功！").successful(true).build();
