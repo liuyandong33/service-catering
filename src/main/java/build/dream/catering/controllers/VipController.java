@@ -1,6 +1,6 @@
 package build.dream.catering.controllers;
 
-import build.dream.catering.models.vip.ChangeVipIsolationLevelModel;
+import build.dream.catering.models.vip.ChangeVipSharedTypeModel;
 import build.dream.catering.models.vip.ObtainVipInfoModel;
 import build.dream.catering.models.vip.SaveVipInfoModel;
 import build.dream.catering.models.vip.SaveVipTypeModel;
@@ -57,10 +57,10 @@ public class VipController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/changeVipIsolationLevel", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/changeVipSharedType", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ApiRestAction(modelClass = ChangeVipIsolationLevelModel.class, serviceClass = VipService.class, serviceMethodName = "changeVipIsolationLevel", error = "获取会员信息失败")
-    public String changeVipIsolationLevel() {
+    @ApiRestAction(modelClass = ChangeVipSharedTypeModel.class, serviceClass = VipService.class, serviceMethodName = "changeVipSharedType", error = "获取会员信息失败")
+    public String changeVipSharedType() {
         return null;
     }
 }

@@ -5,7 +5,7 @@ import build.dream.common.models.BasicModel;
 import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
 
-public class ChangeVipIsolationLevelModel extends BasicModel {
+public class ChangeVipSharedTypeModel extends BasicModel {
     @NotNull
     private BigInteger tenantId;
 
@@ -13,7 +13,7 @@ public class ChangeVipIsolationLevelModel extends BasicModel {
      * 会员隔离级别，1-全部共享，2-全部独立
      */
     @NotNull
-    private Integer vipIsolationLevel;
+    private Integer vipSharedType;
 
     public BigInteger getTenantId() {
         return tenantId;
@@ -23,11 +23,11 @@ public class ChangeVipIsolationLevelModel extends BasicModel {
         this.tenantId = tenantId;
     }
 
-    public Integer getVipIsolationLevel() {
-        return vipIsolationLevel;
+    public Integer getVipSharedType() {
+        return vipSharedType;
     }
 
-    public void setVipIsolationLevel(Integer vipIsolationLevel) {
-        this.vipIsolationLevel = vipIsolationLevel;
+    public void setVipSharedType(Integer vipSharedType) {
+        this.vipSharedType = vipSharedType;
     }
 }
