@@ -291,7 +291,6 @@ public class VipService {
 
             }
         }
-
         return ApiRest.builder().message("修改会员共享类型修改成功！").successful(true).build();
     }
 }
