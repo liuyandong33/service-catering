@@ -221,6 +221,7 @@ public class VipService {
         Branch headquartersBranch = DatabaseHelper.find(Branch.class, searchModel);
 
         BigInteger headquartersBranchId = headquartersBranch.getId();
+        String tenantCode = tenant.getCode();
 
         if (vipSharedType == 1) {
             List<VipAccount> vipAccounts = DatabaseHelper.findAll(VipAccount.class, TupleUtils.buildTuple3("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
@@ -242,7 +243,6 @@ public class VipService {
                 }
             }
 
-            String tenantCode = tenant.getCode();
             for (Map.Entry<BigInteger, List<VipAccount>> entry : vipAccountsMap.entrySet()) {
                 BigDecimal pointSum = BigDecimal.ZERO;
                 BigDecimal accumulativePointSum = BigDecimal.ZERO;
@@ -280,9 +280,52 @@ public class VipService {
             }
         } else if (vipSharedType == 2) {
             if (oldVipSharedType == 1) {
-
+                List<VipAccount> vipAccounts = DatabaseHelper.findAll(VipAccount.class, TupleUtils.buildTuple3("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
+                for (VipAccount vipAccount : vipAccounts) {
+                    vipAccount.setBranchId(headquartersBranchId);
+                    DatabaseHelper.update(vipAccount);
+                }
             } else if (oldVipSharedType == 3) {
+                List<VipAccount> vipAccounts = DatabaseHelper.findAll(VipAccount.class, TupleUtils.buildTuple3("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
+                Map<BigInteger, List<VipAccount>> vipAccountsMap = new HashMap<BigInteger, List<VipAccount>>();
+                for (VipAccount vipAccount : vipAccounts) {
+                    BigInteger vipId = vipAccount.getVipId();
+                    List<VipAccount> vipAccountList = vipAccountsMap.get(vipId);
+                    if (CollectionUtils.isEmpty(vipAccountList)) {
+                        vipAccountList = new ArrayList<VipAccount>();
+                        vipAccountsMap.put(vipId, vipAccountList);
+                    }
+                    vipAccountList.add(vipAccount);
+                    vipAccount.setDeleted(true);
+                    DatabaseHelper.update(vipAccount);
+                }
 
+                for (Map.Entry<BigInteger, List<VipAccount>> entry : vipAccountsMap.entrySet()) {
+                    BigDecimal pointSum = BigDecimal.ZERO;
+                    BigDecimal accumulativePointSum = BigDecimal.ZERO;
+                    BigDecimal balanceSum = BigDecimal.ZERO;
+                    BigDecimal accumulativeRechargeSum = BigDecimal.ZERO;
+
+                    BigInteger vipId = entry.getKey();
+                    List<VipAccount> vipAccountList = entry.getValue();
+                    for (VipAccount vipAccount : vipAccountList) {
+                        pointSum = pointSum.add(vipAccount.getPoint());
+                        accumulativePointSum = accumulativePointSum.add(vipAccount.getAccumulativePoint());
+                        balanceSum = balanceSum.add(vipAccount.getBalance());
+                        accumulativeRechargeSum = accumulativeRechargeSum.add(vipAccount.getAccumulativeRecharge());
+                    }
+
+                    VipAccount vipAccount = VipAccount.builder()
+                            .tenantId(tenantId)
+                            .tenantCode(tenantCode)
+                            .vipId(vipId)
+                            .point(pointSum)
+                            .accumulativePoint(accumulativePointSum)
+                            .balance(balanceSum)
+                            .accumulativeRecharge(accumulativeRechargeSum)
+                            .build();
+                    DatabaseHelper.insert(vipAccount);
+                }
             }
         } else if (vipSharedType == 3) {
             if (oldVipSharedType == 1) {
