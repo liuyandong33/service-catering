@@ -6,7 +6,6 @@ import build.dream.catering.models.vip.ObtainVipInfoModel;
 import build.dream.catering.models.vip.SaveVipInfoModel;
 import build.dream.catering.models.vip.SaveVipTypeModel;
 import build.dream.catering.utils.SequenceUtils;
-import build.dream.catering.utils.TenantUtils;
 import build.dream.catering.utils.VipUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.Branch;
