@@ -356,6 +356,7 @@ public class VipService {
                 }
             }
         }
+        TenantUtils.updateTenantInfo(tenantId, TupleUtils.buildTuple2("vipSharedType", String.valueOf(vipSharedType)));
         return ApiRest.builder().message("修改会员共享类型修改成功！").successful(true).build();
     }
 }
