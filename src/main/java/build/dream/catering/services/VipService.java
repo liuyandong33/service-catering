@@ -328,10 +328,33 @@ public class VipService {
                 }
             }
         } else if (vipSharedType == 3) {
+            BigInteger vipGroupId = headquartersBranch.getVipGroupId();
+            ValidateUtils.isTrue(BigInteger.ONE.compareTo(vipGroupId) != 0, "请设置总部所在的会员分组！");
             if (oldVipSharedType == 1) {
-
+                List<VipAccount> vipAccounts = DatabaseHelper.findAll(VipAccount.class, TupleUtils.buildTuple3("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
+                for (VipAccount vipAccount : vipAccounts) {
+                    vipAccount.setVipGroupId(vipGroupId);
+                    DatabaseHelper.update(vipAccount);
+                }
             } else if (oldVipSharedType == 2) {
-
+                List<VipAccount> vipAccounts = DatabaseHelper.findAll(VipAccount.class, TupleUtils.buildTuple3("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
+                Map<BigInteger, List<VipAccount>> vipAccountsMap = new HashMap<BigInteger, List<VipAccount>>();
+                Map<BigInteger, VipAccount> vipAccountMap = new HashMap<BigInteger, VipAccount>();
+                for (VipAccount vipAccount : vipAccounts) {
+                    BigInteger vipId = vipAccount.getVipId();
+                    List<VipAccount> vipAccountList = vipAccountsMap.get(vipId);
+                    if (CollectionUtils.isEmpty(vipAccountList)) {
+                        vipAccountList = new ArrayList<VipAccount>();
+                        vipAccountsMap.put(vipId, vipAccountList);
+                    }
+                    vipAccountList.add(vipAccount);
+                    if (headquartersBranchId.equals(vipAccount.getBranchId())) {
+                        vipAccountMap.put(vipId, vipAccount);
+                    } else {
+                        vipAccount.setLastUpdateRemark("修改会员共享类型为全部共享，删除会员账户！");
+                        DatabaseHelper.update(vipAccount);
+                    }
+                }
             }
         }
         return ApiRest.builder().message("修改会员共享类型修改成功！").successful(true).build();
