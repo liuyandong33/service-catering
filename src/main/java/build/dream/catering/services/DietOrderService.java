@@ -112,8 +112,8 @@ public class DietOrderService {
             dietOrderDetailGoodsAttributeList.add(dietOrderDetailGoodsAttribute);
         }
 
-        ApiRest apiRest = new ApiRest(buildDietOrderInfo(dietOrder, dietOrderGroups, dietOrderDetailMap, dietOrderDetailGoodsAttributeMap, dietOrderActivities), "获取订单信息成功！");
-        return apiRest;
+        Map<String, Object> dietOrderInfo = buildDietOrderInfo(dietOrder, dietOrderGroups, dietOrderDetailMap, dietOrderDetailGoodsAttributeMap, dietOrderActivities);
+        return ApiRest.builder().data(dietOrderInfo).message("获取订单信息成功！").successful(true).build();
     }
 
     /**
@@ -968,7 +968,7 @@ public class DietOrderService {
         dietOrder.setPaidAmount(BigDecimal.ZERO);
         DatabaseHelper.update(dietOrder);
 
-        return new ApiRest(dietOrder, "保存订单成功！");
+        return ApiRest.builder().data(dietOrder).message("保存订单成功！").successful(true).build()
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -988,10 +988,7 @@ public class DietOrderService {
         dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_VALID);
         DatabaseHelper.update(dietOrder);
 
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("接单成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().message("接单成功！").successful(true).build();
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -1041,7 +1038,7 @@ public class DietOrderService {
 
         Object result = null;
         if (ArrayUtils.contains(Constants.WEI_XIN_PAID_SCENES, paidScene)) {
-            int totalFee = payableAmount.multiply(Constants.BIG_DECIMAL_HUNDRED).intValue();
+            int totalFee = payableAmount.multiply(Constants.BIG_DECIMAL_ONE_HUNDRED).intValue();
             String spbillCreateIp = ApplicationHandler.getRemoteAddress();
             if (paidScene == Constants.PAID_SCENE_WEI_XIN_MICROPAY) {
                 MicroPayModel microPayModel = new MicroPayModel();

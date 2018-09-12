@@ -134,10 +134,7 @@ public class ActivityService {
         }
         DatabaseHelper.insertAll(buyGiveActivities);
         DatabaseHelper.insertAll(canNotOperateReasons);
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("保存买A赠B活动成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().message("保存买A赠B活动成功！").successful(true).build();
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -186,10 +183,7 @@ public class ActivityService {
         FullReductionActivity fullReductionActivity = ActivityUtils.constructFullReductionActivity(tenantId, tenantCode, activityId, saveFullReductionActivityModel.getTotalAmount(), saveFullReductionActivityModel.getDiscountType(), saveFullReductionActivityModel.getDiscountRate(), saveFullReductionActivityModel.getDiscountAmount(), userId, "保存满减活动！");
         DatabaseHelper.insert(fullReductionActivity);
 
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("保存满减活动成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().message("保存满减活动成功！").successful(true).build();
     }
 
     /**
@@ -326,10 +320,7 @@ public class ActivityService {
 
         DatabaseHelper.insertAll(specialGoodsActivities);
         DatabaseHelper.insertAll(canNotOperateReasons);
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("保存特价商品活动成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().message("保存特价商品活动成功！").successful(true).build();
     }
 
     /**
@@ -344,11 +335,7 @@ public class ActivityService {
         BigInteger branchId = listEffectiveActivitiesModel.getBranchId();
         List<EffectiveActivity> effectiveActivities = activityMapper.callProcedureEffectiveActivity(tenantId, branchId);
 
-        ApiRest apiRest = new ApiRest();
-        apiRest.setData(effectiveActivities);
-        apiRest.setMessage("查询生效的活动成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().data(effectiveActivities).message("查询生效的活动成功！").successful(true).build();
     }
 
     /**
@@ -363,11 +350,7 @@ public class ActivityService {
         BigInteger branchId = listFullReductionActivitiesModel.getBranchId();
 
         List<FullReductionActivity> fullReductionActivities = activityMapper.listFullReductionActivities(tenantId, branchId);
-        ApiRest apiRest = new ApiRest();
-        apiRest.setData(fullReductionActivities);
-        apiRest.setMessage("查询所有生效的整单满减活动成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().data(fullReductionActivities).message("查询所有生效的整单满减活动成功！").successful(true).build();
     }
 
     /**
@@ -382,10 +365,6 @@ public class ActivityService {
         BigInteger branchId = listPaymentActivitiesModel.getBranchId();
 
         List<PaymentActivity> paymentActivities = activityMapper.listPaymentActivities(tenantId, branchId);
-        ApiRest apiRest = new ApiRest();
-        apiRest.setData(paymentActivities);
-        apiRest.setMessage("查询所有生效的支付促销活动成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().data(paymentActivities).message("查询所有生效的支付促销活动成功！").successful(true).build();
     }
 }
