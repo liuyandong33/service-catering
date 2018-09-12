@@ -11,6 +11,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping(value = "/branch")
 public class BranchController extends BasicController {
+    /**
+     * 初始化门店
+     *
+     * @return
+     */
     @RequestMapping(value = "/initializeBranch")
     @ResponseBody
     @ApiRestAction(modelClass = InitializeBranchModel.class, serviceClass = BranchService.class, serviceMethodName = "initializeBranch", error = "初始化门店失败")
@@ -18,6 +23,11 @@ public class BranchController extends BasicController {
         return null;
     }
 
+    /**
+     * 分页查询门店信息
+     *
+     * @return
+     */
     @RequestMapping(value = "/listBranches")
     @ResponseBody
     @ApiRestAction(modelClass = ListBranchesModel.class, serviceClass = BranchService.class, serviceMethodName = "listBranches", error = "查询门店列表失败")

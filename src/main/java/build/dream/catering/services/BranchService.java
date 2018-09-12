@@ -61,12 +61,7 @@ public class BranchService {
         DatabaseHelper.insert(branch);
         branchMapper.insertMergeUserBranch(userId, initializeBranchModel.getTenantId(), branch.getId());
 
-        ApiRest apiRest = new ApiRest();
-        apiRest.setData(branch);
-        apiRest.setClassName(Branch.class.getName());
-        apiRest.setMessage("初始化门店成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().data(branch).className(Branch.class.getName()).message("初始化门店成功！").successful(true).build();
     }
 
     @Transactional(readOnly = true)
@@ -95,7 +90,7 @@ public class BranchService {
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("total", total);
         data.put("rows", branches);
-        return new ApiRest(data, "查询门店列表成功！");
+        return ApiRest.builder().data(data).message("查询门店列表成功！").successful(true).build();
     }
 
 
@@ -143,10 +138,7 @@ public class BranchService {
         ApiRest batchDeleteUserApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "user", "batchDeleteUser", batchDeleteUserRequestParameters);
         Validate.isTrue(batchDeleteUserApiRest.isSuccessful(), batchDeleteUserApiRest.getError());
 
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("删除门店信息成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().message("删除门店信息成功！").successful(true).build();
     }
 
     /**
@@ -173,7 +165,7 @@ public class BranchService {
             data.put("updateBranchInfos", updateBranchInfos);
         }
 
-        return new ApiRest(data, "获取所有门店信息成功！");
+        return ApiRest.builder().data(data).message("获取所有门店信息成功！").successful(true).build();
     }
 
     /**
@@ -190,10 +182,7 @@ public class BranchService {
         parameters.put("branchId", disableGoodsModel.getBranchId());
         DatabaseHelper.executeUpdate(parameters);
 
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("禁用门店产品成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().message("禁用门店产品成功！").successful(true).build();
     }
 
     /**
@@ -210,10 +199,7 @@ public class BranchService {
         parameters.put("branchId", renewCallbackModel.getBranchId());
         DatabaseHelper.executeUpdate(parameters);
 
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("处理门店续费回调成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().message("处理门店续费回调成功！").successful(true).build();
     }
 
     /**
@@ -228,11 +214,7 @@ public class BranchService {
         BigInteger userId = obtainBranchInfoModel.getUserId();
         Branch branch = branchMapper.findByTenantIdAndUserId(tenantId, userId);
         Validate.notNull(branch, "门店不存在！");
-        ApiRest apiRest = new ApiRest();
-        apiRest.setData(branch);
-        apiRest.setClassName(Branch.class.getName());
-        apiRest.setMessage("获取门店信息成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+
+        return ApiRest.builder().data(branch).className(Branch.class.getName()).message("获取门店信息成功！").successful(true).build();
     }
 }
