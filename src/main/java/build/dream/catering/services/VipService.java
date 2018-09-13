@@ -78,7 +78,7 @@ public class VipService {
             DatabaseHelper.insert(vipType);
         }
 
-        return new ApiRest(vipType, "保存会员类型成功！");
+        return ApiRest.builder().data(vipType).message("保存会员类型成功！").successful(true).build();
     }
 
     /**
@@ -116,7 +116,7 @@ public class VipService {
             searchModel.addSearchCondition("alipay_user_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, alipayUserId);
         }
         Vip vip = VipUtils.find(searchModel);
-        return new ApiRest(vip, "获取会员信息成功！");
+        return ApiRest.builder().data(vip).message("获取会员信息成功！").successful(true).build();
     }
 
     /**
@@ -194,7 +194,7 @@ public class VipService {
             vip.setLastUpdateRemark("新增会员信息！");
             VipUtils.insert(vip);
         }
-        return new ApiRest(vip, "保存会员信息成功！");
+        return ApiRest.builder().data(vip).message("保存会员信息成功！").successful(true).build();
     }
 
     /**
