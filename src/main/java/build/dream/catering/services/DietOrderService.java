@@ -725,7 +725,7 @@ public class DietOrderService {
                     if (discountType == 1) {
                         dietOrderDetailPayableAmount = effectiveActivity.getSpecialPrice().add(attributeIncrease).multiply(quantity);
                     } else {
-                        dietOrderDetailPayableAmount = price.subtract(price.multiply(effectiveActivity.getDiscountRate()).add(attributeIncrease).divide(Constants.BIG_DECIMAL_HUNDRED));
+                        dietOrderDetailPayableAmount = price.subtract(price.multiply(effectiveActivity.getDiscountRate()).add(attributeIncrease).divide(Constants.BIG_DECIMAL_ONE_HUNDRED));
                     }
                     BigDecimal dietOrderDetailDiscountAmount = dietOrderDetailTotalAmount.subtract(dietOrderDetailPayableAmount);
                     dietOrderTotalAmount = dietOrderTotalAmount.add(dietOrderDetailTotalAmount);
@@ -936,7 +936,7 @@ public class DietOrderService {
                 if (discountType == 1) {
                     amount = fullReductionActivity.getDiscountAmount();
                 } else {
-                    amount = dietOrderPayableAmount.subtract(dietOrderPayableAmount.multiply(fullReductionActivity.getDiscountRate()).divide(Constants.BIG_DECIMAL_HUNDRED));
+                    amount = dietOrderPayableAmount.subtract(dietOrderPayableAmount.multiply(fullReductionActivity.getDiscountRate()).divide(Constants.BIG_DECIMAL_ONE_HUNDRED));
                 }
                 dietOrderDiscountAmount = dietOrderDiscountAmount.add(amount);
                 DietOrderActivity dietOrderActivity = DietOrderActivity.builder()
@@ -968,7 +968,7 @@ public class DietOrderService {
         dietOrder.setPaidAmount(BigDecimal.ZERO);
         DatabaseHelper.update(dietOrder);
 
-        return ApiRest.builder().data(dietOrder).message("保存订单成功！").successful(true).build()
+        return ApiRest.builder().data(dietOrder).message("保存订单成功！").successful(true).build();
     }
 
     @Transactional(rollbackFor = Exception.class)
