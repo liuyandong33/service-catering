@@ -94,4 +94,28 @@ public class BranchController extends BasicController {
     public String obtainBranchInfo() {
         return null;
     }
+
+    /**
+     * 获取智慧餐厅门店列表
+     *
+     * @return
+     */
+    @RequestMapping(value = "/obtainAllSmartRestaurants")
+    @ResponseBody
+    @ApiRestAction(modelClass = ObtainAllSmartRestaurantsModel.class, serviceClass = BranchService.class, serviceMethodName = "obtainAllSmartRestaurants", error = "获取智慧餐厅门店信息失败")
+    public String obtainAllSmartRestaurants() {
+        return null;
+    }
+
+    /**
+     * 获取智慧餐厅门店信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "/obtainSmartRestaurant")
+    @ResponseBody
+    @ApiRestAction(modelClass = ObtainSmartRestaurantModel.class, serviceClass = BranchService.class, serviceMethodName = "obtainSmartRestaurant", error = "获取智慧餐厅门店信息失败")
+    public String obtainSmartRestaurant() {
+        return null;
+    }
 }

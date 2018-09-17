@@ -217,4 +217,40 @@ public class BranchService {
 
         return ApiRest.builder().data(branch).className(Branch.class.getName()).message("获取门店信息成功！").successful(true).build();
     }
+
+    /**
+     * 获取智慧餐厅门店列表
+     *
+     * @param obtainAllSmartRestaurantsModel
+     * @return
+     */
+    public ApiRest obtainAllSmartRestaurants(ObtainAllSmartRestaurantsModel obtainAllSmartRestaurantsModel) {
+        BigInteger tenantId = obtainAllSmartRestaurantsModel.getTenantId();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("smart_restaurant_status", Constants.SQL_OPERATION_SYMBOL_EQUAL, Constants.SMART_RESTAURANT_STATUS_NORMAL);
+
+        List<Branch> branches = DatabaseHelper.findAll(Branch.class, searchModel);
+
+        return ApiRest.builder().data(branches).message("获取智慧餐厅门店信息成功！").successful(true).build();
+    }
+
+    /**
+     * 获取智汇餐厅门店信息
+     *
+     * @param obtainSmartRestaurantModel
+     * @return
+     */
+    public ApiRest obtainSmartRestaurant(ObtainSmartRestaurantModel obtainSmartRestaurantModel) {
+        BigInteger tenantId = obtainSmartRestaurantModel.getTenantId();
+        BigInteger branchId = obtainSmartRestaurantModel.getBranchId();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        Branch branch = DatabaseHelper.find(Branch.class, searchModel);
+
+        return ApiRest.builder().data(branch).className(Branch.class.getName()).message("获取智慧餐厅门店信息成功！").successful(true).build();
+    }
 }
