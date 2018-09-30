@@ -14,14 +14,24 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping(value = "/user")
 public class UserController extends BasicController {
-    @RequestMapping(value = "/listUsers")
+    /**
+     * 查询用户列表
+     *
+     * @return
+     */
+    @RequestMapping(value = "/listUsers", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ListUsersModel.class, serviceClass = UserService.class, serviceMethodName = "listUsers", error = "查询员工列表失败")
     public String listUsers() {
         return null;
     }
 
-    @RequestMapping(value = "/obtainUserInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    /**
+     * 获取用户信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "/obtainUserInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ObtainUserInfoModel.class, serviceClass = UserService.class, serviceMethodName = "obtainUserInfo", error = "获取员工信息失败")
     public String obtainUserInfo() {

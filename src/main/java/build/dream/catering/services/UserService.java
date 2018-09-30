@@ -5,15 +5,17 @@ import build.dream.catering.mappers.BranchMapper;
 import build.dream.catering.models.user.ListUsersModel;
 import build.dream.catering.models.user.ObtainUserInfoModel;
 import build.dream.common.api.ApiRest;
+import build.dream.common.erp.catering.domains.Branch;
 import build.dream.common.utils.PagedSearchModel;
 import build.dream.common.utils.ProxyUtils;
+import build.dream.common.utils.ValidateUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +27,7 @@ public class UserService {
     private BranchMapper branchMapper;
 
     @Transactional(readOnly = true)
-    public ApiRest listUsers(ListUsersModel listUsersModel) throws IOException {
+    public ApiRest listUsers(ListUsersModel listUsersModel) {
         BigInteger tenantId = listUsersModel.getTenantId();
         BigInteger branchId = listUsersModel.getBranchId();
         Integer page = listUsersModel.getPage();
@@ -50,7 +52,26 @@ public class UserService {
         return ApiRest.builder().data(data).message("查询员工列表成功！").successful(true).build();
     }
 
+    @Transactional(readOnly = true)
     public ApiRest obtainUserInfo(ObtainUserInfoModel obtainUserInfoModel) {
-        return ApiRest.builder().successful(true).build();
+        String loginName = obtainUserInfoModel.getLoginName();
+        Map<String, String> obtainUserInfoRequestParameters = new HashMap<String, String>();
+        obtainUserInfoRequestParameters.put("loginName", loginName);
+
+        ApiRest apiRest = ProxyUtils.doGetWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "user", "obtainUserInfo", obtainUserInfoRequestParameters);
+        ValidateUtils.isTrue(apiRest.isSuccessful(), apiRest.getError());
+
+        Map<String, Object> userInfo = (Map<String, Object>) apiRest.getData();
+
+        Map<String, Object> data = new HashMap<String, Object>(userInfo);
+        Map<String, Object> user = MapUtils.getMap(userInfo, "user");
+        BigInteger tenantId = BigInteger.valueOf(MapUtils.getLongValue(user, "tenantId"));
+        BigInteger userId = BigInteger.valueOf(MapUtils.getLongValue(user, "id"));
+
+        Branch branch = branchMapper.findByTenantIdAndUserId(tenantId, userId);
+        ValidateUtils.notNull(branch, "门店信息不存在！");
+
+        data.put("branch", branch);
+        return ApiRest.builder().data(data).message("获取用户信息成功！").successful(true).build();
     }
 }
