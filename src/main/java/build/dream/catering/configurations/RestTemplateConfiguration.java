@@ -9,13 +9,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-
 @Configuration
 public class RestTemplateConfiguration {
     @Bean
     @LoadBalanced
-    public RestTemplate restTemplate() throws IOException {
+    public RestTemplate restTemplate() {
         String connectTimeout = ConfigurationUtils.getConfiguration(Constants.REST_TEMPLATE_CONNECT_TIMEOUT);
         String readTimeout = ConfigurationUtils.getConfiguration(Constants.REST_TEMPLATE_READ_TIMEOUT);
 
