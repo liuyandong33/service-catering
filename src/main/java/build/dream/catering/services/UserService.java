@@ -6,17 +6,14 @@ import build.dream.catering.models.user.ListUsersModel;
 import build.dream.catering.models.user.ObtainUserInfoModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.Branch;
-import build.dream.common.utils.PagedSearchModel;
-import build.dream.common.utils.ProxyUtils;
-import build.dream.common.utils.ValidateUtils;
+import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,22 +30,30 @@ public class UserService {
         Integer page = listUsersModel.getPage();
         Integer rows = listUsersModel.getRows();
 
-        PagedSearchModel pagedSearchModel = new PagedSearchModel();
-        pagedSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        pagedSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        pagedSearchModel.setPage(page);
-        pagedSearchModel.setRows(rows);
-        List<BigInteger> userIds = branchMapper.findAllUserIds(pagedSearchModel);
-        Map<String, String> findAllUsersRequestParameters = new HashMap<String, String>();
-        findAllUsersRequestParameters.put("userIds", StringUtils.join(userIds, ","));
-        String findAllUsersResult = ProxyUtils.doGetOriginalWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "user", "findAllUsers", findAllUsersRequestParameters);
-        ApiRest findAllUsersApiRest = ApiRest.fromJson(findAllUsersResult);
-        Validate.isTrue(findAllUsersApiRest.isSuccessful(), findAllUsersApiRest.getError());
+        List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
+        searchConditions.add(new SearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
+        searchConditions.add(new SearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId));
+        searchConditions.add(new SearchCondition("delete", Constants.SQL_OPERATION_SYMBOL_EQUAL, 0));
+
+        SearchModel searchModel = new SearchModel();
+        searchModel.setSearchConditions(searchConditions);
+        long count = branchMapper.countUsers(searchModel);
+
+        List<Map<String, Object>> userInfos = null;
+        if (count > 0) {
+            PagedSearchModel pagedSearchModel = new PagedSearchModel();
+            pagedSearchModel.setSearchConditions(searchConditions);
+            pagedSearchModel.setPage(page);
+            pagedSearchModel.setRows(rows);
+            List<BigInteger> userIds = branchMapper.findAllUserIds(pagedSearchModel);
+            userInfos = UserUtils.obtainAllUserInfos(userIds);
+        } else {
+            userInfos = new ArrayList<Map<String, Object>>();
+        }
 
         Map<String, Object> data = new HashMap<String, Object>();
-        long total = branchMapper.countUsers(pagedSearchModel);
-        data.put("total", total);
-        data.put("rows", findAllUsersApiRest.getData());
+        data.put("total", count);
+        data.put("rows", userInfos);
         return ApiRest.builder().data(data).message("查询员工列表成功！").successful(true).build();
     }
 
@@ -58,10 +63,7 @@ public class UserService {
         Map<String, String> obtainUserInfoRequestParameters = new HashMap<String, String>();
         obtainUserInfoRequestParameters.put("loginName", loginName);
 
-        ApiRest apiRest = ProxyUtils.doGetWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "user", "obtainUserInfo", obtainUserInfoRequestParameters);
-        ValidateUtils.isTrue(apiRest.isSuccessful(), apiRest.getError());
-
-        Map<String, Object> userInfo = (Map<String, Object>) apiRest.getData();
+        Map<String, Object> userInfo = UserUtils.obtainUserInfo(loginName);
 
         Map<String, Object> data = new HashMap<String, Object>(userInfo);
         Map<String, Object> user = MapUtils.getMap(userInfo, "user");
