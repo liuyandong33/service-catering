@@ -46,7 +46,7 @@ public class UserService {
             pagedSearchModel.setPage(page);
             pagedSearchModel.setRows(rows);
             List<BigInteger> userIds = branchMapper.findAllUserIds(pagedSearchModel);
-            userInfos = UserUtils.obtainAllUserInfos(userIds);
+            userInfos = UserUtils.batchGetUsers(userIds);
         } else {
             userInfos = new ArrayList<Map<String, Object>>();
         }
