@@ -3,6 +3,7 @@ package build.dream.catering.services;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.BranchMapper;
 import build.dream.catering.models.user.ListUsersModel;
+import build.dream.catering.models.user.ObtainUserInfoModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.utils.PagedSearchModel;
 import build.dream.common.utils.ProxyUtils;
@@ -46,7 +47,10 @@ public class UserService {
         long total = branchMapper.countUsers(pagedSearchModel);
         data.put("total", total);
         data.put("rows", findAllUsersApiRest.getData());
-        ApiRest apiRest = new ApiRest(data, "查询员工列表成功！");
-        return apiRest;
+        return ApiRest.builder().data(data).message("查询员工列表成功！").successful(true).build();
+    }
+
+    public ApiRest obtainUserInfo(ObtainUserInfoModel obtainUserInfoModel) {
+        return ApiRest.builder().successful(true).build();
     }
 }
