@@ -1,7 +1,9 @@
 package build.dream.catering.aspects;
 
 import build.dream.common.annotations.ApiRestAction;
+import build.dream.common.annotations.ModelAndViewAction;
 import build.dream.common.api.ApiRest;
+import build.dream.common.constants.Constants;
 import build.dream.common.exceptions.ApiException;
 import build.dream.common.models.BasicModel;
 import build.dream.common.utils.ApplicationHandler;
@@ -13,8 +15,11 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -22,13 +27,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Aspect
 @Component
+@Order
 public class CallActionAspect {
     @Autowired
     private ApplicationContext applicationContext;
     private ConcurrentHashMap<Class<?>, Object> serviceMap = new ConcurrentHashMap<Class<?>, Object>();
 
     private Object obtainService(Class<?> serviceClass) {
-        if (!serviceMap.containsKey(serviceClass)) {
+        if (!serviceMap.contains(serviceClass)) {
             serviceMap.put(serviceClass, applicationContext.getBean(serviceClass));
         }
         return serviceMap.get(serviceClass);
@@ -36,12 +42,13 @@ public class CallActionAspect {
 
     @Around(value = "execution(public * build.dream.catering.controllers.*.*(..)) && @annotation(apiRestAction)")
     public Object callApiRestAction(ProceedingJoinPoint proceedingJoinPoint, ApiRestAction apiRestAction) {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        Object returnValue = null;
+        HttpServletRequest httpServletRequest = ApplicationHandler.getHttpServletRequest();
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters(httpServletRequest);
+        ApiRest apiRest = null;
 
         Throwable throwable = null;
         try {
-            returnValue = callAction(proceedingJoinPoint, requestParameters, apiRestAction.modelClass(), apiRestAction.serviceClass(), apiRestAction.serviceMethodName());
+            apiRest = callAction(proceedingJoinPoint, requestParameters, apiRestAction.modelClass(), apiRestAction.serviceClass(), apiRestAction.serviceMethodName());
         } catch (InvocationTargetException e) {
             throwable = e.getTargetException();
         } catch (Throwable t) {
@@ -51,15 +58,29 @@ public class CallActionAspect {
         if (throwable != null) {
             LogUtils.error(apiRestAction.error(), proceedingJoinPoint.getTarget().getClass().getName(), proceedingJoinPoint.getSignature().getName(), throwable, requestParameters);
             if (throwable instanceof ApiException) {
-                returnValue = GsonUtils.toJson(new ApiRest(throwable));
+                apiRest = new ApiRest(throwable);
             } else {
-                returnValue = GsonUtils.toJson(new ApiRest(apiRestAction.error()));
+                apiRest = ApiRest.builder().error(apiRestAction.error()).build();
             }
         }
+
+        String datePattern = apiRestAction.datePattern();
+
+        if (apiRestAction.zipped()) {
+            apiRest.zipData(datePattern);
+        }
+
+        if (apiRestAction.signed()) {
+            apiRest.sign(datePattern);
+        }
+
+        String returnValue = GsonUtils.toJson(apiRest, datePattern);
+
+        httpServletRequest.setAttribute(Constants.RESPONSE_CONTENT, returnValue);
         return returnValue;
     }
 
-    public Object callAction(ProceedingJoinPoint proceedingJoinPoint, Map<String, String> requestParameters, Class<? extends BasicModel> modelClass, Class<?> serviceClass, String serviceMethodName) throws Throwable {
+    private ApiRest callAction(ProceedingJoinPoint proceedingJoinPoint, Map<String, String> requestParameters, Class<? extends BasicModel> modelClass, Class<?> serviceClass, String serviceMethodName) throws Throwable {
         Object returnValue = null;
         if (modelClass != BasicModel.class && serviceClass != Object.class && StringUtils.isNotBlank(serviceMethodName)) {
             BasicModel model = ApplicationHandler.instantiateObject(modelClass, requestParameters);
@@ -69,12 +90,16 @@ public class CallActionAspect {
             method.setAccessible(true);
 
             returnValue = method.invoke(obtainService(serviceClass), model);
-            if (!(returnValue instanceof String)) {
-                returnValue = GsonUtils.toJson(returnValue);
-            }
         } else {
             returnValue = proceedingJoinPoint.proceed();
         }
-        return returnValue;
+
+        ApiRest apiRest = null;
+        if (returnValue instanceof String) {
+            apiRest = ApiRest.fromJson(returnValue.toString());
+        } else {
+            apiRest = (ApiRest) returnValue;
+        }
+        return apiRest;
     }
 }
