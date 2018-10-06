@@ -105,8 +105,8 @@ public class DietOrderUtils {
                 RefundModel refundModel = new RefundModel();
                 refundModel.setOutTradeNo(dietOrder.getOrderNumber());
                 refundModel.setOutRefundNo(dietOrder.getOrderNumber());
-                refundModel.setTotalFee(dietOrder.getPayableAmount().multiply(Constants.BIG_DECIMAL_HUNDRED).intValue());
-                refundModel.setRefundFee(dietOrder.getPayableAmount().multiply(Constants.BIG_DECIMAL_HUNDRED).intValue());
+                refundModel.setTotalFee(dietOrder.getPayableAmount().multiply(Constants.BIG_DECIMAL_ONE_HUNDRED).intValue());
+                refundModel.setRefundFee(dietOrder.getPayableAmount().multiply(Constants.BIG_DECIMAL_ONE_HUNDRED).intValue());
                 JSONObject extraInfoJsonObject = JSONObject.fromObject(extraInfo);
                 JSONObject attachJsonObject = JSONObject.fromObject(extraInfoJsonObject.getString("attach"));
 

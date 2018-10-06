@@ -24,6 +24,7 @@ public class GoodsController extends BasicController {
     public String count() {
         return null;
     }
+
     /**
      * 查询商品列表
      *
@@ -48,10 +49,10 @@ public class GoodsController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/listGoodsInfos", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/obtainAllGoodsInfos", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ApiRestAction(modelClass = ListGoodsInfosModel.class, serviceClass = GoodsService.class, serviceMethodName = "listGoodsInfos", error = "查询商品信息失败")
-    public String listGoodsInfos() {
+    @ApiRestAction(modelClass = ObtainAllGoodsInfosModel.class, serviceClass = GoodsService.class, serviceMethodName = "obtainAllGoodsInfos", error = "获取商品信息失败")
+    public String obtainAllGoodsInfos() {
         return null;
     }
 

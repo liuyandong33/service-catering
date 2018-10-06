@@ -64,15 +64,85 @@ public class GoodsService extends BasicService {
         SearchModel searchModel = new SearchModel(searchConditions);
         long count = DatabaseHelper.count(Goods.class, searchModel);
 
-        List<Goods> goodsList = new ArrayList<Goods>();
+        List<Map<String, Object>> goodsInfos = new ArrayList<Map<String, Object>>();
         if (count > 0) {
             PagedSearchModel pagedSearchModel = new PagedSearchModel(searchConditions, page, rows);
-            goodsList = DatabaseHelper.findAllPaged(Goods.class, pagedSearchModel);
+            List<Goods> goodsList = DatabaseHelper.findAllPaged(Goods.class, pagedSearchModel);
+
+            List<BigInteger> goodsIds = new ArrayList<BigInteger>();
+            for (Goods goods : goodsList) {
+                goodsIds.add(goods.getId());
+            }
+
+            List<SearchCondition> searchConditionList = new ArrayList<SearchCondition>();
+            searchConditionList.add(new SearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
+            searchConditionList.add(new SearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId));
+            searchConditionList.add(new SearchCondition("deleted", Constants.SQL_OPERATION_SYMBOL_EQUAL, 0));
+            searchConditionList.add(new SearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds));
+
+            SearchModel goodsSpecificationSearchModel = new SearchModel(searchConditionList);
+            List<GoodsSpecification> goodsSpecifications = DatabaseHelper.findAll(GoodsSpecification.class, goodsSpecificationSearchModel);
+            Map<BigInteger, List<GoodsSpecification>> goodsSpecificationMap = new HashMap<BigInteger, List<GoodsSpecification>>();
+            for (GoodsSpecification goodsSpecification : goodsSpecifications) {
+                BigInteger goodsId = goodsSpecification.getGoodsId();
+                List<GoodsSpecification> goodsSpecificationList = goodsSpecificationMap.get(goodsId);
+                if (CollectionUtils.isEmpty(goodsSpecificationList)) {
+                    goodsSpecificationList = new ArrayList<GoodsSpecification>();
+                    goodsSpecificationMap.put(goodsId, goodsSpecificationList);
+                }
+                goodsSpecificationList.add(goodsSpecification);
+            }
+
+            SearchModel goodsAttributeGroupSearchModel = new SearchModel(searchConditionList);
+            List<GoodsAttributeGroup> goodsAttributeGroups = DatabaseHelper.findAll(GoodsAttributeGroup.class, goodsAttributeGroupSearchModel);
+            Map<BigInteger, List<GoodsAttributeGroup>> goodsAttributeGroupMap = new HashMap<BigInteger, List<GoodsAttributeGroup>>();
+            for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroups) {
+                BigInteger goodsId = goodsAttributeGroup.getGoodsId();
+                List<GoodsAttributeGroup> goodsAttributeGroupList = goodsAttributeGroupMap.get(goodsId);
+                if (CollectionUtils.isEmpty(goodsAttributeGroupList)) {
+                    goodsAttributeGroupList = new ArrayList<GoodsAttributeGroup>();
+                    goodsAttributeGroupMap.put(goodsId, goodsAttributeGroupList);
+                }
+                goodsAttributeGroupList.add(goodsAttributeGroup);
+            }
+
+            SearchModel goodsAttributeSearchModel = new SearchModel(searchConditionList);
+            List<GoodsAttribute> goodsAttributes = DatabaseHelper.findAll(GoodsAttribute.class, goodsAttributeSearchModel);
+            Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = new HashMap<BigInteger, List<GoodsAttribute>>();
+            for (GoodsAttribute goodsAttribute : goodsAttributes) {
+                BigInteger goodsAttributeGroupId = goodsAttribute.getGoodsAttributeGroupId();
+                List<GoodsAttribute> goodsAttributeList = goodsAttributeMap.get(goodsAttributeGroupId);
+                if (CollectionUtils.isEmpty(goodsAttributeList)) {
+                    goodsAttributeList = new ArrayList<GoodsAttribute>();
+                    goodsAttributeMap.put(goodsAttributeGroupId, goodsAttributeList);
+                }
+                goodsAttributeList.add(goodsAttribute);
+            }
+
+            for (Goods goods : goodsList) {
+                BigInteger goodsId = goods.getId();
+                Map<String, Object> goodsInfo = new HashMap<String, Object>();
+                goodsInfo.put("goods", goods);
+                goodsInfo.put("goodsSpecifications", goodsSpecificationMap.get(goodsId));
+
+                List<GoodsAttributeGroup> goodsAttributeGroupList = goodsAttributeGroupMap.get(goodsId);
+                List<Map<String, Object>> goodsAttributeGroupInfos = new ArrayList<Map<String, Object>>();
+                if (CollectionUtils.isNotEmpty(goodsAttributeGroupList)) {
+                    for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroupList) {
+                        Map<String, Object> goodsAttributeGroupInfo = ApplicationHandler.toMap(goodsAttributeGroup);
+                        goodsAttributeGroupInfo.put("goodsAttributes", goodsAttributeMap.get(goodsAttributeGroup.getId()));
+                        goodsAttributeGroupInfos.add(goodsAttributeGroupInfo);
+                    }
+                }
+
+                goodsInfo.put("attributeGroups", goodsAttributeGroupInfos);
+                goodsInfos.add(goodsInfo);
+            }
         }
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("total", count);
-        data.put("rows", goodsList);
+        data.put("rows", goodsInfos);
         return new ApiRest(data, "查询商品列表成功！");
     }
 
@@ -164,9 +234,9 @@ public class GoodsService extends BasicService {
     }
 
     @Transactional(readOnly = true)
-    public ApiRest listGoodsInfos(ListGoodsInfosModel listGoodsInfosModel) {
-        BigInteger tenantId = listGoodsInfosModel.getTenantId();
-        BigInteger branchId = listGoodsInfosModel.getBranchId();
+    public ApiRest obtainAllGoodsInfos(ObtainAllGoodsInfosModel obtainAllGoodsInfosModel) {
+        BigInteger tenantId = obtainAllGoodsInfosModel.getTenantId();
+        BigInteger branchId = obtainAllGoodsInfosModel.getBranchId();
         List<Goods> goodsInfos = goodsMapper.findAllGoodsInfos(tenantId, branchId, null);
 
         List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();

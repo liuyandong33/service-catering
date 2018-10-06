@@ -779,27 +779,6 @@ public class ElemeService {
         return ApiRest.builder().message("饿了么门店绑定成功！").successful(true).build();
     }
 
-    /**
-     * 发布饿了么订单消息
-     *
-     * @param tenantId：商户ID
-     * @param branchId：门店ID
-     * @param elemeOrderId：饿了么订单ID
-     * @param type：消息类型
-     * @param uuid：消息唯一ID
-     * @throws IOException
-     */
-    private void publishElemeOrderMessage(BigInteger tenantId, BigInteger branchId, BigInteger elemeOrderId, Integer type, String uuid) throws IOException {
-        String elemeMessageChannelTopic = ConfigurationUtils.getConfiguration(Constants.ELEME_MESSAGE_CHANNEL_TOPIC);
-        JSONObject messageJsonObject = new JSONObject();
-        messageJsonObject.put("tenantId", tenantId);
-        messageJsonObject.put("branchId", branchId);
-        messageJsonObject.put("type", type);
-        messageJsonObject.put("elemeOrderId", elemeOrderId);
-        messageJsonObject.put("uuid", uuid);
-        QueueUtils.convertAndSend(elemeMessageChannelTopic, messageJsonObject.toString());
-    }
-
     @Transactional(readOnly = true)
     public void pushElemeMessage(BigInteger tenantId, BigInteger branchId, BigInteger elemeOrderId, Integer type, String uuid, final int count, int interval) {
         SearchModel searchModel = new SearchModel(true);
