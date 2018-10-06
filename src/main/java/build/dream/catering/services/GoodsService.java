@@ -40,7 +40,7 @@ public class GoodsService extends BasicService {
         searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         long count = DatabaseHelper.count(Goods.class, searchModel);
 
-        return new ApiRest(count, "查询商品数量成功！");
+        return ApiRest.builder().data(count).message("查询商品数量成功！").successful(true).build();
     }
 
     /**
@@ -143,7 +143,7 @@ public class GoodsService extends BasicService {
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("total", count);
         data.put("rows", goodsInfos);
-        return new ApiRest(data, "查询商品列表成功！");
+        return ApiRest.builder().data(data).message("查询商品列表成功！").successful(true).build();
     }
 
 
@@ -230,7 +230,7 @@ public class GoodsService extends BasicService {
             data.put("goods", goods);
             data.put("groups", groups);
         }
-        return new ApiRest(data, "获取商品信息成功！");
+        return ApiRest.builder().data(data).message("获取商品信息成功！").successful(true).build();
     }
 
     @Transactional(readOnly = true)
@@ -345,7 +345,7 @@ public class GoodsService extends BasicService {
                 data.add(goodsInfo);
             }
         }
-        return new ApiRest(data, "查询菜品信息成功！");
+        return ApiRest.builder().data(data).message("获取菜品信息成功！").successful(true).build();
     }
 
     public List<Map<String, Object>> buildGoodsSpecificationInfos(List<GoodsSpecification> goodsSpecifications) {
@@ -638,10 +638,7 @@ public class GoodsService extends BasicService {
                 DatabaseHelper.insertAll(insertGoodsAttributes);
             }
         }
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("保存商品信息成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().message("保存商品信息成功！").successful(true).build();
     }
 
     private GoodsAttributeGroup buildGoodsAttributeGroup(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, SaveGoodsModel.AttributeGroupInfo attributeGroupInfo, BigInteger userId) {
@@ -704,10 +701,7 @@ public class GoodsService extends BasicService {
         goodsSpecification.setLastUpdateUserId(deleteGoodsSpecificationModel.getUserId());
         goodsSpecification.setLastUpdateRemark("删除菜品规格信息！");
         DatabaseHelper.update(goodsSpecification);
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("删除菜品规格成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().message("删除菜品规格成功！").successful(true).build();
     }
 
     /**
@@ -950,7 +944,7 @@ public class GoodsService extends BasicService {
         for (GoodsCategory goodsCategory : goodsCategories) {
             zTreeNodes.add(new ZTreeNode(goodsCategory.getId().toString(), goodsCategory.getName(), goodsCategory.getParentId().toString()));
         }
-        return new ApiRest(zTreeNodes, "查询菜品分类成功！");
+        return ApiRest.builder().data(zTreeNodes).message("查询菜品分类成功！").successful(true).build();
     }
 
     /**
@@ -1018,10 +1012,7 @@ public class GoodsService extends BasicService {
         goodsAttributeUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         DatabaseHelper.universalUpdate(goodsAttributeUpdateModel);
 
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("删除商品信息成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().message("删除商品信息成功！").successful(true).build();
     }
 
     /**
@@ -1084,9 +1075,6 @@ public class GoodsService extends BasicService {
 
         DatabaseHelper.insertAll(goodsSpecifications);
 
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("导入商品信息成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().message("导入商品信息成功！").successful(true).build();
     }
 }

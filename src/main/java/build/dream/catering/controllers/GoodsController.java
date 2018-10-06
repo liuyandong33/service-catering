@@ -32,7 +32,7 @@ public class GoodsController extends BasicController {
      */
     @RequestMapping(value = "/list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ApiRestAction(modelClass = ListModel.class, serviceClass = GoodsService.class, serviceMethodName = "list", error = "查询商品列表失败")
+    @ApiRestAction(modelClass = ListModel.class, serviceClass = GoodsService.class, serviceMethodName = "list", error = "查询商品列表失败", zipped = true, signed = true)
     public String list() {
         return null;
     }
