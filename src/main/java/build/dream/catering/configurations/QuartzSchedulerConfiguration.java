@@ -1,4 +1,4 @@
-package build.dream.catering.jobs;
+package build.dream.catering.configurations;
 
 import org.quartz.spi.TriggerFiredBundle;
 import org.springframework.beans.factory.annotation.Autowired;

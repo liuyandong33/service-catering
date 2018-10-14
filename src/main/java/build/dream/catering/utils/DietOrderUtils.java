@@ -10,7 +10,6 @@ import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.dom4j.DocumentException;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -64,7 +63,7 @@ public class DietOrderUtils {
         }
 
         SearchModel goodsSearchModel = new SearchModel(true);
-        goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
+        goodsSearchModel.addSearchCondition(Goods.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
         List<Goods> goodsList = DatabaseHelper.findAll(Goods.class, goodsSearchModel);
         Map<BigInteger, Goods> goodsMap = new HashMap<BigInteger, Goods>();
         for (Goods goods : goodsList) {
@@ -80,7 +79,7 @@ public class DietOrderUtils {
         }
     }
 
-    public static void refund(DietOrder dietOrder) throws IOException, DocumentException {
+    public static void refund(DietOrder dietOrder) throws DocumentException {
         BigInteger tenantId = dietOrder.getTenantId();
         BigInteger branchId = dietOrder.getBranchId();
         BigInteger dietOrderId = dietOrder.getId();
@@ -91,7 +90,7 @@ public class DietOrderUtils {
         }
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        searchModel.addSearchCondition(DietOrderPayment.ColumnName.DIET_ORDER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
         List<DietOrderPayment> dietOrderPayments = DatabaseHelper.findAll(DietOrderPayment.class, searchModel);
 
         for (DietOrderPayment dietOrderPayment : dietOrderPayments) {
