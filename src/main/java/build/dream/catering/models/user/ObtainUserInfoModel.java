@@ -1,10 +1,10 @@
 package build.dream.catering.models.user;
 
-import build.dream.common.models.BasicModel;
+import build.dream.common.models.CateringBasicModel;
 
 import javax.validation.constraints.NotNull;
 
-public class ObtainUserInfoModel extends BasicModel {
+public class ObtainUserInfoModel extends CateringBasicModel {
     @NotNull
     private String loginName;
 
