@@ -211,8 +211,8 @@ public class BranchService {
     @Transactional(readOnly = true)
     public ApiRest obtainBranchInfo(ObtainBranchInfoModel obtainBranchInfoModel) {
         BigInteger tenantId = obtainBranchInfoModel.getTenantId();
-        BigInteger userId = obtainBranchInfoModel.getUserId();
-        Branch branch = branchMapper.findByTenantIdAndUserId(tenantId, userId);
+        BigInteger branchId = obtainBranchInfoModel.getBranchId();
+        Branch branch = DatabaseHelper.find(Branch.class, TupleUtils.buildTuple3(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId), TupleUtils.buildTuple3(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId));
         Validate.notNull(branch, "门店不存在！");
 
         return ApiRest.builder().data(branch).className(Branch.class.getName()).message("获取门店信息成功！").successful(true).build();

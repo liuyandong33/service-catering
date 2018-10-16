@@ -3,11 +3,13 @@ package build.dream.catering.services;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.BranchMapper;
 import build.dream.catering.models.user.ListUsersModel;
+import build.dream.catering.models.user.ObtainBranchInfoModel;
 import build.dream.catering.models.user.ObtainUserInfoModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.Branch;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,5 +77,21 @@ public class UserService {
 
         data.put("branch", branch);
         return ApiRest.builder().data(data).message("获取用户信息成功！").successful(true).build();
+    }
+
+    /**
+     * 获取门店信息
+     *
+     * @param obtainBranchInfoModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest obtainBranchInfo(ObtainBranchInfoModel obtainBranchInfoModel) {
+        BigInteger tenantId = obtainBranchInfoModel.getTenantId();
+        BigInteger userId = obtainBranchInfoModel.getUserId();
+        Branch branch = branchMapper.findByTenantIdAndUserId(tenantId, userId);
+        Validate.notNull(branch, "门店不存在！");
+
+        return ApiRest.builder().data(branch).className(Branch.class.getName()).message("获取门店信息成功！").successful(true).build();
     }
 }

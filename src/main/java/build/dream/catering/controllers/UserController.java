@@ -1,6 +1,7 @@
 package build.dream.catering.controllers;
 
 import build.dream.catering.models.user.ListUsersModel;
+import build.dream.catering.models.user.ObtainBranchInfoModel;
 import build.dream.catering.models.user.ObtainUserInfoModel;
 import build.dream.catering.services.UserService;
 import build.dream.common.annotations.ApiRestAction;
@@ -35,6 +36,18 @@ public class UserController extends BasicController {
     @ResponseBody
     @ApiRestAction(modelClass = ObtainUserInfoModel.class, serviceClass = UserService.class, serviceMethodName = "obtainUserInfo", error = "获取员工信息失败")
     public String obtainUserInfo() {
+        return null;
+    }
+
+    /**
+     * 获取用户信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "/obtainBranchInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = ObtainBranchInfoModel.class, serviceClass = UserService.class, serviceMethodName = "obtainBranchInfo", error = "获取门店信息失败")
+    public String obtainBranchInfo() {
         return null;
     }
 }

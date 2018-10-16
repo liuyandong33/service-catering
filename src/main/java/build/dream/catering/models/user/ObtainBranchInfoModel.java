@@ -1,4 +1,4 @@
-package build.dream.catering.models.branch;
+package build.dream.catering.models.user;
 
 import build.dream.common.models.BasicModel;
 
@@ -9,7 +9,7 @@ public class ObtainBranchInfoModel extends BasicModel {
     @NotNull
     private BigInteger tenantId;
     @NotNull
-    private BigInteger branchId;
+    private BigInteger userId;
 
     public BigInteger getTenantId() {
         return tenantId;
@@ -19,11 +19,11 @@ public class ObtainBranchInfoModel extends BasicModel {
         this.tenantId = tenantId;
     }
 
-    public BigInteger getBranchId() {
-        return branchId;
+    public BigInteger getUserId() {
+        return userId;
     }
 
-    public void setBranchId(BigInteger branchId) {
-        this.branchId = branchId;
+    public void setUserId(BigInteger userId) {
+        this.userId = userId;
     }
 }
