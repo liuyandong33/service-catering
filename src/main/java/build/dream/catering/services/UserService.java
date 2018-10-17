@@ -27,8 +27,8 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public ApiRest listUsers(ListUsersModel listUsersModel) {
-        BigInteger tenantId = listUsersModel.getTenantId();
-        BigInteger branchId = listUsersModel.getBranchId();
+        BigInteger tenantId = listUsersModel.obtainTenantId();
+        BigInteger branchId = listUsersModel.obtainBranchId();
         Integer page = listUsersModel.getPage();
         Integer rows = listUsersModel.getRows();
 
