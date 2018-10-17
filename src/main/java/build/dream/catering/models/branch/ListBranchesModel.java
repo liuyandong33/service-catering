@@ -1,16 +1,13 @@
 package build.dream.catering.models.branch;
 
 import build.dream.common.models.BasicModel;
+import build.dream.common.models.CateringBasicModel;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
-public class ListBranchesModel extends BasicModel {
-    @NotNull
-    private BigInteger tenantId;
-
+public class ListBranchesModel extends CateringBasicModel {
     private String searchString;
 
     @NotNull
@@ -21,14 +18,6 @@ public class ListBranchesModel extends BasicModel {
     @Min(value = 1)
     @Max(value = 500)
     private Integer rows;
-
-    public BigInteger getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(BigInteger tenantId) {
-        this.tenantId = tenantId;
-    }
 
     public String getSearchString() {
         return searchString;

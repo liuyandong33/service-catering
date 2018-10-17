@@ -66,7 +66,7 @@ public class BranchService {
 
     @Transactional(readOnly = true)
     public ApiRest listBranches(ListBranchesModel listBranchesModel) {
-        BigInteger tenantId = listBranchesModel.getTenantId();
+        BigInteger tenantId = listBranchesModel.obtainTenantId();
         String searchString = listBranchesModel.getSearchString();
         int page = listBranchesModel.getPage();
         int rows = listBranchesModel.getRows();
@@ -103,22 +103,26 @@ public class BranchService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest deleteBranch(DeleteBranchModel deleteBranchModel) throws IOException {
+        BigInteger tenantId = deleteBranchModel.obtainTenantId();
+        BigInteger branchId = deleteBranchModel.getBranchId();
+        BigInteger userId = deleteBranchModel.obtainUserId();
+
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, deleteBranchModel.getBranchId());
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, deleteBranchModel.getTenantId());
+        searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         Validate.notNull(branch, "门店不存在！");
 
         branch.setDeleted(true);
-        branch.setLastUpdateUserId(deleteBranchModel.getUserId());
+        branch.setLastUpdateUserId(userId);
         branch.setLastUpdateRemark("删除门店信息！");
         DatabaseHelper.update(branch);
 
         String findUserIdsSql = "SELECT user_id FROM merge_user_branch WHERE tenant_id = #{tenantId} AND branch_id = #{branchId} AND deleted = 0";
         Map<String, Object> findUserIdsParameters = new HashMap<String, Object>();
         findUserIdsParameters.put("sql", findUserIdsSql);
-        findUserIdsParameters.put("tenantId", deleteBranchModel.getTenantId());
-        findUserIdsParameters.put("branchId", deleteBranchModel.getBranchId());
+        findUserIdsParameters.put("tenantId", tenantId);
+        findUserIdsParameters.put("branchId", branchId);
         List<Map<String, Object>> results = DatabaseHelper.executeQuery(findUserIdsParameters);
         List<BigInteger> userIds = new ArrayList<BigInteger>();
         for (Map<String, Object> map : results) {
@@ -129,8 +133,8 @@ public class BranchService {
         String deleteMergeUserBranchSql = "UPDATE merge_user_branch SET deleted = 1 WHERE tenant_id = #{tenantId} AND branch_id = #{branchId} AND deleted = 0";
         Map<String, Object> deleteMergeUserBranchParameters = new HashMap<String, Object>();
         deleteMergeUserBranchParameters.put("sql", deleteMergeUserBranchSql);
-        deleteMergeUserBranchParameters.put("tenantId", deleteBranchModel.getTenantId());
-        deleteMergeUserBranchParameters.put("branchId", deleteBranchModel.getBranchId());
+        deleteMergeUserBranchParameters.put("tenantId", tenantId);
+        deleteMergeUserBranchParameters.put("branchId", branchId);
         DatabaseHelper.executeUpdate(deleteMergeUserBranchParameters);
 
         Map<String, String> batchDeleteUserRequestParameters = new HashMap<String, String>();
@@ -210,7 +214,7 @@ public class BranchService {
      */
     @Transactional(readOnly = true)
     public ApiRest obtainBranchInfo(ObtainBranchInfoModel obtainBranchInfoModel) {
-        BigInteger tenantId = obtainBranchInfoModel.getTenantId();
+        BigInteger tenantId = obtainBranchInfoModel.obtainTenantId();
         BigInteger branchId = obtainBranchInfoModel.getBranchId();
         Branch branch = DatabaseHelper.find(Branch.class, TupleUtils.buildTuple3(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId), TupleUtils.buildTuple3(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId));
         Validate.notNull(branch, "门店不存在！");
@@ -224,12 +228,13 @@ public class BranchService {
      * @param obtainAllSmartRestaurantsModel
      * @return
      */
+    @Transactional(readOnly = true)
     public ApiRest obtainAllSmartRestaurants(ObtainAllSmartRestaurantsModel obtainAllSmartRestaurantsModel) {
         BigInteger tenantId = obtainAllSmartRestaurantsModel.getTenantId();
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("smart_restaurant_status", Constants.SQL_OPERATION_SYMBOL_EQUAL, Constants.SMART_RESTAURANT_STATUS_NORMAL);
+        searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(Branch.ColumnName.SMART_RESTAURANT_STATUS, Constants.SQL_OPERATION_SYMBOL_EQUAL, Constants.SMART_RESTAURANT_STATUS_NORMAL);
 
         List<Branch> branches = DatabaseHelper.findAll(Branch.class, searchModel);
 
@@ -242,13 +247,14 @@ public class BranchService {
      * @param obtainSmartRestaurantModel
      * @return
      */
+    @Transactional(readOnly = true)
     public ApiRest obtainSmartRestaurant(ObtainSmartRestaurantModel obtainSmartRestaurantModel) {
-        BigInteger tenantId = obtainSmartRestaurantModel.getTenantId();
+        BigInteger tenantId = obtainSmartRestaurantModel.obtainTenantId();
         BigInteger branchId = obtainSmartRestaurantModel.getBranchId();
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
 
         return ApiRest.builder().data(branch).className(Branch.class.getName()).message("获取智慧餐厅门店信息成功！").successful(true).build();
