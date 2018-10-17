@@ -7,7 +7,9 @@ import build.dream.catering.models.user.ObtainBranchInfoModel;
 import build.dream.catering.models.user.ObtainUserInfoModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.erp.catering.domains.Branch;
-import build.dream.common.utils.*;
+import build.dream.common.utils.SearchCondition;
+import build.dream.common.utils.UserUtils;
+import build.dream.common.utils.ValidateUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,17 +39,11 @@ public class UserService {
         searchConditions.add(new SearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId));
         searchConditions.add(new SearchCondition("delete", Constants.SQL_OPERATION_SYMBOL_EQUAL, 0));
 
-        SearchModel searchModel = new SearchModel();
-        searchModel.setSearchConditions(searchConditions);
-        long count = branchMapper.countUsers(searchModel);
+        long count = branchMapper.countUsers(searchConditions);
 
         List<Map<String, Object>> userInfos = null;
         if (count > 0) {
-            PagedSearchModel pagedSearchModel = new PagedSearchModel();
-            pagedSearchModel.setSearchConditions(searchConditions);
-            pagedSearchModel.setPage(page);
-            pagedSearchModel.setRows(rows);
-            List<BigInteger> userIds = branchMapper.findAllUserIds(pagedSearchModel);
+            List<BigInteger> userIds = branchMapper.findAllUserIds(searchConditions, (page - 1) * rows, rows);
             userInfos = UserUtils.batchGetUsers(userIds);
         } else {
             userInfos = new ArrayList<Map<String, Object>>();

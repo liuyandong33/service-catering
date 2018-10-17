@@ -5,12 +5,12 @@
         INSERT INTO merge_user_branch(user_id, tenant_id, branch_id) VALUES (#{userId}, #{tenantId}, #{branchId})
     </insert>
 
-    <select id="findAllUserIds" parameterType="build.dream.common.utils.SearchModel" resultType="java.math.BigInteger">
-        SELECT user_id FROM merge_user_branch <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include> <include refid="build.dream.catering.mappers.CommonMapper.paginationSql"></include>
+    <select id="countUsers" resultType="java.lang.Long">
+        SELECT COUNT(1) FROM merge_user_branch <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
     </select>
 
-    <select id="countUsers" parameterType="build.dream.common.utils.SearchModel" resultType="java.lang.Long">
-        SELECT COUNT(1) FROM merge_user_branch <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
+    <select id="findAllUserIds" resultType="java.math.BigInteger">
+        SELECT user_id FROM merge_user_branch <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include> <include refid="build.dream.catering.mappers.CommonMapper.paginationSql"></include>
     </select>
 
     <select id="findByTenantIdAndUserId" resultType="build.dream.common.erp.catering.domains.Branch">
