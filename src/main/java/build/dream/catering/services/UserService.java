@@ -57,16 +57,12 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public ApiRest obtainUserInfo(ObtainUserInfoModel obtainUserInfoModel) {
-        String loginName = obtainUserInfoModel.getLoginName();
-        Map<String, String> obtainUserInfoRequestParameters = new HashMap<String, String>();
-        obtainUserInfoRequestParameters.put("loginName", loginName);
-
-        Map<String, Object> userInfo = UserUtils.obtainUserInfo(loginName);
+        BigInteger userId = obtainUserInfoModel.obtainUserId();
+        Map<String, Object> userInfo = UserUtils.obtainUserInfo(userId);
 
         Map<String, Object> data = new HashMap<String, Object>(userInfo);
         Map<String, Object> user = MapUtils.getMap(userInfo, "user");
         BigInteger tenantId = BigInteger.valueOf(MapUtils.getLongValue(user, "tenantId"));
-        BigInteger userId = BigInteger.valueOf(MapUtils.getLongValue(user, "id"));
 
         Branch branch = branchMapper.findByTenantIdAndUserId(tenantId, userId);
         ValidateUtils.notNull(branch, "门店信息不存在！");
