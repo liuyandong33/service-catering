@@ -2,10 +2,7 @@ package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
 import build.dream.common.api.ApiRest;
-import build.dream.common.utils.CacheUtils;
-import build.dream.common.utils.ConfigurationUtils;
-import build.dream.common.utils.GsonUtils;
-import build.dream.common.utils.ProxyUtils;
+import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.MapUtils;
@@ -44,7 +41,7 @@ public class AnubisUtils {
         obtainAccessTokenRequestParameters.put("salt", String.valueOf(salt));
         obtainAccessTokenRequestParameters.put("signature", signature);
         ApiRest obtainAccessTokenApiRest = ProxyUtils.doGetWithRequestParameters(Constants.SERVICE_NAME_OUT, "anubis", "obtainAccessToken", obtainAccessTokenRequestParameters);
-        Validate.isTrue(obtainAccessTokenApiRest.isSuccessful(), obtainAccessTokenApiRest.getError());
+        ValidateUtils.isTrue(obtainAccessTokenApiRest.isSuccessful(), obtainAccessTokenApiRest.getError());
         return (Map<String, Object>) obtainAccessTokenApiRest.getData();
     }
 

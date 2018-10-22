@@ -140,7 +140,7 @@ public class BranchService {
         Map<String, String> batchDeleteUserRequestParameters = new HashMap<String, String>();
         batchDeleteUserRequestParameters.put("userIds", StringUtils.join(userIds, ","));
         ApiRest batchDeleteUserApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "user", "batchDeleteUser", batchDeleteUserRequestParameters);
-        Validate.isTrue(batchDeleteUserApiRest.isSuccessful(), batchDeleteUserApiRest.getError());
+        ValidateUtils.isTrue(batchDeleteUserApiRest.isSuccessful(), batchDeleteUserApiRest.getError());
 
         return ApiRest.builder().message("删除门店信息成功！").successful(true).build();
     }

@@ -4,7 +4,8 @@ import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.annotations.ModelAndViewAction;
 import build.dream.common.api.ApiRest;
 import build.dream.common.constants.Constants;
-import build.dream.common.exceptions.ApiException;
+import build.dream.common.exceptions.CustomException;
+import build.dream.common.exceptions.Error;
 import build.dream.common.models.BasicModel;
 import build.dream.common.utils.*;
 import org.apache.commons.lang.StringUtils;
@@ -55,10 +56,11 @@ public class CallActionAspect {
 
         if (throwable != null) {
             LogUtils.error(apiRestAction.error(), proceedingJoinPoint.getTarget().getClass().getName(), proceedingJoinPoint.getSignature().getName(), throwable, requestParameters);
-            if (throwable instanceof ApiException) {
+            if (throwable instanceof CustomException) {
+                CustomException customException = (CustomException) throwable;
                 apiRest = new ApiRest(throwable);
             } else {
-                apiRest = ApiRest.builder().error(apiRestAction.error()).build();
+                apiRest = ApiRest.builder().error(new Error(Constants.HANDLER_METHOD, apiRestAction.error())).build();
             }
         }
 

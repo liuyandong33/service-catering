@@ -5,10 +5,7 @@ import build.dream.common.api.ApiRest;
 import build.dream.common.beans.WebResponse;
 import build.dream.common.beans.WeiXinAccessToken;
 import build.dream.common.saas.domains.WeiXinPublicAccount;
-import build.dream.common.utils.GsonUtils;
-import build.dream.common.utils.LogUtils;
-import build.dream.common.utils.OutUtils;
-import build.dream.common.utils.ProxyUtils;
+import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
@@ -22,7 +19,7 @@ public class WeiXinUtils {
         Map<String, String> obtainWeiXinPublicAccountRequestParameters = new HashMap<String, String>();
         obtainWeiXinPublicAccountRequestParameters.put("tenantId", tenantId);
         ApiRest apiRest = ProxyUtils.doGetWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "weiXin", "obtainWeiXinPublicAccount", obtainWeiXinPublicAccountRequestParameters);
-        Validate.isTrue(apiRest.isSuccessful(), apiRest.getError());
+        ValidateUtils.isTrue(apiRest.isSuccessful(), apiRest.getError());
         WeiXinPublicAccount weiXinPublicAccount = (WeiXinPublicAccount) apiRest.getData();
         return weiXinPublicAccount;
     }
@@ -33,7 +30,7 @@ public class WeiXinUtils {
         obtainAccessTokenRequestParameters.put("appSecret", appSecret);
 
         ApiRest apiRest = ProxyUtils.doGetWithRequestParameters(Constants.SERVICE_NAME_OUT, "weiXin", "obtainAccessToken", obtainAccessTokenRequestParameters);
-        Validate.isTrue(apiRest.isSuccessful(), apiRest.getError());
+        ValidateUtils.isTrue(apiRest.isSuccessful(), apiRest.getError());
 
         WeiXinAccessToken weiXinAccessToken = (WeiXinAccessToken) apiRest.getData();
         return weiXinAccessToken.getAccessToken();
