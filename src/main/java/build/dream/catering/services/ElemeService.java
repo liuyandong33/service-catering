@@ -774,7 +774,7 @@ public class ElemeService {
         saveElemeBranchMappingRequestParameters.put("userId", userId.toString());
 
         ApiRest saveElemeBranchMappingApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "eleme", "saveElemeBranchMapping", saveElemeBranchMappingRequestParameters);
-        Validate.isTrue(saveElemeBranchMappingApiRest.isSuccessful(), saveElemeBranchMappingApiRest.getError());
+        ValidateUtils.isTrue(saveElemeBranchMappingApiRest.isSuccessful(), saveElemeBranchMappingApiRest.getError());
 
         return ApiRest.builder().message("饿了么门店绑定成功！").successful(true).build();
     }

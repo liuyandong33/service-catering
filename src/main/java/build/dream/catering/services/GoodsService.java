@@ -32,8 +32,8 @@ public class GoodsService extends BasicService {
      */
     @Transactional(readOnly = true)
     public ApiRest count(CountModel countModel) {
-        BigInteger tenantId = countModel.getTenantId();
-        BigInteger branchId = countModel.getBranchId();
+        BigInteger tenantId = countModel.obtainTenantId();
+        BigInteger branchId = countModel.obtainBranchId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(Goods.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -51,8 +51,8 @@ public class GoodsService extends BasicService {
      */
     @Transactional(readOnly = true)
     public ApiRest list(ListModel listModel) {
-        BigInteger tenantId = listModel.getTenantId();
-        BigInteger branchId = listModel.getBranchId();
+        BigInteger tenantId = listModel.obtainTenantId();
+        BigInteger branchId = listModel.obtainTenantId();
         int page = listModel.getPage();
         int rows = listModel.getRows();
 
