@@ -53,8 +53,8 @@ public class DietOrderService {
     @Transactional(readOnly = true)
     public ApiRest obtainDietOrderInfo(ObtainDietOrderInfoModel obtainDietOrderInfoModel) {
         // 查询出订单信息
-        BigInteger tenantId = obtainDietOrderInfoModel.getTenantId();
-        BigInteger branchId = obtainDietOrderInfoModel.getBranchId();
+        BigInteger tenantId = obtainDietOrderInfoModel.obtainTenantId();
+        BigInteger branchId = obtainDietOrderInfoModel.obtainBranchId();
         BigInteger dietOrderId = obtainDietOrderInfoModel.getDietOrderId();
         SearchModel dietOrderSearchModel = new SearchModel(true);
         dietOrderSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
