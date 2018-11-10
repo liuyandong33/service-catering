@@ -182,6 +182,7 @@ public class ElemeService {
                 .invoiced(invoiced)
                 .invoiceType(invoiceType)
                 .invoice(invoice)
+                .vipId(BigInteger.ZERO)
                 .createUserId(userId)
                 .lastUpdateUserId(userId)
                 .build();
