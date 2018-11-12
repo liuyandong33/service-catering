@@ -111,4 +111,17 @@ public class DietOrderController extends BasicController {
         }
         return returnValue;
     }
+
+    /**
+     * 获取POS订单
+     *
+     * @param obtainPosOrderModel
+     * @return
+     */
+    @RequestMapping(value = "/obtainPosOrder", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = ObtainPosOrderModel.class, serviceClass = DietOrderService.class, serviceMethodName = "obtainPosOrder", error = "获取POS订单失败")
+    public String obtainPosOrder(ObtainPosOrderModel obtainPosOrderModel) {
+        return null;
+    }
 }

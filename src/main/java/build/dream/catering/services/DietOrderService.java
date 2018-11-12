@@ -8,14 +8,17 @@ import build.dream.catering.mappers.SequenceMapper;
 import build.dream.catering.models.dietorder.*;
 import build.dream.catering.utils.DietOrderUtils;
 import build.dream.catering.utils.GoodsUtils;
+import build.dream.catering.utils.ThreadUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.models.alipay.AlipayTradePagePayModel;
 import build.dream.common.models.alipay.AlipayTradeWapPayModel;
+import build.dream.common.models.aliyunpush.PushMessageToAndroidModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
 import build.dream.common.models.weixinpay.UnifiedOrderModel;
 import build.dream.common.utils.*;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -30,10 +33,13 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URLEncoder;
+import java.security.PrivateKey;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static build.dream.common.utils.RSAUtils.PADDING_MODE_RSA_ECB_PKCS1PADDING;
 
 @Service
 public class DietOrderService {
@@ -1159,5 +1165,60 @@ public class DietOrderService {
         dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_UNPROCESSED);
         dietOrder.setActiveTime(occurrenceTime);
         DatabaseHelper.update(dietOrder);
+    }
+
+    /**
+     * 获取POS订单
+     *
+     * @param obtainPosOrderModel
+     * @return
+     */
+    public ApiRest obtainPosOrder(ObtainPosOrderModel obtainPosOrderModel) throws IOException {
+        BigInteger tenantId = obtainPosOrderModel.getTenantId();
+        BigInteger branchId = obtainPosOrderModel.getBranchId();
+        BigInteger vipId = obtainPosOrderModel.getVipId();
+        PushMessageToAndroidModel pushMessageToAndroidModel = new PushMessageToAndroidModel();
+        pushMessageToAndroidModel.setAppKey("");
+        pushMessageToAndroidModel.setTarget(AliyunPushUtils.TAG);
+        pushMessageToAndroidModel.setTargetValue("POS" + tenantId + "_" + branchId);
+        pushMessageToAndroidModel.setTitle("获取POS订单");
+
+        Map<String, Object> body = new HashMap<String, Object>();
+        body.put("code", "");
+
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("vipId", vipId);
+
+        String uuid = UUID.randomUUID().toString();
+        map.put("uuid", uuid);
+
+        body.put("data", map);
+
+        pushMessageToAndroidModel.setBody(GsonUtils.toJson(body));
+        Map<String, Object> result = AliyunPushUtils.pushMessageToAndroid(pushMessageToAndroidModel);
+
+        String dataJson = null;
+        int times = 0;
+        while (times < 120) {
+            times += 1;
+            dataJson = CacheUtils.get(uuid);
+            if (StringUtils.isNotBlank(dataJson)) {
+                break;
+            }
+            ThreadUtils.sleepSafe(500);
+        }
+
+        ValidateUtils.notBlank(dataJson, "POS端未响应");
+
+        Map<String, Object> dataMap = JacksonUtils.readValueAsMap(dataJson, String.class, Object.class);
+
+        String platformPrivateKey = ConfigurationUtils.getConfiguration(Constants.PLATFORM_PRIVATE_KEY);
+        PrivateKey privateKey = RSAUtils.restorePrivateKey(platformPrivateKey);
+        String encryptedData = Base64.encodeBase64String(RSAUtils.encryptByPrivateKey(dataJson.getBytes(Constants.CHARSET_NAME_UTF_8), privateKey, PADDING_MODE_RSA_ECB_PKCS1PADDING));
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("orders", dataMap.get("orders"));
+        data.put("encryptedData", encryptedData);
+
+        return ApiRest.builder().data(dataMap).message("获取POS订单成功！").successful(true).build();
     }
 }
