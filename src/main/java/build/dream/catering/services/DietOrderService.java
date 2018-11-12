@@ -1176,7 +1176,7 @@ public class DietOrderService {
     public ApiRest obtainPosOrder(ObtainPosOrderModel obtainPosOrderModel) throws IOException {
         BigInteger tenantId = obtainPosOrderModel.getTenantId();
         BigInteger branchId = obtainPosOrderModel.getBranchId();
-        BigInteger vipId = obtainPosOrderModel.getVipId();
+        String tableCode = obtainPosOrderModel.getTableCode();
         PushMessageToAndroidModel pushMessageToAndroidModel = new PushMessageToAndroidModel();
         pushMessageToAndroidModel.setAppKey("");
         pushMessageToAndroidModel.setTarget(AliyunPushUtils.TAG);
@@ -1187,7 +1187,7 @@ public class DietOrderService {
         body.put("code", "");
 
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("vipId", vipId);
+        map.put("vipId", tableCode);
 
         String uuid = UUID.randomUUID().toString();
         map.put("uuid", uuid);
@@ -1216,7 +1216,7 @@ public class DietOrderService {
         PrivateKey privateKey = RSAUtils.restorePrivateKey(platformPrivateKey);
         String encryptedData = Base64.encodeBase64String(RSAUtils.encryptByPrivateKey(dataJson.getBytes(Constants.CHARSET_NAME_UTF_8), privateKey, PADDING_MODE_RSA_ECB_PKCS1PADDING));
         Map<String, Object> data = new HashMap<String, Object>();
-        data.put("orders", dataMap.get("orders"));
+        data.put("order", dataMap.get("order"));
         data.put("encryptedData", encryptedData);
 
         return ApiRest.builder().data(dataMap).message("获取POS订单成功！").successful(true).build();
