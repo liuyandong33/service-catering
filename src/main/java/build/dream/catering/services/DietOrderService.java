@@ -1177,6 +1177,7 @@ public class DietOrderService {
         BigInteger tenantId = obtainPosOrderModel.getTenantId();
         BigInteger branchId = obtainPosOrderModel.getBranchId();
         String tableCode = obtainPosOrderModel.getTableCode();
+        BigInteger vipId = obtainPosOrderModel.getVipId();
         PushMessageToAndroidModel pushMessageToAndroidModel = new PushMessageToAndroidModel();
         pushMessageToAndroidModel.setAppKey("");
         pushMessageToAndroidModel.setTarget(AliyunPushUtils.TAG);
@@ -1187,7 +1188,7 @@ public class DietOrderService {
         body.put("code", "");
 
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("vipId", tableCode);
+        map.put("tableCode", tableCode);
 
         String uuid = UUID.randomUUID().toString();
         map.put("uuid", uuid);

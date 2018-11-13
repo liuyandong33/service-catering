@@ -15,6 +15,9 @@ public class ObtainPosOrderModel extends BasicModel {
     @NotNull
     private String tableCode;
 
+    @NotNull
+    private BigInteger vipId;
+
     public BigInteger getTenantId() {
         return tenantId;
     }
@@ -37,5 +40,13 @@ public class ObtainPosOrderModel extends BasicModel {
 
     public void setTableCode(String tableCode) {
         this.tableCode = tableCode;
+    }
+
+    public BigInteger getVipId() {
+        return vipId;
+    }
+
+    public void setVipId(BigInteger vipId) {
+        this.vipId = vipId;
     }
 }
