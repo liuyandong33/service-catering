@@ -1223,6 +1223,7 @@ public class DietOrderService {
         String order = MapUtils.getString(dataMap, "order");
         String orderGroups = MapUtils.getString(dataMap, "orderGroups");
         String orderDetails = MapUtils.getString(dataMap, "orderDetails");
+        String orderDetailGoodsAttributes = MapUtils.getString(dataMap, "orderDetailGoodsAttributes");
 
         DietOrder dietOrder = JacksonUtils.readValue(order, DietOrder.class);
         List<DietOrderGroup> dietOrderGroups = JacksonUtils.readValueAsList(orderGroups, DietOrderGroup.class);
