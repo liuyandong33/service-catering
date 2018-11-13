@@ -1213,12 +1213,39 @@ public class DietOrderService {
 
         Map<String, Object> dataMap = JacksonUtils.readValueAsMap(dataJson, String.class, Object.class);
 
-        String platformPrivateKey = ConfigurationUtils.getConfiguration(Constants.PLATFORM_PRIVATE_KEY);
+        /*String platformPrivateKey = ConfigurationUtils.getConfiguration(Constants.PLATFORM_PRIVATE_KEY);
         PrivateKey privateKey = RSAUtils.restorePrivateKey(platformPrivateKey);
         String encryptedData = Base64.encodeBase64String(RSAUtils.encryptByPrivateKey(dataJson.getBytes(Constants.CHARSET_NAME_UTF_8), privateKey, PADDING_MODE_RSA_ECB_PKCS1PADDING));
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("order", dataMap.get("order"));
-        data.put("encryptedData", encryptedData);
+        data.put("encryptedData", encryptedData);*/
+
+        String order = MapUtils.getString(dataMap, "order");
+        String orderGroups = MapUtils.getString(dataMap, "orderGroups");
+        String orderDetails = MapUtils.getString(dataMap, "orderDetails");
+
+        DietOrder dietOrder = JacksonUtils.readValue(order, DietOrder.class);
+        List<DietOrderGroup> dietOrderGroups = JacksonUtils.readValueAsList(orderGroups, DietOrderGroup.class);
+        List<DietOrderDetail> dietOrderDetails = JacksonUtils.readValueAsList(orderDetails, DietOrderDetail.class);
+        DatabaseHelper.insert(dietOrder);
+
+        BigInteger dietOrderId = dietOrder.getId();
+
+        Map<String, DietOrderGroup> dietOrderGroupMap = new HashMap<String, DietOrderGroup>();
+        for (DietOrderGroup dietOrderGroup : dietOrderGroups) {
+            dietOrderGroupMap.put(dietOrder.getLocalId(), dietOrderGroup);
+            dietOrderGroup.setDietOrderId(dietOrderId);
+        }
+
+        DatabaseHelper.insertAll(dietOrderGroups);
+
+        for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
+            DietOrderGroup dietOrderGroup = dietOrderGroupMap.get(dietOrderDetail.getLocalDietOrderGroupId());
+            dietOrderDetail.setDietOrderId(dietOrderId);
+            dietOrderDetail.setDietOrderGroupId(dietOrderGroup.getId());
+        }
+
+        DatabaseHelper.insertAll(dietOrderDetails);
 
         return ApiRest.builder().data(dataMap).message("获取POS订单成功！").successful(true).build();
     }
