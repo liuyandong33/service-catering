@@ -24,7 +24,7 @@ public class DataService {
     public void saveDietOrder(String dietOrderData) {
         String signature = null;
         try {
-            DigestUtils.md5Hex(dietOrderData);
+            signature = DigestUtils.md5Hex(dietOrderData);
             if (CacheUtils.exists(signature)) {
                 return;
             }
