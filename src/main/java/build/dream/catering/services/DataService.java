@@ -93,6 +93,7 @@ public class DataService {
                 }
                 DatabaseHelper.insertAll(dietOrderActivities);
             }
+            CacheUtils.set(signature, signature);
         } catch (Exception e) {
             if (StringUtils.isNotBlank(signature)) {
                 CacheUtils.delete(signature);
