@@ -4,18 +4,18 @@ import build.dream.catering.constants.Constants;
 import build.dream.common.erp.catering.domains.*;
 import build.dream.common.utils.CacheUtils;
 import build.dream.common.utils.DatabaseHelper;
-import build.dream.common.utils.GsonUtils;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+import build.dream.common.utils.JacksonUtils;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -37,71 +37,62 @@ public class DataService {
             dataHandleHistory.setHandleTime(new Date());
             DatabaseHelper.insert(dataHandleHistory);
 
-            JSONObject dietOrderJsonObject = JSONObject.fromObject(dietOrderData);
-            JSONArray dietOrderGroupJsonArray = dietOrderJsonObject.getJSONArray("dietOrderGroups");
-            dietOrderJsonObject.remove("dietOrderGroups");
+            Map<String, Object> dataMap = JacksonUtils.readValueAsMap(dietOrderData, String.class, Object.class);
+            String dietOrderJson = MapUtils.getString(dataMap, "dietOrder");
+            String dietOrderGroupsJson = MapUtils.getString(dataMap, "dietOrderGroups");
+            String dietOrderDetailsJson = MapUtils.getString(dataMap, "dietOrderDetails");
+            String dietOrderPaymentsJson = MapUtils.getString(dataMap, "dietOrderPayments");
+            String dietOrderDetailGoodsAttributesJson = MapUtils.getString(dataMap, "dietOrderDetailGoodsAttributes");
+            String dietOrderActivitiesJson = MapUtils.getString(dataMap, "dietOrderActivities");
 
-            DietOrder dietOrder = GsonUtils.fromJson(dietOrderJsonObject, DietOrder.class);
+            DietOrder dietOrder = JacksonUtils.readValue(dietOrderJson, DietOrder.class);
             DatabaseHelper.insert(dietOrder);
 
             BigInteger dietOrderId = dietOrder.getId();
-            int size = dietOrderGroupJsonArray.size();
-            for (int index = 0; index < size; index++) {
-                JSONObject dietOrderGroupJsonObject = dietOrderGroupJsonArray.getJSONObject(index);
-                JSONArray dietOrderDetailJsonArray = dietOrderGroupJsonObject.getJSONArray("dietOrderDetails");
-                dietOrderGroupJsonObject.remove("dietOrderDetails");
-                DietOrderGroup dietOrderGroup = GsonUtils.fromJson(dietOrderGroupJsonObject, DietOrderGroup.class);
+
+            List<DietOrderGroup> dietOrderGroups = JacksonUtils.readValueAsList(dietOrderGroupsJson, DietOrderGroup.class);
+            Map<String, DietOrderGroup> dietOrderGroupMap = new HashMap<String, DietOrderGroup>();
+            for (DietOrderGroup dietOrderGroup : dietOrderGroups) {
                 dietOrderGroup.setDietOrderId(dietOrderId);
-                DatabaseHelper.insert(dietOrderGroup);
+                dietOrderGroupMap.put(dietOrderGroup.getLocalId(), dietOrderGroup);
+            }
+            DatabaseHelper.insertAll(dietOrderGroups);
 
-                int dietOrderDetailJsonArraySize = dietOrderDetailJsonArray.size();
-                for (int dietOrderDetailJsonArrayIndex = 0; dietOrderDetailJsonArrayIndex < dietOrderDetailJsonArraySize; dietOrderDetailJsonArrayIndex++) {
-                    JSONObject dietOrderDetailJsonObject = dietOrderDetailJsonArray.getJSONObject(dietOrderDetailJsonArrayIndex);
+            List<DietOrderDetail> dietOrderDetails = JacksonUtils.readValueAsList(dietOrderDetailsJson, DietOrderDetail.class);
+            Map<String, DietOrderDetail> dietOrderDetailMap = new HashMap<String, DietOrderDetail>();
+            for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
+                DietOrderGroup dietOrderGroup = dietOrderGroupMap.get(dietOrderDetail.getLocalDietOrderGroupId());
+                dietOrderDetail.setDietOrderId(dietOrderId);
+                dietOrderDetail.setDietOrderGroupId(dietOrderGroup.getId());
+                dietOrderDetailMap.put(dietOrderDetail.getLocalId(), dietOrderDetail);
+            }
+            DatabaseHelper.insertAll(dietOrderDetails);
 
-                    JSONArray dietOrderDetailGoodsAttributeJsonArray = null;
-                    if (dietOrderDetailJsonObject.containsKey("dietOrderDetailGoodsAttributes")) {
-                        dietOrderDetailGoodsAttributeJsonArray = dietOrderDetailJsonObject.getJSONArray("dietOrderDetailGoodsAttributes");
-                        dietOrderDetailJsonObject.remove("dietOrderDetailGoodsAttributes");
-                    }
+            List<DietOrderPayment> dietOrderPayments = JacksonUtils.readValueAsList(dietOrderPaymentsJson, DietOrderPayment.class);
+            for (DietOrderPayment dietOrderPayment : dietOrderPayments) {
+                dietOrderPayment.setDietOrderId(dietOrderId);
+            }
+            DatabaseHelper.insertAll(dietOrderPayments);
 
-                    DietOrderDetail dietOrderDetail = GsonUtils.fromJson(dietOrderDetailJsonObject, DietOrderDetail.class);
-                    dietOrderDetail.setDietOrderId(dietOrderId);
-                    dietOrderDetail.setDietOrderGroupId(dietOrderGroup.getId());
-                    DatabaseHelper.insert(dietOrderDetail);
-
-                    int dietOrderDetailGoodsAttributeJsonArraySize = dietOrderDetailGoodsAttributeJsonArray.size();
-                    for (int dietOrderDetailGoodsAttributeJsonArrayIndex = 0; dietOrderDetailGoodsAttributeJsonArrayIndex < dietOrderDetailGoodsAttributeJsonArraySize; dietOrderDetailGoodsAttributeJsonArrayIndex++) {
-                        JSONObject dietOrderDetailGoodsAttributeJsonObject = dietOrderDetailGoodsAttributeJsonArray.getJSONObject(dietOrderDetailGoodsAttributeJsonArrayIndex);
-                        DietOrderDetailGoodsAttribute dietOrderDetailGoodsAttribute = GsonUtils.fromJson(dietOrderDetailGoodsAttributeJsonObject, DietOrderDetailGoodsAttribute.class);
-                        dietOrderDetailGoodsAttribute.setDietOrderId(dietOrder.getId());
-                        dietOrderDetailGoodsAttribute.setDietOrderGroupId(dietOrderGroup.getId());
-                        dietOrderDetailGoodsAttribute.setDietOrderDetailId(dietOrderDetail.getId());
-                        DatabaseHelper.insert(dietOrderDetailGoodsAttribute);
-                    }
+            if (StringUtils.isNotBlank(dietOrderDetailGoodsAttributesJson)) {
+                List<DietOrderDetailGoodsAttribute> dietOrderDetailGoodsAttributes = JacksonUtils.readValueAsList(dietOrderDetailGoodsAttributesJson, DietOrderDetailGoodsAttribute.class);
+                for (DietOrderDetailGoodsAttribute dietOrderDetailGoodsAttribute : dietOrderDetailGoodsAttributes) {
+                    DietOrderGroup dietOrderGroup = dietOrderGroupMap.get(dietOrderDetailGoodsAttribute.getLocalDietOrderGroupId());
+                    DietOrderDetail dietOrderDetail = dietOrderDetailMap.get(dietOrderDetailGoodsAttribute.getLocalDietOrderDetailId());
+                    dietOrderDetailGoodsAttribute.setDietOrderId(dietOrderId);
+                    dietOrderDetailGoodsAttribute.setDietOrderGroupId(dietOrderGroup.getId());
+                    dietOrderDetailGoodsAttribute.setDietOrderDetailId(dietOrderDetail.getId());
                 }
+                DatabaseHelper.insertAll(dietOrderDetailGoodsAttributes);
             }
 
-            if (dietOrderJsonObject.containsKey("dietOrderActivities")) {
-                JSONArray dietOrderActivityJsonArray = dietOrderJsonObject.getJSONArray("dietOrderActivities");
-                int dietOrderActivityJsonArraySize = dietOrderActivityJsonArray.size();
-                List<DietOrderActivity> dietOrderActivities = new ArrayList<DietOrderActivity>();
-                for (int dietOrderActivityJsonArrayIndex = 0; dietOrderActivityJsonArrayIndex < dietOrderActivityJsonArraySize; dietOrderActivityJsonArrayIndex++) {
-                    DietOrderActivity dietOrderActivity = GsonUtils.fromJson(dietOrderActivityJsonArray.getJSONObject(dietOrderActivityJsonArrayIndex), DietOrderActivity.class);
+            if (StringUtils.isNotBlank(dietOrderActivitiesJson)) {
+                List<DietOrderActivity> dietOrderActivities = JacksonUtils.readValueAsList(dietOrderActivitiesJson, DietOrderActivity.class);
+                for (DietOrderActivity dietOrderActivity : dietOrderActivities) {
                     dietOrderActivity.setDietOrderId(dietOrderId);
-                    dietOrderActivities.add(dietOrderActivity);
                 }
                 DatabaseHelper.insertAll(dietOrderActivities);
             }
-
-            JSONArray dietOrderPaymentJsonArray = dietOrderJsonObject.getJSONArray("dietOrderPayments");
-            int dietOrderPaymentJsonArraySize = dietOrderPaymentJsonArray.size();
-            List<DietOrderPayment> dietOrderPayments = new ArrayList<DietOrderPayment>();
-            for (int dietOrderPaymentJsonArrayIndex = 0; dietOrderPaymentJsonArrayIndex < dietOrderPaymentJsonArraySize; dietOrderPaymentJsonArrayIndex++) {
-                DietOrderPayment dietOrderPayment = GsonUtils.fromJson(dietOrderPaymentJsonArray.getJSONObject(dietOrderPaymentJsonArrayIndex), DietOrderPayment.class);
-                dietOrderPayment.setDietOrderId(dietOrderId);
-                dietOrderPayments.add(dietOrderPayment);
-            }
-            DatabaseHelper.insertAll(dietOrderPayments);
         } catch (Exception e) {
             if (StringUtils.isNotBlank(signature)) {
                 CacheUtils.delete(signature);
