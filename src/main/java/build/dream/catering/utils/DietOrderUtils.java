@@ -2,7 +2,7 @@ package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
 import build.dream.common.constants.DietOrderConstants;
-import build.dream.common.erp.catering.domains.*;
+import build.dream.common.catering.domains.*;
 import build.dream.common.models.alipay.AlipayTradeRefundModel;
 import build.dream.common.models.weixinpay.RefundModel;
 import build.dream.common.utils.*;

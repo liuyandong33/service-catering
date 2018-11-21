@@ -5,7 +5,7 @@ import build.dream.catering.exceptions.CanNotDeleteException;
 import build.dream.catering.exceptions.CanNotEditAndDeleteException;
 import build.dream.catering.exceptions.CanNotEditException;
 import build.dream.catering.mappers.CanNotOperateReasonMapper;
-import build.dream.common.erp.catering.domains.CanNotOperateReason;
+import build.dream.common.catering.domains.CanNotOperateReason;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SearchModel;
 import org.springframework.beans.factory.annotation.Autowired;

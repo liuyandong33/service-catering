@@ -4,7 +4,7 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.models.weixin.*;
 import build.dream.catering.utils.WeiXinUtils;
 import build.dream.common.api.ApiRest;
-import build.dream.common.erp.catering.domains.WeiXinMemberCard;
+import build.dream.common.catering.domains.WeiXinMemberCard;
 import build.dream.common.saas.domains.WeiXinPublicAccount;
 import build.dream.common.utils.*;
 import net.sf.json.JSONObject;

@@ -3,7 +3,7 @@ package build.dream.catering.listeners;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.services.ElemeService;
 import build.dream.catering.tools.HandleElemeMessageRunnable;
-import build.dream.common.erp.catering.domains.ElemeCallbackMessage;
+import build.dream.common.catering.domains.ElemeCallbackMessage;
 import build.dream.common.utils.ApplicationHandler;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;

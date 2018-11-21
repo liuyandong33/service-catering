@@ -1,7 +1,7 @@
 package build.dream.catering.utils;
 
-import build.dream.common.erp.catering.domains.Activity;
-import build.dream.common.erp.catering.domains.FullReductionActivity;
+import build.dream.common.catering.domains.Activity;
+import build.dream.common.catering.domains.FullReductionActivity;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

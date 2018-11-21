@@ -1,7 +1,7 @@
 package build.dream.catering.utils;
 
 import build.dream.catering.mappers.VipMapper;
-import build.dream.common.erp.catering.domains.Vip;
+import build.dream.common.catering.domains.Vip;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SearchModel;

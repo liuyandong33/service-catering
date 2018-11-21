@@ -4,7 +4,7 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.models.pos.OfflinePosModel;
 import build.dream.catering.models.pos.OnlinePosModel;
 import build.dream.common.api.ApiRest;
-import build.dream.common.erp.catering.domains.Pos;
+import build.dream.common.catering.domains.Pos;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SearchModel;
 import org.apache.commons.lang.Validate;

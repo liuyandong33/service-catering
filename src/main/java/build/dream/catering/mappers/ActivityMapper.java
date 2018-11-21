@@ -1,8 +1,8 @@
 package build.dream.catering.mappers;
 
-import build.dream.common.erp.catering.domains.EffectiveActivity;
-import build.dream.common.erp.catering.domains.FullReductionActivity;
-import build.dream.common.erp.catering.domains.PaymentActivity;
+import build.dream.common.catering.domains.EffectiveActivity;
+import build.dream.common.catering.domains.FullReductionActivity;
+import build.dream.common.catering.domains.PaymentActivity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

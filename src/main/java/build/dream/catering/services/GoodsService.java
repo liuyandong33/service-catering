@@ -6,7 +6,7 @@ import build.dream.catering.mappers.GoodsMapper;
 import build.dream.catering.models.goods.*;
 import build.dream.catering.utils.TenantConfigUtils;
 import build.dream.common.api.ApiRest;
-import build.dream.common.erp.catering.domains.*;
+import build.dream.common.catering.domains.*;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;

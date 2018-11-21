@@ -4,7 +4,7 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.services.ElemeService;
 import build.dream.catering.utils.DingtalkUtils;
 import build.dream.catering.utils.ThreadUtils;
-import build.dream.common.erp.catering.domains.ElemeCallbackMessage;
+import build.dream.common.catering.domains.ElemeCallbackMessage;
 import build.dream.common.utils.GsonUtils;
 import org.apache.commons.lang.ArrayUtils;
 

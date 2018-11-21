@@ -6,7 +6,7 @@ import build.dream.catering.models.user.ListUsersModel;
 import build.dream.catering.models.user.ObtainBranchInfoModel;
 import build.dream.catering.models.user.ObtainUserInfoModel;
 import build.dream.common.api.ApiRest;
-import build.dream.common.erp.catering.domains.Branch;
+import build.dream.common.catering.domains.Branch;
 import build.dream.common.utils.SearchCondition;
 import build.dream.common.utils.UserUtils;
 import build.dream.common.utils.ValidateUtils;

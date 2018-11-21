@@ -1,6 +1,6 @@
 package build.dream.catering.mappers;
 
-import build.dream.common.erp.catering.domains.Branch;
+import build.dream.common.catering.domains.Branch;
 import build.dream.common.utils.SearchCondition;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

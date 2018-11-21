@@ -7,7 +7,7 @@ import build.dream.catering.models.eleme.*;
 import build.dream.catering.services.ElemeService;
 import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.controllers.BasicController;
-import build.dream.common.erp.catering.domains.ElemeCallbackMessage;
+import build.dream.common.catering.domains.ElemeCallbackMessage;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.CommonUtils;
 import build.dream.common.utils.ConfigurationUtils;

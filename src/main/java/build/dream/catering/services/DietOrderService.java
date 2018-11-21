@@ -11,14 +11,13 @@ import build.dream.catering.utils.GoodsUtils;
 import build.dream.catering.utils.ThreadUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.constants.DietOrderConstants;
-import build.dream.common.erp.catering.domains.*;
+import build.dream.common.catering.domains.*;
 import build.dream.common.models.alipay.AlipayTradePagePayModel;
 import build.dream.common.models.alipay.AlipayTradeWapPayModel;
 import build.dream.common.models.aliyunpush.PushMessageToAndroidModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
 import build.dream.common.models.weixinpay.UnifiedOrderModel;
 import build.dream.common.utils.*;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -33,13 +32,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URLEncoder;
-import java.security.PrivateKey;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-import static build.dream.common.utils.RSAUtils.PADDING_MODE_RSA_ECB_PKCS1PADDING;
 
 @Service
 public class DietOrderService {

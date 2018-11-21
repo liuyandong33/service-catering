@@ -2,7 +2,7 @@ package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.TenantConfigMapper;
-import build.dream.common.erp.catering.domains.TenantConfig;
+import build.dream.common.catering.domains.TenantConfig;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.SearchModel;
 

@@ -6,7 +6,7 @@ import build.dream.catering.models.activity.*;
 import build.dream.catering.utils.ActivityUtils;
 import build.dream.catering.utils.CanNotOperateReasonUtils;
 import build.dream.common.api.ApiRest;
-import build.dream.common.erp.catering.domains.*;
+import build.dream.common.catering.domains.*;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SearchModel;
 import org.apache.commons.collections.MapUtils;
