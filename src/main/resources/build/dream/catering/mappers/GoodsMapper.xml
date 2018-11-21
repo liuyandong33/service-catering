@@ -29,7 +29,7 @@
         AND package_group_detail.deleted = 0;
     </select>
 
-    <select id="findAllGoodsInfos" resultType="build.dream.common.erp.catering.domains.Goods">
+    <select id="findAllGoodsInfos" resultType="build.dream.common.catering.domains.Goods">
         SELECT
         goods.*,
         goods_category.name AS category_name

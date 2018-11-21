@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.catering.mappers.ActivityMapper">
-    <select id="callProcedureEffectiveActivity" resultType="build.dream.common.erp.catering.domains.EffectiveActivity">
+    <select id="callProcedureEffectiveActivity" resultType="build.dream.common.catering.domains.EffectiveActivity">
         call procedure_effective_activity(#{tenantId}, #{branchId});
     </select>
 
@@ -12,7 +12,7 @@
         </foreach>
     </insert>
 
-    <select id="listFullReductionActivities" resultType="build.dream.common.erp.catering.domains.FullReductionActivity">
+    <select id="listFullReductionActivities" resultType="build.dream.common.catering.domains.FullReductionActivity">
         SELECT
         full_reduction_activity.*
         FROM activity
@@ -29,7 +29,7 @@
         AND (CASE (DAYOFWEEK(NOW())) WHEN 2 THEN week_sign % 2 = 0 WHEN 3 THEN week_sign % 3 = 0 WHEN 4 THEN week_sign % 5 = 0 WHEN 5 THEN week_sign % 7 = 0 WHEN 6 THEN week_sign % 11 = 0 WHEN 7 THEN week_sign % 13 = 0 WHEN 1 THEN week_sign % 17 = 0 END);
     </select>
 
-    <select id="listPaymentActivities" resultType="build.dream.common.erp.catering.domains.PaymentActivity">
+    <select id="listPaymentActivities" resultType="build.dream.common.catering.domains.PaymentActivity">
         SELECT
         payment_activity.*
         FROM activity

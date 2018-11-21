@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.catering.mappers.TenantConfigMapper">
-    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.erp.catering.domains.TenantConfig">
+    <select id="find" parameterType="build.dream.common.utils.SearchModel" resultType="build.dream.common.catering.domains.TenantConfig">
         SELECT * FROM add_tenant_config <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
     </select>
 
-    <select id="addTenantConfig" resultType="build.dream.common.erp.catering.domains.TenantConfig">
+    <select id="addTenantConfig" resultType="build.dream.common.catering.domains.TenantConfig">
         CALL add_tenant_config(#{tenantId}, #{name}, #{increment});
     </select>
 </mapper>
