@@ -18,13 +18,13 @@ public class GoodsUtils {
     }
 
     public static BigDecimal deductingGoodsStock(BigInteger goodsId, BigInteger goodsSpecificationId, BigDecimal quantity) {
-        BigDecimal stock = obtainGoodsMapper().callProcedureDeductingGoodsStock(goodsId, goodsSpecificationId, quantity);
+        BigDecimal stock = obtainGoodsMapper().deductingGoodsStock(goodsId, goodsSpecificationId, quantity);
         ValidateUtils.isTrue(stock.compareTo(BigDecimal.ZERO) >= 0, "库存不足！");
         return stock;
     }
 
     public static BigDecimal addGoodsStock(BigInteger goodsId, BigInteger goodsSpecificationId, BigDecimal quantity) {
-        BigDecimal stock = obtainGoodsMapper().callProcedureAddGoodsStock(goodsId, goodsSpecificationId, quantity);
+        BigDecimal stock = obtainGoodsMapper().addGoodsStock(goodsId, goodsSpecificationId, quantity);
         return stock;
     }
 }

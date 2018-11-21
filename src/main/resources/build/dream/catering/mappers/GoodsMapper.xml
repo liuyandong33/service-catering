@@ -46,11 +46,11 @@
         </if>
     </select>
 
-    <select id="callProcedureDeductingGoodsStock" resultType="java.math.BigDecimal">
-        call procedure_deducting_goods_stock(#{goodsId}, #{goodsSpecificationId}, #{quantity});
+    <select id="deductingGoodsStock" resultType="java.math.BigDecimal">
+        CALL procedure_execute_sql_2('UPDATE goods_specification SET stock = stock - ${quantity} WHERE goods_id = ${goodsId} AND id = ${goodsSpecificationId} AND deleted = 0', 'SELECT stock FROM goods_specification WHERE goods_id = ${goodsId} AND id = ${goodsSpecificationId} AND deleted = 0')
     </select>
 
-    <select id="callProcedureAddGoodsStock" resultType="java.math.BigDecimal">
-        call procedure_add_goods_stock(#{goodsId}, #{goodsSpecificationId}, #{quantity});
+    <select id="addGoodsStock" resultType="java.math.BigDecimal">
+        CALL procedure_execute_sql_2('UPDATE goods_specification SET stock = stock + ${quantity} WHERE goods_id = ${goodsId} AND id = ${goodsSpecificationId} AND deleted = 0', 'SELECT stock FROM goods_specification WHERE goods_id = ${goodsId} AND id = ${goodsSpecificationId} AND deleted = 0')
     </select>
 </mapper>

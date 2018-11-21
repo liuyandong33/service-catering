@@ -15,11 +15,11 @@ public interface GoodsMapper {
 
     List<Goods> findAllGoodsInfos(@Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId, @Param("goodsIds") List<BigInteger> goodsIds);
 
-    BigDecimal callProcedureDeductingGoodsStock(@Param("goodsId") BigInteger goodsId,
+    BigDecimal deductingGoodsStock(@Param("goodsId") BigInteger goodsId,
                                                 @Param("goodsSpecificationId") BigInteger goodsSpecificationId,
                                                 @Param("quantity") BigDecimal quantity);
 
-    BigDecimal callProcedureAddGoodsStock(@Param("goodsId") BigInteger goodsId,
+    BigDecimal addGoodsStock(@Param("goodsId") BigInteger goodsId,
                                           @Param("goodsSpecificationId") BigInteger goodsSpecificationId,
                                           @Param("quantity") BigDecimal quantity);
 }

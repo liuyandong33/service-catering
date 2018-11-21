@@ -3,11 +3,9 @@ package build.dream.catering.controllers;
 import build.dream.catering.services.DemoService;
 import build.dream.common.api.ApiRest;
 import build.dream.common.models.weixinpay.RefundModel;
-import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.MethodCaller;
-import build.dream.common.utils.MiyaUtils;
-import build.dream.common.utils.WeiXinPayUtils;
+import build.dream.common.utils.*;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -16,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.UUID;
@@ -76,5 +76,23 @@ public class DemoController {
             return ApiRest.builder().data(data).message("退款成功！").successful(true).build();
         };
         return ApplicationHandler.callMethod(methodCaller, "退款失败", requestParameters);
+    }
+
+    @RequestMapping(value = "/deductingGoodsStock")
+    @ResponseBody
+    public String deductingGoodsStock(HttpServletRequest httpServletRequest) {
+        BigInteger goodsId = NumberUtils.createBigInteger(ApplicationHandler.getRequestParameter(httpServletRequest, "goodsId"));
+        BigInteger goodsSpecificationId = NumberUtils.createBigInteger(ApplicationHandler.getRequestParameter(httpServletRequest, "goodsSpecificationId"));
+        BigDecimal quantity = NumberUtils.createBigDecimal(ApplicationHandler.getRequestParameter(httpServletRequest, "quantity"));
+        return GsonUtils.toJson(demoService.deductingGoodsStock(goodsId, goodsSpecificationId, quantity));
+    }
+
+    @RequestMapping(value = "/addGoodsStock")
+    @ResponseBody
+    public String addGoodsStock(HttpServletRequest httpServletRequest) {
+        BigInteger goodsId = NumberUtils.createBigInteger(ApplicationHandler.getRequestParameter(httpServletRequest, "goodsId"));
+        BigInteger goodsSpecificationId = NumberUtils.createBigInteger(ApplicationHandler.getRequestParameter(httpServletRequest, "goodsSpecificationId"));
+        BigDecimal quantity = NumberUtils.createBigDecimal(ApplicationHandler.getRequestParameter(httpServletRequest, "quantity"));
+        return GsonUtils.toJson(demoService.addGoodsStock(goodsId, goodsSpecificationId, quantity));
     }
 }
