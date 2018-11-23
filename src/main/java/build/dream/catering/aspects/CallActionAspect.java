@@ -58,9 +58,9 @@ public class CallActionAspect {
             LogUtils.error(apiRestAction.error(), proceedingJoinPoint.getTarget().getClass().getName(), proceedingJoinPoint.getSignature().getName(), throwable, requestParameters);
             if (throwable instanceof CustomException) {
                 CustomException customException = (CustomException) throwable;
-                apiRest = new ApiRest(throwable);
+                apiRest = ApiRest.builder().error(new Error(customException.getCode(), customException.getMessage())).build();
             } else {
-                apiRest = ApiRest.builder().error(new Error(Constants.HANDLER_METHOD, apiRestAction.error())).build();
+                apiRest = ApiRest.builder().error(new Error(Constants.ERROR_CODE_UNKNOWN_ERROR, apiRestAction.error())).build();
             }
         }
 
