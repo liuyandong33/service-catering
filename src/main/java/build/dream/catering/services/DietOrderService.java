@@ -956,6 +956,7 @@ public class DietOrderService {
      * @param obtainPosOrderModel
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ApiRest obtainPosOrder(ObtainPosOrderModel obtainPosOrderModel) throws IOException {
         BigInteger tenantId = obtainPosOrderModel.getTenantId();
         BigInteger branchId = obtainPosOrderModel.getBranchId();
