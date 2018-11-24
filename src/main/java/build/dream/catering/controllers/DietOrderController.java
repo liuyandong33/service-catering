@@ -82,6 +82,11 @@ public class DietOrderController extends BasicController {
         return null;
     }
 
+    /**
+     * 支付宝支付回调
+     *
+     * @return
+     */
     @RequestMapping(value = "/alipayCallback", method = RequestMethod.POST)
     @ResponseBody
     public String alipayCallback() {
@@ -97,6 +102,11 @@ public class DietOrderController extends BasicController {
         return returnValue;
     }
 
+    /**
+     * 微信支付回调
+     *
+     * @return
+     */
     @RequestMapping(value = "/weiXinPayCallback", method = RequestMethod.POST)
     @ResponseBody
     public String weiXinPayCallback() {
@@ -115,13 +125,12 @@ public class DietOrderController extends BasicController {
     /**
      * 获取POS订单
      *
-     * @param obtainPosOrderModel
      * @return
      */
     @RequestMapping(value = "/obtainPosOrder", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ObtainPosOrderModel.class, serviceClass = DietOrderService.class, serviceMethodName = "obtainPosOrder", error = "获取POS订单失败")
-    public String obtainPosOrder(ObtainPosOrderModel obtainPosOrderModel) {
+    public String obtainPosOrder() {
         return null;
     }
 }
