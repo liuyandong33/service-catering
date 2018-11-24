@@ -1023,13 +1023,28 @@ public class DietOrderService {
 
         DatabaseHelper.insertAll(dietOrderGroups);
 
+        Map<String, DietOrderDetail> dietOrderDetailMap = new HashMap<String, DietOrderDetail>();
         for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
             DietOrderGroup dietOrderGroup = dietOrderGroupMap.get(dietOrderDetail.getLocalDietOrderGroupId());
             dietOrderDetail.setDietOrderId(dietOrderId);
             dietOrderDetail.setDietOrderGroupId(dietOrderGroup.getId());
+            dietOrderDetailMap.put(dietOrderDetail.getLocalId(), dietOrderDetail);
         }
 
         DatabaseHelper.insertAll(dietOrderDetails);
+
+        if (StringUtils.isNotBlank(orderDetailGoodsAttributes)) {
+            List<DietOrderDetailGoodsAttribute> dietOrderDetailGoodsAttributes = JacksonUtils.readValueAsList(orderDetailGoodsAttributes, DietOrderDetailGoodsAttribute.class);
+            for (DietOrderDetailGoodsAttribute dietOrderDetailGoodsAttribute : dietOrderDetailGoodsAttributes) {
+                DietOrderGroup dietOrderGroup = dietOrderGroupMap.get(dietOrderDetailGoodsAttribute.getLocalDietOrderGroupId());
+                DietOrderDetail dietOrderDetail = dietOrderDetailMap.get(dietOrderDetailGoodsAttribute.getLocalDietOrderDetailId());
+
+                dietOrderDetailGoodsAttribute.setDietOrderId(dietOrderId);
+                dietOrderDetailGoodsAttribute.setDietOrderGroupId(dietOrderGroup.getId());
+                dietOrderDetailGoodsAttribute.setDietOrderDetailId(dietOrderDetail.getId());
+            }
+            DatabaseHelper.insertAll(dietOrderDetailGoodsAttributes);
+        }
 
         return ApiRest.builder().data(dataMap).message("获取POS订单成功！").successful(true).build();
     }
