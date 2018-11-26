@@ -1,5 +1,6 @@
 package build.dream.catering.controllers;
 
+import build.dream.catering.models.purchase.DeletePurchaseOrderModel;
 import build.dream.catering.models.purchase.ExaminePurchaseOrderModel;
 import build.dream.catering.models.purchase.SavePurchaseOrderModel;
 import build.dream.catering.services.PurchaseService;
@@ -35,6 +36,18 @@ public class PurchaseController extends BasicController {
     @ResponseBody
     @ApiRestAction(modelClass = ExaminePurchaseOrderModel.class, serviceClass = PurchaseService.class, serviceMethodName = "examinePurchaseOrder", error = "审核进货单失败")
     public String examinePurchaseOrder() {
+        return null;
+    }
+
+    /**
+     * 删除进货单
+     *
+     * @return
+     */
+    @RequestMapping(value = "/deletePurchaseOrder", method = {RequestMethod.GET, RequestMethod.POST}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = DeletePurchaseOrderModel.class, serviceClass = PurchaseService.class, serviceMethodName = "deletePurchaseOrder", error = "删除进货单失败")
+    public String deletePurchaseOrder() {
         return null;
     }
 }

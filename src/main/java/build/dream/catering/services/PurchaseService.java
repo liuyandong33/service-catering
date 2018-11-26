@@ -45,6 +45,7 @@ public class PurchaseService {
                 .reviewerUserId(Constants.BIGINT_DEFAULT_VALUE)
                 .reviewTime(Constants.DATETIME_DEFAULT_VALUE)
                 .remark(StringUtils.isNotBlank(remark) ? remark : Constants.VARCHAR_DEFAULT_VALUE)
+                .status(1)
                 .createUserId(userId)
                 .lastUpdateUserId(userId)
                 .build();
@@ -91,7 +92,7 @@ public class PurchaseService {
         BigInteger userId = examinePurchaseOrderModel.obtainUserId();
         BigInteger purchaseOrderId = examinePurchaseOrderModel.getPurchaseOrderId();
 
-        SearchModel searchModel = new SearchModel();
+        SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(PurchaseOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition(PurchaseOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         searchModel.addSearchCondition(PurchaseOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, purchaseOrderId);
@@ -110,5 +111,33 @@ public class PurchaseService {
             GoodsUtils.addGoodsStock(purchaseOrderDetail.getGoodsId(), purchaseOrderDetail.getGoodsSpecificationId(), purchaseOrderDetail.getQuantity());
         }
         return ApiRest.builder().message("审核进货单成功！").successful(true).build();
+    }
+
+    /**
+     * 删除进货单
+     *
+     * @param examinePurchaseOrderModel
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest deletePurchaseOrder(ExaminePurchaseOrderModel examinePurchaseOrderModel) {
+        BigInteger tenantId = examinePurchaseOrderModel.obtainTenantId();
+        BigInteger branchId = examinePurchaseOrderModel.obtainBranchId();
+        BigInteger purchaseOrderId = examinePurchaseOrderModel.getPurchaseOrderId();
+        BigInteger userId = examinePurchaseOrderModel.obtainUserId();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(PurchaseOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(PurchaseOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(PurchaseOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, purchaseOrderId);
+        PurchaseOrder purchaseOrder = DatabaseHelper.find(PurchaseOrder.class, searchModel);
+        ValidateUtils.notNull(purchaseOrder, "进货单不存在！");
+
+        purchaseOrder.setLastUpdateUserId(userId);
+        purchaseOrder.setLastUpdateRemark("删除进货单！");
+        purchaseOrder.setDeleted(true);
+        purchaseOrder.setDeleteTime(new Date());
+        DatabaseHelper.update(purchaseOrder);
+        return ApiRest.builder().message("删除进货单成功！").successful(true).build();
     }
 }
