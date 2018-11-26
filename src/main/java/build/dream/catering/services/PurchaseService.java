@@ -1,12 +1,14 @@
 package build.dream.catering.services;
 
+import build.dream.catering.constants.Constants;
+import build.dream.catering.models.purchase.ExaminePurchaseOrderModel;
 import build.dream.catering.models.purchase.SavePurchaseOrderModel;
+import build.dream.catering.utils.GoodsUtils;
 import build.dream.catering.utils.SequenceUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.PurchaseOrder;
 import build.dream.common.catering.domains.PurchaseOrderDetail;
-import build.dream.common.utils.DatabaseHelper;
-import build.dream.common.utils.SerialNumberGenerator;
+import build.dream.common.utils.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,12 @@ import java.util.Map;
 
 @Service
 public class PurchaseService {
+    /**
+     * 保存进货单
+     *
+     * @param savePurchaseOrderModel
+     * @return
+     */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest savePurchaseOrder(SavePurchaseOrderModel savePurchaseOrderModel) {
         BigInteger tenantId = savePurchaseOrderModel.obtainTenantId();
@@ -64,5 +72,36 @@ public class PurchaseService {
         data.put("purchaseOrder", purchaseOrder);
         data.put("purchaseOrderDetails", purchaseOrderDetails);
         return ApiRest.builder().data(data).message("保存进货单成功！").successful(true).build();
+    }
+
+    /**
+     * 审核进货单
+     *
+     * @param examinePurchaseOrderModel
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest examinePurchaseOrder(ExaminePurchaseOrderModel examinePurchaseOrderModel) {
+        BigInteger tenantId = examinePurchaseOrderModel.obtainTenantId();
+        BigInteger branchId = examinePurchaseOrderModel.obtainBranchId();
+        BigInteger userId = examinePurchaseOrderModel.obtainUserId();
+        BigInteger purchaseOrderId = examinePurchaseOrderModel.getPurchaseOrderId();
+
+        SearchModel searchModel = new SearchModel();
+        searchModel.addSearchCondition(PurchaseOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(PurchaseOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(PurchaseOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, purchaseOrderId);
+        PurchaseOrder purchaseOrder = DatabaseHelper.find(PurchaseOrder.class, searchModel);
+        ValidateUtils.notNull(purchaseOrder, "进货单不存在！");
+
+        purchaseOrder.setReviewerUserId(userId);
+        purchaseOrder.setLastUpdateUserId(userId);
+        DatabaseHelper.update(purchaseOrder);
+
+        List<PurchaseOrderDetail> purchaseOrderDetails = DatabaseHelper.findAll(PurchaseOrderDetail.class, TupleUtils.buildTuple3(PurchaseOrderDetail.ColumnName.PURCHASE_ORDER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, purchaseOrderId));
+        for (PurchaseOrderDetail purchaseOrderDetail : purchaseOrderDetails) {
+            GoodsUtils.addGoodsStock(purchaseOrderDetail.getGoodsId(), purchaseOrderDetail.getGoodsSpecificationId(), purchaseOrderDetail.getQuantity());
+        }
+        return ApiRest.builder().message("审核进货单成功！").successful(true).build();
     }
 }
