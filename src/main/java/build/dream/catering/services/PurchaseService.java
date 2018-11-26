@@ -1,6 +1,7 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
+import build.dream.catering.models.purchase.DeletePurchaseOrderModel;
 import build.dream.catering.models.purchase.ExaminePurchaseOrderModel;
 import build.dream.catering.models.purchase.SavePurchaseOrderModel;
 import build.dream.catering.utils.GoodsUtils;
@@ -116,15 +117,15 @@ public class PurchaseService {
     /**
      * 删除进货单
      *
-     * @param examinePurchaseOrderModel
+     * @param deletePurchaseOrderModel
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest deletePurchaseOrder(ExaminePurchaseOrderModel examinePurchaseOrderModel) {
-        BigInteger tenantId = examinePurchaseOrderModel.obtainTenantId();
-        BigInteger branchId = examinePurchaseOrderModel.obtainBranchId();
-        BigInteger purchaseOrderId = examinePurchaseOrderModel.getPurchaseOrderId();
-        BigInteger userId = examinePurchaseOrderModel.obtainUserId();
+    public ApiRest deletePurchaseOrder(DeletePurchaseOrderModel deletePurchaseOrderModel) {
+        BigInteger tenantId = deletePurchaseOrderModel.obtainTenantId();
+        BigInteger branchId = deletePurchaseOrderModel.obtainBranchId();
+        BigInteger purchaseOrderId = deletePurchaseOrderModel.getPurchaseOrderId();
+        BigInteger userId = deletePurchaseOrderModel.obtainUserId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(PurchaseOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -132,6 +133,16 @@ public class PurchaseService {
         searchModel.addSearchCondition(PurchaseOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, purchaseOrderId);
         PurchaseOrder purchaseOrder = DatabaseHelper.find(PurchaseOrder.class, searchModel);
         ValidateUtils.notNull(purchaseOrder, "进货单不存在！");
+
+        UpdateModel updateModel = new UpdateModel(true);
+        updateModel.setTableName("purchase_order_detail");
+        updateModel.addSearchCondition(PurchaseOrderDetail.ColumnName.PURCHASE_ORDER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, purchaseOrderId);
+        updateModel.addContentValue(PurchaseOrderDetail.ColumnName.LAST_UPDATE_USER_ID, userId);
+        updateModel.addContentValue(PurchaseOrderDetail.ColumnName.LAST_UPDATE_REMARK, "删除进货单明细！");
+        updateModel.addContentValue(PurchaseOrderDetail.ColumnName.LAST_UPDATE_TIME, new Date());
+        updateModel.addContentValue(PurchaseOrderDetail.ColumnName.DELETED, 1);
+        updateModel.addContentValue(PurchaseOrderDetail.ColumnName.DELETE_TIME, new Date());
+        DatabaseHelper.universalUpdate(updateModel);
 
         purchaseOrder.setLastUpdateUserId(userId);
         purchaseOrder.setLastUpdateRemark("删除进货单！");
