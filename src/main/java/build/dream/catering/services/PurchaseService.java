@@ -134,20 +134,22 @@ public class PurchaseService {
         PurchaseOrder purchaseOrder = DatabaseHelper.find(PurchaseOrder.class, searchModel);
         ValidateUtils.notNull(purchaseOrder, "进货单不存在！");
 
+        Date date = new Date();
         UpdateModel updateModel = new UpdateModel(true);
         updateModel.setTableName("purchase_order_detail");
         updateModel.addSearchCondition(PurchaseOrderDetail.ColumnName.PURCHASE_ORDER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, purchaseOrderId);
         updateModel.addContentValue(PurchaseOrderDetail.ColumnName.LAST_UPDATE_USER_ID, userId);
+        updateModel.addContentValue(PurchaseOrderDetail.ColumnName.LAST_UPDATE_TIME, date);
         updateModel.addContentValue(PurchaseOrderDetail.ColumnName.LAST_UPDATE_REMARK, "删除进货单明细！");
-        updateModel.addContentValue(PurchaseOrderDetail.ColumnName.LAST_UPDATE_TIME, new Date());
         updateModel.addContentValue(PurchaseOrderDetail.ColumnName.DELETED, 1);
-        updateModel.addContentValue(PurchaseOrderDetail.ColumnName.DELETE_TIME, new Date());
+        updateModel.addContentValue(PurchaseOrderDetail.ColumnName.DELETE_TIME, date);
         DatabaseHelper.universalUpdate(updateModel);
 
         purchaseOrder.setLastUpdateUserId(userId);
+        purchaseOrder.setLastUpdateTime(date);
         purchaseOrder.setLastUpdateRemark("删除进货单！");
         purchaseOrder.setDeleted(true);
-        purchaseOrder.setDeleteTime(new Date());
+        purchaseOrder.setDeleteTime(date);
         DatabaseHelper.update(purchaseOrder);
         return ApiRest.builder().message("删除进货单成功！").successful(true).build();
     }
