@@ -1,10 +1,7 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.models.purchase.DeletePurchaseOrderModel;
-import build.dream.catering.models.purchase.ExaminePurchaseOrderModel;
-import build.dream.catering.models.purchase.ListPurchaseOrdersModel;
-import build.dream.catering.models.purchase.SavePurchaseOrderModel;
+import build.dream.catering.models.purchase.*;
 import build.dream.catering.utils.GoodsUtils;
 import build.dream.catering.utils.SequenceUtils;
 import build.dream.common.api.ApiRest;
@@ -155,12 +152,28 @@ public class PurchaseService {
         return ApiRest.builder().message("删除进货单成功！").successful(true).build();
     }
 
+    /**
+     * 获取进货单列表
+     *
+     * @param listPurchaseOrdersModel
+     * @return
+     */
     @Transactional(readOnly = true)
     public ApiRest listPurchaseOrders(ListPurchaseOrdersModel listPurchaseOrdersModel) {
         BigInteger tenantId = listPurchaseOrdersModel.obtainTenantId();
         BigInteger branchId = listPurchaseOrdersModel.obtainBranchId();
         int page = listPurchaseOrdersModel.getPage();
         int rows = listPurchaseOrdersModel.getRows();
+        String sort = listPurchaseOrdersModel.getSort();
+        String order = listPurchaseOrdersModel.getOrder();
+
+        if (StringUtils.isBlank(sort)) {
+            sort = PurchaseOrder.ColumnName.LAST_UPDATE_TIME;
+        }
+
+        if (StringUtils.isBlank(order)) {
+            order = Constants.DESC;
+        }
 
         List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
         searchConditions.add(new SearchCondition(PurchaseOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
@@ -175,6 +188,7 @@ public class PurchaseService {
         if (count > 0) {
             PagedSearchModel pagedSearchModel = new PagedSearchModel();
             pagedSearchModel.setSearchConditions(searchConditions);
+            pagedSearchModel.setOrderBy(sort + " " + order);
             pagedSearchModel.setPage(page);
             pagedSearchModel.setRows(rows);
             purchaseOrders = DatabaseHelper.findAllPaged(PurchaseOrder.class, pagedSearchModel);
@@ -187,5 +201,37 @@ public class PurchaseService {
         data.put("rows", purchaseOrders);
 
         return ApiRest.builder().data(data).message("获取进货单列表成功！").successful(true).build();
+    }
+
+    /**
+     * 获取进货单信息
+     *
+     * @param obtainPurchaseOrderModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest obtainPurchaseOrder(ObtainPurchaseOrderModel obtainPurchaseOrderModel) {
+        BigInteger tenantId = obtainPurchaseOrderModel.obtainTenantId();
+        BigInteger branchId = obtainPurchaseOrderModel.obtainBranchId();
+        BigInteger purchaseOrderId = obtainPurchaseOrderModel.getPurchaseOrderId();
+
+        SearchModel purchaseOrderSearchModel = new SearchModel(true);
+        purchaseOrderSearchModel.addSearchCondition(PurchaseOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        purchaseOrderSearchModel.addSearchCondition(PurchaseOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        purchaseOrderSearchModel.addSearchCondition(PurchaseOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, purchaseOrderId);
+
+        PurchaseOrder purchaseOrder = DatabaseHelper.find(PurchaseOrder.class, purchaseOrderSearchModel);
+        ValidateUtils.notNull(purchaseOrder, "进货单不存在！");
+
+        SearchModel purchaseOrderDetailSearchModel = new SearchModel(true);
+        purchaseOrderDetailSearchModel.addSearchCondition(PurchaseOrderDetail.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        purchaseOrderDetailSearchModel.addSearchCondition(PurchaseOrderDetail.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        purchaseOrderDetailSearchModel.addSearchCondition(PurchaseOrderDetail.ColumnName.PURCHASE_ORDER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, purchaseOrderId);
+        List<PurchaseOrderDetail> purchaseOrderDetails = DatabaseHelper.findAll(PurchaseOrderDetail.class, purchaseOrderDetailSearchModel);
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("order", purchaseOrder);
+        data.put("details", purchaseOrderDetails);
+        return ApiRest.builder().data(data).message("获取进货单成功！").successful(true).build();
     }
 }

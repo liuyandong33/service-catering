@@ -31,10 +31,10 @@
             WHERE ${@build.dream.common.utils.DatabaseUtils@obtainWhereClause(whereClause)}
         </if>
         <if test="@org.apache.commons.lang.StringUtils@isNotBlank(groupBy)">
-            GROUP BY groupBy
+            GROUP BY ${groupBy}
         </if>
         <if test="@org.apache.commons.lang.StringUtils@isNotBlank(orderBy)">
-            ORDER BY orderBy
+            ORDER BY ${orderBy}
         </if>
     </sql>
 

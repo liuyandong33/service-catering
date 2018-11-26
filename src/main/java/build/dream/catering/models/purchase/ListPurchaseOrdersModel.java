@@ -1,6 +1,5 @@
 package build.dream.catering.models.purchase;
 
-import build.dream.common.models.BasicModel;
 import build.dream.common.models.CateringBasicModel;
 
 import javax.validation.constraints.Max;
@@ -17,6 +16,10 @@ public class ListPurchaseOrdersModel extends CateringBasicModel {
     @Max(value = 500)
     private Integer rows;
 
+    private String sort;
+
+    private String order;
+
     public Integer getPage() {
         return page;
     }
@@ -31,5 +34,21 @@ public class ListPurchaseOrdersModel extends CateringBasicModel {
 
     public void setRows(Integer rows) {
         this.rows = rows;
+    }
+
+    public String getSort() {
+        return sort;
+    }
+
+    public void setSort(String sort) {
+        this.sort = sort;
+    }
+
+    public String getOrder() {
+        return order;
+    }
+
+    public void setOrder(String order) {
+        this.order = order;
     }
 }
