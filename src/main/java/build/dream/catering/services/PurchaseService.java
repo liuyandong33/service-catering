@@ -9,6 +9,7 @@ import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.PurchaseOrder;
 import build.dream.common.catering.domains.PurchaseOrderDetail;
 import build.dream.common.utils.*;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +45,11 @@ public class PurchaseService {
                 .branchId(branchId)
                 .orderNumber(orderNumber)
                 .originatorUserId(userId)
-                .remark(remark)
+                .reviewerUserId(Constants.BIGINT_DEFAULT_VALUE)
+                .reviewTime(Constants.DATETIME_DEFAULT_VALUE)
+                .remark(StringUtils.isNotBlank(remark) ? remark : Constants.VARCHAR_DEFAULT_VALUE)
+                .createUserId(userId)
+                .lastUpdateUserId(userId)
                 .build();
 
         DatabaseHelper.insert(purchaseOrder);
@@ -63,6 +68,8 @@ public class PurchaseService {
                     .unitId(detail.getUnitId())
                     .purchasePrice(detail.getPurchasePrice())
                     .quantity(detail.getQuantity())
+                    .createUserId(userId)
+                    .lastUpdateUserId(userId)
                     .build();
             purchaseOrderDetails.add(purchaseOrderDetail);
         }
