@@ -14,10 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class PurchaseService {
@@ -100,8 +97,10 @@ public class PurchaseService {
         searchModel.addSearchCondition(PurchaseOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, purchaseOrderId);
         PurchaseOrder purchaseOrder = DatabaseHelper.find(PurchaseOrder.class, searchModel);
         ValidateUtils.notNull(purchaseOrder, "进货单不存在！");
+        ValidateUtils.isTrue(purchaseOrder.getStatus() == 1, "只有未审核状态的进货单才能进行审核操作！");
 
         purchaseOrder.setReviewerUserId(userId);
+        purchaseOrder.setReviewTime(new Date());
         purchaseOrder.setLastUpdateUserId(userId);
         DatabaseHelper.update(purchaseOrder);
 
