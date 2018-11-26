@@ -101,6 +101,7 @@ public class PurchaseService {
 
         purchaseOrder.setReviewerUserId(userId);
         purchaseOrder.setReviewTime(new Date());
+        purchaseOrder.setStatus(2);
         purchaseOrder.setLastUpdateUserId(userId);
         DatabaseHelper.update(purchaseOrder);
 
