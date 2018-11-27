@@ -136,6 +136,8 @@ public class PurchaseService {
         Date date = new Date();
         UpdateModel updateModel = new UpdateModel(true);
         updateModel.setTableName("purchase_order_detail");
+        updateModel.addSearchCondition(PurchaseOrderDetail.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        updateModel.addSearchCondition(PurchaseOrderDetail.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         updateModel.addSearchCondition(PurchaseOrderDetail.ColumnName.PURCHASE_ORDER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, purchaseOrderId);
         updateModel.addContentValue(PurchaseOrderDetail.ColumnName.LAST_UPDATE_USER_ID, userId);
         updateModel.addContentValue(PurchaseOrderDetail.ColumnName.LAST_UPDATE_REMARK, "删除进货单明细！");
