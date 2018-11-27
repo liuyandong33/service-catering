@@ -44,7 +44,7 @@ public class PurchaseService {
                 .examinerUserId(Constants.BIGINT_DEFAULT_VALUE)
                 .examineTime(Constants.DATETIME_DEFAULT_VALUE)
                 .remark(StringUtils.isNotBlank(remark) ? remark : Constants.VARCHAR_DEFAULT_VALUE)
-                .status(1)
+                .status(Constants.PURCHASE_ORDER_STATUS_NOT_EXAMINED)
                 .createUserId(userId)
                 .lastUpdateUserId(userId)
                 .build();
@@ -97,11 +97,11 @@ public class PurchaseService {
         searchModel.addSearchCondition(PurchaseOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, purchaseOrderId);
         PurchaseOrder purchaseOrder = DatabaseHelper.find(PurchaseOrder.class, searchModel);
         ValidateUtils.notNull(purchaseOrder, "进货单不存在！");
-        ValidateUtils.isTrue(purchaseOrder.getStatus() == 1, "只有未审核状态的进货单才能进行审核操作！");
+        ValidateUtils.isTrue(purchaseOrder.getStatus() == Constants.PURCHASE_ORDER_STATUS_NOT_EXAMINED, "只有未审核状态的进货单才能进行审核操作！");
 
         purchaseOrder.setExaminerUserId(userId);
         purchaseOrder.setExamineTime(new Date());
-        purchaseOrder.setStatus(2);
+        purchaseOrder.setStatus(Constants.PURCHASE_ORDER_STATUS_EXAMINED);
         purchaseOrder.setLastUpdateUserId(userId);
         purchaseOrder.setLastUpdateRemark("审核进货单！");
         DatabaseHelper.update(purchaseOrder);
