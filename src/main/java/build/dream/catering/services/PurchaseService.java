@@ -33,7 +33,7 @@ public class PurchaseService {
         String remark = savePurchaseOrderModel.getRemark();
         List<SavePurchaseOrderModel.Detail> details = savePurchaseOrderModel.getDetails();
 
-        String sequenceName = SerialNumberGenerator.generatorTodaySequenceName(tenantId, branchId, "purchase_order");
+        String sequenceName = SerialNumberGenerator.generatorTodaySequenceName(tenantId, branchId, "purchase_order_number");
         String orderNumber = SerialNumberGenerator.nextOrderNumber("JH", 8, SequenceUtils.nextValue(sequenceName));
 
         PurchaseOrder purchaseOrder = PurchaseOrder.builder()

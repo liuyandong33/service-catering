@@ -7,6 +7,7 @@ import build.dream.catering.mappers.SequenceMapper;
 import build.dream.catering.models.dietorder.*;
 import build.dream.catering.utils.DietOrderUtils;
 import build.dream.catering.utils.GoodsUtils;
+import build.dream.catering.utils.SequenceUtils;
 import build.dream.catering.utils.ThreadUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.*;
@@ -225,9 +226,9 @@ public class DietOrderService {
         if (orderType == DietOrderConstants.ORDER_TYPE_SCAN_CODE_ORDER) {
             orderNumberPrefix = "SC";
         }
-        Integer daySerialNumber = sequenceMapper.nextValue(SerialNumberGenerator.generatorTodaySequenceName(tenantId, branchId, "diet_order_number"));
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
-        String orderNumber = orderNumberPrefix + simpleDateFormat.format(new Date()) + SerialNumberGenerator.nextSerialNumber(8, daySerialNumber);
+
+        Integer daySerialNumber = SequenceUtils.nextValue(SerialNumberGenerator.generatorTodaySequenceName(tenantId, branchId, "diet_order_number"));
+        String orderNumber = SerialNumberGenerator.nextOrderNumber(orderNumberPrefix, 8, daySerialNumber);
 
         DietOrder.Builder builder = DietOrder.builder()
                 .tenantId(tenantId)
