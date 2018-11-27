@@ -11,6 +11,7 @@ import build.dream.common.utils.*;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import scala.Tuple3;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -151,6 +152,29 @@ public class PurchaseService {
         purchaseOrder.setDeleteTime(date);
         DatabaseHelper.update(purchaseOrder);
         return ApiRest.builder().message("删除进货单成功！").successful(true).build();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest batchDeletePurchaseOrders(BatchDeletePurchaseOrdersModel batchDeletePurchaseOrdersModel) {
+        BigInteger tenantId = batchDeletePurchaseOrdersModel.obtainTenantId();
+        BigInteger branchId = batchDeletePurchaseOrdersModel.obtainBranchId();
+        BigInteger userId = batchDeletePurchaseOrdersModel.obtainUserId();
+        List<BigInteger> purchaseOrderIds = batchDeletePurchaseOrdersModel.getPurchaseOrderIds();
+
+        Tuple3[] purchaseOrderSearchConditions = new Tuple3[]{
+                TupleUtils.buildTuple3(PurchaseOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId),
+                TupleUtils.buildTuple3(PurchaseOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId),
+                TupleUtils.buildTuple3(PurchaseOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, purchaseOrderIds)
+        };
+        DatabaseHelper.markedDelete(PurchaseOrder.class, userId, "删除进货单！", purchaseOrderSearchConditions);
+
+        Tuple3[] purchaseOrderDetailSearchConditions = new Tuple3[]{
+                TupleUtils.buildTuple3(PurchaseOrderDetail.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId),
+                TupleUtils.buildTuple3(PurchaseOrderDetail.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId),
+                TupleUtils.buildTuple3(PurchaseOrderDetail.ColumnName.PURCHASE_ORDER_ID, Constants.SQL_OPERATION_SYMBOL_IN, purchaseOrderIds)
+        };
+        DatabaseHelper.markedDelete(PurchaseOrderDetail.class, userId, "删除进货单明细！", purchaseOrderDetailSearchConditions);
+        return ApiRest.builder().message("批量删除进货单成功！").successful(true).build();
     }
 
     /**

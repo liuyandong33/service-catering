@@ -49,6 +49,18 @@ public class PurchaseController extends BasicController {
         return null;
     }
 
+    /**
+     * 批量删除进货单
+     *
+     * @return
+     */
+    @RequestMapping(value = "/batchDeletePurchaseOrders", method = {RequestMethod.GET, RequestMethod.POST}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = BatchDeletePurchaseOrdersModel.class, serviceClass = PurchaseService.class, serviceMethodName = "batchDeletePurchaseOrders", error = "批量删除进货单失败")
+    public String batchDeletePurchaseOrders() {
+        return null;
+    }
+
 
     /**
      * 分页查询进货单
