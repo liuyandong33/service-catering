@@ -127,30 +127,16 @@ public class PurchaseService {
         BigInteger purchaseOrderId = deletePurchaseOrderModel.getPurchaseOrderId();
         BigInteger userId = deletePurchaseOrderModel.obtainUserId();
 
-        SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition(PurchaseOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition(PurchaseOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition(PurchaseOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, purchaseOrderId);
-        PurchaseOrder purchaseOrder = DatabaseHelper.find(PurchaseOrder.class, searchModel);
-        ValidateUtils.notNull(purchaseOrder, "进货单不存在！");
+        DatabaseHelper.markedDelete(PurchaseOrder.class, purchaseOrderId, userId, "删除进货单！");
 
-        Date date = new Date();
-        UpdateModel updateModel = new UpdateModel(true);
-        updateModel.setTableName("purchase_order_detail");
-        updateModel.addSearchCondition(PurchaseOrderDetail.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        updateModel.addSearchCondition(PurchaseOrderDetail.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        updateModel.addSearchCondition(PurchaseOrderDetail.ColumnName.PURCHASE_ORDER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, purchaseOrderId);
-        updateModel.addContentValue(PurchaseOrderDetail.ColumnName.LAST_UPDATE_USER_ID, userId);
-        updateModel.addContentValue(PurchaseOrderDetail.ColumnName.LAST_UPDATE_REMARK, "删除进货单明细！");
-        updateModel.addContentValue(PurchaseOrderDetail.ColumnName.DELETED, 1);
-        updateModel.addContentValue(PurchaseOrderDetail.ColumnName.DELETE_TIME, date);
-        DatabaseHelper.universalUpdate(updateModel);
+        Tuple3[] searchConditions = new Tuple3[]{
+                TupleUtils.buildTuple3(PurchaseOrderDetail.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId),
+                TupleUtils.buildTuple3(PurchaseOrderDetail.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId),
+                TupleUtils.buildTuple3(PurchaseOrderDetail.ColumnName.PURCHASE_ORDER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, purchaseOrderId),
+        };
 
-        purchaseOrder.setLastUpdateUserId(userId);
-        purchaseOrder.setLastUpdateRemark("删除进货单！");
-        purchaseOrder.setDeleted(true);
-        purchaseOrder.setDeleteTime(date);
-        DatabaseHelper.update(purchaseOrder);
+        DatabaseHelper.markedDelete(PurchaseOrderDetail.class, userId, "删除进货单明细！", searchConditions);
+
         return ApiRest.builder().message("删除进货单成功！").successful(true).build();
     }
 
