@@ -230,8 +230,8 @@ public class PurchaseService {
         List<PurchaseOrderDetail> purchaseOrderDetails = DatabaseHelper.findAll(PurchaseOrderDetail.class, purchaseOrderDetailSearchModel);
 
         Map<String, Object> data = new HashMap<String, Object>();
-        data.put("order", purchaseOrder);
-        data.put("details", purchaseOrderDetails);
+        data.put("purchaseOrder", purchaseOrder);
+        data.put("purchaseOrderDetails", purchaseOrderDetails);
         return ApiRest.builder().data(data).message("获取进货单成功！").successful(true).build();
     }
 }
