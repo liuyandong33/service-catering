@@ -41,8 +41,8 @@ public class PurchaseService {
                 .branchId(branchId)
                 .orderNumber(orderNumber)
                 .originatorUserId(userId)
-                .reviewerUserId(Constants.BIGINT_DEFAULT_VALUE)
-                .reviewTime(Constants.DATETIME_DEFAULT_VALUE)
+                .examinerUserId(Constants.BIGINT_DEFAULT_VALUE)
+                .examineTime(Constants.DATETIME_DEFAULT_VALUE)
                 .remark(StringUtils.isNotBlank(remark) ? remark : Constants.VARCHAR_DEFAULT_VALUE)
                 .status(1)
                 .createUserId(userId)
@@ -99,10 +99,11 @@ public class PurchaseService {
         ValidateUtils.notNull(purchaseOrder, "进货单不存在！");
         ValidateUtils.isTrue(purchaseOrder.getStatus() == 1, "只有未审核状态的进货单才能进行审核操作！");
 
-        purchaseOrder.setReviewerUserId(userId);
-        purchaseOrder.setReviewTime(new Date());
+        purchaseOrder.setExaminerUserId(userId);
+        purchaseOrder.setExamineTime(new Date());
         purchaseOrder.setStatus(2);
         purchaseOrder.setLastUpdateUserId(userId);
+        purchaseOrder.setLastUpdateRemark("审核进货单！");
         DatabaseHelper.update(purchaseOrder);
 
         List<PurchaseOrderDetail> purchaseOrderDetails = DatabaseHelper.findAll(PurchaseOrderDetail.class, TupleUtils.buildTuple3(PurchaseOrderDetail.ColumnName.PURCHASE_ORDER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, purchaseOrderId));
@@ -137,14 +138,12 @@ public class PurchaseService {
         updateModel.setTableName("purchase_order_detail");
         updateModel.addSearchCondition(PurchaseOrderDetail.ColumnName.PURCHASE_ORDER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, purchaseOrderId);
         updateModel.addContentValue(PurchaseOrderDetail.ColumnName.LAST_UPDATE_USER_ID, userId);
-        updateModel.addContentValue(PurchaseOrderDetail.ColumnName.LAST_UPDATE_TIME, date);
         updateModel.addContentValue(PurchaseOrderDetail.ColumnName.LAST_UPDATE_REMARK, "删除进货单明细！");
         updateModel.addContentValue(PurchaseOrderDetail.ColumnName.DELETED, 1);
         updateModel.addContentValue(PurchaseOrderDetail.ColumnName.DELETE_TIME, date);
         DatabaseHelper.universalUpdate(updateModel);
 
         purchaseOrder.setLastUpdateUserId(userId);
-        purchaseOrder.setLastUpdateTime(date);
         purchaseOrder.setLastUpdateRemark("删除进货单！");
         purchaseOrder.setDeleted(true);
         purchaseOrder.setDeleteTime(date);
