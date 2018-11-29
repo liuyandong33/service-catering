@@ -7,12 +7,14 @@ import build.dream.catering.utils.SequenceUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.PurchaseOrder;
 import build.dream.common.catering.domains.PurchaseOrderDetail;
+import build.dream.common.catering.domains.StockFlow;
 import build.dream.common.utils.*;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import scala.Tuple3;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -108,9 +110,29 @@ public class PurchaseService {
         DatabaseHelper.update(purchaseOrder);
 
         List<PurchaseOrderDetail> purchaseOrderDetails = DatabaseHelper.findAll(PurchaseOrderDetail.class, TupleUtils.buildTuple3(PurchaseOrderDetail.ColumnName.PURCHASE_ORDER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, purchaseOrderId));
+        String tenantCode = purchaseOrder.getTenantCode();
+        List<StockFlow> stockFlows = new ArrayList<StockFlow>();
         for (PurchaseOrderDetail purchaseOrderDetail : purchaseOrderDetails) {
-            GoodsUtils.addGoodsStock(purchaseOrderDetail.getGoodsId(), purchaseOrderDetail.getGoodsSpecificationId(), purchaseOrderDetail.getQuantity());
+            BigInteger goodsId = purchaseOrderDetail.getGoodsId();
+            BigInteger goodsSpecificationId = purchaseOrderDetail.getGoodsSpecificationId();
+            BigInteger unitId = purchaseOrderDetail.getUnitId();
+            BigDecimal quantity = purchaseOrderDetail.getQuantity();
+            GoodsUtils.addGoodsStock(goodsId, goodsSpecificationId, quantity);
+
+            StockFlow stockFlow = StockFlow.builder()
+                    .tenantId(tenantId)
+                    .tenantCode(tenantCode)
+                    .branchId(branchId)
+                    .goodsId(goodsId)
+                    .goodsSpecificationId(goodsSpecificationId)
+                    .unitId(unitId)
+                    .quantity(quantity)
+                    .createUserId(userId)
+                    .lastUpdateUserId(userId)
+                    .build();
+            stockFlows.add(stockFlow);
         }
+        DatabaseHelper.insertAll(stockFlows);
         return ApiRest.builder().message("审核进货单成功！").successful(true).build();
     }
 
