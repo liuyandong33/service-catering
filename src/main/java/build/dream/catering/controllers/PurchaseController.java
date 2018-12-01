@@ -67,7 +67,7 @@ public class PurchaseController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/listPurchaseOrders", method = {RequestMethod.GET, RequestMethod.POST}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/listPurchaseOrders", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ListPurchaseOrdersModel.class, serviceClass = PurchaseService.class, serviceMethodName = "listPurchaseOrders", error = "获取进货单列表失败")
     public String listPurchaseOrders() {
@@ -79,7 +79,7 @@ public class PurchaseController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/obtainPurchaseOrder", method = {RequestMethod.GET, RequestMethod.POST}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/obtainPurchaseOrder", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ObtainPurchaseOrderModel.class, serviceClass = PurchaseService.class, serviceMethodName = "obtainPurchaseOrder", error = "获取进货单信息失败")
     public String obtainPurchaseOrder() {
