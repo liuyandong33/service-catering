@@ -102,8 +102,10 @@ public class PurchaseService {
         ValidateUtils.notNull(purchaseOrder, "进货单不存在！");
         ValidateUtils.isTrue(purchaseOrder.getStatus() == Constants.PURCHASE_ORDER_STATUS_NOT_EXAMINED, "只有未审核状态的进货单才能进行审核操作！");
 
+        Date date = new Date();
+
         purchaseOrder.setAuditorUserId(userId);
-        purchaseOrder.setAuditTime(new Date());
+        purchaseOrder.setAuditTime(date);
         purchaseOrder.setStatus(Constants.PURCHASE_ORDER_STATUS_EXAMINED);
         purchaseOrder.setLastUpdateUserId(userId);
         purchaseOrder.setLastUpdateRemark("审核进货单！");
@@ -112,6 +114,7 @@ public class PurchaseService {
         List<PurchaseOrderDetail> purchaseOrderDetails = DatabaseHelper.findAll(PurchaseOrderDetail.class, TupleUtils.buildTuple3(PurchaseOrderDetail.ColumnName.PURCHASE_ORDER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, purchaseOrderId));
         String tenantCode = purchaseOrder.getTenantCode();
         List<StockFlow> stockFlows = new ArrayList<StockFlow>();
+
         for (PurchaseOrderDetail purchaseOrderDetail : purchaseOrderDetails) {
             BigInteger goodsId = purchaseOrderDetail.getGoodsId();
             BigInteger goodsSpecificationId = purchaseOrderDetail.getGoodsSpecificationId();
@@ -126,6 +129,8 @@ public class PurchaseService {
                     .goodsId(goodsId)
                     .goodsSpecificationId(goodsSpecificationId)
                     .unitId(unitId)
+                    .type(Constants.STOCK_FLOW_TYPE_PURCHASE)
+                    .occurrenceTime(date)
                     .quantity(quantity)
                     .createUserId(userId)
                     .lastUpdateUserId(userId)

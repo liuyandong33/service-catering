@@ -120,4 +120,8 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String ELASTICSEARCH_CLUSTER_NODES = "elasticsearch.cluster-nodes";
     public static final String ELASTICJOB_ZOOKEEPER_SERVER_LISTS = "elasticjob.zookeeper.server-lists";
     public static final String ELASTICJOB_ZOOKEEPER_NAMESPACE = "elasticjob.zookeeper.namespace";
+
+    public static final Integer STOCK_FLOW_TYPE_PURCHASE = 1;
+    public static final Integer STOCK_FLOW_TYPE_REFUND = 2;
+    public static final Integer STOCK_FLOW_TYPE_SALE = 3;
 }
