@@ -44,8 +44,8 @@ public class PurchaseService {
                 .branchId(branchId)
                 .orderNumber(orderNumber)
                 .originatorUserId(userId)
-                .examinerUserId(Constants.BIGINT_DEFAULT_VALUE)
-                .examineTime(Constants.DATETIME_DEFAULT_VALUE)
+                .auditorUserId(Constants.BIGINT_DEFAULT_VALUE)
+                .auditTime(Constants.DATETIME_DEFAULT_VALUE)
                 .remark(StringUtils.isNotBlank(remark) ? remark : Constants.VARCHAR_DEFAULT_VALUE)
                 .status(Constants.PURCHASE_ORDER_STATUS_NOT_EXAMINED)
                 .createUserId(userId)
@@ -84,15 +84,15 @@ public class PurchaseService {
     /**
      * 审核进货单
      *
-     * @param examinePurchaseOrderModel
+     * @param auditPurchaseOrderModel
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest examinePurchaseOrder(ExaminePurchaseOrderModel examinePurchaseOrderModel) {
-        BigInteger tenantId = examinePurchaseOrderModel.obtainTenantId();
-        BigInteger branchId = examinePurchaseOrderModel.obtainBranchId();
-        BigInteger userId = examinePurchaseOrderModel.obtainUserId();
-        BigInteger purchaseOrderId = examinePurchaseOrderModel.getPurchaseOrderId();
+    public ApiRest auditPurchaseOrder(AuditPurchaseOrderModel auditPurchaseOrderModel) {
+        BigInteger tenantId = auditPurchaseOrderModel.obtainTenantId();
+        BigInteger branchId = auditPurchaseOrderModel.obtainBranchId();
+        BigInteger userId = auditPurchaseOrderModel.obtainUserId();
+        BigInteger purchaseOrderId = auditPurchaseOrderModel.getPurchaseOrderId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(PurchaseOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -102,8 +102,8 @@ public class PurchaseService {
         ValidateUtils.notNull(purchaseOrder, "进货单不存在！");
         ValidateUtils.isTrue(purchaseOrder.getStatus() == Constants.PURCHASE_ORDER_STATUS_NOT_EXAMINED, "只有未审核状态的进货单才能进行审核操作！");
 
-        purchaseOrder.setExaminerUserId(userId);
-        purchaseOrder.setExamineTime(new Date());
+        purchaseOrder.setAuditorUserId(userId);
+        purchaseOrder.setAuditTime(new Date());
         purchaseOrder.setStatus(Constants.PURCHASE_ORDER_STATUS_EXAMINED);
         purchaseOrder.setLastUpdateUserId(userId);
         purchaseOrder.setLastUpdateRemark("审核进货单！");

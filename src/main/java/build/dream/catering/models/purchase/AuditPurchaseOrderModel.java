@@ -5,7 +5,7 @@ import build.dream.common.models.CateringBasicModel;
 import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
 
-public class ExaminePurchaseOrderModel extends CateringBasicModel {
+public class AuditPurchaseOrderModel extends CateringBasicModel {
     @NotNull
     private BigInteger purchaseOrderId;
 

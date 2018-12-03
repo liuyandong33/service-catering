@@ -30,10 +30,10 @@ public class PurchaseController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/examinePurchaseOrder", method = {RequestMethod.GET, RequestMethod.POST}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/auditPurchaseOrder", method = {RequestMethod.GET, RequestMethod.POST}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ApiRestAction(modelClass = ExaminePurchaseOrderModel.class, serviceClass = PurchaseService.class, serviceMethodName = "examinePurchaseOrder", error = "审核进货单失败")
-    public String examinePurchaseOrder() {
+    @ApiRestAction(modelClass = AuditPurchaseOrderModel.class, serviceClass = PurchaseService.class, serviceMethodName = "auditPurchaseOrder", error = "审核进货单失败")
+    public String auditPurchaseOrder() {
         return null;
     }
 
