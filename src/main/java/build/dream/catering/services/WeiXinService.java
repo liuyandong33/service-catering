@@ -397,4 +397,9 @@ public class WeiXinService {
         ValidateUtils.isTrue(obtainWeiXinAuthorizerInfoResult.isSuccessful(), obtainWeiXinAuthorizerInfoResult.getError());
         return ApiRest.builder().data(obtainWeiXinAuthorizerInfoResult.getData()).message("获取微信授权信息成功！").successful(true).build();
     }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest handleAuthCallback(AuthCallbackModel authCallbackModel) {
+        return null;
+    }
 }

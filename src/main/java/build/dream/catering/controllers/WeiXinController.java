@@ -1,12 +1,12 @@
 package build.dream.catering.controllers;
 
+import build.dream.catering.constants.Constants;
 import build.dream.catering.models.weixin.*;
 import build.dream.catering.services.WeiXinService;
 import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
-import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.GsonUtils;
+import build.dream.common.utils.*;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigInteger;
 import java.util.Map;
 
 @Controller
@@ -95,6 +96,46 @@ public class WeiXinController extends BasicController {
     @ResponseBody
     @ApiRestAction(modelClass = ObtainWeiXinAuthorizerInfoModel.class, serviceClass = WeiXinService.class, serviceMethodName = "obtainWeiXinAuthorizerInfo", error = "获取微信授权信息失败")
     public String obtainWeiXinAuthorizerInfo() {
+        return null;
+    }
+
+    /**
+     * 生成授权链接
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/generateComponentLoginPageUrl")
+    @ResponseBody
+    @ApiRestAction(error = "生成授权链接失败")
+    public String generateComponentLoginPageUrl() throws Exception {
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        GenerateComponentLoginPageUrlModel generateComponentLoginPageUrlModel = ApplicationHandler.instantiateObject(GenerateComponentLoginPageUrlModel.class, requestParameters);
+        generateComponentLoginPageUrlModel.validateAndThrow();
+
+        String authType = generateComponentLoginPageUrlModel.getAuthType();
+        BigInteger tenantId = generateComponentLoginPageUrlModel.obtainTenantId();
+
+        String componentAppId = ConfigurationUtils.getConfiguration(Constants.WEI_XIN_OPEN_PLATFORM_APPLICATION_APP_ID);
+        String componentAppSecret = ConfigurationUtils.getConfiguration(Constants.WEI_XIN_OPEN_PLATFORM_APPLICATION_APP_SECRET);
+
+        String preAuthCode = WeiXinUtils.obtainPreAuthCode(componentAppId, componentAppSecret);
+        String redirectUri = CommonUtils.getOutsideUrl(Constants.SERVICE_NAME_WEBAPI, "weiXin", "authCallback") + "?tenantId=" + tenantId + "&componentAppId=" + componentAppId;
+        String url = WeiXinUtils.generateComponentLoginPageUrl(componentAppId, preAuthCode, redirectUri, authType);
+
+        ApiRest apiRest = ApiRest.builder().data(url).message("生成授权链接成功！").successful(true).build();
+        return GsonUtils.toJson(apiRest);
+    }
+
+    /**
+     * 授权回调
+     *
+     * @return
+     */
+    @RequestMapping(value = "/authCallback")
+    @ResponseBody
+    @ApiRestAction(modelClass = AuthCallbackModel.class, serviceClass = WeiXinService.class, serviceMethodName = "handleAuthCallback", error = "授权回调处理失败")
+    public String authCallback() {
         return null;
     }
 }

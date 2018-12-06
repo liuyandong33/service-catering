@@ -124,4 +124,7 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final Integer STOCK_FLOW_TYPE_PURCHASE = 1;
     public static final Integer STOCK_FLOW_TYPE_REFUND = 2;
     public static final Integer STOCK_FLOW_TYPE_SALE = 3;
+
+    public static final String WEI_XIN_OPEN_PLATFORM_APPLICATION_APP_ID = "wei.xin.open.platform.application.app.id";
+    public static final String WEI_XIN_OPEN_PLATFORM_APPLICATION_APP_SECRET = "wei.xin.open.platform.application.app.secret";
 }
