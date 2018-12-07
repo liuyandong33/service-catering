@@ -85,6 +85,7 @@ public class PosService {
         Validate.notNull(pos, "POS不存在！");
 
         pos.setOnline(false);
+        pos.setLastUpdateRemark("下线POS");
         DatabaseHelper.update(pos);
 
         return new ApiRest(pos, "下线POS成功！");
