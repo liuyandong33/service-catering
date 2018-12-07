@@ -22,10 +22,12 @@ public class PosService {
      * @return
      */
     public ApiRest onlinePos(OnlinePosModel onlinePosModel) {
-        BigInteger tenantId = onlinePosModel.getTenantId();
-        BigInteger branchId = onlinePosModel.getBranchId();
-        BigInteger userId = onlinePosModel.getUserId();
-        String registrationId = onlinePosModel.getRegistrationId();
+        BigInteger tenantId = onlinePosModel.obtainTenantId();
+        String tenantCode = onlinePosModel.obtainTenantCode();
+        BigInteger branchId = onlinePosModel.obtainBranchId();
+        String branchCode = onlinePosModel.obtainBranchCode();
+        BigInteger userId = onlinePosModel.obtainUserId();
+        String deviceId = onlinePosModel.getDeviceId();
         String type = onlinePosModel.getType();
         String version = onlinePosModel.getVersion();
 
@@ -37,11 +39,11 @@ public class PosService {
         if (pos == null) {
             pos = new Pos();
             pos.setTenantId(tenantId);
-            pos.setTenantCode(onlinePosModel.getTenantCode());
+            pos.setTenantCode(tenantCode);
             pos.setBranchId(branchId);
-            pos.setBranchCode(onlinePosModel.getBranchCode());
+            pos.setBranchCode(branchCode);
             pos.setUserId(userId);
-            pos.setRegistrationId(registrationId);
+            pos.setDeviceId(deviceId);
             pos.setType(type);
             pos.setVersion(version);
             pos.setOnline(true);
@@ -51,7 +53,7 @@ public class PosService {
             DatabaseHelper.insert(pos);
         } else {
             pos.setUserId(userId);
-            pos.setRegistrationId(registrationId);
+            pos.setDeviceId(deviceId);
             pos.setType(type);
             pos.setVersion(version);
             pos.setOnline(true);
