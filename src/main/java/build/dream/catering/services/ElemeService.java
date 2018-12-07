@@ -788,9 +788,9 @@ public class ElemeService {
         searchModel.addSearchCondition("online", Constants.SQL_OPERATION_SYMBOL_EQUAL, 1);
         List<Pos> poses = DatabaseHelper.findAll(Pos.class, searchModel);
         if (CollectionUtils.isNotEmpty(poses)) {
-            List<String> registrationIds = new ArrayList<String>();
+            List<String> deviceIds = new ArrayList<String>();
             for (Pos pos : poses) {
-                registrationIds.add(pos.getRegistrationId());
+                deviceIds.add(pos.getDeviceId());
             }
             PushModel pushModel = new PushModel();
             PushMessageThread pushMessageThread = new PushMessageThread(pushModel, uuid, count, interval);

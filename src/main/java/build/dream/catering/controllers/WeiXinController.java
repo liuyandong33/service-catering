@@ -4,6 +4,7 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.models.weixin.*;
 import build.dream.catering.services.WeiXinService;
 import build.dream.common.annotations.ApiRestAction;
+import build.dream.common.annotations.ModelAndViewAction;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.*;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigInteger;
@@ -134,9 +136,16 @@ public class WeiXinController extends BasicController {
      * @return
      */
     @RequestMapping(value = "/authCallback")
-    @ResponseBody
-    @ApiRestAction(modelClass = AuthCallbackModel.class, serviceClass = WeiXinService.class, serviceMethodName = "handleAuthCallback", error = "授权回调处理失败")
-    public String authCallback() {
-        return null;
+    public ModelAndView authCallback() {
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        ModelAndView modelAndView = new ModelAndView();
+        try {
+            AuthCallbackModel authCallbackModel = ApplicationHandler.instantiateObject(AuthCallbackModel.class, requestParameters);
+            weiXinService.handleAuthCallback(authCallbackModel);
+            modelAndView.setViewName("weiXin/authSuccess");
+        } catch (Exception e) {
+            modelAndView.setViewName("weiXin/authFailure");
+        }
+        return modelAndView;
     }
 }

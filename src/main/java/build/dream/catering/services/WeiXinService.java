@@ -398,8 +398,12 @@ public class WeiXinService {
         return ApiRest.builder().data(obtainWeiXinAuthorizerInfoResult.getData()).message("获取微信授权信息成功！").successful(true).build();
     }
 
+    /**
+     * 处理授权回调
+     *
+     * @param authCallbackModel
+     */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest handleAuthCallback(AuthCallbackModel authCallbackModel) {
-        return null;
+    public void handleAuthCallback(AuthCallbackModel authCallbackModel) {
     }
 }
