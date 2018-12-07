@@ -115,12 +115,13 @@ public class WeiXinController extends BasicController {
 
         String authType = generateComponentLoginPageUrlModel.getAuthType();
         BigInteger tenantId = generateComponentLoginPageUrlModel.obtainTenantId();
+        String partitionCode = generateComponentLoginPageUrlModel.obtainPartitionCode();
 
         String componentAppId = ConfigurationUtils.getConfiguration(Constants.WEI_XIN_OPEN_PLATFORM_APPLICATION_APP_ID);
         String componentAppSecret = ConfigurationUtils.getConfiguration(Constants.WEI_XIN_OPEN_PLATFORM_APPLICATION_APP_SECRET);
 
         String preAuthCode = WeiXinUtils.obtainPreAuthCode(componentAppId, componentAppSecret);
-        String redirectUri = CommonUtils.getOutsideUrl(Constants.SERVICE_NAME_WEBAPI, "weiXin", "authCallback") + "?tenantId=" + tenantId + "&componentAppId=" + componentAppId;
+        String redirectUri = CommonUtils.getOutsideServiceDomain(Constants.SERVICE_NAME_WEBAPI) + "/proxy/doGetPermit/" + partitionCode + "/" + Constants.SERVICE_NAME_CATERING + "/weiXin/authCallback?tenantId=" + tenantId + "&componentAppId=" + componentAppId;
         String url = WeiXinUtils.generateComponentLoginPageUrl(componentAppId, preAuthCode, redirectUri, authType);
 
         ApiRest apiRest = ApiRest.builder().data(url).message("生成授权链接成功！").successful(true).build();
