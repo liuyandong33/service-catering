@@ -2,9 +2,11 @@ package build.dream.catering.utils;
 
 import build.dream.catering.beans.PackageGroupDietOrderDetail;
 import build.dream.catering.constants.Constants;
+import build.dream.catering.tools.PushMessageThread;
 import build.dream.common.catering.domains.*;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.models.alipay.AlipayTradeRefundModel;
+import build.dream.common.models.jpush.PushModel;
 import build.dream.common.models.weixinpay.RefundModel;
 import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
@@ -336,5 +338,22 @@ public class DietOrderUtils {
             packageGroups.add(packageGroup);
         }
         return packageGroups;
+    }
+
+    public static void pushMessage(BigInteger tenantId, BigInteger branchId, BigInteger dietOrderId, String uuid, int count, int interval) {
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition("online", Constants.SQL_OPERATION_SYMBOL_EQUAL, 1);
+        List<Pos> poses = DatabaseHelper.findAll(Pos.class, searchModel);
+        if (CollectionUtils.isNotEmpty(poses)) {
+            List<String> registrationIds = new ArrayList<String>();
+            for (Pos pos : poses) {
+                registrationIds.add(pos.getRegistrationId());
+            }
+            PushModel pushModel = new PushModel();
+            PushMessageThread pushMessageThread = new PushMessageThread(pushModel, uuid, count, interval);
+            new Thread(pushMessageThread).start();
+        }
     }
 }
