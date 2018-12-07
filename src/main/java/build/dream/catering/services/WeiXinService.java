@@ -405,5 +405,8 @@ public class WeiXinService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void handleAuthCallback(AuthCallbackModel authCallbackModel) {
+        BigInteger tenantId = authCallbackModel.getTenantId();
+        String componentAppId = authCallbackModel.getComponentAppId();
+        String authCode = authCallbackModel.getAuthCode();
     }
 }
