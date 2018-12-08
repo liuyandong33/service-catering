@@ -141,6 +141,7 @@ public class WeiXinController extends BasicController {
         ModelAndView modelAndView = new ModelAndView();
         try {
             AuthCallbackModel authCallbackModel = ApplicationHandler.instantiateObject(AuthCallbackModel.class, requestParameters);
+            authCallbackModel.validateAndThrow();
             weiXinService.handleAuthCallback(authCallbackModel);
             modelAndView.setViewName("weiXin/authSuccess");
         } catch (Exception e) {

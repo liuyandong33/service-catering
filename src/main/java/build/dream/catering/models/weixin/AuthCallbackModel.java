@@ -3,11 +3,17 @@ package build.dream.catering.models.weixin;
 import build.dream.common.annotations.InstantiateObjectKey;
 import build.dream.common.models.BasicModel;
 
+import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
 
 public class AuthCallbackModel extends BasicModel {
+    @NotNull
     private BigInteger tenantId;
+
+    @NotNull
     private String componentAppId;
+
+    @NotNull
     @InstantiateObjectKey(name = "auth_code")
     private String authCode;
 
