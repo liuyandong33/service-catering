@@ -21,6 +21,7 @@ public class PosService {
      * @param onlinePosModel
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ApiRest onlinePos(OnlinePosModel onlinePosModel) {
         BigInteger tenantId = onlinePosModel.obtainTenantId();
         String tenantCode = onlinePosModel.obtainTenantCode();
