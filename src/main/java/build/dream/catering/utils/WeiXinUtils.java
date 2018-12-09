@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class WeiXinUtils {
-    public static WeiXinPublicAccount obtainWeiXinPublicAccount(String tenantId) throws IOException {
+    public static WeiXinPublicAccount obtainWeiXinPublicAccount(String tenantId) {
         Map<String, String> obtainWeiXinPublicAccountRequestParameters = new HashMap<String, String>();
         obtainWeiXinPublicAccountRequestParameters.put("tenantId", tenantId);
         ApiRest apiRest = ProxyUtils.doGetWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "weiXin", "obtainWeiXinPublicAccount", obtainWeiXinPublicAccountRequestParameters);
@@ -24,7 +24,7 @@ public class WeiXinUtils {
         return weiXinPublicAccount;
     }
 
-    public static String obtainAccessToken(String appId, String appSecret) throws IOException {
+    public static String obtainAccessToken(String appId, String appSecret) {
         Map<String, String> obtainAccessTokenRequestParameters = new HashMap<String, String>();
         obtainAccessTokenRequestParameters.put("appId", appId);
         obtainAccessTokenRequestParameters.put("appSecret", appSecret);
