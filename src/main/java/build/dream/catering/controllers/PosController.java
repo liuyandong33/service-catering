@@ -2,6 +2,7 @@ package build.dream.catering.controllers;
 
 import build.dream.catering.models.pos.OfflinePosModel;
 import build.dream.catering.models.pos.OnlinePosModel;
+import build.dream.catering.models.pos.ReceiptModel;
 import build.dream.catering.services.PosService;
 import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.api.ApiRest;
@@ -50,15 +51,13 @@ public class PosController extends BasicController {
     @RequestMapping(value = "/receipt")
     @ResponseBody
     @ApiRestAction(error = "回执失败")
-    public String receipt() {
+    public String receipt() throws Exception {
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        String uuid = requestParameters.get("uuid");
-        ApplicationHandler.notBlank(uuid, "uuid");
+        ReceiptModel receiptModel = ApplicationHandler.instantiateObject(ReceiptModel.class, requestParameters);
+        receiptModel.validateAndThrow();
+        String uuid = receiptModel.getUuid();
 
         CacheUtils.delete(uuid);
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("回执成功！");
-        apiRest.setSuccessful(true);
-        return GsonUtils.toJson(apiRest);
+        return GsonUtils.toJson(ApiRest.builder().message("回执成功！").successful(true).build());
     }
 }
