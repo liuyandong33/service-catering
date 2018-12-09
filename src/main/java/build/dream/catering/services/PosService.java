@@ -61,7 +61,7 @@ public class PosService {
             pos.setLastUpdateRemark("POS存在，设置为在线状态！");
             DatabaseHelper.update(pos);
         }
-        return new ApiRest(pos, "上线POS成功！");
+        return ApiRest.builder().data(pos).message("上线POS成功！").successful(true).build();
     }
 
     /**
@@ -72,22 +72,23 @@ public class PosService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest offlinePos(OfflinePosModel offlinePosModel) {
-        BigInteger tenantId = offlinePosModel.getTenantId();
-        BigInteger branchId = offlinePosModel.getBranchId();
-        BigInteger userId = offlinePosModel.getUserId();
+        BigInteger tenantId = offlinePosModel.obtainTenantId();
+        BigInteger branchId = offlinePosModel.obtainBranchId();
+        BigInteger userId = offlinePosModel.obtainUserId();
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition("user_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, userId);
+        searchModel.addSearchCondition(Pos.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(Pos.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(Pos.ColumnName.USER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, userId);
 
         Pos pos = DatabaseHelper.find(Pos.class, searchModel);
         Validate.notNull(pos, "POS不存在！");
 
+        pos.setDeviceId(Constants.VARCHAR_DEFAULT_VALUE);
         pos.setOnline(false);
         pos.setLastUpdateRemark("下线POS");
         DatabaseHelper.update(pos);
 
-        return new ApiRest(pos, "下线POS成功！");
+        return ApiRest.builder().data(pos).message("下线POS成功！").build();
     }
 }
