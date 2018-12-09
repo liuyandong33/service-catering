@@ -7,7 +7,7 @@ import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.Pos;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SearchModel;
-import org.apache.commons.lang.Validate;
+import build.dream.common.utils.ValidateUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,7 +83,7 @@ public class PosService {
         searchModel.addSearchCondition(Pos.ColumnName.USER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, userId);
 
         Pos pos = DatabaseHelper.find(Pos.class, searchModel);
-        Validate.notNull(pos, "POS不存在！");
+        ValidateUtils.notNull(pos, "POS不存在！");
 
         pos.setDeviceId(Constants.VARCHAR_DEFAULT_VALUE);
         pos.setOnline(false);
