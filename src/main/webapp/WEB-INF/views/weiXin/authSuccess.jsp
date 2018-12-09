@@ -11,6 +11,6 @@
     <title>Title</title>
 </head>
 <body>
-<img src="http://www.smartpos.top/upload/tenant/image/weiXin/12837/qrCode.png">
+<img src="${proxyUrl}?url=${baseUrl}/images/weiXin/qrCode.png">
 </body>
 </html>

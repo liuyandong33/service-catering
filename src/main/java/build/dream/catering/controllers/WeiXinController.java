@@ -4,7 +4,6 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.models.weixin.*;
 import build.dream.catering.services.WeiXinService;
 import build.dream.common.annotations.ApiRestAction;
-import build.dream.common.annotations.ModelAndViewAction;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.*;
@@ -19,6 +18,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.Map;
 
 @Controller
@@ -143,6 +143,15 @@ public class WeiXinController extends BasicController {
             AuthCallbackModel authCallbackModel = ApplicationHandler.instantiateObject(AuthCallbackModel.class, requestParameters);
             authCallbackModel.validateAndThrow();
             weiXinService.handleAuthCallback(authCallbackModel);
+
+            Map<String, Object> model = new HashMap<String, Object>();
+            String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
+            String baseUrl = CommonUtils.getServiceDomain(partitionCode, Constants.SERVICE_NAME_CATERING);
+            String proxyUrl = CommonUtils.getOutsideUrl(Constants.SERVICE_NAME_WEBAPI, "proxy", "doGetPermitWithUrl");
+            model.put("baseUrl", baseUrl);
+            model.put("proxyUrl", proxyUrl);
+
+            modelAndView.addAllObjects(model);
             modelAndView.setViewName("weiXin/authSuccess");
         } catch (Exception e) {
             modelAndView.setViewName("weiXin/authFailure");

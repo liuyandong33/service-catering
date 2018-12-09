@@ -10,6 +10,6 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().antMatchers("/favicon.ico", "/user/obtainBranchInfo", "/demo/**", "/weiXin/authCallback").permitAll().anyRequest().authenticated();
+        http.authorizeRequests().antMatchers("/favicon.ico", "/user/obtainBranchInfo", "/demo/**", "/weiXin/authCallback", "/images/**", "/libraries/**").permitAll().anyRequest().authenticated();
     }
 }
