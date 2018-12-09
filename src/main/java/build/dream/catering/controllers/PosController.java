@@ -6,7 +6,6 @@ import build.dream.catering.models.pos.ReceiptModel;
 import build.dream.catering.services.PosService;
 import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.api.ApiRest;
-import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.CacheUtils;
 import build.dream.common.utils.GsonUtils;
@@ -18,7 +17,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping(value = "/pos")
-public class PosController extends BasicController {
+public class PosController {
     /**
      * 上线POS
      *
