@@ -48,9 +48,9 @@ public class PosService {
             pos.setType(type);
             pos.setVersion(version);
             pos.setOnline(true);
-            pos.setCreateUserId(userId);
-            pos.setLastUpdateUserId(userId);
-            pos.setLastUpdateRemark("POS不存在，新增POS并且设置为在线状态！");
+            pos.setCreatedUserId(userId);
+            pos.setUpdatedUserId(userId);
+            pos.setUpdatedRemark("POS不存在，新增POS并且设置为在线状态！");
             DatabaseHelper.insert(pos);
         } else {
             pos.setUserId(userId);
@@ -58,8 +58,8 @@ public class PosService {
             pos.setType(type);
             pos.setVersion(version);
             pos.setOnline(true);
-            pos.setLastUpdateUserId(userId);
-            pos.setLastUpdateRemark("POS存在，设置为在线状态！");
+            pos.setUpdatedUserId(userId);
+            pos.setUpdatedRemark("POS存在，设置为在线状态！");
             DatabaseHelper.update(pos);
         }
         return ApiRest.builder().data(pos).message("上线POS成功！").successful(true).build();
@@ -87,7 +87,7 @@ public class PosService {
 
         pos.setDeviceId(Constants.VARCHAR_DEFAULT_VALUE);
         pos.setOnline(false);
-        pos.setLastUpdateRemark("下线POS");
+        pos.setUpdatedRemark("下线POS");
         DatabaseHelper.update(pos);
 
         return ApiRest.builder().data(pos).message("下线POS成功！").build();

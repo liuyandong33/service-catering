@@ -25,7 +25,7 @@ import java.util.Map;
 @Service
 public class WeiXinService {
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest createMemberCard(CreateMemberCardModel createMemberCardModel, MultipartFile backgroundPicFile, MultipartFile logoFile) throws IOException {
+    public ApiRest createMemberCard(CreateMemberCardModel createMemberCardModel, MultipartFile backgroundPicFile, MultipartFile logoFile) {
         BigInteger tenantId = createMemberCardModel.getTenantId();
         BigInteger userId = createMemberCardModel.getUserId();
         WeiXinPublicAccount weiXinPublicAccount = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
@@ -246,9 +246,9 @@ public class WeiXinService {
         weiXinMemberCard.setCardId(cardId);
         weiXinMemberCard.setUrl(url);
         weiXinMemberCard.setShowQrCodeUrl(showQrCodeUrl);
-        weiXinMemberCard.setCreateUserId(userId);
-        weiXinMemberCard.setLastUpdateUserId(userId);
-        weiXinMemberCard.setLastUpdateRemark("创建微信会员卡！");
+        weiXinMemberCard.setCreatedUserId(userId);
+        weiXinMemberCard.setUpdatedUserId(userId);
+        weiXinMemberCard.setUpdatedRemark("创建微信会员卡！");
         DatabaseHelper.insert(weiXinMemberCard);
 
         ApiRest apiRest = new ApiRest();
@@ -259,7 +259,7 @@ public class WeiXinService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest addPayGiftCard(PayGiftCardModel payGiftCardModel) throws IOException {
+    public ApiRest addPayGiftCard(PayGiftCardModel payGiftCardModel) {
         BigInteger tenantId = payGiftCardModel.getTenantId();
         BigInteger weiXinCardId = payGiftCardModel.getWeiXinCardId();
 
@@ -307,7 +307,7 @@ public class WeiXinService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest deleteWeiXinMemberCard(DeleteWeiXinMemberCardModel deleteWeiXinMemberCardModel) throws IOException {
+    public ApiRest deleteWeiXinMemberCard(DeleteWeiXinMemberCardModel deleteWeiXinMemberCardModel) {
         BigInteger tenantId = deleteWeiXinMemberCardModel.getTenantId();
         BigInteger userId = deleteWeiXinMemberCardModel.getUserId();
         BigInteger weiXinCardId = deleteWeiXinMemberCardModel.getWeiXinCardId();
@@ -336,8 +336,8 @@ public class WeiXinService {
         Validate.isTrue(deleteCardResultJsonObject.getInt("errcode") == 0, deleteCardResultJsonObject.getString("errmsg"));
 
         weiXinMemberCard.setDeleted(true);
-        weiXinMemberCard.setLastUpdateUserId(userId);
-        weiXinMemberCard.setLastUpdateRemark("删除微信会员卡！");
+        weiXinMemberCard.setUpdatedUserId(userId);
+        weiXinMemberCard.setUpdatedRemark("删除微信会员卡！");
         DatabaseHelper.update(weiXinMemberCard);
 
         ApiRest apiRest = new ApiRest();
@@ -385,7 +385,7 @@ public class WeiXinService {
      * @return
      * @throws IOException
      */
-    public ApiRest obtainWeiXinAuthorizerInfo(ObtainWeiXinAuthorizerInfoModel obtainWeiXinAuthorizerInfoModel) throws IOException {
+    public ApiRest obtainWeiXinAuthorizerInfo(ObtainWeiXinAuthorizerInfoModel obtainWeiXinAuthorizerInfoModel) {
         BigInteger tenantId = obtainWeiXinAuthorizerInfoModel.getTenantId();
         BigInteger branchId = obtainWeiXinAuthorizerInfoModel.getBranchId();
 
