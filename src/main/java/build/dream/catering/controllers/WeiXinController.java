@@ -144,11 +144,20 @@ public class WeiXinController extends BasicController {
             authCallbackModel.validateAndThrow();
             weiXinService.handleAuthCallback(authCallbackModel);
 
-            String clientType = authCallbackModel.getClientType();
             Map<String, Object> model = new HashMap<String, Object>();
             String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
             String baseUrl = CommonUtils.getServiceDomain(partitionCode, Constants.SERVICE_NAME_CATERING);
-            String proxyUrl = CommonUtils.getOutsideUrl(Constants.SERVICE_NAME_WEBAPI, "proxy", "doGetPermitWithUrl");
+
+            String clientType = authCallbackModel.getClientType();
+            String proxyUrl = null;
+            if (Constants.CLIENT_TYPE_APP.equals(clientType)) {
+                proxyUrl = CommonUtils.getOutsideUrl(Constants.SERVICE_NAME_APPAPI, "proxy", "doGetPermitWithUrl");
+            } else if (Constants.CLIENT_TYPE_POS.equals(clientType)) {
+                proxyUrl = CommonUtils.getOutsideUrl(Constants.SERVICE_NAME_POSAPI, "proxy", "doGetPermitWithUrl");
+            } else if (Constants.CLIENT_TYPE_WEB.equals(clientType)) {
+                proxyUrl = CommonUtils.getOutsideUrl(Constants.SERVICE_NAME_WEBAPI, "proxy", "doGetPermitWithUrl");
+            }
+
             model.put("baseUrl", baseUrl);
             model.put("proxyUrl", proxyUrl);
 
