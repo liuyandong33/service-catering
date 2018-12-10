@@ -61,7 +61,7 @@ public class VipService {
             vipType.setDiscountRate(discountRate != null ? discountRate : Constants.DECIMAL_DEFAULT_VALUE);
             vipType.setEnableBonus(enableBonus);
             vipType.setBonusCoefficient(bonusCoefficient != null ? bonusCoefficient : Constants.INT_DEFAULT_VALUE);
-            vipType.setLastUpdateUserId(userId);
+            vipType.setUpdatedUserId(userId);
             DatabaseHelper.update(vipType);
         } else {
             vipType = new VipType();
@@ -73,8 +73,8 @@ public class VipService {
             vipType.setDiscountRate(discountRate != null ? discountRate : Constants.DECIMAL_DEFAULT_VALUE);
             vipType.setEnableBonus(enableBonus);
             vipType.setBonusCoefficient(bonusCoefficient != null ? bonusCoefficient : Constants.INT_DEFAULT_VALUE);
-            vipType.setCreateUserId(userId);
-            vipType.setLastUpdateUserId(userId);
+            vipType.setCreatedUserId(userId);
+            vipType.setUpdatedUserId(userId);
             DatabaseHelper.insert(vipType);
         }
 
@@ -157,8 +157,8 @@ public class VipService {
             vip.setOpenId(StringUtils.isNotBlank(openId) ? openId : Constants.VARCHAR_DEFAULT_VALUE);
             vip.setMainOpenId(StringUtils.isNotBlank(mainOpenId) ? mainOpenId : Constants.VARCHAR_DEFAULT_VALUE);
             vip.setAlipayUserId(StringUtils.isNotBlank(alipayUserId) ? alipayUserId : Constants.VARCHAR_DEFAULT_VALUE);
-            vip.setLastUpdateUserId(userId);
-            vip.setLastUpdateRemark("修改会员信息！");
+            vip.setUpdatedUserId(userId);
+            vip.setUpdatedRemark("修改会员信息！");
             VipUtils.update(vip);
         } else {
             SearchModel searchModel = new SearchModel(true);
@@ -189,9 +189,9 @@ public class VipService {
             if (StringUtils.isNotBlank(alipayUserId)) {
                 vip.setAlipayUserId(alipayUserId);
             }
-            vip.setCreateUserId(userId);
-            vip.setLastUpdateUserId(userId);
-            vip.setLastUpdateRemark("新增会员信息！");
+            vip.setCreatedUserId(userId);
+            vip.setUpdatedUserId(userId);
+            vip.setUpdatedRemark("新增会员信息！");
             VipUtils.insert(vip);
         }
         return ApiRest.builder().data(vip).message("保存会员信息成功！").successful(true).build();
@@ -237,7 +237,7 @@ public class VipService {
                 if (headquartersBranchId.equals(vipAccount.getBranchId())) {
                     vipAccountMap.put(vipId, vipAccount);
                 } else {
-                    vipAccount.setLastUpdateRemark("修改会员共享类型为全部共享，删除会员账户！");
+                    vipAccount.setUpdatedRemark("修改会员共享类型为全部共享，删除会员账户！");
                     DatabaseHelper.update(vipAccount);
                 }
             }
@@ -350,7 +350,7 @@ public class VipService {
                     if (headquartersBranchId.equals(vipAccount.getBranchId())) {
                         vipAccountMap.put(vipId, vipAccount);
                     } else {
-                        vipAccount.setLastUpdateRemark("修改会员共享类型为全部共享，删除会员账户！");
+                        vipAccount.setUpdatedRemark("修改会员共享类型为全部共享，删除会员账户！");
                         DatabaseHelper.update(vipAccount);
                     }
                 }

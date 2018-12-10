@@ -125,8 +125,8 @@ public class MeiTuanService {
                             .activityName(extraJsonObject.getString("remark"))
                             .activityType(extraJsonObject.getInt("type"))
                             .amount(poiCharge)
-                            .createUserId(userId)
-                            .lastUpdateUserId(userId)
+                            .createdUserId(userId)
+                            .updatedUserId(userId)
                             .build();
                     dietOrderActivities.add(dietOrderActivity);
                 }
@@ -208,9 +208,9 @@ public class MeiTuanService {
                 .invoiced(invoiced)
                 .invoiceType(invoiceType)
                 .invoice(invoice)
-                .createUserId(userId)
-                .lastUpdateUserId(userId)
-                .lastUpdateRemark("接受美团订单生效回调，保存订单信息！")
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .updatedRemark("接受美团订单生效回调，保存订单信息！")
                 .build();
         DatabaseHelper.insert(dietOrder);
         BigInteger dietOrderId = dietOrder.getId();
@@ -225,8 +225,8 @@ public class MeiTuanService {
                     .paymentCode(Constants.MT_PAYMENT_CODE)
                     .paymentName(Constants.MT_PAYMENT_NAME)
                     .occurrenceTime(activeTime)
-                    .createUserId(userId)
-                    .lastUpdateUserId(userId)
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
                     .paidAmount(paidAmount)
                     .build();
             DatabaseHelper.insert(dietOrderPayment);
@@ -261,8 +261,8 @@ public class MeiTuanService {
                         .dietOrderId(dietOrderId)
                         .name(cartId + 1 + "号口袋")
                         .type(DietOrderConstants.GROUP_TYPE_NORMAL)
-                        .createUserId(userId)
-                        .lastUpdateUserId(userId)
+                        .createdUserId(userId)
+                        .updatedUserId(userId)
                         .build();
                 DatabaseHelper.insert(dietOrderGroup);
                 dietOrderGroupMap.put(cartId, dietOrderGroup);
@@ -294,8 +294,8 @@ public class MeiTuanService {
                     .totalAmount(dietOrderDetailTotalAmount)
                     .discountAmount(BigDecimal.ZERO)
                     .payableAmount(dietOrderDetailTotalAmount)
-                    .createUserId(userId)
-                    .lastUpdateUserId(userId)
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
                     .build();
             DatabaseHelper.insert(dietOrderDetail);
 
@@ -316,8 +316,8 @@ public class MeiTuanService {
                             .goodsAttributeId(Constants.BIGINT_DEFAULT_VALUE)
                             .goodsAttributeName(property)
                             .price(Constants.DECIMAL_DEFAULT_VALUE)
-                            .createUserId(userId)
-                            .lastUpdateUserId(userId)
+                            .createdUserId(userId)
+                            .updatedUserId(userId)
                             .build();
                     dietOrderDetailGoodsAttributes.add(dietOrderDetailGoodsAttribute);
                 }
@@ -332,8 +332,8 @@ public class MeiTuanService {
                     .dietOrderId(dietOrderId)
                     .name("其他费用")
                     .type(DietOrderConstants.GROUP_TYPE_EXTRA)
-                    .createUserId(userId)
-                    .lastUpdateUserId(userId)
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
                     .build();
             DatabaseHelper.insert(dietOrderGroup);
             if (packageFee.compareTo(BigDecimal.ZERO) > 0) {
@@ -356,8 +356,8 @@ public class MeiTuanService {
                         .totalAmount(packageFee)
                         .discountAmount(BigDecimal.ZERO)
                         .payableAmount(packageFee)
-                        .createUserId(userId)
-                        .lastUpdateUserId(userId)
+                        .createdUserId(userId)
+                        .updatedUserId(userId)
                         .build();
                 DatabaseHelper.insert(dietOrderDetail);
             }
@@ -381,8 +381,8 @@ public class MeiTuanService {
                         .totalAmount(shippingFee)
                         .discountAmount(BigDecimal.ZERO)
                         .payableAmount(shippingFee)
-                        .createUserId(userId)
-                        .lastUpdateUserId(userId)
+                        .createdUserId(userId)
+                        .updatedUserId(userId)
                         .build();
                 DatabaseHelper.insert(dietOrderDetail);
             }
@@ -418,33 +418,11 @@ public class MeiTuanService {
         BigInteger userId = CommonUtils.getServiceSystemUserId();
 
         dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_INVALID);
-        dietOrder.setLastUpdateUserId(userId);
-        dietOrder.setLastUpdateRemark("取消订单！");
+        dietOrder.setUpdatedUserId(userId);
+        dietOrder.setUpdatedRemark("取消订单！");
         DatabaseHelper.update(dietOrder);
 
         BigInteger dietOrderId = dietOrder.getId();
-
-        MeiTuanOrderCancelMessage meiTuanOrderCancelMessage = new MeiTuanOrderCancelMessage();
-        meiTuanOrderCancelMessage.setDietOrderId(dietOrderId);
-        meiTuanOrderCancelMessage.setDeveloperId(NumberUtils.createBigInteger(developerId));
-        meiTuanOrderCancelMessage.setePoiId(ePoiId);
-        meiTuanOrderCancelMessage.setSign(sign);
-        meiTuanOrderCancelMessage.setOrderId(orderId);
-
-        String reasonCode = orderCancelJsonObject.optString("reasonCode");
-        if (StringUtils.isNotBlank(reasonCode)) {
-            meiTuanOrderCancelMessage.setReasonCode(reasonCode);
-        }
-
-        String reason = orderCancelJsonObject.optString("reason");
-        if (StringUtils.isNotBlank(reason)) {
-            meiTuanOrderCancelMessage.setReason(reason);
-        }
-
-        meiTuanOrderCancelMessage.setCreateUserId(userId);
-        meiTuanOrderCancelMessage.setLastUpdateUserId(userId);
-        meiTuanOrderCancelMessage.setLastUpdateRemark("处理美团订单取消回调，保存美团订单取消消息！");
-        DatabaseHelper.insert(meiTuanOrderCancelMessage);
 
         pushMeiTuanMessage(tenantId, branchId, dietOrderId, type, uuid, 5, 60000);
     }
@@ -494,21 +472,9 @@ public class MeiTuanService {
         }
 
         dietOrder.setRefundStatus(refundStatus);
-        dietOrder.setLastUpdateUserId(userId);
+        dietOrder.setUpdatedUserId(userId);
         DatabaseHelper.update(dietOrder);
 
-        MeiTuanOrderRefundMessage meiTuanOrderRefundMessage = new MeiTuanOrderRefundMessage();
-        meiTuanOrderRefundMessage.setDietOrderId(dietOrderId);
-        meiTuanOrderRefundMessage.setDeveloperId(NumberUtils.createBigInteger(developerId));
-        meiTuanOrderRefundMessage.setePoiId(ePoiId);
-        meiTuanOrderRefundMessage.setSign(sign);
-        meiTuanOrderRefundMessage.setOrderId(orderId);
-        meiTuanOrderRefundMessage.setNotifyType(notifyType);
-        String reason = orderRefundJsonObject.getString("reason");
-        if (StringUtils.isNotBlank(reason)) {
-            meiTuanOrderRefundMessage.setReason(reason);
-        }
-        DatabaseHelper.insert(meiTuanOrderRefundMessage);
         pushMeiTuanMessage(tenantId, branchId, dietOrderId, type, uuid, 5, 60000);
     }
 
@@ -557,7 +523,7 @@ public class MeiTuanService {
         branch.setAppAuthToken(appAuthToken);
         branch.setPoiId(poiId);
         branch.setPoiName(poiName);
-        branch.setLastUpdateUserId(userId);
+        branch.setUpdatedUserId(userId);
         DatabaseHelper.update(branch);
     }
 

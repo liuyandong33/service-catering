@@ -26,10 +26,10 @@ public class MeiTuanUtils {
     public static ApiRest callMeiTuanSystem(String tenantId, String branchId, String signKey, Map<String, String> requestParameters, String url, String requestMethod) throws IOException {
         putSystemLevelParameter(tenantId, branchId, signKey, requestParameters);
         ApiRest apiRest = null;
-        if (WebUtils.RequestMethod.GET.equals(requestMethod)) {
+        if (Constants.REQUEST_METHOD_GET.equals(requestMethod)) {
             requestParameters.put("url", url);
             apiRest = ProxyUtils.doGetWithRequestParameters(Constants.SERVICE_NAME_OUT, "meiTuan", "callMeiTuanSystem", requestParameters);
-        } else if (WebUtils.RequestMethod.POST.equals(requestMethod)) {
+        } else if (Constants.REQUEST_METHOD_POST.equals(requestMethod)) {
             StringBuffer requestUrl = new StringBuffer(url).append("?");
             requestUrl.append("?").append("appAuthToken").append("=").append(requestParameters.remove("appAuthToken"));
             requestUrl.append("&").append("charset").append("=").append(requestParameters.remove("charset"));

@@ -56,8 +56,8 @@ public class BranchService {
         branch.setPoiName(null);
 
         BigInteger userId = initializeBranchModel.getUserId();
-        branch.setCreateUserId(userId);
-        branch.setLastUpdateUserId(userId);
+        branch.setCreatedUserId(userId);
+        branch.setUpdatedUserId(userId);
         DatabaseHelper.insert(branch);
         branchMapper.insertMergeUserBranch(userId, initializeBranchModel.getTenantId(), branch.getId());
 
@@ -114,8 +114,8 @@ public class BranchService {
         Validate.notNull(branch, "门店不存在！");
 
         branch.setDeleted(true);
-        branch.setLastUpdateUserId(userId);
-        branch.setLastUpdateRemark("删除门店信息！");
+        branch.setUpdatedUserId(userId);
+        branch.setUpdatedRemark("删除门店信息！");
         DatabaseHelper.update(branch);
 
         String findUserIdsSql = "SELECT user_id FROM merge_user_branch WHERE tenant_id = #{tenantId} AND branch_id = #{branchId} AND deleted = 0";
@@ -161,7 +161,7 @@ public class BranchService {
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("insertBranchInfos", insertBranchInfos);
         if (!pullBranchInfosModel.getReacquire()) {
-            String findUpdateBranchSql = "SELECT tenant_id, id AS branch_id, code, name, type, status, tenant_code, create_time, deleted FROM branch WHERE create_time <= #{lastPullTime} AND last_update_time >= #{lastPullTime}";
+            String findUpdateBranchSql = "SELECT tenant_id, id AS branch_id, code, name, type, status, tenant_code, create_time, deleted FROM branch WHERE create_time <= #{lastPullTime} AND updated_time >= #{lastPullTime}";
             Map<String, Object> findUpdateBranchParameters = new HashMap<String, Object>();
             findUpdateBranchParameters.put("sql", findUpdateBranchSql);
             findUpdateBranchParameters.put("lastPullTime", pullBranchInfosModel.getLastPullTime());

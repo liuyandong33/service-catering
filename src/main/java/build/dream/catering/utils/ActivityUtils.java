@@ -26,9 +26,9 @@ public class ActivityUtils {
             activity.setStatus(1);
         }
         activity.setWeekSign(weekSign);
-        activity.setCreateUserId(userId);
-        activity.setLastUpdateUserId(userId);
-        activity.setLastUpdateRemark(lastUpdateRemark);
+        activity.setCreatedUserId(userId);
+        activity.setUpdatedUserId(userId);
+        activity.setUpdatedRemark(lastUpdateRemark);
         return activity;
     }
 
@@ -41,9 +41,9 @@ public class ActivityUtils {
         fullReductionActivity.setDiscountType(discountType);
         fullReductionActivity.setDiscountRate(discountRate);
         fullReductionActivity.setDiscountAmount(discountAmount);
-        fullReductionActivity.setCreateUserId(userId);
-        fullReductionActivity.setLastUpdateUserId(userId);
-        fullReductionActivity.setLastUpdateRemark(lastUpdateRemark);
+        fullReductionActivity.setCreatedUserId(userId);
+        fullReductionActivity.setUpdatedUserId(userId);
+        fullReductionActivity.setUpdatedRemark(lastUpdateRemark);
         return fullReductionActivity;
     }
 }

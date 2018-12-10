@@ -48,8 +48,8 @@ public class PurchaseService {
                 .auditTime(Constants.DATETIME_DEFAULT_VALUE)
                 .remark(StringUtils.isNotBlank(remark) ? remark : Constants.VARCHAR_DEFAULT_VALUE)
                 .status(Constants.PURCHASE_ORDER_STATUS_NOT_EXAMINED)
-                .createUserId(userId)
-                .lastUpdateUserId(userId)
+                .createdUserId(userId)
+                .updatedUserId(userId)
                 .build();
 
         DatabaseHelper.insert(purchaseOrder);
@@ -68,8 +68,8 @@ public class PurchaseService {
                     .unitId(detail.getUnitId())
                     .purchasePrice(detail.getPurchasePrice())
                     .quantity(detail.getQuantity())
-                    .createUserId(userId)
-                    .lastUpdateUserId(userId)
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
                     .build();
             purchaseOrderDetails.add(purchaseOrderDetail);
         }
@@ -107,8 +107,8 @@ public class PurchaseService {
         purchaseOrder.setAuditorUserId(userId);
         purchaseOrder.setAuditTime(date);
         purchaseOrder.setStatus(Constants.PURCHASE_ORDER_STATUS_EXAMINED);
-        purchaseOrder.setLastUpdateUserId(userId);
-        purchaseOrder.setLastUpdateRemark("审核进货单！");
+        purchaseOrder.setUpdatedUserId(userId);
+        purchaseOrder.setUpdatedRemark("审核进货单！");
         DatabaseHelper.update(purchaseOrder);
 
         List<PurchaseOrderDetail> purchaseOrderDetails = DatabaseHelper.findAll(PurchaseOrderDetail.class, TupleUtils.buildTuple3(PurchaseOrderDetail.ColumnName.PURCHASE_ORDER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, purchaseOrderId));
@@ -132,8 +132,8 @@ public class PurchaseService {
                     .type(Constants.STOCK_FLOW_TYPE_PURCHASE)
                     .occurrenceTime(date)
                     .quantity(quantity)
-                    .createUserId(userId)
-                    .lastUpdateUserId(userId)
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
                     .build();
             stockFlows.add(stockFlow);
         }
@@ -206,7 +206,7 @@ public class PurchaseService {
         String order = listPurchaseOrdersModel.getOrder();
 
         if (StringUtils.isBlank(sort)) {
-            sort = PurchaseOrder.ColumnName.LAST_UPDATE_TIME;
+            sort = PurchaseOrder.ColumnName.UPDATED_TIME;
         }
 
         if (StringUtils.isBlank(order)) {

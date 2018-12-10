@@ -251,7 +251,7 @@ public class DietOrderService {
         } else {
             builder.vipId(Constants.BIGINT_DEFAULT_VALUE);
         }
-        builder.createUserId(userId).lastUpdateUserId(userId).lastUpdateRemark("保存订单信息！");
+        builder.createdUserId(userId).updatedUserId(userId).updatedRemark("保存订单信息！");
 
         DietOrder dietOrder = builder.build();
         DatabaseHelper.insert(dietOrder);
@@ -293,9 +293,9 @@ public class DietOrderService {
                 .dietOrderId(dietOrderId)
                 .name("正常的菜品")
                 .type(DietOrderConstants.GROUP_TYPE_NORMAL)
-                .createUserId(userId)
-                .lastUpdateUserId(userId)
-                .lastUpdateRemark("保存订单分组信息！")
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .updatedRemark("保存订单分组信息！")
                 .build();
         DatabaseHelper.insert(normalDietOrderGroup);
 
@@ -343,8 +343,8 @@ public class DietOrderService {
                                 .totalAmount(BigDecimal.ZERO)
                                 .discountAmount(BigDecimal.ZERO)
                                 .payableAmount(BigDecimal.ZERO)
-                                .createUserId(userId)
-                                .lastUpdateUserId(userId)
+                                .createdUserId(userId)
+                                .updatedUserId(userId)
                                 .build();
                         dietOrderDetails.add(dietOrderDetail);
                     }
@@ -373,8 +373,8 @@ public class DietOrderService {
                             .totalAmount(BigDecimal.ZERO)
                             .discountAmount(BigDecimal.ZERO)
                             .payableAmount(BigDecimal.ZERO)
-                            .createUserId(userId)
-                            .lastUpdateUserId(userId)
+                            .createdUserId(userId)
+                            .updatedUserId(userId)
                             .build();
                     dietOrderDetails.add(dietOrderDetail);
                 }
@@ -406,8 +406,8 @@ public class DietOrderService {
                             .goodsAttributeId(goodsAttribute.getId())
                             .goodsAttributeName(goodsAttribute.getName())
                             .price(goodsAttribute.getPrice())
-                            .createUserId(userId)
-                            .lastUpdateUserId(userId)
+                            .createdUserId(userId)
+                            .updatedUserId(userId)
                             .build();
                     dietOrderDetailGoodsAttributes.add(dietOrderDetailGoodsAttribute);
                     dietOrderDetailGoodsAttributeMap.put(uuid, dietOrderDetailGoodsAttributes);
@@ -430,9 +430,9 @@ public class DietOrderService {
                                     .dietOrderId(dietOrderId)
                                     .name("赠送的菜品")
                                     .type(DietOrderConstants.GROUP_TYPE_DISCOUNT)
-                                    .createUserId(userId)
-                                    .lastUpdateUserId(userId)
-                                    .lastUpdateRemark("保存订单分组信息！")
+                                    .createdUserId(userId)
+                                    .updatedUserId(userId)
+                                    .updatedRemark("保存订单分组信息！")
                                     .build();
                             DatabaseHelper.insert(discountDietOrderGroup);
                         }
@@ -457,8 +457,8 @@ public class DietOrderService {
                                 .totalAmount(giveTotalAmount)
                                 .discountAmount(giveTotalAmount)
                                 .payableAmount(BigDecimal.ZERO)
-                                .createUserId(userId)
-                                .lastUpdateUserId(userId)
+                                .createdUserId(userId)
+                                .updatedUserId(userId)
                                 .build();
                         dietOrderDetails.add(giveDietOrderDetail);
 
@@ -474,8 +474,8 @@ public class DietOrderService {
                                     .activityName(effectiveActivity.getName())
                                     .activityType(type)
                                     .amount(giveDietOrderDetail.getDiscountAmount())
-                                    .createUserId(userId)
-                                    .lastUpdateUserId(userId)
+                                    .createdUserId(userId)
+                                    .updatedUserId(userId)
                                     .build();
                             dietOrderActivityMap.put(activityId, dietOrderActivity);
                         } else {
@@ -503,8 +503,8 @@ public class DietOrderService {
                             .totalAmount(dietOrderDetailTotalAmount)
                             .discountAmount(BigDecimal.ZERO)
                             .payableAmount(dietOrderDetailTotalAmount)
-                            .createUserId(userId)
-                            .lastUpdateUserId(userId)
+                            .createdUserId(userId)
+                            .updatedUserId(userId)
                             .build();
                 }
 
@@ -539,8 +539,8 @@ public class DietOrderService {
                             .totalAmount(dietOrderDetailTotalAmount)
                             .discountAmount(dietOrderDetailDiscountAmount)
                             .payableAmount(dietOrderDetailPayableAmount)
-                            .createUserId(userId)
-                            .lastUpdateUserId(userId)
+                            .createdUserId(userId)
+                            .updatedUserId(userId)
                             .build();
 
                     BigInteger activityId = effectiveActivity.getActivityId();
@@ -555,8 +555,8 @@ public class DietOrderService {
                                 .activityName(effectiveActivity.getName())
                                 .activityType(type)
                                 .amount(dietOrderDetailDiscountAmount)
-                                .createUserId(userId)
-                                .lastUpdateUserId(userId)
+                                .createdUserId(userId)
+                                .updatedUserId(userId)
                                 .build();
 
                         dietOrderActivityMap.put(activityId, dietOrderActivity);
@@ -586,8 +586,8 @@ public class DietOrderService {
                         .totalAmount(dietOrderDetailTotalAmount)
                         .discountAmount(BigDecimal.ZERO)
                         .payableAmount(dietOrderDetailTotalAmount)
-                        .createUserId(userId)
-                        .lastUpdateUserId(userId)
+                        .createdUserId(userId)
+                        .updatedUserId(userId)
                         .build();
             }
 
@@ -607,9 +607,9 @@ public class DietOrderService {
                         .dietOrderId(dietOrderId)
                         .name("其他费用")
                         .type(DietOrderConstants.GROUP_TYPE_EXTRA)
-                        .createUserId(userId)
-                        .lastUpdateUserId(userId)
-                        .lastUpdateRemark("保存订单分组信息！")
+                        .createdUserId(userId)
+                        .updatedUserId(userId)
+                        .updatedRemark("保存订单分组信息！")
                         .build();
                 DatabaseHelper.insert(extraDietOrderGroup);
             }
@@ -633,8 +633,8 @@ public class DietOrderService {
                     .totalAmount(deliverFee)
                     .discountAmount(BigDecimal.ZERO)
                     .payableAmount(deliverFee)
-                    .createUserId(userId)
-                    .lastUpdateUserId(userId)
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
                     .build();
             dietOrderDetails.add(dietOrderDetail);
         }
@@ -648,9 +648,9 @@ public class DietOrderService {
                         .dietOrderId(dietOrderId)
                         .name("其他费用")
                         .type(DietOrderConstants.GROUP_TYPE_EXTRA)
-                        .createUserId(userId)
-                        .lastUpdateUserId(userId)
-                        .lastUpdateRemark("保存订单分组信息！")
+                        .createdUserId(userId)
+                        .updatedUserId(userId)
+                        .updatedRemark("保存订单分组信息！")
                         .build();
                 DatabaseHelper.insert(extraDietOrderGroup);
             }
@@ -674,8 +674,8 @@ public class DietOrderService {
                     .totalAmount(packageFee)
                     .discountAmount(BigDecimal.ZERO)
                     .payableAmount(packageFee)
-                    .createUserId(userId)
-                    .lastUpdateUserId(userId)
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
                     .build();
             dietOrderDetails.add(dietOrderDetail);
         }
@@ -738,8 +738,8 @@ public class DietOrderService {
                         .activityName(fullReductionActivity.getName())
                         .activityType(fullReductionActivity.getType())
                         .amount(amount)
-                        .createUserId(userId)
-                        .lastUpdateUserId(userId)
+                        .createdUserId(userId)
+                        .updatedUserId(userId)
                         .build();
                 dietOrderActivities.add(dietOrderActivity);
             }

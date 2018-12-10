@@ -51,8 +51,8 @@ public class SaleFlowUtils {
         sale.setDiscountAmount(dietOrder.getDiscountAmount());
         sale.setPayableAmount(dietOrder.getPayableAmount());
         sale.setPaidAmount(dietOrder.getPaidAmount());
-        sale.setCreateUserId(userId);
-        sale.setLastUpdateUserId(userId);
+        sale.setCreatedUserId(userId);
+        sale.setUpdatedUserId(userId);
         DatabaseHelper.insert(sale);
 
         BigInteger saleId = sale.getId();
@@ -178,8 +178,8 @@ public class SaleFlowUtils {
         BigDecimal discountShare = dietOrderDetail.getDiscountShare();
         saleDetail.setDiscountShare(discountShare != null ? discountShare : BigDecimal.ZERO);
 
-        saleDetail.setCreateUserId(userId);
-        saleDetail.setLastUpdateUserId(userId);
+        saleDetail.setCreatedUserId(userId);
+        saleDetail.setUpdatedUserId(userId);
         return saleDetail;
     }
 
@@ -194,8 +194,8 @@ public class SaleFlowUtils {
         salePayment.setPaymentCode(dietOrderPayment.getPaymentCode());
         salePayment.setPaymentName(dietOrderPayment.getPaymentName());
         salePayment.setPaidAmount(dietOrderPayment.getPaidAmount());
-        salePayment.setCreateUserId(userId);
-        salePayment.setLastUpdateUserId(userId);
+        salePayment.setCreatedUserId(userId);
+        salePayment.setUpdatedUserId(userId);
         return salePayment;
     }
 }

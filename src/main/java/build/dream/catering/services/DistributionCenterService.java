@@ -51,8 +51,8 @@ public class DistributionCenterService {
             distributionCenter.setLatitude(latitude);
             distributionCenter.setLinkman(linkman);
             distributionCenter.setContactPhone(contactPhone);
-            distributionCenter.setLastUpdateUserId(userId);
-            distributionCenter.setLastUpdateRemark("修改配送中心信息！");
+            distributionCenter.setUpdatedUserId(userId);
+            distributionCenter.setUpdatedRemark("修改配送中心信息！");
         } else {
             String code = SerialNumberGenerator.nextSerialNumber(4, SequenceUtils.nextValue(tenantCode + "_distribution_center_count"));
             distributionCenter = DistributionCenter.builder()
@@ -70,9 +70,9 @@ public class DistributionCenterService {
                     .address(address)
                     .longitude(longitude)
                     .latitude(latitude)
-                    .createUserId(userId)
-                    .lastUpdateUserId(userId)
-                    .lastUpdateRemark("新增配送中心信息！")
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
+                    .updatedRemark("新增配送中心信息！")
                     .build();
             DatabaseHelper.insert(distributionCenter);
         }

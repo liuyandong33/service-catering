@@ -482,8 +482,8 @@ public class GoodsService extends BasicService {
             if (CollectionUtils.isNotEmpty(saveGoodsModel.getDeleteGoodsSpecificationIds())) {
                 UpdateModel updateModel = new UpdateModel(true);
                 updateModel.setTableName("goods_specification");
-                updateModel.addContentValue("last_update_user_id", userId);
-                updateModel.addContentValue("last_update_remark", "删除商品规格信息！");
+                updateModel.addContentValue("updated_user_id", userId);
+                updateModel.addContentValue("updated_remark", "删除商品规格信息！");
                 updateModel.addContentValue("delete_time", new Date());
                 updateModel.addContentValue("deleted", 1);
                 updateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -496,8 +496,8 @@ public class GoodsService extends BasicService {
             if (CollectionUtils.isNotEmpty(saveGoodsModel.getDeleteGoodsAttributeGroupIds())) {
                 UpdateModel deleteGoodsAttributeGroupUpdateModel = new UpdateModel(true);
                 deleteGoodsAttributeGroupUpdateModel.setTableName("goods_attribute_group");
-                deleteGoodsAttributeGroupUpdateModel.addContentValue("last_update_user_id", userId);
-                deleteGoodsAttributeGroupUpdateModel.addContentValue("last_update_remark", "删除商品口味组信息！");
+                deleteGoodsAttributeGroupUpdateModel.addContentValue("updated_user_id", userId);
+                deleteGoodsAttributeGroupUpdateModel.addContentValue("updated_remark", "删除商品口味组信息！");
                 deleteGoodsAttributeGroupUpdateModel.addContentValue("delete_time", new Date());
                 deleteGoodsAttributeGroupUpdateModel.addContentValue("delete", 1);
                 deleteGoodsAttributeGroupUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -507,8 +507,8 @@ public class GoodsService extends BasicService {
 
                 UpdateModel deleteGoodsAttributeUpdateModel = new UpdateModel(true);
                 deleteGoodsAttributeUpdateModel.setTableName("goods_attribute");
-                deleteGoodsAttributeUpdateModel.addContentValue("last_update_user_id", userId);
-                deleteGoodsAttributeUpdateModel.addContentValue("last_update_remark", "删除商品口味信息！");
+                deleteGoodsAttributeUpdateModel.addContentValue("updated_user_id", userId);
+                deleteGoodsAttributeUpdateModel.addContentValue("updated_remark", "删除商品口味信息！");
                 deleteGoodsAttributeUpdateModel.addContentValue("delete_time", new Date());
                 deleteGoodsAttributeUpdateModel.addContentValue("delete", 1);
                 deleteGoodsAttributeUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -585,8 +585,8 @@ public class GoodsService extends BasicService {
                 if (CollectionUtils.isNotEmpty(deleteGoodsAttributeIds)) {
                     UpdateModel deleteGoodsAttributeUpdateModel = new UpdateModel(true);
                     deleteGoodsAttributeUpdateModel.setTableName("goods_attribute");
-                    deleteGoodsAttributeUpdateModel.addContentValue("last_update_user_id", userId);
-                    deleteGoodsAttributeUpdateModel.addContentValue("last_update_remark", "删除商品口味信息！");
+                    deleteGoodsAttributeUpdateModel.addContentValue("updated_user_id", userId);
+                    deleteGoodsAttributeUpdateModel.addContentValue("updated_remark", "删除商品口味信息！");
                     deleteGoodsAttributeUpdateModel.addContentValue("delete_time", new Date());
                     deleteGoodsAttributeUpdateModel.addContentValue("delete", 1);
                     deleteGoodsAttributeUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -626,8 +626,8 @@ public class GoodsService extends BasicService {
                         GoodsAttributeGroup goodsAttributeGroup = goodsAttributeGroupMap.get(attributeGroupInfo.getId());
                         Validate.notNull(goodsAttributeGroup, "口味组不存在！");
                         goodsAttributeGroup.setName(attributeGroupInfo.getName());
-                        goodsAttributeGroup.setLastUpdateUserId(userId);
-                        goodsAttributeGroup.setLastUpdateRemark("修改口味组信息！");
+                        goodsAttributeGroup.setUpdatedUserId(userId);
+                        goodsAttributeGroup.setUpdatedRemark("修改口味组信息！");
                         DatabaseHelper.update(goodsAttributeGroup);
 
                         for (SaveGoodsModel.AttributeInfo attributeInfo : attributeGroupInfo.getAttributeInfos()) {
@@ -636,8 +636,8 @@ public class GoodsService extends BasicService {
                                 Validate.notNull(goodsAttribute, "商品口味不存在！");
                                 goodsAttribute.setName(attributeInfo.getName());
                                 goodsAttribute.setPrice(attributeInfo.getPrice() == null ? BigDecimal.ZERO : attributeInfo.getPrice());
-                                goodsAttribute.setLastUpdateUserId(userId);
-                                goodsAttribute.setLastUpdateRemark("修改口味信息！");
+                                goodsAttribute.setUpdatedUserId(userId);
+                                goodsAttribute.setUpdatedRemark("修改口味信息！");
                                 DatabaseHelper.update(goodsAttribute);
                             } else {
                                 GoodsAttribute goodsAttribute = buildGoodsAttribute(attributeInfo, tenantId, tenantCode, branchId, goodsId, goodsAttributeGroup.getId(), userId);
@@ -668,9 +668,9 @@ public class GoodsService extends BasicService {
             goods.setType(saveGoodsModel.getType());
             goods.setCategoryId(saveGoodsModel.getCategoryId());
             goods.setImageUrl(saveGoodsModel.getImageUrl());
-            goods.setCreateUserId(userId);
-            goods.setLastUpdateUserId(userId);
-            goods.setLastUpdateRemark("新增商品信息！");
+            goods.setCreatedUserId(userId);
+            goods.setUpdatedUserId(userId);
+            goods.setUpdatedRemark("新增商品信息！");
             DatabaseHelper.insert(goods);
 
             BigInteger goodsId = goods.getId();
@@ -708,9 +708,9 @@ public class GoodsService extends BasicService {
         goodsAttributeGroup.setBranchId(branchId);
         goodsAttributeGroup.setGoodsId(goodsId);
         goodsAttributeGroup.setName(attributeGroupInfo.getName());
-        goodsAttributeGroup.setCreateUserId(userId);
-        goodsAttributeGroup.setLastUpdateUserId(userId);
-        goodsAttributeGroup.setLastUpdateRemark("新增口味组信息！");
+        goodsAttributeGroup.setCreatedUserId(userId);
+        goodsAttributeGroup.setUpdatedUserId(userId);
+        goodsAttributeGroup.setUpdatedRemark("新增口味组信息！");
         return goodsAttributeGroup;
     }
 
@@ -723,9 +723,9 @@ public class GoodsService extends BasicService {
         goodsAttribute.setGoodsAttributeGroupId(goodsAttributeGroupId);
         goodsAttribute.setName(attributeInfo.getName());
         goodsAttribute.setPrice(attributeInfo.getPrice() == null ? BigDecimal.ZERO : attributeInfo.getPrice());
-        goodsAttribute.setCreateUserId(userId);
-        goodsAttribute.setLastUpdateUserId(userId);
-        goodsAttribute.setLastUpdateRemark("新增属性信息！");
+        goodsAttribute.setCreatedUserId(userId);
+        goodsAttribute.setUpdatedUserId(userId);
+        goodsAttribute.setUpdatedRemark("新增属性信息！");
         return goodsAttribute;
     }
 
@@ -737,9 +737,9 @@ public class GoodsService extends BasicService {
         goodsSpecification.setGoodsId(goodsId);
         goodsSpecification.setName(goodsSpecificationInfo.getName());
         goodsSpecification.setPrice(goodsSpecificationInfo.getPrice());
-        goodsSpecification.setCreateUserId(userId);
-        goodsSpecification.setLastUpdateUserId(userId);
-        goodsSpecification.setLastUpdateRemark("新增规格信息！");
+        goodsSpecification.setCreatedUserId(userId);
+        goodsSpecification.setUpdatedUserId(userId);
+        goodsSpecification.setUpdatedRemark("新增规格信息！");
         return goodsSpecification;
     }
 
@@ -758,8 +758,8 @@ public class GoodsService extends BasicService {
         GoodsSpecification goodsSpecification = DatabaseHelper.find(GoodsSpecification.class, searchModel);
         Validate.notNull(goodsSpecification, "菜品规格不存在！");
         goodsSpecification.setDeleted(true);
-        goodsSpecification.setLastUpdateUserId(deleteGoodsSpecificationModel.getUserId());
-        goodsSpecification.setLastUpdateRemark("删除菜品规格信息！");
+        goodsSpecification.setUpdatedUserId(deleteGoodsSpecificationModel.getUserId());
+        goodsSpecification.setUpdatedRemark("删除菜品规格信息！");
         DatabaseHelper.update(goodsSpecification);
         return ApiRest.builder().message("删除菜品规格成功！").successful(true).build();
     }
@@ -866,7 +866,7 @@ public class GoodsService extends BasicService {
                     if (groupType == 1) {
                         packageGroupBuilder.optionalQuantity(optionalQuantity);
                     }
-                    packageGroup = packageGroupBuilder.createUserId(userId).lastUpdateUserId(userId).build();
+                    packageGroup = packageGroupBuilder.createdUserId(userId).updatedUserId(userId).build();
                     DatabaseHelper.insert(packageGroup);
                 } else {
                     packageGroup = packageGroupMap.get(groupId);
@@ -876,7 +876,7 @@ public class GoodsService extends BasicService {
                     if (groupType == 1) {
                         packageGroup.setOptionalQuantity(optionalQuantity);
                     }
-                    packageGroup.setLastUpdateUserId(userId);
+                    packageGroup.setUpdatedUserId(userId);
                     DatabaseHelper.update(packageGroup);
                 }
 
@@ -898,7 +898,7 @@ public class GoodsService extends BasicService {
                         if (quantity != null) {
                             packageGroupDetailBuilder.quantity(quantity);
                         }
-                        packageGroupDetail = packageGroupDetailBuilder.lastUpdateUserId(userId).build();
+                        packageGroupDetail = packageGroupDetailBuilder.updatedUserId(userId).build();
                         DatabaseHelper.insert(packageGroupDetail);
                     } else {
                         packageGroupDetail.setGoodsId(goodsId);
@@ -906,7 +906,7 @@ public class GoodsService extends BasicService {
                         if (quantity != null) {
                             packageGroupDetail.setQuantity(quantity);
                         }
-                        packageGroupDetail.setLastUpdateUserId(userId);
+                        packageGroupDetail.setUpdatedUserId(userId);
                         DatabaseHelper.update(packageGroupDetail);
                     }
                 }
@@ -914,11 +914,11 @@ public class GoodsService extends BasicService {
             goods.setName(name);
             goods.setCategoryId(categoryId);
             goods.setImageUrl(imageUrl);
-            goods.setLastUpdateUserId(userId);
+            goods.setUpdatedUserId(userId);
             DatabaseHelper.update(goods);
 
             goodsSpecification.setPrice(price);
-            goodsSpecification.setLastUpdateUserId(userId);
+            goodsSpecification.setUpdatedUserId(userId);
             DatabaseHelper.update(goodsSpecification);
         } else {
             goods = Goods.builder()
@@ -930,8 +930,8 @@ public class GoodsService extends BasicService {
                     .categoryId(categoryId)
                     .imageUrl(imageUrl)
                     .stocked(false)
-                    .createUserId(userId)
-                    .lastUpdateUserId(userId)
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
                     .build();
             DatabaseHelper.insert(goods);
 
@@ -945,8 +945,8 @@ public class GoodsService extends BasicService {
                     .name(Constants.VARCHAR_DEFAULT_VALUE)
                     .price(price)
                     .stock(Constants.DECIMAL_DEFAULT_VALUE)
-                    .createUserId(userId)
-                    .lastUpdateUserId(userId)
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
                     .build();
             DatabaseHelper.insert(goodsSpecification);
 
@@ -966,7 +966,7 @@ public class GoodsService extends BasicService {
                 if (groupType == 1) {
                     packageGroupBuilder.optionalQuantity(optionalQuantity);
                 }
-                PackageGroup packageGroup = packageGroupBuilder.createUserId(userId).lastUpdateUserId(userId).build();
+                PackageGroup packageGroup = packageGroupBuilder.createdUserId(userId).updatedUserId(userId).build();
                 DatabaseHelper.insert(packageGroup);
 
                 for (SavePackageModel.GroupDetail groupDetail : groupDetails) {
@@ -985,7 +985,7 @@ public class GoodsService extends BasicService {
                     if (quantity != null) {
                         packageGroupDetailBuilder.quantity(quantity);
                     }
-                    PackageGroupDetail packageGroupDetail = packageGroupDetailBuilder.createUserId(userId).lastUpdateUserId(userId).build();
+                    PackageGroupDetail packageGroupDetail = packageGroupDetailBuilder.createdUserId(userId).updatedUserId(userId).build();
                     DatabaseHelper.insert(packageGroupDetail);
                 }
             }
@@ -1030,9 +1030,9 @@ public class GoodsService extends BasicService {
         validateCanNotOperate(tenantId, branchId, "goods", goodsId, 2);
 
         Date currentTime = new Date();
-        goods.setLastUpdateUserId(userId);
-        goods.setLastUpdateRemark("删除商品信息！");
-        goods.setDeleteTime(currentTime);
+        goods.setUpdatedUserId(userId);
+        goods.setUpdatedRemark("删除商品信息！");
+        goods.setDeletedTime(currentTime);
         goods.setDeleted(true);
         DatabaseHelper.update(goods);
 
@@ -1041,8 +1041,8 @@ public class GoodsService extends BasicService {
         goodsSpecificationUpdateModel.setTableName("goods_specification");
         goodsSpecificationUpdateModel.addContentValue("delete_time", currentTime);
         goodsSpecificationUpdateModel.addContentValue("deleted", 1);
-        goodsSpecificationUpdateModel.addContentValue("last_update_user_id", userId);
-        goodsSpecificationUpdateModel.addContentValue("last_update_remark", "删除商品规格信息！");
+        goodsSpecificationUpdateModel.addContentValue("updated_user_id", userId);
+        goodsSpecificationUpdateModel.addContentValue("updated_remark", "删除商品规格信息！");
         goodsSpecificationUpdateModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
         goodsSpecificationUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         goodsSpecificationUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -1053,8 +1053,8 @@ public class GoodsService extends BasicService {
         goodsAttributeGroupUpdateModel.setTableName("goods_attribute_group");
         goodsAttributeGroupUpdateModel.addContentValue("delete_time", currentTime);
         goodsAttributeGroupUpdateModel.addContentValue("deleted", 1);
-        goodsAttributeGroupUpdateModel.addContentValue("last_update_user_id", userId);
-        goodsAttributeGroupUpdateModel.addContentValue("last_update_remark", "删除商品口味组信息！");
+        goodsAttributeGroupUpdateModel.addContentValue("updated_user_id", userId);
+        goodsAttributeGroupUpdateModel.addContentValue("updated_remark", "删除商品口味组信息！");
         goodsAttributeGroupUpdateModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
         goodsAttributeGroupUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         goodsAttributeGroupUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -1065,8 +1065,8 @@ public class GoodsService extends BasicService {
         goodsAttributeUpdateModel.setTableName("goods_attribute");
         goodsAttributeUpdateModel.addContentValue("delete_time", currentTime);
         goodsAttributeUpdateModel.addContentValue("deleted", 1);
-        goodsAttributeUpdateModel.addContentValue("last_update_user_id", userId);
-        goodsAttributeUpdateModel.addContentValue("last_update_remark", "删除商品口味组信息！");
+        goodsAttributeUpdateModel.addContentValue("updated_user_id", userId);
+        goodsAttributeUpdateModel.addContentValue("updated_remark", "删除商品口味组信息！");
         goodsAttributeUpdateModel.addSearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
         goodsAttributeUpdateModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         goodsAttributeUpdateModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -1109,8 +1109,8 @@ public class GoodsService extends BasicService {
             goods.setName(MapUtils.getString(goodsInfo, "name"));
             goods.setType(1);
             goods.setCategoryId(BigInteger.ONE);
-            goods.setCreateUserId(userId);
-            goods.setLastUpdateUserId(userId);
+            goods.setCreatedUserId(userId);
+            goods.setUpdatedUserId(userId);
             goodsMap.put(uuid, goods);
             goodses.add(goods);
 
@@ -1119,8 +1119,8 @@ public class GoodsService extends BasicService {
             goodsSpecification.setTenantCode(tenantCode);
             goodsSpecification.setBranchId(branchId);
             goodsSpecification.setPrice(BigDecimal.valueOf(MapUtils.getDoubleValue(goodsInfo, "price")));
-            goodsSpecification.setCreateUserId(userId);
-            goodsSpecification.setLastUpdateUserId(userId);
+            goodsSpecification.setCreatedUserId(userId);
+            goodsSpecification.setUpdatedUserId(userId);
             goodsSpecificationMap.put(uuid, goodsSpecification);
         }
 

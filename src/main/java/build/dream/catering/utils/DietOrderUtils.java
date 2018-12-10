@@ -183,9 +183,9 @@ public class DietOrderUtils {
         dietOrderInfo.put("invoiceType", dietOrder.getInvoiceType());
         dietOrderInfo.put("invoice", dietOrder.getInvoice());
         dietOrderInfo.put("vipId", dietOrder.getVipId());
-        dietOrderInfo.put("createTime", dietOrder.getCreateTime());
-        dietOrderInfo.put("lastUpdateTime", dietOrder.getLastUpdateTime());
-        dietOrderInfo.put("lastUpdateRemark", dietOrder.getLastUpdateRemark());
+        dietOrderInfo.put("createTime", dietOrder.getCreatedTime());
+        dietOrderInfo.put("lastUpdateTime", dietOrder.getUpdatedTime());
+        dietOrderInfo.put("lastUpdateRemark", dietOrder.getUpdatedRemark());
         dietOrderInfo.put("groups", buildDietOrderGroupInfos(dietOrderGroups, dietOrderDetailMap, dietOrderDetailGoodsAttributeMap));
         List<Map<String, Object>> orderActivities = new ArrayList<Map<String, Object>>();
         for (DietOrderActivity dietOrderActivity : dietOrderActivities) {

@@ -385,8 +385,8 @@ public class AnubisService {
         dietOrderDeliveryState.setLatitude(dataJsonObject.optString("latitude", null));
 
         BigInteger userId = BigInteger.ZERO;
-        dietOrderDeliveryState.setCreateUserId(userId);
-        dietOrderDeliveryState.setLastUpdateUserId(userId);
+        dietOrderDeliveryState.setCreatedUserId(userId);
+        dietOrderDeliveryState.setUpdatedUserId(userId);
         long pushTime = dataJsonObject.getLong("push_time");
 
         Calendar calendar = Calendar.getInstance();

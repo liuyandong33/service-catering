@@ -123,9 +123,9 @@ public class ActivityService {
             buyGiveActivity.setGiveGoodsId(giveGoods.getId());
             buyGiveActivity.setGiveGoodsSpecificationId(giveGoodsSpecification.getId());
             buyGiveActivity.setGiveQuantity(buyGiveActivityInfo.getGiveQuantity());
-            buyGiveActivity.setCreateUserId(userId);
-            buyGiveActivity.setLastUpdateUserId(userId);
-            buyGiveActivity.setLastUpdateRemark("保存买A赠B活动！");
+            buyGiveActivity.setCreatedUserId(userId);
+            buyGiveActivity.setUpdatedUserId(userId);
+            buyGiveActivity.setUpdatedRemark("保存买A赠B活动！");
             buyGiveActivities.add(buyGiveActivity);
 
             String reason = "该商品已参与促销活动【" + activity.getName() + "】，活动期间不可%s！如需更改，请先取消活动！";
@@ -304,9 +304,9 @@ public class ActivityService {
             } else if (discountType == 2) {
                 specialGoodsActivity.setDiscountRate(specialGoodsActivityInfo.getDiscountRate());
             }
-            specialGoodsActivity.setCreateUserId(userId);
-            specialGoodsActivity.setLastUpdateUserId(userId);
-            specialGoodsActivity.setLastUpdateRemark("保存特价商品活动！");
+            specialGoodsActivity.setCreatedUserId(userId);
+            specialGoodsActivity.setUpdatedUserId(userId);
+            specialGoodsActivity.setUpdatedRemark("保存特价商品活动！");
             specialGoodsActivities.add(specialGoodsActivity);
 
             String reason = "该商品已参与促销活动【" + activity.getName() + "】，活动期间不可%s！如需更改，请先取消活动！";

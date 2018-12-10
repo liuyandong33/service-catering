@@ -623,8 +623,8 @@ public class ElemeService {
         UpdateModel updateModel = new UpdateModel(true);
         updateModel.setTableName("branch");
         updateModel.addContentValue("shop_id", null);
-        updateModel.addContentValue("last_update_user_id", userId);
-        updateModel.addContentValue("last_update_remark", lastUpdateRemark);
+        updateModel.addContentValue("updated_user_id", userId);
+        updateModel.addContentValue("updated_remark", lastUpdateRemark);
         updateModel.addSearchCondition("shop_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, shopId);
         DatabaseHelper.universalUpdate(updateModel);
 
