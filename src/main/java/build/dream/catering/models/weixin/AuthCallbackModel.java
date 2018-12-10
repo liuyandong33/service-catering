@@ -8,6 +8,9 @@ import java.math.BigInteger;
 
 public class AuthCallbackModel extends BasicModel {
     @NotNull
+    private String clientType;
+
+    @NotNull
     private BigInteger tenantId;
 
     @NotNull
@@ -16,6 +19,14 @@ public class AuthCallbackModel extends BasicModel {
     @NotNull
     @InstantiateObjectKey(name = "auth_code")
     private String authCode;
+
+    public String getClientType() {
+        return clientType;
+    }
+
+    public void setClientType(String clientType) {
+        this.clientType = clientType;
+    }
 
     public BigInteger getTenantId() {
         return tenantId;

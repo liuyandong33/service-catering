@@ -144,6 +144,7 @@ public class WeiXinController extends BasicController {
             authCallbackModel.validateAndThrow();
             weiXinService.handleAuthCallback(authCallbackModel);
 
+            String clientType = authCallbackModel.getClientType();
             Map<String, Object> model = new HashMap<String, Object>();
             String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
             String baseUrl = CommonUtils.getServiceDomain(partitionCode, Constants.SERVICE_NAME_CATERING);
