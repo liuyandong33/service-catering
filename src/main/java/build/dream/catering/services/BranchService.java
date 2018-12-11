@@ -28,29 +28,46 @@ public class BranchService {
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest initializeBranch(InitializeBranchModel initializeBranchModel) {
+        BigInteger tenantId = initializeBranchModel.getTenantId();
+        String tenantCode = initializeBranchModel.getTenantCode();
+        int type = initializeBranchModel.getType();
+        int status = initializeBranchModel.getStatus();
+        String name = initializeBranchModel.getName();
+        String provinceCode = initializeBranchModel.getProvinceCode();
+        String provinceName = initializeBranchModel.getProvinceName();
+        String cityCode = initializeBranchModel.getCityCode();
+        String cityName = initializeBranchModel.getCityName();
+        String districtCode = initializeBranchModel.getDistrictCode();
+        String districtName = initializeBranchModel.getDistrictName();
+        String address = initializeBranchModel.getAddress();
+        String longitude = initializeBranchModel.getLongitude();
+        String latitude = initializeBranchModel.getLatitude();
+        String linkman = initializeBranchModel.getLinkman();
+        String contactPhone = initializeBranchModel.getContactPhone();
+        Integer smartRestaurantStatus = initializeBranchModel.getSmartRestaurantStatus();
+        BigInteger userId = initializeBranchModel.getUserId();
+
         Branch branch = new Branch();
         branch.setTenantId(initializeBranchModel.getTenantId());
         branch.setTenantCode(initializeBranchModel.getTenantCode());
 
         String code = SerialNumberGenerator.nextSerialNumber(4, SequenceUtils.nextValue(initializeBranchModel.getTenantCode() + "_branch_code"));
         branch.setCode(code);
-        branch.setName(initializeBranchModel.getName());
-        branch.setType(initializeBranchModel.getType());
-        branch.setStatus(initializeBranchModel.getStatus());
-        branch.setProvinceCode(initializeBranchModel.getProvinceCode());
-        branch.setProvinceName(initializeBranchModel.getProvinceName());
-        branch.setCityCode(initializeBranchModel.getCityCode());
-        branch.setCityName(initializeBranchModel.getCityName());
-        branch.setDistrictCode(initializeBranchModel.getDistrictCode());
-        branch.setDistrictName(initializeBranchModel.getDistrictName());
-        branch.setAddress(initializeBranchModel.getAddress());
-        branch.setLongitude(initializeBranchModel.getLongitude());
-        branch.setLatitude(initializeBranchModel.getLatitude());
-        branch.setLinkman(initializeBranchModel.getLinkman());
-        branch.setContactPhone(initializeBranchModel.getContactPhone());
-        branch.setSmartRestaurantStatus(initializeBranchModel.getSmartRestaurantStatus());
-
-        BigInteger userId = initializeBranchModel.getUserId();
+        branch.setName(name);
+        branch.setType(type);
+        branch.setStatus(status);
+        branch.setProvinceCode(provinceCode);
+        branch.setProvinceName(provinceName);
+        branch.setCityCode(cityCode);
+        branch.setCityName(cityName);
+        branch.setDistrictCode(districtCode);
+        branch.setDistrictName(districtName);
+        branch.setAddress(address);
+        branch.setLongitude(longitude);
+        branch.setLatitude(latitude);
+        branch.setLinkman(linkman);
+        branch.setContactPhone(contactPhone);
+        branch.setSmartRestaurantStatus(smartRestaurantStatus);
         branch.setCreatedUserId(userId);
         branch.setUpdatedUserId(userId);
         DatabaseHelper.insert(branch);
