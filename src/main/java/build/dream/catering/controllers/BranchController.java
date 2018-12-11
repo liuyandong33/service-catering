@@ -3,7 +3,6 @@ package build.dream.catering.controllers;
 import build.dream.catering.models.branch.*;
 import build.dream.catering.services.BranchService;
 import build.dream.common.annotations.ApiRestAction;
-import build.dream.common.controllers.BasicController;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(value = "/branch")
-public class BranchController extends BasicController {
+public class BranchController {
     /**
      * 初始化门店
      *
