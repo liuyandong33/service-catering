@@ -2,12 +2,13 @@ package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.weixin.*;
-import build.dream.catering.utils.WeiXinUtils;
 import build.dream.common.api.ApiRest;
+import build.dream.common.beans.WeiXinAccessToken;
 import build.dream.common.catering.domains.WeiXinMemberCard;
 import build.dream.common.saas.domains.WeiXinPublicAccount;
 import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
@@ -34,7 +35,8 @@ public class WeiXinService {
         String appId = weiXinPublicAccount.getAppId();
         String appSecret = weiXinPublicAccount.getAppSecret();
 
-        String accessToken = WeiXinUtils.obtainAccessToken(appId, appSecret);
+        WeiXinAccessToken weiXinAccessToken = WeiXinUtils.obtainAccessToken(appId, appSecret);
+        String accessToken = weiXinAccessToken.getAccessToken();
 
         String uploadImgUrl = "https://api.weixin.qq.com/cgi-bin/media/uploadimg";
         String backgroundPicUrl = null;
@@ -274,7 +276,8 @@ public class WeiXinService {
 
         String appId = weiXinPublicAccount.getAppId();
         String appSecret = weiXinPublicAccount.getAppSecret();
-        String accessToken = WeiXinUtils.obtainAccessToken(appId, appSecret);
+        WeiXinAccessToken weiXinAccessToken = WeiXinUtils.obtainAccessToken(appId, appSecret);
+        String accessToken = weiXinAccessToken.getAccessToken();
 
         Map<String, Object> baseInfo = new HashMap<String, Object>();
         baseInfo.put("mchid_list", payGiftCardModel.getMchIdList());
@@ -318,7 +321,8 @@ public class WeiXinService {
         String appId = weiXinPublicAccount.getAppId();
         String appSecret = weiXinPublicAccount.getAppSecret();
 
-        String accessToken = WeiXinUtils.obtainAccessToken(appId, appSecret);
+        WeiXinAccessToken weiXinAccessToken = WeiXinUtils.obtainAccessToken(appId, appSecret);
+        String accessToken = weiXinAccessToken.getAccessToken();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -404,9 +408,21 @@ public class WeiXinService {
      * @param authCallbackModel
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleAuthCallback(AuthCallbackModel authCallbackModel) {
+    public void handleAuthCallback(AuthCallbackModel authCallbackModel) throws IOException {
         BigInteger tenantId = authCallbackModel.getTenantId();
         String componentAppId = authCallbackModel.getComponentAppId();
         String authCode = authCallbackModel.getAuthCode();
+
+        Map<String, String> handleAuthCallbackRequestParameters = new HashMap<String, String>();
+        handleAuthCallbackRequestParameters.put("tenantId", tenantId.toString());
+        handleAuthCallbackRequestParameters.put("componentAppId", componentAppId);
+        handleAuthCallbackRequestParameters.put("authCode", authCode);
+
+        ApiRest handleAuthCallbackResult = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "weiXin", "handleAuthCallback", handleAuthCallbackRequestParameters);
+        ValidateUtils.isTrue(handleAuthCallbackResult.isSuccessful(), handleAuthCallbackResult.getError());
+
+        Map<String, Object> data = (Map<String, Object>) handleAuthCallbackResult.getData();
+        Map<String, Object> infoMap = MapUtils.getMap(data, "weiXinAuthorizerInfo");
+        Map<String, Object> tokenMap = MapUtils.getMap(data, "weiXinAuthorizerToken");
     }
 }
