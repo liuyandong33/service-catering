@@ -386,8 +386,8 @@ public class WeiXinService {
      * @throws IOException
      */
     public ApiRest obtainWeiXinAuthorizerInfo(ObtainWeiXinAuthorizerInfoModel obtainWeiXinAuthorizerInfoModel) {
-        BigInteger tenantId = obtainWeiXinAuthorizerInfoModel.getTenantId();
-        BigInteger branchId = obtainWeiXinAuthorizerInfoModel.getBranchId();
+        BigInteger tenantId = obtainWeiXinAuthorizerInfoModel.obtainTenantId();
+        BigInteger branchId = obtainWeiXinAuthorizerInfoModel.obtainBranchId();
 
         Map<String, String> obtainWeiXinAuthorizerInfoRequestParameters = new HashMap<String, String>();
         obtainWeiXinAuthorizerInfoRequestParameters.put("tenantId", tenantId.toString());
