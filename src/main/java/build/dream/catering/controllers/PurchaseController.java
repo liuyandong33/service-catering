@@ -3,7 +3,6 @@ package build.dream.catering.controllers;
 import build.dream.catering.models.purchase.*;
 import build.dream.catering.services.PurchaseService;
 import build.dream.common.annotations.ApiRestAction;
-import build.dream.common.controllers.BasicController;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(value = "/purchase")
-public class PurchaseController extends BasicController {
+public class PurchaseController {
     /**
      * 保存进货单
      *
