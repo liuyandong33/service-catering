@@ -4,8 +4,10 @@ import build.dream.catering.models.branch.*;
 import build.dream.catering.services.BranchService;
 import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.controllers.BasicController;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
@@ -16,7 +18,7 @@ public class BranchController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/initializeBranch")
+    @RequestMapping(value = "/initializeBranch", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = InitializeBranchModel.class, serviceClass = BranchService.class, serviceMethodName = "initializeBranch", error = "初始化门店失败")
     public String initializeBranch() {
@@ -28,7 +30,7 @@ public class BranchController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/listBranches")
+    @RequestMapping(value = "/listBranches", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ListBranchesModel.class, serviceClass = BranchService.class, serviceMethodName = "listBranches", error = "查询门店列表失败")
     public String listBranches() {
@@ -40,7 +42,7 @@ public class BranchController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/deleteBranch")
+    @RequestMapping(value = "/deleteBranch", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = DeleteBranchModel.class, serviceClass = BranchService.class, serviceMethodName = "deleteBranch", error = "删除门店信息失败")
     public String deleteBranch() {
@@ -52,7 +54,7 @@ public class BranchController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/pullBranchInfos")
+    @RequestMapping(value = "/pullBranchInfos", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = PullBranchInfosModel.class, serviceClass = BranchService.class, serviceMethodName = "pullBranchInfos", error = "拉取门店信息失败")
     public String pullBranchInfos() {
@@ -64,7 +66,7 @@ public class BranchController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/disableGoods")
+    @RequestMapping(value = "/disableGoods", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = DisableGoodsModel.class, serviceClass = BranchService.class, serviceMethodName = "disableGoods", error = "禁用门店产品失败")
     public String disableGoods() {
@@ -76,7 +78,7 @@ public class BranchController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/renewCallback")
+    @RequestMapping(value = "/renewCallback", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = RenewCallbackModel.class, serviceClass = BranchService.class, serviceMethodName = "handleRenewCallback", error = "处理门店续费回调失败")
     public String renewCallback() {
@@ -88,7 +90,7 @@ public class BranchController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/obtainBranchInfo")
+    @RequestMapping(value = "/obtainBranchInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ObtainBranchInfoModel.class, serviceClass = BranchService.class, serviceMethodName = "obtainBranchInfo", error = "获取门店信息失败")
     public String obtainBranchInfo() {
@@ -100,7 +102,7 @@ public class BranchController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/obtainAllSmartRestaurants")
+    @RequestMapping(value = "/obtainAllSmartRestaurants", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ObtainAllSmartRestaurantsModel.class, serviceClass = BranchService.class, serviceMethodName = "obtainAllSmartRestaurants", error = "获取智慧餐厅门店信息失败")
     public String obtainAllSmartRestaurants() {
@@ -112,7 +114,7 @@ public class BranchController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/obtainSmartRestaurant")
+    @RequestMapping(value = "/obtainSmartRestaurant", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ObtainSmartRestaurantModel.class, serviceClass = BranchService.class, serviceMethodName = "obtainSmartRestaurant", error = "获取智慧餐厅门店信息失败")
     public String obtainSmartRestaurant() {

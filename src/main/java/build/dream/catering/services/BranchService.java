@@ -32,7 +32,7 @@ public class BranchService {
         branch.setTenantId(initializeBranchModel.getTenantId());
         branch.setTenantCode(initializeBranchModel.getTenantCode());
 
-        String code = SerialNumberGenerator.nextSerialNumber(4, SequenceUtils.nextValue(initializeBranchModel.getTenantCode() + "_branch_count"));
+        String code = SerialNumberGenerator.nextSerialNumber(4, SequenceUtils.nextValue(initializeBranchModel.getTenantCode() + "_branch_code"));
         branch.setCode(code);
         branch.setName(initializeBranchModel.getName());
         branch.setType(initializeBranchModel.getType());
@@ -48,12 +48,7 @@ public class BranchService {
         branch.setLatitude(initializeBranchModel.getLatitude());
         branch.setLinkman(initializeBranchModel.getLinkman());
         branch.setContactPhone(initializeBranchModel.getContactPhone());
-        branch.setElemeAccountType(Constants.ELEME_ACCOUNT_TYPE_CHAIN_ACCOUNT);
-        branch.setShopId(null);
         branch.setSmartRestaurantStatus(initializeBranchModel.getSmartRestaurantStatus());
-        branch.setAppAuthToken(null);
-        branch.setPoiId(null);
-        branch.setPoiName(null);
 
         BigInteger userId = initializeBranchModel.getUserId();
         branch.setCreatedUserId(userId);
