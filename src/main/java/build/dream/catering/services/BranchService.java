@@ -48,8 +48,8 @@ public class BranchService {
         BigInteger userId = initializeBranchModel.getUserId();
 
         Branch branch = new Branch();
-        branch.setTenantId(initializeBranchModel.getTenantId());
-        branch.setTenantCode(initializeBranchModel.getTenantCode());
+        branch.setTenantId(tenantId);
+        branch.setTenantCode(tenantCode);
 
         String code = SerialNumberGenerator.nextSerialNumber(4, SequenceUtils.nextValue(initializeBranchModel.getTenantCode() + "_branch_code"));
         branch.setCode(code);
