@@ -45,6 +45,7 @@ public class BranchService {
         String linkman = initializeBranchModel.getLinkman();
         String contactPhone = initializeBranchModel.getContactPhone();
         Integer smartRestaurantStatus = initializeBranchModel.getSmartRestaurantStatus();
+        BigInteger currentUserId = initializeBranchModel.getCurrentUserId();
         BigInteger userId = initializeBranchModel.getUserId();
 
         Branch branch = new Branch();
@@ -71,7 +72,7 @@ public class BranchService {
         branch.setCreatedUserId(userId);
         branch.setUpdatedUserId(userId);
         DatabaseHelper.insert(branch);
-        branchMapper.insertMergeUserBranch(userId, initializeBranchModel.getTenantId(), branch.getId());
+        branchMapper.insertMergeUserBranch(userId, initializeBranchModel.getTenantId(), tenantCode, branch.getId(), currentUserId, "初始化门店，增加店长所属门店！");
 
         return ApiRest.builder().data(branch).className(Branch.class.getName()).message("初始化门店成功！").successful(true).build();
     }

@@ -74,6 +74,9 @@ public class InitializeBranchModel extends BasicModel {
     private Integer smartRestaurantStatus;
 
     @NotNull
+    private BigInteger currentUserId;
+
+    @NotNull
     private BigInteger userId;
 
     public static Integer[] getBranchStatus() {
@@ -214,6 +217,14 @@ public class InitializeBranchModel extends BasicModel {
 
     public void setSmartRestaurantStatus(Integer smartRestaurantStatus) {
         this.smartRestaurantStatus = smartRestaurantStatus;
+    }
+
+    public BigInteger getCurrentUserId() {
+        return currentUserId;
+    }
+
+    public void setCurrentUserId(BigInteger currentUserId) {
+        this.currentUserId = currentUserId;
     }
 
     public BigInteger getUserId() {

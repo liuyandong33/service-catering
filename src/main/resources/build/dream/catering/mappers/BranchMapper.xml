@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.catering.mappers.BranchMapper">
     <insert id="insertMergeUserBranch">
-        INSERT INTO merge_user_branch(user_id, tenant_id, branch_id) VALUES (#{userId}, #{tenantId}, #{branchId})
+        INSERT INTO merge_user_branch(user_id, tenant_id, tenant_code, branch_id, created_user_id, updated_user_id, updated_remark) VALUES (#{userId}, #{tenantId}, #{tenantCode}, #{branchId}, #{currentUserId}, #{currentUserId}, #{updatedRemark})
     </insert>
 
     <select id="countUsers" resultType="java.lang.Long">

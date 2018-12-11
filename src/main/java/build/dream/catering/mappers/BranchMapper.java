@@ -10,7 +10,12 @@ import java.util.List;
 
 @Mapper
 public interface BranchMapper {
-    long insertMergeUserBranch(@Param("userId") BigInteger userId, @Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId);
+    long insertMergeUserBranch(@Param("userId") BigInteger userId,
+                               @Param("tenantId") BigInteger tenantId,
+                               @Param("tenantCode") String tenantCode,
+                               @Param("branchId") BigInteger branchId,
+                               @Param("currentUserId") BigInteger currentUserId,
+                               @Param("updatedRemark") String updatedRemark);
 
     List<BigInteger> findAllUserIds(@Param("searchConditions") List<SearchCondition> searchConditions, @Param("offset") int offset, @Param("maxResults") int maxResults);
 
