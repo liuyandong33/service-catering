@@ -50,4 +50,15 @@ public class UserController extends BasicController {
     public String obtainBranchInfo() {
         return null;
     }
+
+    /**
+     * 增加员工
+     * @return
+     */
+    @RequestMapping(value = "/addUser", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = ObtainBranchInfoModel.class, serviceClass = UserService.class, serviceMethodName = "addUser", error = "增加员工失败")
+    public String addUser() {
+        return null;
+    }
 }
