@@ -133,7 +133,7 @@ public class WeiXinController extends BasicController {
         } else if (Constants.CLIENT_TYPE_WEB.equals(clientType)) {
             serviceName = Constants.SERVICE_NAME_WEBAPI;
         }
-        
+
         String redirectUri = CommonUtils.getOutsideServiceDomain(serviceName) + "/proxy/doGetPermit/" + partitionCode + "/" + Constants.SERVICE_NAME_CATERING + "/weiXin/authCallback?tenantId=" + tenantId + "&componentAppId=" + componentAppId;
         String url = WeiXinUtils.generateComponentLoginPageUrl(componentAppId, preAuthCode, redirectUri, authType);
 
@@ -153,7 +153,7 @@ public class WeiXinController extends BasicController {
         try {
             AuthCallbackModel authCallbackModel = ApplicationHandler.instantiateObject(AuthCallbackModel.class, requestParameters);
             authCallbackModel.validateAndThrow();
-            weiXinService.handleAuthCallback(authCallbackModel);
+            Map<String, Object> info = weiXinService.handleAuthCallback(authCallbackModel);
 
             Map<String, Object> model = new HashMap<String, Object>();
             String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
@@ -171,6 +171,7 @@ public class WeiXinController extends BasicController {
 
             model.put("baseUrl", baseUrl);
             model.put("proxyUrl", proxyUrl);
+            model.put("info", info);
 
             modelAndView.addAllObjects(model);
             modelAndView.setViewName("weiXin/authSuccess");

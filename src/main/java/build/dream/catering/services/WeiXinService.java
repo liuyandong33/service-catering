@@ -408,7 +408,7 @@ public class WeiXinService {
      * @param authCallbackModel
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleAuthCallback(AuthCallbackModel authCallbackModel) throws IOException {
+    public Map<String, Object> handleAuthCallback(AuthCallbackModel authCallbackModel) throws IOException {
         BigInteger tenantId = authCallbackModel.getTenantId();
         String componentAppId = authCallbackModel.getComponentAppId();
         String authCode = authCallbackModel.getAuthCode();
@@ -424,5 +424,7 @@ public class WeiXinService {
         Map<String, Object> data = (Map<String, Object>) handleAuthCallbackResult.getData();
         Map<String, Object> infoMap = MapUtils.getMap(data, "weiXinAuthorizerInfo");
         Map<String, Object> tokenMap = MapUtils.getMap(data, "weiXinAuthorizerToken");
+
+        return infoMap;
     }
 }
