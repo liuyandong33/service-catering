@@ -401,7 +401,7 @@ public class WeiXinService {
      * @param authCallbackModel
      */
     @Transactional(rollbackFor = Exception.class)
-    public Map<String, Object> handleAuthCallback(AuthCallbackModel authCallbackModel) throws IOException {
+    public Map<String, Object> handleAuthCallback(AuthCallbackModel authCallbackModel) {
         BigInteger tenantId = authCallbackModel.getTenantId();
         String componentAppId = authCallbackModel.getComponentAppId();
         String authCode = authCallbackModel.getAuthCode();
