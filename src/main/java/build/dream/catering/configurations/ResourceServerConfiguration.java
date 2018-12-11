@@ -8,8 +8,21 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 @Configuration
 @EnableResourceServer
 public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
+    private static final String[] PERMIT_ALL_ANT_PATTERNS = {
+            "/favicon.ico",
+            "/user/obtainBranchInfo",
+            "/demo/**",
+            "/weiXin/authCallback",
+            "/images/**",
+            "/libraries/**",
+            "/branch/initializeBranch",
+            "/branch/pullBranchInfos",
+            "/branch/disableGoods",
+            "/branch/renewCallback"
+    };
+
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().antMatchers("/favicon.ico", "/user/obtainBranchInfo", "/demo/**", "/weiXin/authCallback", "/images/**", "/libraries/**").permitAll().anyRequest().authenticated();
+        http.authorizeRequests().antMatchers(PERMIT_ALL_ANT_PATTERNS).permitAll().anyRequest().authenticated();
     }
 }
