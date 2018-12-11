@@ -30,8 +30,8 @@ public class BranchService {
     public ApiRest initializeBranch(InitializeBranchModel initializeBranchModel) {
         BigInteger tenantId = initializeBranchModel.getTenantId();
         String tenantCode = initializeBranchModel.getTenantCode();
-        int type = initializeBranchModel.getType();
-        int status = initializeBranchModel.getStatus();
+        Integer type = initializeBranchModel.getType();
+        Integer status = initializeBranchModel.getStatus();
         String name = initializeBranchModel.getName();
         String provinceCode = initializeBranchModel.getProvinceCode();
         String provinceName = initializeBranchModel.getProvinceName();
