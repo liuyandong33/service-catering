@@ -3,15 +3,14 @@ package build.dream.catering.services;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.weixin.*;
 import build.dream.common.api.ApiRest;
-import build.dream.common.beans.WeiXinAccessToken;
 import build.dream.common.catering.domains.WeiXinMemberCard;
-import build.dream.common.saas.domains.WeiXinPublicAccount;
+import build.dream.common.saas.domains.WeiXinAuthorizerInfo;
+import build.dream.common.saas.domains.WeiXinAuthorizerToken;
 import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,14 +28,13 @@ public class WeiXinService {
     public ApiRest createMemberCard(CreateMemberCardModel createMemberCardModel, MultipartFile backgroundPicFile, MultipartFile logoFile) {
         BigInteger tenantId = createMemberCardModel.getTenantId();
         BigInteger userId = createMemberCardModel.getUserId();
-        WeiXinPublicAccount weiXinPublicAccount = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
-        Validate.notNull(weiXinPublicAccount, "未配置微信公众号，不能创建会员卡！");
+        WeiXinAuthorizerInfo weiXinAuthorizerInfo = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
+        ValidateUtils.notNull(weiXinAuthorizerInfo, "未配置微信公众号，不能创建会员卡！");
 
-        String appId = weiXinPublicAccount.getAppId();
-        String appSecret = weiXinPublicAccount.getAppSecret();
-
-        WeiXinAccessToken weiXinAccessToken = WeiXinUtils.obtainAccessToken(appId, appSecret);
-        String accessToken = weiXinAccessToken.getAccessToken();
+        String authorizerAppId = weiXinAuthorizerInfo.getAuthorizerAppId();
+        String componentAppId = weiXinAuthorizerInfo.getComponentAppId();
+        WeiXinAuthorizerToken weiXinAuthorizerToken = WeiXinUtils.obtainWeiXinAuthorizerToken(componentAppId, authorizerAppId);
+        String accessToken = weiXinAuthorizerToken.getAuthorizerAccessToken();
 
         String uploadImgUrl = "https://api.weixin.qq.com/cgi-bin/media/uploadimg";
         String backgroundPicUrl = null;
@@ -47,7 +45,7 @@ public class WeiXinService {
 
             String uploadBackgroundPicResult = OutUtils.doPostWithRequestParametersAndFiles(uploadImgUrl, null, uploadBackgroundPicRequestParameters).getResult();
             JSONObject uploadBackgroundPicResultJsonObject = JSONObject.fromObject(uploadBackgroundPicResult);
-            Validate.isTrue(!uploadBackgroundPicResultJsonObject.has("errcode"), uploadBackgroundPicResultJsonObject.optString("errmsg"));
+            ValidateUtils.isTrue(!uploadBackgroundPicResultJsonObject.has("errcode"), uploadBackgroundPicResultJsonObject.optString("errmsg"));
 
             backgroundPicUrl = uploadBackgroundPicResultJsonObject.getString("url");
         }
@@ -58,7 +56,7 @@ public class WeiXinService {
 
         String uploadLogoResult = OutUtils.doPostWithRequestParametersAndFiles(uploadImgUrl, null, uploadLogoRequestParameters).getResult();
         JSONObject uploadLogoResultJsonObject = JSONObject.fromObject(uploadLogoResult);
-        Validate.isTrue(!uploadLogoResultJsonObject.has("errcode"), uploadLogoResultJsonObject.optString("errmsg"));
+        ValidateUtils.isTrue(!uploadLogoResultJsonObject.has("errcode"), uploadLogoResultJsonObject.optString("errmsg"));
 
         String logoUrl = uploadLogoResultJsonObject.getString("url");
 
@@ -169,7 +167,7 @@ public class WeiXinService {
         String createMemberCardUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_CREATE_URI + "?access_token=" + accessToken;
         String createMemberCardResult = OutUtils.doPostWithRequestBody(createMemberCardUrl, null, GsonUtils.toJson(createMemberCardRequestBody)).getResult();
         JSONObject createMemberCardResultJsonObject = JSONObject.fromObject(createMemberCardResult);
-        Validate.isTrue(createMemberCardResultJsonObject.getInt("errcode") == 0, createMemberCardResultJsonObject.getString("errmsg"));
+        ValidateUtils.isTrue(createMemberCardResultJsonObject.getInt("errcode") == 0, createMemberCardResultJsonObject.getString("errmsg"));
 
         String cardId = createMemberCardResultJsonObject.getString("card_id");
 
@@ -222,7 +220,7 @@ public class WeiXinService {
         String activateUserFormUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_MEMBER_CARD_ACTIVATE_USER_FORM_SET_URI + "?access_token=" + accessToken;
         String activateUserFormResult = OutUtils.doPostWithRequestBody(activateUserFormUrl, null, GsonUtils.toJson(activateUserFormRequestBody)).getResult();
         JSONObject activateUserFormResultJsonObject = JSONObject.fromObject(activateUserFormResult);
-        Validate.isTrue(activateUserFormResultJsonObject.getInt("errcode") == 0, activateUserFormResultJsonObject.getString("errmsg"));
+        ValidateUtils.isTrue(activateUserFormResultJsonObject.getInt("errcode") == 0, activateUserFormResultJsonObject.getString("errmsg"));
 
         Map<String, Object> actionInfoCard = new HashMap<String, Object>();
         actionInfoCard.put("card_id", cardId);
@@ -237,14 +235,14 @@ public class WeiXinService {
         String createQrCodeUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_QRCODE_CREATE_URI + "?access_token=" + accessToken;
         String createQrCodeResult = OutUtils.doPostWithRequestBody(createQrCodeUrl, null, GsonUtils.toJson(createQRcodeRequestBody)).getResult();
         JSONObject createQrCodeResultJsonObject = JSONObject.fromObject(createQrCodeResult);
-        Validate.isTrue(createQrCodeResultJsonObject.getInt("errcode") == 0, createQrCodeResultJsonObject.getString("errmsg"));
+        ValidateUtils.isTrue(createQrCodeResultJsonObject.getInt("errcode") == 0, createQrCodeResultJsonObject.getString("errmsg"));
 
         String url = createQrCodeResultJsonObject.getString("url");
         String showQrCodeUrl = createQrCodeResultJsonObject.getString("show_qrcode_url");
 
         WeiXinMemberCard weiXinMemberCard = new WeiXinMemberCard();
         weiXinMemberCard.setTenantId(tenantId);
-        weiXinMemberCard.setAppId(appId);
+        weiXinMemberCard.setAppId(authorizerAppId);
         weiXinMemberCard.setCardId(cardId);
         weiXinMemberCard.setUrl(url);
         weiXinMemberCard.setShowQrCodeUrl(showQrCodeUrl);
@@ -265,19 +263,17 @@ public class WeiXinService {
         BigInteger tenantId = payGiftCardModel.getTenantId();
         BigInteger weiXinCardId = payGiftCardModel.getWeiXinCardId();
 
-        WeiXinPublicAccount weiXinPublicAccount = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
-        Validate.notNull(weiXinPublicAccount, "未配置微信公众号，不能开通支付即会员！");
+        WeiXinAuthorizerInfo weiXinAuthorizerInfo = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
+        ValidateUtils.notNull(weiXinAuthorizerInfo, "未授权微信公众号，不能开通支付即会员！");
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, weiXinCardId);
         WeiXinMemberCard weiXinMemberCard = DatabaseHelper.find(WeiXinMemberCard.class, searchModel);
-        Validate.notNull(weiXinMemberCard, "微信会员卡不存在！");
+        ValidateUtils.notNull(weiXinMemberCard, "微信会员卡不存在！");
 
-        String appId = weiXinPublicAccount.getAppId();
-        String appSecret = weiXinPublicAccount.getAppSecret();
-        WeiXinAccessToken weiXinAccessToken = WeiXinUtils.obtainAccessToken(appId, appSecret);
-        String accessToken = weiXinAccessToken.getAccessToken();
+        WeiXinAuthorizerToken weiXinAuthorizerToken = WeiXinUtils.obtainWeiXinAuthorizerToken(weiXinAuthorizerInfo.getComponentAppId(), weiXinAuthorizerInfo.getAuthorizerAppId());
+        String accessToken = weiXinAuthorizerToken.getAuthorizerAccessToken();
 
         Map<String, Object> baseInfo = new HashMap<String, Object>();
         baseInfo.put("mchid_list", payGiftCardModel.getMchIdList());
@@ -301,7 +297,7 @@ public class WeiXinService {
         String weiXinAddPayGiftCardUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_PAY_GIFT_CARD_ADD_URI + "?access_token=" + accessToken;
         String payGiftCardResult = OutUtils.doPostWithRequestBody(weiXinAddPayGiftCardUrl, null, GsonUtils.toJson(payGiftCardRequestBody)).getResult();
         JSONObject payGiftCardResultJsonObject = JSONObject.fromObject(payGiftCardResult);
-        Validate.isTrue(payGiftCardResultJsonObject.getInt("errcode") == 0, payGiftCardResultJsonObject.getString("errmsg"));
+        ValidateUtils.isTrue(payGiftCardResultJsonObject.getInt("errcode") == 0, payGiftCardResultJsonObject.getString("errmsg"));
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("开通支付即会员成功！");
@@ -315,20 +311,17 @@ public class WeiXinService {
         BigInteger userId = deleteWeiXinMemberCardModel.getUserId();
         BigInteger weiXinCardId = deleteWeiXinMemberCardModel.getWeiXinCardId();
 
-        WeiXinPublicAccount weiXinPublicAccount = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
-        Validate.notNull(weiXinPublicAccount, "未配置微信公众号，不能删除微信会员卡！");
+        WeiXinAuthorizerInfo weiXinAuthorizerInfo = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
+        ValidateUtils.notNull(weiXinAuthorizerInfo, "未授权微信公众号，不能删除微信会员卡！");
 
-        String appId = weiXinPublicAccount.getAppId();
-        String appSecret = weiXinPublicAccount.getAppSecret();
-
-        WeiXinAccessToken weiXinAccessToken = WeiXinUtils.obtainAccessToken(appId, appSecret);
-        String accessToken = weiXinAccessToken.getAccessToken();
+        WeiXinAuthorizerToken weiXinAuthorizerToken = WeiXinUtils.obtainWeiXinAuthorizerToken(weiXinAuthorizerInfo.getComponentAppId(), weiXinAuthorizerInfo.getAuthorizerAppId());
+        String accessToken = weiXinAuthorizerToken.getAuthorizerAccessToken();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, weiXinCardId);
         WeiXinMemberCard weiXinMemberCard = DatabaseHelper.find(WeiXinMemberCard.class, searchModel);
-        Validate.notNull(weiXinMemberCard, "微信会员卡不存在！");
+        ValidateUtils.notNull(weiXinMemberCard, "微信会员卡不存在！");
 
         Map<String, Object> deleteCardRequestBody = new HashMap<String, Object>();
         deleteCardRequestBody.put("card_id", weiXinMemberCard.getCardId());
@@ -337,7 +330,7 @@ public class WeiXinService {
         String deleteCardUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_DELETE_URI + "?access_token=" + accessToken;
         String deleteCardResult = OutUtils.doPostWithRequestBody(deleteCardUrl, null, GsonUtils.toJson(deleteCardRequestBody)).getResult();
         JSONObject deleteCardResultJsonObject = JSONObject.fromObject(deleteCardResult);
-        Validate.isTrue(deleteCardResultJsonObject.getInt("errcode") == 0, deleteCardResultJsonObject.getString("errmsg"));
+        ValidateUtils.isTrue(deleteCardResultJsonObject.getInt("errcode") == 0, deleteCardResultJsonObject.getString("errmsg"));
 
         weiXinMemberCard.setDeleted(true);
         weiXinMemberCard.setUpdatedUserId(userId);
