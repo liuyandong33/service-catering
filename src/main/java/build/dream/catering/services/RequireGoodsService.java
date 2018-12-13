@@ -3,11 +3,13 @@ package build.dream.catering.services;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.requiregoods.ObtainRequireGoodsOrderModel;
 import build.dream.catering.models.requiregoods.SaveRequireGoodsOrderModel;
+import build.dream.catering.utils.SequenceUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.RequireGoodsOrder;
 import build.dream.common.catering.domains.RequireGoodsOrderDetail;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SearchModel;
+import build.dream.common.utils.SerialNumberGenerator;
 import build.dream.common.utils.ValidateUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,8 +32,31 @@ public class RequireGoodsService {
         BigInteger tenantId = saveRequireGoodsOrderModel.obtainTenantId();
         String tenantCode = saveRequireGoodsOrderModel.obtainTenantCode();
         BigInteger branchId = saveRequireGoodsOrderModel.obtainBranchId();
+        BigInteger distributionCenterId = saveRequireGoodsOrderModel.getDistributionCenterId();
+        BigInteger userId = saveRequireGoodsOrderModel.obtainUserId();
+        String remark = saveRequireGoodsOrderModel.getRemark();
 
-        return ApiRest.builder().build();
+        String sequenceName = SerialNumberGenerator.generatorTodaySequenceName(tenantId, branchId, "require_goods_order_number");
+        String orderNumber = SerialNumberGenerator.nextOrderNumber("YH", 8, SequenceUtils.nextValue(sequenceName));
+
+        RequireGoodsOrder requireGoodsOrder = RequireGoodsOrder.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .distributionCenterId(distributionCenterId)
+                .orderNumber(orderNumber)
+                .originatorUserId(userId)
+                .auditorUserId(Constants.BIGINT_DEFAULT_VALUE)
+                .auditTime(Constants.DATETIME_DEFAULT_VALUE)
+                .remark(remark)
+                .status(1)
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .updatedRemark("创建要货单！")
+                .build();
+        DatabaseHelper.insert(requireGoodsOrder);
+
+        return ApiRest.builder().data(requireGoodsOrder).message("保存要货单成功！").successful(true).build();
     }
 
     /**
