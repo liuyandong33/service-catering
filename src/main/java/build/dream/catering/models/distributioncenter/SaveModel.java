@@ -1,4 +1,4 @@
-package build.dream.catering.models.distributionCenter;
+package build.dream.catering.models.distributioncenter;
 
 import build.dream.common.models.CateringBasicModel;
 

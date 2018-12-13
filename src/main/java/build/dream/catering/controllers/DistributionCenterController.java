@@ -1,6 +1,6 @@
 package build.dream.catering.controllers;
 
-import build.dream.catering.models.distributionCenter.SaveModel;
+import build.dream.catering.models.distributioncenter.SaveModel;
 import build.dream.catering.services.DistributionCenterService;
 import build.dream.common.annotations.ApiRestAction;
 import org.springframework.http.MediaType;

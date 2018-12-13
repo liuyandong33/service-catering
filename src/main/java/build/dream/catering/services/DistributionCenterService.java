@@ -1,7 +1,7 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.models.distributionCenter.SaveModel;
+import build.dream.catering.models.distributioncenter.SaveModel;
 import build.dream.catering.utils.SequenceUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.DistributionCenter;
