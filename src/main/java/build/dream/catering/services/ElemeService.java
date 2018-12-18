@@ -30,12 +30,12 @@ import java.util.*;
 public class ElemeService {
     @Transactional(readOnly = true)
     public ApiRest tenantAuthorize(TenantAuthorizeModel tenantAuthorizeModel) throws IOException {
-        BigInteger tenantId = tenantAuthorizeModel.getTenantId();
-        BigInteger branchId = tenantAuthorizeModel.getBranchId();
-        BigInteger userId = tenantAuthorizeModel.getUserId();
+        BigInteger tenantId = tenantAuthorizeModel.obtainTenantId();
+        BigInteger branchId = tenantAuthorizeModel.obtainBranchId();
+        BigInteger userId = tenantAuthorizeModel.obtainUserId();
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         ValidateUtils.notNull(branch, "门店不存在！");
         Map<String, String> checkIsAuthorizeRequestParameters = new HashMap<String, String>();
