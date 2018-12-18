@@ -8,8 +8,8 @@ import build.dream.catering.tools.PushMessageThread;
 import build.dream.catering.utils.MeiTuanUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.beans.WebResponse;
-import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.catering.domains.*;
+import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.models.jpush.PushModel;
 import build.dream.common.utils.*;
 import net.sf.json.JSONArray;
@@ -70,7 +70,7 @@ public class MeiTuanService {
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleOrderEffectiveCallback(JSONObject callbackParametersJsonObject, String uuid, Integer type) throws IOException {
+    public void handleOrderEffectiveCallback(JSONObject callbackParametersJsonObject, String uuid, Integer type) {
 //        String ePoiId = callbackParametersJsonObject.getString("ePoiId");
 //        JSONObject orderJsonObject = callbackParametersJsonObject.getJSONObject("order");
 
@@ -398,7 +398,7 @@ public class MeiTuanService {
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleOrderCancelCallback(JSONObject callbackParametersJsonObject, String uuid, int type) throws IOException {
+    public void handleOrderCancelCallback(JSONObject callbackParametersJsonObject, String uuid, int type) {
         String developerId = callbackParametersJsonObject.getString("developerId");
         String ePoiId = callbackParametersJsonObject.getString("ePoiId");
         String sign = callbackParametersJsonObject.getString("sign");
@@ -436,7 +436,7 @@ public class MeiTuanService {
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleOrderRefundCallback(JSONObject callbackParametersJsonObject, String uuid, int type) throws IOException {
+    public void handleOrderRefundCallback(JSONObject callbackParametersJsonObject, String uuid, int type) {
         String developerId = callbackParametersJsonObject.getString("developerId");
         String ePoiId = callbackParametersJsonObject.getString("ePoiId");
         String sign = callbackParametersJsonObject.getString("sign");
@@ -504,7 +504,7 @@ public class MeiTuanService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleBindingStoreCallback(JSONObject callbackParametersJsonObject, String uuid, int type) throws IOException {
+    public void handleBindingStoreCallback(JSONObject callbackParametersJsonObject, String uuid, int type) {
         String ePoiId = callbackParametersJsonObject.getString("ePoiId");
         String appAuthToken = callbackParametersJsonObject.getString("appAuthToken");
         String poiId = callbackParametersJsonObject.getString("poiId");
