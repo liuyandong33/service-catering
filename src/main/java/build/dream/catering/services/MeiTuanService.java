@@ -36,8 +36,8 @@ public class MeiTuanService {
      */
     @Transactional(readOnly = true)
     public ApiRest generateBindingStoreLink(GenerateBindingStoreLinkModel generateBindingStoreLinkModel) throws IOException {
-        BigInteger tenantId = generateBindingStoreLinkModel.getTenantId();
-        BigInteger branchId = generateBindingStoreLinkModel.getBranchId();
+        BigInteger tenantId = generateBindingStoreLinkModel.obtainTenantId();
+        BigInteger branchId = generateBindingStoreLinkModel.obtainBranchId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -55,11 +55,7 @@ public class MeiTuanService {
         bindingStoreLink.append("&signKey=").append(meiTuanSignKey);
         bindingStoreLink.append("&ePoiName=").append(branch.getName());
         bindingStoreLink.append("&timestamp=").append(System.currentTimeMillis());
-        ApiRest apiRest = new ApiRest();
-        apiRest.setData(bindingStoreLink.toString());
-        apiRest.setMessage("生成门店绑定链接成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().data(bindingStoreLink.toString()).message("生成门店绑定链接成功！").successful(true).build();
     }
 
     /**
@@ -536,8 +532,8 @@ public class MeiTuanService {
      */
     @Transactional(readOnly = true)
     public ApiRest checkIsBinding(CheckIsBindingModel checkIsBindingModel) {
-        BigInteger tenantId = checkIsBindingModel.getTenantId();
-        BigInteger branchId = checkIsBindingModel.getBranchId();
+        BigInteger tenantId = checkIsBindingModel.obtainTenantId();
+        BigInteger branchId = checkIsBindingModel.obtainBranchId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -549,13 +545,13 @@ public class MeiTuanService {
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("isBinding", isBinding);
 
-        return new ApiRest(data, "查询门店是否绑定美团成功！");
+        return ApiRest.builder().data(data).message("查询门店是否绑定美团成功！").successful(true).build();
     }
 
     @Transactional(readOnly = true)
     public ApiRest queryPoiInfo(QueryPoiInfoModel queryPoiInfoModel) throws IOException {
-        BigInteger tenantId = queryPoiInfoModel.getTenantId();
-        BigInteger branchId = queryPoiInfoModel.getBranchId();
+        BigInteger tenantId = queryPoiInfoModel.obtainTenantId();
+        BigInteger branchId = queryPoiInfoModel.obtainBranchId();
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
