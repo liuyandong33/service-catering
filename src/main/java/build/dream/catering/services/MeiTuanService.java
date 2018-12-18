@@ -211,7 +211,7 @@ public class MeiTuanService {
                 .vipId(Constants.BIGINT_DEFAULT_VALUE)
                 .createdUserId(userId)
                 .updatedUserId(userId)
-                .updatedRemark("接受美团订单生效回调，保存订单信息！")
+                .updatedRemark("接收美团订单生效回调，保存订单信息！")
                 .build();
         DatabaseHelper.insert(dietOrder);
         BigInteger dietOrderId = dietOrder.getId();
