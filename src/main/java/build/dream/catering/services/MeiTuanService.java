@@ -74,7 +74,7 @@ public class MeiTuanService {
 //        String ePoiId = callbackParametersJsonObject.getString("ePoiId");
 //        JSONObject orderJsonObject = callbackParametersJsonObject.getJSONObject("order");
 
-        String ePoiId = "1Z1";
+        String ePoiId = "1Z1074954252843094017";
         JSONObject orderJsonObject = callbackParametersJsonObject;
 
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
@@ -204,10 +204,11 @@ public class MeiTuanService {
                 .deliverFee(shippingFee)
                 .telephoneNumber(orderJsonObject.getString("recipientPhone"))
                 .daySerialNumber(orderJsonObject.getString("daySeq"))
-                .consignee(orderJsonObject.getString("recipientPhone"))
+                .consignee(orderJsonObject.getString("recipientName"))
                 .invoiced(invoiced)
                 .invoiceType(invoiceType)
                 .invoice(invoice)
+                .vipId(Constants.BIGINT_DEFAULT_VALUE)
                 .createdUserId(userId)
                 .updatedUserId(userId)
                 .updatedRemark("接受美团订单生效回调，保存订单信息！")
