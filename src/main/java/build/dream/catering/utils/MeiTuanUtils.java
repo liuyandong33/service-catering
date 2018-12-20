@@ -1,15 +1,13 @@
 package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
-import build.dream.common.api.ApiRest;
-import build.dream.common.utils.CacheUtils;
-import build.dream.common.utils.ConfigurationUtils;
-import build.dream.common.utils.ProxyUtils;
-import build.dream.common.utils.WebUtils;
+import build.dream.common.beans.WebResponse;
+import build.dream.common.utils.*;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -23,12 +21,11 @@ public class MeiTuanUtils {
         return DigestUtils.sha1Hex(finalData.toString());
     }
 
-    public static ApiRest callMeiTuanSystem(String tenantId, String branchId, String signKey, Map<String, String> requestParameters, String url, String requestMethod) throws IOException {
+    public static Map<String, Object> callMeiTuanSystem(String tenantId, String branchId, String signKey, Map<String, String> requestParameters, String url, String requestMethod) {
         putSystemLevelParameter(tenantId, branchId, signKey, requestParameters);
-        ApiRest apiRest = null;
+        WebResponse webResponse = null;
         if (Constants.REQUEST_METHOD_GET.equals(requestMethod)) {
-            requestParameters.put("url", url);
-            apiRest = ProxyUtils.doGetWithRequestParameters(Constants.SERVICE_NAME_OUT, "meiTuan", "callMeiTuanSystem", requestParameters);
+            webResponse = OutUtils.doGetWithRequestParameters(url, requestParameters);
         } else if (Constants.REQUEST_METHOD_POST.equals(requestMethod)) {
             StringBuffer requestUrl = new StringBuffer(url).append("?");
             requestUrl.append("?").append("appAuthToken").append("=").append(requestParameters.remove("appAuthToken"));
@@ -37,12 +34,16 @@ public class MeiTuanUtils {
             requestUrl.append("&").append("version").append("=").append(requestParameters.remove("version"));
             requestUrl.append("&").append("sign").append("=").append(requestParameters.remove("sign"));
             requestParameters.put("url", requestUrl.toString());
-            apiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "meiTuan", "callMeiTuanSystem", requestParameters);
+            webResponse = OutUtils.doPostWithRequestParameters(url, requestParameters);
         }
-        return apiRest;
+        String result = webResponse.getResult();
+        Map<String, Object> resultMap = JacksonUtils.readValueAsMap(result, String.class, Object.class);
+        String code = MapUtils.getString(resultMap, "code");
+        ValidateUtils.isTrue(StringUtils.isBlank(code), MapUtils.getString(resultMap, "msg"));
+        return resultMap;
     }
 
-    public static ApiRest callMeiTuanSystem(String tenantId, String branchId, Map<String, String> requestParameters, String url, String requestMethod) throws IOException {
+    public static Map<String, Object> callMeiTuanSystem(String tenantId, String branchId, Map<String, String> requestParameters, String url, String requestMethod) {
         String signKey = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_SIGN_KEY);
         return callMeiTuanSystem(tenantId, branchId, signKey, requestParameters, url, requestMethod);
     }

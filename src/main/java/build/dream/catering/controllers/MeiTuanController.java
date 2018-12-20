@@ -1,9 +1,7 @@
 package build.dream.catering.controllers;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.models.meituan.CheckIsBindingModel;
-import build.dream.catering.models.meituan.GenerateBindingStoreLinkModel;
-import build.dream.catering.models.meituan.QueryPoiInfoModel;
+import build.dream.catering.models.meituan.*;
 import build.dream.catering.services.MeiTuanService;
 import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.controllers.BasicController;
@@ -66,5 +64,53 @@ public class MeiTuanController extends BasicController {
             returnValue = e.getMessage();
         }
         return returnValue;
+    }
+
+    /**
+     * 确认订单
+     *
+     * @return
+     */
+    @RequestMapping(value = "/confirmOrder")
+    @ResponseBody
+    @ApiRestAction(modelClass = ConfirmOrderModel.class, serviceClass = MeiTuanService.class, serviceMethodName = "confirmOrder", error = "确认订单失败")
+    public String confirmOrder() {
+        return null;
+    }
+
+    /**
+     * 取消订单
+     *
+     * @return
+     */
+    @RequestMapping(value = "/cancelOrder")
+    @ResponseBody
+    @ApiRestAction(modelClass = CancelOrderModel.class, serviceClass = MeiTuanService.class, serviceMethodName = "cancelOrder", error = "取消订单失败")
+    public String cancelOrder() {
+        return null;
+    }
+
+    /**
+     * 自配送－配送状态
+     *
+     * @return
+     */
+    @RequestMapping(value = "/deliveringOrder")
+    @ResponseBody
+    @ApiRestAction(modelClass = DeliveringOrderModel.class, serviceClass = MeiTuanService.class, serviceMethodName = "deliveringOrder", error = "设置订单配送状态失败")
+    public String deliveringOrder() {
+        return null;
+    }
+
+    /**
+     * 自配送场景－订单已送达
+     *
+     * @return
+     */
+    @RequestMapping(value = "/deliveredOrder")
+    @ResponseBody
+    @ApiRestAction(modelClass = DeliveredOrderModel.class, serviceClass = MeiTuanService.class, serviceMethodName = "deliveredOrder", error = "设置订单已送达失败")
+    public String deliveredOrder() {
+        return null;
     }
 }

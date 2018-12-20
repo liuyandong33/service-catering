@@ -1,9 +1,7 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.models.meituan.CheckIsBindingModel;
-import build.dream.catering.models.meituan.GenerateBindingStoreLinkModel;
-import build.dream.catering.models.meituan.QueryPoiInfoModel;
+import build.dream.catering.models.meituan.*;
 import build.dream.catering.tools.PushMessageThread;
 import build.dream.catering.utils.MeiTuanUtils;
 import build.dream.common.api.ApiRest;
@@ -15,6 +13,7 @@ import build.dream.common.utils.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.stereotype.Service;
@@ -110,6 +109,9 @@ public class MeiTuanService {
             int extrasSize = extrasJsonArray.size();
             for (int index = 0; index < extrasSize; index++) {
                 JSONObject extraJsonObject = extrasJsonArray.getJSONObject(index);
+                if (extraJsonObject.isEmpty()) {
+                    continue;
+                }
                 BigDecimal poiCharge = BigDecimal.valueOf(extraJsonObject.optDouble("poi_charge", 0));
                 if (poiCharge.compareTo(BigDecimal.ZERO) > 0) {
                     discountAmount = discountAmount.add(poiCharge);
@@ -573,5 +575,135 @@ public class MeiTuanService {
         WebResponse webResponse = WebUtils.doGetWithRequestParameters(url, requestParameters);
         System.out.println(webResponse.getResult());
         return new ApiRest();
+    }
+
+    /**
+     * 确认订单
+     *
+     * @param confirmOrderModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest confirmOrder(ConfirmOrderModel confirmOrderModel) {
+        BigInteger tenantId = confirmOrderModel.obtainTenantId();
+        BigInteger branchId = confirmOrderModel.obtainBranchId();
+        BigInteger dietOrderId = confirmOrderModel.getDietOrderId();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
+
+        Map<String, String> requestParameters = new HashMap<String, String>();
+        requestParameters.put("orderId", dietOrder.getOrderNumber().substring(1));
+
+        String url = "https://api-open-cater.meituan.com/waimai/order/confirm";
+        Map<String, Object> result = MeiTuanUtils.callMeiTuanSystem(tenantId.toString(), branchId.toString(), requestParameters, url, Constants.REQUEST_METHOD_POST);
+        String data = MapUtils.getString(result, "data");
+        ValidateUtils.isTrue(Constants.OK.equals(data), "确认订单失败！");
+        return ApiRest.builder().message("确认订单成功！").successful(true).build();
+    }
+
+    /**
+     * 取消订单
+     *
+     * @param cancelOrderModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest cancelOrder(CancelOrderModel cancelOrderModel) {
+        BigInteger tenantId = cancelOrderModel.obtainTenantId();
+        BigInteger branchId = cancelOrderModel.obtainBranchId();
+        BigInteger dietOrderId = cancelOrderModel.getDietOrderId();
+        String reasonCode = cancelOrderModel.getReasonCode();
+        String reason = cancelOrderModel.getReason();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
+
+        Map<String, String> requestParameters = new HashMap<String, String>();
+        requestParameters.put("orderId", dietOrder.getOrderNumber().substring(1));
+        requestParameters.put("reasonCode", reasonCode);
+        requestParameters.put("reason", reason);
+
+        String url = "https://api-open-cater.meituan.com/waimai/order/cancel";
+        Map<String, Object> result = MeiTuanUtils.callMeiTuanSystem(tenantId.toString(), branchId.toString(), requestParameters, url, Constants.REQUEST_METHOD_POST);
+        String data = MapUtils.getString(result, "data");
+        ValidateUtils.isTrue(Constants.OK.equals(data), "取消订单失败！");
+        return ApiRest.builder().message("取消订单成功！").successful(true).build();
+    }
+
+    /**
+     * 自配送－配送状态
+     *
+     * @param deliveringOrderModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest deliveringOrder(DeliveringOrderModel deliveringOrderModel) {
+        BigInteger tenantId = deliveringOrderModel.obtainTenantId();
+        BigInteger branchId = deliveringOrderModel.obtainBranchId();
+        BigInteger dietOrderId = deliveringOrderModel.getDietOrderId();
+        String courierName = deliveringOrderModel.getCourierName();
+        String courierPhone = deliveringOrderModel.getCourierPhone();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
+
+        Map<String, String> requestParameters = new HashMap<String, String>();
+        requestParameters.put("orderId", dietOrder.getOrderNumber().substring(1));
+
+        if (StringUtils.isNotBlank(courierName)) {
+            requestParameters.put("courierName", courierName);
+        }
+
+        if (StringUtils.isNotBlank(courierPhone)) {
+            requestParameters.put("courierPhone", courierPhone);
+        }
+
+        String url = "https://api-open-cater.meituan.com/waimai/order/delivering";
+        Map<String, Object> result = MeiTuanUtils.callMeiTuanSystem(tenantId.toString(), branchId.toString(), requestParameters, url, Constants.REQUEST_METHOD_POST);
+        String data = MapUtils.getString(result, "data");
+        ValidateUtils.isTrue(Constants.OK.equals(data), "设置配送状态失败！");
+        return ApiRest.builder().message("设置配送状态成功！").successful(true).build();
+    }
+
+    /**
+     * 自配送场景－订单已送达
+     *
+     * @param deliveredOrderModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest deliveredOrder(DeliveredOrderModel deliveredOrderModel) {
+        BigInteger tenantId = deliveredOrderModel.obtainTenantId();
+        BigInteger branchId = deliveredOrderModel.obtainBranchId();
+        BigInteger dietOrderId = deliveredOrderModel.getDietOrderId();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
+
+        Map<String, String> requestParameters = new HashMap<String, String>();
+        requestParameters.put("orderId", dietOrder.getOrderNumber().substring(1));
+
+        String url = "https://api-open-cater.meituan.com/waimai/order/delivered";
+        Map<String, Object> result = MeiTuanUtils.callMeiTuanSystem(tenantId.toString(), branchId.toString(), requestParameters, url, Constants.REQUEST_METHOD_POST);
+        String data = MapUtils.getString(result, "data");
+        ValidateUtils.isTrue(Constants.OK.equals(data), "设置订单已送达状态失败！");
+        return ApiRest.builder().message("设置订单已送达状态成功！").successful(true).build();
     }
 }
