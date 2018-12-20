@@ -3,6 +3,7 @@ package build.dream.catering.services;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.pos.OfflinePosModel;
 import build.dream.catering.models.pos.OnlinePosModel;
+import build.dream.catering.models.pos.ScanCodePayModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.Pos;
 import build.dream.common.utils.DatabaseHelper;
@@ -91,5 +92,20 @@ public class PosService {
         DatabaseHelper.update(pos);
 
         return ApiRest.builder().data(pos).message("下线POS成功！").build();
+    }
+
+    /**
+     * 扫码支付
+     *
+     * @param scanCodePayModel
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest scanCodePay(ScanCodePayModel scanCodePayModel) {
+        BigInteger tenantId = scanCodePayModel.obtainTenantId();
+        BigInteger branchId = scanCodePayModel.obtainBranchId();
+        String orderNumber = scanCodePayModel.getOrderNumber();
+
+        return ApiRest.builder().message("扫码支付成功！").successful(true).build();
     }
 }

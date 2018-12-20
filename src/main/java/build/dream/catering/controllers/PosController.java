@@ -3,6 +3,7 @@ package build.dream.catering.controllers;
 import build.dream.catering.models.pos.OfflinePosModel;
 import build.dream.catering.models.pos.OnlinePosModel;
 import build.dream.catering.models.pos.ReceiptModel;
+import build.dream.catering.models.pos.ScanCodePayModel;
 import build.dream.catering.services.PosService;
 import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.api.ApiRest;
@@ -58,5 +59,17 @@ public class PosController {
 
         CacheUtils.delete(uuid);
         return GsonUtils.toJson(ApiRest.builder().message("回执成功！").successful(true).build());
+    }
+
+    /**
+     * 扫码支付
+     *
+     * @return
+     */
+    @RequestMapping(value = "/scanCodePay")
+    @ResponseBody
+    @ApiRestAction(modelClass = ScanCodePayModel.class, serviceClass = PosService.class, serviceMethodName = "scanCodePay", error = "扫码支付")
+    public String scanCodePay() {
+        return null;
     }
 }
