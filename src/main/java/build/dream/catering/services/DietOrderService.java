@@ -948,6 +948,9 @@ public class DietOrderService {
         dietOrder.setPayStatus(DietOrderConstants.PAY_STATUS_PAID);
         dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_UNPROCESSED);
         dietOrder.setActiveTime(occurrenceTime);
+
+        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        dietOrder.setUpdatedUserId(userId);
         DatabaseHelper.update(dietOrder);
     }
 
