@@ -1,18 +1,22 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
+import build.dream.catering.models.pos.OfflinePayModel;
 import build.dream.catering.models.pos.OfflinePosModel;
 import build.dream.catering.models.pos.OnlinePosModel;
-import build.dream.catering.models.pos.ScanCodePayModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.Pos;
-import build.dream.common.utils.DatabaseHelper;
-import build.dream.common.utils.SearchModel;
-import build.dream.common.utils.ValidateUtils;
+import build.dream.common.models.aggregatepay.ScanCodePayModel;
+import build.dream.common.utils.*;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.dom4j.DocumentException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class PosService {
@@ -97,15 +101,38 @@ public class PosService {
     /**
      * 扫码支付
      *
-     * @param scanCodePayModel
+     * @param offlinePayModel
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest scanCodePay(ScanCodePayModel scanCodePayModel) {
-        BigInteger tenantId = scanCodePayModel.obtainTenantId();
-        BigInteger branchId = scanCodePayModel.obtainBranchId();
-        String orderNumber = scanCodePayModel.getOrderNumber();
+    public ApiRest offlinePay(OfflinePayModel offlinePayModel) throws DocumentException {
+        BigInteger tenantId = offlinePayModel.obtainTenantId();
+        BigInteger branchId = offlinePayModel.obtainBranchId();
+        BigInteger userId = offlinePayModel.obtainUserId();
+        String authCode = offlinePayModel.getAuthCode();
+        String subject = offlinePayModel.getSubject();
+        int totalAmount = offlinePayModel.getTotalAmount();
 
-        return ApiRest.builder().message("扫码支付成功！").successful(true).build();
+        String outTradeNo = DigestUtils.md5Hex(UUID.randomUUID().toString()).toUpperCase();
+        String notifyUrl = "";
+        int channelType = 1;
+        String ipAddress = ApplicationHandler.getRemoteAddress();
+        ScanCodePayModel scanCodePayModel = ScanCodePayModel.builder()
+                .tenantId(tenantId.toString())
+                .branchId(branchId.toString())
+                .channelType(channelType)
+                .outTradeNo(outTradeNo)
+                .authCode(authCode)
+                .subject(subject)
+                .totalAmount(totalAmount)
+                .notifyUrl(notifyUrl)
+                .ipAddress(ipAddress)
+                .build();
+
+        Map<String, ? extends Object> result = AggregatePayUtils.scanCodePay(scanCodePayModel);
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("outTradeNo", outTradeNo);
+        return ApiRest.builder().data(data).message("扫码支付成功！").successful(true).build();
     }
 }
