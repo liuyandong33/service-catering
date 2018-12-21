@@ -269,7 +269,6 @@ public class ElemeService {
                         .branchId(branchId)
                         .dietOrderId(dietOrderId)
                         .dietOrderGroupId(dietOrderGroupId)
-                        .goodsType(Constants.GOODS_TYPE_ORDINARY_GOODS)
                         .goodsName(elemeOrderItemJsonObject.getString("name"))
                         .goodsSpecificationName(goodsSpecificationName)
                         .price(BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("price")))
@@ -287,13 +286,15 @@ public class ElemeService {
 
                 DietOrderDetail dietOrderDetail = null;
                 if (isPackageFee) {
-                    dietOrderDetail = dietOrderDetailBuilder.goodsId(Constants.BIG_INTEGER_MINUS_TWO)
+                    dietOrderDetail = dietOrderDetailBuilder.goodsType(Constants.GOODS_TYPE_PACKAGE_FEE)
+                            .goodsId(Constants.BIG_INTEGER_MINUS_TWO)
                             .goodsSpecificationId(Constants.BIG_INTEGER_MINUS_TWO)
                             .categoryId(Constants.FICTITIOUS_GOODS_CATEGORY_ID)
                             .categoryName(Constants.FICTITIOUS_GOODS_CATEGORY_NAME)
                             .build();
                 } else {
-                    dietOrderDetail = dietOrderDetailBuilder.goodsId(id)
+                    dietOrderDetail = dietOrderDetailBuilder.goodsType(Constants.GOODS_TYPE_ORDINARY_GOODS)
+                            .goodsId(id)
                             .goodsSpecificationId(skuId)
                             .categoryId(categoryId)
                             .categoryName(categoryName)
@@ -364,12 +365,17 @@ public class ElemeService {
                     .quantity(BigDecimal.ONE)
                     .totalAmount(deliverFee)
                     .discountAmount(BigDecimal.ZERO)
-                    .payableAmount(BigDecimal.ZERO)
+                    .payableAmount(deliverFee)
                     .createdUserId(userId)
                     .updatedUserId(userId)
                     .build();
             DatabaseHelper.insert(dietOrderDetail);
         }
+        elemeCallbackMessage.setTenantId(tenantId);
+        elemeCallbackMessage.setTenantCode(tenantCode);
+        elemeCallbackMessage.setBranchId(branchId);
+        elemeCallbackMessage.setCreatedUserId(userId);
+        elemeCallbackMessage.setUpdatedUserId(userId);
         DatabaseHelper.insert(elemeCallbackMessage);
     }
 
