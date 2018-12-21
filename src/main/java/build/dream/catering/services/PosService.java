@@ -5,10 +5,12 @@ import build.dream.catering.models.pos.OfflinePayModel;
 import build.dream.catering.models.pos.OfflinePosModel;
 import build.dream.catering.models.pos.OnlinePosModel;
 import build.dream.common.api.ApiRest;
+import build.dream.common.catering.domains.OfflinePayRecord;
 import build.dream.common.catering.domains.Pos;
 import build.dream.common.models.aggregatepay.ScanCodePayModel;
 import build.dream.common.utils.*;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.dom4j.DocumentException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -107,15 +109,43 @@ public class PosService {
     @Transactional(rollbackFor = Exception.class)
     public ApiRest offlinePay(OfflinePayModel offlinePayModel) throws DocumentException {
         BigInteger tenantId = offlinePayModel.obtainTenantId();
+        String tenantCode = offlinePayModel.obtainTenantCode();
         BigInteger branchId = offlinePayModel.obtainBranchId();
         BigInteger userId = offlinePayModel.obtainUserId();
+        String orderNumber = offlinePayModel.getOrderNumber();
         String authCode = offlinePayModel.getAuthCode();
         String subject = offlinePayModel.getSubject();
         int totalAmount = offlinePayModel.getTotalAmount();
 
         String outTradeNo = DigestUtils.md5Hex(UUID.randomUUID().toString()).toUpperCase();
         String notifyUrl = "";
-        int channelType = 1;
+
+        int payCodePrefix = Integer.parseInt(authCode.substring(0, 2));
+
+        int channelType = 0;
+        if (ArrayUtils.contains(Constants.WEI_XIN_PAY_CODE_PREFIXES, payCodePrefix)) {
+            channelType = Constants.CHANNEL_TYPE_WEI_XIN;
+        } else if (ArrayUtils.contains(Constants.ALIPAY_PAY_CODE_PREFIXES, payCodePrefix)) {
+            channelType = Constants.CHANNEL_TYPE_ALIPAY;
+        } else if (ArrayUtils.contains(Constants.JING_DONG_PAY_CODE_PREFIXES, payCodePrefix)) {
+            channelType = Constants.CHANNEL_TYPE_JING_DONG;
+        }
+        ValidateUtils.isTrue(channelType != 0, "支付码错误！");
+
+        OfflinePayRecord offlinePayRecord = OfflinePayRecord.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .userId(userId)
+                .orderNumber(orderNumber)
+                .channelType(channelType)
+                .outTradeNo(outTradeNo)
+                .totalAmount(totalAmount)
+                .authCode(authCode)
+                .status(1)
+                .build();
+        DatabaseHelper.insert(offlinePayRecord);
+
         String ipAddress = ApplicationHandler.getRemoteAddress();
         ScanCodePayModel scanCodePayModel = ScanCodePayModel.builder()
                 .tenantId(tenantId.toString())

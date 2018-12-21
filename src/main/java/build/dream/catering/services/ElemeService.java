@@ -67,7 +67,7 @@ public class ElemeService {
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public void saveElemeOrder(ElemeCallbackMessage elemeCallbackMessage, String uuid) throws IOException, ParseException {
+    public void saveElemeOrder(ElemeCallbackMessage elemeCallbackMessage, String uuid) throws ParseException {
         JSONObject messageJsonObject = JSONObject.fromObject(elemeCallbackMessage.getMessage());
 
         String openId = messageJsonObject.getString("openId");
@@ -387,7 +387,7 @@ public class ElemeService {
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleElemeRefundOrderMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) throws IOException {
+    public void handleElemeRefundOrderMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
 
     }
 
@@ -423,7 +423,7 @@ public class ElemeService {
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleElemeOrderStateChangeMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) throws IOException {
+    public void handleElemeOrderStateChangeMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
 
     }
 
@@ -525,7 +525,7 @@ public class ElemeService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest doBindingStore(DoBindingStoreModel doBindingStoreModel) throws IOException {
+    public ApiRest doBindingStore(DoBindingStoreModel doBindingStoreModel) {
         BigInteger tenantId = doBindingStoreModel.getTenantId();
         BigInteger branchId = doBindingStoreModel.getBranchId();
         BigInteger shopId = doBindingStoreModel.getShopId();
