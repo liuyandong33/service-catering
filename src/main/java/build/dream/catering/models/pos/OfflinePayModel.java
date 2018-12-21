@@ -7,6 +7,9 @@ import javax.validation.constraints.NotNull;
 
 public class OfflinePayModel extends CateringBasicModel {
     @NotNull
+    private String orderNumber;
+
+    @NotNull
     @Min(value = 0)
     private Integer totalAmount;
 
@@ -15,6 +18,14 @@ public class OfflinePayModel extends CateringBasicModel {
 
     @NotNull
     private String subject;
+
+    public String getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(String orderNumber) {
+        this.orderNumber = orderNumber;
+    }
 
     public Integer getTotalAmount() {
         return totalAmount;

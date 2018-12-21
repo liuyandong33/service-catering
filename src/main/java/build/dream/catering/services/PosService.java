@@ -5,6 +5,7 @@ import build.dream.catering.models.pos.OfflinePayModel;
 import build.dream.catering.models.pos.OfflinePosModel;
 import build.dream.catering.models.pos.OnlinePosModel;
 import build.dream.common.api.ApiRest;
+import build.dream.common.catering.domains.OfflinePayRecord;
 import build.dream.common.catering.domains.Pos;
 import build.dream.common.models.aggregatepay.ScanCodePayModel;
 import build.dream.common.utils.*;
@@ -108,8 +109,10 @@ public class PosService {
     @Transactional(rollbackFor = Exception.class)
     public ApiRest offlinePay(OfflinePayModel offlinePayModel) throws DocumentException {
         BigInteger tenantId = offlinePayModel.obtainTenantId();
+        String tenantCode = offlinePayModel.obtainTenantCode();
         BigInteger branchId = offlinePayModel.obtainBranchId();
         BigInteger userId = offlinePayModel.obtainUserId();
+        String orderNumber = offlinePayModel.getOrderNumber();
         String authCode = offlinePayModel.getAuthCode();
         String subject = offlinePayModel.getSubject();
         int totalAmount = offlinePayModel.getTotalAmount();
@@ -128,6 +131,20 @@ public class PosService {
             channelType = Constants.CHANNEL_TYPE_JING_DONG;
         }
         ValidateUtils.isTrue(channelType != 0, "支付码错误！");
+
+        OfflinePayRecord offlinePayRecord = OfflinePayRecord.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .userId(userId)
+                .orderNumber(orderNumber)
+                .channelType(channelType)
+                .outTradeNo(outTradeNo)
+                .totalAmount(totalAmount)
+                .authCode(authCode)
+                .status(1)
+                .build();
+        DatabaseHelper.insert(offlinePayRecord);
 
         String ipAddress = ApplicationHandler.getRemoteAddress();
         ScanCodePayModel scanCodePayModel = ScanCodePayModel.builder()
