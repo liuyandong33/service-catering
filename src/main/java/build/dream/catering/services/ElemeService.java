@@ -263,6 +263,8 @@ public class ElemeService {
                     goodsSpecificationName = newSpecsJsonArray.getJSONObject(0).getString("value");
                 }
 
+                BigDecimal total = BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("total"));
+
                 DietOrderDetail.Builder dietOrderDetailBuilder = DietOrderDetail.builder()
                         .tenantId(tenantId)
                         .tenantCode(tenantCode)
@@ -274,9 +276,9 @@ public class ElemeService {
                         .price(BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("price")))
                         .attributeIncrease(BigDecimal.ZERO)
                         .quantity(BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("quantity")))
-                        .totalAmount(BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("total")))
+                        .totalAmount(total)
                         .discountAmount(BigDecimal.ZERO)
-                        .payableAmount(BigDecimal.ZERO)
+                        .payableAmount(total)
                         .createdUserId(userId)
                         .updatedUserId(userId);
 
