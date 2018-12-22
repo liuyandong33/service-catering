@@ -44,6 +44,8 @@ public class ElemeMessageListener implements MessageListener<String, String> {
         int type = callbackRequestBodyJsonObject.getInt("type");
 
         ElemeCallbackMessage elemeCallbackMessage = new ElemeCallbackMessage();
+        elemeCallbackMessage.setTenantId(BigInteger.valueOf(elemeMessageJsonObject.getLong("tenantId")));
+        elemeCallbackMessage.setTenantCode(elemeMessageJsonObject.getString("tenantCode"));
         elemeCallbackMessage.setRequestId(callbackRequestBodyJsonObject.getString("requestId"));
         elemeCallbackMessage.setType(type);
         elemeCallbackMessage.setAppId(BigInteger.valueOf(callbackRequestBodyJsonObject.getLong("appId")));
