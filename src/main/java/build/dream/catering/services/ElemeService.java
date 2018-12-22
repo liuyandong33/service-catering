@@ -434,22 +434,7 @@ public class ElemeService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void handleElemeCancelOrderMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
-        BigInteger tenantId = elemeCallbackMessage.getTenantId();
-        BigInteger shopId = elemeCallbackMessage.getShopId();
 
-        SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition(Branch.ColumnName.SHOP_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, shopId);
-        Branch branch = DatabaseHelper.find(Branch.class, searchModel);
-
-        branch.setShopId(BigInteger.ZERO);
-        DatabaseHelper.update(branch);
-
-        BigInteger userId = CommonUtils.getServiceSystemUserId();
-        elemeCallbackMessage.setCreatedUserId(userId);
-        elemeCallbackMessage.setUpdatedUserId(userId);
-        elemeCallbackMessage.setBranchId(branch.getId());
-        DatabaseHelper.insert(elemeCallbackMessage);
     }
 
     /**
@@ -481,7 +466,22 @@ public class ElemeService {
     }
 
     public void handleAuthorizationStateChangeMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
+        BigInteger tenantId = elemeCallbackMessage.getTenantId();
+        BigInteger shopId = elemeCallbackMessage.getShopId();
 
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(Branch.ColumnName.SHOP_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, shopId);
+        Branch branch = DatabaseHelper.find(Branch.class, searchModel);
+
+        branch.setShopId(BigInteger.ZERO);
+        DatabaseHelper.update(branch);
+
+        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        elemeCallbackMessage.setCreatedUserId(userId);
+        elemeCallbackMessage.setUpdatedUserId(userId);
+        elemeCallbackMessage.setBranchId(branch.getId());
+        DatabaseHelper.insert(elemeCallbackMessage);
     }
 
     /**
