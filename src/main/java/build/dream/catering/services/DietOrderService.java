@@ -763,8 +763,8 @@ public class DietOrderService {
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest confirmOrder(ConfirmOrderModel confirmOrderModel) {
-        BigInteger tenantId = confirmOrderModel.getTenantId();
-        BigInteger branchId = confirmOrderModel.getBranchId();
+        BigInteger tenantId = confirmOrderModel.obtainTenantId();
+        BigInteger branchId = confirmOrderModel.obtainBranchId();
         BigInteger orderId = confirmOrderModel.getOrderId();
 
         SearchModel searchModel = new SearchModel(true);
@@ -783,8 +783,8 @@ public class DietOrderService {
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest cancelOrder(CancelOrderModel cancelOrderModel) throws IOException, DocumentException {
-        BigInteger tenantId = cancelOrderModel.getTenantId();
-        BigInteger branchId = cancelOrderModel.getBranchId();
+        BigInteger tenantId = cancelOrderModel.obtainTenantId();
+        BigInteger branchId = cancelOrderModel.obtainBranchId();
         BigInteger orderId = cancelOrderModel.getOrderId();
 
         SearchModel searchModel = new SearchModel(true);

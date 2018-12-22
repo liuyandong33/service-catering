@@ -28,6 +28,13 @@ import java.util.*;
 
 @Service
 public class ElemeService {
+    /**
+     * 商户授权
+     *
+     * @param tenantAuthorizeModel
+     * @return
+     * @throws IOException
+     */
     @Transactional(readOnly = true)
     public ApiRest tenantAuthorize(TenantAuthorizeModel tenantAuthorizeModel) throws IOException {
         BigInteger tenantId = tenantAuthorizeModel.obtainTenantId();
@@ -502,8 +509,14 @@ public class ElemeService {
 
     @Transactional(readOnly = true)
     public ApiRest obtainElemeCallbackMessage(ObtainElemeCallbackMessageModel obtainElemeCallbackMessageModel) {
+        BigInteger tenantId = obtainElemeCallbackMessageModel.obtainTenantId();
+        BigInteger branchId = obtainElemeCallbackMessageModel.obtainBranchId();
+        BigInteger elemeCallbackMessageId = obtainElemeCallbackMessageModel.getElemeCallbackMessageId();
+
         SearchModel searchModel = new SearchModel(false);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, obtainElemeCallbackMessageModel.getElemeCallbackMessageId());
+        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, elemeCallbackMessageId);
         ElemeCallbackMessage elemeCallbackMessage = DatabaseHelper.find(ElemeCallbackMessage.class, searchModel);
 
         Map<String, Object> data = new HashMap<String, Object>();
@@ -528,10 +541,10 @@ public class ElemeService {
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest doBindingStore(DoBindingStoreModel doBindingStoreModel) {
-        BigInteger tenantId = doBindingStoreModel.getTenantId();
-        BigInteger branchId = doBindingStoreModel.getBranchId();
+        BigInteger tenantId = doBindingStoreModel.obtainTenantId();
+        BigInteger branchId = doBindingStoreModel.obtainBranchId();
         BigInteger shopId = doBindingStoreModel.getShopId();
-        BigInteger userId = doBindingStoreModel.getUserId();
+        BigInteger userId = doBindingStoreModel.obtainUserId();
 
         String lastUpdateRemark = "门店(" + branchId + ")绑定饿了么(" + shopId + ")，清除绑定关系！";
         UpdateModel updateModel = new UpdateModel(true);
@@ -586,9 +599,10 @@ public class ElemeService {
      * @param getOrderModel
      * @return
      */
+    @Transactional(readOnly = true)
     public ApiRest getOrder(GetOrderModel getOrderModel) throws IOException {
-        BigInteger tenantId = getOrderModel.getTenantId();
-        BigInteger branchId = getOrderModel.getBranchId();
+        BigInteger tenantId = getOrderModel.obtainTenantId();
+        BigInteger branchId = getOrderModel.obtainBranchId();
         BigInteger elemeOrderId = getOrderModel.getElemeOrderId();
 
 
@@ -611,11 +625,12 @@ public class ElemeService {
      */
     @Transactional(readOnly = true)
     public ApiRest batchGetOrders(BatchGetOrdersModel batchGetOrdersModel) throws IOException {
-        BigInteger tenantId = batchGetOrdersModel.getTenantId();
-        BigInteger branchId = batchGetOrdersModel.getBranchId();
+        BigInteger tenantId = batchGetOrdersModel.obtainTenantId();
+        BigInteger branchId = batchGetOrdersModel.obtainBranchId();
+        List<BigInteger> elemeOrderIds = batchGetOrdersModel.getElemeOrderIds();
 
         Branch branch = findBranch(tenantId, branchId);
-        List<DietOrder> dietOrders = findAllElemeOrders(tenantId, branchId, batchGetOrdersModel.getElemeOrderIds());
+        List<DietOrder> dietOrders = findAllElemeOrders(tenantId, branchId, elemeOrderIds);
         List<String> orderIds = obtainOrderIds(dietOrders);
 
         Map<String, Object> params = new HashMap<String, Object>();
@@ -633,9 +648,10 @@ public class ElemeService {
      * @return
      * @throws IOException
      */
+    @Transactional(readOnly = true)
     public ApiRest confirmOrderLite(ConfirmOrderLiteModel confirmOrderLiteModel) throws IOException {
-        BigInteger tenantId = confirmOrderLiteModel.getTenantId();
-        BigInteger branchId = confirmOrderLiteModel.getBranchId();
+        BigInteger tenantId = confirmOrderLiteModel.obtainTenantId();
+        BigInteger branchId = confirmOrderLiteModel.obtainBranchId();
         BigInteger elemeOrderId = confirmOrderLiteModel.getElemeOrderId();
 
         Branch branch = findBranch(tenantId, branchId);
@@ -655,9 +671,10 @@ public class ElemeService {
      * @return
      * @throws IOException
      */
+    @Transactional(readOnly = true)
     public ApiRest cancelOrderLite(CancelOrderLiteModel cancelOrderLiteModel) throws IOException {
-        BigInteger tenantId = cancelOrderLiteModel.getTenantId();
-        BigInteger branchId = cancelOrderLiteModel.getBranchId();
+        BigInteger tenantId = cancelOrderLiteModel.obtainTenantId();
+        BigInteger branchId = cancelOrderLiteModel.obtainBranchId();
         BigInteger elemeOrderId = cancelOrderLiteModel.getElemeOrderId();
 
         Branch branch = findBranch(tenantId, branchId);
@@ -680,9 +697,10 @@ public class ElemeService {
      * @return
      * @throws IOException
      */
+    @Transactional(readOnly = true)
     public ApiRest agreeRefundLite(AgreeRefundLiteModel agreeRefundLiteModel) throws IOException {
-        BigInteger tenantId = agreeRefundLiteModel.getTenantId();
-        BigInteger branchId = agreeRefundLiteModel.getBranchId();
+        BigInteger tenantId = agreeRefundLiteModel.obtainTenantId();
+        BigInteger branchId = agreeRefundLiteModel.obtainBranchId();
         BigInteger elemeOrderId = agreeRefundLiteModel.getElemeOrderId();
 
         Branch branch = findBranch(tenantId, branchId);
@@ -702,9 +720,10 @@ public class ElemeService {
      * @return
      * @throws IOException
      */
+    @Transactional(readOnly = true)
     public ApiRest disagreeRefundLite(DisagreeRefundLiteModel disagreeRefundLiteModel) throws IOException {
-        BigInteger tenantId = disagreeRefundLiteModel.getTenantId();
-        BigInteger branchId = disagreeRefundLiteModel.getBranchId();
+        BigInteger tenantId = disagreeRefundLiteModel.obtainTenantId();
+        BigInteger branchId = disagreeRefundLiteModel.obtainBranchId();
 
         Branch branch = findBranch(tenantId, branchId);
         DietOrder dietOrder = findElemeOrder(tenantId, branchId, disagreeRefundLiteModel.getElemeOrderId());
@@ -723,9 +742,10 @@ public class ElemeService {
      * @return
      * @throws IOException
      */
+    @Transactional(readOnly = true)
     public ApiRest deliveryBySelfLite(DeliveryBySelfLiteModel deliveryBySelfLiteModel) throws IOException {
-        BigInteger tenantId = deliveryBySelfLiteModel.getTenantId();
-        BigInteger branchId = deliveryBySelfLiteModel.getBranchId();
+        BigInteger tenantId = deliveryBySelfLiteModel.obtainTenantId();
+        BigInteger branchId = deliveryBySelfLiteModel.obtainBranchId();
         BigInteger elemeOrderId = deliveryBySelfLiteModel.getElemeOrderId();
 
         Branch branch = findBranch(tenantId, branchId);
@@ -745,9 +765,10 @@ public class ElemeService {
      * @return
      * @throws IOException
      */
+    @Transactional(readOnly = true)
     public ApiRest noMoreDeliveryLite(NoMoreDeliveryLiteModel noMoreDeliveryLiteModel) throws IOException {
-        BigInteger tenantId = noMoreDeliveryLiteModel.getTenantId();
-        BigInteger branchId = noMoreDeliveryLiteModel.getBranchId();
+        BigInteger tenantId = noMoreDeliveryLiteModel.obtainTenantId();
+        BigInteger branchId = noMoreDeliveryLiteModel.obtainBranchId();
 
         Branch branch = findBranch(tenantId, branchId);
         DietOrder dietOrder = findElemeOrder(tenantId, branchId, noMoreDeliveryLiteModel.getElemeOrderId());
@@ -766,9 +787,10 @@ public class ElemeService {
      * @return
      * @throws IOException
      */
+    @Transactional(readOnly = true)
     public ApiRest receivedOrderLite(ReceivedOrderLiteModel receivedOrderLiteModel) throws IOException {
-        BigInteger tenantId = receivedOrderLiteModel.getTenantId();
-        BigInteger branchId = receivedOrderLiteModel.getBranchId();
+        BigInteger tenantId = receivedOrderLiteModel.obtainTenantId();
+        BigInteger branchId = receivedOrderLiteModel.obtainBranchId();
 
         Branch branch = findBranch(tenantId, branchId);
         DietOrder dietOrder = findElemeOrder(tenantId, branchId, receivedOrderLiteModel.getElemeOrderId());
@@ -787,9 +809,10 @@ public class ElemeService {
      * @return
      * @throws IOException
      */
+    @Transactional(readOnly = true)
     public ApiRest replyReminder(ReplyReminderModel replyReminderModel) throws IOException {
-        BigInteger tenantId = replyReminderModel.getTenantId();
-        BigInteger branchId = replyReminderModel.getBranchId();
+        BigInteger tenantId = replyReminderModel.obtainTenantId();
+        BigInteger branchId = replyReminderModel.obtainBranchId();
 
         Branch branch = findBranch(tenantId, branchId);
         DietOrder dietOrder = findElemeOrder(tenantId, branchId, replyReminderModel.getElemeOrderId());
@@ -810,9 +833,10 @@ public class ElemeService {
      * @return
      * @throws IOException
      */
+    @Transactional(readOnly = true)
     public ApiRest getUser(GetUserModel getUserModel) throws IOException {
-        BigInteger tenantId = getUserModel.getTenantId();
-        BigInteger branchId = getUserModel.getBranchId();
+        BigInteger tenantId = getUserModel.obtainTenantId();
+        BigInteger branchId = getUserModel.obtainBranchId();
 
         Branch branch = findBranch(tenantId, branchId);
 

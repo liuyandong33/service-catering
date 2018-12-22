@@ -1,8 +1,6 @@
 package build.dream.catering.controllers;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.models.dietorder.CancelOrderModel;
-import build.dream.catering.models.dietorder.ConfirmOrderModel;
 import build.dream.catering.models.eleme.*;
 import build.dream.catering.services.ElemeService;
 import build.dream.common.annotations.ApiRestAction;
@@ -134,7 +132,7 @@ public class ElemeController extends BasicController {
      */
     @RequestMapping(value = "/batchGetOrders", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ApiRestAction(modelClass = GetOrderModel.class, serviceClass = ElemeService.class, serviceMethodName = "batchGetOrders", error = "批量获取订单失败")
+    @ApiRestAction(modelClass = BatchGetOrdersModel.class, serviceClass = ElemeService.class, serviceMethodName = "batchGetOrders", error = "批量获取订单失败")
     public String batchGetOrders() {
         return null;
     }
@@ -146,7 +144,7 @@ public class ElemeController extends BasicController {
      */
     @RequestMapping(value = "/confirmOrderLite", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ApiRestAction(modelClass = ConfirmOrderModel.class, serviceClass = ElemeService.class, serviceMethodName = "confirmOrderLite", error = "确认订单失败")
+    @ApiRestAction(modelClass = ConfirmOrderLiteModel.class, serviceClass = ElemeService.class, serviceMethodName = "confirmOrderLite", error = "确认订单失败")
     public String confirmOrderLite() {
         return null;
     }
@@ -158,7 +156,7 @@ public class ElemeController extends BasicController {
      */
     @RequestMapping(value = "/cancelOrderLite", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ApiRestAction(modelClass = CancelOrderModel.class, serviceClass = ElemeService.class, serviceMethodName = "cancelOrderLite", error = "取消订单失败")
+    @ApiRestAction(modelClass = CancelOrderLiteModel.class, serviceClass = ElemeService.class, serviceMethodName = "cancelOrderLite", error = "取消订单失败")
     public String cancelOrderLite() {
         return null;
     }
