@@ -13,7 +13,6 @@ import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -478,7 +477,7 @@ public class ElemeService {
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
-        Validate.notNull(branch, "门店不存在！");
+        ValidateUtils.notNull(branch, "门店不存在！");
         return branch;
     }
 
@@ -489,7 +488,7 @@ public class ElemeService {
         searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, categoryId);
         GoodsCategory goodsCategory = DatabaseHelper.find(GoodsCategory.class, searchModel);
-        Validate.notNull(goodsCategory, "分类信息不存在！");
+        ValidateUtils.notNull(goodsCategory, "分类信息不存在！");
         return goodsCategory;
     }
 
@@ -557,26 +556,28 @@ public class ElemeService {
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest doBindingStore(DoBindingStoreModel doBindingStoreModel) {
-        BigInteger tenantId = doBindingStoreModel.obtainTenantId();
-        BigInteger branchId = doBindingStoreModel.obtainBranchId();
+        BigInteger tenantId = doBindingStoreModel.getTenantId();
+        BigInteger branchId = doBindingStoreModel.getBranchId();
         BigInteger shopId = doBindingStoreModel.getShopId();
-        BigInteger userId = doBindingStoreModel.obtainUserId();
+        BigInteger userId = doBindingStoreModel.getUserId();
 
-        String lastUpdateRemark = "门店(" + branchId + ")绑定饿了么(" + shopId + ")，清除绑定关系！";
+        String updatedRemark = "门店(" + branchId + ")绑定饿了么(" + shopId + ")，清除绑定关系！";
         UpdateModel updateModel = new UpdateModel(true);
         updateModel.setTableName("branch");
-        updateModel.addContentValue("shop_id", null);
-        updateModel.addContentValue("updated_user_id", userId);
-        updateModel.addContentValue("updated_remark", lastUpdateRemark);
-        updateModel.addSearchCondition("shop_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, shopId);
+        updateModel.addContentValue(Branch.ColumnName.SHOP_ID, BigInteger.ZERO);
+        updateModel.addContentValue(Branch.ColumnName.UPDATED_USER_ID, userId);
+        updateModel.addContentValue(Branch.ColumnName.UPDATED_REMARK, updatedRemark);
+        updateModel.addSearchCondition(Branch.ColumnName.SHOP_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, shopId);
         DatabaseHelper.universalUpdate(updateModel);
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
-        Validate.notNull(branch, "门店不存在！");
-        branch.setShopId(doBindingStoreModel.getShopId());
+        ValidateUtils.notNull(branch, "门店不存在！");
+        branch.setShopId(shopId);
+        branch.setUpdatedUserId(userId);
+        branch.setUpdatedRemark("绑定饿了么，设置shop_id！");
         DatabaseHelper.update(branch);
 
         Map<String, String> saveElemeBranchMappingRequestParameters = new HashMap<String, String>();
@@ -585,7 +586,7 @@ public class ElemeService {
         saveElemeBranchMappingRequestParameters.put("shopId", shopId.toString());
         saveElemeBranchMappingRequestParameters.put("userId", userId.toString());
 
-        ApiRest saveElemeBranchMappingApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "eleme", "saveElemeBranchMapping", saveElemeBranchMappingRequestParameters);
+        ApiRest saveElemeBranchMappingApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "eleme", "saveElemeBranchMapping", saveElemeBranchMappingRequestParameters);
         ValidateUtils.isTrue(saveElemeBranchMappingApiRest.isSuccessful(), saveElemeBranchMappingApiRest.getError());
 
         return ApiRest.builder().message("饿了么门店绑定成功！").successful(true).build();

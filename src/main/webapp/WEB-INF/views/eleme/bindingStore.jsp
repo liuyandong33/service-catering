@@ -355,16 +355,12 @@
             }
             var doBindingStoreUrl = "${doBindingStoreUrl}";
             $.post(doBindingStoreUrl, {
-                serviceName: serviceName,
-                controllerName: "eleme",
-                actionName: "doBindingStore",
                 tenantId: tenantId,
                 branchId: branchId,
                 shopId: shopId,
                 userId: userId,
                 partitionCode: partitionCode
             }, function (data) {
-                debugger
                 if (data["successful"]) {
                     alertMessage("提示", data["message"], "确定", undefined);
                     $("#ok_button").attr("disabled", false);
