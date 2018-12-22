@@ -1,19 +1,18 @@
 package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
-import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.catering.domains.*;
-import build.dream.common.utils.CommonUtils;
-import build.dream.common.utils.DatabaseHelper;
-import build.dream.common.utils.SearchCondition;
-import build.dream.common.utils.SearchModel;
+import build.dream.common.constants.DietOrderConstants;
+import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.Validate;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public class SaleFlowUtils {
     public static void writeSaleFlow(DietOrder dietOrder, List<DietOrderGroup> dietOrderGroups, List<DietOrderDetail> dietOrderDetails, List<DietOrderActivity> dietOrderActivities, List<DietOrderPayment> dietOrderPayments) throws IOException {
@@ -103,7 +102,7 @@ public class SaleFlowUtils {
 
     public static void writeSaleFlow(BigInteger dietOrderId) throws IOException {
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, dietOrderId);
-        Validate.notNull(dietOrder, "订单不存在！");
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
 
         List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
         searchConditions.add(new SearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId));

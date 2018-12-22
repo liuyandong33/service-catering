@@ -16,7 +16,6 @@ import build.dream.common.saas.domains.Tenant;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,8 +88,8 @@ public class VipService {
      */
     @Transactional(readOnly = true)
     public ApiRest obtainVipInfo(ObtainVipInfoModel obtainVipInfoModel) {
-        BigInteger tenantId = obtainVipInfoModel.getTenantId();
-        BigInteger branchId = obtainVipInfoModel.getBranchId();
+        BigInteger tenantId = obtainVipInfoModel.obtainTenantId();
+        BigInteger branchId = obtainVipInfoModel.obtainBranchId();
         BigInteger vipId = obtainVipInfoModel.getVipId();
         String vipCode = obtainVipInfoModel.getVipCode();
         String phoneNumber = obtainVipInfoModel.getPhoneNumber();
@@ -148,7 +147,7 @@ public class VipService {
             searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
             searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, vipId);
             vip = VipUtils.find(searchModel);
-            Validate.notNull(vip, "会员不存在！");
+            ValidateUtils.notNull(vip, "会员不存在！");
 
             vip.setVipTypeId(vipTypeId);
             vip.setVipName(vipName);
@@ -166,7 +165,7 @@ public class VipService {
             searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
             searchModel.addSearchCondition("phone_number", Constants.SQL_OPERATION_SYMBOL_EQUAL, phoneNumber);
             long count = VipUtils.count(searchModel);
-            Validate.isTrue(count == 0, "手机号已存在！");
+            ValidateUtils.isTrue(count == 0, "手机号已存在！");
 
             vip = new Vip();
             vip.setTenantId(tenantId);

@@ -9,8 +9,8 @@ import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.*;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SearchModel;
+import build.dream.common.utils.ValidateUtils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,8 +37,8 @@ public class ActivityService {
         Date endDate = simpleDateFormat.parse(saveBuyGiveActivityModel.getEndDate());
         Time startTime = Time.valueOf(saveBuyGiveActivityModel.getStartTime());
         Time endTime = Time.valueOf(saveBuyGiveActivityModel.getEndTime());
-        Validate.isTrue(endDate.after(startDate), "活动结束日期必须大于开始日期！");
-        Validate.isTrue(endTime.after(startTime), "活动结束时间必须大于开始时间！");
+        ValidateUtils.isTrue(endDate.after(startDate), "活动结束日期必须大于开始日期！");
+        ValidateUtils.isTrue(endTime.after(startTime), "活动结束时间必须大于开始时间！");
         int weekSign = saveBuyGiveActivityModel.getWeekSign();
 
         List<SaveBuyGiveActivityModel.BuyGiveActivityInfo> buyGiveActivityInfos = saveBuyGiveActivityModel.getBuyGiveActivityInfos();
@@ -73,7 +73,7 @@ public class ActivityService {
         CanNotOperateReason persistenceCanNotOperateReason = DatabaseHelper.find(CanNotOperateReason.class, canNotOperateReasonSearchModel);
         if (persistenceCanNotOperateReason != null) {
             Goods goods = goodsMap.get(persistenceCanNotOperateReason.getTableId());
-            Validate.notNull(goods, "商品不存在！");
+            ValidateUtils.notNull(goods, "商品不存在！");
 
             throw new RuntimeException(String.format(persistenceCanNotOperateReason.getReason(), goods.getName()));
         }
@@ -102,16 +102,16 @@ public class ActivityService {
         List<CanNotOperateReason> canNotOperateReasons = new ArrayList<CanNotOperateReason>();
         for (SaveBuyGiveActivityModel.BuyGiveActivityInfo buyGiveActivityInfo : buyGiveActivityInfos) {
             Goods buyGoods = goodsMap.get(buyGiveActivityInfo.getBuyGoodsId());
-            Validate.notNull(buyGoods, "商品不存在！");
+            ValidateUtils.notNull(buyGoods, "商品不存在！");
 
             GoodsSpecification buyGoodsSpecification = goodsSpecificationMap.get(buyGiveActivityInfo.getBuyGoodsSpecificationId());
-            Validate.notNull(buyGoods, "商品规格不存在！");
+            ValidateUtils.notNull(buyGoods, "商品规格不存在！");
 
             Goods giveGoods = goodsMap.get(buyGiveActivityInfo.getGiveGoodsId());
-            Validate.notNull(buyGoods, "商品不存在！");
+            ValidateUtils.notNull(buyGoods, "商品不存在！");
 
             GoodsSpecification giveGoodsSpecification = goodsSpecificationMap.get(buyGiveActivityInfo.getGiveGoodsSpecificationId());
-            Validate.notNull(buyGoods, "商品规格不存在！");
+            ValidateUtils.notNull(buyGoods, "商品规格不存在！");
 
             BuyGiveActivity buyGiveActivity = new BuyGiveActivity();
             buyGiveActivity.setTenantId(tenantId);
@@ -149,8 +149,8 @@ public class ActivityService {
         Time startTime = Time.valueOf(saveFullReductionActivityModel.getStartTime());
         Time endTime = Time.valueOf(saveFullReductionActivityModel.getEndTime());
 
-        Validate.isTrue(endDate.after(startDate), "活动结束日期必须大于开始日期！");
-        Validate.isTrue(endTime.after(startTime), "活动结束时间必须大于开始时间！");
+        ValidateUtils.isTrue(endDate.after(startDate), "活动结束日期必须大于开始日期！");
+        ValidateUtils.isTrue(endTime.after(startTime), "活动结束时间必须大于开始时间！");
 
         int weekSign = saveFullReductionActivityModel.getWeekSign();
 
@@ -205,8 +205,8 @@ public class ActivityService {
         Time startTime = Time.valueOf(saveSpecialGoodsActivityModel.getStartTime());
         Time endTime = Time.valueOf(saveSpecialGoodsActivityModel.getEndTime());
 
-        Validate.isTrue(endDate.after(startDate), "活动结束日期必须大于开始日期！");
-        Validate.isTrue(endTime.after(startTime), "活动结束时间必须大于开始时间！");
+        ValidateUtils.isTrue(endDate.after(startDate), "活动结束日期必须大于开始日期！");
+        ValidateUtils.isTrue(endTime.after(startTime), "活动结束时间必须大于开始时间！");
 
         int weekSign = saveSpecialGoodsActivityModel.getWeekSign();
 
@@ -257,7 +257,7 @@ public class ActivityService {
         CanNotOperateReason persistenceCanNotOperateReason = DatabaseHelper.find(CanNotOperateReason.class, canNotOperateReasonSearchModel);
         if (persistenceCanNotOperateReason != null) {
             Goods goods = goodsMap.get(persistenceCanNotOperateReason.getTableId());
-            Validate.notNull(goods, "商品不存在！");
+            ValidateUtils.notNull(goods, "商品不存在！");
 
             throw new RuntimeException(String.format(persistenceCanNotOperateReason.getReason(), goods.getName()));
         }
@@ -286,10 +286,10 @@ public class ActivityService {
         List<CanNotOperateReason> canNotOperateReasons = new ArrayList<CanNotOperateReason>();
         for (SaveSpecialGoodsActivityModel.SpecialGoodsActivityInfo specialGoodsActivityInfo : specialGoodsActivityInfos) {
             Goods goods = goodsMap.get(specialGoodsActivityInfo.getGoodsId());
-            Validate.notNull(goods, "商品不存在！");
+            ValidateUtils.notNull(goods, "商品不存在！");
 
             GoodsSpecification goodsSpecification = goodsSpecificationMap.get(specialGoodsActivityInfo.getGoodsSpecificationId());
-            Validate.notNull(goodsSpecification, "商品规格不存在！");
+            ValidateUtils.notNull(goodsSpecification, "商品规格不存在！");
 
             SpecialGoodsActivity specialGoodsActivity = new SpecialGoodsActivity();
             specialGoodsActivity.setTenantId(tenantId);

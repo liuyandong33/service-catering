@@ -12,7 +12,6 @@ import build.dream.common.catering.domains.Branch;
 import build.dream.common.saas.domains.SystemUser;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,7 +82,7 @@ public class UserService {
         BigInteger tenantId = obtainBranchInfoModel.getTenantId();
         BigInteger userId = obtainBranchInfoModel.getUserId();
         Branch branch = branchMapper.findByTenantIdAndUserId(tenantId, userId);
-        Validate.notNull(branch, "门店不存在！");
+        ValidateUtils.notNull(branch, "门店不存在！");
 
         return ApiRest.builder().data(branch).className(Branch.class.getName()).message("获取门店信息成功！").successful(true).build();
     }

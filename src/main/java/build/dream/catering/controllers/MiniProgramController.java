@@ -8,8 +8,8 @@ import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.OutUtils;
+import build.dream.common.utils.ValidateUtils;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.Validate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -37,7 +37,7 @@ public class MiniProgramController extends BasicController {
         String url = "https://api.weixin.qq.com/sns/jscode2session";
         WebResponse webResponse = OutUtils.doGetWithRequestParameters(url, null, obtainSessionRequestParameters);
         JSONObject obtainSessionResultJsonObject = JSONObject.fromObject(webResponse.getResult());
-        Validate.isTrue(!obtainSessionResultJsonObject.has("errcode"), obtainSessionResultJsonObject.optString("errmsg"));
+        ValidateUtils.isTrue(!obtainSessionResultJsonObject.has("errcode"), obtainSessionResultJsonObject.optString("errmsg"));
 
         ApiRest apiRest = new ApiRest();
         apiRest.setData(obtainSessionResultJsonObject);

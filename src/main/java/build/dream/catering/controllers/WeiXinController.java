@@ -7,7 +7,6 @@ import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.*;
-import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,13 +40,13 @@ public class WeiXinController extends BasicController {
         CreateMemberCardModel createMemberCardModel = ApplicationHandler.instantiateObject(CreateMemberCardModel.class, requestParameters);
         createMemberCardModel.validateAndThrow();
 
-        Validate.isTrue(httpServletRequest instanceof MultipartHttpServletRequest, "请上传logo！");
+        ValidateUtils.isTrue(httpServletRequest instanceof MultipartHttpServletRequest, "请上传logo！");
         MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) httpServletRequest;
 
         MultipartFile backgroundPicFile = multipartHttpServletRequest.getFile("backgroundPic");
 
         MultipartFile logoFile = multipartHttpServletRequest.getFile("logo");
-        Validate.notNull(logoFile, "请上传logo！");
+        ValidateUtils.notNull(logoFile, "请上传logo！");
 
         ApiRest apiRest = weiXinService.createMemberCard(createMemberCardModel, backgroundPicFile, logoFile);
         return GsonUtils.toJson(apiRest);

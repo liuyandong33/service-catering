@@ -8,7 +8,6 @@ import build.dream.common.catering.domains.*;
 import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +36,7 @@ public class AnubisService {
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
-        Validate.notNull(branch, "门店不存在！");
+        ValidateUtils.notNull(branch, "门店不存在！");
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("chain_store_code", branch.getTenantCode() + "Z" + branch.getCode());
@@ -72,7 +71,7 @@ public class AnubisService {
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
-        Validate.notNull(branch, "门店不存在！");
+        ValidateUtils.notNull(branch, "门店不存在！");
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("chain_store_code", branch.getTenantCode() + "Z" + branch.getCode());
@@ -106,7 +105,7 @@ public class AnubisService {
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
-        Validate.notNull(branch, "门店不存在！");
+        ValidateUtils.notNull(branch, "门店不存在！");
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("chain_store_code", branch.getTenantCode() + "Z" + branch.getCode());
@@ -139,7 +138,7 @@ public class AnubisService {
         branchSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         branchSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         Branch branch = DatabaseHelper.find(Branch.class, branchSearchModel);
-        Validate.notNull(branch, "门店不存在！");
+        ValidateUtils.notNull(branch, "门店不存在！");
 
         // 查询订单信息
         SearchModel dietOrderSearchModel = new SearchModel(true);
@@ -147,7 +146,7 @@ public class AnubisService {
         dietOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         dietOrderSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, dietOrderSearchModel);
-        Validate.notNull(dietOrder, "订单不存在！");
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
 
         SearchModel dietOrderGroupSearchModel = new SearchModel(true);
         dietOrderGroupSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -309,7 +308,7 @@ public class AnubisService {
         dietOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         dietOrderSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, dietOrderSearchModel);
-        Validate.notNull(dietOrder, "订单不存在！");
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
         return dietOrder;
     }
 
@@ -354,7 +353,7 @@ public class AnubisService {
         String appId = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_ID);
         String signature = callbackRequestBodyJsonObject.getString("signature");
         int salt = callbackRequestBodyJsonObject.getInt("salt");
-        Validate.isTrue(AnubisUtils.verifySignature(appId, data, salt, signature), "签名验证未通过！");
+        ValidateUtils.isTrue(AnubisUtils.verifySignature(appId, data, salt, signature), "签名验证未通过！");
 
         JSONObject dataJsonObject = JSONObject.fromObject(data);
 
@@ -362,7 +361,7 @@ public class AnubisService {
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("order_number", Constants.SQL_OPERATION_SYMBOL_EQUAL, orderNumber);
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
-        Validate.notNull(dietOrder, "订单不存在！");
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
 
         DietOrderDeliveryState dietOrderDeliveryState = new DietOrderDeliveryState();
         dietOrderDeliveryState.setTenantId(dietOrder.getTenantId());

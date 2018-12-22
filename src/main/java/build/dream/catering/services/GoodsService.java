@@ -10,7 +10,6 @@ import build.dream.common.catering.domains.*;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -468,7 +467,7 @@ public class GoodsService extends BasicService {
             goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
             goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
             Goods goods = DatabaseHelper.find(Goods.class, goodsSearchModel);
-            Validate.notNull(goods, "商品不存在！");
+            ValidateUtils.notNull(goods, "商品不存在！");
 
             // 验证商品是否可以编辑
             validateCanNotOperate(tenantId, branchId, "goods", goodsId, 2);
@@ -544,7 +543,7 @@ public class GoodsService extends BasicService {
                 List<GoodsSpecification> insertGoodsSpecifications = new ArrayList<GoodsSpecification>();
                 if (goodsSpecificationInfo.getId() != null) {
                     GoodsSpecification goodsSpecification = goodsSpecificationMap.get(goodsSpecificationInfo.getId());
-                    Validate.notNull(goodsSpecification, "商品规格不存在！");
+                    ValidateUtils.notNull(goodsSpecification, "商品规格不存在！");
                     goodsSpecification.setName(goodsSpecificationInfo.getName());
                     goodsSpecification.setPrice(goodsSpecificationInfo.getPrice());
                     DatabaseHelper.update(goodsSpecification);
@@ -624,7 +623,7 @@ public class GoodsService extends BasicService {
                     List<GoodsAttribute> insertGoodsAttributes = new ArrayList<GoodsAttribute>();
                     if (attributeGroupInfo.getId() != null) {
                         GoodsAttributeGroup goodsAttributeGroup = goodsAttributeGroupMap.get(attributeGroupInfo.getId());
-                        Validate.notNull(goodsAttributeGroup, "口味组不存在！");
+                        ValidateUtils.notNull(goodsAttributeGroup, "口味组不存在！");
                         goodsAttributeGroup.setName(attributeGroupInfo.getName());
                         goodsAttributeGroup.setUpdatedUserId(userId);
                         goodsAttributeGroup.setUpdatedRemark("修改口味组信息！");
@@ -633,7 +632,7 @@ public class GoodsService extends BasicService {
                         for (SaveGoodsModel.AttributeInfo attributeInfo : attributeGroupInfo.getAttributeInfos()) {
                             if (attributeInfo.getId() != null) {
                                 GoodsAttribute goodsAttribute = goodsAttributeMap.get(attributeInfo.getId());
-                                Validate.notNull(goodsAttribute, "商品口味不存在！");
+                                ValidateUtils.notNull(goodsAttribute, "商品口味不存在！");
                                 goodsAttribute.setName(attributeInfo.getName());
                                 goodsAttribute.setPrice(attributeInfo.getPrice() == null ? BigDecimal.ZERO : attributeInfo.getPrice());
                                 goodsAttribute.setUpdatedUserId(userId);
@@ -756,7 +755,7 @@ public class GoodsService extends BasicService {
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, deleteGoodsSpecificationModel.getTenantId());
         searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, deleteGoodsSpecificationModel.getBranchId());
         GoodsSpecification goodsSpecification = DatabaseHelper.find(GoodsSpecification.class, searchModel);
-        Validate.notNull(goodsSpecification, "菜品规格不存在！");
+        ValidateUtils.notNull(goodsSpecification, "菜品规格不存在！");
         goodsSpecification.setDeleted(true);
         goodsSpecification.setUpdatedUserId(deleteGoodsSpecificationModel.getUserId());
         goodsSpecification.setUpdatedRemark("删除菜品规格信息！");
@@ -1025,7 +1024,7 @@ public class GoodsService extends BasicService {
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         Goods goods = DatabaseHelper.find(Goods.class, searchModel);
-        Validate.notNull(goods, "商品不存在！");
+        ValidateUtils.notNull(goods, "商品不存在！");
 
         validateCanNotOperate(tenantId, branchId, "goods", goodsId, 2);
 
@@ -1094,7 +1093,7 @@ public class GoodsService extends BasicService {
         TenantConfig tenantConfig = TenantConfigUtils.addTenantConfig(BigInteger.ONE, "goods_num", count);
         int currentValue = tenantConfig.getCurrentValue();
         int maxValue = tenantConfig.getMaxValue();
-        Validate.isTrue(currentValue <= maxValue, "您最多可以添加" + (maxValue - currentValue + count) + "条商品信息！");
+        ValidateUtils.isTrue(currentValue <= maxValue, "您最多可以添加" + (maxValue - currentValue + count) + "条商品信息！");
 
         List<Goods> goodses = new ArrayList<Goods>();
         Map<String, Goods> goodsMap = new HashMap<String, Goods>();

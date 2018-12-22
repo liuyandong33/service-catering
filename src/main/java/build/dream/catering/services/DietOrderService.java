@@ -22,7 +22,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
 import org.dom4j.DocumentException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -916,7 +915,7 @@ public class DietOrderService {
         SearchModel dietOrderSearchModel = new SearchModel(true);
         dietOrderSearchModel.addSearchCondition("order_number", Constants.SQL_OPERATION_SYMBOL_EQUAL, orderNumber);
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, dietOrderSearchModel);
-        Validate.notNull(dietOrder, "订单不存在！");
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
         if (dietOrder.getOrderStatus() == DietOrderConstants.PAY_STATUS_PAID) {
             return;
         }

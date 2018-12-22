@@ -6,7 +6,6 @@ import build.dream.common.utils.*;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -50,7 +49,7 @@ public class MeiTuanUtils {
 
     public static String getMeiTuanAppAuthToken(String tenantId, String branchId) {
         String meiTuanAppAuthToken = CacheUtils.hget(Constants.KEY_MEI_TUAN_APP_AUTH_TOKENS, tenantId + "_" + branchId);
-        Validate.notNull(meiTuanAppAuthToken, "门店未绑定美团！");
+        ValidateUtils.notNull(meiTuanAppAuthToken, "门店未绑定美团！");
         return meiTuanAppAuthToken;
     }
 

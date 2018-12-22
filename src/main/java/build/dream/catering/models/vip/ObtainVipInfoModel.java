@@ -1,18 +1,12 @@
 package build.dream.catering.models.vip;
 
-import build.dream.common.models.BasicModel;
+import build.dream.common.models.CateringBasicModel;
+import build.dream.common.utils.ValidateUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
 
-import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
 
-public class ObtainVipInfoModel extends BasicModel {
-    @NotNull
-    private BigInteger tenantId;
-    @NotNull
-    private BigInteger branchId;
-
+public class ObtainVipInfoModel extends CateringBasicModel {
     private BigInteger vipId;
 
     private String vipCode;
@@ -22,22 +16,6 @@ public class ObtainVipInfoModel extends BasicModel {
     private String openId;
 
     private String alipayUserId;
-
-    public BigInteger getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(BigInteger tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public BigInteger getBranchId() {
-        return branchId;
-    }
-
-    public void setBranchId(BigInteger branchId) {
-        this.branchId = branchId;
-    }
 
     public BigInteger getVipId() {
         return vipId;
@@ -82,6 +60,6 @@ public class ObtainVipInfoModel extends BasicModel {
     @Override
     public void validateAndThrow() {
         super.validateAndThrow();
-        Validate.isTrue(vipId != null || StringUtils.isNotBlank(vipCode) || StringUtils.isNotBlank(phoneNumber) || StringUtils.isNotBlank(openId) || StringUtils.isNotBlank(alipayUserId), "参数【vipId、vipCode、phoneNumber、openId、alipayUserId】不能同时为空！");
+        ValidateUtils.isTrue(vipId != null || StringUtils.isNotBlank(vipCode) || StringUtils.isNotBlank(phoneNumber) || StringUtils.isNotBlank(openId) || StringUtils.isNotBlank(alipayUserId), "参数【vipId、vipCode、phoneNumber、openId、alipayUserId】不能同时为空！");
     }
 }
