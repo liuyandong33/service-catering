@@ -2,7 +2,7 @@ package build.dream.catering.models.activity;
 
 import build.dream.catering.constants.Constants;
 import build.dream.common.annotations.JsonSchema;
-import build.dream.common.models.BasicModel;
+import build.dream.common.models.CateringBasicModel;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotEmpty;
@@ -10,14 +10,7 @@ import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
 import java.util.List;
 
-public class SaveBuyGiveActivityModel extends BasicModel {
-    @NotNull
-    private BigInteger tenantId;
-
-    @NotNull
-    @Length(max = 20)
-    private String tenantCode;
-
+public class SaveBuyGiveActivityModel extends CateringBasicModel {
     @NotEmpty
     private List<BigInteger> branchIds;
 
@@ -49,22 +42,6 @@ public class SaveBuyGiveActivityModel extends BasicModel {
 
     @JsonSchema(value = Constants.BUY_GIVE_ACTIVITY_INFOS_SCHEMA_FILE_PATH)
     private List<BuyGiveActivityInfo> buyGiveActivityInfos;
-
-    public BigInteger getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(BigInteger tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public String getTenantCode() {
-        return tenantCode;
-    }
-
-    public void setTenantCode(String tenantCode) {
-        this.tenantCode = tenantCode;
-    }
 
     public List<BigInteger> getBranchIds() {
         return branchIds;

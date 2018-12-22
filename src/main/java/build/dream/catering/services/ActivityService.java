@@ -28,8 +28,8 @@ public class ActivityService {
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveBuyGiveActivity(SaveBuyGiveActivityModel saveBuyGiveActivityModel) throws ParseException {
-        BigInteger tenantId = saveBuyGiveActivityModel.getTenantId();
-        String tenantCode = saveBuyGiveActivityModel.getTenantCode();
+        BigInteger tenantId = saveBuyGiveActivityModel.obtainTenantId();
+        String tenantCode = saveBuyGiveActivityModel.obtainTenantCode();
         List<BigInteger> branchIds = saveBuyGiveActivityModel.getBranchIds();
         BigInteger userId = saveBuyGiveActivityModel.getUserId();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -139,8 +139,8 @@ public class ActivityService {
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveFullReductionActivity(SaveFullReductionActivityModel saveFullReductionActivityModel) throws ParseException {
-        BigInteger tenantId = saveFullReductionActivityModel.getTenantId();
-        String tenantCode = saveFullReductionActivityModel.getTenantCode();
+        BigInteger tenantId = saveFullReductionActivityModel.obtainTenantId();
+        String tenantCode = saveFullReductionActivityModel.obtainTenantCode();
         List<BigInteger> branchIds = saveFullReductionActivityModel.getBranchIds();
         BigInteger userId = saveFullReductionActivityModel.getUserId();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -194,8 +194,8 @@ public class ActivityService {
      * @throws ParseException
      */
     public ApiRest saveSpecialGoodsActivity(SaveSpecialGoodsActivityModel saveSpecialGoodsActivityModel) throws ParseException {
-        BigInteger tenantId = saveSpecialGoodsActivityModel.getTenantId();
-        String tenantCode = saveSpecialGoodsActivityModel.getTenantCode();
+        BigInteger tenantId = saveSpecialGoodsActivityModel.obtainTenantId();
+        String tenantCode = saveSpecialGoodsActivityModel.obtainTenantCode();
         List<BigInteger> branchIds = saveSpecialGoodsActivityModel.getBranchIds();
         BigInteger userId = saveSpecialGoodsActivityModel.getUserId();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DEFAULT_DATE_PATTERN);
@@ -331,8 +331,8 @@ public class ActivityService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest listEffectiveActivities(ListEffectiveActivitiesModel listEffectiveActivitiesModel) {
-        BigInteger tenantId = listEffectiveActivitiesModel.getTenantId();
-        BigInteger branchId = listEffectiveActivitiesModel.getBranchId();
+        BigInteger tenantId = listEffectiveActivitiesModel.obtainTenantId();
+        BigInteger branchId = listEffectiveActivitiesModel.obtainBranchId();
         List<EffectiveActivity> effectiveActivities = activityMapper.callProcedureEffectiveActivity(tenantId, branchId);
 
         return ApiRest.builder().data(effectiveActivities).message("查询生效的活动成功！").successful(true).build();
@@ -346,8 +346,8 @@ public class ActivityService {
      */
     @Transactional(readOnly = true)
     public ApiRest listFullReductionActivities(ListFullReductionActivitiesModel listFullReductionActivitiesModel) {
-        BigInteger tenantId = listFullReductionActivitiesModel.getTenantId();
-        BigInteger branchId = listFullReductionActivitiesModel.getBranchId();
+        BigInteger tenantId = listFullReductionActivitiesModel.obtainTenantId();
+        BigInteger branchId = listFullReductionActivitiesModel.obtainBranchId();
 
         List<FullReductionActivity> fullReductionActivities = activityMapper.listFullReductionActivities(tenantId, branchId);
         return ApiRest.builder().data(fullReductionActivities).message("查询所有生效的整单满减活动成功！").successful(true).build();
@@ -361,8 +361,8 @@ public class ActivityService {
      */
     @Transactional(readOnly = true)
     public ApiRest listPaymentActivities(ListPaymentActivitiesModel listPaymentActivitiesModel) {
-        BigInteger tenantId = listPaymentActivitiesModel.getTenantId();
-        BigInteger branchId = listPaymentActivitiesModel.getBranchId();
+        BigInteger tenantId = listPaymentActivitiesModel.obtainTenantId();
+        BigInteger branchId = listPaymentActivitiesModel.obtainBranchId();
 
         List<PaymentActivity> paymentActivities = activityMapper.listPaymentActivities(tenantId, branchId);
         return ApiRest.builder().data(paymentActivities).message("查询所有生效的支付促销活动成功！").successful(true).build();

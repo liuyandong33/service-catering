@@ -1,6 +1,6 @@
 package build.dream.catering.models.activity;
 
-import build.dream.common.models.BasicModel;
+import build.dream.common.models.CateringBasicModel;
 import build.dream.common.utils.ApplicationHandler;
 import org.apache.commons.lang.ArrayUtils;
 import org.hibernate.validator.constraints.Length;
@@ -10,15 +10,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
-public class SaveFullReductionActivityModel extends BasicModel {
+public class SaveFullReductionActivityModel extends CateringBasicModel {
     private static Integer[] DISCOUNT_TYPES = new Integer[]{1, 2};
-    @NotNull
-    private BigInteger tenantId;
-
-    @NotNull
-    @Length(max = 20)
-    private String tenantCode;
-
     @NotNull
     private List<BigInteger> branchIds;
 
@@ -55,22 +48,6 @@ public class SaveFullReductionActivityModel extends BasicModel {
     private Integer discountType;
     private BigDecimal discountRate;
     private BigDecimal discountAmount;
-
-    public BigInteger getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(BigInteger tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public String getTenantCode() {
-        return tenantCode;
-    }
-
-    public void setTenantCode(String tenantCode) {
-        this.tenantCode = tenantCode;
-    }
 
     public List<BigInteger> getBranchIds() {
         return branchIds;

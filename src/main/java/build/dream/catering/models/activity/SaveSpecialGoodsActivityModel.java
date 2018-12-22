@@ -2,9 +2,7 @@ package build.dream.catering.models.activity;
 
 import build.dream.catering.constants.Constants;
 import build.dream.common.annotations.JsonSchema;
-import build.dream.common.models.BasicModel;
-import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.GsonUtils;
+import build.dream.common.models.CateringBasicModel;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotEmpty;
@@ -13,14 +11,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
-public class SaveSpecialGoodsActivityModel extends BasicModel {
-    @NotNull
-    private BigInteger tenantId;
-
-    @NotNull
-    @Length(max = 20)
-    private String tenantCode;
-
+public class SaveSpecialGoodsActivityModel extends CateringBasicModel {
     @NotEmpty
     private List<BigInteger> branchIds;
 
@@ -52,22 +43,6 @@ public class SaveSpecialGoodsActivityModel extends BasicModel {
 
     @JsonSchema(value = Constants.SPECIAL_GOODS_ACTIVITY_INFOS_SCHEMA_FILE_PATH)
     private List<SpecialGoodsActivityInfo> specialGoodsActivityInfos;
-
-    public BigInteger getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(BigInteger tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public String getTenantCode() {
-        return tenantCode;
-    }
-
-    public void setTenantCode(String tenantCode) {
-        this.tenantCode = tenantCode;
-    }
 
     public List<BigInteger> getBranchIds() {
         return branchIds;
