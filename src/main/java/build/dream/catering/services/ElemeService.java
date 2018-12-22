@@ -465,6 +465,7 @@ public class ElemeService {
 
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void handleAuthorizationStateChangeMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
         BigInteger tenantId = elemeCallbackMessage.getTenantId();
         BigInteger shopId = elemeCallbackMessage.getShopId();
