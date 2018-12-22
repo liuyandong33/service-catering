@@ -19,7 +19,9 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
             "/branch/pullBranchInfos",
             "/branch/disableGoods",
             "/branch/renewCallback",
-            "/meiTuan/test"
+            "/meiTuan/test",
+            "/eleme/bindingStore",
+            "/eleme/doBindingStore",
     };
 
     @Override

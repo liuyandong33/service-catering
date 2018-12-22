@@ -26,9 +26,9 @@ public class OrderInvalidMessageListener implements MessageListener<String, Stri
 
         JSONObject info = JSONObject.fromObject(value);
         CancelOrderModel cancelOrderModel = new CancelOrderModel();
-        cancelOrderModel.setTenantId(BigInteger.valueOf(info.getLong("tenantId")));
-        cancelOrderModel.setTenantId(BigInteger.valueOf(info.getLong("branchId")));
-        cancelOrderModel.setTenantId(BigInteger.valueOf(info.getLong("orderId")));
+//        cancelOrderModel.setTenantId(BigInteger.valueOf(info.getLong("tenantId")));
+//        cancelOrderModel.setTenantId(BigInteger.valueOf(info.getLong("branchId")));
+//        cancelOrderModel.setTenantId(BigInteger.valueOf(info.getLong("orderId")));
         try {
             dietOrderService.cancelOrder(cancelOrderModel);
         } catch (IOException e) {

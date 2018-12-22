@@ -40,6 +40,9 @@ public class ElemeService {
         BigInteger tenantId = tenantAuthorizeModel.obtainTenantId();
         BigInteger branchId = tenantAuthorizeModel.obtainBranchId();
         BigInteger userId = tenantAuthorizeModel.obtainUserId();
+        String partitionCode = tenantAuthorizeModel.obtainPartitionCode();
+        String clientType = tenantAuthorizeModel.obtainClientType();
+
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -52,18 +55,31 @@ public class ElemeService {
         int elemeAccountType = branch.getElemeAccountType();
         boolean isAuthorize = branch.getShopId().compareTo(Constants.BIGINT_DEFAULT_VALUE) != 0;
 
+        String apiServiceName = CommonUtils.obtainApiServiceName(clientType);
         String data = null;
         if (isAuthorize) {
-            String serviceName = ConfigurationUtils.getConfiguration(Constants.SERVICE_NAME);
-            data = CommonUtils.getOutsideUrl(Constants.SERVICE_NAME_POSAPI, "proxy", "doGetPermit") + "?serviceName=" + serviceName + "&controllerName=eleme&actionName=bindingStore" + "&tenantId=" + tenantId + "&branchId=" + branchId + "&userId=" + userId;
+            data = CommonUtils.getOutsideUrl(apiServiceName, "proxy", "doGetPermit") + "/" + partitionCode + "/" + Constants.SERVICE_NAME_CATERING + "/eleme/bindingStore?tenantId=" + tenantId + "&branchId=" + branchId + "&userId=" + userId;
         } else {
             String elemeUrl = ConfigurationUtils.getConfiguration(Constants.ELEME_SERVICE_URL);
             String elemeAppKey = ConfigurationUtils.getConfiguration(Constants.ELEME_APP_KEY);
 
-            String outServiceOutsideServiceDomain = CommonUtils.getOutsideServiceDomain(Constants.SERVICE_NAME_OUT);
-            data = String.format(Constants.ELEME_TENANT_AUTHORIZE_URL_FORMAT, elemeUrl + "/" + "authorize", "code", elemeAppKey, URLEncoder.encode(outServiceOutsideServiceDomain + "/eleme/tenantAuthorizeCallback", Constants.CHARSET_NAME_UTF_8), tenantId + "Z" + branchId + "Z" + userId + "Z" + elemeAccountType, "all");
+            String redirectUri = URLEncoder.encode(CommonUtils.getOutsideUrl(apiServiceName, "proxy", "doGetPermit") + "/" + partitionCode + "/" + Constants.SERVICE_NAME_CATERING + "/eleme/tenantAuthorizeCallback", Constants.CHARSET_NAME_UTF_8);
+            String state = tenantId + "Z" + branchId + "Z" + userId + "Z" + elemeAccountType;
+            data = String.format(Constants.ELEME_TENANT_AUTHORIZE_URL_FORMAT, elemeUrl + "/" + "authorize", "code", elemeAppKey, redirectUri, state, "all");
         }
         return ApiRest.builder().data(data).message("生成授权链接成功！").successful(true).build();
+    }
+
+    /**
+     * 处理商户授权回调
+     *
+     * @param tenantId
+     * @param branchId
+     * @param userId
+     * @param elemeAccountType
+     */
+    public void handleTenantAuthorizeCallback(BigInteger tenantId, BigInteger branchId, BigInteger userId, int elemeAccountType, String code) {
+
     }
 
     /**

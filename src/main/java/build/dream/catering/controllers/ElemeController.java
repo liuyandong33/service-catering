@@ -8,21 +8,25 @@ import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.CommonUtils;
 import build.dream.common.utils.ConfigurationUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.Map;
 
 @Controller
 @RequestMapping(value = "/eleme")
 public class ElemeController extends BasicController {
+    @Autowired
+    private ElemeService elemeService;
+
     /**
      * 商户授权
      *
@@ -33,6 +37,44 @@ public class ElemeController extends BasicController {
     @ApiRestAction(modelClass = TenantAuthorizeModel.class, serviceClass = ElemeService.class, serviceMethodName = "tenantAuthorize", error = "生成授权链接失败")
     public String tenantAuthorize() {
         return null;
+    }
+
+    @RequestMapping(value = "/tenantAuthorizeCallback", method = RequestMethod.GET)
+    public ModelAndView tenantAuthorizeCallback() {
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        String clientType = requestParameters.get(Constants.CLIENT_TYPE);
+        String code = requestParameters.get("code");
+        String state = requestParameters.get("state");
+        String[] array = state.split("Z");
+        String tenantId = array[0];
+        String branchId = array[1];
+        String userId = array[2];
+        String elemeAccountType = array[3];
+        elemeService.handleTenantAuthorizeCallback(NumberUtils.createBigInteger(tenantId), NumberUtils.createBigInteger(branchId), NumberUtils.createBigInteger(userId), Integer.parseInt(elemeAccountType), code);
+        return buildBindingStoreModelAndView(tenantId, branchId, userId, clientType);
+    }
+
+    private ModelAndView buildBindingStoreModelAndView(String tenantId, String branchId, String userId, String clientType) {
+        String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
+        String apiServiceName = CommonUtils.obtainApiServiceName(clientType);
+
+        String proxyUrl = CommonUtils.getOutsideUrl(apiServiceName, "proxy", "doGetPermitWithUrl");
+        String doBindingStoreUrl = CommonUtils.getOutsideUrl(apiServiceName, "proxy", "doPostPermit") + "/" + partitionCode + "/" + Constants.SERVICE_NAME_CATERING + "/eleme/doBindingStore";
+        String baseUrl = CommonUtils.getServiceDomain(partitionCode, Constants.SERVICE_NAME_CATERING);
+
+        Map<String, Object> model = new HashMap<String, Object>();
+
+        model.put("tenantId", tenantId);
+        model.put("branchId", branchId);
+        model.put("userId", userId);
+        model.put("proxyUrl", proxyUrl);
+        model.put("baseUrl", baseUrl);
+        model.put("doBindingStoreUrl", doBindingStoreUrl);
+
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("eleme/bindingStore");
+        modelAndView.addAllObjects(model);
+        return modelAndView;
     }
 
     /**
@@ -67,38 +109,13 @@ public class ElemeController extends BasicController {
      */
     @RequestMapping(value = "/bindingStore")
     @ResponseBody
-    public String bindingStore() throws IOException {
+    public ModelAndView bindingStore() {
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
-        String result = readResource("bindingStore.html");
-        result = result.replaceAll("\\$\\{serviceName}", ConfigurationUtils.getConfiguration(Constants.SERVICE_NAME));
-        result = result.replaceAll("\\$\\{tenantId}", requestParameters.get("tenantId"));
-        result = result.replaceAll("\\$\\{branchId}", requestParameters.get("branchId"));
-        result = result.replaceAll("\\$\\{userId}", requestParameters.get("userId"));
-        result = result.replaceAll("\\$\\{partitionCode}", ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE));
-        result = result.replaceAll("\\$\\{doBindingStoreUrl}", CommonUtils.getOutsideUrl(Constants.SERVICE_NAME_POSAPI, "proxy", "doPostPermit"));
-        result = StringUtils.join(result.split("\\$\\{jquery-3\\.2\\.1\\.min.js}"), readResource("jquery-3.2.1.min.js"));
-        return result;
-    }
-
-    private String readResource(String resourceName) throws IOException {
-        InputStream inputStream = null;
-        InputStreamReader inputStreamReader = null;
-        ClassLoader classLoader = this.getClass().getClassLoader();
-        StringBuilder result = new StringBuilder();
-        if ("bindingStore.html".equals(resourceName)) {
-            inputStream = classLoader.getResourceAsStream("views/eleme/bindingStore.html");
-        } else if ("jquery-3.2.1.min.js".equals(resourceName)) {
-            inputStream = classLoader.getResourceAsStream("libraries/jquery/jquery-3.2.1.min.js");
-        }
-        inputStreamReader = new InputStreamReader(inputStream, Constants.CHARSET_NAME_UTF_8);
-        int length = 0;
-        char[] buffer = new char[1024];
-        while ((length = inputStreamReader.read(buffer, 0, 1024)) != -1) {
-            result.append(buffer, 0, length);
-        }
-        inputStreamReader.close();
-        inputStream.close();
-        return result.toString();
+        String tenantId = requestParameters.get("tenantId");
+        String branchId = requestParameters.get("branchId");
+        String userId = requestParameters.get("userId");
+        String clientType = requestParameters.get(Constants.CLIENT_TYPE);
+        return buildBindingStoreModelAndView(tenantId, branchId, userId, clientType);
     }
 
     /**
