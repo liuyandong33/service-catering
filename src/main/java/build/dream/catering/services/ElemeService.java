@@ -471,49 +471,64 @@ public class ElemeService {
 
     }
 
-    @Transactional(readOnly = true)
-    public Branch findBranch(BigInteger tenantId, BigInteger branchId) {
+    /**
+     * 查询门店信息，并校验非空
+     *
+     * @param tenantId
+     * @param branchId
+     * @return
+     */
+    private Branch findBranch(BigInteger tenantId, BigInteger branchId) {
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         ValidateUtils.notNull(branch, "门店不存在！");
         return branch;
     }
 
-    @Transactional(readOnly = true)
-    public GoodsCategory findGoodsCategoryInfo(BigInteger tenantId, BigInteger branchId, BigInteger categoryId) {
+    /**
+     * 查询订单信息，并校验非空
+     *
+     * @param tenantId
+     * @param branchId
+     * @param elemeOrderId
+     * @return
+     */
+    private DietOrder findElemeOrder(BigInteger tenantId, BigInteger branchId, BigInteger elemeOrderId) {
         SearchModel searchModel = new SearchModel();
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, categoryId);
-        GoodsCategory goodsCategory = DatabaseHelper.find(GoodsCategory.class, searchModel);
-        ValidateUtils.notNull(goodsCategory, "分类信息不存在！");
-        return goodsCategory;
-    }
-
-    @Transactional(readOnly = true)
-    public DietOrder findElemeOrder(BigInteger tenantId, BigInteger branchId, BigInteger elemeOrderId) {
-        SearchModel searchModel = new SearchModel();
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, elemeOrderId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, elemeOrderId);
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
         ValidateUtils.notNull(dietOrder, "订单不存在！");
         return dietOrder;
     }
 
-    @Transactional(readOnly = true)
+    /**
+     * 批量查询订单，并校验非空
+     *
+     * @param tenantId
+     * @param branchId
+     * @param elemeOrderIds
+     * @return
+     */
     public List<DietOrder> findAllElemeOrders(BigInteger tenantId, BigInteger branchId, List<BigInteger> elemeOrderIds) {
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_IN, elemeOrderIds);
+        searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, elemeOrderIds);
         List<DietOrder> dietOrders = DatabaseHelper.findAll(DietOrder.class, searchModel);
         ValidateUtils.notEmpty(dietOrders, "订单不存在！");
         return dietOrders;
     }
 
+    /**
+     * 获取订单ID
+     *
+     * @param dietOrders
+     * @return
+     */
     public List<String> obtainOrderIds(List<DietOrder> dietOrders) {
         List<String> orderIds = new ArrayList<String>();
         for (DietOrder dietOrder : dietOrders) {
@@ -860,5 +875,27 @@ public class ElemeService {
         Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.user.getUser", null);
 
         return ApiRest.builder().data(result).message("获取商户账号信息成功！").successful(true).build();
+    }
+
+    /**
+     * 查询店铺信息
+     *
+     * @param getShopModel
+     * @return
+     * @throws IOException
+     */
+    @Transactional(readOnly = true)
+    public ApiRest getShop(GetShopModel getShopModel) throws IOException {
+        BigInteger tenantId = getShopModel.obtainTenantId();
+        BigInteger branchId = getShopModel.obtainBranchId();
+
+        Branch branch = findBranch(tenantId, branchId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("shopId", branch.getShopId());
+
+        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.shop.getShop", null);
+
+        return ApiRest.builder().data(result).message("查询店铺信息成功！").successful(true).build();
     }
 }

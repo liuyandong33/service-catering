@@ -261,4 +261,16 @@ public class ElemeController extends BasicController {
     public String getUser() {
         return null;
     }
+
+    /**
+     * 查询店铺信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "/getShop", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = GetShopModel.class, serviceClass = ElemeService.class, serviceMethodName = "getShop", error = "查询店铺信息失败")
+    public String getShop() {
+        return null;
+    }
 }
