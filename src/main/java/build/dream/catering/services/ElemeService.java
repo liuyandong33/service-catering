@@ -78,7 +78,14 @@ public class ElemeService {
      * @param elemeAccountType
      */
     public void handleTenantAuthorizeCallback(BigInteger tenantId, BigInteger branchId, BigInteger userId, int elemeAccountType, String code) {
-
+        Map<String, String> requestParameters = new HashMap<String, String>();
+        requestParameters.put("tenantId", tenantId.toString());
+        requestParameters.put("branchId", branchId.toString());
+        requestParameters.put("userId", userId.toString());
+        requestParameters.put("elemeAccountType", String.valueOf(elemeAccountType));
+        requestParameters.put("code", code);
+        ApiRest apiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "eleme", "handleTenantAuthorizeCallback", requestParameters);
+        ValidateUtils.isTrue(apiRest.isSuccessful(), apiRest.getError());
     }
 
     /**
