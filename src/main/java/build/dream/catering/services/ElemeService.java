@@ -47,9 +47,6 @@ public class ElemeService {
         searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         ValidateUtils.notNull(branch, "门店不存在！");
-        Map<String, String> checkIsAuthorizeRequestParameters = new HashMap<String, String>();
-        checkIsAuthorizeRequestParameters.put("tenantId", tenantId.toString());
-        checkIsAuthorizeRequestParameters.put("branchId", branchId.toString());
 
         int elemeAccountType = branch.getElemeAccountType();
         boolean isAuthorize = branch.getShopId().compareTo(Constants.BIGINT_DEFAULT_VALUE) != 0;
