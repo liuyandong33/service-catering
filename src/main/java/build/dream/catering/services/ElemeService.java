@@ -49,6 +49,12 @@ public class ElemeService {
         ValidateUtils.notNull(branch, "门店不存在！");
 
         int elemeAccountType = branch.getElemeAccountType();
+
+        Map<String, String> checkIsAuthorizeRequestParameters = new HashMap<String, String>();
+        checkIsAuthorizeRequestParameters.put("tenantId", tenantId.toString());
+        checkIsAuthorizeRequestParameters.put("branchId", branchId.toString());
+        checkIsAuthorizeRequestParameters.put("elemeAccountType", String.valueOf(elemeAccountType));
+
         boolean isAuthorize = branch.getShopId().compareTo(Constants.BIGINT_DEFAULT_VALUE) != 0;
 
         String apiServiceName = CommonUtils.obtainApiServiceName(clientType);
