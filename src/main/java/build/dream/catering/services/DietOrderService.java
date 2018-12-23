@@ -3,7 +3,6 @@ package build.dream.catering.services;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.ActivityMapper;
 import build.dream.catering.mappers.GoodsMapper;
-import build.dream.catering.mappers.SequenceMapper;
 import build.dream.catering.models.dietorder.*;
 import build.dream.catering.utils.DietOrderUtils;
 import build.dream.catering.utils.GoodsUtils;
@@ -38,8 +37,6 @@ import java.util.*;
 
 @Service
 public class DietOrderService {
-    @Autowired
-    private SequenceMapper sequenceMapper;
     @Autowired
     private ActivityMapper activityMapper;
     @Autowired
@@ -961,9 +958,9 @@ public class DietOrderService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest obtainPosOrder(ObtainPosOrderModel obtainPosOrderModel) throws IOException {
-        BigInteger tenantId = obtainPosOrderModel.getTenantId();
-        BigInteger branchId = obtainPosOrderModel.getBranchId();
-        String tableCode = obtainPosOrderModel.getTableCode();
+        BigInteger tenantId = obtainPosOrderModel.obtainTenantId();
+        BigInteger branchId = obtainPosOrderModel.obtainBranchId();
+        String tableCode = obtainPosOrderModel.obtainBranchCode();
         BigInteger vipId = obtainPosOrderModel.getVipId();
         PushMessageToAndroidModel pushMessageToAndroidModel = new PushMessageToAndroidModel();
         pushMessageToAndroidModel.setAppKey("");

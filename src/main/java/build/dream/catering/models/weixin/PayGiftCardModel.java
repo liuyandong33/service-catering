@@ -1,6 +1,6 @@
 package build.dream.catering.models.weixin;
 
-import build.dream.common.models.BasicModel;
+import build.dream.common.models.CateringBasicModel;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -8,13 +8,7 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
-public class PayGiftCardModel extends BasicModel {
-    @NotNull
-    private BigInteger tenantId;
-
-    @NotNull
-    private BigInteger userId;
-
+public class PayGiftCardModel extends CateringBasicModel {
     @NotEmpty
     private List<String> mchIdList;
 
@@ -32,22 +26,6 @@ public class PayGiftCardModel extends BasicModel {
 
     @NotNull
     private Integer maxCost;
-
-    public BigInteger getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(BigInteger tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public BigInteger getUserId() {
-        return userId;
-    }
-
-    public void setUserId(BigInteger userId) {
-        this.userId = userId;
-    }
 
     public List<String> getMchIdList() {
         return mchIdList;

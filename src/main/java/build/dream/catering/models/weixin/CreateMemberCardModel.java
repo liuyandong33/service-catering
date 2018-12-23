@@ -1,18 +1,11 @@
 package build.dream.catering.models.weixin;
 
-import build.dream.common.models.BasicModel;
+import build.dream.common.models.CateringBasicModel;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
-public class CreateMemberCardModel extends BasicModel {
-    @NotNull
-    private BigInteger tenantId;
-
-    @NotNull
-    private BigInteger userId;
-
+public class CreateMemberCardModel extends CateringBasicModel {
     @NotNull
     @Length(max = 12)
     private String brandName;
@@ -34,22 +27,6 @@ public class CreateMemberCardModel extends BasicModel {
     @NotNull
     @Length(max = 1024)
     private String description;
-
-    public BigInteger getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(BigInteger tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public BigInteger getUserId() {
-        return userId;
-    }
-
-    public void setUserId(BigInteger userId) {
-        this.userId = userId;
-    }
 
     public String getBrandName() {
         return brandName;

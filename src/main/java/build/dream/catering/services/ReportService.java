@@ -25,8 +25,8 @@ public class ReportService {
      */
     @Transactional(readOnly = true)
     public ApiRest singleSummary(SingleSummaryModel singleSummaryModel) {
-        BigInteger tenantId = singleSummaryModel.getTenantId();
-        BigInteger branchId = singleSummaryModel.getBranchId();
+        BigInteger tenantId = singleSummaryModel.obtainTenantId();
+        BigInteger branchId = singleSummaryModel.obtainBranchId();
         Date startTime = singleSummaryModel.getStartTime();
         Date endTime = singleSummaryModel.getEndTime();
         int page = singleSummaryModel.getPage();
@@ -56,8 +56,8 @@ public class ReportService {
      */
     @Transactional(readOnly = true)
     public ApiRest categorySummary(CategorySummaryModel categorySummaryModel) {
-        BigInteger tenantId = categorySummaryModel.getTenantId();
-        BigInteger branchId = categorySummaryModel.getBranchId();
+        BigInteger tenantId = categorySummaryModel.obtainTenantId();
+        BigInteger branchId = categorySummaryModel.obtainBranchId();
         Date startTime = categorySummaryModel.getStartTime();
         Date endTime = categorySummaryModel.getEndTime();
         int page = categorySummaryModel.getPage();
@@ -87,8 +87,8 @@ public class ReportService {
      */
     @Transactional(readOnly = true)
     public ApiRest paymentSummary(PaymentSummaryModel paymentSummaryModel) {
-        BigInteger tenantId = paymentSummaryModel.getTenantId();
-        BigInteger branchId = paymentSummaryModel.getBranchId();
+        BigInteger tenantId = paymentSummaryModel.obtainTenantId();
+        BigInteger branchId = paymentSummaryModel.obtainBranchId();
         Date startTime = paymentSummaryModel.getStartTime();
         Date endTime = paymentSummaryModel.getEndTime();
         int page = paymentSummaryModel.getPage();

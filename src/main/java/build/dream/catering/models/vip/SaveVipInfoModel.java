@@ -1,7 +1,7 @@
 package build.dream.catering.models.vip;
 
 import build.dream.common.annotations.DateFormat;
-import build.dream.common.models.BasicModel;
+import build.dream.common.models.CateringBasicModel;
 import build.dream.common.utils.ApplicationHandler;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.validator.constraints.Length;
@@ -10,17 +10,7 @@ import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
 import java.util.Date;
 
-public class SaveVipInfoModel extends BasicModel {
-    @NotNull
-    private BigInteger tenantId;
-
-    @NotNull
-    @Length(max = 20)
-    private String tenantCode;
-
-    @NotNull
-    private BigInteger branchId;
-
+public class SaveVipInfoModel extends CateringBasicModel {
     private BigInteger vipId;
 
     @NotNull
@@ -46,33 +36,6 @@ public class SaveVipInfoModel extends BasicModel {
 
     @Length(max = 50)
     private String alipayUserId;
-
-    @NotNull
-    private BigInteger userId;
-
-    public BigInteger getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(BigInteger tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public String getTenantCode() {
-        return tenantCode;
-    }
-
-    public void setTenantCode(String tenantCode) {
-        this.tenantCode = tenantCode;
-    }
-
-    public BigInteger getBranchId() {
-        return branchId;
-    }
-
-    public void setBranchId(BigInteger branchId) {
-        this.branchId = branchId;
-    }
 
     public BigInteger getVipId() {
         return vipId;
@@ -136,14 +99,6 @@ public class SaveVipInfoModel extends BasicModel {
 
     public void setAlipayUserId(String alipayUserId) {
         this.alipayUserId = alipayUserId;
-    }
-
-    public BigInteger getUserId() {
-        return userId;
-    }
-
-    public void setUserId(BigInteger userId) {
-        this.userId = userId;
     }
 
     @Override

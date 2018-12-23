@@ -1,20 +1,13 @@
 package build.dream.catering.models.report;
 
 import build.dream.catering.constants.Constants;
-import build.dream.common.models.BasicModel;
+import build.dream.common.models.CateringBasicModel;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 import java.util.Date;
 
-public class SingleSummaryModel extends BasicModel {
-    @NotNull
-    private BigInteger tenantId;
-
-    @NotNull
-    private BigInteger branchId;
-
+public class SingleSummaryModel extends CateringBasicModel {
     @NotNull
     @JsonFormat(pattern = Constants.DEFAULT_DATE_PATTERN)
     private Date startTime;
@@ -28,22 +21,6 @@ public class SingleSummaryModel extends BasicModel {
 
     @NotNull
     private Integer rows;
-
-    public BigInteger getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(BigInteger tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public BigInteger getBranchId() {
-        return branchId;
-    }
-
-    public void setBranchId(BigInteger branchId) {
-        this.branchId = branchId;
-    }
 
     public Date getStartTime() {
         return startTime;

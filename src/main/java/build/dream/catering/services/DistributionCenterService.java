@@ -10,11 +10,13 @@ import build.dream.common.utils.SerialNumberGenerator;
 import build.dream.common.utils.TupleUtils;
 import build.dream.common.utils.ValidateUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 
 @Service
 public class DistributionCenterService {
+    @Transactional(rollbackFor = Exception.class)
     public ApiRest save(SaveModel saveModel) {
         BigInteger id = saveModel.getId();
         BigInteger tenantId = saveModel.obtainTenantId();

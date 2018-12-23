@@ -26,8 +26,8 @@ import java.util.Map;
 public class WeiXinService {
     @Transactional(rollbackFor = Exception.class)
     public ApiRest createMemberCard(CreateMemberCardModel createMemberCardModel, MultipartFile backgroundPicFile, MultipartFile logoFile) {
-        BigInteger tenantId = createMemberCardModel.getTenantId();
-        BigInteger userId = createMemberCardModel.getUserId();
+        BigInteger tenantId = createMemberCardModel.obtainTenantId();
+        BigInteger userId = createMemberCardModel.obtainUserId();
         WeiXinAuthorizerInfo weiXinAuthorizerInfo = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
         ValidateUtils.notNull(weiXinAuthorizerInfo, "未配置微信公众号，不能创建会员卡！");
 
@@ -260,7 +260,7 @@ public class WeiXinService {
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest addPayGiftCard(PayGiftCardModel payGiftCardModel) {
-        BigInteger tenantId = payGiftCardModel.getTenantId();
+        BigInteger tenantId = payGiftCardModel.obtainTenantId();
         BigInteger weiXinCardId = payGiftCardModel.getWeiXinCardId();
 
         WeiXinAuthorizerInfo weiXinAuthorizerInfo = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
@@ -307,8 +307,8 @@ public class WeiXinService {
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest deleteWeiXinMemberCard(DeleteWeiXinMemberCardModel deleteWeiXinMemberCardModel) {
-        BigInteger tenantId = deleteWeiXinMemberCardModel.getTenantId();
-        BigInteger userId = deleteWeiXinMemberCardModel.getUserId();
+        BigInteger tenantId = deleteWeiXinMemberCardModel.obtainTenantId();
+        BigInteger userId = deleteWeiXinMemberCardModel.obtainUserId();
         BigInteger weiXinCardId = deleteWeiXinMemberCardModel.getWeiXinCardId();
 
         WeiXinAuthorizerInfo weiXinAuthorizerInfo = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
@@ -351,8 +351,8 @@ public class WeiXinService {
      */
     @Transactional(readOnly = true)
     public ApiRest listWeiXinMemberCards(ListWeiXinMemberCardsModel listWeiXinMemberCardsModel) {
-        BigInteger tenantId = listWeiXinMemberCardsModel.getTenantId();
-        BigInteger branchId = listWeiXinMemberCardsModel.getBranchId();
+        BigInteger tenantId = listWeiXinMemberCardsModel.obtainTenantId();
+        BigInteger branchId = listWeiXinMemberCardsModel.obtainBranchId();
 
         SearchModel searchModel = new SearchModel(true);
         List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();

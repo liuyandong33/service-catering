@@ -2,7 +2,7 @@ package build.dream.catering.models.goods;
 
 import build.dream.catering.constants.Constants;
 import build.dream.common.annotations.JsonSchema;
-import build.dream.common.models.BasicModel;
+import build.dream.common.models.CateringBasicModel;
 import build.dream.common.utils.ApplicationHandler;
 import org.apache.commons.lang.ArrayUtils;
 import org.hibernate.validator.constraints.Length;
@@ -12,21 +12,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
-public class SaveGoodsModel extends BasicModel {
+public class SaveGoodsModel extends CateringBasicModel {
     private static final Integer[] TYPES = {Constants.GOODS_TYPE_ORDINARY_GOODS, Constants.GOODS_TYPE_PACKAGE};
-    @NotNull
-    private BigInteger tenantId;
-
-    @NotNull
-    @Length(max = 20)
-    private String tenantCode;
-
-    @NotNull
-    private BigInteger branchId;
-
-    @NotNull
-    private BigInteger userId;
-
     private BigInteger id;
 
     @NotNull
@@ -49,38 +36,6 @@ public class SaveGoodsModel extends BasicModel {
     private List<BigInteger> deleteGoodsSpecificationIds;
 
     private List<BigInteger> deleteGoodsAttributeGroupIds;
-
-    public BigInteger getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(BigInteger tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public String getTenantCode() {
-        return tenantCode;
-    }
-
-    public void setTenantCode(String tenantCode) {
-        this.tenantCode = tenantCode;
-    }
-
-    public BigInteger getBranchId() {
-        return branchId;
-    }
-
-    public void setBranchId(BigInteger branchId) {
-        this.branchId = branchId;
-    }
-
-    public BigInteger getUserId() {
-        return userId;
-    }
-
-    public void setUserId(BigInteger userId) {
-        this.userId = userId;
-    }
 
     public BigInteger getId() {
         return id;

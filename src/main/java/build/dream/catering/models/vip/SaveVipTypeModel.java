@@ -1,6 +1,6 @@
 package build.dream.catering.models.vip;
 
-import build.dream.common.models.BasicModel;
+import build.dream.common.models.CateringBasicModel;
 import build.dream.common.utils.ApplicationHandler;
 import org.hibernate.validator.constraints.Length;
 
@@ -8,17 +8,9 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-public class SaveVipTypeModel extends BasicModel {
+public class SaveVipTypeModel extends CateringBasicModel {
     private static final Integer[] DISCOUNT_POLICIES = {1, 2, 3};
     private BigInteger id;
-    @NotNull
-    private BigInteger tenantId;
-
-    @NotNull
-    private String tenantCode;
-
-    @NotNull
-    private BigInteger branchId;
 
     @NotNull
     @Length(max = 20)
@@ -33,39 +25,12 @@ public class SaveVipTypeModel extends BasicModel {
 
     private Integer bonusCoefficient;
 
-    @NotNull
-    private BigInteger userId;
-
     public BigInteger getId() {
         return id;
     }
 
     public void setId(BigInteger id) {
         this.id = id;
-    }
-
-    public BigInteger getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(BigInteger tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public String getTenantCode() {
-        return tenantCode;
-    }
-
-    public void setTenantCode(String tenantCode) {
-        this.tenantCode = tenantCode;
-    }
-
-    public BigInteger getBranchId() {
-        return branchId;
-    }
-
-    public void setBranchId(BigInteger branchId) {
-        this.branchId = branchId;
     }
 
     public String getName() {
@@ -106,14 +71,6 @@ public class SaveVipTypeModel extends BasicModel {
 
     public void setBonusCoefficient(Integer bonusCoefficient) {
         this.bonusCoefficient = bonusCoefficient;
-    }
-
-    public BigInteger getUserId() {
-        return userId;
-    }
-
-    public void setUserId(BigInteger userId) {
-        this.userId = userId;
     }
 
     @Override

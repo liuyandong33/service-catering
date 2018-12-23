@@ -36,15 +36,15 @@ public class VipService {
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveVipType(SaveVipTypeModel saveVipTypeModel) {
         BigInteger id = saveVipTypeModel.getId();
-        BigInteger tenantId = saveVipTypeModel.getTenantId();
-        String tenantCode = saveVipTypeModel.getTenantCode();
-        BigInteger branchId = saveVipTypeModel.getBranchId();
+        BigInteger tenantId = saveVipTypeModel.obtainTenantId();
+        String tenantCode = saveVipTypeModel.obtainTenantCode();
+        BigInteger branchId = saveVipTypeModel.obtainBranchId();
         String name = saveVipTypeModel.getName();
         Integer discountPolicy = saveVipTypeModel.getDiscountPolicy();
         BigDecimal discountRate = saveVipTypeModel.getDiscountRate();
         Boolean enableBonus = saveVipTypeModel.getEnableBonus();
         Integer bonusCoefficient = saveVipTypeModel.getBonusCoefficient();
-        BigInteger userId = saveVipTypeModel.getUserId();
+        BigInteger userId = saveVipTypeModel.obtainUserId();
 
         VipType vipType = null;
         if (id != null) {
@@ -126,9 +126,9 @@ public class VipService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveVipInfo(SaveVipInfoModel saveVipInfoModel) {
-        BigInteger tenantId = saveVipInfoModel.getTenantId();
-        String tenantCode = saveVipInfoModel.getTenantCode();
-        BigInteger branchId = saveVipInfoModel.getBranchId();
+        BigInteger tenantId = saveVipInfoModel.obtainTenantId();
+        String tenantCode = saveVipInfoModel.obtainTenantCode();
+        BigInteger branchId = saveVipInfoModel.obtainBranchId();
         BigInteger vipId = saveVipInfoModel.getVipId();
         BigInteger vipTypeId = saveVipInfoModel.getVipTypeId();
         String vipName = saveVipInfoModel.getVipName();
@@ -137,7 +137,7 @@ public class VipService {
         String openId = saveVipInfoModel.getOpenId();
         String mainOpenId = saveVipInfoModel.getMainOpenId();
         String alipayUserId = saveVipInfoModel.getAlipayUserId();
-        BigInteger userId = saveVipInfoModel.getUserId();
+        BigInteger userId = saveVipInfoModel.obtainUserId();
 
 
         Vip vip = null;
@@ -204,7 +204,7 @@ public class VipService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest changeVipSharedType(ChangeVipSharedTypeModel changeVipSharedTypeModel) throws IOException {
-        BigInteger tenantId = changeVipSharedTypeModel.getTenantId();
+        BigInteger tenantId = changeVipSharedTypeModel.obtainTenantId();
         int vipSharedType = changeVipSharedTypeModel.getVipSharedType();
 
         Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);

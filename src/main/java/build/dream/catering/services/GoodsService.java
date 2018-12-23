@@ -208,8 +208,8 @@ public class GoodsService extends BasicService {
 
     @Transactional(readOnly = true)
     public ApiRest obtainGoodsInfo(ObtainGoodsInfoModel obtainGoodsInfoModel) {
-        BigInteger tenantId = obtainGoodsInfoModel.getTenantId();
-        BigInteger branchId = obtainGoodsInfoModel.getBranchId();
+        BigInteger tenantId = obtainGoodsInfoModel.obtainTenantId();
+        BigInteger branchId = obtainGoodsInfoModel.obtainBranchId();
         BigInteger goodsId = obtainGoodsInfoModel.getGoodsId();
 
         SearchModel goodsSearchModel = new SearchModel(true);
@@ -294,8 +294,8 @@ public class GoodsService extends BasicService {
 
     @Transactional(readOnly = true)
     public ApiRest obtainAllGoodsInfos(ObtainAllGoodsInfosModel obtainAllGoodsInfosModel) {
-        BigInteger tenantId = obtainAllGoodsInfosModel.getTenantId();
-        BigInteger branchId = obtainAllGoodsInfosModel.getBranchId();
+        BigInteger tenantId = obtainAllGoodsInfosModel.obtainTenantId();
+        BigInteger branchId = obtainAllGoodsInfosModel.obtainBranchId();
         List<Goods> goodsInfos = goodsMapper.findAllGoodsInfos(tenantId, branchId, null);
 
         List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
@@ -454,10 +454,10 @@ public class GoodsService extends BasicService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveGoods(SaveGoodsModel saveGoodsModel) {
-        BigInteger tenantId = saveGoodsModel.getTenantId();
-        String tenantCode = saveGoodsModel.getTenantCode();
-        BigInteger branchId = saveGoodsModel.getBranchId();
-        BigInteger userId = saveGoodsModel.getUserId();
+        BigInteger tenantId = saveGoodsModel.obtainTenantId();
+        String tenantCode = saveGoodsModel.obtainTenantCode();
+        BigInteger branchId = saveGoodsModel.obtainBranchId();
+        BigInteger userId = saveGoodsModel.obtainUserId();
 
         if (saveGoodsModel.getId() != null) {
             BigInteger goodsId = saveGoodsModel.getId();
@@ -777,10 +777,10 @@ public class GoodsService extends BasicService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest savePackage(SavePackageModel savePackageModel) {
-        BigInteger tenantId = savePackageModel.getTenantId();
-        String tenantCode = savePackageModel.getTenantCode();
-        BigInteger branchId = savePackageModel.getBranchId();
-        BigInteger userId = savePackageModel.getUserId();
+        BigInteger tenantId = savePackageModel.obtainTenantId();
+        String tenantCode = savePackageModel.obtainTenantCode();
+        BigInteger branchId = savePackageModel.obtainBranchId();
+        BigInteger userId = savePackageModel.obtainUserId();
         BigInteger id = savePackageModel.getId();
         String name = savePackageModel.getName();
         Integer type = savePackageModel.getType();
@@ -1000,9 +1000,12 @@ public class GoodsService extends BasicService {
 
     @Transactional(readOnly = true)
     public ApiRest listCategories(ListCategoriesModel listCategoriesModel) {
+        BigInteger tenantId = listCategoriesModel.obtainTenantId();
+        BigInteger branchId = listCategoriesModel.obtainBranchId();
+
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition(GoodsCategory.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, listCategoriesModel.getTenantId());
-        searchModel.addSearchCondition(GoodsCategory.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, listCategoriesModel.getBranchId());
+        searchModel.addSearchCondition(GoodsCategory.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(GoodsCategory.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         List<GoodsCategory> goodsCategories = DatabaseHelper.findAll(GoodsCategory.class, searchModel);
 
         List<ZTreeNode> zTreeNodes = new ArrayList<ZTreeNode>();
@@ -1020,9 +1023,9 @@ public class GoodsService extends BasicService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest deleteGoods(DeleteGoodsModel deleteGoodsModel) {
-        BigInteger tenantId = deleteGoodsModel.getTenantId();
-        BigInteger branchId = deleteGoodsModel.getBranchId();
-        BigInteger userId = deleteGoodsModel.getUserId();
+        BigInteger tenantId = deleteGoodsModel.obtainTenantId();
+        BigInteger branchId = deleteGoodsModel.obtainBranchId();
+        BigInteger userId = deleteGoodsModel.obtainUserId();
         BigInteger goodsId = deleteGoodsModel.getGoodsId();
 
         SearchModel searchModel = new SearchModel(true);
@@ -1088,10 +1091,10 @@ public class GoodsService extends BasicService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest importGoods(ImportGoodsModel importGoodsModel) {
-        BigInteger tenantId = importGoodsModel.getTenantId();
-        String tenantCode = importGoodsModel.getTenantCode();
-        BigInteger branchId = importGoodsModel.getBranchId();
-        BigInteger userId = importGoodsModel.getUserId();
+        BigInteger tenantId = importGoodsModel.obtainTenantId();
+        String tenantCode = importGoodsModel.obtainTenantCode();
+        BigInteger branchId = importGoodsModel.obtainBranchId();
+        BigInteger userId = importGoodsModel.obtainUserId();
         String zipGoodsInfos = importGoodsModel.getZipGoodsInfos();
         List<Map<String, Object>> goodsInfos = GsonUtils.fromJson(ZipUtils.unzipText(zipGoodsInfos), List.class);
         int count = goodsInfos.size();
