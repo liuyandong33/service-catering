@@ -55,7 +55,19 @@ public class ElemeService {
         } else if (elemeAccountType == Constants.ELEME_ACCOUNT_TYPE_INDEPENDENT_ACCOUNT) {
             tokenField = Constants.ELEME_TOKEN + "_" + tenantId + "_" + branchId;
         }
-        boolean isAuthorize = CacheUtils.hexists(Constants.KEY_ELEME_TOKENS, tokenField);
+
+        boolean tokenIsExists = CacheUtils.hexists(Constants.KEY_ELEME_TOKENS, tokenField);
+        boolean isAuthorize = false;
+        if (tokenIsExists) {
+            Map<String, String> verifyTokenRequestParameters = new HashMap<String, String>();
+            verifyTokenRequestParameters.put("tenantId", tenantId.toString());
+            verifyTokenRequestParameters.put("branchId", branchId.toString());
+            verifyTokenRequestParameters.put("userId", userId.toString());
+            verifyTokenRequestParameters.put("elemeAccountType", String.valueOf(elemeAccountType));
+            ApiRest verifyTokenResult = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "eleme", "verifyToken", verifyTokenRequestParameters);
+            ValidateUtils.isTrue(verifyTokenResult.isSuccessful(), verifyTokenResult.getError());
+            isAuthorize = Boolean.parseBoolean(String.valueOf(verifyTokenResult.getData()));
+        }
 
         String apiServiceName = CommonUtils.obtainApiServiceName(clientType);
         String data = null;
