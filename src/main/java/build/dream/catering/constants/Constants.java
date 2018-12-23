@@ -12,7 +12,6 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String ELEME_APP_KEY = "eleme.app.key";
     public static final String ELEME_APP_SECRET = "eleme.app.secret";
     public static final String ELEME_SERVICE_URL = "eleme.service.url";
-    public static final String KEY_ELEME_TOKEN = "_eleme_token";
     public static final String ELEME_TENANT_AUTHORIZE_URL_FORMAT = "%s?response_type=%s&client_id=%s&redirect_uri=%s&state=%s&scope=%s";
     public static final String ELEME_ORDER_CALLBACK_SUCCESS_RETURN_VALUE = "{\"message\":\"ok\"}";
 

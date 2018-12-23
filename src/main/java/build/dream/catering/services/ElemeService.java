@@ -49,13 +49,13 @@ public class ElemeService {
         ValidateUtils.notNull(branch, "门店不存在！");
 
         int elemeAccountType = branch.getElemeAccountType();
-
-        Map<String, String> checkIsAuthorizeRequestParameters = new HashMap<String, String>();
-        checkIsAuthorizeRequestParameters.put("tenantId", tenantId.toString());
-        checkIsAuthorizeRequestParameters.put("branchId", branchId.toString());
-        checkIsAuthorizeRequestParameters.put("elemeAccountType", String.valueOf(elemeAccountType));
-
-        boolean isAuthorize = branch.getShopId().compareTo(Constants.BIGINT_DEFAULT_VALUE) != 0;
+        String tokenField = null;
+        if (elemeAccountType == Constants.ELEME_ACCOUNT_TYPE_CHAIN_ACCOUNT) {
+            tokenField = Constants.ELEME_TOKEN + "_" + tenantId;
+        } else if (elemeAccountType == Constants.ELEME_ACCOUNT_TYPE_INDEPENDENT_ACCOUNT) {
+            tokenField = Constants.ELEME_TOKEN + "_" + tenantId + "_" + branchId;
+        }
+        boolean isAuthorize = CacheUtils.hexists(Constants.KEY_ELEME_TOKENS, tokenField);
 
         String apiServiceName = CommonUtils.obtainApiServiceName(clientType);
         String data = null;
