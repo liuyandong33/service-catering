@@ -602,7 +602,7 @@ public class ElemeService {
 
         String updatedRemark = "门店(" + branchId + ")绑定饿了么(" + shopId + ")，清除绑定关系！";
         UpdateModel updateModel = new UpdateModel(true);
-        updateModel.setTableName("branch");
+        updateModel.setTableName(Branch.TABLE_NAME);
         updateModel.addContentValue(Branch.ColumnName.SHOP_ID, BigInteger.ZERO);
         updateModel.addContentValue(Branch.ColumnName.UPDATED_USER_ID, userId);
         updateModel.addContentValue(Branch.ColumnName.UPDATED_REMARK, updatedRemark);
