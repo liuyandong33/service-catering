@@ -4,12 +4,12 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.models.pos.OfflinePayModel;
 import build.dream.catering.models.pos.OfflinePosModel;
 import build.dream.catering.models.pos.OnlinePosModel;
+import build.dream.catering.utils.SequenceUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.OfflinePayRecord;
 import build.dream.common.catering.domains.Pos;
 import build.dream.common.models.aggregatepay.ScanCodePayModel;
 import build.dream.common.utils.*;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.dom4j.DocumentException;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 public class PosService {
@@ -117,7 +116,8 @@ public class PosService {
         String subject = offlinePayModel.getSubject();
         int totalAmount = offlinePayModel.getTotalAmount();
 
-        String outTradeNo = DigestUtils.md5Hex(UUID.randomUUID().toString()).toUpperCase();
+        String sequenceName = SerialNumberGenerator.generatorTodaySequenceName(tenantId, branchId, "offline_pay_out_trade_no");
+        String outTradeNo = SerialNumberGenerator.nextOrderNumber("OP", 8, SequenceUtils.nextValue(sequenceName));
         String notifyUrl = "";
 
         int payCodePrefix = Integer.parseInt(authCode.substring(0, 2));
