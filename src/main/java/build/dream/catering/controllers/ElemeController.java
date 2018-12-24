@@ -107,8 +107,7 @@ public class ElemeController extends BasicController {
      * @return
      * @throws IOException
      */
-    @RequestMapping(value = "/bindingStore")
-    @ResponseBody
+    @RequestMapping(value = "/bindingStore", method = RequestMethod.GET)
     public ModelAndView bindingStore() {
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         String tenantId = requestParameters.get("tenantId");
