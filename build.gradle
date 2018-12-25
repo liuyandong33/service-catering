@@ -5,6 +5,7 @@ buildscript {
     ext {
         springBootVersion = "2.1.0.RELEASE"
         springCloudVersion = "Finchley.SR2"
+        projectName = "catering-service"
     }
     repositories {
         mavenLocal()
@@ -20,6 +21,7 @@ apply plugin: "org.springframework.boot"
 apply plugin: "io.spring.dependency-management"
 apply plugin: "idea"
 apply plugin: "war"
+apply plugin: "maven-publish"
 
 repositories {
     mavenLocal()
@@ -57,4 +59,39 @@ dependencies {
     compile("org.quartz-scheduler:quartz:2.3.0")
     compile("com.networknt:json-schema-validator:0.1.13")
     compile("dom4j:dom4j:1.6.1")
+}
+
+publishing {
+    repositories {
+        if (project.hasProperty("release")) {
+            maven {
+                url "${mavenReleasesRepositoryUrl}"
+                credentials {
+                    username = "${nexusUserName}"
+                    password = "${nexusPassword}"
+                }
+            }
+        } else {
+            maven {
+                url "${mavenSnapshotsRepositoryUrl}"
+                credentials {
+                    username = "${nexusUserName}"
+                    password = "${nexusPassword}"
+                }
+            }
+        }
+    }
+    publications {
+        mavenJava(MavenPublication) {
+            artifacts = ["build/libs/${projectName}-${version}.jar"]
+
+            groupId project.group
+            if (!project.hasProperty("release")) {
+                version version + "-SNAPSHOT"
+            } else {
+                version version
+            }
+            artifactId = projectName
+        }
+    }
 }
