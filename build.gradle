@@ -3,12 +3,12 @@ version "1.0.0"
 
 buildscript {
     ext {
-        springBootVersion = "2.0.0.RELEASE"
-        springCloudVersion = "Finchley.M9"
+        springBootVersion = "2.1.0.RELEASE"
+        springCloudVersion = "Finchley.SR2"
     }
     repositories {
         mavenLocal()
-        maven { url "https://repo.spring.io/libs-milestone" }
+        maven { url "http://node1:8081/repository/maven-public/" }
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
@@ -23,7 +23,7 @@ apply plugin: "war"
 
 repositories {
     mavenLocal()
-    maven { url "https://repo.spring.io/libs-milestone" }
+    maven { url "http://node1:8081/repository/maven-public/" }
 }
 
 dependencyManagement {
@@ -41,13 +41,10 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-data-redis")
     compile("org.springframework.boot:spring-boot-devtools")
     compile("org.springframework.security.oauth:spring-security-oauth2:2.3.2.RELEASE")
-//    compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     compile("org.springframework.cloud:spring-cloud-starter-zookeeper-discovery")
     compile("org.springframework.cloud:spring-cloud-starter-zookeeper-config")
-//    compile("org.springframework.cloud:spring-cloud-starter-hystrix:1.4.5.RELEASE")
     compile("org.springframework.kafka:spring-kafka:2.1.5.RELEASE")
     compile("org.springframework.boot:spring-boot-starter-amqp")
-//    compile("org.springframework.boot:spring-boot-starter-activemq")
     compile("com.alibaba:druid:1.1.9")
     compile("mysql:mysql-connector-java:6.0.6")
     compile("commons-lang:commons-lang:2.6")
