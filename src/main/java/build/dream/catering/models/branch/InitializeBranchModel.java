@@ -5,8 +5,11 @@ import build.dream.common.models.BasicModel;
 import build.dream.common.utils.ApplicationHandler;
 import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
+import java.util.Date;
+import java.util.List;
 
 public class InitializeBranchModel extends BasicModel {
     private static final Integer[] TYPES = {Constants.BRANCH_TYPE_HEADQUARTERS, Constants.BRANCH_TYPE_DIRECT_SALE_STORE, Constants.BRANCH_TYPE_FRANCHISE_STORE};
@@ -78,6 +81,9 @@ public class InitializeBranchModel extends BasicModel {
 
     @NotNull
     private BigInteger userId;
+
+    @NotEmpty
+    private List<BusinessTime> businessTimes;
 
     public static Integer[] getBranchStatus() {
         return BRANCH_STATUS;
@@ -235,10 +241,45 @@ public class InitializeBranchModel extends BasicModel {
         this.userId = userId;
     }
 
+    public List<BusinessTime> getBusinessTimes() {
+        return businessTimes;
+    }
+
+    public void setBusinessTimes(List<BusinessTime> businessTimes) {
+        this.businessTimes = businessTimes;
+    }
+
     @Override
     public void validateAndThrow() {
         super.validateAndThrow();
         ApplicationHandler.inArray(TYPES, type, "type");
         ApplicationHandler.inArray(BRANCH_STATUS, status, "status");
+        for (BusinessTime businessTime : businessTimes) {
+            ApplicationHandler.isTrue(businessTime.validate(), "businessTimes");
+        }
+    }
+
+    public static class BusinessTime extends BasicModel {
+        @NotNull
+        private Date start;
+
+        @NotNull
+        private Date end;
+
+        public Date getStart() {
+            return start;
+        }
+
+        public void setStart(Date start) {
+            this.start = start;
+        }
+
+        public Date getEnd() {
+            return end;
+        }
+
+        public void setEnd(Date end) {
+            this.end = end;
+        }
     }
 }

@@ -19,7 +19,7 @@ public class BranchController {
      */
     @RequestMapping(value = "/initializeBranch", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ApiRestAction(modelClass = InitializeBranchModel.class, serviceClass = BranchService.class, serviceMethodName = "initializeBranch", error = "初始化门店失败")
+    @ApiRestAction(modelClass = InitializeBranchModel.class, serviceClass = BranchService.class, serviceMethodName = "initializeBranch", error = "初始化门店失败", datePattern = "HH:mm")
     public String initializeBranch() {
         return null;
     }

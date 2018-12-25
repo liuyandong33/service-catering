@@ -15,10 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 public class BranchService {
@@ -46,6 +44,7 @@ public class BranchService {
         Integer smartRestaurantStatus = initializeBranchModel.getSmartRestaurantStatus();
         BigInteger currentUserId = initializeBranchModel.getCurrentUserId();
         BigInteger userId = initializeBranchModel.getUserId();
+        List<InitializeBranchModel.BusinessTime> businessTimes = initializeBranchModel.getBusinessTimes();
 
         Branch branch = new Branch();
         branch.setTenantId(tenantId);
@@ -70,6 +69,26 @@ public class BranchService {
         branch.setSmartRestaurantStatus(smartRestaurantStatus);
         branch.setCreatedUserId(userId);
         branch.setUpdatedUserId(userId);
+        List<Map<String, Object>> businessTimeList = new ArrayList<Map<String, Object>>();
+        for (InitializeBranchModel.BusinessTime businessTime : businessTimes) {
+            Map<String, Object> map = new HashMap<String, Object>();
+            Date start = businessTime.getStart();
+            Date end = businessTime.getEnd();
+
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
+            Calendar startCalendar = Calendar.getInstance();
+            startCalendar.setTime(businessTime.getStart());
+
+            Calendar endCalendar = Calendar.getInstance();
+            endCalendar.setTime(businessTime.getEnd());
+
+            map.put("startMinute", startCalendar.get(Calendar.HOUR_OF_DAY) * 60 + startCalendar.get(Calendar.MINUTE));
+            map.put("endMinute", endCalendar.get(Calendar.HOUR_OF_DAY) * 60 + endCalendar.get(Calendar.MINUTE));
+            map.put("startTime", simpleDateFormat.format(start));
+            map.put("endTime", simpleDateFormat.format(end));
+            businessTimeList.add(map);
+        }
+        branch.setBusinessTimes(GsonUtils.toJson(businessTimeList));
         DatabaseHelper.insert(branch);
         branchMapper.insertMergeUserBranch(userId, initializeBranchModel.getTenantId(), tenantCode, branch.getId(), currentUserId, "初始化门店，增加店长所属门店！");
 
