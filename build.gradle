@@ -46,7 +46,7 @@ dependencies {
     compile("org.springframework.security.oauth:spring-security-oauth2:2.3.2.RELEASE")
     compile("org.springframework.cloud:spring-cloud-starter-zookeeper-discovery")
     compile("org.springframework.cloud:spring-cloud-starter-zookeeper-config")
-    compile("org.springframework.kafka:spring-kafka:2.2.2.RELEASE")
+    compile("org.springframework.kafka:spring-kafka:2.1.5.RELEASE")
     compile("org.springframework.boot:spring-boot-starter-amqp")
     compile("com.alibaba:druid:1.1.9")
     compile("mysql:mysql-connector-java:6.0.6")
