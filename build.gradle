@@ -34,6 +34,10 @@ dependencyManagement {
     }
 }
 
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, "seconds"
+}
+
 dependencies {
 //    compile fileTree(include: ["*.jar"], dir: "libs")
     compile("build.dream:lib-common:0.1.0-SNAPSHOT")
