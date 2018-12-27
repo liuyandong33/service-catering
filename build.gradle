@@ -87,7 +87,7 @@ publishing {
         }
     }
     publications {
-        mavenJava(MavenPublication) {
+        maven(MavenPublication) {
             artifacts = ["build/libs/${projectName}-${version}.jar"]
 
             groupId project.group
