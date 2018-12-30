@@ -30,9 +30,6 @@ public class DoPayModel extends BasicModel {
     @Length(max = 128)
     private String subOpenId;
 
-    @NotNull
-    private String userId;
-
     public BigInteger getTenantId() {
         return tenantId;
     }
@@ -89,17 +86,12 @@ public class DoPayModel extends BasicModel {
         this.subOpenId = subOpenId;
     }
 
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
     @Override
     public void validateAndThrow() {
         super.validateAndThrow();
         ApplicationHandler.inArray(Constants.PAID_SCENES, paidScene, "paidScene");
+        if (paidScene == Constants.PAID_SCENE_WEI_XIN_MICROPAY || paidScene == Constants.PAID_SCENE_ALIPAY_FAC_TO_FACE) {
+            ApplicationHandler.notBlank(authCode, "authCode");
+        }
     }
 }
