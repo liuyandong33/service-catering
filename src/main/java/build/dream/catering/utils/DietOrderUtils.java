@@ -104,16 +104,22 @@ public class DietOrderUtils {
             } else if (Constants.PAYMENT_CODE_HYQB.equals(paymentCode)) {
                 VipUtils.addVipBalance(vip.getTenantId(), vip.getBranchId(), vipId, dietOrderPayment.getPaidAmount());
             } else if (Constants.PAYMENT_CODE_WX.equals(paymentCode)) {
-                RefundModel refundModel = new RefundModel();
-                refundModel.setOutTradeNo(dietOrder.getOrderNumber());
-                refundModel.setOutRefundNo(dietOrder.getOrderNumber());
-                refundModel.setTotalFee(dietOrder.getPayableAmount().multiply(Constants.BIG_DECIMAL_ONE_HUNDRED).intValue());
-                refundModel.setRefundFee(dietOrder.getPayableAmount().multiply(Constants.BIG_DECIMAL_ONE_HUNDRED).intValue());
+                String orderNumber = dietOrder.getOrderNumber();
+                int payableAmount = dietOrder.getPayableAmount().intValue();
+
                 JSONObject extraInfoJsonObject = JSONObject.fromObject(extraInfo);
                 JSONObject attachJsonObject = JSONObject.fromObject(extraInfoJsonObject.getString("attach"));
 
-                refundModel.setTradeType(WeiXinPayUtils.obtainTradeType(attachJsonObject.getInt("paidScene")));
-                WeiXinPayUtils.refund(tenantId.toString(), branchId.toString(), refundModel);
+                RefundModel refundModel = RefundModel.builder()
+                        .tenantId(tenantId.toString())
+                        .branchId(branchId.toString())
+                        .outTradeNo(orderNumber)
+                        .outRefundNo(orderNumber)
+                        .totalFee(payableAmount)
+                        .refundFee(payableAmount)
+                        .tradeType(WeiXinPayUtils.obtainTradeType(attachJsonObject.getInt("paidScene")))
+                        .build();
+                WeiXinPayUtils.refund(refundModel);
             } else if (Constants.PAYMENT_CODE_ALIPAY.equals(paymentCode)) {
                 AlipayTradeRefundModel alipayTradeRefundModel = new AlipayTradeRefundModel();
                 AlipayUtils.alipayTradeRefund(tenantId.toString(), branchId.toString(), null, alipayTradeRefundModel);
