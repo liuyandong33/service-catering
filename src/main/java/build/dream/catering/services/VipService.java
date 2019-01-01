@@ -41,13 +41,21 @@ public class VipService {
         Boolean enableBonus = saveVipTypeModel.getEnableBonus();
         Integer bonusCoefficient = saveVipTypeModel.getBonusCoefficient();
         BigInteger userId = saveVipTypeModel.obtainUserId();
+        Integer vipSharedType = saveVipTypeModel.obtainVipSharedType();
 
         VipType vipType = null;
         if (id != null) {
             SearchModel searchModel = new SearchModel(true);
             searchModel.addSearchCondition(VipType.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-            searchModel.addSearchCondition(VipType.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
             searchModel.addSearchCondition(VipType.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, id);
+            if (vipSharedType == 1) {
+
+            } else if (vipSharedType == 2) {
+                searchModel.addSearchCondition(VipType.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+            } else if (vipSharedType == 3) {
+                Branch branch = DatabaseHelper.find(Branch.class, TupleUtils.buildTuple3(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId), TupleUtils.buildTuple3(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId));
+                searchModel.addSearchCondition(VipType.ColumnName.VIP_GROUP_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branch.getVipGroupId());
+            }
             vipType = DatabaseHelper.find(VipType.class, searchModel);
             ValidateUtils.notNull(vipType, "会员类型不存在！");
 
@@ -62,7 +70,17 @@ public class VipService {
             vipType = new VipType();
             vipType.setTenantId(tenantId);
             vipType.setTenantCode(tenantCode);
-            vipType.setBranchId(branchId);
+            if (vipSharedType == 1) {
+                vipType.setVipGroupId(Constants.BIGINT_DEFAULT_VALUE);
+                vipType.setBranchId(Constants.BIGINT_DEFAULT_VALUE);
+            } else if (vipSharedType == 2) {
+                vipType.setBranchId(branchId);
+                vipType.setVipGroupId(Constants.BIGINT_DEFAULT_VALUE);
+            } else if (vipSharedType == 3) {
+                Branch branch = DatabaseHelper.find(Branch.class, TupleUtils.buildTuple3(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId), TupleUtils.buildTuple3(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId));
+                vipType.setBranchId(Constants.BIGINT_DEFAULT_VALUE);
+                vipType.setVipGroupId(branch.getVipGroupId());
+            }
             vipType.setName(name);
             vipType.setDiscountPolicy(discountPolicy);
             vipType.setDiscountRate(discountRate != null ? discountRate : Constants.DECIMAL_DEFAULT_VALUE);
