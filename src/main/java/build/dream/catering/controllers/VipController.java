@@ -71,4 +71,16 @@ public class VipController {
     public String listVipTypes() {
         return null;
     }
+
+    /**
+     * 删除会员类型
+     *
+     * @return
+     */
+    @RequestMapping(value = "/deleteVipType", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = DeleteVipTypeModel.class, serviceClass = VipService.class, serviceMethodName = "deleteVipType", error = "删除会员类型失败")
+    public String deleteVipType() {
+        return null;
+    }
 }

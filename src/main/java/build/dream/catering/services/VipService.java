@@ -398,4 +398,48 @@ public class VipService {
         List<VipType> vipTypes = DatabaseHelper.findAll(VipType.class, searchModel);
         return ApiRest.builder().data(vipTypes).message("查询会员类型成功！").successful(true).build();
     }
+
+    /**
+     * 删除会员类型
+     *
+     * @param deleteVipTypeModel
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest deleteVipType(DeleteVipTypeModel deleteVipTypeModel) {
+        BigInteger tenantId = deleteVipTypeModel.obtainTenantId();
+        BigInteger branchId = deleteVipTypeModel.obtainBranchId();
+        BigInteger vipTypeId = deleteVipTypeModel.getVipTypeId();
+        BigInteger userId = deleteVipTypeModel.obtainUserId();
+        Integer vipSharedType = deleteVipTypeModel.obtainVipSharedType();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(VipType.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        if (vipSharedType == 1) {
+
+        } else if (vipSharedType == 2) {
+            searchModel.addSearchCondition(VipType.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        } else if (vipSharedType == 3) {
+            Branch branch = DatabaseHelper.find(Branch.class, TupleUtils.buildTuple3(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId), TupleUtils.buildTuple3(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId));
+            searchModel.addSearchCondition(VipType.ColumnName.VIP_GROUP_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branch.getVipGroupId());
+        }
+        searchModel.addSearchCondition(VipType.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, vipTypeId);
+        VipType vipType = DatabaseHelper.find(VipType.class, searchModel);
+        ValidateUtils.notNull(vipType, "会员类型不存在！");
+
+        PagedSearchModel pagedSearchModel = new PagedSearchModel(true);
+        pagedSearchModel.addSearchCondition(Vip.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        pagedSearchModel.addSearchCondition(Vip.ColumnName.VIP_TYPE_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, vipTypeId);
+        pagedSearchModel.setPage(1);
+        pagedSearchModel.setRows(1);
+        List<Vip> vips = VipUtils.findAllPaged(pagedSearchModel);
+        ValidateUtils.isTrue(CollectionUtils.isEmpty(vips), "会员类型【" + vipType.getName() + "】下存在会员，不能删除！");
+
+        vipType.setUpdatedUserId(userId);
+        vipType.setDeletedTime(new Date());
+        vipType.setDeleted(true);
+        DatabaseHelper.update(vipType);
+
+        return ApiRest.builder().data(vipType).message("删除会员类型成功！").successful(true).build();
+    }
 }
