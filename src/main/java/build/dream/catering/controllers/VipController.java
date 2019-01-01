@@ -6,7 +6,6 @@ import build.dream.catering.models.vip.SaveVipInfoModel;
 import build.dream.catering.models.vip.SaveVipTypeModel;
 import build.dream.catering.services.VipService;
 import build.dream.common.annotations.ApiRestAction;
-import build.dream.common.controllers.BasicController;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(value = "/vip")
-public class VipController extends BasicController {
+public class VipController {
     /**
      * 保存会员类型
      *
