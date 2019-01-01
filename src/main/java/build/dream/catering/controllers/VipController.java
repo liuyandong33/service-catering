@@ -1,9 +1,6 @@
 package build.dream.catering.controllers;
 
-import build.dream.catering.models.vip.ChangeVipSharedTypeModel;
-import build.dream.catering.models.vip.ObtainVipInfoModel;
-import build.dream.catering.models.vip.SaveVipInfoModel;
-import build.dream.catering.models.vip.SaveVipTypeModel;
+import build.dream.catering.models.vip.*;
 import build.dream.catering.services.VipService;
 import build.dream.common.annotations.ApiRestAction;
 import org.springframework.http.MediaType;
@@ -60,6 +57,18 @@ public class VipController {
     @ResponseBody
     @ApiRestAction(modelClass = ChangeVipSharedTypeModel.class, serviceClass = VipService.class, serviceMethodName = "changeVipSharedType", error = "获取会员信息失败")
     public String changeVipSharedType() {
+        return null;
+    }
+
+    /**
+     * 获取会员类型
+     *
+     * @return
+     */
+    @RequestMapping(value = "/listVipTypes", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = ListVipTypesModel.class, serviceClass = VipService.class, serviceMethodName = "listVipTypes", error = "获取会员类型失败")
+    public String listVipTypes() {
         return null;
     }
 }

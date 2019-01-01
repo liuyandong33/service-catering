@@ -1,10 +1,7 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.models.vip.ChangeVipSharedTypeModel;
-import build.dream.catering.models.vip.ObtainVipInfoModel;
-import build.dream.catering.models.vip.SaveVipInfoModel;
-import build.dream.catering.models.vip.SaveVipTypeModel;
+import build.dream.catering.models.vip.*;
 import build.dream.catering.utils.SequenceUtils;
 import build.dream.catering.utils.VipUtils;
 import build.dream.common.api.ApiRest;
@@ -356,5 +353,31 @@ public class VipService {
         }
         TenantUtils.updateTenantInfo(tenantId, TupleUtils.buildTuple2("vipSharedType", String.valueOf(vipSharedType)));
         return ApiRest.builder().message("修改会员共享类型修改成功！").successful(true).build();
+    }
+
+    /**
+     * 查询会员类型
+     *
+     * @param listVipTypesModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest listVipTypes(ListVipTypesModel listVipTypesModel) {
+        BigInteger tenantId = listVipTypesModel.obtainTenantId();
+        BigInteger branchId = listVipTypesModel.obtainBranchId();
+        Integer vipSharedType = listVipTypesModel.obtainVipSharedType();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(VipType.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        if (vipSharedType == 1) {
+
+        } else if (vipSharedType == 2) {
+            searchModel.addSearchCondition(VipType.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        } else if (vipSharedType == 3) {
+            Branch branch = DatabaseHelper.find(Branch.class, TupleUtils.buildTuple3(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId), TupleUtils.buildTuple3(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId));
+            searchModel.addSearchCondition(VipType.ColumnName.VIP_GROUP_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branch.getVipGroupId());
+        }
+        List<VipType> vipTypes = DatabaseHelper.findAll(VipType.class, searchModel);
+        return ApiRest.builder().data(vipTypes).message("查询会员类型成功！").successful(true).build();
     }
 }
