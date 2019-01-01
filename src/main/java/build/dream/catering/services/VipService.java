@@ -19,7 +19,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
@@ -49,9 +48,9 @@ public class VipService {
         VipType vipType = null;
         if (id != null) {
             SearchModel searchModel = new SearchModel(true);
-            searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-            searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-            searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, id);
+            searchModel.addSearchCondition(VipType.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+            searchModel.addSearchCondition(VipType.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+            searchModel.addSearchCondition(VipType.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, id);
             vipType = DatabaseHelper.find(VipType.class, searchModel);
             ValidateUtils.notNull(vipType, "会员类型不存在！");
 
@@ -97,22 +96,22 @@ public class VipService {
         String alipayUserId = obtainVipInfoModel.getAlipayUserId();
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(Vip.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(Vip.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         if (vipId != null) {
-            searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, vipId);
+            searchModel.addSearchCondition(Vip.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, vipId);
         }
         if (StringUtils.isNotBlank(vipCode)) {
-            searchModel.addSearchCondition("vip_code", Constants.SQL_OPERATION_SYMBOL_EQUAL, vipCode);
+            searchModel.addSearchCondition(Vip.ColumnName.VIP_CODE, Constants.SQL_OPERATION_SYMBOL_EQUAL, vipCode);
         }
         if (StringUtils.isNotBlank(phoneNumber)) {
-            searchModel.addSearchCondition("phone_number", Constants.SQL_OPERATION_SYMBOL_EQUAL, phoneNumber);
+            searchModel.addSearchCondition(Vip.ColumnName.PHONE_NUMBER, Constants.SQL_OPERATION_SYMBOL_EQUAL, phoneNumber);
         }
         if (StringUtils.isNotBlank(openId)) {
-            searchModel.addSearchCondition("open_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, openId);
+            searchModel.addSearchCondition(Vip.ColumnName.OPEN_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, openId);
         }
         if (StringUtils.isNotBlank(alipayUserId)) {
-            searchModel.addSearchCondition("alipay_user_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, alipayUserId);
+            searchModel.addSearchCondition(Vip.ColumnName.ALIPAY_USER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, alipayUserId);
         }
         Vip vip = VipUtils.find(searchModel);
         return ApiRest.builder().data(vip).message("获取会员信息成功！").successful(true).build();
@@ -143,9 +142,9 @@ public class VipService {
         Vip vip = null;
         if (saveVipInfoModel.getVipId() != null) {
             SearchModel searchModel = new SearchModel(true);
-            searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-            searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-            searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, vipId);
+            searchModel.addSearchCondition(Vip.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+            searchModel.addSearchCondition(Vip.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+            searchModel.addSearchCondition(Vip.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, vipId);
             vip = VipUtils.find(searchModel);
             ValidateUtils.notNull(vip, "会员不存在！");
 
@@ -161,9 +160,9 @@ public class VipService {
             VipUtils.update(vip);
         } else {
             SearchModel searchModel = new SearchModel(true);
-            searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-            searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-            searchModel.addSearchCondition("phone_number", Constants.SQL_OPERATION_SYMBOL_EQUAL, phoneNumber);
+            searchModel.addSearchCondition(Vip.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+            searchModel.addSearchCondition(Vip.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+            searchModel.addSearchCondition(Vip.ColumnName.PHONE_NUMBER, Constants.SQL_OPERATION_SYMBOL_EQUAL, phoneNumber);
             long count = VipUtils.count(searchModel);
             ValidateUtils.isTrue(count == 0, "手机号已存在！");
 
@@ -203,7 +202,7 @@ public class VipService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest changeVipSharedType(ChangeVipSharedTypeModel changeVipSharedTypeModel) throws IOException {
+    public ApiRest changeVipSharedType(ChangeVipSharedTypeModel changeVipSharedTypeModel) {
         BigInteger tenantId = changeVipSharedTypeModel.obtainTenantId();
         int vipSharedType = changeVipSharedTypeModel.getVipSharedType();
 
@@ -214,15 +213,15 @@ public class VipService {
         }
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("type", Constants.SQL_OPERATION_SYMBOL_EQUAL, Constants.BRANCH_TYPE_HEADQUARTERS);
+        searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(Branch.ColumnName.TYPE, Constants.SQL_OPERATION_SYMBOL_EQUAL, Constants.BRANCH_TYPE_HEADQUARTERS);
         Branch headquartersBranch = DatabaseHelper.find(Branch.class, searchModel);
 
         BigInteger headquartersBranchId = headquartersBranch.getId();
         String tenantCode = tenant.getCode();
 
         if (vipSharedType == 1) {
-            List<VipAccount> vipAccounts = DatabaseHelper.findAll(VipAccount.class, TupleUtils.buildTuple3("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
+            List<VipAccount> vipAccounts = DatabaseHelper.findAll(VipAccount.class, TupleUtils.buildTuple3(VipAccount.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
             Map<BigInteger, List<VipAccount>> vipAccountsMap = new HashMap<BigInteger, List<VipAccount>>();
             Map<BigInteger, VipAccount> vipAccountMap = new HashMap<BigInteger, VipAccount>();
             for (VipAccount vipAccount : vipAccounts) {
@@ -278,13 +277,13 @@ public class VipService {
             }
         } else if (vipSharedType == 2) {
             if (oldVipSharedType == 1) {
-                List<VipAccount> vipAccounts = DatabaseHelper.findAll(VipAccount.class, TupleUtils.buildTuple3("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
+                List<VipAccount> vipAccounts = DatabaseHelper.findAll(VipAccount.class, TupleUtils.buildTuple3(VipAccount.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
                 for (VipAccount vipAccount : vipAccounts) {
                     vipAccount.setBranchId(headquartersBranchId);
                     DatabaseHelper.update(vipAccount);
                 }
             } else if (oldVipSharedType == 3) {
-                List<VipAccount> vipAccounts = DatabaseHelper.findAll(VipAccount.class, TupleUtils.buildTuple3("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
+                List<VipAccount> vipAccounts = DatabaseHelper.findAll(VipAccount.class, TupleUtils.buildTuple3(VipAccount.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
                 Map<BigInteger, List<VipAccount>> vipAccountsMap = new HashMap<BigInteger, List<VipAccount>>();
                 for (VipAccount vipAccount : vipAccounts) {
                     BigInteger vipId = vipAccount.getVipId();
@@ -329,13 +328,13 @@ public class VipService {
             BigInteger vipGroupId = headquartersBranch.getVipGroupId();
             ValidateUtils.isTrue(BigInteger.ONE.compareTo(vipGroupId) != 0, "请设置总部所在的会员分组！");
             if (oldVipSharedType == 1) {
-                List<VipAccount> vipAccounts = DatabaseHelper.findAll(VipAccount.class, TupleUtils.buildTuple3("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
+                List<VipAccount> vipAccounts = DatabaseHelper.findAll(VipAccount.class, TupleUtils.buildTuple3(VipAccount.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
                 for (VipAccount vipAccount : vipAccounts) {
                     vipAccount.setVipGroupId(vipGroupId);
                     DatabaseHelper.update(vipAccount);
                 }
             } else if (oldVipSharedType == 2) {
-                List<VipAccount> vipAccounts = DatabaseHelper.findAll(VipAccount.class, TupleUtils.buildTuple3("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
+                List<VipAccount> vipAccounts = DatabaseHelper.findAll(VipAccount.class, TupleUtils.buildTuple3(VipAccount.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
                 Map<BigInteger, List<VipAccount>> vipAccountsMap = new HashMap<BigInteger, List<VipAccount>>();
                 Map<BigInteger, VipAccount> vipAccountMap = new HashMap<BigInteger, VipAccount>();
                 for (VipAccount vipAccount : vipAccounts) {
