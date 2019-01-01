@@ -83,4 +83,23 @@ public class VipController {
     public String deleteVipType() {
         return null;
     }
+
+    /**
+     * 删除会员分组
+     *
+     * @return
+     */
+    @RequestMapping(value = "/deleteVipGroup", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = DeleteVipGroupModel.class, serviceClass = VipService.class, serviceMethodName = "deleteVipGroup", error = "删除会员类型失败")
+    public String deleteVipGroup() {
+        return null;
+    }
+
+    @RequestMapping(value = "/listVipGroups", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = ListVipGroupsModel.class, serviceClass = VipService.class, serviceMethodName = "listVipGroups", error = "获取会员分组失败")
+    public String listVipGroups() {
+        return null;
+    }
 }

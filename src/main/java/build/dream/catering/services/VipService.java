@@ -5,10 +5,7 @@ import build.dream.catering.models.vip.*;
 import build.dream.catering.utils.SequenceUtils;
 import build.dream.catering.utils.VipUtils;
 import build.dream.common.api.ApiRest;
-import build.dream.common.catering.domains.Branch;
-import build.dream.common.catering.domains.Vip;
-import build.dream.common.catering.domains.VipAccount;
-import build.dream.common.catering.domains.VipType;
+import build.dream.common.catering.domains.*;
 import build.dream.common.saas.domains.Tenant;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
@@ -436,10 +433,63 @@ public class VipService {
         ValidateUtils.isTrue(CollectionUtils.isEmpty(vips), "会员类型【" + vipType.getName() + "】下存在会员，不能删除！");
 
         vipType.setUpdatedUserId(userId);
+        vipType.setUpdatedRemark("删除会员类型！");
         vipType.setDeletedTime(new Date());
         vipType.setDeleted(true);
         DatabaseHelper.update(vipType);
 
-        return ApiRest.builder().data(vipType).message("删除会员类型成功！").successful(true).build();
+        return ApiRest.builder().message("删除会员类型成功！").successful(true).build();
+    }
+
+    /**
+     * 删除会员分组
+     *
+     * @param deleteVipGroupModel
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest deleteVipGroup(DeleteVipGroupModel deleteVipGroupModel) {
+        BigInteger tenantId = deleteVipGroupModel.obtainTenantId();
+        BigInteger vipGroupId = deleteVipGroupModel.getVipGroupId();
+        BigInteger userId = deleteVipGroupModel.obtainUserId();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(VipGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(VipGroup.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, vipGroupId);
+        VipGroup vipGroup = DatabaseHelper.find(VipGroup.class, searchModel);
+        ValidateUtils.notNull(vipGroup, "会员分组不存在！");
+
+        PagedSearchModel pagedSearchModel = new PagedSearchModel(true);
+        pagedSearchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        pagedSearchModel.addSearchCondition(Branch.ColumnName.VIP_GROUP_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, vipGroupId);
+        pagedSearchModel.setPage(1);
+        pagedSearchModel.setRows(1);
+        List<Branch> branches = DatabaseHelper.findAllPaged(Branch.class, searchModel);
+        ValidateUtils.isTrue(CollectionUtils.isEmpty(branches), "会员分组【" + vipGroup.getName() + "】已存在门店，不能删除！");
+
+        vipGroup.setUpdatedUserId(userId);
+        vipGroup.setUpdatedRemark("删除会员分组！");
+        vipGroup.setDeletedTime(new Date());
+        vipGroup.setDeleted(true);
+        DatabaseHelper.update(vipGroup);
+
+        return ApiRest.builder().message("删除会员分组成功！").successful(true).build();
+    }
+
+    /**
+     * 获取会员分组
+     *
+     * @param listVipGroupsModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest listVipGroups(ListVipGroupsModel listVipGroupsModel) {
+        BigInteger tenantId = listVipGroupsModel.obtainTenantId();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(VipGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        List<VipGroup> vipGroups = DatabaseHelper.findAll(VipGroup.class, searchModel);
+
+        return ApiRest.builder().data(vipGroups).message("获取会员分组成功！").successful(true).build();
     }
 }
