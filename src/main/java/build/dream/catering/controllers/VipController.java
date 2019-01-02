@@ -96,10 +96,27 @@ public class VipController {
         return null;
     }
 
+    /**
+     * 获取会员分组
+     *
+     * @return
+     */
     @RequestMapping(value = "/listVipGroups", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ListVipGroupsModel.class, serviceClass = VipService.class, serviceMethodName = "listVipGroups", error = "获取会员分组失败")
     public String listVipGroups() {
+        return null;
+    }
+
+    /**
+     * 保存会员分组
+     *
+     * @return
+     */
+    @RequestMapping(value = "/saveVipGroup", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = SaveVipGroupModel.class, serviceClass = VipService.class, serviceMethodName = "saveVipGroup", error = "保存会员分组失败")
+    public String saveVipGroup() {
         return null;
     }
 }

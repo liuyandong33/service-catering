@@ -492,4 +492,44 @@ public class VipService {
 
         return ApiRest.builder().data(vipGroups).message("获取会员分组成功！").successful(true).build();
     }
+
+    /**
+     * 保存会员分组
+     *
+     * @param saveVipGroupModel
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest saveVipGroup(SaveVipGroupModel saveVipGroupModel) {
+        BigInteger tenantId = saveVipGroupModel.obtainTenantId();
+        String tenantCode = saveVipGroupModel.obtainTenantCode();
+        BigInteger userId = saveVipGroupModel.obtainUserId();
+        BigInteger id = saveVipGroupModel.getId();
+        String name = saveVipGroupModel.getName();
+
+        VipGroup vipGroup = null;
+        if (id != null) {
+            SearchModel searchModel = new SearchModel(true);
+            searchModel.addSearchCondition(VipGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+            searchModel.addSearchCondition(VipGroup.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, id);
+            vipGroup = DatabaseHelper.find(VipGroup.class, searchModel);
+            ValidateUtils.notNull(vipGroup, "会员分组不存在！");
+
+            vipGroup.setName(name);
+            vipGroup.setUpdatedUserId(userId);
+            vipGroup.setUpdatedRemark("修改会员分组！");
+            DatabaseHelper.update(vipGroup);
+        } else {
+            vipGroup = VipGroup.builder()
+                    .tenantId(tenantId)
+                    .tenantCode(tenantCode)
+                    .name(name)
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
+                    .updatedRemark("新增会员分组！")
+                    .build();
+            DatabaseHelper.insert(vipGroup);
+        }
+        return ApiRest.builder().data(vipGroup).message("保存会员分组成功！").successful(true).build();
+    }
 }
