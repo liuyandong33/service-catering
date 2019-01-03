@@ -440,7 +440,7 @@ public class WeiXinService {
         SaveWeiXinMenuModel.Button third = saveWeiXinMenuModel.getThird();
 
         saveWeiXinMenu(tenantId, tenantCode, userId, first);
-        saveWeiXinMenu(tenantId, tenantCode, userId,second);
+        saveWeiXinMenu(tenantId, tenantCode, userId, second);
         saveWeiXinMenu(tenantId, tenantCode, userId, third);
         return ApiRest.builder().message("保存微信菜单成功！").successful(true).build();
     }
@@ -451,20 +451,7 @@ public class WeiXinService {
         }
         BigInteger id = button.getId();
         if (id == null) {
-            WeiXinMenu weiXinMenu = WeiXinMenu.builder()
-                    .tenantId(tenantId)
-                    .tenantCode(tenantCode)
-                    .parentId(BigInteger.ZERO)
-                    .name(button.getName())
-                    .type(button.getType())
-                    .messageContent(button.getMessageContent())
-                    .mediaId(button.getMediaId())
-                    .url(button.getUrl())
-                    .pagePath(button.getPagePath())
-                    .miniProgramAppId(button.getMiniProgramAppId())
-                    .createdUserId(userId)
-                    .updatedUserId(userId)
-                    .build();
+            WeiXinMenu weiXinMenu = buildWeiXinMenu(tenantId, tenantCode, userId, button);
             DatabaseHelper.insert(weiXinMenu);
 
             List<SaveWeiXinMenuModel.SubButton> subButtons = button.getSubButtons();
@@ -472,37 +459,14 @@ public class WeiXinService {
                 BigInteger parentId = weiXinMenu.getId();
                 List<WeiXinMenu> subWeiXinMenus = new ArrayList<WeiXinMenu>();
                 for (SaveWeiXinMenuModel.SubButton subButton : subButtons) {
-                    WeiXinMenu subWeiXinMenu = WeiXinMenu.builder()
-                            .tenantId(tenantId)
-                            .tenantCode(tenantCode)
-                            .parentId(parentId)
-                            .name(subButton.getName())
-                            .type(subButton.getType())
-                            .messageContent(subButton.getMessageContent())
-                            .mediaId(subButton.getMediaId())
-                            .url(subButton.getUrl())
-                            .pagePath(subButton.getPagePath())
-                            .miniProgramAppId(subButton.getMiniProgramAppId())
-                            .createdUserId(userId)
-                            .updatedUserId(userId)
-                            .build();
-                    subWeiXinMenus.add(subWeiXinMenu);
+                    subWeiXinMenus.add(buildSubWeiXinMenu(tenantId, tenantCode, userId, parentId, subButton));
                 }
                 DatabaseHelper.insertAll(subWeiXinMenus);
             }
         } else {
             WeiXinMenu weiXinMenu = DatabaseHelper.find(WeiXinMenu.class, TupleUtils.buildTuple3(WeiXinMenu.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId), TupleUtils.buildTuple3(WeiXinMenu.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, id));
             ValidateUtils.notNull(weiXinMenu, "微信菜单不存在！");
-
-            weiXinMenu.setName(button.getName());
-            weiXinMenu.setType(button.getType());
-            weiXinMenu.setMessageContent(button.getMessageContent());
-            weiXinMenu.setMediaId(button.getMediaId());
-            weiXinMenu.setUrl(button.getUrl());
-            weiXinMenu.setPagePath(button.getPagePath());
-            weiXinMenu.setMiniProgramAppId(button.getMiniProgramAppId());
-            weiXinMenu.setUpdatedUserId(userId);
-
+            weiXinMenu = buildWeiXinMenu(weiXinMenu, button, userId);
             DatabaseHelper.update(weiXinMenu);
 
             List<SaveWeiXinMenuModel.SubButton> subButtons = button.getSubButtons();
@@ -527,36 +491,108 @@ public class WeiXinService {
                         WeiXinMenu subWeiXinMenu = weiXinMenuMap.get(weiXinMenuId);
                         ValidateUtils.notNull(subWeiXinMenu, "微信菜单不存在！");
 
-                        subWeiXinMenu.setName(button.getName());
-                        subWeiXinMenu.setType(button.getType());
-                        subWeiXinMenu.setMessageContent(button.getMessageContent());
-                        subWeiXinMenu.setMediaId(button.getMediaId());
-                        subWeiXinMenu.setUrl(button.getUrl());
-                        subWeiXinMenu.setPagePath(button.getPagePath());
-                        subWeiXinMenu.setMiniProgramAppId(button.getMiniProgramAppId());
-                        subWeiXinMenu.setUpdatedUserId(userId);
+                        weiXinMenu = buildWeiXinMenu(weiXinMenu, subButton, userId);
 
                         DatabaseHelper.update(subWeiXinMenu);
                     } else {
-                        WeiXinMenu subWeiXinMenu = WeiXinMenu.builder()
-                                .tenantId(tenantId)
-                                .tenantCode(tenantCode)
-                                .parentId(parentId)
-                                .name(subButton.getName())
-                                .type(subButton.getType())
-                                .messageContent(subButton.getMessageContent())
-                                .mediaId(subButton.getMediaId())
-                                .url(subButton.getUrl())
-                                .pagePath(subButton.getPagePath())
-                                .miniProgramAppId(subButton.getMiniProgramAppId())
-                                .createdUserId(userId)
-                                .updatedUserId(userId)
-                                .build();
+                        WeiXinMenu subWeiXinMenu = buildSubWeiXinMenu(tenantId, tenantCode, userId, parentId, subButton);
                         DatabaseHelper.insert(subWeiXinMenu);
                     }
                 }
             }
         }
+    }
+
+    private WeiXinMenu buildWeiXinMenu(WeiXinMenu weiXinMenu, SaveWeiXinMenuModel.Button button, BigInteger userId) {
+        String name = button.getName();
+        String type = button.getType();
+        String messageContent = button.getMessageContent();
+        String mediaId = button.getMediaId();
+        String url = button.getUrl();
+        String pagePath = button.getPagePath();
+        String miniProgramAppId = button.getMiniProgramAppId();
+
+        weiXinMenu.setName(name);
+        weiXinMenu.setType(type);
+        weiXinMenu.setMessageContent(StringUtils.isNotBlank(messageContent) ? messageContent : Constants.VARCHAR_DEFAULT_VALUE);
+        weiXinMenu.setMediaId(StringUtils.isNotBlank(mediaId) ? mediaId : Constants.VARCHAR_DEFAULT_VALUE);
+        weiXinMenu.setUrl(StringUtils.isNotBlank(url) ? url : Constants.VARCHAR_DEFAULT_VALUE);
+        weiXinMenu.setPagePath(StringUtils.isNotBlank(pagePath) ? pagePath : Constants.VARCHAR_DEFAULT_VALUE);
+        weiXinMenu.setMiniProgramAppId(StringUtils.isNotBlank(miniProgramAppId) ? miniProgramAppId : Constants.VARCHAR_DEFAULT_VALUE);
+        weiXinMenu.setUpdatedUserId(userId);
+        return weiXinMenu;
+    }
+
+    private WeiXinMenu buildWeiXinMenu(WeiXinMenu weiXinMenu, SaveWeiXinMenuModel.SubButton subButton, BigInteger userId) {
+        String name = subButton.getName();
+        String type = subButton.getType();
+        String messageContent = subButton.getMessageContent();
+        String mediaId = subButton.getMediaId();
+        String url = subButton.getUrl();
+        String pagePath = subButton.getPagePath();
+        String miniProgramAppId = subButton.getMiniProgramAppId();
+
+        weiXinMenu.setName(name);
+        weiXinMenu.setType(type);
+        weiXinMenu.setMessageContent(StringUtils.isNotBlank(messageContent) ? messageContent : Constants.VARCHAR_DEFAULT_VALUE);
+        weiXinMenu.setMediaId(StringUtils.isNotBlank(mediaId) ? mediaId : Constants.VARCHAR_DEFAULT_VALUE);
+        weiXinMenu.setUrl(StringUtils.isNotBlank(url) ? url : Constants.VARCHAR_DEFAULT_VALUE);
+        weiXinMenu.setPagePath(StringUtils.isNotBlank(pagePath) ? pagePath : Constants.VARCHAR_DEFAULT_VALUE);
+        weiXinMenu.setMiniProgramAppId(StringUtils.isNotBlank(miniProgramAppId) ? miniProgramAppId : Constants.VARCHAR_DEFAULT_VALUE);
+        weiXinMenu.setUpdatedUserId(userId);
+        return weiXinMenu;
+    }
+
+    private WeiXinMenu buildWeiXinMenu(BigInteger tenantId, String tenantCode, BigInteger userId, SaveWeiXinMenuModel.Button button) {
+        String name = button.getName();
+        String type = button.getType();
+        String messageContent = button.getMessageContent();
+        String mediaId = button.getMediaId();
+        String url = button.getUrl();
+        String pagePath = button.getPagePath();
+        String miniProgramAppId = button.getMiniProgramAppId();
+
+        WeiXinMenu weiXinMenu = WeiXinMenu.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .parentId(BigInteger.ZERO)
+                .name(name)
+                .type(type)
+                .messageContent(StringUtils.isNotBlank(messageContent) ? messageContent : Constants.VARCHAR_DEFAULT_VALUE)
+                .mediaId(StringUtils.isNotBlank(mediaId) ? mediaId : Constants.VARCHAR_DEFAULT_VALUE)
+                .url(StringUtils.isNotBlank(url) ? url : Constants.VARCHAR_DEFAULT_VALUE)
+                .pagePath(StringUtils.isNotBlank(pagePath) ? pagePath : Constants.VARCHAR_DEFAULT_VALUE)
+                .miniProgramAppId(StringUtils.isNotBlank(miniProgramAppId) ? miniProgramAppId : Constants.VARCHAR_DEFAULT_VALUE)
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .build();
+        return weiXinMenu;
+    }
+
+    private WeiXinMenu buildSubWeiXinMenu(BigInteger tenantId, String tenantCode, BigInteger userId, BigInteger parentId, SaveWeiXinMenuModel.SubButton subButton) {
+        String name = subButton.getName();
+        String type = subButton.getType();
+        String messageContent = subButton.getMessageContent();
+        String mediaId = subButton.getMediaId();
+        String url = subButton.getUrl();
+        String pagePath = subButton.getPagePath();
+        String miniProgramAppId = subButton.getMiniProgramAppId();
+
+        WeiXinMenu weiXinMenu = WeiXinMenu.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .parentId(parentId)
+                .name(name)
+                .type(type)
+                .messageContent(StringUtils.isNotBlank(messageContent) ? messageContent : Constants.VARCHAR_DEFAULT_VALUE)
+                .mediaId(StringUtils.isNotBlank(mediaId) ? mediaId : Constants.VARCHAR_DEFAULT_VALUE)
+                .url(StringUtils.isNotBlank(url) ? url : Constants.VARCHAR_DEFAULT_VALUE)
+                .pagePath(StringUtils.isNotBlank(pagePath) ? pagePath : Constants.VARCHAR_DEFAULT_VALUE)
+                .miniProgramAppId(StringUtils.isNotBlank(miniProgramAppId) ? miniProgramAppId : Constants.VARCHAR_DEFAULT_VALUE)
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .build();
+        return weiXinMenu;
     }
 
     /**
