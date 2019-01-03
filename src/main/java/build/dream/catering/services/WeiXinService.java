@@ -430,9 +430,61 @@ public class WeiXinService {
      * @param saveWeiXinMenuModel
      * @return
      */
-    @Transactional(readOnly = true)
+    @Transactional(rollbackFor = Exception.class)
     public ApiRest saveWeiXinMenu(SaveWeiXinMenuModel saveWeiXinMenuModel) {
-        return null;
+        BigInteger tenantId = saveWeiXinMenuModel.obtainTenantId();
+        String tenantCode = saveWeiXinMenuModel.obtainTenantCode();
+        SaveWeiXinMenuModel.Button first = saveWeiXinMenuModel.getFirst();
+        SaveWeiXinMenuModel.Button second = saveWeiXinMenuModel.getSecond();
+        SaveWeiXinMenuModel.Button third = saveWeiXinMenuModel.getThird();
+
+        saveWeiXinMenu(tenantId, tenantCode, first);
+        saveWeiXinMenu(tenantId, tenantCode, second);
+        saveWeiXinMenu(tenantId, tenantCode, third);
+        return ApiRest.builder().message("保存微信菜单成功！").successful(true).build();
+    }
+
+    private void saveWeiXinMenu(BigInteger tenantId, String tenantCode, SaveWeiXinMenuModel.Button button) {
+        BigInteger id = button.getId();
+        if (id == null) {
+            WeiXinMenu weiXinMenu = WeiXinMenu.builder()
+                    .tenantId(tenantId)
+                    .tenantCode(tenantCode)
+                    .parentId(BigInteger.ZERO)
+                    .name(button.getName())
+                    .type(button.getType())
+                    .messageContent("")
+                    .mediaId(button.getMediaId())
+                    .url(button.getUrl())
+                    .pagePath(button.getPagePath())
+                    .miniProgramAppId("")
+                    .build();
+            DatabaseHelper.insert(weiXinMenu);
+
+            List<SaveWeiXinMenuModel.SubButton> subButtons = button.getSubButtons();
+            if (CollectionUtils.isNotEmpty(subButtons)) {
+                BigInteger parentId = weiXinMenu.getParentId();
+                List<WeiXinMenu> subWeiXinMenus = new ArrayList<WeiXinMenu>();
+                for (SaveWeiXinMenuModel.SubButton subButton : subButtons) {
+                    WeiXinMenu subWeiXinMenu = WeiXinMenu.builder()
+                            .tenantId(tenantId)
+                            .tenantCode(tenantCode)
+                            .parentId(parentId)
+                            .name(subButton.getName())
+                            .type(subButton.getType())
+                            .messageContent("")
+                            .mediaId(subButton.getMediaId())
+                            .url(subButton.getUrl())
+                            .pagePath(subButton.getPagePath())
+                            .miniProgramAppId("")
+                            .build();
+                    subWeiXinMenus.add(subWeiXinMenu);
+                }
+                DatabaseHelper.insertAll(subWeiXinMenus);
+            }
+        } else {
+
+        }
     }
 
     /**
