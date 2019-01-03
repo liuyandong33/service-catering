@@ -425,6 +425,17 @@ public class WeiXinService {
     }
 
     /**
+     * 保存微信菜单
+     *
+     * @param saveWeiXinMenuModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest saveWeiXinMenu(SaveWeiXinMenuModel saveWeiXinMenuModel) {
+        return null;
+    }
+
+    /**
      * 推送菜单
      *
      * @param pushMenuModel

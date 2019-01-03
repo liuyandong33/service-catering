@@ -182,6 +182,13 @@ public class WeiXinController extends BasicController {
         return modelAndView;
     }
 
+    @RequestMapping(value = "/saveWeiXinMenu", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = SaveWeiXinMenuModel.class, serviceClass = WeiXinService.class, serviceMethodName = "saveWeiXinMenu", error = "保存微信菜单失败")
+    public String saveWeiXinMenu() {
+        return null;
+    }
+
     /**
      * 推送菜单
      *
