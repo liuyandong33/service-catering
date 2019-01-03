@@ -5,6 +5,7 @@ import build.dream.catering.models.weixin.*;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.WeiXinMemberCard;
 import build.dream.common.catering.domains.WeiXinMenu;
+import build.dream.common.models.weixin.CreateMenuModel;
 import build.dream.common.saas.domains.WeiXinAuthorizerInfo;
 import build.dream.common.saas.domains.WeiXinAuthorizerToken;
 import build.dream.common.utils.*;
@@ -429,6 +430,7 @@ public class WeiXinService {
      * @param pushMenuModel
      * @return
      */
+    @Transactional(readOnly = true)
     public ApiRest pushMenu(PushMenuModel pushMenuModel) {
         BigInteger tenantId = pushMenuModel.obtainTenantId();
         SearchModel searchModel = new SearchModel(true);
@@ -451,24 +453,97 @@ public class WeiXinService {
             }
         }
 
-        List<Map<String, Object>> buttons = new ArrayList<Map<String, Object>>();
+        List<CreateMenuModel.Button> buttons = new ArrayList<CreateMenuModel.Button>();
         for (WeiXinMenu weiXinMenu : firstLevelWeiXinMenus) {
             List<WeiXinMenu> childWeiXinMenus = weiXinMenuMap.get(weiXinMenu.getParentId());
-            Map<String, Object> button = new HashMap<String, Object>();
             if (CollectionUtils.isEmpty(childWeiXinMenus)) {
-                String type = weiXinMenu.getType();
-                button.put("type", type);
-                button.put("name", weiXinMenu.getName());
-                if ("click".equals(type)) {
-                    button.put("key", tenantId + "_" + weiXinMenu.getId());
-                } else if ("view".equals(type)) {
-                    button.put("url", weiXinMenu.getUrl());
-                } else if ("scancode_push".equals(type)) {
-                    button.put("key", tenantId + "_" + weiXinMenu.getId());
+                buttons.add(buildButton(tenantId, weiXinMenu));
+            } else {
+                CreateMenuModel.Button button = new CreateMenuModel.Button();
+                button.setName(weiXinMenu.getName());
+
+                List<CreateMenuModel.SubButton> subButtonModels = new ArrayList<CreateMenuModel.SubButton>();
+                for (WeiXinMenu childWeiXinMenu : childWeiXinMenus) {
+                    subButtonModels.add(buildSubButton(tenantId, childWeiXinMenu));
                 }
+                button.setSubButtons(subButtonModels);
+                buttons.add(button);
             }
         }
 
+        CreateMenuModel createMenuModel = new CreateMenuModel();
+        createMenuModel.setButtons(buttons);
+
+        WeiXinAuthorizerInfo weiXinAuthorizerInfo = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
+        ValidateUtils.notNull(weiXinAuthorizerInfo, "为检测到微信授权信息！");
+        WeiXinAuthorizerToken weiXinAuthorizerToken = WeiXinUtils.obtainWeiXinAuthorizerToken(weiXinAuthorizerInfo.getComponentAppId(), weiXinAuthorizerInfo.getAuthorizerAppId());
+        WeiXinUtils.createMenu(weiXinAuthorizerToken.getAuthorizerAccessToken(), createMenuModel);
         return ApiRest.builder().message("推送菜单成功！").successful(true).build();
+    }
+
+    private CreateMenuModel.Button buildButton(BigInteger tenantId, WeiXinMenu weiXinMenu) {
+        CreateMenuModel.Button button = new CreateMenuModel.Button();
+        String type = weiXinMenu.getType();
+
+        button.setType(type);
+        button.setName(weiXinMenu.getName());
+        if ("click".equals(type)) {
+            button.setKey(tenantId + "_" + weiXinMenu.getId());
+        } else if ("view".equals(type)) {
+            button.setUrl(weiXinMenu.getUrl());
+        } else if ("scancode_push".equals(type)) {
+            button.setKey(tenantId + "_" + weiXinMenu.getId());
+        } else if ("scancode_waitmsg".equals(type)) {
+            button.setKey(tenantId + "_" + weiXinMenu.getId());
+        } else if ("pic_sysphoto".equals(type)) {
+            button.setKey(tenantId + "_" + weiXinMenu.getId());
+        } else if ("pic_photo_or_album".equals(type)) {
+            button.setKey(tenantId + "_" + weiXinMenu.getId());
+        } else if ("pic_weixin".equals(type)) {
+            button.setKey(tenantId + "_" + weiXinMenu.getId());
+        } else if ("location_select".equals(type)) {
+            button.setKey(tenantId + "_" + weiXinMenu.getId());
+        } else if ("media_id".equals(type)) {
+            button.setMediaId(weiXinMenu.getMediaId());
+        } else if ("view_limited".equals(type)) {
+            button.setMediaId(weiXinMenu.getMediaId());
+        } else if ("miniprogram".equals(type)) {
+            button.setPagePath(weiXinMenu.getPagePath());
+            button.setUrl(weiXinMenu.getUrl());
+        }
+        return button;
+    }
+
+    private CreateMenuModel.SubButton buildSubButton(BigInteger tenantId, WeiXinMenu weiXinMenu) {
+        CreateMenuModel.SubButton subButton = new CreateMenuModel.SubButton();
+        String type = weiXinMenu.getType();
+
+        subButton.setType(type);
+        subButton.setName(weiXinMenu.getName());
+        if ("click".equals(type)) {
+            subButton.setKey(tenantId + "_" + weiXinMenu.getId());
+        } else if ("view".equals(type)) {
+            subButton.setUrl(weiXinMenu.getUrl());
+        } else if ("scancode_push".equals(type)) {
+            subButton.setKey(tenantId + "_" + weiXinMenu.getId());
+        } else if ("scancode_waitmsg".equals(type)) {
+            subButton.setKey(tenantId + "_" + weiXinMenu.getId());
+        } else if ("pic_sysphoto".equals(type)) {
+            subButton.setKey(tenantId + "_" + weiXinMenu.getId());
+        } else if ("pic_photo_or_album".equals(type)) {
+            subButton.setKey(tenantId + "_" + weiXinMenu.getId());
+        } else if ("pic_weixin".equals(type)) {
+            subButton.setKey(tenantId + "_" + weiXinMenu.getId());
+        } else if ("location_select".equals(type)) {
+            subButton.setKey(tenantId + "_" + weiXinMenu.getId());
+        } else if ("media_id".equals(type)) {
+            subButton.setMediaId(weiXinMenu.getMediaId());
+        } else if ("view_limited".equals(type)) {
+            subButton.setMediaId(weiXinMenu.getMediaId());
+        } else if ("miniprogram".equals(type)) {
+            subButton.setPagePath(weiXinMenu.getPagePath());
+            subButton.setUrl(weiXinMenu.getUrl());
+        }
+        return subButton;
     }
 }
