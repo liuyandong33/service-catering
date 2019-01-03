@@ -434,17 +434,21 @@ public class WeiXinService {
     public ApiRest saveWeiXinMenu(SaveWeiXinMenuModel saveWeiXinMenuModel) {
         BigInteger tenantId = saveWeiXinMenuModel.obtainTenantId();
         String tenantCode = saveWeiXinMenuModel.obtainTenantCode();
+        BigInteger userId = saveWeiXinMenuModel.obtainUserId();
         SaveWeiXinMenuModel.Button first = saveWeiXinMenuModel.getFirst();
         SaveWeiXinMenuModel.Button second = saveWeiXinMenuModel.getSecond();
         SaveWeiXinMenuModel.Button third = saveWeiXinMenuModel.getThird();
 
-        saveWeiXinMenu(tenantId, tenantCode, first);
-        saveWeiXinMenu(tenantId, tenantCode, second);
-        saveWeiXinMenu(tenantId, tenantCode, third);
+        saveWeiXinMenu(tenantId, tenantCode, userId, first);
+        saveWeiXinMenu(tenantId, tenantCode, userId,second);
+        saveWeiXinMenu(tenantId, tenantCode, userId, third);
         return ApiRest.builder().message("保存微信菜单成功！").successful(true).build();
     }
 
-    private void saveWeiXinMenu(BigInteger tenantId, String tenantCode, SaveWeiXinMenuModel.Button button) {
+    private void saveWeiXinMenu(BigInteger tenantId, String tenantCode, BigInteger userId, SaveWeiXinMenuModel.Button button) {
+        if (button == null) {
+            return;
+        }
         BigInteger id = button.getId();
         if (id == null) {
             WeiXinMenu weiXinMenu = WeiXinMenu.builder()
@@ -453,17 +457,19 @@ public class WeiXinService {
                     .parentId(BigInteger.ZERO)
                     .name(button.getName())
                     .type(button.getType())
-                    .messageContent("")
+                    .messageContent(button.getMessageContent())
                     .mediaId(button.getMediaId())
                     .url(button.getUrl())
                     .pagePath(button.getPagePath())
-                    .miniProgramAppId("")
+                    .miniProgramAppId(button.getMiniProgramAppId())
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
                     .build();
             DatabaseHelper.insert(weiXinMenu);
 
             List<SaveWeiXinMenuModel.SubButton> subButtons = button.getSubButtons();
             if (CollectionUtils.isNotEmpty(subButtons)) {
-                BigInteger parentId = weiXinMenu.getParentId();
+                BigInteger parentId = weiXinMenu.getId();
                 List<WeiXinMenu> subWeiXinMenus = new ArrayList<WeiXinMenu>();
                 for (SaveWeiXinMenuModel.SubButton subButton : subButtons) {
                     WeiXinMenu subWeiXinMenu = WeiXinMenu.builder()
@@ -472,11 +478,13 @@ public class WeiXinService {
                             .parentId(parentId)
                             .name(subButton.getName())
                             .type(subButton.getType())
-                            .messageContent("")
+                            .messageContent(subButton.getMessageContent())
                             .mediaId(subButton.getMediaId())
                             .url(subButton.getUrl())
                             .pagePath(subButton.getPagePath())
-                            .miniProgramAppId("")
+                            .miniProgramAppId(subButton.getMiniProgramAppId())
+                            .createdUserId(userId)
+                            .updatedUserId(userId)
                             .build();
                     subWeiXinMenus.add(subWeiXinMenu);
                 }
@@ -488,11 +496,12 @@ public class WeiXinService {
 
             weiXinMenu.setName(button.getName());
             weiXinMenu.setType(button.getType());
-            weiXinMenu.setMessageContent("");
+            weiXinMenu.setMessageContent(button.getMessageContent());
             weiXinMenu.setMediaId(button.getMediaId());
             weiXinMenu.setUrl(button.getUrl());
             weiXinMenu.setPagePath(button.getPagePath());
-            weiXinMenu.setMiniProgramAppId("");
+            weiXinMenu.setMiniProgramAppId(button.getMiniProgramAppId());
+            weiXinMenu.setUpdatedUserId(userId);
 
             DatabaseHelper.update(weiXinMenu);
 
@@ -511,7 +520,7 @@ public class WeiXinService {
                     weiXinMenuMap.put(subWeiXinMenu.getId(), subWeiXinMenu);
                 }
 
-                BigInteger parentId = weiXinMenu.getParentId();
+                BigInteger parentId = weiXinMenu.getId();
                 for (SaveWeiXinMenuModel.SubButton subButton : subButtons) {
                     BigInteger weiXinMenuId = subButton.getId();
                     if (weiXinMenuId != null) {
@@ -520,11 +529,12 @@ public class WeiXinService {
 
                         subWeiXinMenu.setName(button.getName());
                         subWeiXinMenu.setType(button.getType());
-                        subWeiXinMenu.setMessageContent("");
+                        subWeiXinMenu.setMessageContent(button.getMessageContent());
                         subWeiXinMenu.setMediaId(button.getMediaId());
                         subWeiXinMenu.setUrl(button.getUrl());
                         subWeiXinMenu.setPagePath(button.getPagePath());
-                        subWeiXinMenu.setMiniProgramAppId("");
+                        subWeiXinMenu.setMiniProgramAppId(button.getMiniProgramAppId());
+                        subWeiXinMenu.setUpdatedUserId(userId);
 
                         DatabaseHelper.update(subWeiXinMenu);
                     } else {
@@ -534,11 +544,13 @@ public class WeiXinService {
                                 .parentId(parentId)
                                 .name(subButton.getName())
                                 .type(subButton.getType())
-                                .messageContent("")
+                                .messageContent(subButton.getMessageContent())
                                 .mediaId(subButton.getMediaId())
                                 .url(subButton.getUrl())
                                 .pagePath(subButton.getPagePath())
-                                .miniProgramAppId("")
+                                .miniProgramAppId(subButton.getMiniProgramAppId())
+                                .createdUserId(userId)
+                                .updatedUserId(userId)
                                 .build();
                         DatabaseHelper.insert(subWeiXinMenu);
                     }
@@ -578,7 +590,7 @@ public class WeiXinService {
 
         List<CreateMenuModel.Button> buttons = new ArrayList<CreateMenuModel.Button>();
         for (WeiXinMenu weiXinMenu : firstLevelWeiXinMenus) {
-            List<WeiXinMenu> childWeiXinMenus = weiXinMenuMap.get(weiXinMenu.getParentId());
+            List<WeiXinMenu> childWeiXinMenus = weiXinMenuMap.get(weiXinMenu.getId());
             if (CollectionUtils.isEmpty(childWeiXinMenus)) {
                 buttons.add(buildButton(tenantId, weiXinMenu));
             } else {

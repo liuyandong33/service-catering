@@ -44,11 +44,13 @@ public class SaveWeiXinMenuModel extends CateringBasicModel {
 
         private String name;
 
+        private String messageContent;
+
         private String url;
 
         private String mediaId;
 
-        private String appId;
+        private String miniProgramAppId;
 
         private String pagePath;
 
@@ -84,6 +86,14 @@ public class SaveWeiXinMenuModel extends CateringBasicModel {
             this.name = name;
         }
 
+        public String getMessageContent() {
+            return messageContent;
+        }
+
+        public void setMessageContent(String messageContent) {
+            this.messageContent = messageContent;
+        }
+
         public String getUrl() {
             return url;
         }
@@ -100,12 +110,12 @@ public class SaveWeiXinMenuModel extends CateringBasicModel {
             this.mediaId = mediaId;
         }
 
-        public String getAppId() {
-            return appId;
+        public String getMiniProgramAppId() {
+            return miniProgramAppId;
         }
 
-        public void setAppId(String appId) {
-            this.appId = appId;
+        public void setMiniProgramAppId(String miniProgramAppId) {
+            this.miniProgramAppId = miniProgramAppId;
         }
 
         public String getPagePath() {
@@ -124,11 +134,13 @@ public class SaveWeiXinMenuModel extends CateringBasicModel {
 
         private String name;
 
+        private String messageContent;
+
         private String url;
 
         private String mediaId;
 
-        private String appId;
+        private String miniProgramAppId;
 
         private String pagePath;
 
@@ -156,6 +168,14 @@ public class SaveWeiXinMenuModel extends CateringBasicModel {
             this.name = name;
         }
 
+        public String getMessageContent() {
+            return messageContent;
+        }
+
+        public void setMessageContent(String messageContent) {
+            this.messageContent = messageContent;
+        }
+
         public String getUrl() {
             return url;
         }
@@ -172,12 +192,12 @@ public class SaveWeiXinMenuModel extends CateringBasicModel {
             this.mediaId = mediaId;
         }
 
-        public String getAppId() {
-            return appId;
+        public String getMiniProgramAppId() {
+            return miniProgramAppId;
         }
 
-        public void setAppId(String appId) {
-            this.appId = appId;
+        public void setMiniProgramAppId(String miniProgramAppId) {
+            this.miniProgramAppId = miniProgramAppId;
         }
 
         public String getPagePath() {
