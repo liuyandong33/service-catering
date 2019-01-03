@@ -451,6 +451,24 @@ public class WeiXinService {
             }
         }
 
+        List<Map<String, Object>> buttons = new ArrayList<Map<String, Object>>();
+        for (WeiXinMenu weiXinMenu : firstLevelWeiXinMenus) {
+            List<WeiXinMenu> childWeiXinMenus = weiXinMenuMap.get(weiXinMenu.getParentId());
+            Map<String, Object> button = new HashMap<String, Object>();
+            if (CollectionUtils.isEmpty(childWeiXinMenus)) {
+                String type = weiXinMenu.getType();
+                button.put("type", type);
+                button.put("name", weiXinMenu.getName());
+                if ("click".equals(type)) {
+                    button.put("key", tenantId + "_" + weiXinMenu.getId());
+                } else if ("view".equals(type)) {
+                    button.put("url", weiXinMenu.getUrl());
+                } else if ("scancode_push".equals(type)) {
+                    button.put("key", tenantId + "_" + weiXinMenu.getId());
+                }
+            }
+        }
+
         return ApiRest.builder().message("推送菜单成功！").successful(true).build();
     }
 }
