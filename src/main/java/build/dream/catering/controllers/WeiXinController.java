@@ -8,8 +8,10 @@ import build.dream.common.api.ApiRest;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -178,5 +180,17 @@ public class WeiXinController extends BasicController {
             modelAndView.setViewName("weiXin/authFailure");
         }
         return modelAndView;
+    }
+
+    /**
+     * 推送菜单
+     *
+     * @return
+     */
+    @RequestMapping(value = "/pushMenu", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = PushMenuModel.class, serviceClass = WeiXinService.class, serviceMethodName = "pushMenu", error = "推送菜单失败")
+    public String pushMenu() {
+        return null;
     }
 }

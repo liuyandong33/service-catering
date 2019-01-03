@@ -4,10 +4,12 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.models.weixin.*;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.WeiXinMemberCard;
+import build.dream.common.catering.domains.WeiXinMenu;
 import build.dream.common.saas.domains.WeiXinAuthorizerInfo;
 import build.dream.common.saas.domains.WeiXinAuthorizerToken;
 import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
@@ -419,5 +421,36 @@ public class WeiXinService {
         Map<String, Object> tokenMap = MapUtils.getMap(data, "weiXinAuthorizerToken");
 
         return infoMap;
+    }
+
+    /**
+     * 推送菜单
+     *
+     * @param pushMenuModel
+     * @return
+     */
+    public ApiRest pushMenu(PushMenuModel pushMenuModel) {
+        BigInteger tenantId = pushMenuModel.obtainTenantId();
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(WeiXinMenu.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        List<WeiXinMenu> weiXinMenus = DatabaseHelper.findAll(WeiXinMenu.class, searchModel);
+
+        List<WeiXinMenu> firstLevelWeiXinMenus = new ArrayList<WeiXinMenu>();
+        Map<BigInteger, List<WeiXinMenu>> weiXinMenuMap = new HashMap<BigInteger, List<WeiXinMenu>>();
+        for (WeiXinMenu weiXinMenu : weiXinMenus) {
+            BigInteger parentId = weiXinMenu.getParentId();
+            if (BigInteger.ZERO.compareTo(parentId) == 0) {
+                firstLevelWeiXinMenus.add(weiXinMenu);
+            } else {
+                List<WeiXinMenu> weiXinMenuList = weiXinMenuMap.get(parentId);
+                if (CollectionUtils.isEmpty(weiXinMenuList)) {
+                    weiXinMenuList = new ArrayList<WeiXinMenu>();
+                    weiXinMenuMap.put(parentId, weiXinMenuList);
+                }
+                weiXinMenuList.add(weiXinMenu);
+            }
+        }
+
+        return ApiRest.builder().message("推送菜单成功！").successful(true).build();
     }
 }
