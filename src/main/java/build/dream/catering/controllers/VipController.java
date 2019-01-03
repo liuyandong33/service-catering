@@ -1,12 +1,8 @@
 package build.dream.catering.controllers;
 
-import build.dream.catering.models.vip.ChangeVipSharedTypeModel;
-import build.dream.catering.models.vip.ObtainVipInfoModel;
-import build.dream.catering.models.vip.SaveVipInfoModel;
-import build.dream.catering.models.vip.SaveVipTypeModel;
+import build.dream.catering.models.vip.*;
 import build.dream.catering.services.VipService;
 import build.dream.common.annotations.ApiRestAction;
-import build.dream.common.controllers.BasicController;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(value = "/vip")
-public class VipController extends BasicController {
+public class VipController {
     /**
      * 保存会员类型
      *
@@ -61,6 +57,66 @@ public class VipController extends BasicController {
     @ResponseBody
     @ApiRestAction(modelClass = ChangeVipSharedTypeModel.class, serviceClass = VipService.class, serviceMethodName = "changeVipSharedType", error = "获取会员信息失败")
     public String changeVipSharedType() {
+        return null;
+    }
+
+    /**
+     * 获取会员类型
+     *
+     * @return
+     */
+    @RequestMapping(value = "/listVipTypes", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = ListVipTypesModel.class, serviceClass = VipService.class, serviceMethodName = "listVipTypes", error = "获取会员类型失败")
+    public String listVipTypes() {
+        return null;
+    }
+
+    /**
+     * 删除会员类型
+     *
+     * @return
+     */
+    @RequestMapping(value = "/deleteVipType", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = DeleteVipTypeModel.class, serviceClass = VipService.class, serviceMethodName = "deleteVipType", error = "删除会员类型失败")
+    public String deleteVipType() {
+        return null;
+    }
+
+    /**
+     * 删除会员分组
+     *
+     * @return
+     */
+    @RequestMapping(value = "/deleteVipGroup", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = DeleteVipGroupModel.class, serviceClass = VipService.class, serviceMethodName = "deleteVipGroup", error = "删除会员类型失败")
+    public String deleteVipGroup() {
+        return null;
+    }
+
+    /**
+     * 获取会员分组
+     *
+     * @return
+     */
+    @RequestMapping(value = "/listVipGroups", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = ListVipGroupsModel.class, serviceClass = VipService.class, serviceMethodName = "listVipGroups", error = "获取会员分组失败")
+    public String listVipGroups() {
+        return null;
+    }
+
+    /**
+     * 保存会员分组
+     *
+     * @return
+     */
+    @RequestMapping(value = "/saveVipGroup", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = SaveVipGroupModel.class, serviceClass = VipService.class, serviceMethodName = "saveVipGroup", error = "保存会员分组失败")
+    public String saveVipGroup() {
         return null;
     }
 }
