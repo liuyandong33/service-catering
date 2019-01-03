@@ -483,7 +483,67 @@ public class WeiXinService {
                 DatabaseHelper.insertAll(subWeiXinMenus);
             }
         } else {
+            WeiXinMenu weiXinMenu = DatabaseHelper.find(WeiXinMenu.class, TupleUtils.buildTuple3(WeiXinMenu.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId), TupleUtils.buildTuple3(WeiXinMenu.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, id));
+            ValidateUtils.notNull(weiXinMenu, "微信菜单不存在！");
 
+            weiXinMenu.setName(button.getName());
+            weiXinMenu.setType(button.getType());
+            weiXinMenu.setMessageContent("");
+            weiXinMenu.setMediaId(button.getMediaId());
+            weiXinMenu.setUrl(button.getUrl());
+            weiXinMenu.setPagePath(button.getPagePath());
+            weiXinMenu.setMiniProgramAppId("");
+
+            DatabaseHelper.update(weiXinMenu);
+
+            List<SaveWeiXinMenuModel.SubButton> subButtons = button.getSubButtons();
+            if (CollectionUtils.isNotEmpty(subButtons)) {
+                List<BigInteger> weiXinMenuIds = new ArrayList<BigInteger>();
+                for (SaveWeiXinMenuModel.SubButton subButton : subButtons) {
+                    BigInteger weiXinMenuId = subButton.getId();
+                    if (weiXinMenuId != null) {
+                        weiXinMenuIds.add(weiXinMenuId);
+                    }
+                }
+                List<WeiXinMenu> subWeiXinMenus = DatabaseHelper.findAll(WeiXinMenu.class, TupleUtils.buildTuple3(WeiXinMenu.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId), TupleUtils.buildTuple3(WeiXinMenu.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, weiXinMenuIds));
+                Map<BigInteger, WeiXinMenu> weiXinMenuMap = new HashMap<BigInteger, WeiXinMenu>();
+                for (WeiXinMenu subWeiXinMenu : subWeiXinMenus) {
+                    weiXinMenuMap.put(subWeiXinMenu.getId(), subWeiXinMenu);
+                }
+
+                BigInteger parentId = weiXinMenu.getParentId();
+                for (SaveWeiXinMenuModel.SubButton subButton : subButtons) {
+                    BigInteger weiXinMenuId = subButton.getId();
+                    if (weiXinMenuId != null) {
+                        WeiXinMenu subWeiXinMenu = weiXinMenuMap.get(weiXinMenuId);
+                        ValidateUtils.notNull(subWeiXinMenu, "微信菜单不存在！");
+
+                        subWeiXinMenu.setName(button.getName());
+                        subWeiXinMenu.setType(button.getType());
+                        subWeiXinMenu.setMessageContent("");
+                        subWeiXinMenu.setMediaId(button.getMediaId());
+                        subWeiXinMenu.setUrl(button.getUrl());
+                        subWeiXinMenu.setPagePath(button.getPagePath());
+                        subWeiXinMenu.setMiniProgramAppId("");
+
+                        DatabaseHelper.update(subWeiXinMenu);
+                    } else {
+                        WeiXinMenu subWeiXinMenu = WeiXinMenu.builder()
+                                .tenantId(tenantId)
+                                .tenantCode(tenantCode)
+                                .parentId(parentId)
+                                .name(subButton.getName())
+                                .type(subButton.getType())
+                                .messageContent("")
+                                .mediaId(subButton.getMediaId())
+                                .url(subButton.getUrl())
+                                .pagePath(subButton.getPagePath())
+                                .miniProgramAppId("")
+                                .build();
+                        DatabaseHelper.insert(subWeiXinMenu);
+                    }
+                }
+            }
         }
     }
 
