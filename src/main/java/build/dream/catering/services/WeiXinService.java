@@ -754,8 +754,9 @@ public class WeiXinService {
             if (CollectionUtils.isNotEmpty(subWeiXinMenus)) {
                 List<Map<String, Object>> subMenus = new ArrayList<Map<String, Object>>();
                 for (WeiXinMenu subWeiXinMenu : subWeiXinMenus) {
-                    subMenus.add(buildMenu(weiXinMenu));
+                    subMenus.add(buildMenu(subWeiXinMenu));
                 }
+                menu.put("subMenus", subMenus);
             }
 
             menus.add(menu);
