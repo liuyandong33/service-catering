@@ -212,4 +212,16 @@ public class WeiXinController extends BasicController {
     public String listMenus() {
         return null;
     }
+
+    /**
+     * 获取消息内容
+     *
+     * @return
+     */
+    @RequestMapping(value = "/obtainMessageContent", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = ObtainMessageContentModel.class, serviceClass = WeiXinService.class, serviceMethodName = "listMenus", error = "获取消息内容失败")
+    public String obtainMessageContent() {
+        return null;
+    }
 }

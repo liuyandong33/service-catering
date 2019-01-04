@@ -812,4 +812,25 @@ public class WeiXinService {
         }
         return menu;
     }
+
+    /**
+     * 获取消息内容
+     *
+     * @param obtainMessageContentModel
+     * @return
+     */
+    public ApiRest obtainMessageContent(ObtainMessageContentModel obtainMessageContentModel) {
+        BigInteger tenantId = obtainMessageContentModel.getTenantId();
+        BigInteger weiXinMenuId = obtainMessageContentModel.getWeiXinMenuId();
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(WeiXinMenu.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(WeiXinMenu.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, weiXinMenuId);
+        WeiXinMenu weiXinMenu = DatabaseHelper.find(WeiXinMenu.class, searchModel);
+
+        String data = "";
+        if (weiXinMenu != null) {
+            data = weiXinMenu.getMessageContent();
+        }
+        return ApiRest.builder().data(data).message("获取消息内容成功！").successful(true).build();
+    }
 }
