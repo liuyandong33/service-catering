@@ -660,7 +660,10 @@ public class WeiXinService {
 
         WeiXinAuthorizerInfo weiXinAuthorizerInfo = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
         ValidateUtils.notNull(weiXinAuthorizerInfo, "未检测到微信授权信息！");
-        WeiXinAuthorizerToken weiXinAuthorizerToken = WeiXinUtils.obtainWeiXinAuthorizerToken(weiXinAuthorizerInfo.getComponentAppId(), weiXinAuthorizerInfo.getAuthorizerAppId());
+
+        String componentAppId = weiXinAuthorizerInfo.getComponentAppId();
+        String authorizerAppId = weiXinAuthorizerInfo.getAuthorizerAppId();
+        WeiXinAuthorizerToken weiXinAuthorizerToken = WeiXinUtils.obtainWeiXinAuthorizerToken(componentAppId, authorizerAppId);
         WeiXinUtils.createMenu(weiXinAuthorizerToken.getAuthorizerAccessToken(), createMenuModel);
         return ApiRest.builder().message("推送菜单成功！").successful(true).build();
     }
