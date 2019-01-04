@@ -658,27 +658,27 @@ public class WeiXinService {
 
         button.setType(type);
         button.setName(weiXinMenu.getName());
-        if ("click".equals(type)) {
+        if (Constants.WEI_XIN_MENU_TYPE_CLICK.equals(type)) {
             button.setKey(tenantId + "_" + weiXinMenu.getId());
-        } else if ("view".equals(type)) {
+        } else if (Constants.WEI_XIN_MENU_TYPE_VIEW.equals(type)) {
             button.setUrl(weiXinMenu.getUrl());
-        } else if ("scancode_push".equals(type)) {
+        } else if (Constants.WEI_XIN_MENU_TYPE_SCANCODE_PUSH.equals(type)) {
             button.setKey(tenantId + "_" + weiXinMenu.getId());
-        } else if ("scancode_waitmsg".equals(type)) {
+        } else if (Constants.WEI_XIN_MENU_TYPE_SCANCODE_WAITMSG.equals(type)) {
             button.setKey(tenantId + "_" + weiXinMenu.getId());
-        } else if ("pic_sysphoto".equals(type)) {
+        } else if (Constants.WEI_XIN_MENU_TYPE_PIC_SYSPHOTO.equals(type)) {
             button.setKey(tenantId + "_" + weiXinMenu.getId());
-        } else if ("pic_photo_or_album".equals(type)) {
+        } else if (Constants.WEI_XIN_MENU_TYPE_PIC_PHOTO_OR_ALBUM.equals(type)) {
             button.setKey(tenantId + "_" + weiXinMenu.getId());
-        } else if ("pic_weixin".equals(type)) {
+        } else if (Constants.WEI_XIN_MENU_TYPE_PIC_WEIXIN.equals(type)) {
             button.setKey(tenantId + "_" + weiXinMenu.getId());
-        } else if ("location_select".equals(type)) {
+        } else if (Constants.WEI_XIN_MENU_TYPE_LOCATION_SELECT.equals(type)) {
             button.setKey(tenantId + "_" + weiXinMenu.getId());
-        } else if ("media_id".equals(type)) {
+        } else if (Constants.WEI_XIN_MENU_TYPE_MEDIA_ID.equals(type)) {
             button.setMediaId(weiXinMenu.getMediaId());
-        } else if ("view_limited".equals(type)) {
+        } else if (Constants.WEI_XIN_MENU_TYPE_VIEW_LIMITED.equals(type)) {
             button.setMediaId(weiXinMenu.getMediaId());
-        } else if ("miniprogram".equals(type)) {
+        } else if (Constants.WEI_XIN_MENU_TYPE_MINIPROGRAM.equals(type)) {
             button.setPagePath(weiXinMenu.getPagePath());
             button.setUrl(weiXinMenu.getUrl());
         }
@@ -691,27 +691,27 @@ public class WeiXinService {
 
         subButton.setType(type);
         subButton.setName(weiXinMenu.getName());
-        if ("click".equals(type)) {
+        if (Constants.WEI_XIN_MENU_TYPE_CLICK.equals(type)) {
             subButton.setKey(tenantId + "_" + weiXinMenu.getId());
-        } else if ("view".equals(type)) {
+        } else if (Constants.WEI_XIN_MENU_TYPE_VIEW.equals(type)) {
             subButton.setUrl(weiXinMenu.getUrl());
-        } else if ("scancode_push".equals(type)) {
+        } else if (Constants.WEI_XIN_MENU_TYPE_SCANCODE_PUSH.equals(type)) {
             subButton.setKey(tenantId + "_" + weiXinMenu.getId());
-        } else if ("scancode_waitmsg".equals(type)) {
+        } else if (Constants.WEI_XIN_MENU_TYPE_SCANCODE_WAITMSG.equals(type)) {
             subButton.setKey(tenantId + "_" + weiXinMenu.getId());
-        } else if ("pic_sysphoto".equals(type)) {
+        } else if (Constants.WEI_XIN_MENU_TYPE_PIC_SYSPHOTO.equals(type)) {
             subButton.setKey(tenantId + "_" + weiXinMenu.getId());
-        } else if ("pic_photo_or_album".equals(type)) {
+        } else if (Constants.WEI_XIN_MENU_TYPE_PIC_PHOTO_OR_ALBUM.equals(type)) {
             subButton.setKey(tenantId + "_" + weiXinMenu.getId());
-        } else if ("pic_weixin".equals(type)) {
+        } else if (Constants.WEI_XIN_MENU_TYPE_PIC_WEIXIN.equals(type)) {
             subButton.setKey(tenantId + "_" + weiXinMenu.getId());
-        } else if ("location_select".equals(type)) {
+        } else if (Constants.WEI_XIN_MENU_TYPE_LOCATION_SELECT.equals(type)) {
             subButton.setKey(tenantId + "_" + weiXinMenu.getId());
-        } else if ("media_id".equals(type)) {
+        } else if (Constants.WEI_XIN_MENU_TYPE_MEDIA_ID.equals(type)) {
             subButton.setMediaId(weiXinMenu.getMediaId());
-        } else if ("view_limited".equals(type)) {
+        } else if (Constants.WEI_XIN_MENU_TYPE_VIEW_LIMITED.equals(type)) {
             subButton.setMediaId(weiXinMenu.getMediaId());
-        } else if ("miniprogram".equals(type)) {
+        } else if (Constants.WEI_XIN_MENU_TYPE_MINIPROGRAM.equals(type)) {
             subButton.setPagePath(weiXinMenu.getPagePath());
             subButton.setUrl(weiXinMenu.getUrl());
         }

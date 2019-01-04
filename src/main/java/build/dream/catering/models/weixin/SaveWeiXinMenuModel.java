@@ -1,7 +1,11 @@
 package build.dream.catering.models.weixin;
 
+import build.dream.catering.constants.Constants;
 import build.dream.common.models.BasicModel;
 import build.dream.common.models.CateringBasicModel;
+import build.dream.common.utils.ApplicationHandler;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -10,6 +14,22 @@ public class SaveWeiXinMenuModel extends CateringBasicModel {
     private Button first;
     private Button second;
     private Button third;
+
+    @Override
+    public void validateAndThrow() {
+        super.validateAndThrow();
+        if (first != null) {
+            ApplicationHandler.isTrue(first.validate(), "first");
+        }
+
+        if (second != null) {
+            ApplicationHandler.isTrue(second.validate(), "second");
+        }
+
+        if (third != null) {
+            ApplicationHandler.isTrue(third.validate(), "third");
+        }
+    }
 
     public Button getFirst() {
         return first;
@@ -125,6 +145,54 @@ public class SaveWeiXinMenuModel extends CateringBasicModel {
         public void setPagePath(String pagePath) {
             this.pagePath = pagePath;
         }
+
+        @Override
+        public boolean validate() {
+            boolean isOk = super.validate();
+            if (!isOk) {
+                return false;
+            }
+
+            if (Constants.WEI_XIN_MENU_TYPE_CLICK.equals(type)) {
+                return StringUtils.isNotBlank(messageContent);
+            } else if (Constants.WEI_XIN_MENU_TYPE_VIEW.equals(type)) {
+                return StringUtils.isNotBlank(url);
+            } else if (Constants.WEI_XIN_MENU_TYPE_SCANCODE_PUSH.equals(type)) {
+                return true;
+            } else if (Constants.WEI_XIN_MENU_TYPE_SCANCODE_WAITMSG.equals(type)) {
+                return true;
+            } else if (Constants.WEI_XIN_MENU_TYPE_PIC_SYSPHOTO.equals(type)) {
+                return true;
+            } else if (Constants.WEI_XIN_MENU_TYPE_PIC_PHOTO_OR_ALBUM.equals(type)) {
+                return true;
+            } else if (Constants.WEI_XIN_MENU_TYPE_PIC_WEIXIN.equals(type)) {
+                return true;
+            } else if (Constants.WEI_XIN_MENU_TYPE_LOCATION_SELECT.equals(type)) {
+                return true;
+            } else if (Constants.WEI_XIN_MENU_TYPE_MEDIA_ID.equals(type)) {
+                return StringUtils.isNotBlank(mediaId);
+            } else if (Constants.WEI_XIN_MENU_TYPE_VIEW_LIMITED.equals(type)) {
+                return StringUtils.isNotBlank(mediaId);
+            } else if (Constants.WEI_XIN_MENU_TYPE_MINIPROGRAM.equals(type)) {
+                return StringUtils.isNotBlank(pagePath) && StringUtils.isNotBlank(url);
+            }
+
+            if (StringUtils.isBlank(type)) {
+                isOk = CollectionUtils.isNotEmpty(subButtons);
+                if (!isOk) {
+                    return false;
+                }
+
+                for (SubButton subButton : subButtons) {
+                    isOk = subButton.validate();
+                    if (!isOk) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
     }
 
     public static class SubButton extends BasicModel {
@@ -206,6 +274,40 @@ public class SaveWeiXinMenuModel extends CateringBasicModel {
 
         public void setPagePath(String pagePath) {
             this.pagePath = pagePath;
+        }
+
+        @Override
+        public boolean validate() {
+            boolean isOk = super.validate();
+            if (!isOk) {
+                return false;
+            }
+
+            if (Constants.WEI_XIN_MENU_TYPE_CLICK.equals(type)) {
+                return StringUtils.isNotBlank(messageContent);
+            } else if (Constants.WEI_XIN_MENU_TYPE_VIEW.equals(type)) {
+                return StringUtils.isNotBlank(url);
+            } else if (Constants.WEI_XIN_MENU_TYPE_SCANCODE_PUSH.equals(type)) {
+                return true;
+            } else if (Constants.WEI_XIN_MENU_TYPE_SCANCODE_WAITMSG.equals(type)) {
+                return true;
+            } else if (Constants.WEI_XIN_MENU_TYPE_PIC_SYSPHOTO.equals(type)) {
+                return true;
+            } else if (Constants.WEI_XIN_MENU_TYPE_PIC_PHOTO_OR_ALBUM.equals(type)) {
+                return true;
+            } else if (Constants.WEI_XIN_MENU_TYPE_PIC_WEIXIN.equals(type)) {
+                return true;
+            } else if (Constants.WEI_XIN_MENU_TYPE_LOCATION_SELECT.equals(type)) {
+                return true;
+            } else if (Constants.WEI_XIN_MENU_TYPE_MEDIA_ID.equals(type)) {
+                return StringUtils.isNotBlank(mediaId);
+            } else if (Constants.WEI_XIN_MENU_TYPE_VIEW_LIMITED.equals(type)) {
+                return StringUtils.isNotBlank(mediaId);
+            } else if (Constants.WEI_XIN_MENU_TYPE_MINIPROGRAM.equals(type)) {
+                return StringUtils.isNotBlank(pagePath) && StringUtils.isNotBlank(url);
+            } else {
+                return false;
+            }
         }
     }
 }
