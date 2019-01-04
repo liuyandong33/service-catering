@@ -671,25 +671,26 @@ public class WeiXinService {
     private CreateMenuModel.Button buildButton(BigInteger tenantId, WeiXinMenu weiXinMenu) {
         CreateMenuModel.Button button = new CreateMenuModel.Button();
         String type = weiXinMenu.getType();
+        String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
 
         button.setType(type);
         button.setName(weiXinMenu.getName());
         if (Constants.WEI_XIN_MENU_TYPE_CLICK.equals(type)) {
-            button.setKey(tenantId + "_" + weiXinMenu.getId());
+            button.setKey(partitionCode + "_" + tenantId + "_" + weiXinMenu.getId());
         } else if (Constants.WEI_XIN_MENU_TYPE_VIEW.equals(type)) {
             button.setUrl(weiXinMenu.getUrl());
         } else if (Constants.WEI_XIN_MENU_TYPE_SCANCODE_PUSH.equals(type)) {
-            button.setKey(tenantId + "_" + weiXinMenu.getId());
+            button.setKey(partitionCode + "_" + tenantId + "_" + weiXinMenu.getId());
         } else if (Constants.WEI_XIN_MENU_TYPE_SCANCODE_WAITMSG.equals(type)) {
-            button.setKey(tenantId + "_" + weiXinMenu.getId());
+            button.setKey(partitionCode + "_" + tenantId + "_" + weiXinMenu.getId());
         } else if (Constants.WEI_XIN_MENU_TYPE_PIC_SYSPHOTO.equals(type)) {
-            button.setKey(tenantId + "_" + weiXinMenu.getId());
+            button.setKey(partitionCode + "_" + tenantId + "_" + weiXinMenu.getId());
         } else if (Constants.WEI_XIN_MENU_TYPE_PIC_PHOTO_OR_ALBUM.equals(type)) {
-            button.setKey(tenantId + "_" + weiXinMenu.getId());
+            button.setKey(partitionCode + "_" + tenantId + "_" + weiXinMenu.getId());
         } else if (Constants.WEI_XIN_MENU_TYPE_PIC_WEIXIN.equals(type)) {
-            button.setKey(tenantId + "_" + weiXinMenu.getId());
+            button.setKey(partitionCode + "_" + tenantId + "_" + weiXinMenu.getId());
         } else if (Constants.WEI_XIN_MENU_TYPE_LOCATION_SELECT.equals(type)) {
-            button.setKey(tenantId + "_" + weiXinMenu.getId());
+            button.setKey(partitionCode + "_" + tenantId + "_" + weiXinMenu.getId());
         } else if (Constants.WEI_XIN_MENU_TYPE_MEDIA_ID.equals(type)) {
             button.setMediaId(weiXinMenu.getMediaId());
         } else if (Constants.WEI_XIN_MENU_TYPE_VIEW_LIMITED.equals(type)) {
@@ -704,25 +705,26 @@ public class WeiXinService {
     private CreateMenuModel.SubButton buildSubButton(BigInteger tenantId, WeiXinMenu weiXinMenu) {
         CreateMenuModel.SubButton subButton = new CreateMenuModel.SubButton();
         String type = weiXinMenu.getType();
+        String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
 
         subButton.setType(type);
         subButton.setName(weiXinMenu.getName());
         if (Constants.WEI_XIN_MENU_TYPE_CLICK.equals(type)) {
-            subButton.setKey(tenantId + "_" + weiXinMenu.getId());
+            subButton.setKey(partitionCode + "_" + tenantId + "_" + weiXinMenu.getId());
         } else if (Constants.WEI_XIN_MENU_TYPE_VIEW.equals(type)) {
             subButton.setUrl(weiXinMenu.getUrl());
         } else if (Constants.WEI_XIN_MENU_TYPE_SCANCODE_PUSH.equals(type)) {
-            subButton.setKey(tenantId + "_" + weiXinMenu.getId());
+            subButton.setKey(partitionCode + "_" + tenantId + "_" + weiXinMenu.getId());
         } else if (Constants.WEI_XIN_MENU_TYPE_SCANCODE_WAITMSG.equals(type)) {
-            subButton.setKey(tenantId + "_" + weiXinMenu.getId());
+            subButton.setKey(partitionCode + "_" + tenantId + "_" + weiXinMenu.getId());
         } else if (Constants.WEI_XIN_MENU_TYPE_PIC_SYSPHOTO.equals(type)) {
-            subButton.setKey(tenantId + "_" + weiXinMenu.getId());
+            subButton.setKey(partitionCode + "_" + tenantId + "_" + weiXinMenu.getId());
         } else if (Constants.WEI_XIN_MENU_TYPE_PIC_PHOTO_OR_ALBUM.equals(type)) {
-            subButton.setKey(tenantId + "_" + weiXinMenu.getId());
+            subButton.setKey(partitionCode + "_" + tenantId + "_" + weiXinMenu.getId());
         } else if (Constants.WEI_XIN_MENU_TYPE_PIC_WEIXIN.equals(type)) {
-            subButton.setKey(tenantId + "_" + weiXinMenu.getId());
+            subButton.setKey(partitionCode + "_" + tenantId + "_" + weiXinMenu.getId());
         } else if (Constants.WEI_XIN_MENU_TYPE_LOCATION_SELECT.equals(type)) {
-            subButton.setKey(tenantId + "_" + weiXinMenu.getId());
+            subButton.setKey(partitionCode + "_" + tenantId + "_" + weiXinMenu.getId());
         } else if (Constants.WEI_XIN_MENU_TYPE_MEDIA_ID.equals(type)) {
             subButton.setMediaId(weiXinMenu.getMediaId());
         } else if (Constants.WEI_XIN_MENU_TYPE_VIEW_LIMITED.equals(type)) {
