@@ -200,4 +200,16 @@ public class WeiXinController extends BasicController {
     public String pushMenu() {
         return null;
     }
+
+    /**
+     * 查询微信菜单
+     *
+     * @return
+     */
+    @RequestMapping(value = "/listMenus", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = ListMenusModel.class, serviceClass = WeiXinService.class, serviceMethodName = "listMenus", error = "查询微信菜单失败")
+    public String listMenus() {
+        return null;
+    }
 }

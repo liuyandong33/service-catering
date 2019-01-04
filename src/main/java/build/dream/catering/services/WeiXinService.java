@@ -717,4 +717,80 @@ public class WeiXinService {
         }
         return subButton;
     }
+
+    /**
+     * 查询微信菜单
+     *
+     * @param listMenusModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest listMenus(ListMenusModel listMenusModel) {
+        BigInteger tenantId = listMenusModel.obtainTenantId();
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(WeiXinMenu.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        List<WeiXinMenu> weiXinMenus = DatabaseHelper.findAll(WeiXinMenu.class, searchModel);
+        List<WeiXinMenu> firstLevelWeiXinMenus = new ArrayList<WeiXinMenu>();
+        Map<BigInteger, List<WeiXinMenu>> weiXinMenuMap = new HashMap<BigInteger, List<WeiXinMenu>>();
+        for (WeiXinMenu weiXinMenu : weiXinMenus) {
+            BigInteger parentId = weiXinMenu.getParentId();
+            if (BigInteger.ZERO.compareTo(parentId) == 0) {
+                firstLevelWeiXinMenus.add(weiXinMenu);
+            } else {
+                List<WeiXinMenu> weiXinMenuList = weiXinMenuMap.get(parentId);
+                if (CollectionUtils.isEmpty(weiXinMenuList)) {
+                    weiXinMenuList = new ArrayList<WeiXinMenu>();
+                    weiXinMenuMap.put(parentId, weiXinMenuList);
+                }
+                weiXinMenuList.add(weiXinMenu);
+            }
+        }
+
+        List<Map<String, Object>> menus = new ArrayList<Map<String, Object>>();
+        for (WeiXinMenu weiXinMenu : firstLevelWeiXinMenus) {
+            Map<String, Object> menu = buildMenu(weiXinMenu);
+
+            List<WeiXinMenu> subWeiXinMenus = weiXinMenuMap.get(weiXinMenu.getId());
+            if (CollectionUtils.isNotEmpty(subWeiXinMenus)) {
+                List<Map<String, Object>> subMenus = new ArrayList<Map<String, Object>>();
+                for (WeiXinMenu subWeiXinMenu : subWeiXinMenus) {
+                    subMenus.add(buildMenu(weiXinMenu));
+                }
+            }
+
+            menus.add(menu);
+        }
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        if (CollectionUtils.isNotEmpty(menus)) {
+            int size = menus.size();
+            if (size == 1) {
+                data.put("first", menus.get(0));
+            } else if (size == 2) {
+                data.put("first", menus.get(0));
+                data.put("second", menus.get(1));
+            } else if (size == 3) {
+                data.put("first", menus.get(0));
+                data.put("second", menus.get(2));
+                data.put("third", menus.get(3));
+            }
+        }
+
+        return ApiRest.builder().data(data).message("查询微信菜单成功！").successful(true).build();
+    }
+
+    private Map<String, Object> buildMenu(WeiXinMenu weiXinMenu) {
+        Map<String, Object> menu = new HashMap<String, Object>();
+        menu.put("name", weiXinMenu.getName());
+
+        if (StringUtils.isNotBlank(weiXinMenu.getType())) {
+            menu.put("type", weiXinMenu.getType());
+            menu.put("messageContent", weiXinMenu.getMessageContent());
+            menu.put("mediaId", weiXinMenu.getMediaId());
+            menu.put("url", weiXinMenu.getUrl());
+            menu.put("pagePath", weiXinMenu.getPagePath());
+            menu.put("miniProgramAppId", weiXinMenu.getMiniProgramAppId());
+        }
+        return menu;
+    }
 }
