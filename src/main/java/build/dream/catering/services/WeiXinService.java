@@ -771,8 +771,8 @@ public class WeiXinService {
                 data.put("second", menus.get(1));
             } else if (size == 3) {
                 data.put("first", menus.get(0));
-                data.put("second", menus.get(2));
-                data.put("third", menus.get(3));
+                data.put("second", menus.get(1));
+                data.put("third", menus.get(2));
             }
         }
 
