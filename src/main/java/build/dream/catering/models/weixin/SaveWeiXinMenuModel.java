@@ -174,7 +174,7 @@ public class SaveWeiXinMenuModel extends CateringBasicModel {
             } else if (Constants.WEI_XIN_MENU_TYPE_VIEW_LIMITED.equals(type)) {
                 return StringUtils.isNotBlank(mediaId);
             } else if (Constants.WEI_XIN_MENU_TYPE_MINIPROGRAM.equals(type)) {
-                return StringUtils.isNotBlank(pagePath) && StringUtils.isNotBlank(url);
+                return StringUtils.isNotBlank(pagePath) && StringUtils.isNotBlank(url) && StringUtils.isNotBlank(miniProgramAppId);
             }
 
             if (StringUtils.isBlank(type)) {
@@ -304,7 +304,7 @@ public class SaveWeiXinMenuModel extends CateringBasicModel {
             } else if (Constants.WEI_XIN_MENU_TYPE_VIEW_LIMITED.equals(type)) {
                 return StringUtils.isNotBlank(mediaId);
             } else if (Constants.WEI_XIN_MENU_TYPE_MINIPROGRAM.equals(type)) {
-                return StringUtils.isNotBlank(pagePath) && StringUtils.isNotBlank(url);
+                return StringUtils.isNotBlank(pagePath) && StringUtils.isNotBlank(url) && StringUtils.isNotBlank(miniProgramAppId);
             } else {
                 return false;
             }
