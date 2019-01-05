@@ -11,28 +11,26 @@ import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.text.Text;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+import org.elasticsearch.search.sort.SortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -493,6 +491,7 @@ public class GoodsService extends BasicService {
             goods.setCategoryId(saveGoodsModel.getCategoryId());
             goods.setImageUrl(saveGoodsModel.getImageUrl());
             DatabaseHelper.update(goods);
+            ElasticsearchUtils.index(Constants.ELASTICSEARCH_INDEX_CATERING, Goods.TABLE_NAME, goods);
 
             // 删除需要删除的规格
             if (CollectionUtils.isNotEmpty(saveGoodsModel.getDeleteGoodsSpecificationIds())) {
@@ -688,6 +687,7 @@ public class GoodsService extends BasicService {
             goods.setUpdatedUserId(userId);
             goods.setUpdatedRemark("新增商品信息！");
             DatabaseHelper.insert(goods);
+            ElasticsearchUtils.index(Constants.ELASTICSEARCH_INDEX_CATERING, Goods.TABLE_NAME, goods);
 
             BigInteger goodsId = goods.getId();
             // 新增所有规格
@@ -938,6 +938,7 @@ public class GoodsService extends BasicService {
             goods.setImageUrl(imageUrl);
             goods.setUpdatedUserId(userId);
             DatabaseHelper.update(goods);
+            ElasticsearchUtils.index(Constants.ELASTICSEARCH_INDEX_CATERING, Goods.TABLE_NAME, goods);
 
             goodsSpecification.setPrice(price);
             goodsSpecification.setUpdatedUserId(userId);
@@ -956,6 +957,7 @@ public class GoodsService extends BasicService {
                     .updatedUserId(userId)
                     .build();
             DatabaseHelper.insert(goods);
+            ElasticsearchUtils.index(Constants.ELASTICSEARCH_INDEX_CATERING, Goods.TABLE_NAME, goods);
 
             BigInteger packageId = goods.getId();
 
@@ -1052,7 +1054,7 @@ public class GoodsService extends BasicService {
         Goods goods = DatabaseHelper.find(Goods.class, searchModel);
         ValidateUtils.notNull(goods, "商品不存在！");
 
-        validateCanNotOperate(tenantId, branchId, "goods", goodsId, 2);
+        validateCanNotOperate(tenantId, branchId, Goods.TABLE_NAME, goodsId, 2);
 
         Date currentTime = new Date();
         goods.setUpdatedUserId(userId);
@@ -1060,6 +1062,7 @@ public class GoodsService extends BasicService {
         goods.setDeletedTime(currentTime);
         goods.setDeleted(true);
         DatabaseHelper.update(goods);
+        ElasticsearchUtils.delete(Constants.ELASTICSEARCH_INDEX_CATERING, Goods.TABLE_NAME, goodsId.toString());
 
         // 删除该商品的所有规格
         UpdateModel goodsSpecificationUpdateModel = new UpdateModel(true);
@@ -1121,7 +1124,7 @@ public class GoodsService extends BasicService {
         int maxValue = tenantConfig.getMaxValue();
         ValidateUtils.isTrue(currentValue <= maxValue, "您最多可以添加" + (maxValue - currentValue + count) + "条商品信息！");
 
-        List<Goods> goodses = new ArrayList<Goods>();
+        List<Goods> goodsList = new ArrayList<Goods>();
         Map<String, Goods> goodsMap = new HashMap<String, Goods>();
         Map<String, GoodsSpecification> goodsSpecificationMap = new HashMap<String, GoodsSpecification>();
 
@@ -1132,12 +1135,12 @@ public class GoodsService extends BasicService {
             goods.setTenantCode(tenantCode);
             goods.setBranchId(branchId);
             goods.setName(MapUtils.getString(goodsInfo, "name"));
-            goods.setType(1);
+            goods.setType(Constants.GOODS_TYPE_ORDINARY_GOODS);
             goods.setCategoryId(BigInteger.ONE);
             goods.setCreatedUserId(userId);
             goods.setUpdatedUserId(userId);
             goodsMap.put(uuid, goods);
-            goodses.add(goods);
+            goodsList.add(goods);
 
             GoodsSpecification goodsSpecification = new GoodsSpecification();
             goodsSpecification.setTenantId(tenantId);
@@ -1149,7 +1152,8 @@ public class GoodsService extends BasicService {
             goodsSpecificationMap.put(uuid, goodsSpecification);
         }
 
-        DatabaseHelper.insertAll(goodses);
+        DatabaseHelper.insertAll(goodsList);
+        ElasticsearchUtils.indexAll(Constants.ELASTICSEARCH_INDEX_CATERING, Goods.TABLE_NAME, goodsList);
 
         List<GoodsSpecification> goodsSpecifications = new ArrayList<GoodsSpecification>();
         for (Map.Entry<String, GoodsSpecification> entry : goodsSpecificationMap.entrySet()) {
@@ -1162,9 +1166,6 @@ public class GoodsService extends BasicService {
 
         return ApiRest.builder().message("导入商品信息成功！").successful(true).build();
     }
-
-    @Autowired
-    private TransportClient transportClient;
 
     /**
      * 检索商品
@@ -1181,27 +1182,31 @@ public class GoodsService extends BasicService {
         String searchStr = searchGoodsModel.getSearchStr();
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        boolQueryBuilder.must(QueryBuilders.termQuery("tenantId", tenantId.longValue()));
-        boolQueryBuilder.must(QueryBuilders.termQuery("branchId", branchId.longValue()));
+        boolQueryBuilder.must(QueryBuilders.termQuery(Goods.FieldName.TENANT_ID, tenantId.longValue()));
+        boolQueryBuilder.must(QueryBuilders.termQuery(Goods.FieldName.BRANCH_ID, branchId.longValue()));
 
         if (categoryId != null) {
-            boolQueryBuilder.must(QueryBuilders.termQuery("categoryId", categoryId.longValue()));
+            boolQueryBuilder.must(QueryBuilders.termQuery(Goods.FieldName.CATEGORY_ID, categoryId.longValue()));
         }
 
         if (StringUtils.isNotBlank(searchStr)) {
-            boolQueryBuilder.must(QueryBuilders.matchQuery("name", searchStr));
+            boolQueryBuilder.must(QueryBuilders.matchQuery(Goods.FieldName.NAME, searchStr));
         }
 
         HighlightBuilder highlightBuilder = new HighlightBuilder();
         highlightBuilder.preTags(Constants.ELASTICSEARCH_HIGHLIGHT_PRE_TAG);
         highlightBuilder.postTags(Constants.ELASTICSEARCH_HIGHLIGHT_POST_TAG);
-        highlightBuilder.field("name");
+        highlightBuilder.field(Goods.FieldName.NAME);
 
-        SearchRequestBuilder searchRequestBuilder = transportClient.prepareSearch("catering")
-                .setTypes("goods")
+        SortBuilder sortBuilder = SortBuilders.fieldSort(Goods.FieldName.UPDATED_TIME).order(SortOrder.DESC);
+
+        TransportClient transportClient = ElasticsearchUtils.obtainTransportClient();
+        SearchRequestBuilder searchRequestBuilder = transportClient.prepareSearch(Constants.ELASTICSEARCH_INDEX_CATERING)
+                .setTypes(Goods.TABLE_NAME)
                 .highlighter(highlightBuilder)
                 .setSearchType(SearchType.QUERY_THEN_FETCH)
                 .setQuery(boolQueryBuilder)
+                .addSort(sortBuilder)
                 .setFrom((page - 1) * rows)
                 .setSize(rows);
         SearchResponse searchResponse = searchRequestBuilder.get();
@@ -1211,11 +1216,11 @@ public class GoodsService extends BasicService {
         for (SearchHit searchHit : searchHits) {
             Map<String, Object> result = searchHit.getSource();
             Map<String, HighlightField> highlightFields = searchHit.getHighlightFields();
-            HighlightField nameHighlightField = highlightFields.get("name");
+            HighlightField nameHighlightField = highlightFields.get(Goods.FieldName.NAME);
 
             if (nameHighlightField != null) {
                 Text[] nameFragments = nameHighlightField.getFragments();
-                result.put("name", StringUtils.join(nameFragments, ""));
+                result.put(Goods.FieldName.NAME, StringUtils.join(nameFragments, ""));
             }
 
             results.add(result);
@@ -1228,31 +1233,10 @@ public class GoodsService extends BasicService {
         return ApiRest.builder().data(data).message("检索商品成功！").successful(true).build();
     }
 
-    @Autowired
-    private GoodsMapper getGoodsMapper;
-
     @Transactional(readOnly = true)
-    public ApiRest test(BigInteger tenantId, BigInteger branchId) throws IOException {
-        List<Goods> goodsList = getGoodsMapper.findAllGoodsInfos(tenantId, branchId, null);
-
-        for (Goods goods : goodsList) {
-            XContentBuilder contentBuilder = XContentFactory.jsonBuilder().startObject();
-
-            Map<String, Object> map = ApplicationHandler.toMap(goods);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DEFAULT_DATE_PATTERN);
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                Object value = entry.getValue();
-                if (value instanceof Date) {
-                    contentBuilder.field(entry.getKey(), simpleDateFormat.format(value));
-                } else {
-                    contentBuilder.field(entry.getKey(), entry.getValue());
-                }
-            }
-            contentBuilder.endObject();
-            System.out.println(contentBuilder.string());
-
-            IndexResponse indexResponse = transportClient.prepareIndex("catering", "goods", goods.getId().toString()).setSource(contentBuilder).get();
-        }
+    public ApiRest test(BigInteger tenantId, BigInteger branchId) {
+        List<Goods> goodsList = DatabaseHelper.callMapperMethod(GoodsMapper.class, "findAllGoodsInfos", TupleUtils.buildTuple2(BigInteger.class, tenantId), TupleUtils.buildTuple2(BigInteger.class, branchId), TupleUtils.buildTuple2(List.class, null));
+        ElasticsearchUtils.indexAll(Constants.ELASTICSEARCH_INDEX_CATERING, Goods.TABLE_NAME, goodsList);
         return ApiRest.builder().message("操作成功！").successful(true).build();
     }
 }
