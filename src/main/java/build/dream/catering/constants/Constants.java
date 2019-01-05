@@ -127,6 +127,6 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String WEI_XIN_OPEN_PLATFORM_APPLICATION_APP_ID = "wei.xin.open.platform.application.app.id";
     public static final String WEI_XIN_OPEN_PLATFORM_APPLICATION_APP_SECRET = "wei.xin.open.platform.application.app.secret";
 
-    public static final String ELASTICSEARCH_HIGHLIGHT_PRE_TAG = "<span style=\"color: red;\">";
+    public static final String ELASTICSEARCH_HIGHLIGHT_PRE_TAG = "<span class=\"elasticsearch_highlight\">";
     public static final String ELASTICSEARCH_HIGHLIGHT_POST_TAG = "</span>";
 }
