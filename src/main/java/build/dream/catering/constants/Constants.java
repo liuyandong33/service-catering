@@ -115,8 +115,8 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String WEI_XIN_CARD_PAY_GIFT_CARD_ADD_URI = "/card/paygiftcard/add";
     public static final String WEI_XIN_CARD_DELETE_URI = "/card/delete";
 
-    public static final String ELASTICSEARCH_CLUSTER_NAME = "elasticsearch.cluster-name";
-    public static final String ELASTICSEARCH_CLUSTER_NODES = "elasticsearch.cluster-nodes";
+    public static final String ELASTICSEARCH_CLUSTER_NAME = "elasticsearch.cluster.name";
+    public static final String ELASTICSEARCH_CLUSTER_NODES = "elasticsearch.cluster.nodes";
     public static final String ELASTICJOB_ZOOKEEPER_SERVER_LISTS = "elasticjob.zookeeper.server-lists";
     public static final String ELASTICJOB_ZOOKEEPER_NAMESPACE = "elasticjob.zookeeper.namespace";
 
@@ -126,4 +126,7 @@ public class Constants extends build.dream.common.constants.Constants {
 
     public static final String WEI_XIN_OPEN_PLATFORM_APPLICATION_APP_ID = "wei.xin.open.platform.application.app.id";
     public static final String WEI_XIN_OPEN_PLATFORM_APPLICATION_APP_SECRET = "wei.xin.open.platform.application.app.secret";
+
+    public static final String ELASTICSEARCH_HIGHLIGHT_PRE_TAG = "<span style=\"color: red;\">";
+    public static final String ELASTICSEARCH_HIGHLIGHT_POST_TAG = "</span>";
 }

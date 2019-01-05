@@ -26,3 +26,27 @@ cluster.name: wali
 node.name: slave1
 network.host: 127.0.0.1
 discovery.zen.ping.unicast.hosts: ["127.0.0.1"]
+
+
+SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(Goods.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        List<Goods> goodsList = DatabaseHelper.findAll(Goods.class, searchModel);
+
+        for (Goods goods : goodsList) {
+            XContentBuilder contentBuilder = XContentFactory.jsonBuilder().startObject();
+
+            Map<String, Object> map = ApplicationHandler.toMap(goods);
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DEFAULT_DATE_PATTERN);
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                Object value = entry.getValue();
+                if (value instanceof Date) {
+                    contentBuilder.field(entry.getKey(), simpleDateFormat.format(value));
+                } else {
+                    contentBuilder.field(entry.getKey(), entry.getValue());
+                }
+            }
+            contentBuilder.endObject();
+            System.out.println(contentBuilder.string());
+
+            IndexResponse indexResponse = transportClient.prepareIndex("catering", "goods", goods.getId().toString()).setSource(contentBuilder).get();
+        }

@@ -10,12 +10,29 @@ import build.dream.common.catering.domains.*;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.text.Text;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -1144,5 +1161,98 @@ public class GoodsService extends BasicService {
         DatabaseHelper.insertAll(goodsSpecifications);
 
         return ApiRest.builder().message("导入商品信息成功！").successful(true).build();
+    }
+
+    @Autowired
+    private TransportClient transportClient;
+
+    /**
+     * 检索商品
+     *
+     * @param searchGoodsModel
+     * @return
+     */
+    public ApiRest searchGoods(SearchGoodsModel searchGoodsModel) {
+        BigInteger tenantId = searchGoodsModel.obtainTenantId();
+        BigInteger branchId = searchGoodsModel.obtainBranchId();
+        int page = searchGoodsModel.getPage();
+        int rows = searchGoodsModel.getRows();
+        BigInteger categoryId = searchGoodsModel.getCategoryId();
+        String searchStr = searchGoodsModel.getSearchStr();
+
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        boolQueryBuilder.must(QueryBuilders.termQuery("tenantId", tenantId.longValue()));
+        boolQueryBuilder.must(QueryBuilders.termQuery("branchId", branchId.longValue()));
+
+        if (categoryId != null) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("categoryId", categoryId.longValue()));
+        }
+
+        if (StringUtils.isNotBlank(searchStr)) {
+            boolQueryBuilder.must(QueryBuilders.matchQuery("name", searchStr));
+        }
+
+        HighlightBuilder highlightBuilder = new HighlightBuilder();
+        highlightBuilder.preTags(Constants.ELASTICSEARCH_HIGHLIGHT_PRE_TAG);
+        highlightBuilder.postTags(Constants.ELASTICSEARCH_HIGHLIGHT_POST_TAG);
+        highlightBuilder.field("name");
+
+        SearchRequestBuilder searchRequestBuilder = transportClient.prepareSearch("catering")
+                .setTypes("goods")
+                .highlighter(highlightBuilder)
+                .setSearchType(SearchType.QUERY_THEN_FETCH)
+                .setQuery(boolQueryBuilder)
+                .setFrom((page - 1) * rows)
+                .setSize(rows);
+        SearchResponse searchResponse = searchRequestBuilder.get();
+        SearchHits searchHits = searchResponse.getHits();
+
+        List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
+        for (SearchHit searchHit : searchHits) {
+            Map<String, Object> result = searchHit.getSource();
+            Map<String, HighlightField> highlightFields = searchHit.getHighlightFields();
+            HighlightField nameHighlightField = highlightFields.get("name");
+
+            if (nameHighlightField != null) {
+                Text[] nameFragments = nameHighlightField.getFragments();
+                result.put("name", StringUtils.join(nameFragments, ""));
+            }
+
+            results.add(result);
+        }
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("total", searchHits.totalHits);
+        data.put("rows", results);
+
+        return ApiRest.builder().data(data).message("检索商品成功！").successful(true).build();
+    }
+
+    @Autowired
+    private GoodsMapper getGoodsMapper;
+
+    @Transactional(readOnly = true)
+    public ApiRest test(BigInteger tenantId, BigInteger branchId) throws IOException {
+        List<Goods> goodsList = getGoodsMapper.findAllGoodsInfos(tenantId, branchId, null);
+
+        for (Goods goods : goodsList) {
+            XContentBuilder contentBuilder = XContentFactory.jsonBuilder().startObject();
+
+            Map<String, Object> map = ApplicationHandler.toMap(goods);
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DEFAULT_DATE_PATTERN);
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                Object value = entry.getValue();
+                if (value instanceof Date) {
+                    contentBuilder.field(entry.getKey(), simpleDateFormat.format(value));
+                } else {
+                    contentBuilder.field(entry.getKey(), entry.getValue());
+                }
+            }
+            contentBuilder.endObject();
+            System.out.println(contentBuilder.string());
+
+            IndexResponse indexResponse = transportClient.prepareIndex("catering", "goods", goods.getId().toString()).setSource(contentBuilder).get();
+        }
+        return ApiRest.builder().message("操作成功！").successful(true).build();
     }
 }
