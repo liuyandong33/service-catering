@@ -474,6 +474,7 @@ public class GoodsService extends BasicService {
         BigInteger branchId = saveGoodsModel.obtainBranchId();
         BigInteger userId = saveGoodsModel.obtainUserId();
 
+        Goods goods = null;
         if (saveGoodsModel.getId() != null) {
             BigInteger goodsId = saveGoodsModel.getId();
 
@@ -481,7 +482,7 @@ public class GoodsService extends BasicService {
             goodsSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
             goodsSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
             goodsSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
-            Goods goods = DatabaseHelper.find(Goods.class, goodsSearchModel);
+            goods = DatabaseHelper.find(Goods.class, goodsSearchModel);
             ValidateUtils.notNull(goods, "商品不存在！");
 
             // 验证商品是否可以编辑
@@ -491,7 +492,6 @@ public class GoodsService extends BasicService {
             goods.setCategoryId(saveGoodsModel.getCategoryId());
             goods.setImageUrl(saveGoodsModel.getImageUrl());
             DatabaseHelper.update(goods);
-            ElasticsearchUtils.index(Constants.ELASTICSEARCH_INDEX_CATERING, Goods.TABLE_NAME, goods);
 
             // 删除需要删除的规格
             if (CollectionUtils.isNotEmpty(saveGoodsModel.getDeleteGoodsSpecificationIds())) {
@@ -675,7 +675,7 @@ public class GoodsService extends BasicService {
             }
         } else {
             // 新增商品
-            Goods goods = new Goods();
+            goods = new Goods();
             goods.setTenantId(tenantId);
             goods.setTenantCode(tenantCode);
             goods.setBranchId(branchId);
@@ -687,7 +687,6 @@ public class GoodsService extends BasicService {
             goods.setUpdatedUserId(userId);
             goods.setUpdatedRemark("新增商品信息！");
             DatabaseHelper.insert(goods);
-            ElasticsearchUtils.index(Constants.ELASTICSEARCH_INDEX_CATERING, Goods.TABLE_NAME, goods);
 
             BigInteger goodsId = goods.getId();
             // 新增所有规格
@@ -714,7 +713,8 @@ public class GoodsService extends BasicService {
                 DatabaseHelper.insertAll(insertGoodsAttributes);
             }
         }
-        return ApiRest.builder().message("保存商品信息成功！").successful(true).build();
+        ElasticsearchUtils.index(Constants.ELASTICSEARCH_INDEX_CATERING, Goods.TABLE_NAME, goods);
+        return ApiRest.builder().data(goods).message("保存商品信息成功！").successful(true).build();
     }
 
     private GoodsAttributeGroup buildGoodsAttributeGroup(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, SaveGoodsModel.AttributeGroupInfo attributeGroupInfo, BigInteger userId) {
@@ -938,7 +938,6 @@ public class GoodsService extends BasicService {
             goods.setImageUrl(imageUrl);
             goods.setUpdatedUserId(userId);
             DatabaseHelper.update(goods);
-            ElasticsearchUtils.index(Constants.ELASTICSEARCH_INDEX_CATERING, Goods.TABLE_NAME, goods);
 
             goodsSpecification.setPrice(price);
             goodsSpecification.setUpdatedUserId(userId);
@@ -957,7 +956,6 @@ public class GoodsService extends BasicService {
                     .updatedUserId(userId)
                     .build();
             DatabaseHelper.insert(goods);
-            ElasticsearchUtils.index(Constants.ELASTICSEARCH_INDEX_CATERING, Goods.TABLE_NAME, goods);
 
             BigInteger packageId = goods.getId();
 
@@ -1014,6 +1012,7 @@ public class GoodsService extends BasicService {
                 }
             }
         }
+        ElasticsearchUtils.index(Constants.ELASTICSEARCH_INDEX_CATERING, Goods.TABLE_NAME, goods);
         return ApiRest.builder().data(goods).message("保存套餐成功！").successful(true).build();
     }
 
@@ -1062,7 +1061,6 @@ public class GoodsService extends BasicService {
         goods.setDeletedTime(currentTime);
         goods.setDeleted(true);
         DatabaseHelper.update(goods);
-        ElasticsearchUtils.delete(Constants.ELASTICSEARCH_INDEX_CATERING, Goods.TABLE_NAME, goodsId.toString());
 
         // 删除该商品的所有规格
         UpdateModel goodsSpecificationUpdateModel = new UpdateModel(true);
@@ -1100,6 +1098,7 @@ public class GoodsService extends BasicService {
         goodsAttributeUpdateModel.addSearchCondition(GoodsAttribute.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         DatabaseHelper.universalUpdate(goodsAttributeUpdateModel);
 
+        ElasticsearchUtils.delete(Constants.ELASTICSEARCH_INDEX_CATERING, Goods.TABLE_NAME, goodsId.toString());
         return ApiRest.builder().message("删除商品信息成功！").successful(true).build();
     }
 
@@ -1153,7 +1152,6 @@ public class GoodsService extends BasicService {
         }
 
         DatabaseHelper.insertAll(goodsList);
-        ElasticsearchUtils.indexAll(Constants.ELASTICSEARCH_INDEX_CATERING, Goods.TABLE_NAME, goodsList);
 
         List<GoodsSpecification> goodsSpecifications = new ArrayList<GoodsSpecification>();
         for (Map.Entry<String, GoodsSpecification> entry : goodsSpecificationMap.entrySet()) {
@@ -1164,6 +1162,7 @@ public class GoodsService extends BasicService {
 
         DatabaseHelper.insertAll(goodsSpecifications);
 
+        ElasticsearchUtils.indexAll(Constants.ELASTICSEARCH_INDEX_CATERING, Goods.TABLE_NAME, goodsList);
         return ApiRest.builder().message("导入商品信息成功！").successful(true).build();
     }
 
