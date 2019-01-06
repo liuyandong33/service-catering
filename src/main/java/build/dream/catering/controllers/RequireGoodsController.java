@@ -1,5 +1,6 @@
 package build.dream.catering.controllers;
 
+import build.dream.catering.models.requiregoods.AuditRequireGoodsOrderModel;
 import build.dream.catering.models.requiregoods.ObtainRequireGoodsOrderModel;
 import build.dream.catering.models.requiregoods.SaveRequireGoodsOrderModel;
 import build.dream.catering.services.RequireGoodsService;
@@ -33,6 +34,18 @@ public class RequireGoodsController {
     @ResponseBody
     @ApiRestAction(modelClass = ObtainRequireGoodsOrderModel.class, serviceClass = RequireGoodsService.class, serviceMethodName = "obtainRequireGoodsOrder", error = "获取要货单失败")
     public String obtainRequireGoodsOrder() {
+        return null;
+    }
+
+    /**
+     * 审核要货单
+     *
+     * @return
+     */
+    @RequestMapping(value = "/auditRequireGoodsOrder", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = AuditRequireGoodsOrderModel.class, serviceClass = RequireGoodsService.class, serviceMethodName = "auditRequireGoodsOrder", error = "审核要货单失败")
+    public String auditRequireGoodsOrder() {
         return null;
     }
 }

@@ -1,6 +1,7 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
+import build.dream.catering.models.requiregoods.AuditRequireGoodsOrderModel;
 import build.dream.catering.models.requiregoods.ObtainRequireGoodsOrderModel;
 import build.dream.catering.models.requiregoods.SaveRequireGoodsOrderModel;
 import build.dream.catering.utils.SequenceUtils;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,5 +91,38 @@ public class RequireGoodsService {
         data.put("requireGoodsOrder", requireGoodsOrder);
         data.put("requireGoodsOrderDetails", requireGoodsOrderDetails);
         return ApiRest.builder().data(data).message("获取要货单成功！").successful(true).build();
+    }
+
+    /**
+     * 审核要货单
+     *
+     * @param auditRequireGoodsOrderModel
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest auditRequireGoodsOrder(AuditRequireGoodsOrderModel auditRequireGoodsOrderModel) {
+        BigInteger tenantId = auditRequireGoodsOrderModel.obtainTenantId();
+        BigInteger branchId = auditRequireGoodsOrderModel.obtainBranchId();
+        BigInteger userId = auditRequireGoodsOrderModel.obtainUserId();
+        BigInteger requireGoodsOrderId = auditRequireGoodsOrderModel.getRequireGoodsOrderId();
+
+
+        SearchModel requireGoodsOrderSearchModel = new SearchModel(true);
+        requireGoodsOrderSearchModel.addSearchCondition(RequireGoodsOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        requireGoodsOrderSearchModel.addSearchCondition(RequireGoodsOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        requireGoodsOrderSearchModel.addSearchCondition(RequireGoodsOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, requireGoodsOrderId);
+        RequireGoodsOrder requireGoodsOrder = DatabaseHelper.find(RequireGoodsOrder.class, requireGoodsOrderSearchModel);
+        ValidateUtils.notNull(requireGoodsOrder, "要货单不存在！");
+        ValidateUtils.isTrue(requireGoodsOrder.getStatus() == 1, "只有未审核状态的要货单才能进行审核操作！");
+
+        requireGoodsOrder.setStatus(2);
+        requireGoodsOrder.setAuditTime(new Date());
+        requireGoodsOrder.setAuditorUserId(userId);
+        requireGoodsOrder.setUpdatedUserId(userId);
+        requireGoodsOrder.setUpdatedRemark("审核要货单！");
+
+        DatabaseHelper.update(requireGoodsOrder);
+
+        return ApiRest.builder().message("审核要货单成功！").successful(true).build();
     }
 }
