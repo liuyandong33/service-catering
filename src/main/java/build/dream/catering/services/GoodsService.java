@@ -473,7 +473,6 @@ public class GoodsService extends BasicService {
         String tenantCode = saveGoodsModel.obtainTenantCode();
         BigInteger branchId = saveGoodsModel.obtainBranchId();
         BigInteger userId = saveGoodsModel.obtainUserId();
-        String partitionCode = saveGoodsModel.obtainPartitionCode();
 
         Goods goods = null;
         if (saveGoodsModel.getId() != null) {
@@ -714,7 +713,7 @@ public class GoodsService extends BasicService {
                 DatabaseHelper.insertAll(insertGoodsAttributes);
             }
         }
-        ElasticsearchUtils.index(Constants.ELASTICSEARCH_INDEX_GOODS, partitionCode + "_" + Goods.TABLE_NAME, goods);
+        ElasticsearchUtils.index(Constants.ELASTICSEARCH_INDEX_GOODS, Goods.TABLE_NAME, goods);
         return ApiRest.builder().data(goods).message("保存商品信息成功！").successful(true).build();
     }
 
@@ -799,7 +798,6 @@ public class GoodsService extends BasicService {
         String tenantCode = savePackageModel.obtainTenantCode();
         BigInteger branchId = savePackageModel.obtainBranchId();
         BigInteger userId = savePackageModel.obtainUserId();
-        String partitionCode = savePackageModel.obtainPartitionCode();
         BigInteger id = savePackageModel.getId();
         String name = savePackageModel.getName();
         Integer type = savePackageModel.getType();
@@ -1014,7 +1012,7 @@ public class GoodsService extends BasicService {
                 }
             }
         }
-        ElasticsearchUtils.index(Constants.ELASTICSEARCH_INDEX_GOODS, partitionCode + "-" + Goods.TABLE_NAME, goods);
+        ElasticsearchUtils.index(Constants.ELASTICSEARCH_INDEX_GOODS, Goods.TABLE_NAME, goods);
         return ApiRest.builder().data(goods).message("保存套餐成功！").successful(true).build();
     }
 
@@ -1046,7 +1044,6 @@ public class GoodsService extends BasicService {
         BigInteger tenantId = deleteGoodsModel.obtainTenantId();
         BigInteger branchId = deleteGoodsModel.obtainBranchId();
         BigInteger userId = deleteGoodsModel.obtainUserId();
-        String partitionCode = deleteGoodsModel.obtainPartitionCode();
         BigInteger goodsId = deleteGoodsModel.getGoodsId();
 
         SearchModel searchModel = new SearchModel(true);
@@ -1101,7 +1098,7 @@ public class GoodsService extends BasicService {
         goodsAttributeUpdateModel.addSearchCondition(GoodsAttribute.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         DatabaseHelper.universalUpdate(goodsAttributeUpdateModel);
 
-        ElasticsearchUtils.delete(Constants.ELASTICSEARCH_INDEX_GOODS, partitionCode + "_" + Goods.TABLE_NAME, goodsId.toString());
+        ElasticsearchUtils.delete(Constants.ELASTICSEARCH_INDEX_GOODS, Goods.TABLE_NAME, goodsId.toString());
         return ApiRest.builder().message("删除商品信息成功！").successful(true).build();
     }
 
@@ -1117,7 +1114,6 @@ public class GoodsService extends BasicService {
         String tenantCode = importGoodsModel.obtainTenantCode();
         BigInteger branchId = importGoodsModel.obtainBranchId();
         BigInteger userId = importGoodsModel.obtainUserId();
-        String partitionCode = importGoodsModel.obtainPartitionCode();
         String zipGoodsInfos = importGoodsModel.getZipGoodsInfos();
         List<Map<String, Object>> goodsInfos = GsonUtils.fromJson(ZipUtils.unzipText(zipGoodsInfos), List.class);
         int count = goodsInfos.size();
@@ -1166,7 +1162,7 @@ public class GoodsService extends BasicService {
 
         DatabaseHelper.insertAll(goodsSpecifications);
 
-        ElasticsearchUtils.indexAll(Constants.ELASTICSEARCH_INDEX_GOODS, partitionCode + "_" + Goods.TABLE_NAME, goodsList);
+        ElasticsearchUtils.indexAll(Constants.ELASTICSEARCH_INDEX_GOODS, Goods.TABLE_NAME, goodsList);
         return ApiRest.builder().message("导入商品信息成功！").successful(true).build();
     }
 
@@ -1179,7 +1175,6 @@ public class GoodsService extends BasicService {
     public ApiRest searchGoods(SearchGoodsModel searchGoodsModel) {
         BigInteger tenantId = searchGoodsModel.obtainTenantId();
         BigInteger branchId = searchGoodsModel.obtainBranchId();
-        String partitionCode = searchGoodsModel.obtainPartitionCode();
         int page = searchGoodsModel.getPage();
         int rows = searchGoodsModel.getRows();
         BigInteger categoryId = searchGoodsModel.getCategoryId();
@@ -1206,7 +1201,7 @@ public class GoodsService extends BasicService {
 
         TransportClient transportClient = ElasticsearchUtils.obtainTransportClient();
         SearchRequestBuilder searchRequestBuilder = transportClient.prepareSearch(Constants.ELASTICSEARCH_INDEX_GOODS)
-                .setTypes(partitionCode + "_" + Goods.TABLE_NAME)
+                .setTypes(Goods.TABLE_NAME)
                 .highlighter(highlightBuilder)
                 .setSearchType(SearchType.QUERY_THEN_FETCH)
                 .setQuery(boolQueryBuilder)
@@ -1239,12 +1234,8 @@ public class GoodsService extends BasicService {
 
     @Transactional(readOnly = true)
     public ApiRest test(BigInteger tenantId, BigInteger branchId) {
-        String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
-//        List<Goods> goodsList = DatabaseHelper.callMapperMethod(GoodsMapper.class, "findAllGoodsInfos", TupleUtils.buildTuple2(BigInteger.class, tenantId), TupleUtils.buildTuple2(BigInteger.class, branchId), TupleUtils.buildTuple2(List.class, null));
-//        ElasticsearchUtils.indexAll(Constants.ELASTICSEARCH_INDEX_GOODS, partitionCode + "_" + Goods.TABLE_NAME, goodsList);
-        List<Branch> branches = DatabaseHelper.findAll(Branch.class, TupleUtils.buildTuple3(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
-
-        ElasticsearchUtils.indexAll(Constants.ELASTICSEARCH_INDEX_BRANCH, partitionCode + "_" + Branch.TABLE_NAME, branches);
+        List<Goods> goodsList = DatabaseHelper.callMapperMethod(GoodsMapper.class, "findAllGoodsInfos", TupleUtils.buildTuple2(BigInteger.class, tenantId), TupleUtils.buildTuple2(BigInteger.class, branchId), TupleUtils.buildTuple2(List.class, null));
+        ElasticsearchUtils.indexAll(Constants.ELASTICSEARCH_INDEX_GOODS, Goods.TABLE_NAME, goodsList);
         return ApiRest.builder().message("操作成功！").successful(true).build();
     }
 }
