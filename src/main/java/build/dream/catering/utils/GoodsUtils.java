@@ -126,6 +126,7 @@ public class GoodsUtils {
             BigInteger packageGroupId = packageGroup.getId();
 
             Map<String, Object> group = new HashMap<String, Object>();
+            group.put("id", packageGroup.getId());
             group.put("groupName", packageGroup.getGroupName());
             group.put("groupType", packageGroup.getGroupType());
             group.put("optionalQuantity", packageGroup.getOptionalQuantity());
