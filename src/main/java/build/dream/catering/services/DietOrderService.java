@@ -159,7 +159,7 @@ public class DietOrderService {
         // 查询出订单中包含的所有商品
         List<Goods> goodses = new ArrayList<Goods>();
         if (CollectionUtils.isNotEmpty(goodsIds)) {
-            goodses = goodsMapper.findAllGoodsInfos(tenantId, branchId, goodsIds);
+            goodses = goodsMapper.findAllByIdInList(tenantId, branchId, goodsIds);
         }
 
         // 查询出订单中包含的所有商品规格

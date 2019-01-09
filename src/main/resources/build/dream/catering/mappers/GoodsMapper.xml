@@ -21,7 +21,8 @@
         </if>
         AND package_group.deleted = 0
         INNER JOIN goods ON goods.id = package_group_detail.goods_id AND goods.deleted = 0
-        INNER JOIN goods_specification ON goods_specification.id = package_group_detail.goods_specification_id AND goods_specification.deleted = 0
+        INNER JOIN goods_specification ON goods_specification.id = package_group_detail.goods_specification_id AND
+        goods_specification.deleted = 0
         WHERE package_group_detail.package_id IN
         <foreach collection="packageIds" index="index" item="packageId" open="(" separator="," close=")">
             #{packageId}
@@ -29,7 +30,7 @@
         AND package_group_detail.deleted = 0;
     </select>
 
-    <select id="findAllGoodsInfos" resultType="build.dream.common.catering.domains.Goods">
+    <select id="findAllByIdInList" resultType="build.dream.common.catering.domains.Goods">
         SELECT
         goods.*,
         goods_category.name AS category_name
@@ -38,12 +39,22 @@
         WHERE goods.deleted = 0
         AND goods.tenant_id = #{tenantId}
         AND goods.branch_id = #{branchId}
-        <if test="@org.apache.commons.collections.CollectionUtils@isNotEmpty(goodsIds)">
-            AND goods.id IN
-            <foreach collection="goodsIds" index="index" item="goodsId" open="(" separator="," close=")">
-                #{goodsId}
-            </foreach>
-        </if>
+        AND goods.id IN
+        <foreach collection="goodsIds" index="index" item="goodsId" open="(" separator="," close=")">
+            #{goodsId}
+        </foreach>
+    </select>
+
+    <select id="findAllByCategoryId" resultType="build.dream.common.catering.domains.Goods">
+        SELECT
+        goods.*,
+        goods_category.name AS category_name
+        FROM goods
+        INNER JOIN goods_category ON goods_category.id = goods.category_id AND goods_category.deleted = 0
+        WHERE goods.deleted = 0
+        AND goods.tenant_id = #{tenantId}
+        AND goods.branch_id = #{branchId}
+        AND goods.category_id = #{categoryId}
     </select>
 
     <select id="deductingGoodsStock" resultType="java.math.BigDecimal">

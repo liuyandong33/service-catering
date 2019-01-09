@@ -13,13 +13,15 @@ import java.util.Map;
 public interface GoodsMapper {
     List<Map<String, Object>> listPackageInfos(@Param("packageIds") List<BigInteger> packageIds, @Param("groupType") Integer groupType);
 
-    List<Goods> findAllGoodsInfos(@Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId, @Param("goodsIds") List<BigInteger> goodsIds);
+    List<Goods> findAllByIdInList(@Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId, @Param("goodsIds") List<BigInteger> goodsIds);
+
+    List<Goods> findAllByCategoryId(@Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId, @Param("categoryId") BigInteger categoryId);
 
     BigDecimal deductingGoodsStock(@Param("goodsId") BigInteger goodsId,
-                                                @Param("goodsSpecificationId") BigInteger goodsSpecificationId,
-                                                @Param("quantity") BigDecimal quantity);
+                                   @Param("goodsSpecificationId") BigInteger goodsSpecificationId,
+                                   @Param("quantity") BigDecimal quantity);
 
     BigDecimal addGoodsStock(@Param("goodsId") BigInteger goodsId,
-                                          @Param("goodsSpecificationId") BigInteger goodsSpecificationId,
-                                          @Param("quantity") BigDecimal quantity);
+                             @Param("goodsSpecificationId") BigInteger goodsSpecificationId,
+                             @Param("quantity") BigDecimal quantity);
 }

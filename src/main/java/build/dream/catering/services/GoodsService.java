@@ -312,23 +312,32 @@ public class GoodsService extends BasicService {
     public ApiRest obtainAllGoodsInfos(ObtainAllGoodsInfosModel obtainAllGoodsInfosModel) {
         BigInteger tenantId = obtainAllGoodsInfosModel.obtainTenantId();
         BigInteger branchId = obtainAllGoodsInfosModel.obtainBranchId();
-        List<Goods> goodsInfos = goodsMapper.findAllGoodsInfos(tenantId, branchId, null);
+        BigInteger categoryId = obtainAllGoodsInfosModel.getCategoryId();
+        List<Goods> goodsInfos = goodsMapper.findAllByCategoryId(tenantId, branchId, categoryId);
 
         List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
         if (CollectionUtils.isNotEmpty(goodsInfos)) {
+            List<BigInteger> goodsIds = new ArrayList<BigInteger>();
+            for (Goods goods : goodsInfos) {
+                goodsIds.add(goods.getId());
+            }
+
             SearchModel goodsSpecificationSearchModel = new SearchModel(true);
             goodsSpecificationSearchModel.addSearchCondition(GoodsSpecification.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
             goodsSpecificationSearchModel.addSearchCondition(GoodsSpecification.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+            goodsSpecificationSearchModel.addSearchCondition(GoodsSpecification.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
             List<GoodsSpecification> goodsSpecifications = DatabaseHelper.findAll(GoodsSpecification.class, goodsSpecificationSearchModel);
 
             SearchModel goodsAttributeGroupSearchModel = new SearchModel(true);
             goodsAttributeGroupSearchModel.addSearchCondition(GoodsAttributeGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
             goodsAttributeGroupSearchModel.addSearchCondition(GoodsAttributeGroup.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+            goodsAttributeGroupSearchModel.addSearchCondition(GoodsAttributeGroup.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
             List<GoodsAttributeGroup> goodsAttributeGroups = DatabaseHelper.findAll(GoodsAttributeGroup.class, goodsAttributeGroupSearchModel);
 
             SearchModel goodsAttributeSearchModel = new SearchModel(true);
             goodsAttributeSearchModel.addSearchCondition(GoodsAttribute.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
             goodsAttributeSearchModel.addSearchCondition(GoodsAttribute.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+            goodsAttributeSearchModel.addSearchCondition(GoodsAttribute.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
             List<GoodsAttribute> goodsAttributes = DatabaseHelper.findAll(GoodsAttribute.class, goodsAttributeSearchModel);
 
             Map<BigInteger, List<GoodsSpecification>> goodsSpecificationMap = new HashMap<BigInteger, List<GoodsSpecification>>();
