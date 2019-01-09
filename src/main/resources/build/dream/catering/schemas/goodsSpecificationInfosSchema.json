@@ -12,11 +12,15 @@
             },
             "price": {
                 "type": "number"
+            },
+            "stock": {
+                "type": "number"
             }
         },
         "required": [
             "name",
-            "price"
+            "price",
+            "stock"
         ]
     },
     "minItems": 1

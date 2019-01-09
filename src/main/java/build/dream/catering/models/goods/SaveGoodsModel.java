@@ -25,7 +25,11 @@ public class SaveGoodsModel extends CateringBasicModel {
     @NotNull
     private BigInteger categoryId;
 
+    @NotNull
     private String imageUrl;
+
+    @NotNull
+    private Boolean stocked;
 
     @JsonSchema(value = Constants.GOODS_SPECIFICATION_INFOS_SCHEMA_FILE_PATH)
     private List<GoodsSpecificationInfo> goodsSpecificationInfos;
@@ -75,6 +79,14 @@ public class SaveGoodsModel extends CateringBasicModel {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public Boolean getStocked() {
+        return stocked;
+    }
+
+    public void setStocked(Boolean stocked) {
+        this.stocked = stocked;
     }
 
     public List<GoodsSpecificationInfo> getGoodsSpecificationInfos() {
@@ -131,6 +143,7 @@ public class SaveGoodsModel extends CateringBasicModel {
         private BigInteger id;
         private String name;
         private BigDecimal price;
+        private BigDecimal stock;
 
         public BigInteger getId() {
             return id;
@@ -154,6 +167,14 @@ public class SaveGoodsModel extends CateringBasicModel {
 
         public void setPrice(BigDecimal price) {
             this.price = price;
+        }
+
+        public BigDecimal getStock() {
+            return stock;
+        }
+
+        public void setStock(BigDecimal stock) {
+            this.stock = stock;
         }
     }
 

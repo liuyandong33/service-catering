@@ -433,27 +433,37 @@ public class GoodsService extends BasicService {
         BigInteger branchId = saveGoodsModel.obtainBranchId();
         BigInteger userId = saveGoodsModel.obtainUserId();
 
-        Goods goods = null;
-        if (saveGoodsModel.getId() != null) {
-            BigInteger goodsId = saveGoodsModel.getId();
+        BigInteger id = saveGoodsModel.getId();
+        String name = saveGoodsModel.getName();
+        int type = saveGoodsModel.getType();
+        BigInteger categoryId = saveGoodsModel.getCategoryId();
+        String imageUrl = saveGoodsModel.getImageUrl();
+        boolean stocked = saveGoodsModel.getStocked();
+        List<SaveGoodsModel.GoodsSpecificationInfo> goodsSpecificationInfos = saveGoodsModel.getGoodsSpecificationInfos();
+        List<SaveGoodsModel.AttributeGroupInfo> attributeGroupInfos = saveGoodsModel.getAttributeGroupInfos();
+        List<BigInteger> deleteGoodsSpecificationIds = saveGoodsModel.getDeleteGoodsSpecificationIds();
+        List<BigInteger> deleteGoodsAttributeGroupIds = saveGoodsModel.getDeleteGoodsAttributeGroupIds();
 
+        Goods goods = null;
+        if (id != null) {
             SearchModel goodsSearchModel = new SearchModel(true);
             goodsSearchModel.addSearchCondition(Goods.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
             goodsSearchModel.addSearchCondition(Goods.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-            goodsSearchModel.addSearchCondition(Goods.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
+            goodsSearchModel.addSearchCondition(Goods.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, id);
             goods = DatabaseHelper.find(Goods.class, goodsSearchModel);
             ValidateUtils.notNull(goods, "商品不存在！");
 
             // 验证商品是否可以编辑
-            validateCanNotOperate(tenantId, branchId, Goods.TABLE_NAME, goodsId, 2);
+            validateCanNotOperate(tenantId, branchId, Goods.TABLE_NAME, id, 2);
 
-            goods.setName(saveGoodsModel.getName());
-            goods.setCategoryId(saveGoodsModel.getCategoryId());
-            goods.setImageUrl(saveGoodsModel.getImageUrl());
+            goods.setName(name);
+            goods.setCategoryId(categoryId);
+            goods.setImageUrl(imageUrl);
+            goods.setStocked(stocked);
             DatabaseHelper.update(goods);
 
             // 删除需要删除的规格
-            if (CollectionUtils.isNotEmpty(saveGoodsModel.getDeleteGoodsSpecificationIds())) {
+            if (CollectionUtils.isNotEmpty(deleteGoodsSpecificationIds)) {
                 UpdateModel updateModel = new UpdateModel(true);
                 updateModel.setTableName(GoodsSpecification.TABLE_NAME);
                 updateModel.addContentValue(GoodsSpecification.ColumnName.UPDATED_USER_ID, userId);
@@ -462,12 +472,12 @@ public class GoodsService extends BasicService {
                 updateModel.addContentValue(GoodsSpecification.ColumnName.DELETED, 1);
                 updateModel.addSearchCondition(GoodsSpecification.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
                 updateModel.addSearchCondition(GoodsSpecification.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-                updateModel.addSearchCondition(GoodsSpecification.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, saveGoodsModel.getDeleteGoodsSpecificationIds());
+                updateModel.addSearchCondition(GoodsSpecification.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, deleteGoodsSpecificationIds);
                 DatabaseHelper.universalUpdate(updateModel);
             }
 
             // 删除需要删除的口味组及其下的口味
-            if (CollectionUtils.isNotEmpty(saveGoodsModel.getDeleteGoodsAttributeGroupIds())) {
+            if (CollectionUtils.isNotEmpty(deleteGoodsAttributeGroupIds)) {
                 UpdateModel deleteGoodsAttributeGroupUpdateModel = new UpdateModel(true);
                 deleteGoodsAttributeGroupUpdateModel.setTableName(GoodsAttributeGroup.TABLE_NAME);
                 deleteGoodsAttributeGroupUpdateModel.addContentValue(GoodsAttributeGroup.ColumnName.UPDATED_USER_ID, userId);
@@ -476,7 +486,7 @@ public class GoodsService extends BasicService {
                 deleteGoodsAttributeGroupUpdateModel.addContentValue(GoodsAttributeGroup.ColumnName.DELETED, 1);
                 deleteGoodsAttributeGroupUpdateModel.addSearchCondition(GoodsAttributeGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
                 deleteGoodsAttributeGroupUpdateModel.addSearchCondition(GoodsAttributeGroup.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-                deleteGoodsAttributeGroupUpdateModel.addSearchCondition(GoodsAttributeGroup.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, saveGoodsModel.getDeleteGoodsAttributeGroupIds());
+                deleteGoodsAttributeGroupUpdateModel.addSearchCondition(GoodsAttributeGroup.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, deleteGoodsAttributeGroupIds);
                 DatabaseHelper.universalUpdate(deleteGoodsAttributeGroupUpdateModel);
 
                 UpdateModel deleteGoodsAttributeUpdateModel = new UpdateModel(true);
@@ -487,12 +497,11 @@ public class GoodsService extends BasicService {
                 deleteGoodsAttributeUpdateModel.addContentValue(GoodsAttribute.ColumnName.DELETED, 1);
                 deleteGoodsAttributeUpdateModel.addSearchCondition(GoodsAttribute.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
                 deleteGoodsAttributeUpdateModel.addSearchCondition(GoodsAttribute.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-                deleteGoodsAttributeUpdateModel.addSearchCondition(GoodsAttribute.ColumnName.GOODS_ATTRIBUTE_GROUP_ID, Constants.SQL_OPERATION_SYMBOL_IN, saveGoodsModel.getDeleteGoodsAttributeGroupIds());
+                deleteGoodsAttributeUpdateModel.addSearchCondition(GoodsAttribute.ColumnName.GOODS_ATTRIBUTE_GROUP_ID, Constants.SQL_OPERATION_SYMBOL_IN, deleteGoodsAttributeGroupIds);
                 DatabaseHelper.universalUpdate(deleteGoodsAttributeUpdateModel);
             }
 
             // 查询出需要修改的商品规格
-            List<SaveGoodsModel.GoodsSpecificationInfo> goodsSpecificationInfos = saveGoodsModel.getGoodsSpecificationInfos();
             List<BigInteger> goodsSpecificationIds = new ArrayList<BigInteger>();
             for (SaveGoodsModel.GoodsSpecificationInfo goodsSpecificationInfo : goodsSpecificationInfos) {
                 if (goodsSpecificationInfo.getId() != null) {
@@ -505,7 +514,7 @@ public class GoodsService extends BasicService {
                 SearchModel searchModel = new SearchModel(true);
                 searchModel.addSearchCondition(GoodsSpecification.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
                 searchModel.addSearchCondition(GoodsSpecification.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-                searchModel.addSearchCondition(GoodsSpecification.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
+                searchModel.addSearchCondition(GoodsSpecification.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, id);
                 searchModel.addSearchCondition(GoodsSpecification.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, goodsSpecificationIds);
                 List<GoodsSpecification> goodsSpecifications = DatabaseHelper.findAll(GoodsSpecification.class, searchModel);
                 for (GoodsSpecification goodsSpecification : goodsSpecifications) {
@@ -523,7 +532,7 @@ public class GoodsService extends BasicService {
                     goodsSpecification.setPrice(goodsSpecificationInfo.getPrice());
                     DatabaseHelper.update(goodsSpecification);
                 } else {
-                    GoodsSpecification goodsSpecification = buildGoodsSpecification(tenantId, tenantCode, branchId, goodsId, goodsSpecificationInfo, userId);
+                    GoodsSpecification goodsSpecification = buildGoodsSpecification(tenantId, tenantCode, branchId, id, goodsSpecificationInfo, userId);
                     insertGoodsSpecifications.add(goodsSpecification);
                 }
                 if (CollectionUtils.isNotEmpty(insertGoodsSpecifications)) {
@@ -531,7 +540,6 @@ public class GoodsService extends BasicService {
                 }
             }
 
-            List<SaveGoodsModel.AttributeGroupInfo> attributeGroupInfos = saveGoodsModel.getAttributeGroupInfos();
             if (CollectionUtils.isNotEmpty(attributeGroupInfos)) {
                 // 用来保存需要修改的口味组id
                 List<BigInteger> goodsAttributeGroupIds = new ArrayList<BigInteger>();
@@ -573,7 +581,7 @@ public class GoodsService extends BasicService {
                 SearchModel goodsAttributeGroupSearchModel = new SearchModel(true);
                 goodsAttributeGroupSearchModel.addSearchCondition(GoodsAttributeGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
                 goodsAttributeGroupSearchModel.addSearchCondition(GoodsAttributeGroup.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-                goodsAttributeGroupSearchModel.addSearchCondition(GoodsAttributeGroup.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
+                goodsAttributeGroupSearchModel.addSearchCondition(GoodsAttributeGroup.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, id);
                 goodsAttributeGroupSearchModel.addSearchCondition(GoodsAttributeGroup.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, goodsAttributeGroupIds);
                 List<GoodsAttributeGroup> goodsAttributeGroups = DatabaseHelper.findAll(GoodsAttributeGroup.class, goodsAttributeGroupSearchModel);
                 Map<BigInteger, GoodsAttributeGroup> goodsAttributeGroupMap = new HashMap<BigInteger, GoodsAttributeGroup>();
@@ -585,7 +593,7 @@ public class GoodsService extends BasicService {
                 SearchModel goodsAttributeSearchModel = new SearchModel(true);
                 goodsAttributeSearchModel.addSearchCondition(GoodsAttribute.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
                 goodsAttributeSearchModel.addSearchCondition(GoodsAttribute.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-                goodsAttributeSearchModel.addSearchCondition(GoodsAttribute.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
+                goodsAttributeSearchModel.addSearchCondition(GoodsAttribute.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, id);
                 goodsAttributeSearchModel.addSearchCondition(GoodsAttribute.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, goodsAttributeIds);
                 List<GoodsAttribute> goodsAttributes = DatabaseHelper.findAll(GoodsAttribute.class, goodsAttributeSearchModel);
                 Map<BigInteger, GoodsAttribute> goodsAttributeMap = new HashMap<BigInteger, GoodsAttribute>();
@@ -614,16 +622,16 @@ public class GoodsService extends BasicService {
                                 goodsAttribute.setUpdatedRemark("修改口味信息！");
                                 DatabaseHelper.update(goodsAttribute);
                             } else {
-                                GoodsAttribute goodsAttribute = buildGoodsAttribute(attributeInfo, tenantId, tenantCode, branchId, goodsId, goodsAttributeGroup.getId(), userId);
+                                GoodsAttribute goodsAttribute = buildGoodsAttribute(attributeInfo, tenantId, tenantCode, branchId, id, goodsAttributeGroup.getId(), userId);
                                 insertGoodsAttributes.add(goodsAttribute);
                             }
                         }
                     } else {
-                        GoodsAttributeGroup goodsAttributeGroup = buildGoodsAttributeGroup(tenantId, tenantCode, branchId, goodsId, attributeGroupInfo, userId);
+                        GoodsAttributeGroup goodsAttributeGroup = buildGoodsAttributeGroup(tenantId, tenantCode, branchId, id, attributeGroupInfo, userId);
                         DatabaseHelper.insert(goodsAttributeGroup);
 
                         for (SaveGoodsModel.AttributeInfo attributeInfo : attributeGroupInfo.getAttributeInfos()) {
-                            GoodsAttribute goodsAttribute = buildGoodsAttribute(attributeInfo, tenantId, tenantCode, branchId, goodsId, goodsAttributeGroup.getId(), userId);
+                            GoodsAttribute goodsAttribute = buildGoodsAttribute(attributeInfo, tenantId, tenantCode, branchId, id, goodsAttributeGroup.getId(), userId);
                             insertGoodsAttributes.add(goodsAttribute);
                         }
                     }
@@ -634,30 +642,30 @@ public class GoodsService extends BasicService {
             }
         } else {
             // 新增商品
-            goods = new Goods();
-            goods.setTenantId(tenantId);
-            goods.setTenantCode(tenantCode);
-            goods.setBranchId(branchId);
-            goods.setName(saveGoodsModel.getName());
-            goods.setType(saveGoodsModel.getType());
-            goods.setCategoryId(saveGoodsModel.getCategoryId());
-            goods.setImageUrl(saveGoodsModel.getImageUrl());
-            goods.setCreatedUserId(userId);
-            goods.setUpdatedUserId(userId);
-            goods.setUpdatedRemark("新增商品信息！");
+            goods = Goods.builder()
+                    .tenantId(tenantId)
+                    .tenantCode(tenantCode)
+                    .branchId(branchId)
+                    .name(name)
+                    .type(type)
+                    .categoryId(categoryId)
+                    .imageUrl(imageUrl)
+                    .stocked(stocked)
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
+                    .updatedRemark("新增商品信息！")
+                    .build();
             DatabaseHelper.insert(goods);
 
             BigInteger goodsId = goods.getId();
             // 新增所有规格
             List<GoodsSpecification> insertGoodsSpecifications = new ArrayList<GoodsSpecification>();
-            List<SaveGoodsModel.GoodsSpecificationInfo> goodsSpecificationInfos = saveGoodsModel.getGoodsSpecificationInfos();
             for (SaveGoodsModel.GoodsSpecificationInfo goodsSpecificationInfo : goodsSpecificationInfos) {
                 GoodsSpecification goodsSpecification = buildGoodsSpecification(tenantId, tenantCode, branchId, goodsId, goodsSpecificationInfo, userId);
                 insertGoodsSpecifications.add(goodsSpecification);
             }
             DatabaseHelper.insertAll(insertGoodsSpecifications);
 
-            List<SaveGoodsModel.AttributeGroupInfo> attributeGroupInfos = saveGoodsModel.getAttributeGroupInfos();
             if (CollectionUtils.isNotEmpty(attributeGroupInfos)) {
                 List<GoodsAttribute> insertGoodsAttributes = new ArrayList<GoodsAttribute>();
                 for (SaveGoodsModel.AttributeGroupInfo attributeGroupInfo : attributeGroupInfos) {
@@ -705,16 +713,18 @@ public class GoodsService extends BasicService {
     }
 
     private GoodsSpecification buildGoodsSpecification(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, SaveGoodsModel.GoodsSpecificationInfo goodsSpecificationInfo, BigInteger userId) {
-        GoodsSpecification goodsSpecification = new GoodsSpecification();
-        goodsSpecification.setTenantId(tenantId);
-        goodsSpecification.setTenantCode(tenantCode);
-        goodsSpecification.setBranchId(branchId);
-        goodsSpecification.setGoodsId(goodsId);
-        goodsSpecification.setName(goodsSpecificationInfo.getName());
-        goodsSpecification.setPrice(goodsSpecificationInfo.getPrice());
-        goodsSpecification.setCreatedUserId(userId);
-        goodsSpecification.setUpdatedUserId(userId);
-        goodsSpecification.setUpdatedRemark("新增规格信息！");
+        GoodsSpecification goodsSpecification = GoodsSpecification.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .goodsId(goodsId)
+                .name(goodsSpecificationInfo.getName())
+                .price(goodsSpecificationInfo.getPrice())
+                .stock(goodsSpecificationInfo.getStock())
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .updatedRemark("新增规格信息！")
+                .build();
         return goodsSpecification;
     }
 
