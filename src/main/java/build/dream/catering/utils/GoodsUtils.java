@@ -37,14 +37,14 @@ public class GoodsUtils {
 
     public static Map<String, Object> buildGoodsInfo(Goods goods, List<GoodsSpecification> goodsSpecifications, List<GoodsAttributeGroup> goodsAttributeGroups, List<GoodsAttribute> goodsAttributes) {
         Map<String, Object> goodsInfo = new HashMap<String, Object>();
-        goodsInfo.put("id", goods.getId());
-        goodsInfo.put("name", goods.getName());
-        goodsInfo.put("tenantId", goods.getTenantId());
-        goodsInfo.put("tenantCode", goods.getTenantCode());
-        goodsInfo.put("branchId", goods.getBranchId());
-        goodsInfo.put("type", goods.getType());
-        goodsInfo.put("categoryId", goods.getCategoryId());
-        goodsInfo.put("categoryName", goods.getCategoryName());
+        goodsInfo.put(Goods.FieldName.ID, goods.getId());
+        goodsInfo.put(Goods.FieldName.NAME, goods.getName());
+        goodsInfo.put(Goods.FieldName.TENANT_ID, goods.getTenantId());
+        goodsInfo.put(Goods.FieldName.TENANT_CODE, goods.getTenantCode());
+        goodsInfo.put(Goods.FieldName.BRANCH_ID, goods.getBranchId());
+        goodsInfo.put(Goods.FieldName.TYPE, goods.getType());
+        goodsInfo.put(Goods.FieldName.CATEGORY_ID, goods.getCategoryId());
+        goodsInfo.put(Goods.FieldName.CATEGORY_NAME, goods.getCategoryName());
         goodsInfo.put("goodsSpecifications", buildGoodsSpecificationInfos(goodsSpecifications));
 
         if (CollectionUtils.isNotEmpty(goodsAttributeGroups)) {
@@ -69,16 +69,16 @@ public class GoodsUtils {
         for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroups) {
             BigInteger goodsAttributeGroupId = goodsAttributeGroup.getId();
             Map<String, Object> attributeGroup = new HashMap<String, Object>();
-            attributeGroup.put("id", goodsAttributeGroup.getId());
-            attributeGroup.put("name", goodsAttributeGroup.getName());
+            attributeGroup.put(GoodsAttributeGroup.FieldName.ID, goodsAttributeGroup.getId());
+            attributeGroup.put(GoodsAttributeGroup.FieldName.NAME, goodsAttributeGroup.getName());
 
             List<GoodsAttribute> goodsAttributeList = goodsAttributeMap.get(goodsAttributeGroupId);
             List<Map<String, Object>> attributes = new ArrayList<Map<String, Object>>();
             for (GoodsAttribute goodsAttribute : goodsAttributeList) {
                 Map<String, Object> attribute = new HashMap<String, Object>();
-                attribute.put("id", goodsAttribute.getId());
-                attribute.put("name", goodsAttribute.getName());
-                attribute.put("price", goodsAttribute.getPrice());
+                attribute.put(GoodsAttribute.FieldName.ID, goodsAttribute.getId());
+                attribute.put(GoodsAttribute.FieldName.NAME, goodsAttribute.getName());
+                attribute.put(GoodsAttribute.FieldName.PRICE, goodsAttribute.getPrice());
                 attributes.add(attribute);
             }
             attributeGroup.put("attributes", attributes);
@@ -91,9 +91,9 @@ public class GoodsUtils {
         List<Map<String, Object>> goodsSpecificationInfos = new ArrayList<Map<String, Object>>();
         for (GoodsSpecification goodsSpecification : goodsSpecifications) {
             Map<String, Object> goodsSpecificationInfo = new HashMap<String, Object>();
-            goodsSpecificationInfo.put("id", goodsSpecification.getId());
-            goodsSpecificationInfo.put("name", goodsSpecification.getName());
-            goodsSpecificationInfo.put("price", goodsSpecification.getPrice());
+            goodsSpecificationInfo.put(GoodsSpecification.FieldName.ID, goodsSpecification.getId());
+            goodsSpecificationInfo.put(GoodsSpecification.FieldName.NAME, goodsSpecification.getName());
+            goodsSpecificationInfo.put(GoodsSpecification.FieldName.PRICE, goodsSpecification.getPrice());
             goodsSpecificationInfos.add(goodsSpecificationInfo);
         }
         return goodsSpecificationInfos;
@@ -101,14 +101,15 @@ public class GoodsUtils {
 
     public static Map<String, Object> buildPackageInfo(Goods goods, List<PackageGroup> packageGroups, List<Map<String, Object>> packageGroupDetails) {
         Map<String, Object> goodsInfo = new HashMap<String, Object>();
-        goodsInfo.put("id", goods.getId());
-        goodsInfo.put("name", goods.getName());
-        goodsInfo.put("tenantId", goods.getTenantId());
-        goodsInfo.put("tenantCode", goods.getTenantCode());
-        goodsInfo.put("branchId", goods.getBranchId());
-        goodsInfo.put("type", goods.getType());
-        goodsInfo.put("categoryId", goods.getCategoryId());
-        goodsInfo.put("categoryName", goods.getCategoryName());
+        goodsInfo.put(Goods.FieldName.ID, goods.getId());
+        goodsInfo.put(Goods.FieldName.NAME, goods.getName());
+        goodsInfo.put(Goods.FieldName.TENANT_ID, goods.getTenantId());
+        goodsInfo.put(Goods.FieldName.TENANT_CODE, goods.getTenantCode());
+        goodsInfo.put(Goods.FieldName.BRANCH_ID, goods.getBranchId());
+        goodsInfo.put(Goods.FieldName.TYPE, goods.getType());
+        goodsInfo.put(Goods.FieldName.CATEGORY_ID, goods.getCategoryId());
+        goodsInfo.put(Goods.FieldName.CATEGORY_NAME, goods.getCategoryName());
+        goodsInfo.put(Goods.FieldName.IMAGE_URL, goods.getImageUrl());
 
         Map<BigInteger, List<Map<String, Object>>> packageGroupDetailMap = new HashMap<BigInteger, List<Map<String, Object>>>();
         for (Map<String, Object> packageGroupDetail : packageGroupDetails) {
@@ -126,10 +127,10 @@ public class GoodsUtils {
             BigInteger packageGroupId = packageGroup.getId();
 
             Map<String, Object> group = new HashMap<String, Object>();
-            group.put("id", packageGroup.getId());
-            group.put("groupName", packageGroup.getGroupName());
-            group.put("groupType", packageGroup.getGroupType());
-            group.put("optionalQuantity", packageGroup.getOptionalQuantity());
+            group.put(PackageGroup.FieldName.ID, packageGroup.getId());
+            group.put(PackageGroup.FieldName.GROUP_NAME, packageGroup.getGroupName());
+            group.put(PackageGroup.FieldName.GROUP_TYPE, packageGroup.getGroupType());
+            group.put(PackageGroup.FieldName.OPTIONAL_QUANTITY, packageGroup.getOptionalQuantity());
             group.put("details", packageGroupDetailMap.get(packageGroupId));
 
             groups.add(group);
