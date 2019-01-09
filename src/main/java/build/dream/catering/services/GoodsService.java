@@ -346,7 +346,7 @@ public class GoodsService extends BasicService {
                 for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroups) {
                     BigInteger goodsId = goodsAttributeGroup.getGoodsId();
                     List<GoodsAttributeGroup> goodsAttributeGroupList = goodsAttributeGroupMap.get(goodsId);
-                    if (CollectionUtils.isNotEmpty(goodsAttributeGroupList)) {
+                    if (CollectionUtils.isEmpty(goodsAttributeGroupList)) {
                         goodsAttributeGroupList = new ArrayList<GoodsAttributeGroup>();
                         goodsAttributeGroupMap.put(goodsId, goodsAttributeGroupList);
                     }
@@ -359,7 +359,7 @@ public class GoodsService extends BasicService {
                 for (GoodsAttribute goodsAttribute : goodsAttributes) {
                     BigInteger goodsId = goodsAttribute.getGoodsId();
                     List<GoodsAttribute> goodsAttributeList = goodsAttributeMap.get(goodsId);
-                    if (CollectionUtils.isNotEmpty(goodsAttributeList)) {
+                    if (CollectionUtils.isEmpty(goodsAttributeList)) {
                         goodsAttributeList = new ArrayList<GoodsAttribute>();
                         goodsAttributeMap.put(goodsId, goodsAttributeList);
                     }
