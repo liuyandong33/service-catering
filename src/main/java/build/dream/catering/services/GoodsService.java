@@ -513,8 +513,9 @@ public class GoodsService extends BasicService {
             // 查询出需要修改的商品规格
             List<BigInteger> goodsSpecificationIds = new ArrayList<BigInteger>();
             for (SaveGoodsModel.GoodsSpecificationInfo goodsSpecificationInfo : goodsSpecificationInfos) {
-                if (goodsSpecificationInfo.getId() != null) {
-                    goodsSpecificationIds.add(goodsSpecificationInfo.getId());
+                BigInteger goodsSpecificationId = goodsSpecificationInfo.getId();
+                if (goodsSpecificationId != null) {
+                    goodsSpecificationIds.add(goodsSpecificationId);
                 }
             }
 
@@ -532,8 +533,8 @@ public class GoodsService extends BasicService {
             }
 
             // 处理所有规格，修改与更新
+            List<GoodsSpecification> insertGoodsSpecifications = new ArrayList<GoodsSpecification>();
             for (SaveGoodsModel.GoodsSpecificationInfo goodsSpecificationInfo : goodsSpecificationInfos) {
-                List<GoodsSpecification> insertGoodsSpecifications = new ArrayList<GoodsSpecification>();
                 if (goodsSpecificationInfo.getId() != null) {
                     GoodsSpecification goodsSpecification = goodsSpecificationMap.get(goodsSpecificationInfo.getId());
                     ValidateUtils.notNull(goodsSpecification, "商品规格不存在！");
@@ -544,9 +545,9 @@ public class GoodsService extends BasicService {
                     GoodsSpecification goodsSpecification = buildGoodsSpecification(tenantId, tenantCode, branchId, id, goodsSpecificationInfo, userId);
                     insertGoodsSpecifications.add(goodsSpecification);
                 }
-                if (CollectionUtils.isNotEmpty(insertGoodsSpecifications)) {
-                    DatabaseHelper.insertAll(insertGoodsSpecifications);
-                }
+            }
+            if (CollectionUtils.isNotEmpty(insertGoodsSpecifications)) {
+                DatabaseHelper.insertAll(insertGoodsSpecifications);
             }
 
             if (CollectionUtils.isNotEmpty(attributeGroupInfos)) {
@@ -694,30 +695,32 @@ public class GoodsService extends BasicService {
     }
 
     private GoodsAttributeGroup buildGoodsAttributeGroup(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, SaveGoodsModel.AttributeGroupInfo attributeGroupInfo, BigInteger userId) {
-        GoodsAttributeGroup goodsAttributeGroup = new GoodsAttributeGroup();
-        goodsAttributeGroup.setTenantId(tenantId);
-        goodsAttributeGroup.setTenantCode(tenantCode);
-        goodsAttributeGroup.setBranchId(branchId);
-        goodsAttributeGroup.setGoodsId(goodsId);
-        goodsAttributeGroup.setName(attributeGroupInfo.getName());
-        goodsAttributeGroup.setCreatedUserId(userId);
-        goodsAttributeGroup.setUpdatedUserId(userId);
-        goodsAttributeGroup.setUpdatedRemark("新增口味组信息！");
+        GoodsAttributeGroup goodsAttributeGroup = GoodsAttributeGroup.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .goodsId(goodsId)
+                .name(attributeGroupInfo.getName())
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .updatedRemark("新增口味组信息！")
+                .build();
         return goodsAttributeGroup;
     }
 
     private GoodsAttribute buildGoodsAttribute(SaveGoodsModel.AttributeInfo attributeInfo, BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, BigInteger goodsAttributeGroupId, BigInteger userId) {
-        GoodsAttribute goodsAttribute = new GoodsAttribute();
-        goodsAttribute.setTenantId(tenantId);
-        goodsAttribute.setTenantCode(tenantCode);
-        goodsAttribute.setBranchId(branchId);
-        goodsAttribute.setGoodsId(goodsId);
-        goodsAttribute.setGoodsAttributeGroupId(goodsAttributeGroupId);
-        goodsAttribute.setName(attributeInfo.getName());
-        goodsAttribute.setPrice(attributeInfo.getPrice() == null ? BigDecimal.ZERO : attributeInfo.getPrice());
-        goodsAttribute.setCreatedUserId(userId);
-        goodsAttribute.setUpdatedUserId(userId);
-        goodsAttribute.setUpdatedRemark("新增属性信息！");
+        GoodsAttribute goodsAttribute = GoodsAttribute.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .goodsId(goodsId)
+                .goodsAttributeGroupId(goodsAttributeGroupId)
+                .name(attributeInfo.getName())
+                .price(attributeInfo.getPrice() == null ? Constants.DECIMAL_DEFAULT_VALUE : attributeInfo.getPrice())
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .updatedRemark("新增属性信息！")
+                .build();
         return goodsAttribute;
     }
 
