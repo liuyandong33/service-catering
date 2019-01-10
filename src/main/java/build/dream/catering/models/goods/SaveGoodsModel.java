@@ -3,38 +3,22 @@ package build.dream.catering.models.goods;
 import build.dream.catering.constants.Constants;
 import build.dream.common.annotations.JsonSchema;
 import build.dream.common.models.CateringBasicModel;
-import build.dream.common.utils.ApplicationHandler;
-import org.apache.commons.lang.ArrayUtils;
-import org.hibernate.validator.constraints.Length;
 
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
+@JsonSchema(value = Constants.SAVE_GOODS_SCHEMA_FILE_PATH)
 public class SaveGoodsModel extends CateringBasicModel {
-    private static final Integer[] TYPES = {Constants.GOODS_TYPE_ORDINARY_GOODS, Constants.GOODS_TYPE_PACKAGE};
     private BigInteger id;
-
-    @NotNull
-    @Length(max = 20)
     private String name;
-
     private Integer type;
-
-    @NotNull
     private BigInteger categoryId;
-
-    @NotNull
     private String imageUrl;
-
-    @NotNull
     private Boolean stocked;
 
-    @JsonSchema(value = Constants.GOODS_SPECIFICATION_INFOS_SCHEMA_FILE_PATH)
     private List<GoodsSpecificationInfo> goodsSpecificationInfos;
 
-    @JsonSchema(value = Constants.ATTRIBUTE_GROUP_INFOS_SCHEMA_FILE_PATH)
     private List<AttributeGroupInfo> attributeGroupInfos;
 
     private List<BigInteger> deleteGoodsSpecificationIds;
@@ -121,24 +105,6 @@ public class SaveGoodsModel extends CateringBasicModel {
         this.deleteGoodsAttributeGroupIds = deleteGoodsAttributeGroupIds;
     }
 
-    @Override
-    public boolean validate() {
-        if (!super.validate()) {
-            return false;
-        }
-        if (!ArrayUtils.contains(TYPES, type)) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public void validateAndThrow() {
-        super.validateAndThrow();
-        ApplicationHandler.notNull(type, "type");
-        ApplicationHandler.inArray(TYPES, type, "type");
-    }
-
     public static class GoodsSpecificationInfo {
         private BigInteger id;
         private String name;
@@ -180,12 +146,8 @@ public class SaveGoodsModel extends CateringBasicModel {
 
     public static class AttributeGroupInfo {
         private BigInteger id;
-        @NotNull
-        @Length(max = 20)
         private String name;
-
         private List<AttributeInfo> attributeInfos;
-
         private List<BigInteger> deleteGoodsAttributeIds;
 
         public BigInteger getId() {
@@ -223,11 +185,7 @@ public class SaveGoodsModel extends CateringBasicModel {
 
     public static class AttributeInfo {
         private BigInteger id;
-
-        @NotNull
-        @Length(max = 20)
         private String name;
-
         private BigDecimal price;
 
         public BigInteger getId() {

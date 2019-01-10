@@ -56,14 +56,13 @@ public class Constants extends build.dream.common.constants.Constants {
 
     public static final String KEY_DATA_HANDLE_SIGNATURES = "_data_handle_signatures";
 
-    public static final String GOODS_SPECIFICATION_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/goodsSpecificationInfosSchema.json";
-    public static final String ATTRIBUTE_GROUP_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/attributeGroupInfosSchema.json";
     public static final String BUY_GIVE_ACTIVITY_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/buyGiveActivityInfosSchema.json";
     public static final String SPECIAL_GOODS_ACTIVITY_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/specialGoodsActivityInfosSchema.json";
     public static final String ELEME_MESSAGE_SCHEMA_FILE_PATH = "build/dream/catering/schemas/elemeMessageSchema.json";
     public static final String MEI_TUAN_MESSAGE_SCHEMA_FILE_PATH = "build/dream/catering/schemas/meiTuanMessageSchema.json";
     public static final String GROUPS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/groupsSchema.json";
     public static final String GOODS_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/goodsInfosSchema.json";
+    public static final String SAVE_GOODS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/goods/saveGoodsSchema.json";
 
     public static final String KEY_BUY_GIVE_ACTIVITIES = "_buy_give_activities";
     public static final String KEY_FULL_REDUCTION_ACTIVITIES = "_full_reduction_activities";

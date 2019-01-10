@@ -1,0 +1,119 @@
+{
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "integer"
+        },
+        "name": {
+            "type": "string",
+            "maxLength": 20
+        },
+        "type": {
+            "enum": [
+                1,
+                2
+            ]
+        },
+        "categoryId": {
+            "type": "integer"
+        },
+        "imageUrl": {
+            "type": "string",
+            "maxLength": 200
+        },
+        "stocked": {
+            "type": "boolean"
+        },
+        "goodsSpecificationInfos": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 20
+                    },
+                    "price": {
+                        "type": "number"
+                    },
+                    "stock": {
+                        "type": "number"
+                    }
+                },
+                "required": [
+                    "name",
+                    "price",
+                    "stock"
+                ]
+            },
+            "minItems": 1
+        },
+        "attributeGroupInfos": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 20
+                    },
+                    "attributeInfos": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "integer"
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "maxLength": 20
+                                },
+                                "price": {
+                                    "type": "number"
+                                }
+                            },
+                            "required": [
+                                "name"
+                            ]
+                        }
+                    },
+                    "deleteGoodsAttributeIds": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "required": [
+                    "name"
+                ]
+            }
+        },
+        "deleteGoodsSpecificationIds": {
+            "type": "array",
+            "items": {
+                "type": "integer"
+            }
+        },
+        "deleteGoodsAttributeGroupIds": {
+            "type": "array",
+            "items": {
+                "type": "integer"
+            }
+        }
+    },
+    "required": [
+        "name",
+        "type",
+        "categoryId",
+        "imageUrl",
+        "stocked"
+    ]
+}
