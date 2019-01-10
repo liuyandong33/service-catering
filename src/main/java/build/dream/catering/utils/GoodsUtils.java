@@ -1,6 +1,8 @@
 package build.dream.catering.utils;
 
+import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.GoodsMapper;
+import build.dream.catering.models.goods.SaveGoodsModel;
 import build.dream.common.catering.domains.*;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.ValidateUtils;
@@ -138,5 +140,51 @@ public class GoodsUtils {
 
         goodsInfo.put("groups", groups);
         return goodsInfo;
+    }
+
+    public static GoodsAttributeGroup buildGoodsAttributeGroup(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, SaveGoodsModel.AttributeGroupInfo attributeGroupInfo, BigInteger userId) {
+        GoodsAttributeGroup goodsAttributeGroup = GoodsAttributeGroup.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .goodsId(goodsId)
+                .name(attributeGroupInfo.getName())
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .updatedRemark("新增口味组信息！")
+                .build();
+        return goodsAttributeGroup;
+    }
+
+    public static GoodsAttribute buildGoodsAttribute(SaveGoodsModel.AttributeInfo attributeInfo, BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, BigInteger goodsAttributeGroupId, BigInteger userId) {
+        GoodsAttribute goodsAttribute = GoodsAttribute.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .goodsId(goodsId)
+                .goodsAttributeGroupId(goodsAttributeGroupId)
+                .name(attributeInfo.getName())
+                .price(attributeInfo.getPrice() == null ? Constants.DECIMAL_DEFAULT_VALUE : attributeInfo.getPrice())
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .updatedRemark("新增属性信息！")
+                .build();
+        return goodsAttribute;
+    }
+
+    public static GoodsSpecification buildGoodsSpecification(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, SaveGoodsModel.GoodsSpecificationInfo goodsSpecificationInfo, BigInteger userId) {
+        GoodsSpecification goodsSpecification = GoodsSpecification.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .goodsId(goodsId)
+                .name(goodsSpecificationInfo.getName())
+                .price(goodsSpecificationInfo.getPrice())
+                .stock(goodsSpecificationInfo.getStock())
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .updatedRemark("新增规格信息！")
+                .build();
+        return goodsSpecification;
     }
 }

@@ -542,7 +542,7 @@ public class GoodsService extends BasicService {
                     goodsSpecification.setPrice(goodsSpecificationInfo.getPrice());
                     DatabaseHelper.update(goodsSpecification);
                 } else {
-                    GoodsSpecification goodsSpecification = buildGoodsSpecification(tenantId, tenantCode, branchId, id, goodsSpecificationInfo, userId);
+                    GoodsSpecification goodsSpecification = GoodsUtils.buildGoodsSpecification(tenantId, tenantCode, branchId, id, goodsSpecificationInfo, userId);
                     insertGoodsSpecifications.add(goodsSpecification);
                 }
             }
@@ -632,16 +632,16 @@ public class GoodsService extends BasicService {
                                 goodsAttribute.setUpdatedRemark("修改口味信息！");
                                 DatabaseHelper.update(goodsAttribute);
                             } else {
-                                GoodsAttribute goodsAttribute = buildGoodsAttribute(attributeInfo, tenantId, tenantCode, branchId, id, goodsAttributeGroup.getId(), userId);
+                                GoodsAttribute goodsAttribute = GoodsUtils.buildGoodsAttribute(attributeInfo, tenantId, tenantCode, branchId, id, goodsAttributeGroup.getId(), userId);
                                 insertGoodsAttributes.add(goodsAttribute);
                             }
                         }
                     } else {
-                        GoodsAttributeGroup goodsAttributeGroup = buildGoodsAttributeGroup(tenantId, tenantCode, branchId, id, attributeGroupInfo, userId);
+                        GoodsAttributeGroup goodsAttributeGroup = GoodsUtils.buildGoodsAttributeGroup(tenantId, tenantCode, branchId, id, attributeGroupInfo, userId);
                         DatabaseHelper.insert(goodsAttributeGroup);
 
                         for (SaveGoodsModel.AttributeInfo attributeInfo : attributeGroupInfo.getAttributeInfos()) {
-                            GoodsAttribute goodsAttribute = buildGoodsAttribute(attributeInfo, tenantId, tenantCode, branchId, id, goodsAttributeGroup.getId(), userId);
+                            GoodsAttribute goodsAttribute = GoodsUtils.buildGoodsAttribute(attributeInfo, tenantId, tenantCode, branchId, id, goodsAttributeGroup.getId(), userId);
                             insertGoodsAttributes.add(goodsAttribute);
                         }
                     }
@@ -671,7 +671,7 @@ public class GoodsService extends BasicService {
             // 新增所有规格
             List<GoodsSpecification> insertGoodsSpecifications = new ArrayList<GoodsSpecification>();
             for (SaveGoodsModel.GoodsSpecificationInfo goodsSpecificationInfo : goodsSpecificationInfos) {
-                GoodsSpecification goodsSpecification = buildGoodsSpecification(tenantId, tenantCode, branchId, goodsId, goodsSpecificationInfo, userId);
+                GoodsSpecification goodsSpecification = GoodsUtils.buildGoodsSpecification(tenantId, tenantCode, branchId, goodsId, goodsSpecificationInfo, userId);
                 insertGoodsSpecifications.add(goodsSpecification);
             }
             DatabaseHelper.insertAll(insertGoodsSpecifications);
@@ -679,11 +679,11 @@ public class GoodsService extends BasicService {
             if (CollectionUtils.isNotEmpty(attributeGroupInfos)) {
                 List<GoodsAttribute> insertGoodsAttributes = new ArrayList<GoodsAttribute>();
                 for (SaveGoodsModel.AttributeGroupInfo attributeGroupInfo : attributeGroupInfos) {
-                    GoodsAttributeGroup goodsAttributeGroup = buildGoodsAttributeGroup(tenantId, tenantCode, branchId, goodsId, attributeGroupInfo, userId);
+                    GoodsAttributeGroup goodsAttributeGroup = GoodsUtils.buildGoodsAttributeGroup(tenantId, tenantCode, branchId, goodsId, attributeGroupInfo, userId);
                     DatabaseHelper.insert(goodsAttributeGroup);
 
                     for (SaveGoodsModel.AttributeInfo attributeInfo : attributeGroupInfo.getAttributeInfos()) {
-                        GoodsAttribute goodsAttribute = buildGoodsAttribute(attributeInfo, tenantId, tenantCode, branchId, goodsId, goodsAttributeGroup.getId(), userId);
+                        GoodsAttribute goodsAttribute = GoodsUtils.buildGoodsAttribute(attributeInfo, tenantId, tenantCode, branchId, goodsId, goodsAttributeGroup.getId(), userId);
                         insertGoodsAttributes.add(goodsAttribute);
                     }
                 }
@@ -692,52 +692,6 @@ public class GoodsService extends BasicService {
         }
         ElasticsearchUtils.index(Constants.ELASTICSEARCH_INDEX_GOODS, Goods.TABLE_NAME, goods);
         return ApiRest.builder().data(goods).message("保存商品信息成功！").successful(true).build();
-    }
-
-    private GoodsAttributeGroup buildGoodsAttributeGroup(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, SaveGoodsModel.AttributeGroupInfo attributeGroupInfo, BigInteger userId) {
-        GoodsAttributeGroup goodsAttributeGroup = GoodsAttributeGroup.builder()
-                .tenantId(tenantId)
-                .tenantCode(tenantCode)
-                .branchId(branchId)
-                .goodsId(goodsId)
-                .name(attributeGroupInfo.getName())
-                .createdUserId(userId)
-                .updatedUserId(userId)
-                .updatedRemark("新增口味组信息！")
-                .build();
-        return goodsAttributeGroup;
-    }
-
-    private GoodsAttribute buildGoodsAttribute(SaveGoodsModel.AttributeInfo attributeInfo, BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, BigInteger goodsAttributeGroupId, BigInteger userId) {
-        GoodsAttribute goodsAttribute = GoodsAttribute.builder()
-                .tenantId(tenantId)
-                .tenantCode(tenantCode)
-                .branchId(branchId)
-                .goodsId(goodsId)
-                .goodsAttributeGroupId(goodsAttributeGroupId)
-                .name(attributeInfo.getName())
-                .price(attributeInfo.getPrice() == null ? Constants.DECIMAL_DEFAULT_VALUE : attributeInfo.getPrice())
-                .createdUserId(userId)
-                .updatedUserId(userId)
-                .updatedRemark("新增属性信息！")
-                .build();
-        return goodsAttribute;
-    }
-
-    private GoodsSpecification buildGoodsSpecification(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, SaveGoodsModel.GoodsSpecificationInfo goodsSpecificationInfo, BigInteger userId) {
-        GoodsSpecification goodsSpecification = GoodsSpecification.builder()
-                .tenantId(tenantId)
-                .tenantCode(tenantCode)
-                .branchId(branchId)
-                .goodsId(goodsId)
-                .name(goodsSpecificationInfo.getName())
-                .price(goodsSpecificationInfo.getPrice())
-                .stock(goodsSpecificationInfo.getStock())
-                .createdUserId(userId)
-                .updatedUserId(userId)
-                .updatedRemark("新增规格信息！")
-                .build();
-        return goodsSpecification;
     }
 
     /**
