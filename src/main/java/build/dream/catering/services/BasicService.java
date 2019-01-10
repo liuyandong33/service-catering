@@ -18,11 +18,11 @@ public class BasicService {
 
     public void validateCanNotOperate(BigInteger tenantId, BigInteger branchId, String tableName, BigInteger tableId, int operateType) {
         SearchModel searchModel = new SearchModel();
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition("table_name", Constants.SQL_OPERATION_SYMBOL_EQUAL, tableName);
-        searchModel.addSearchCondition("table_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tableId);
-        searchModel.addSearchCondition("operate_type", Constants.SQL_OPERATION_SYMBOL_IN, new int[]{operateType, 3});
+        searchModel.addSearchCondition(CanNotOperateReason.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(CanNotOperateReason.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(CanNotOperateReason.ColumnName.TABLE_NAME, Constants.SQL_OPERATION_SYMBOL_EQUAL, tableName);
+        searchModel.addSearchCondition(CanNotOperateReason.ColumnName.TABLE_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tableId);
+        searchModel.addSearchCondition(CanNotOperateReason.ColumnName.OPERATE_TYPE, Constants.SQL_OPERATION_SYMBOL_IN, new int[]{operateType, 3});
         CanNotOperateReason canNotOperateReason = DatabaseHelper.find(CanNotOperateReason.class, searchModel);
         if (canNotOperateReason != null) {
             int persistenceOperateType = canNotOperateReason.getOperateType();
@@ -39,10 +39,10 @@ public class BasicService {
 
     public void deleteCanNotOperateReason(BigInteger tenantId, BigInteger branchId, String causeTableName, BigInteger causeTableId) {
         SearchModel searchModel = new SearchModel();
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition("cause_table_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, causeTableId);
-        searchModel.addSearchCondition("cause_table_name", Constants.SQL_OPERATION_SYMBOL_EQUAL, causeTableName);
+        searchModel.addSearchCondition(CanNotOperateReason.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(CanNotOperateReason.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(CanNotOperateReason.ColumnName.CAUSE_TABLE_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, causeTableId);
+        searchModel.addSearchCondition(CanNotOperateReason.ColumnName.CAUSE_TABLE_NAME, Constants.SQL_OPERATION_SYMBOL_EQUAL, causeTableName);
         canNotOperateReasonMapper.delete(searchModel);
     }
 }
