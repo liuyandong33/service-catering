@@ -1053,7 +1053,7 @@ public class GoodsService extends BasicService {
         List<Map<String, Object>> goodsInfos = GsonUtils.fromJson(ZipUtils.unzipText(zipGoodsInfos), List.class);
         int count = goodsInfos.size();
 
-        TenantConfig tenantConfig = TenantConfigUtils.addTenantConfig(BigInteger.ONE, "goods_num", count);
+        TenantConfig tenantConfig = TenantConfigUtils.addTenantConfig(tenantId, "goods_num", count);
         int currentValue = tenantConfig.getCurrentValue();
         int maxValue = tenantConfig.getMaxValue();
         ValidateUtils.isTrue(currentValue <= maxValue, "您最多可以添加" + (maxValue - currentValue + count) + "条商品信息！");
