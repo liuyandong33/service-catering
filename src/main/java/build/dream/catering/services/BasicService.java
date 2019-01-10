@@ -4,18 +4,14 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.exceptions.CanNotDeleteException;
 import build.dream.catering.exceptions.CanNotEditAndDeleteException;
 import build.dream.catering.exceptions.CanNotEditException;
-import build.dream.catering.mappers.CanNotOperateReasonMapper;
 import build.dream.common.catering.domains.CanNotOperateReason;
 import build.dream.common.utils.DatabaseHelper;
+import build.dream.common.utils.DeleteModel;
 import build.dream.common.utils.SearchModel;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigInteger;
 
 public class BasicService {
-    @Autowired
-    private CanNotOperateReasonMapper canNotOperateReasonMapper;
-
     public void validateCanNotOperate(BigInteger tenantId, BigInteger branchId, String tableName, BigInteger tableId, int operateType) {
         SearchModel searchModel = new SearchModel();
         searchModel.addSearchCondition(CanNotOperateReason.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -38,11 +34,11 @@ public class BasicService {
     }
 
     public void deleteCanNotOperateReason(BigInteger tenantId, BigInteger branchId, String causeTableName, BigInteger causeTableId) {
-        SearchModel searchModel = new SearchModel();
-        searchModel.addSearchCondition(CanNotOperateReason.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition(CanNotOperateReason.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition(CanNotOperateReason.ColumnName.CAUSE_TABLE_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, causeTableId);
-        searchModel.addSearchCondition(CanNotOperateReason.ColumnName.CAUSE_TABLE_NAME, Constants.SQL_OPERATION_SYMBOL_EQUAL, causeTableName);
-        canNotOperateReasonMapper.delete(searchModel);
+        DeleteModel deleteModel = new DeleteModel();
+        deleteModel.addSearchCondition(CanNotOperateReason.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        deleteModel.addSearchCondition(CanNotOperateReason.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        deleteModel.addSearchCondition(CanNotOperateReason.ColumnName.CAUSE_TABLE_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, causeTableId);
+        deleteModel.addSearchCondition(CanNotOperateReason.ColumnName.CAUSE_TABLE_NAME, Constants.SQL_OPERATION_SYMBOL_EQUAL, causeTableName);
+        DatabaseHelper.delete(CanNotOperateReason.class, deleteModel);
     }
 }
