@@ -50,7 +50,7 @@ public class BranchService {
         branch.setTenantId(tenantId);
         branch.setTenantCode(tenantCode);
 
-        String code = SerialNumberGenerator.nextSerialNumber(4, SequenceUtils.nextValue(initializeBranchModel.getTenantCode() + "_branch_code"));
+        String code = SerialNumberGenerator.nextSerialNumber(4, SequenceUtils.nextValue(tenantCode + "_branch_code"));
         branch.setCode(code);
         branch.setName(name);
         branch.setType(type);
@@ -90,7 +90,7 @@ public class BranchService {
         }
         branch.setBusinessTimes(GsonUtils.toJson(businessTimeList));
         DatabaseHelper.insert(branch);
-        branchMapper.insertMergeUserBranch(userId, initializeBranchModel.getTenantId(), tenantCode, branch.getId(), currentUserId, "初始化门店，增加店长所属门店！");
+        branchMapper.insertMergeUserBranch(userId, tenantId, tenantCode, branch.getId(), currentUserId, "初始化门店，增加店长所属门店！");
 
         return ApiRest.builder().data(branch).className(Branch.class.getName()).message("初始化门店成功！").successful(true).build();
     }
