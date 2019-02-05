@@ -1137,7 +1137,7 @@ public class GoodsService extends BasicService {
         int page = searchGoodsModel.getPage();
         int rows = searchGoodsModel.getRows();
         BigInteger categoryId = searchGoodsModel.getCategoryId();
-        String searchStr = searchGoodsModel.getSearchStr();
+        String searchString = searchGoodsModel.getSearchString();
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must(QueryBuilders.termQuery(Goods.FieldName.TENANT_ID, tenantId.longValue()));
@@ -1147,8 +1147,8 @@ public class GoodsService extends BasicService {
             boolQueryBuilder.must(QueryBuilders.termQuery(Goods.FieldName.CATEGORY_ID, categoryId.longValue()));
         }
 
-        if (StringUtils.isNotBlank(searchStr)) {
-            boolQueryBuilder.must(QueryBuilders.matchQuery(Goods.FieldName.NAME, searchStr));
+        if (StringUtils.isNotBlank(searchString)) {
+            boolQueryBuilder.must(QueryBuilders.matchQuery(Goods.FieldName.NAME, searchString));
         }
 
         HighlightBuilder highlightBuilder = new HighlightBuilder();

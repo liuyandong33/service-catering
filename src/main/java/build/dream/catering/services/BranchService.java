@@ -102,9 +102,9 @@ public class BranchService {
         int page = listBranchesModel.getPage();
         int rows = listBranchesModel.getRows();
         List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
-        searchConditions.add(new SearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
+        searchConditions.add(new SearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
         if (StringUtils.isNotBlank(searchString)) {
-            searchConditions.add(new SearchCondition("name", Constants.SQL_OPERATION_SYMBOL_LIKE, "%" + searchString + "%"));
+            searchConditions.add(new SearchCondition(Branch.ColumnName.NAME, Constants.SQL_OPERATION_SYMBOL_LIKE, "%" + searchString + "%"));
         }
 
         SearchModel searchModel = new SearchModel(true);
