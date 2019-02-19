@@ -1137,7 +1137,8 @@ public class GoodsService extends BasicService {
         int page = searchGoodsModel.getPage();
         int rows = searchGoodsModel.getRows();
         BigInteger categoryId = searchGoodsModel.getCategoryId();
-        String searchStr = searchGoodsModel.getSearchStr();
+        String searchString = searchGoodsModel.getSearchString();
+        boolean highlight = searchGoodsModel.getHighlight();
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must(QueryBuilders.termQuery(Goods.FieldName.TENANT_ID, tenantId.longValue()));
@@ -1147,38 +1148,45 @@ public class GoodsService extends BasicService {
             boolQueryBuilder.must(QueryBuilders.termQuery(Goods.FieldName.CATEGORY_ID, categoryId.longValue()));
         }
 
-        if (StringUtils.isNotBlank(searchStr)) {
-            boolQueryBuilder.must(QueryBuilders.matchQuery(Goods.FieldName.NAME, searchStr));
+        if (StringUtils.isNotBlank(searchString)) {
+            boolQueryBuilder.must(QueryBuilders.matchQuery(Goods.FieldName.NAME, searchString));
         }
-
-        HighlightBuilder highlightBuilder = new HighlightBuilder();
-        highlightBuilder.preTags(Constants.ELASTICSEARCH_HIGHLIGHT_PRE_TAG);
-        highlightBuilder.postTags(Constants.ELASTICSEARCH_HIGHLIGHT_POST_TAG);
-        highlightBuilder.field(Goods.FieldName.NAME);
 
         SortBuilder sortBuilder = SortBuilders.fieldSort(Goods.FieldName.UPDATED_TIME).order(SortOrder.DESC);
 
         TransportClient transportClient = ElasticsearchUtils.obtainTransportClient();
         SearchRequestBuilder searchRequestBuilder = transportClient.prepareSearch(Constants.ELASTICSEARCH_INDEX_GOODS)
                 .setTypes(Goods.TABLE_NAME)
-                .highlighter(highlightBuilder)
                 .setSearchType(SearchType.QUERY_THEN_FETCH)
                 .setQuery(boolQueryBuilder)
                 .addSort(sortBuilder)
                 .setFrom((page - 1) * rows)
                 .setSize(rows);
+
+        if (highlight) {
+            HighlightBuilder highlightBuilder = new HighlightBuilder();
+            highlightBuilder.preTags(Constants.ELASTICSEARCH_HIGHLIGHT_PRE_TAG);
+            highlightBuilder.postTags(Constants.ELASTICSEARCH_HIGHLIGHT_POST_TAG);
+            highlightBuilder.field(Goods.FieldName.NAME);
+
+            searchRequestBuilder.highlighter(highlightBuilder);
+        }
+
         SearchResponse searchResponse = searchRequestBuilder.get();
         SearchHits searchHits = searchResponse.getHits();
 
         List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
         for (SearchHit searchHit : searchHits) {
             Map<String, Object> result = searchHit.getSource();
-            Map<String, HighlightField> highlightFields = searchHit.getHighlightFields();
-            HighlightField nameHighlightField = highlightFields.get(Goods.FieldName.NAME);
 
-            if (nameHighlightField != null) {
-                Text[] nameFragments = nameHighlightField.getFragments();
-                result.put(Goods.FieldName.NAME, StringUtils.join(nameFragments, ""));
+            if (highlight) {
+                Map<String, HighlightField> highlightFields = searchHit.getHighlightFields();
+                HighlightField nameHighlightField = highlightFields.get(Goods.FieldName.NAME);
+
+                if (nameHighlightField != null) {
+                    Text[] nameFragments = nameHighlightField.getFragments();
+                    result.put(Goods.FieldName.NAME, StringUtils.join(nameFragments, ""));
+                }
             }
 
             results.add(result);

@@ -50,7 +50,7 @@ public class BranchService {
         branch.setTenantId(tenantId);
         branch.setTenantCode(tenantCode);
 
-        String code = SerialNumberGenerator.nextSerialNumber(4, SequenceUtils.nextValue(initializeBranchModel.getTenantCode() + "_branch_code"));
+        String code = SerialNumberGenerator.nextSerialNumber(4, SequenceUtils.nextValue(tenantCode + "_branch_code"));
         branch.setCode(code);
         branch.setName(name);
         branch.setType(type);
@@ -90,7 +90,7 @@ public class BranchService {
         }
         branch.setBusinessTimes(GsonUtils.toJson(businessTimeList));
         DatabaseHelper.insert(branch);
-        branchMapper.insertMergeUserBranch(userId, initializeBranchModel.getTenantId(), tenantCode, branch.getId(), currentUserId, "初始化门店，增加店长所属门店！");
+        branchMapper.insertMergeUserBranch(userId, tenantId, tenantCode, branch.getId(), currentUserId, "初始化门店，增加店长所属门店！");
 
         return ApiRest.builder().data(branch).className(Branch.class.getName()).message("初始化门店成功！").successful(true).build();
     }
@@ -102,9 +102,9 @@ public class BranchService {
         int page = listBranchesModel.getPage();
         int rows = listBranchesModel.getRows();
         List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
-        searchConditions.add(new SearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
+        searchConditions.add(new SearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
         if (StringUtils.isNotBlank(searchString)) {
-            searchConditions.add(new SearchCondition("name", Constants.SQL_OPERATION_SYMBOL_LIKE, "%" + searchString + "%"));
+            searchConditions.add(new SearchCondition(Branch.ColumnName.NAME, Constants.SQL_OPERATION_SYMBOL_LIKE, "%" + searchString + "%"));
         }
 
         SearchModel searchModel = new SearchModel(true);

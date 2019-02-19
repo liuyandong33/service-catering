@@ -23,7 +23,10 @@ public class SearchGoodsModel extends CateringBasicModel {
     private Integer type;
 
     @Length(min = 1, max = 20)
-    private String searchStr;
+    private String searchString;
+
+    @NotNull
+    private Boolean highlight;
 
     public Integer getPage() {
         return page;
@@ -57,11 +60,19 @@ public class SearchGoodsModel extends CateringBasicModel {
         this.type = type;
     }
 
-    public String getSearchStr() {
-        return searchStr;
+    public String getSearchString() {
+        return searchString;
     }
 
-    public void setSearchStr(String searchStr) {
-        this.searchStr = searchStr;
+    public void setSearchString(String searchString) {
+        this.searchString = searchString;
+    }
+
+    public Boolean getHighlight() {
+        return highlight;
+    }
+
+    public void setHighlight(Boolean highlight) {
+        this.highlight = highlight;
     }
 }
