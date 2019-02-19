@@ -25,11 +25,13 @@ public class DataService {
         String signature = null;
         try {
             signature = DigestUtils.md5Hex(dietOrderData);
-            if (CacheUtils.exists(signature)) {
+            boolean isNotExists = CacheUtils.setnx(signature, signature);
+            if (!isNotExists) {
                 return;
             }
 
-            CacheUtils.setex(signature, signature, 30, TimeUnit.DAYS);
+            CacheUtils.expire(signature, 30, TimeUnit.DAYS);
+
             DataHandleHistory dataHandleHistory = new DataHandleHistory();
             dataHandleHistory.setSignature(signature);
             dataHandleHistory.setDataType(Constants.DATA_TYPE_DIET_ORDER);
@@ -93,11 +95,8 @@ public class DataService {
                 }
                 DatabaseHelper.insertAll(dietOrderActivities);
             }
-            CacheUtils.set(signature, signature);
         } catch (Exception e) {
-            if (StringUtils.isNotBlank(signature)) {
-                CacheUtils.delete(signature);
-            }
+            CacheUtils.delete(signature);
             throw e;
         }
     }
