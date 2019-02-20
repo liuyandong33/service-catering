@@ -263,14 +263,14 @@ public class WeiXinService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest addPayGiftCard(PayGiftCardModel payGiftCardModel) {
-        BigInteger tenantId = payGiftCardModel.obtainTenantId();
-        List<String> mchIdList = payGiftCardModel.getMchIdList();
-        Date beginTime = payGiftCardModel.getBeginTime();
-        Date endTime = payGiftCardModel.getEndTime();
-        BigInteger weiXinCardId = payGiftCardModel.getWeiXinCardId();
-        Integer leastCost = payGiftCardModel.getLeastCost();
-        Integer maxCost = payGiftCardModel.getMaxCost();
+    public ApiRest addPayGiftCard(AddPayGiftCardModel addPayGiftCardModel) {
+        BigInteger tenantId = addPayGiftCardModel.obtainTenantId();
+        List<String> mchIdList = addPayGiftCardModel.getMchIdList();
+        Date beginTime = addPayGiftCardModel.getBeginTime();
+        Date endTime = addPayGiftCardModel.getEndTime();
+        BigInteger weiXinCardId = addPayGiftCardModel.getWeiXinCardId();
+        Integer leastCost = addPayGiftCardModel.getLeastCost();
+        Integer maxCost = addPayGiftCardModel.getMaxCost();
 
         WeiXinAuthorizerInfo weiXinAuthorizerInfo = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
         ValidateUtils.notNull(weiXinAuthorizerInfo, "未授权微信公众号，不能开通支付即会员！");

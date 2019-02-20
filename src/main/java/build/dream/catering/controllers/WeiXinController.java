@@ -61,7 +61,7 @@ public class WeiXinController extends BasicController {
      */
     @RequestMapping(value = "/addPayGiftCard")
     @ResponseBody
-    @ApiRestAction(modelClass = PayGiftCardModel.class, serviceClass = WeiXinService.class, serviceMethodName = "addPayGiftCard", error = "开通支付即会员失败")
+    @ApiRestAction(modelClass = AddPayGiftCardModel.class, serviceClass = WeiXinService.class, serviceMethodName = "addPayGiftCard", error = "开通支付即会员失败")
     public String addPayGiftCard() {
         return null;
     }

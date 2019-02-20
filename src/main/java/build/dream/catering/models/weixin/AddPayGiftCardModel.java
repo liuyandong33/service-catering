@@ -8,7 +8,7 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
-public class PayGiftCardModel extends CateringBasicModel {
+public class AddPayGiftCardModel extends CateringBasicModel {
     @NotEmpty
     private List<String> mchIdList;
 
