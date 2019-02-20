@@ -10,7 +10,6 @@ import build.dream.common.models.weixin.CreateMenuModel;
 import build.dream.common.saas.domains.WeiXinAuthorizerInfo;
 import build.dream.common.saas.domains.WeiXinAuthorizerToken;
 import build.dream.common.utils.*;
-import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.map.HashedMap;
@@ -21,10 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class WeiXinService {
@@ -49,10 +45,10 @@ public class WeiXinService {
 
             WebResponse uploadBackgroundPicWebResponse = OutUtils.doPostWithRequestParametersAndFiles(uploadImgUrl, null, uploadBackgroundPicRequestParameters);
             String uploadBackgroundPicResult = uploadBackgroundPicWebResponse.getResult();
-            JSONObject uploadBackgroundPicResultJsonObject = JSONObject.fromObject(uploadBackgroundPicResult);
-            ValidateUtils.isTrue(!uploadBackgroundPicResultJsonObject.has("errcode"), uploadBackgroundPicResultJsonObject.optString("errmsg"));
+            Map<String, Object> uploadBackgroundPicResultMap = JacksonUtils.readValueAsMap(uploadBackgroundPicResult, String.class, Object.class);
+            ValidateUtils.isTrue(!uploadBackgroundPicResultMap.containsKey("errcode"), MapUtils.getString(uploadBackgroundPicResultMap, "errmsg"));
 
-            backgroundPicUrl = uploadBackgroundPicResultJsonObject.getString("url");
+            backgroundPicUrl = MapUtils.getString(uploadBackgroundPicResultMap, "url");
         }
 
         Map<String, Object> uploadLogoRequestParameters = new HashMap<String, Object>();
@@ -61,10 +57,10 @@ public class WeiXinService {
 
         WebResponse uploadLogoWebResponse = OutUtils.doPostWithRequestParametersAndFiles(uploadImgUrl, null, uploadLogoRequestParameters);
         String uploadLogoResult = uploadLogoWebResponse.getResult();
-        JSONObject uploadLogoResultJsonObject = JSONObject.fromObject(uploadLogoResult);
-        ValidateUtils.isTrue(!uploadLogoResultJsonObject.has("errcode"), uploadLogoResultJsonObject.optString("errmsg"));
+        Map<String, Object> uploadLogoResultMap = JacksonUtils.readValueAsMap(uploadLogoResult, String.class, Object.class);
+        ValidateUtils.isTrue(!uploadLogoResultMap.containsKey("errcode"), MapUtils.getString(uploadLogoResultMap, "errmsg"));
 
-        String logoUrl = uploadLogoResultJsonObject.getString("url");
+        String logoUrl = MapUtils.getString(uploadLogoResultMap, "url");
 
         Map<String, Object> baseInfo = new HashMap<String, Object>();
         baseInfo.put("logo_url", logoUrl);
@@ -174,10 +170,10 @@ public class WeiXinService {
 
         WebResponse createMemberCardWebResponse = OutUtils.doPostWithRequestBody(createMemberCardUrl, null, GsonUtils.toJson(createMemberCardRequestBody));
         String createMemberCardResult = createMemberCardWebResponse.getResult();
-        JSONObject createMemberCardResultJsonObject = JSONObject.fromObject(createMemberCardResult);
-        ValidateUtils.isTrue(createMemberCardResultJsonObject.getInt("errcode") == 0, createMemberCardResultJsonObject.getString("errmsg"));
+        Map<String, Object> createMemberCardResultMap = JacksonUtils.readValueAsMap(createMemberCardResult, String.class, Object.class);
+        ValidateUtils.isTrue(MapUtils.getIntValue(createMemberCardResultMap, "errcode") == 0, MapUtils.getString(createMemberCardResultMap, "errmsg"));
 
-        String cardId = createMemberCardResultJsonObject.getString("card_id");
+        String cardId = MapUtils.getString(createMemberCardResultMap, "card_id");
 
         // 设置开卡字段
         Map<String, Object> serviceStatement = new HashMap<String, Object>();
@@ -229,8 +225,8 @@ public class WeiXinService {
 
         WebResponse activateUserFormWebResponse = OutUtils.doPostWithRequestBody(activateUserFormUrl, null, GsonUtils.toJson(activateUserFormRequestBody));
         String activateUserFormResult = activateUserFormWebResponse.getResult();
-        JSONObject activateUserFormResultJsonObject = JSONObject.fromObject(activateUserFormResult);
-        ValidateUtils.isTrue(activateUserFormResultJsonObject.getInt("errcode") == 0, activateUserFormResultJsonObject.getString("errmsg"));
+        Map<String, Object> activateUserFormResultMap = JacksonUtils.readValueAsMap(activateUserFormResult, String.class, Object.class);
+        ValidateUtils.isTrue(MapUtils.getIntValue(activateUserFormResultMap, "errcode") == 0, MapUtils.getString(activateUserFormResultMap, "errmsg"));
 
         Map<String, Object> actionInfoCard = new HashMap<String, Object>();
         actionInfoCard.put("card_id", cardId);
@@ -246,11 +242,11 @@ public class WeiXinService {
 
         WebResponse createQrCodeWebResponse = OutUtils.doPostWithRequestBody(createQrCodeUrl, null, GsonUtils.toJson(createQRcodeRequestBody));
         String createQrCodeResult = createQrCodeWebResponse.getResult();
-        JSONObject createQrCodeResultJsonObject = JSONObject.fromObject(createQrCodeResult);
-        ValidateUtils.isTrue(createQrCodeResultJsonObject.getInt("errcode") == 0, createQrCodeResultJsonObject.getString("errmsg"));
+        Map<String, Object> createQrCodeResultMap = JacksonUtils.readValueAsMap(createQrCodeResult, String.class, Object.class);
+        ValidateUtils.isTrue(MapUtils.getIntValue(createQrCodeResultMap, "errcode") == 0, MapUtils.getString(createQrCodeResultMap, "errmsg"));
 
-        String url = createQrCodeResultJsonObject.getString("url");
-        String showQrCodeUrl = createQrCodeResultJsonObject.getString("show_qrcode_url");
+        String url = MapUtils.getString(createQrCodeResultMap, "url");
+        String showQrCodeUrl = MapUtils.getString(createQrCodeResultMap, "show_qrcode_url");
 
         WeiXinMemberCard weiXinMemberCard = new WeiXinMemberCard();
         weiXinMemberCard.setTenantId(tenantId);
@@ -263,17 +259,18 @@ public class WeiXinService {
         weiXinMemberCard.setUpdatedRemark("创建微信会员卡！");
         DatabaseHelper.insert(weiXinMemberCard);
 
-        ApiRest apiRest = new ApiRest();
-        apiRest.setData(weiXinMemberCard);
-        apiRest.setMessage("创建会员卡成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().data(weiXinMemberCard).message("创建会员卡成功！").successful(true).build();
     }
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest addPayGiftCard(PayGiftCardModel payGiftCardModel) {
         BigInteger tenantId = payGiftCardModel.obtainTenantId();
+        List<String> mchIdList = payGiftCardModel.getMchIdList();
+        Date beginTime = payGiftCardModel.getBeginTime();
+        Date endTime = payGiftCardModel.getEndTime();
         BigInteger weiXinCardId = payGiftCardModel.getWeiXinCardId();
+        Integer leastCost = payGiftCardModel.getLeastCost();
+        Integer maxCost = payGiftCardModel.getMaxCost();
 
         WeiXinAuthorizerInfo weiXinAuthorizerInfo = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
         ValidateUtils.notNull(weiXinAuthorizerInfo, "未授权微信公众号，不能开通支付即会员！");
@@ -288,14 +285,14 @@ public class WeiXinService {
         String accessToken = weiXinAuthorizerToken.getAuthorizerAccessToken();
 
         Map<String, Object> baseInfo = new HashMap<String, Object>();
-        baseInfo.put("mchid_list", payGiftCardModel.getMchIdList());
-        baseInfo.put("begin_time", payGiftCardModel.getBeginTime().getTime() / 1000);
-        baseInfo.put("end_time", payGiftCardModel.getEndTime().getTime() / 1000);
+        baseInfo.put("mchid_list", mchIdList);
+        baseInfo.put("begin_time", beginTime.getTime() / 1000);
+        baseInfo.put("end_time", endTime.getTime() / 1000);
 
         Map<String, Object> memberRule = new HashedMap<String, Object>();
         memberRule.put("card_id", weiXinMemberCard.getCardId());
-        memberRule.put("least_cost", payGiftCardModel.getLeastCost());
-        memberRule.put("max_cost", payGiftCardModel.getMaxCost());
+        memberRule.put("least_cost", leastCost);
+        memberRule.put("max_cost", maxCost);
 
         Map<String, Object> ruleInfo = new HashMap<String, Object>();
         ruleInfo.put("type", "RULE_TYPE_PAY_MEMBER_CARD");
@@ -310,13 +307,10 @@ public class WeiXinService {
 
         WebResponse payGiftCardWebResponse = OutUtils.doPostWithRequestBody(weiXinAddPayGiftCardUrl, null, GsonUtils.toJson(payGiftCardRequestBody));
         String payGiftCardResult = payGiftCardWebResponse.getResult();
-        JSONObject payGiftCardResultJsonObject = JSONObject.fromObject(payGiftCardResult);
-        ValidateUtils.isTrue(payGiftCardResultJsonObject.getInt("errcode") == 0, payGiftCardResultJsonObject.getString("errmsg"));
+        Map<String, Object> payGiftCardResultMap = JacksonUtils.readValueAsMap(payGiftCardResult, String.class, Object.class);
+        ValidateUtils.isTrue(MapUtils.getIntValue(payGiftCardResultMap, "errcode") == 0, MapUtils.getString(payGiftCardResultMap, "errmsg"));
 
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("开通支付即会员成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().message("开通支付即会员成功！").successful(true).build();
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -345,18 +339,15 @@ public class WeiXinService {
 
         WebResponse deleteCardWebResponse = OutUtils.doPostWithRequestBody(deleteCardUrl, null, GsonUtils.toJson(deleteCardRequestBody));
         String deleteCardResult = deleteCardWebResponse.getResult();
-        JSONObject deleteCardResultJsonObject = JSONObject.fromObject(deleteCardResult);
-        ValidateUtils.isTrue(deleteCardResultJsonObject.getInt("errcode") == 0, deleteCardResultJsonObject.getString("errmsg"));
+        Map<String, Object> deleteCardResultMap = JacksonUtils.readValueAsMap(deleteCardResult, String.class, Object.class);
+        ValidateUtils.isTrue(MapUtils.getIntValue(deleteCardResultMap, "errcode") == 0, MapUtils.getString(deleteCardResultMap, "errmsg"));
 
         weiXinMemberCard.setDeleted(true);
         weiXinMemberCard.setUpdatedUserId(userId);
         weiXinMemberCard.setUpdatedRemark("删除微信会员卡！");
         DatabaseHelper.update(weiXinMemberCard);
 
-        ApiRest apiRest = new ApiRest();
-        apiRest.setMessage("删除微信会员卡成功！");
-        apiRest.setSuccessful(true);
-        return apiRest;
+        return ApiRest.builder().message("删除微信会员卡成功！").successful(true).build();
     }
 
     /**
@@ -369,6 +360,8 @@ public class WeiXinService {
     public ApiRest listWeiXinMemberCards(ListWeiXinMemberCardsModel listWeiXinMemberCardsModel) {
         BigInteger tenantId = listWeiXinMemberCardsModel.obtainTenantId();
         BigInteger branchId = listWeiXinMemberCardsModel.obtainBranchId();
+        int page = listWeiXinMemberCardsModel.getPage();
+        int rows = listWeiXinMemberCardsModel.getRows();
 
         SearchModel searchModel = new SearchModel(true);
         List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
@@ -379,8 +372,8 @@ public class WeiXinService {
         List<WeiXinMemberCard> weiXinMemberCards = new ArrayList<WeiXinMemberCard>();
         if (count > 0) {
             PagedSearchModel pagedSearchModel = new PagedSearchModel(true);
-            pagedSearchModel.setPage(listWeiXinMemberCardsModel.getPage());
-            pagedSearchModel.setRows(listWeiXinMemberCardsModel.getRows());
+            pagedSearchModel.setPage(page);
+            pagedSearchModel.setRows(rows);
             pagedSearchModel.setSearchConditions(searchConditions);
             weiXinMemberCards = DatabaseHelper.findAllPaged(WeiXinMemberCard.class, pagedSearchModel);
         }
