@@ -12,7 +12,6 @@ import build.dream.common.saas.domains.WeiXinAuthorizerToken;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -289,7 +288,7 @@ public class WeiXinService {
         baseInfo.put("begin_time", beginTime.getTime() / 1000);
         baseInfo.put("end_time", endTime.getTime() / 1000);
 
-        Map<String, Object> memberRule = new HashedMap<String, Object>();
+        Map<String, Object> memberRule = new HashMap<String, Object>();
         memberRule.put("card_id", weiXinMemberCard.getCardId());
         memberRule.put("least_cost", leastCost);
         memberRule.put("max_cost", maxCost);
