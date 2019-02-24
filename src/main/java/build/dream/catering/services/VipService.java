@@ -126,7 +126,7 @@ public class VipService {
             searchModel.addSearchCondition(Vip.ColumnName.ALIPAY_USER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, alipayUserId);
         }
         Vip vip = VipUtils.find(searchModel);
-        return ApiRest.builder().data(vip).message("获取会员信息成功！").successful(true).build();
+        return ApiRest.builder().data(vip).className(Vip.class.getName()).message("获取会员信息成功！").successful(true).build();
     }
 
     /**
