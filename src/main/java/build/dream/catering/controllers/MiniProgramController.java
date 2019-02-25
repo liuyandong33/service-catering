@@ -5,11 +5,8 @@ import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.api.ApiRest;
 import build.dream.common.beans.WebResponse;
 import build.dream.common.controllers.BasicController;
-import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.GsonUtils;
-import build.dream.common.utils.OutUtils;
-import build.dream.common.utils.ValidateUtils;
-import net.sf.json.JSONObject;
+import build.dream.common.utils.*;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -36,13 +33,10 @@ public class MiniProgramController extends BasicController {
 
         String url = "https://api.weixin.qq.com/sns/jscode2session";
         WebResponse webResponse = OutUtils.doGetWithRequestParameters(url, null, obtainSessionRequestParameters);
-        JSONObject obtainSessionResultJsonObject = JSONObject.fromObject(webResponse.getResult());
-        ValidateUtils.isTrue(!obtainSessionResultJsonObject.has("errcode"), obtainSessionResultJsonObject.optString("errmsg"));
+        Map<String, Object> resultMap = JacksonUtils.readValueAsMap(webResponse.getResult(), String.class, Object.class);
+        ValidateUtils.isTrue(!resultMap.containsKey("errcode"), MapUtils.getString(resultMap, "errmsg"));
 
-        ApiRest apiRest = new ApiRest();
-        apiRest.setData(obtainSessionResultJsonObject);
-        apiRest.setMessage("code换取session_key成功！");
-        apiRest.setSuccessful(true);
+        ApiRest apiRest = ApiRest.builder().data(resultMap).message("code换取session_key成功！").successful(true).build();
         return GsonUtils.toJson(apiRest);
     }
 }
