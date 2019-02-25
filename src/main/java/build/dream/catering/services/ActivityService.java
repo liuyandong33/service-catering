@@ -333,7 +333,7 @@ public class ActivityService {
     public ApiRest listEffectiveActivities(ListEffectiveActivitiesModel listEffectiveActivitiesModel) {
         BigInteger tenantId = listEffectiveActivitiesModel.obtainTenantId();
         BigInteger branchId = listEffectiveActivitiesModel.obtainBranchId();
-        List<EffectiveActivity> effectiveActivities = activityMapper.callProcedureEffectiveActivity(tenantId, branchId);
+        List<EffectiveActivity> effectiveActivities = activityMapper.listEffectiveActivities(tenantId, branchId);
 
         return ApiRest.builder().data(effectiveActivities).message("查询生效的活动成功！").successful(true).build();
     }

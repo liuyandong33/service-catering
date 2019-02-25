@@ -1,14 +1,31 @@
 package build.dream.catering.utils;
 
+import build.dream.catering.mappers.ActivityMapper;
 import build.dream.common.catering.domains.Activity;
+import build.dream.common.catering.domains.EffectiveActivity;
 import build.dream.common.catering.domains.FullReductionActivity;
+import build.dream.common.utils.ApplicationHandler;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
 import java.util.Date;
+import java.util.List;
 
 public class ActivityUtils {
+    private static ActivityMapper activityMapper;
+
+    private static ActivityMapper obtainActivityMapper() {
+        if (activityMapper == null) {
+            activityMapper = ApplicationHandler.getBean(ActivityMapper.class);
+        }
+        return activityMapper;
+    }
+
+    public static List<EffectiveActivity> listEffectiveActivities(BigInteger tenantId, BigInteger branchId) {
+        return obtainActivityMapper().listEffectiveActivities(tenantId, branchId);
+    }
+
     public static Activity constructActivity(BigInteger tenantId, String tenantCode, String name, Integer type, Date startDate, Time startTime, Date endDate, Time endTime, int weekSign, BigInteger userId, String lastUpdateRemark) {
         Activity activity = new Activity();
         activity.setTenantId(tenantId);

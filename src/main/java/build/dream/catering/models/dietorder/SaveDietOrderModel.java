@@ -1,6 +1,7 @@
 package build.dream.catering.models.dietorder;
 
 import build.dream.catering.constants.Constants;
+import build.dream.common.annotations.InstantiateObjectIgnore;
 import build.dream.common.annotations.JsonSchema;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.models.BasicModel;
@@ -16,13 +17,10 @@ import java.util.List;
 public class SaveDietOrderModel extends BasicModel {
     private static final String[] INVOICE_TYPES = {DietOrderConstants.INVOICE_TYPE_PERSONAL, DietOrderConstants.INVOICE_TYPE_COMPANY};
 
-    @NotNull
+    @InstantiateObjectIgnore
     private BigInteger tenantId;
-
-    @NotNull
+    @InstantiateObjectIgnore
     private String tenantCode;
-
-    @NotNull
     private BigInteger branchId;
 
     @NotNull
@@ -37,7 +35,7 @@ public class SaveDietOrderModel extends BasicModel {
     private String invoice;
     private BigInteger vipId;
 
-    @NotNull
+    @InstantiateObjectIgnore
     private BigInteger userId;
 
     @NotEmpty

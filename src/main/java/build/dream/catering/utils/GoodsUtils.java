@@ -187,4 +187,12 @@ public class GoodsUtils {
                 .build();
         return goodsSpecification;
     }
+
+    public static List<Map<String, Object>> listPackageInfos(List<BigInteger> packageIds, Integer groupType) {
+        return obtainGoodsMapper().listPackageInfos(packageIds, groupType);
+    }
+
+    public static List<Goods> findAllByIdInList(BigInteger tenantId, BigInteger branchId, List<BigInteger> goodsIds) {
+        return goodsMapper.findAllByIdInList(tenantId, branchId, goodsIds);
+    }
 }

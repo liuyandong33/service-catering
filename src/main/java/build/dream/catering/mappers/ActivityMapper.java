@@ -11,7 +11,7 @@ import java.util.List;
 
 @Mapper
 public interface ActivityMapper {
-    List<EffectiveActivity> callProcedureEffectiveActivity(@Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId);
+    List<EffectiveActivity> listEffectiveActivities(@Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId);
 
     long insertAllActivityBranchR(@Param("activityId") BigInteger activityId, @Param("tenantId") BigInteger tenantId, @Param("branchIds") List<BigInteger> branchIds);
 
