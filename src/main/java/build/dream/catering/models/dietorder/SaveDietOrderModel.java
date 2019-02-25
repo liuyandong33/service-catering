@@ -5,7 +5,6 @@ import build.dream.common.annotations.JsonSchema;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.models.BasicModel;
 import build.dream.common.utils.ApplicationHandler;
-import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotEmpty;
