@@ -119,4 +119,16 @@ public class BranchController {
     public String obtainSmartRestaurant() {
         return null;
     }
+
+    /**
+     * 获取总部门店信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "/obtainHeadquartersInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = ObtainHeadquartersInfoModel.class, serviceClass = BranchService.class, serviceMethodName = "obtainHeadquartersInfo", error = "获取总部门店信息失败")
+    public String obtainHeadquartersInfo() {
+        return null;
+    }
 }

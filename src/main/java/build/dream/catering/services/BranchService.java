@@ -290,4 +290,22 @@ public class BranchService {
 
         return ApiRest.builder().data(branch).className(Branch.class.getName()).message("获取智慧餐厅门店信息成功！").successful(true).build();
     }
+
+    /**
+     * 获取总部门店信息
+     *
+     * @param obtainHeadquartersInfoModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest obtainHeadquartersInfo(ObtainHeadquartersInfoModel obtainHeadquartersInfoModel) {
+        BigInteger tenantId = obtainHeadquartersInfoModel.getTenantId();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(Branch.ColumnName.TYPE, Constants.SQL_OPERATION_SYMBOL_EQUAL, Constants.BRANCH_TYPE_HEADQUARTERS);
+        Branch branch = DatabaseHelper.find(Branch.class, searchModel);
+
+        return ApiRest.builder().data(branch).className(Branch.class.getName()).message("获取总部门店信息成功！").successful(true).build();
+    }
 }
