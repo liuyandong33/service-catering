@@ -28,8 +28,8 @@
                 vip_account.balance,
                 vip_account.accumulative_recharge
                 FROM vip_account
-                INNER JOIN vip ON vip.id = vip_account.vip_id AND vip.deleted = 0
-                INNER JOIN vip_type ON vip_type.id = vip_account.vip_type_id AND vip_type.deleted = 0
+                INNER JOIN vip ON vip.id = vip_account.vip_id AND vip.deleted = 0 AND vip.tenant_id = #{tenantId}
+                INNER JOIN vip_type ON vip_type.id = vip_account.vip_type_id AND vip_type.deleted = 0 AND vip_type.tenant_id = #{tenantId}
                 WHERE vip_account.tenant_id = #{tenantId}
                 AND vip_account.deleted = 0
             </when>
@@ -42,8 +42,8 @@
                 vip_account.balance,
                 vip_account.accumulative_recharge
                 FROM vip_account
-                INNER JOIN vip ON vip.id = vip_account.vip_id AND vip.deleted = 0
-                INNER JOIN vip_type ON vip_type.id = vip_account.vip_type_id AND vip_type.deleted = 0
+                INNER JOIN vip ON vip.id = vip_account.vip_id AND vip.deleted = 0 AND vip.tenant_id = #{tenantId}
+                INNER JOIN vip_type ON vip_type.id = vip_account.vip_type_id AND vip_type.deleted = 0 AND vip_type.tenant_id = #{tenantId}
                 WHERE vip_account.tenant_id = #{tenantId}
                 AND vip_account.deleted = 0
                 AND vip_account.branch_id = #{branchId}
@@ -57,8 +57,8 @@
                 vip_account.balance,
                 vip_account.accumulative_recharge
                 FROM vip_account
-                INNER JOIN vip ON vip.id = vip_account.vip_id AND vip.deleted = 0
-                INNER JOIN vip_type ON vip_type.id = vip_account.vip_type_id AND vip_type.deleted = 0
+                INNER JOIN vip ON vip.id = vip_account.vip_id AND vip.deleted = 0 AND vip.tenant_id = #{tenantId}
+                INNER JOIN vip_type ON vip_type.id = vip_account.vip_type_id AND vip_type.deleted = 0 AND vip_type.tenant_id = #{tenantId}
                 WHERE vip_account.tenant_id = #{tenantId}
                 AND vip_account.deleted = 0
                 AND vip_account.vip_group_id = (SELECT vip_group_id FROM branch WHERE tenant_id = #{tenantId} AND id = #{branchId})
@@ -73,8 +73,8 @@
                 SELECT
                 COUNT(1)
                 FROM vip_account
-                INNER JOIN vip ON vip.id = vip_account.vip_id AND vip.deleted = 0
-                INNER JOIN vip_type ON vip_type.id = vip_account.vip_type_id AND vip_type.deleted = 0
+                INNER JOIN vip ON vip.id = vip_account.vip_id AND vip.deleted = 0 AND vip.tenant_id = #{tenantId}
+                INNER JOIN vip_type ON vip_type.id = vip_account.vip_type_id AND vip_type.deleted = 0 AND vip_type.tenant_id = #{tenantId}
                 WHERE vip_account.tenant_id = #{tenantId}
                 AND vip_account.deleted = 0;
             </when>
@@ -82,8 +82,8 @@
                 SELECT
                 COUNT(1)
                 FROM vip_account
-                INNER JOIN vip ON vip.id = vip_account.vip_id AND vip.deleted = 0
-                INNER JOIN vip_type ON vip_type.id = vip_account.vip_type_id AND vip_type.deleted = 0
+                INNER JOIN vip ON vip.id = vip_account.vip_id AND vip.deleted = 0 AND vip.tenant_id = #{tenantId}
+                INNER JOIN vip_type ON vip_type.id = vip_account.vip_type_id AND vip_type.deleted = 0 AND vip_type.tenant_id = #{tenantId}
                 WHERE vip_account.tenant_id = #{tenantId}
                 AND vip_account.deleted = 0
                 AND vip_account.branch_id = #{branchId};
@@ -92,8 +92,8 @@
                 SELECT
                 COUNT(1)
                 FROM vip_account
-                INNER JOIN vip ON vip.id = vip_account.vip_id AND vip.deleted = 0
-                INNER JOIN vip_type ON vip_type.id = vip_account.vip_type_id AND vip_type.deleted = 0
+                INNER JOIN vip ON vip.id = vip_account.vip_id AND vip.deleted = 0 AND vip.tenant_id = #{tenantId}
+                INNER JOIN vip_type ON vip_type.id = vip_account.vip_type_id AND vip_type.deleted = 0 AND vip_type.tenant_id = #{tenantId}
                 WHERE vip_account.tenant_id = #{tenantId}
                 AND vip_account.deleted = 0
                 AND vip_account.vip_group_id = (SELECT vip_group_id FROM branch WHERE tenant_id = #{tenantId} AND id = #{branchId});
