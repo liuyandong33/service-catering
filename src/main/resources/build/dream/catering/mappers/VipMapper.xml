@@ -16,4 +16,88 @@
     <select id="callProcedureAddVipBalance" resultType="java.math.BigDecimal">
         call procedure_add_vip_balance(#{tenantId}, #{branchId}, #{vipId}, #{balance});
     </select>
+
+    <select id="listVipInfos" resultType="build.dream.common.utils.UnderscoreToCamelCaseMap">
+        <choose>
+            <when test="vipSharedType == 1">
+                SELECT
+                vip.*,
+                vip_type.name AS vip_type_name,
+                vip_account.point,
+                vip_account.accumulative_point,
+                vip_account.balance,
+                vip_account.accumulative_recharge
+                FROM vip_account
+                INNER JOIN vip ON vip.id = vip_account.vip_id AND vip.deleted = 0
+                INNER JOIN vip_type ON vip_type.id = vip_account.vip_type_id AND vip_type.deleted = 0
+                WHERE vip_account.tenant_id = #{tenantId}
+                AND vip_account.deleted = 0
+            </when>
+            <when test="vipSharedType == 2">
+                SELECT
+                vip.*,
+                vip_type.name AS vip_type_name,
+                vip_account.point,
+                vip_account.accumulative_point,
+                vip_account.balance,
+                vip_account.accumulative_recharge
+                FROM vip_account
+                INNER JOIN vip ON vip.id = vip_account.vip_id AND vip.deleted = 0
+                INNER JOIN vip_type ON vip_type.id = vip_account.vip_type_id AND vip_type.deleted = 0
+                WHERE vip_account.tenant_id = #{tenantId}
+                AND vip_account.deleted = 0
+                AND vip_account.branch_id = #{branchId}
+            </when>
+            <when test="vipSharedType == 3">
+                SELECT
+                vip.*,
+                vip_type.name AS vip_type_name,
+                vip_account.point,
+                vip_account.accumulative_point,
+                vip_account.balance,
+                vip_account.accumulative_recharge
+                FROM vip_account
+                INNER JOIN vip ON vip.id = vip_account.vip_id AND vip.deleted = 0
+                INNER JOIN vip_type ON vip_type.id = vip_account.vip_type_id AND vip_type.deleted = 0
+                WHERE vip_account.tenant_id = #{tenantId}
+                AND vip_account.deleted = 0
+                AND vip_account.vip_group_id = (SELECT vip_group_id FROM branch WHERE tenant_id = #{tenantId} AND id = #{branchId})
+            </when>
+        </choose>
+        LIMIT #{offset}, #{maxResults}
+    </select>
+
+    <select id="countVipInfos" resultType="long">
+        <choose>
+            <when test="vipSharedType == 1">
+                SELECT
+                COUNT(1)
+                FROM vip_account
+                INNER JOIN vip ON vip.id = vip_account.vip_id AND vip.deleted = 0
+                INNER JOIN vip_type ON vip_type.id = vip_account.vip_type_id AND vip_type.deleted = 0
+                WHERE vip_account.tenant_id = #{tenantId}
+                AND vip_account.deleted = 0;
+            </when>
+            <when test="vipSharedType == 2">
+                SELECT
+                COUNT(1)
+                FROM vip_account
+                INNER JOIN vip ON vip.id = vip_account.vip_id AND vip.deleted = 0
+                INNER JOIN vip_type ON vip_type.id = vip_account.vip_type_id AND vip_type.deleted = 0
+                WHERE vip_account.tenant_id = #{tenantId}
+                AND vip_account.deleted = 0
+                AND vip_account.branch_id = #{branchId};
+            </when>
+            <when test="vipSharedType == 3">
+                SELECT
+                COUNT(1)
+                FROM vip_account
+                INNER JOIN vip ON vip.id = vip_account.vip_id AND vip.deleted = 0
+                INNER JOIN vip_type ON vip_type.id = vip_account.vip_type_id AND vip_type.deleted = 0
+                WHERE vip_account.tenant_id = #{tenantId}
+                AND vip_account.deleted = 0
+                AND vip_account.vip_group_id = (SELECT vip_group_id FROM branch WHERE tenant_id = #{tenantId} AND id = #{branchId});
+            </when>
+        </choose>
+    </select>
 </mapper>

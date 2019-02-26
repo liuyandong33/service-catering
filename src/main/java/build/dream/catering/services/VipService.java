@@ -1,6 +1,7 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
+import build.dream.catering.mappers.VipMapper;
 import build.dream.catering.models.vip.*;
 import build.dream.catering.utils.SequenceUtils;
 import build.dream.catering.utils.VipUtils;
@@ -10,6 +11,7 @@ import build.dream.common.saas.domains.Tenant;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,9 @@ import java.util.*;
 
 @Service
 public class VipService {
+    @Autowired
+    private VipMapper vipMapper;
+
     /**
      * 保存会员类型
      *
@@ -106,10 +111,10 @@ public class VipService {
         String phoneNumber = obtainVipInfoModel.getPhoneNumber();
         String openId = obtainVipInfoModel.getOpenId();
         String alipayUserId = obtainVipInfoModel.getAlipayUserId();
+        int vipSharedType = obtainVipInfoModel.obtainVipSharedType();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(Vip.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition(Vip.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         if (vipId != null) {
             searchModel.addSearchCondition(Vip.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, vipId);
         }
@@ -126,7 +131,24 @@ public class VipService {
             searchModel.addSearchCondition(Vip.ColumnName.ALIPAY_USER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, alipayUserId);
         }
         Vip vip = VipUtils.find(searchModel);
-        return ApiRest.builder().data(vip).className(Vip.class.getName()).message("获取会员信息成功！").successful(true).build();
+
+        SearchModel vipAccountSearchModel = new SearchModel(true);
+        vipAccountSearchModel.addSearchCondition(Vip.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        if (vipSharedType == 1) {
+
+        } else if (vipSharedType == 2) {
+            vipAccountSearchModel.addSearchCondition(Vip.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        } else if (vipSharedType == 3) {
+            Branch branch = DatabaseHelper.find(Branch.class, TupleUtils.buildTuple3(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId), TupleUtils.buildTuple3(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId));
+            vipAccountSearchModel.addSearchCondition(VipAccount.ColumnName.VIP_GROUP_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branch.getVipGroupId());
+        }
+        VipAccount vipAccount = DatabaseHelper.find(VipAccount.class, vipAccountSearchModel);
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("vip", vip);
+        data.put("vipAccount", vipAccount);
+
+        return ApiRest.builder().data(data).message("获取会员信息成功！").successful(true).build();
     }
 
     /**
@@ -531,5 +553,28 @@ public class VipService {
             DatabaseHelper.insert(vipGroup);
         }
         return ApiRest.builder().data(vipGroup).message("保存会员分组成功！").successful(true).build();
+    }
+
+    @Transactional(readOnly = true)
+    public ApiRest listVipInfos(ListVipInfosModel listVipInfosModel) {
+        BigInteger tenantId = listVipInfosModel.obtainTenantId();
+        BigInteger branchId = listVipInfosModel.obtainBranchId();
+        int sharedType = listVipInfosModel.obtainVipSharedType();
+        int page = listVipInfosModel.getPage();
+        int rows = listVipInfosModel.getRows();
+        long count = vipMapper.countVipInfos(tenantId, branchId, sharedType);
+
+        List<Map<String, Object>> vipInfos = null;
+        if (count > 0) {
+            vipInfos = vipMapper.listVipInfos(tenantId, branchId, sharedType, (page - 1) * rows, rows);
+        } else {
+            vipInfos = new ArrayList<Map<String, Object>>();
+        }
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("total", count);
+        data.put("rows", vipInfos);
+
+        return ApiRest.builder().data(data).message("获取会员信息成功！").successful(true).build();
     }
 }

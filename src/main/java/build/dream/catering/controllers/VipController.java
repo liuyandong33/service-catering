@@ -119,4 +119,11 @@ public class VipController {
     public String saveVipGroup() {
         return null;
     }
+
+    @RequestMapping(value = "/listVipInfos", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = ListVipInfosModel.class, serviceClass = VipService.class, serviceMethodName = "listVipInfos", error = "获取会员信息失败")
+    public String listVipInfos() {
+        return null;
+    }
 }

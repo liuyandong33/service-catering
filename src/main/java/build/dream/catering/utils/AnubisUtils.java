@@ -39,7 +39,7 @@ public class AnubisUtils {
         obtainAccessTokenRequestParameters.put("appId", appId);
         obtainAccessTokenRequestParameters.put("salt", String.valueOf(salt));
         obtainAccessTokenRequestParameters.put("signature", signature);
-        ApiRest obtainAccessTokenApiRest = ProxyUtils.doGetWithRequestParameters(Constants.SERVICE_NAME_OUT, "anubis", "obtainAccessToken", obtainAccessTokenRequestParameters);
+        ApiRest obtainAccessTokenApiRest = ProxyUtils.doGetWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "anubis", "obtainAccessToken", obtainAccessTokenRequestParameters);
         ValidateUtils.isTrue(obtainAccessTokenApiRest.isSuccessful(), obtainAccessTokenApiRest.getError());
         return (Map<String, Object>) obtainAccessTokenApiRest.getData();
     }
@@ -95,7 +95,7 @@ public class AnubisUtils {
         Map<String, String> callAnubisSystemRequestParameters = new HashMap<String, String>();
         callAnubisSystemRequestParameters.put("url", url);
         callAnubisSystemRequestParameters.put("requestBody", GsonUtils.toJson(requestBody));
-        ApiRest apiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_OUT, "anubis", "callAnubisSystem", callAnubisSystemRequestParameters);
+        ApiRest apiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "anubis", "callAnubisSystem", callAnubisSystemRequestParameters);
         return apiRest;
     }
 }
