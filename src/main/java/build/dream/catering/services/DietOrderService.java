@@ -1,8 +1,6 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.mappers.ActivityMapper;
-import build.dream.catering.mappers.GoodsMapper;
 import build.dream.catering.models.dietorder.*;
 import build.dream.catering.utils.DietOrderUtils;
 import build.dream.catering.utils.ThreadUtils;
@@ -25,7 +23,6 @@ import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.dom4j.DocumentException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,11 +35,6 @@ import java.util.*;
 
 @Service
 public class DietOrderService {
-    @Autowired
-    private ActivityMapper activityMapper;
-    @Autowired
-    private GoodsMapper goodsMapper;
-
     /**
      * 获取订单明细
      *
@@ -103,20 +95,20 @@ public class DietOrderService {
     public ApiRest saveDietOrder(SaveDietOrderModel saveDietOrderModel) {
         AbstractUserDetails abstractUserDetails = WebSecurityUtils.obtainUserDetails();
         String clientType = abstractUserDetails.getClientType();
-        if (Constants.CLIENT_TYPE_POS.equals(clientType) || Constants.CLIENT_TYPE_APP.equals(clientType)) {
-            VipUserDetails vipUserDetails = (VipUserDetails) abstractUserDetails;
-            Tenant tenant = vipUserDetails.getTenant();
-            Vip vip = vipUserDetails.getVip();
-            saveDietOrderModel.setTenantId(tenant.getId());
-            saveDietOrderModel.setTenantCode(tenant.getCode());
-            saveDietOrderModel.setVipId(vip.getId());
-        } else if (Constants.CLIENT_TYPE_O2O.equals(clientType)) {
+        if (Constants.CLIENT_TYPE_POS.equals(clientType) || Constants.CLIENT_TYPE_APP.equals(clientType) || Constants.CLIENT_TYPE_WEB.equals(clientType)) {
             CustomUserDetails customUserDetails = (CustomUserDetails) abstractUserDetails;
             Tenant tenant = customUserDetails.getTenant();
             SystemUser systemUser = customUserDetails.getSystemUser();
             saveDietOrderModel.setTenantId(tenant.getId());
             saveDietOrderModel.setTenantCode(tenant.getCode());
             saveDietOrderModel.setUserId(systemUser.getId());
+        } else if (Constants.CLIENT_TYPE_O2O.equals(clientType)) {
+            VipUserDetails vipUserDetails = (VipUserDetails) abstractUserDetails;
+            Tenant tenant = vipUserDetails.getTenant();
+            Vip vip = vipUserDetails.getVip();
+            saveDietOrderModel.setTenantId(tenant.getId());
+            saveDietOrderModel.setTenantCode(tenant.getCode());
+            saveDietOrderModel.setVipId(vip.getId());
         }
 
         DietOrder dietOrder = DietOrderUtils.saveDietOrder(saveDietOrderModel);
