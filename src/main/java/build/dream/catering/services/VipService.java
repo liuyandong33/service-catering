@@ -174,7 +174,7 @@ public class VipService {
 
 
         Vip vip = null;
-        if (saveVipInfoModel.getVipId() != null) {
+        if (vipId != null) {
             SearchModel searchModel = new SearchModel(true);
             searchModel.addSearchCondition(Vip.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
             searchModel.addSearchCondition(Vip.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
