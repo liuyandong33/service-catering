@@ -182,7 +182,6 @@ public class VipService {
             vip = VipUtils.find(searchModel);
             ValidateUtils.notNull(vip, "会员不存在！");
 
-            vip.setVipTypeId(vipTypeId);
             vip.setVipName(vipName);
             vip.setBirthday(birthday);
             vip.setPhoneNumber(phoneNumber);
@@ -204,7 +203,6 @@ public class VipService {
             vip.setTenantId(tenantId);
             vip.setTenantCode(tenantCode);
             vip.setBranchId(branchId);
-            vip.setVipTypeId(vipTypeId);
             String vipCode = new SimpleDateFormat("yyyyMMdd").format(new Date()) + SerialNumberGenerator.nextSerialNumber(8, SequenceUtils.nextValue("vip_number"));
             vip.setVipCode(vipCode);
             vip.setVipName(vipName);
@@ -447,12 +445,12 @@ public class VipService {
         ValidateUtils.notNull(vipType, "会员类型不存在！");
 
         PagedSearchModel pagedSearchModel = new PagedSearchModel(true);
-        pagedSearchModel.addSearchCondition(Vip.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        pagedSearchModel.addSearchCondition(Vip.ColumnName.VIP_TYPE_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, vipTypeId);
+        pagedSearchModel.addSearchCondition(VipAccount.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        pagedSearchModel.addSearchCondition(VipAccount.ColumnName.VIP_TYPE_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, vipTypeId);
         pagedSearchModel.setPage(1);
         pagedSearchModel.setRows(1);
-        List<Vip> vips = VipUtils.findAllPaged(pagedSearchModel);
-        ValidateUtils.isTrue(CollectionUtils.isEmpty(vips), "会员类型【" + vipType.getName() + "】下存在会员，不能删除！");
+        List<VipAccount> vipAccounts = DatabaseHelper.findAllPaged(VipAccount.class, pagedSearchModel);
+        ValidateUtils.isTrue(CollectionUtils.isEmpty(vipAccounts), "会员类型【" + vipType.getName() + "】下存在会员，不能删除！");
 
         vipType.setUpdatedUserId(userId);
         vipType.setUpdatedRemark("删除会员类型！");
