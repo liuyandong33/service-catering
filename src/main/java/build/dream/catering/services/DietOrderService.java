@@ -301,9 +301,9 @@ public class DietOrderService {
         BigInteger branchId = dietOrder.getBranchId();
 
         SearchModel paymentSearchModel = new SearchModel(true);
-        paymentSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        paymentSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        paymentSearchModel.addSearchCondition("code", Constants.SQL_OPERATION_SYMBOL_EQUAL, paymentCode);
+        paymentSearchModel.addSearchCondition(Payment.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        paymentSearchModel.addSearchCondition(Payment.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        paymentSearchModel.addSearchCondition(Payment.ColumnName.CODE, Constants.SQL_OPERATION_SYMBOL_EQUAL, paymentCode);
         Payment payment = DatabaseHelper.find(Payment.class, paymentSearchModel);
 
         DietOrderPayment dietOrderPayment = DietOrderPayment.builder()
@@ -314,6 +314,7 @@ public class DietOrderService {
                 .paymentId(payment.getId())
                 .paymentCode(payment.getCode())
                 .paymentName(payment.getName())
+                .paidAmount(totalAmount)
                 .occurrenceTime(occurrenceTime)
                 .extraInfo(GsonUtils.toJson(parameters))
                 .build();
