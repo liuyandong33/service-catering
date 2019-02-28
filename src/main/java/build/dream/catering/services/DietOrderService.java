@@ -432,6 +432,9 @@ public class DietOrderService {
         List<DietOrderActivity> dietOrderActivities = null;
         if (StringUtils.isNotBlank(orderActivities)) {
             dietOrderActivities = JacksonUtils.readValueAsList(orderActivities, DietOrderActivity.class);
+            for (DietOrderActivity dietOrderActivity : dietOrderActivities) {
+                dietOrderActivity.setDietOrderId(dietOrderId);
+            }
             DatabaseHelper.insertAll(dietOrderActivities);
         }
 
