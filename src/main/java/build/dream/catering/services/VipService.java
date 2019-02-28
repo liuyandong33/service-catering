@@ -187,9 +187,9 @@ public class VipService {
             vip.setVipName(vipName);
             vip.setBirthday(birthday);
             vip.setPhoneNumber(phoneNumber);
-            vip.setOpenId(StringUtils.isNotBlank(openId) ? openId : Constants.VARCHAR_DEFAULT_VALUE);
-            vip.setMainOpenId(StringUtils.isNotBlank(mainOpenId) ? mainOpenId : Constants.VARCHAR_DEFAULT_VALUE);
-            vip.setAlipayUserId(StringUtils.isNotBlank(alipayUserId) ? alipayUserId : Constants.VARCHAR_DEFAULT_VALUE);
+            vip.setOpenId(StringUtils.isBlank(openId) ? Constants.VARCHAR_DEFAULT_VALUE : openId);
+            vip.setMainOpenId(StringUtils.isBlank(mainOpenId) ? Constants.VARCHAR_DEFAULT_VALUE : mainOpenId);
+            vip.setAlipayUserId(StringUtils.isBlank(alipayUserId) ? Constants.VARCHAR_DEFAULT_VALUE : alipayUserId);
             vip.setUpdatedUserId(userId);
             vip.setUpdatedRemark("修改会员信息！");
             VipUtils.update(vip);
@@ -200,29 +200,23 @@ public class VipService {
             long count = VipUtils.count(searchModel);
             ValidateUtils.isTrue(count == 0, "手机号已存在！");
 
-            vip = new Vip();
-            vip.setTenantId(tenantId);
-            vip.setTenantCode(tenantCode);
-            vip.setBranchId(branchId);
             String vipCode = new SimpleDateFormat("yyyyMMdd").format(new Date()) + SerialNumberGenerator.nextSerialNumber(8, SequenceUtils.nextValue("vip_number"));
-            vip.setVipCode(vipCode);
-            vip.setVipName(vipName);
-            vip.setBirthday(birthday);
-            vip.setPhoneNumber(phoneNumber);
-            if (StringUtils.isNotBlank(openId)) {
-                vip.setOpenId(openId);
-            }
 
-            if (StringUtils.isNotBlank(mainOpenId)) {
-                vip.setMainOpenId(mainOpenId);
-            }
-
-            if (StringUtils.isNotBlank(alipayUserId)) {
-                vip.setAlipayUserId(alipayUserId);
-            }
-            vip.setCreatedUserId(userId);
-            vip.setUpdatedUserId(userId);
-            vip.setUpdatedRemark("新增会员信息！");
+            vip = Vip.builder()
+                    .tenantId(tenantId)
+                    .tenantCode(tenantCode)
+                    .branchId(branchId)
+                    .vipCode(vipCode)
+                    .vipName(vipName)
+                    .birthday(birthday)
+                    .phoneNumber(phoneNumber)
+                    .openId(StringUtils.isBlank(openId) ? Constants.VARCHAR_DEFAULT_VALUE : openId)
+                    .mainOpenId(StringUtils.isBlank(mainOpenId) ? Constants.VARCHAR_DEFAULT_VALUE : mainOpenId)
+                    .alipayUserId(StringUtils.isBlank(alipayUserId) ? Constants.VARCHAR_DEFAULT_VALUE : alipayUserId)
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
+                    .updatedRemark("新增会员信息！")
+                    .build();
             VipUtils.insert(vip);
         }
 
