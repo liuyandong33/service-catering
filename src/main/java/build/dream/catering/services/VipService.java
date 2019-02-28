@@ -262,6 +262,7 @@ public class VipService {
             DatabaseHelper.insert(vipAccount);
         } else {
             vipAccount.setVipTypeId(vipTypeId);
+            vipAccount.setUpdatedUserId(userId);
             vipAccount.setUpdatedRemark("修改会员账户！");
             DatabaseHelper.update(vipAccount);
         }
