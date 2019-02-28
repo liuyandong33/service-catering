@@ -388,6 +388,7 @@ public class DietOrderService {
         String orderGroups = MapUtils.getString(dataMap, "orderGroups");
         String orderDetails = MapUtils.getString(dataMap, "orderDetails");
         String orderDetailGoodsAttributes = MapUtils.getString(dataMap, "orderDetailGoodsAttributes");
+        String orderActivities = MapUtils.getString(dataMap, "orderActivities");
 
         DietOrder dietOrder = JacksonUtils.readValue(order, DietOrder.class);
         List<DietOrderGroup> dietOrderGroups = JacksonUtils.readValueAsList(orderGroups, DietOrderGroup.class);
@@ -414,8 +415,9 @@ public class DietOrderService {
 
         DatabaseHelper.insertAll(dietOrderDetails);
 
+        List<DietOrderDetailGoodsAttribute> dietOrderDetailGoodsAttributes = null;
         if (StringUtils.isNotBlank(orderDetailGoodsAttributes)) {
-            List<DietOrderDetailGoodsAttribute> dietOrderDetailGoodsAttributes = JacksonUtils.readValueAsList(orderDetailGoodsAttributes, DietOrderDetailGoodsAttribute.class);
+            dietOrderDetailGoodsAttributes = JacksonUtils.readValueAsList(orderDetailGoodsAttributes, DietOrderDetailGoodsAttribute.class);
             for (DietOrderDetailGoodsAttribute dietOrderDetailGoodsAttribute : dietOrderDetailGoodsAttributes) {
                 DietOrderGroup dietOrderGroup = dietOrderGroupMap.get(dietOrderDetailGoodsAttribute.getLocalDietOrderGroupId());
                 DietOrderDetail dietOrderDetail = dietOrderDetailMap.get(dietOrderDetailGoodsAttribute.getLocalDietOrderDetailId());
@@ -427,6 +429,12 @@ public class DietOrderService {
             DatabaseHelper.insertAll(dietOrderDetailGoodsAttributes);
         }
 
-        return ApiRest.builder().data(dataMap).message("获取POS订单成功！").successful(true).build();
+        List<DietOrderActivity> dietOrderActivities = null;
+        if (StringUtils.isNotBlank(orderActivities)) {
+            dietOrderActivities = JacksonUtils.readValueAsList(orderActivities, DietOrderActivity.class);
+        }
+
+        Map<String, Object> dietOrderInfo = DietOrderUtils.buildDietOrderInfo(dietOrder, dietOrderGroups, dietOrderDetails, dietOrderDetailGoodsAttributes, dietOrderActivities);
+        return ApiRest.builder().data(dietOrderInfo).message("获取POS订单成功！").successful(true).build();
     }
 }
