@@ -171,13 +171,15 @@ public class VipService {
         String mainOpenId = saveVipInfoModel.getMainOpenId();
         String alipayUserId = saveVipInfoModel.getAlipayUserId();
         BigInteger userId = saveVipInfoModel.obtainUserId();
+        int vipSharedType = saveVipInfoModel.obtainVipSharedType();
 
+        VipType vipType = DatabaseHelper.find(VipType.class, TupleUtils.buildTuple3(VipType.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId), TupleUtils.buildTuple3(VipType.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, vipTypeId));
+        ValidateUtils.notNull(vipType, "会员类型不存在！");
 
         Vip vip = null;
         if (vipId != null) {
             SearchModel searchModel = new SearchModel(true);
             searchModel.addSearchCondition(Vip.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-            searchModel.addSearchCondition(Vip.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
             searchModel.addSearchCondition(Vip.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, vipId);
             vip = VipUtils.find(searchModel);
             ValidateUtils.notNull(vip, "会员不存在！");
@@ -194,7 +196,6 @@ public class VipService {
         } else {
             SearchModel searchModel = new SearchModel(true);
             searchModel.addSearchCondition(Vip.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-            searchModel.addSearchCondition(Vip.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
             searchModel.addSearchCondition(Vip.ColumnName.PHONE_NUMBER, Constants.SQL_OPERATION_SYMBOL_EQUAL, phoneNumber);
             long count = VipUtils.count(searchModel);
             ValidateUtils.isTrue(count == 0, "手机号已存在！");
@@ -224,7 +225,58 @@ public class VipService {
             vip.setUpdatedRemark("新增会员信息！");
             VipUtils.insert(vip);
         }
-        return ApiRest.builder().data(vip).message("保存会员信息成功！").successful(true).build();
+
+        SearchModel vipAccountSearchModel = new SearchModel(true);
+        vipAccountSearchModel.addSearchCondition(VipAccount.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        vipAccountSearchModel.addSearchCondition(VipAccount.ColumnName.VIP_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, vip.getId());
+
+        BigInteger vipAccountBranchId = null;
+        BigInteger vipAccountVipGroupId = null;
+        if (vipSharedType == 1) {
+            vipAccountBranchId = BigInteger.ZERO;
+            vipAccountVipGroupId = BigInteger.ZERO;
+        } else if (vipSharedType == 2) {
+            vipAccountSearchModel.addSearchCondition(VipAccount.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+
+            vipAccountBranchId = branchId;
+            vipAccountVipGroupId = BigInteger.ZERO;
+        } else if (vipSharedType == 3) {
+            Branch branch = DatabaseHelper.find(Branch.class, TupleUtils.buildTuple3(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId), TupleUtils.buildTuple3(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId));
+            BigInteger vipGroupId = branch.getVipGroupId();
+            vipAccountSearchModel.addSearchCondition(VipAccount.ColumnName.VIP_GROUP_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, vipGroupId);
+
+            vipAccountBranchId = BigInteger.ZERO;
+            vipAccountVipGroupId = vipGroupId;
+        }
+
+        VipAccount vipAccount = DatabaseHelper.find(VipAccount.class, vipAccountSearchModel);
+        if (vipAccount == null) {
+            vipAccount = VipAccount.builder()
+                    .tenantId(tenantId)
+                    .tenantCode(tenantCode)
+                    .branchId(vipAccountBranchId)
+                    .vipTypeId(vipTypeId)
+                    .vipGroupId(vipAccountVipGroupId)
+                    .point(BigDecimal.ZERO)
+                    .accumulativePoint(BigDecimal.ZERO)
+                    .balance(BigDecimal.ZERO)
+                    .accumulativeRecharge(BigDecimal.ZERO)
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
+                    .updatedRemark("创建会员账户！")
+                    .build();
+            DatabaseHelper.insert(vipAccount);
+        } else {
+            vipAccount.setVipTypeId(vipTypeId);
+            vipAccount.setUpdatedRemark("修改会员账户！");
+            DatabaseHelper.update(vipAccount);
+        }
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("vip", vip);
+        data.put("vipAccount", vipAccount);
+
+        return ApiRest.builder().data(data).message("保存会员信息成功！").successful(true).build();
     }
 
     /**
