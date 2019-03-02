@@ -16,7 +16,7 @@ import java.util.Map;
 @Service
 public class AlipayService {
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest marketingCardTemplateCreate(CreateMemberCardTemplateModel createMemberCardTemplateModel) {
+    public ApiRest createMemberCardTemplate(CreateMemberCardTemplateModel createMemberCardTemplateModel) {
         BigInteger tenantId = createMemberCardTemplateModel.obtainTenantId();
         BigInteger branchId = createMemberCardTemplateModel.obtainBranchId();
 

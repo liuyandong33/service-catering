@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class AlipayController {
     @RequestMapping(value = "/createMemberCardTemplate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ApiRestAction(modelClass = CreateMemberCardTemplateModel.class, serviceClass = AlipayService.class, serviceMethodName = "marketingCardTemplateCreate", error = "创建会员卡模板失败")
+    @ApiRestAction(modelClass = CreateMemberCardTemplateModel.class, serviceClass = AlipayService.class, serviceMethodName = "createMemberCardTemplate", error = "创建会员卡模板失败")
     public String createMemberCardTemplate() {
         return null;
     }
