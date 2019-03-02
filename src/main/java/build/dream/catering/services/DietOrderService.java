@@ -301,9 +301,9 @@ public class DietOrderService {
         BigInteger branchId = dietOrder.getBranchId();
 
         SearchModel paymentSearchModel = new SearchModel(true);
-        paymentSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        paymentSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        paymentSearchModel.addSearchCondition("code", Constants.SQL_OPERATION_SYMBOL_EQUAL, paymentCode);
+        paymentSearchModel.addSearchCondition(Payment.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        paymentSearchModel.addSearchCondition(Payment.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        paymentSearchModel.addSearchCondition(Payment.ColumnName.CODE, Constants.SQL_OPERATION_SYMBOL_EQUAL, paymentCode);
         Payment payment = DatabaseHelper.find(Payment.class, paymentSearchModel);
 
         DietOrderPayment dietOrderPayment = DietOrderPayment.builder()
@@ -314,6 +314,7 @@ public class DietOrderService {
                 .paymentId(payment.getId())
                 .paymentCode(payment.getCode())
                 .paymentName(payment.getName())
+                .paidAmount(totalAmount)
                 .occurrenceTime(occurrenceTime)
                 .extraInfo(GsonUtils.toJson(parameters))
                 .build();
@@ -387,6 +388,7 @@ public class DietOrderService {
         String orderGroups = MapUtils.getString(dataMap, "orderGroups");
         String orderDetails = MapUtils.getString(dataMap, "orderDetails");
         String orderDetailGoodsAttributes = MapUtils.getString(dataMap, "orderDetailGoodsAttributes");
+        String orderActivities = MapUtils.getString(dataMap, "orderActivities");
 
         DietOrder dietOrder = JacksonUtils.readValue(order, DietOrder.class);
         List<DietOrderGroup> dietOrderGroups = JacksonUtils.readValueAsList(orderGroups, DietOrderGroup.class);
@@ -413,8 +415,9 @@ public class DietOrderService {
 
         DatabaseHelper.insertAll(dietOrderDetails);
 
+        List<DietOrderDetailGoodsAttribute> dietOrderDetailGoodsAttributes = null;
         if (StringUtils.isNotBlank(orderDetailGoodsAttributes)) {
-            List<DietOrderDetailGoodsAttribute> dietOrderDetailGoodsAttributes = JacksonUtils.readValueAsList(orderDetailGoodsAttributes, DietOrderDetailGoodsAttribute.class);
+            dietOrderDetailGoodsAttributes = JacksonUtils.readValueAsList(orderDetailGoodsAttributes, DietOrderDetailGoodsAttribute.class);
             for (DietOrderDetailGoodsAttribute dietOrderDetailGoodsAttribute : dietOrderDetailGoodsAttributes) {
                 DietOrderGroup dietOrderGroup = dietOrderGroupMap.get(dietOrderDetailGoodsAttribute.getLocalDietOrderGroupId());
                 DietOrderDetail dietOrderDetail = dietOrderDetailMap.get(dietOrderDetailGoodsAttribute.getLocalDietOrderDetailId());
@@ -426,6 +429,16 @@ public class DietOrderService {
             DatabaseHelper.insertAll(dietOrderDetailGoodsAttributes);
         }
 
-        return ApiRest.builder().data(dataMap).message("获取POS订单成功！").successful(true).build();
+        List<DietOrderActivity> dietOrderActivities = null;
+        if (StringUtils.isNotBlank(orderActivities)) {
+            dietOrderActivities = JacksonUtils.readValueAsList(orderActivities, DietOrderActivity.class);
+            for (DietOrderActivity dietOrderActivity : dietOrderActivities) {
+                dietOrderActivity.setDietOrderId(dietOrderId);
+            }
+            DatabaseHelper.insertAll(dietOrderActivities);
+        }
+
+        Map<String, Object> dietOrderInfo = DietOrderUtils.buildDietOrderInfo(dietOrder, dietOrderGroups, dietOrderDetails, dietOrderDetailGoodsAttributes, dietOrderActivities);
+        return ApiRest.builder().data(dietOrderInfo).message("获取POS订单成功！").successful(true).build();
     }
 }
