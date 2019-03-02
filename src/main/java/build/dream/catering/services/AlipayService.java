@@ -1,6 +1,6 @@
 package build.dream.catering.services;
 
-import build.dream.catering.models.alipay.MarketingCardTemplateCreateModel;
+import build.dream.catering.models.alipay.CreateMemberCardTemplateModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.models.alipay.AlipayMarketingCardActivateUrlApplyModel;
 import build.dream.common.models.alipay.AlipayMarketingCardFormTemplateSetModel;
@@ -16,9 +16,9 @@ import java.util.Map;
 @Service
 public class AlipayService {
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest marketingCardTemplateCreate(MarketingCardTemplateCreateModel marketingCardTemplateCreateModel) {
-        BigInteger tenantId = marketingCardTemplateCreateModel.obtainTenantId();
-        BigInteger branchId = marketingCardTemplateCreateModel.obtainBranchId();
+    public ApiRest marketingCardTemplateCreate(CreateMemberCardTemplateModel createMemberCardTemplateModel) {
+        BigInteger tenantId = createMemberCardTemplateModel.obtainTenantId();
+        BigInteger branchId = createMemberCardTemplateModel.obtainBranchId();
 
         AlipayMarketingCardTemplateCreateModel alipayMarketingCardTemplateCreateModel = AlipayMarketingCardTemplateCreateModel.builder()
                 .tenantId(tenantId.toString())
