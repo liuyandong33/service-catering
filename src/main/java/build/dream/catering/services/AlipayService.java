@@ -2,6 +2,7 @@ package build.dream.catering.services;
 
 import build.dream.catering.models.alipay.MarketingCardTemplateCreateModel;
 import build.dream.common.api.ApiRest;
+import build.dream.common.models.alipay.AlipayMarketingCardFormTemplateSetModel;
 import build.dream.common.models.alipay.AlipayMarketingCardTemplateCreateModel;
 import build.dream.common.utils.AlipayUtils;
 import org.apache.commons.collections.MapUtils;
@@ -23,8 +24,14 @@ public class AlipayService {
                 .branchId(branchId.toString())
                 .build();
 
-        Map<String, Object> resultMap = AlipayUtils.alipayMarketingCardTemplateCreate(alipayMarketingCardTemplateCreateModel);
-        String templateId = MapUtils.getString(resultMap, "template_id");
+        Map<String, Object> cardTemplateCreateResult = AlipayUtils.alipayMarketingCardTemplateCreate(alipayMarketingCardTemplateCreateModel);
+        String templateId = MapUtils.getString(cardTemplateCreateResult, "template_id");
+
+        AlipayMarketingCardFormTemplateSetModel alipayMarketingCardFormTemplateSetModel = AlipayMarketingCardFormTemplateSetModel.builder()
+                .tenantId(tenantId.toString())
+                .branchId(branchId.toString())
+                .build();
+        Map<String, Object> cardFormTemplateSetResult = AlipayUtils.alipayMarketingCardFormTemplateSet(alipayMarketingCardFormTemplateSetModel);
         return ApiRest.builder().build();
     }
 }
