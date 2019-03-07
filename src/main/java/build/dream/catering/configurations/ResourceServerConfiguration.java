@@ -23,7 +23,8 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
             "/meiTuan/test",
             "/eleme/bindingStore",
             "/eleme/doBindingStore",
-            "/eleme/tenantAuthorizeCallback"
+            "/eleme/tenantAuthorizeCallback",
+            "/o2o/obtainVipInfo"
     };
 
     @Override

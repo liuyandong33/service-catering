@@ -121,7 +121,7 @@ public class DietOrderUtils {
                 WeiXinPayUtils.refund(refundModel);
             } else if (Constants.PAYMENT_CODE_ALIPAY.equals(paymentCode)) {
                 AlipayTradeRefundModel alipayTradeRefundModel = new AlipayTradeRefundModel();
-                AlipayUtils.alipayTradeRefund(tenantId.toString(), branchId.toString(), null, alipayTradeRefundModel);
+                AlipayUtils.alipayTradeRefund(alipayTradeRefundModel);
             }
         }
     }
