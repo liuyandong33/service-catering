@@ -8,18 +8,7 @@
         </foreach>
     </insert>
 
-    <insert id="insertAllMenuGoodsR">
-        INSERT INTO activity_branch_r(menu_id, tenant_id, tenant_code, goods_id) VALUES
-        <foreach collection="goodsIds" index="index" item="goodsId" open="" separator="," close="">
-            (#{menuId}, #{tenantId} #{tenantCode}, #{goodsId})
-        </foreach>
-    </insert>
-
     <insert id="deleteAllMenuBranchR">
         DELETE FROM menu_branch_r WHERE menu_id = #{menuId} AND tenant_id = #{tenantId}
-    </insert>
-
-    <insert id="deleteAllMenuGoodsR">
-        DELETE FROM menu_goods_r WHERE menu_id = #{menuId} AND tenant_id = #{tenantId}
     </insert>
 </mapper>

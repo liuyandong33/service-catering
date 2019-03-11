@@ -1,6 +1,8 @@
 package build.dream.catering.models.menu;
 
+import build.dream.common.models.BasicModel;
 import build.dream.common.models.CateringBasicModel;
+import build.dream.common.utils.ValidateUtils;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -33,7 +35,7 @@ public class SaveMenuModel extends CateringBasicModel {
     private List<BigInteger> branchIds;
 
     @NotEmpty
-    private List<BigInteger> goodsIds;
+    private List<Detail> details;
 
     public BigInteger getId() {
         return id;
@@ -99,11 +101,54 @@ public class SaveMenuModel extends CateringBasicModel {
         this.branchIds = branchIds;
     }
 
-    public List<BigInteger> getGoodsIds() {
-        return goodsIds;
+    public List<Detail> getDetails() {
+        return details;
     }
 
-    public void setGoodsIds(List<BigInteger> goodsIds) {
-        this.goodsIds = goodsIds;
+    public void setDetails(List<Detail> details) {
+        this.details = details;
+    }
+
+    @Override
+    public void validateAndThrow() {
+        super.validateAndThrow();
+        for (Detail detail : details) {
+            ValidateUtils.isTrue(detail.validate(), "details");
+        }
+    }
+
+    public static class Detail extends BasicModel {
+        @NotNull
+        private BigInteger goodsId;
+
+        @NotNull
+        private BigInteger goodsSpecificationId;
+
+        @NotNull
+        private BigInteger goodsUnitId;
+
+        public BigInteger getGoodsId() {
+            return goodsId;
+        }
+
+        public void setGoodsId(BigInteger goodsId) {
+            this.goodsId = goodsId;
+        }
+
+        public BigInteger getGoodsSpecificationId() {
+            return goodsSpecificationId;
+        }
+
+        public void setGoodsSpecificationId(BigInteger goodsSpecificationId) {
+            this.goodsSpecificationId = goodsSpecificationId;
+        }
+
+        public BigInteger getGoodsUnitId() {
+            return goodsUnitId;
+        }
+
+        public void setGoodsUnitId(BigInteger goodsUnitId) {
+            this.goodsUnitId = goodsUnitId;
+        }
     }
 }
