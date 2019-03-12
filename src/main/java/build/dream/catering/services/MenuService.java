@@ -2,6 +2,7 @@ package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.MenuMapper;
+import build.dream.catering.models.menu.ObtainMenuInfoModel;
 import build.dream.catering.models.menu.SaveMenuModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.Menu;
@@ -10,14 +11,14 @@ import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.DeleteModel;
 import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.ValidateUtils;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class MenuService {
@@ -108,5 +109,49 @@ public class MenuService {
 
         DatabaseHelper.insertAll(menuDetails);
         return ApiRest.builder().data(menu).message("保存菜牌成功！").successful(true).build();
+    }
+
+    /**
+     * 获取菜牌信息
+     *
+     * @param obtainMenuInfoModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest obtainMenuInfo(ObtainMenuInfoModel obtainMenuInfoModel) {
+        BigInteger tenantId = obtainMenuInfoModel.obtainTenantId();
+        BigInteger branchId = obtainMenuInfoModel.obtainBranchId();
+        int effectiveScope = obtainMenuInfoModel.getEffectiveScope();
+
+        Menu menu = menuMapper.findEffectiveMenu(tenantId, branchId, effectiveScope);
+        ValidateUtils.notNull(menu, "未检索到有效菜牌！");
+
+        List<Map<String, Object>> menuDetails = menuMapper.findMenuDetails(tenantId, menu.getId());
+        Map<BigInteger, Set<BigInteger>> categoryIdGoodsIdMap = new HashMap<BigInteger, Set<BigInteger>>();
+        Map<BigInteger, List<Map<String, Object>>> goodsIdMenuDetailMap = new HashMap<BigInteger, List<Map<String, Object>>>();
+        for (Map<String, Object> menuDetail : menuDetails) {
+            BigInteger categoryId = BigInteger.valueOf(MapUtils.getLongValue(menuDetail, "categoryId"));
+            BigInteger goodsId = BigInteger.valueOf(MapUtils.getLongValue(menuDetail, "goodsId"));
+
+            Set<BigInteger> goodsIds = categoryIdGoodsIdMap.get(categoryId);
+            if (CollectionUtils.isEmpty(goodsIds)) {
+                goodsIds = new HashSet<BigInteger>();
+                categoryIdGoodsIdMap.put(categoryId, goodsIds);
+            }
+            goodsIds.add(goodsId);
+
+            List<Map<String, Object>> mapList = goodsIdMenuDetailMap.get(goodsId);
+            if (CollectionUtils.isEmpty(mapList)) {
+                mapList = new ArrayList<Map<String, Object>>();
+                goodsIdMenuDetailMap.put(categoryId, mapList);
+            }
+            mapList.add(menuDetail);
+        }
+        List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
+        for (Map.Entry<BigInteger, Set<BigInteger>> entry : categoryIdGoodsIdMap.entrySet()) {
+
+        }
+
+        return ApiRest.builder().build();
     }
 }

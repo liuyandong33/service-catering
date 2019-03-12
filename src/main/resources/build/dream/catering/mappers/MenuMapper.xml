@@ -11,4 +11,39 @@
     <insert id="deleteAllMenuBranchR">
         DELETE FROM menu_branch_r WHERE menu_id = #{menuId} AND tenant_id = #{tenantId}
     </insert>
+    
+    <select id="findEffectiveMenu" resultType="build.dream.common.catering.domains.Menu">
+        SELECT
+        menu.*
+        FROM menu
+        INNER JOIN menu_branch_r ON menu_branch_r.tenant_id = menu.tenant_id AND menu_branch_r.branch_id = #{branchId}
+        WHERE menu.tenant_id = #{tenantId}
+        AND menu.status = 1
+        AND menu.effective_scope IN (#{effectiveScope}, 3)
+        AND menu.deleted = 0
+        AND menu.start_time &lt;= NOW()
+        AND menu.end_time &gt;= NOW()
+    </select>
+
+    <select id="findMenuDetails" resultType="build.dream.common.utils.UnderscoreToCamelCaseMap">
+        SELECT
+        goods.id AS goods_id,
+        goods.name AS goods_name,
+        goods.type AS goods_type,
+        goods_specification.id AS goods_specification_id,
+        goods_specification.name AS goods_specification_name,
+        goods_category.id AS category_id,
+        goods_category.name AS category_name,
+        goods_category.description AS category_description,
+        goods_unit.id AS goods_unit_id,
+        goods_unit.name AS goods_unit_name
+        FROM menu_detail
+        INNER JOIN goods ON goods.id = menu_detail.goods_id AND goods.deleted = 0
+        INNER JOIN goods_specification ON goods_specification.id = menu_detail.goods_specification_id AND goods_specification.deleted = 0
+        INNER JOIN goods_unit ON goods_unit.id = menu_detail.goods_unit_id AND goods_unit.deleted = 0
+        INNER JOIN goods_category ON goods_category.id = goods.category_id AND goods_category.deleted = 0
+        WHERE menu_detail.deleted = 0
+        AND menu_detail.id = #{menuId}
+        AND menu_detail.tenant_id = #{tenantId};
+    </select>
 </mapper>
