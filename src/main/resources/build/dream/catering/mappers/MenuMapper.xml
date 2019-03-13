@@ -32,6 +32,7 @@
         goods.type AS goods_type,
         goods_specification.id AS goods_specification_id,
         goods_specification.name AS goods_specification_name,
+        menu_detail.price,
         goods_category.id AS category_id,
         goods_category.name AS category_name,
         goods_category.description AS category_description,
