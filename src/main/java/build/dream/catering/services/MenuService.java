@@ -4,7 +4,9 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.MenuMapper;
 import build.dream.catering.models.menu.ObtainMenuInfoModel;
 import build.dream.catering.models.menu.SaveMenuModel;
+import build.dream.catering.utils.GoodsUtils;
 import build.dream.common.api.ApiRest;
+import build.dream.common.catering.domains.GoodsAttributeGroup;
 import build.dream.common.catering.domains.Menu;
 import build.dream.common.catering.domains.MenuDetail;
 import build.dream.common.utils.DatabaseHelper;
@@ -129,27 +131,48 @@ public class MenuService {
         List<Map<String, Object>> menuDetails = menuMapper.findMenuDetails(tenantId, menu.getId());
         Map<BigInteger, Set<BigInteger>> categoryIdGoodsIdMap = new HashMap<BigInteger, Set<BigInteger>>();
         Map<BigInteger, List<Map<String, Object>>> goodsIdMenuDetailMap = new HashMap<BigInteger, List<Map<String, Object>>>();
+        Set<BigInteger> goodsIds = new HashSet<BigInteger>();
+        Set<BigInteger> packageIds = new HashSet<BigInteger>();
         for (Map<String, Object> menuDetail : menuDetails) {
             BigInteger categoryId = BigInteger.valueOf(MapUtils.getLongValue(menuDetail, "categoryId"));
             BigInteger goodsId = BigInteger.valueOf(MapUtils.getLongValue(menuDetail, "goodsId"));
+            int goodsType = MapUtils.getIntValue(menuDetail, "goodsType");
 
-            Set<BigInteger> goodsIds = categoryIdGoodsIdMap.get(categoryId);
-            if (CollectionUtils.isEmpty(goodsIds)) {
-                goodsIds = new HashSet<BigInteger>();
-                categoryIdGoodsIdMap.put(categoryId, goodsIds);
+            if (goodsType == Constants.GOODS_TYPE_ORDINARY_GOODS) {
+                goodsIds.add(goodsId);
+            } else if (goodsType == Constants.GOODS_TYPE_PACKAGE) {
+                packageIds.add(goodsId);
             }
-            goodsIds.add(goodsId);
+
+            Set<BigInteger> ids = categoryIdGoodsIdMap.get(categoryId);
+            if (CollectionUtils.isEmpty(ids)) {
+                ids = new HashSet<BigInteger>();
+                categoryIdGoodsIdMap.put(categoryId, ids);
+            }
+            ids.add(goodsId);
 
             List<Map<String, Object>> mapList = goodsIdMenuDetailMap.get(goodsId);
             if (CollectionUtils.isEmpty(mapList)) {
                 mapList = new ArrayList<Map<String, Object>>();
-                goodsIdMenuDetailMap.put(categoryId, mapList);
+                goodsIdMenuDetailMap.put(goodsId, mapList);
             }
             mapList.add(menuDetail);
         }
+
+        Map<BigInteger, List<GoodsAttributeGroup>> goodsAttributeGroupMap = GoodsUtils.obtainGoodsAttributeGroupInfos(tenantId, branchId, goodsIds);
+
         List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
         for (Map.Entry<BigInteger, Set<BigInteger>> entry : categoryIdGoodsIdMap.entrySet()) {
+            BigInteger categoryId = entry.getKey();
+            Set<BigInteger> ids = entry.getValue();
 
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("id", categoryId);
+
+            for (BigInteger goodsId : ids) {
+                List<Map<String, Object>> details = goodsIdMenuDetailMap.get(goodsId);
+
+            }
         }
 
         return ApiRest.builder().build();

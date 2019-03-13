@@ -13,10 +13,7 @@ import org.apache.commons.collections.MapUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GoodsUtils {
     private static GoodsMapper goodsMapper;
@@ -190,7 +187,7 @@ public class GoodsUtils {
         return goodsSpecification;
     }
 
-    public static List<Map<String, Object>> listPackageInfos(BigInteger tenantId, BigInteger branchId, List<BigInteger> packageIds, Integer groupType) {
+    public static List<Map<String, Object>> listPackageInfos(BigInteger tenantId, BigInteger branchId, Collection<BigInteger> packageIds, Integer groupType) {
         return obtainGoodsMapper().listPackageInfos(tenantId, branchId, packageIds, groupType);
     }
 
@@ -198,7 +195,7 @@ public class GoodsUtils {
         return goodsMapper.findAllByIdInList(tenantId, branchId, goodsIds);
     }
 
-    public static Map<BigInteger, List<GoodsAttributeGroup>> obtainGoodsAttributeGroupInfos(BigInteger tenantId, BigInteger branchId, List<BigInteger> goodsIds) {
+    public static Map<BigInteger, List<GoodsAttributeGroup>> obtainGoodsAttributeGroupInfos(BigInteger tenantId, BigInteger branchId, Collection<BigInteger> goodsIds) {
         Map<BigInteger, List<GoodsAttributeGroup>> goodsAttributeGroupMap = new HashMap<BigInteger, List<GoodsAttributeGroup>>();
         if (CollectionUtils.isEmpty(goodsIds)) {
             return goodsAttributeGroupMap;
@@ -224,7 +221,7 @@ public class GoodsUtils {
         return goodsAttributeGroupMap;
     }
 
-    public static Map<BigInteger, List<GoodsAttribute>> obtainGoodsAttributeInfos(BigInteger tenantId, BigInteger branchId, List<BigInteger> goodsIds) {
+    public static Map<BigInteger, List<GoodsAttribute>> obtainGoodsAttributeInfos(BigInteger tenantId, BigInteger branchId, Collection<BigInteger> goodsIds) {
         Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = new HashMap<BigInteger, List<GoodsAttribute>>();
         if (CollectionUtils.isEmpty(goodsIds)) {
             return goodsAttributeMap;
@@ -250,7 +247,7 @@ public class GoodsUtils {
         return goodsAttributeMap;
     }
 
-    public static Map<BigInteger, List<GoodsSpecification>> obtainGoodsSpecificationInfos(BigInteger tenantId, BigInteger branchId, List<BigInteger> goodsIds) {
+    public static Map<BigInteger, List<GoodsSpecification>> obtainGoodsSpecificationInfos(BigInteger tenantId, BigInteger branchId, Collection<BigInteger> goodsIds) {
         Map<BigInteger, List<GoodsSpecification>> goodsSpecificationMap = new HashMap<BigInteger, List<GoodsSpecification>>();
         if (CollectionUtils.isEmpty(goodsIds)) {
             return goodsSpecificationMap;
@@ -273,7 +270,7 @@ public class GoodsUtils {
         return goodsSpecificationMap;
     }
 
-    public static Map<BigInteger, List<Map<String, Object>>> obtainPackageGroupDetailInfos(BigInteger tenantId, BigInteger branchId, List<BigInteger> packageIds) {
+    public static Map<BigInteger, List<Map<String, Object>>> obtainPackageGroupDetailInfos(BigInteger tenantId, BigInteger branchId, Collection<BigInteger> packageIds) {
         Map<BigInteger, List<Map<String, Object>>> packageGroupDetailMap = new HashMap<BigInteger, List<Map<String, Object>>>();
         if (CollectionUtils.isEmpty(packageIds)) {
             return packageGroupDetailMap;
@@ -293,7 +290,7 @@ public class GoodsUtils {
         return packageGroupDetailMap;
     }
 
-    public static Map<BigInteger, List<PackageGroup>> obtainPackageGroupInfos(BigInteger tenantId, BigInteger branchId, List<BigInteger> packageIds) {
+    public static Map<BigInteger, List<PackageGroup>> obtainPackageGroupInfos(BigInteger tenantId, BigInteger branchId, Collection<BigInteger> packageIds) {
         Map<BigInteger, List<PackageGroup>> packageGroupMap = new HashMap<BigInteger, List<PackageGroup>>();
         if (CollectionUtils.isEmpty(packageIds)) {
             return packageGroupMap;
