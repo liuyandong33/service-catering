@@ -6,6 +6,7 @@ import build.dream.catering.models.menu.ObtainMenuInfoModel;
 import build.dream.catering.models.menu.SaveMenuModel;
 import build.dream.catering.utils.GoodsUtils;
 import build.dream.common.api.ApiRest;
+import build.dream.common.catering.domains.GoodsAttribute;
 import build.dream.common.catering.domains.GoodsAttributeGroup;
 import build.dream.common.catering.domains.Menu;
 import build.dream.common.catering.domains.MenuDetail;
@@ -160,6 +161,7 @@ public class MenuService {
         }
 
         Map<BigInteger, List<GoodsAttributeGroup>> goodsAttributeGroupMap = GoodsUtils.obtainGoodsAttributeGroupInfos(tenantId, branchId, goodsIds);
+        Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = GoodsUtils.obtainGoodsAttributeInfos(tenantId, branchId, goodsIds);
 
         List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
         for (Map.Entry<BigInteger, Set<BigInteger>> entry : categoryIdGoodsIdMap.entrySet()) {

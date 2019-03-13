@@ -30,7 +30,7 @@ public class MenuController {
      *
      * @return
      */
-    @RequestMapping(value = "/obtainMenuInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/obtainMenuInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ObtainMenuInfoModel.class, serviceClass = MenuService.class, serviceMethodName = "obtainMenuInfo", error = "获取菜牌失败")
     public String obtainMenuInfo() {
