@@ -181,7 +181,7 @@ public class GoodsService extends BasicService {
                     packageGroupList.add(packageGroup);
                 }
 
-                List<Map<String, Object>> packageInfos = goodsMapper.listPackageInfos(packageIds, null);
+                List<Map<String, Object>> packageInfos = goodsMapper.listPackageInfos(tenantId, branchId, packageIds, null);
                 Map<BigInteger, List<Map<String, Object>>> packageInfoMap = new HashMap<BigInteger, List<Map<String, Object>>>();
                 for (Map<String, Object> packageInfo : packageInfos) {
                     BigInteger packageGroupId = BigInteger.valueOf(MapUtils.getLong(packageInfo, "packageGroupId"));
@@ -282,7 +282,7 @@ public class GoodsService extends BasicService {
 
             List<BigInteger> packageIds = new ArrayList<BigInteger>();
             packageIds.add(goodsId);
-            List<Map<String, Object>> packageInfos = goodsMapper.listPackageInfos(packageIds, null);
+            List<Map<String, Object>> packageInfos = goodsMapper.listPackageInfos(tenantId, branchId, packageIds, null);
 
             Map<BigInteger, List<Map<String, Object>>> packageInfoMap = new HashMap<BigInteger, List<Map<String, Object>>>();
             for (Map<String, Object> packageInfo : packageInfos) {
@@ -318,100 +318,21 @@ public class GoodsService extends BasicService {
         List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
         if (CollectionUtils.isNotEmpty(goodsInfos)) {
             List<BigInteger> goodsIds = new ArrayList<BigInteger>();
+            List<BigInteger> packageIds = new ArrayList<BigInteger>();
             for (Goods goods : goodsInfos) {
                 goodsIds.add(goods.getId());
-            }
-
-            SearchModel goodsSpecificationSearchModel = new SearchModel(true);
-            goodsSpecificationSearchModel.addSearchCondition(GoodsSpecification.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-            goodsSpecificationSearchModel.addSearchCondition(GoodsSpecification.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-            goodsSpecificationSearchModel.addSearchCondition(GoodsSpecification.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
-            List<GoodsSpecification> goodsSpecifications = DatabaseHelper.findAll(GoodsSpecification.class, goodsSpecificationSearchModel);
-
-            SearchModel goodsAttributeGroupSearchModel = new SearchModel(true);
-            goodsAttributeGroupSearchModel.addSearchCondition(GoodsAttributeGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-            goodsAttributeGroupSearchModel.addSearchCondition(GoodsAttributeGroup.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-            goodsAttributeGroupSearchModel.addSearchCondition(GoodsAttributeGroup.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
-            List<GoodsAttributeGroup> goodsAttributeGroups = DatabaseHelper.findAll(GoodsAttributeGroup.class, goodsAttributeGroupSearchModel);
-
-            SearchModel goodsAttributeSearchModel = new SearchModel(true);
-            goodsAttributeSearchModel.addSearchCondition(GoodsAttribute.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-            goodsAttributeSearchModel.addSearchCondition(GoodsAttribute.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-            goodsAttributeSearchModel.addSearchCondition(GoodsAttribute.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
-            List<GoodsAttribute> goodsAttributes = DatabaseHelper.findAll(GoodsAttribute.class, goodsAttributeSearchModel);
-
-            Map<BigInteger, List<GoodsSpecification>> goodsSpecificationMap = new HashMap<BigInteger, List<GoodsSpecification>>();
-            for (GoodsSpecification goodsSpecification : goodsSpecifications) {
-                List<GoodsSpecification> goodsSpecificationList = goodsSpecificationMap.get(goodsSpecification.getGoodsId());
-                if (goodsSpecificationList == null) {
-                    goodsSpecificationList = new ArrayList<GoodsSpecification>();
-                    goodsSpecificationMap.put(goodsSpecification.getGoodsId(), goodsSpecificationList);
-                }
-                goodsSpecificationList.add(goodsSpecification);
-            }
-
-            Map<BigInteger, List<GoodsAttributeGroup>> goodsAttributeGroupMap = new HashMap<BigInteger, List<GoodsAttributeGroup>>();
-            if (CollectionUtils.isNotEmpty(goodsAttributeGroups)) {
-                for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroups) {
-                    BigInteger goodsId = goodsAttributeGroup.getGoodsId();
-                    List<GoodsAttributeGroup> goodsAttributeGroupList = goodsAttributeGroupMap.get(goodsId);
-                    if (CollectionUtils.isEmpty(goodsAttributeGroupList)) {
-                        goodsAttributeGroupList = new ArrayList<GoodsAttributeGroup>();
-                        goodsAttributeGroupMap.put(goodsId, goodsAttributeGroupList);
-                    }
-                    goodsAttributeGroupList.add(goodsAttributeGroup);
-                }
-            }
-
-            Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = new HashMap<BigInteger, List<GoodsAttribute>>();
-            if (CollectionUtils.isNotEmpty(goodsAttributes)) {
-                for (GoodsAttribute goodsAttribute : goodsAttributes) {
-                    BigInteger goodsId = goodsAttribute.getGoodsId();
-                    List<GoodsAttribute> goodsAttributeList = goodsAttributeMap.get(goodsId);
-                    if (CollectionUtils.isEmpty(goodsAttributeList)) {
-                        goodsAttributeList = new ArrayList<GoodsAttribute>();
-                        goodsAttributeMap.put(goodsId, goodsAttributeList);
-                    }
-                    goodsAttributeList.add(goodsAttribute);
-                }
-            }
-
-            List<BigInteger> packageIds = new ArrayList<BigInteger>();
-
-            for (Goods goods : goodsInfos) {
                 int type = goods.getType();
                 if (type == 2) {
                     packageIds.add(goods.getId());
                 }
             }
 
-            Map<BigInteger, List<Map<String, Object>>> packageGroupDetailMap = new HashMap<BigInteger, List<Map<String, Object>>>();
-            Map<BigInteger, List<PackageGroup>> packageGroupMap = new HashMap<BigInteger, List<PackageGroup>>();
-            if (CollectionUtils.isNotEmpty(packageIds)) {
-                List<Map<String, Object>> packageInfos = goodsMapper.listPackageInfos(packageIds, null);
-                for (Map<String, Object> packageInfo : packageInfos) {
-                    BigInteger packageId = BigInteger.valueOf(MapUtils.getLongValue(packageInfo, "packageId"));
-                    List<Map<String, Object>> packageGroupDetails = packageGroupDetailMap.get(packageId);
-                    if (CollectionUtils.isEmpty(packageGroupDetails)) {
-                        packageGroupDetails = new ArrayList<Map<String, Object>>();
-                        packageGroupDetailMap.put(packageId, packageGroupDetails);
-                    }
-                    packageGroupDetails.add(packageInfo);
-                }
+            Map<BigInteger, List<GoodsSpecification>> goodsSpecificationMap = GoodsUtils.obtainGoodsSpecificationInfos(tenantId, branchId, goodsIds);
+            Map<BigInteger, List<GoodsAttributeGroup>> goodsAttributeGroupMap = GoodsUtils.obtainGoodsAttributeGroupInfos(tenantId, branchId, goodsIds);
+            Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = GoodsUtils.obtainGoodsAttributeInfos(tenantId, branchId, goodsIds);
 
-                SearchModel packageGroupSearchModel = new SearchModel(true);
-                packageGroupSearchModel.addSearchCondition(PackageGroup.ColumnName.PACKAGE_ID, Constants.SQL_OPERATION_SYMBOL_IN, packageIds);
-                List<PackageGroup> packageGroups = DatabaseHelper.findAll(PackageGroup.class, packageGroupSearchModel);
-                for (PackageGroup packageGroup : packageGroups) {
-                    BigInteger packageId = packageGroup.getPackageId();
-                    List<PackageGroup> packageGroupList = packageGroupMap.get(packageId);
-                    if (CollectionUtils.isEmpty(packageGroupList)) {
-                        packageGroupList = new ArrayList<PackageGroup>();
-                        packageGroupMap.put(packageId, packageGroupList);
-                    }
-                    packageGroupList.add(packageGroup);
-                }
-            }
+            Map<BigInteger, List<Map<String, Object>>> packageGroupDetailMap = GoodsUtils.obtainPackageGroupDetailInfos(tenantId, branchId, packageIds);
+            Map<BigInteger, List<PackageGroup>> packageGroupMap = GoodsUtils.obtainPackageGroupInfos(tenantId, branchId, packageIds);
 
             for (Goods goods : goodsInfos) {
                 BigInteger goodsId = goods.getId();

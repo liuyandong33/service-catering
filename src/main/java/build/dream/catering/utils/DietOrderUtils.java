@@ -399,8 +399,8 @@ public class DietOrderUtils {
         List<Map<String, Object>> optionalGroupInfos = new ArrayList<Map<String, Object>>();
         List<Map<String, Object>> requiredGroupInfos = new ArrayList<Map<String, Object>>();
         if (CollectionUtils.isNotEmpty(packageIds)) {
-            optionalGroupInfos = GoodsUtils.listPackageInfos(packageIds, 1);
-            requiredGroupInfos = GoodsUtils.listPackageInfos(packageIds, 2);
+            optionalGroupInfos = GoodsUtils.listPackageInfos(tenantId, branchId, packageIds, 1);
+            requiredGroupInfos = GoodsUtils.listPackageInfos(tenantId, branchId, packageIds, 2);
         }
 
         Map<String, Map<String, Object>> optionalGroupInfoMap = new HashMap<String, Map<String, Object>>();
