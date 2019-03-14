@@ -117,6 +117,8 @@ public class FlashSaleService {
                 .localDietOrderGroupId(Constants.VARCHAR_DEFAULT_VALUE)
                 .localCreatedTime(Constants.DATETIME_DEFAULT_VALUE)
                 .localUpdatedTime(Constants.DATETIME_DEFAULT_VALUE)
+                .createdUserId(userId)
+                .updatedUserId(userId)
                 .build();
         DatabaseHelper.insert(dietOrderDetail);
         CacheUtils.setex(uuid, GsonUtils.toJson(dietOrder), 10, TimeUnit.MINUTES);

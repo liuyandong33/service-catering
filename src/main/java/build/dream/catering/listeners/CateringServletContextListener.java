@@ -1,6 +1,7 @@
 package build.dream.catering.listeners;
 
 import build.dream.catering.jobs.JobScheduler;
+import build.dream.catering.mappers.CommonMapper;
 import build.dream.catering.services.FlashSaleService;
 import build.dream.catering.tasks.SaveFlashSaleOrderTask;
 import build.dream.common.listeners.BasicServletContextListener;
@@ -21,6 +22,7 @@ public class CateringServletContextListener extends BasicServletContextListener 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         super.contextInitialized(servletContextEvent);
+        previousInjectionBean(servletContextEvent.getServletContext(), CommonMapper.class);
         try {
             jobScheduler.scheduler();
         } catch (IOException e) {
