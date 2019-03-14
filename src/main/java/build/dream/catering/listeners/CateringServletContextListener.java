@@ -1,6 +1,8 @@
 package build.dream.catering.listeners;
 
 import build.dream.catering.jobs.JobScheduler;
+import build.dream.catering.services.FlashSaleService;
+import build.dream.catering.tasks.SaveFlashSaleOrderTask;
 import build.dream.common.listeners.BasicServletContextListener;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,8 @@ import java.io.IOException;
 public class CateringServletContextListener extends BasicServletContextListener {
     @Autowired
     private JobScheduler jobScheduler;
+    @Autowired
+    private FlashSaleService flashSaleService;
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
@@ -24,6 +28,8 @@ public class CateringServletContextListener extends BasicServletContextListener 
         } catch (SchedulerException e) {
             e.printStackTrace();
         }
+
+        new SaveFlashSaleOrderTask(flashSaleService).start();
     }
 
     @Override

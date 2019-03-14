@@ -130,4 +130,6 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String ELASTICSEARCH_HIGHLIGHT_POST_TAG = "</span>";
     public static final String ELASTICSEARCH_INDEX_GOODS = "goods";
     public static final String ELASTICSEARCH_INDEX_BRANCH = "branch";
+
+    public static final String KEY_FLASH_SALE_ORDERS = "_flash_sale_orders";
 }
