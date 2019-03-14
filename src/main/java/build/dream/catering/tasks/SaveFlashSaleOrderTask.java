@@ -26,11 +26,12 @@ public class SaveFlashSaleOrderTask implements Runnable {
                 if (StringUtils.isNotBlank(orderJson)) {
                     Map<String, Object> orderInfo = JacksonUtils.readValueAsMap(orderJson, String.class, Object.class);
                     BigInteger tenantId = BigInteger.valueOf(MapUtils.getLongValue(orderInfo, "tenantId"));
+                    String tenantCode = MapUtils.getString(orderInfo, "tenantCode");
                     BigInteger branchId = BigInteger.valueOf(MapUtils.getLongValue(orderInfo, "tenantId"));
                     BigInteger vipId = BigInteger.valueOf(MapUtils.getLongValue(orderInfo, "tenantId"));
                     BigInteger activityId = BigInteger.valueOf(MapUtils.getLongValue(orderInfo, "tenantId"));
                     String uuid = MapUtils.getString(orderInfo, "uuid");
-                    flashSaleService.saveFlashSaleOrder(tenantId, branchId, vipId, activityId, uuid);
+                    flashSaleService.saveFlashSaleOrder(tenantId, tenantCode, branchId, vipId, activityId, uuid);
                     System.out.println(orderJson);
                 }
             } catch (Exception e) {
