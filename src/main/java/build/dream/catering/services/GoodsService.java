@@ -237,7 +237,7 @@ public class GoodsService extends BasicService {
 
         Map<String, Object> data = new HashMap<String, Object>();
         int type = goods.getType();
-        if (type == 1) {
+        if (type == Constants.GOODS_TYPE_ORDINARY_GOODS) {
             SearchModel goodsSpecificationSearchModel = new SearchModel(true);
             goodsSpecificationSearchModel.addSearchCondition(GoodsSpecification.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
             List<GoodsSpecification> goodsSpecifications = DatabaseHelper.findAll(GoodsSpecification.class, goodsSpecificationSearchModel);
@@ -275,7 +275,7 @@ public class GoodsService extends BasicService {
                 }
                 data.put("attributeGroups", attributeGroups);
             }
-        } else if (type == 2) {
+        } else if (type == Constants.GOODS_TYPE_PACKAGE) {
             SearchModel searchModel = new SearchModel(true);
             searchModel.addSearchCondition(PackageGroup.ColumnName.PACKAGE_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
             List<PackageGroup> packageGroups = DatabaseHelper.findAll(PackageGroup.class, searchModel);
@@ -322,7 +322,7 @@ public class GoodsService extends BasicService {
             for (Goods goods : goodsInfos) {
                 goodsIds.add(goods.getId());
                 int type = goods.getType();
-                if (type == 2) {
+                if (type == Constants.GOODS_TYPE_PACKAGE) {
                     packageIds.add(goods.getId());
                 }
             }
@@ -339,9 +339,9 @@ public class GoodsService extends BasicService {
                 int type = goods.getType();
 
                 Map<String, Object> goodsInfo = null;
-                if (type == 1) {
+                if (type == Constants.GOODS_TYPE_ORDINARY_GOODS) {
                     goodsInfo = GoodsUtils.buildGoodsInfo(goods, goodsSpecificationMap.get(goodsId), goodsAttributeGroupMap.get(goodsId), goodsAttributeMap.get(goodsId));
-                } else if (type == 2) {
+                } else if (type == Constants.GOODS_TYPE_PACKAGE) {
                     goodsInfo = GoodsUtils.buildPackageInfo(goods, packageGroupMap.get(goodsId), packageGroupDetailMap.get(goodsId));
                 }
                 data.add(goodsInfo);

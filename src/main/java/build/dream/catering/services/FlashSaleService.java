@@ -1,9 +1,9 @@
 package build.dream.catering.services;
 
+import build.dream.catering.constants.Constants;
 import build.dream.common.catering.domains.DietOrder;
 import build.dream.common.catering.domains.DietOrderDetail;
 import build.dream.common.catering.domains.DietOrderGroup;
-import build.dream.common.constants.Constants;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.utils.CacheUtils;
 import build.dream.common.utils.DatabaseHelper;
@@ -96,7 +96,7 @@ public class FlashSaleService {
                 .branchId(branchId)
                 .dietOrderId(dietOrderId)
                 .dietOrderGroupId(dietOrderGroup.getId())
-                .goodsType(1)
+                .goodsType(Constants.GOODS_TYPE_ORDINARY_GOODS)
                 .goodsId(goodsId)
                 .goodsName(goodsName)
                 .goodsSpecificationId(goodsSpecificationId)
