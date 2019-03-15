@@ -20,7 +20,7 @@ public class DingtalkUtils {
 
     public static String obtainAccessToken() {
         String accessToken = null;
-        String tokenJson = CacheUtils.get(Constants.KEY_DINGTALK_TOKEN);
+        String tokenJson = RedisUtils.get(Constants.KEY_DINGTALK_TOKEN);
         boolean isRetrieveAccessToken = false;
         if (StringUtils.isNotBlank(tokenJson)) {
             JSONObject tokenJsonObject = JSONObject.fromObject(tokenJson);
@@ -48,7 +48,7 @@ public class DingtalkUtils {
             tokenMap.put("access_token", accessToken);
             tokenMap.put("expires_in", resultJsonObject.getLong("expires_in"));
             tokenMap.put("fetch_time", System.currentTimeMillis());
-            CacheUtils.set(Constants.KEY_DINGTALK_TOKEN, GsonUtils.toJson(tokenMap));
+            RedisUtils.set(Constants.KEY_DINGTALK_TOKEN, GsonUtils.toJson(tokenMap));
         }
         return accessToken;
     }

@@ -5,9 +5,9 @@ import build.dream.common.catering.domains.DietOrder;
 import build.dream.common.catering.domains.DietOrderDetail;
 import build.dream.common.catering.domains.DietOrderGroup;
 import build.dream.common.constants.DietOrderConstants;
-import build.dream.common.utils.CacheUtils;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.GsonUtils;
+import build.dream.common.utils.RedisUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -121,6 +121,6 @@ public class FlashSaleService {
                 .updatedUserId(userId)
                 .build();
         DatabaseHelper.insert(dietOrderDetail);
-        CacheUtils.setex(uuid, GsonUtils.toJson(dietOrder), 10, TimeUnit.MINUTES);
+        RedisUtils.setex(uuid, GsonUtils.toJson(dietOrder), 10, TimeUnit.MINUTES);
     }
 }

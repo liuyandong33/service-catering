@@ -2,9 +2,9 @@ package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
 import build.dream.common.catering.domains.*;
-import build.dream.common.utils.CacheUtils;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.JacksonUtils;
+import build.dream.common.utils.RedisUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -25,12 +25,12 @@ public class DataService {
         String signature = null;
         try {
             signature = DigestUtils.md5Hex(dietOrderData);
-            boolean isNotExists = CacheUtils.setnx(signature, signature);
+            boolean isNotExists = RedisUtils.setnx(signature, signature);
             if (!isNotExists) {
                 return;
             }
 
-            CacheUtils.expire(signature, 30, TimeUnit.DAYS);
+            RedisUtils.expire(signature, 30, TimeUnit.DAYS);
 
             DataHandleHistory dataHandleHistory = new DataHandleHistory();
             dataHandleHistory.setSignature(signature);
@@ -96,7 +96,7 @@ public class DataService {
                 DatabaseHelper.insertAll(dietOrderActivities);
             }
         } catch (Exception e) {
-            CacheUtils.delete(signature);
+            RedisUtils.delete(signature);
             throw e;
         }
     }

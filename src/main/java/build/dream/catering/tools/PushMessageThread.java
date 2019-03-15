@@ -1,9 +1,9 @@
 package build.dream.catering.tools;
 
 import build.dream.common.models.jpush.PushModel;
-import build.dream.common.utils.CacheUtils;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.JPushUtils;
+import build.dream.common.utils.RedisUtils;
 import build.dream.common.utils.ThreadUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -18,13 +18,13 @@ public class PushMessageThread implements Runnable {
         this.uuid = uuid;
         this.count = count;
         this.interval = interval;
-        CacheUtils.set(uuid, GsonUtils.toJson(pushModel, false));
+        RedisUtils.set(uuid, GsonUtils.toJson(pushModel, false));
     }
 
     @Override
     public void run() {
         while (continued) {
-            String message = CacheUtils.get(uuid);
+            String message = RedisUtils.get(uuid);
             if (StringUtils.isBlank(message)) {
                 continued = false;
             } else {
@@ -35,7 +35,7 @@ public class PushMessageThread implements Runnable {
                 }
                 count = count - 1;
                 if (count <= 0) {
-                    CacheUtils.delete(uuid);
+                    RedisUtils.delete(uuid);
                     continued = false;
                 } else {
                     ThreadUtils.sleepSafe(interval);

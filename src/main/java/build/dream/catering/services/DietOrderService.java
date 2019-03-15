@@ -366,7 +366,7 @@ public class DietOrderService {
         int times = 0;
         while (times < 120) {
             times += 1;
-            dataJson = CacheUtils.get(uuid);
+            dataJson = RedisUtils.get(uuid);
             if (StringUtils.isNotBlank(dataJson)) {
                 break;
             }

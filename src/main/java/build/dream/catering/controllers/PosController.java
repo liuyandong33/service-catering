@@ -8,8 +8,8 @@ import build.dream.catering.services.PosService;
 import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.api.ApiRest;
 import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.CacheUtils;
 import build.dream.common.utils.GsonUtils;
+import build.dream.common.utils.RedisUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -57,7 +57,7 @@ public class PosController {
         receiptModel.validateAndThrow();
         String uuid = receiptModel.getUuid();
 
-        CacheUtils.delete(uuid);
+        RedisUtils.delete(uuid);
         return GsonUtils.toJson(ApiRest.builder().message("回执成功！").successful(true).build());
     }
 
