@@ -168,15 +168,43 @@ public class MenuService {
             BigInteger categoryId = entry.getKey();
             Set<BigInteger> ids = entry.getValue();
 
-            Map<String, Object> map = new HashMap<String, Object>();
-            map.put("id", categoryId);
+            Map<String, Object> item = new HashMap<String, Object>();
+            item.put("id", categoryId);
+            item.put("name", MapUtils.getString(goodsIdMenuDetailMap.get(ids.iterator().next()).get(0), "categoryName"));
 
+            List<Map<String, Object>> goodsInfos = new ArrayList<Map<String, Object>>();
             for (BigInteger goodsId : ids) {
                 List<Map<String, Object>> details = goodsIdMenuDetailMap.get(goodsId);
+                int size = details.size();
 
+                Map<String, Object> goodsInfo = new HashMap<String, Object>();
+                List<Map<String, Object>> specifications = new ArrayList<Map<String, Object>>();
+                for (int index = 0; index < size; index++) {
+                    Map<String, Object> detail = details.get(index);
+                    if (index == 0) {
+                        goodsInfo.put("id", MapUtils.getLongValue(detail, "goodsId"));
+                        goodsInfo.put("name", MapUtils.getString(detail, "goodsName"));
+                        goodsInfo.put("type", MapUtils.getIntValue(detail, "goodsType"));
+
+                        List<GoodsAttributeGroup> goodsAttributeGroups = goodsAttributeGroupMap.get(goodsId);
+                        if (CollectionUtils.isNotEmpty(goodsAttributeGroups)) {
+                            List<Map<String, Object>> attributeGroups = GoodsUtils.buildGoodsAttributeGroups(goodsAttributeGroups, goodsAttributeMap.get(goodsId));
+                            goodsInfo.put("attributeGroups", attributeGroups);
+                        }
+                    }
+                    Map<String, Object> specification = new HashMap<String, Object>();
+                    specification.put("id", MapUtils.getLongValue(detail, "goodsSpecificationId"));
+                    specification.put("name", MapUtils.getString(detail, "goodsSpecificationName"));
+                    specification.put("price", MapUtils.getDoubleValue(detail, "price"));
+                    specifications.add(specification);
+                }
+                goodsInfo.put("specifications", specifications);
+                goodsInfos.add(goodsInfo);
             }
+            item.put("goodsInfos", goodsInfos);
+            data.add(item);
         }
 
-        return ApiRest.builder().build();
+        return ApiRest.builder().data(data).message("查询菜牌信息成功！").successful(true).build();
     }
 }
