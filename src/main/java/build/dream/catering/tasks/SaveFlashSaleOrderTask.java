@@ -41,6 +41,6 @@ public class SaveFlashSaleOrderTask implements Runnable {
     }
 
     public void start() {
-        new Thread(this).run();
+        new Thread(this).start();
     }
 }
