@@ -25,7 +25,7 @@
         AND menu.end_time &gt;= NOW()
     </select>
 
-    <select id="findMenuDetails" resultType="build.dream.common.utils.UnderscoreToCamelCaseMap">
+    <select id="findAllMenuDetails" resultType="build.dream.common.utils.UnderscoreToCamelCaseMap">
         SELECT
         goods.id AS goods_id,
         goods.name AS goods_name,
@@ -44,7 +44,7 @@
         INNER JOIN goods_unit ON goods_unit.id = menu_detail.goods_unit_id AND goods_unit.deleted = 0
         INNER JOIN goods_category ON goods_category.id = goods.category_id AND goods_category.deleted = 0
         WHERE menu_detail.deleted = 0
-        AND menu_detail.id = #{menuId}
+        AND menu_detail.menu_id = #{menuId}
         AND menu_detail.tenant_id = #{tenantId};
     </select>
 </mapper>

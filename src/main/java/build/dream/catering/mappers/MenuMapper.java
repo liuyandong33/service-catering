@@ -19,5 +19,5 @@ public interface MenuMapper {
 
     Menu findEffectiveMenu(@Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId, @Param("effectiveScope") int effectiveScope);
 
-    List<Map<String, Object>> findMenuDetails(@Param("tenantId") BigInteger tenantId, @Param("menuId") BigInteger menuId);
+    List<Map<String, Object>> findAllMenuDetails(@Param("tenantId") BigInteger tenantId, @Param("menuId") BigInteger menuId);
 }

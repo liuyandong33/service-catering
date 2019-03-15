@@ -50,6 +50,7 @@ public class MenuService {
         List<SaveMenuModel.Detail> details = saveMenuModel.getDetails();
 
         Menu menu = null;
+        BigInteger menuId = null;
         if (id == null) {
             menu = Menu.builder()
                     .tenantId(tenantId)
@@ -66,7 +67,7 @@ public class MenuService {
                     .build();
             DatabaseHelper.insert(menu);
 
-            BigInteger menuId = menu.getId();
+            menuId = menu.getId();
             menuMapper.insertAllMenuBranchR(menuId, tenantId, tenantCode, branchIds);
         } else {
             SearchModel searchModel = new SearchModel(true);
@@ -85,7 +86,7 @@ public class MenuService {
 
             DatabaseHelper.update(menu);
 
-            BigInteger menuId = menu.getId();
+            menuId = menu.getId();
             menuMapper.deleteAllMenuBranchR(menuId, tenantId);
             menuMapper.insertAllMenuBranchR(menuId, tenantId, tenantCode, branchIds);
 
@@ -100,6 +101,7 @@ public class MenuService {
             MenuDetail menuDetail = MenuDetail.builder()
                     .tenantId(tenantId)
                     .tenantCode(tenantCode)
+                    .menuId(menuId)
                     .goodsId(detail.getGoodsId())
                     .goodsUnitId(detail.getGoodsSpecificationId())
                     .goodsUnitId(detail.getGoodsUnitId())
@@ -129,7 +131,7 @@ public class MenuService {
         Menu menu = menuMapper.findEffectiveMenu(tenantId, branchId, effectiveScope);
         ValidateUtils.notNull(menu, "未检索到有效菜牌！");
 
-        List<Map<String, Object>> menuDetails = menuMapper.findMenuDetails(tenantId, menu.getId());
+        List<Map<String, Object>> menuDetails = menuMapper.findAllMenuDetails(tenantId, menu.getId());
         Map<BigInteger, Set<BigInteger>> categoryIdGoodsIdMap = new HashMap<BigInteger, Set<BigInteger>>();
         Map<BigInteger, List<Map<String, Object>>> goodsIdMenuDetailMap = new HashMap<BigInteger, List<Map<String, Object>>>();
         Set<BigInteger> goodsIds = new HashSet<BigInteger>();
