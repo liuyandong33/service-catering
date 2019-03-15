@@ -6,10 +6,7 @@ import build.dream.catering.models.menu.ObtainMenuInfoModel;
 import build.dream.catering.models.menu.SaveMenuModel;
 import build.dream.catering.utils.GoodsUtils;
 import build.dream.common.api.ApiRest;
-import build.dream.common.catering.domains.GoodsAttribute;
-import build.dream.common.catering.domains.GoodsAttributeGroup;
-import build.dream.common.catering.domains.Menu;
-import build.dream.common.catering.domains.MenuDetail;
+import build.dream.common.catering.domains.*;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.DeleteModel;
 import build.dream.common.utils.SearchModel;
@@ -164,6 +161,8 @@ public class MenuService {
 
         Map<BigInteger, List<GoodsAttributeGroup>> goodsAttributeGroupMap = GoodsUtils.obtainGoodsAttributeGroupInfos(tenantId, branchId, goodsIds);
         Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = GoodsUtils.obtainGoodsAttributeInfos(tenantId, branchId, goodsIds);
+        Map<BigInteger, List<Map<String, Object>>> packageGroupDetailMap = GoodsUtils.obtainPackageGroupDetailInfos(tenantId, branchId, packageIds);
+        Map<BigInteger, List<PackageGroup>> packageGroupMap = GoodsUtils.obtainPackageGroupInfos(tenantId, branchId, packageIds);
 
         List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
         for (Map.Entry<BigInteger, Set<BigInteger>> entry : categoryIdGoodsIdMap.entrySet()) {
@@ -177,30 +176,32 @@ public class MenuService {
             List<Map<String, Object>> goodsInfos = new ArrayList<Map<String, Object>>();
             for (BigInteger goodsId : ids) {
                 List<Map<String, Object>> details = goodsIdMenuDetailMap.get(goodsId);
-                int size = details.size();
+                Map<String, Object> info = details.get(0);
 
+                int goodsType = MapUtils.getIntValue(info, "goodsType");
                 Map<String, Object> goodsInfo = new HashMap<String, Object>();
-                List<Map<String, Object>> specifications = new ArrayList<Map<String, Object>>();
-                for (int index = 0; index < size; index++) {
-                    Map<String, Object> detail = details.get(index);
-                    if (index == 0) {
-                        goodsInfo.put("id", MapUtils.getLongValue(detail, "goodsId"));
-                        goodsInfo.put("name", MapUtils.getString(detail, "goodsName"));
-                        goodsInfo.put("type", MapUtils.getIntValue(detail, "goodsType"));
-
+                goodsInfo.put("id", MapUtils.getLongValue(info, "goodsId"));
+                goodsInfo.put("name", MapUtils.getString(info, "goodsName"));
+                goodsInfo.put("type", goodsType);
+                if (goodsType == Constants.GOODS_TYPE_ORDINARY_GOODS) {
+                    List<Map<String, Object>> specifications = new ArrayList<Map<String, Object>>();
+                    for (Map<String, Object> detail : details) {
+                        Map<String, Object> specification = new HashMap<String, Object>();
+                        specification.put("id", MapUtils.getLongValue(detail, "goodsSpecificationId"));
+                        specification.put("name", MapUtils.getString(detail, "goodsSpecificationName"));
+                        specification.put("price", MapUtils.getDoubleValue(detail, "price"));
+                        specifications.add(specification);
                         List<GoodsAttributeGroup> goodsAttributeGroups = goodsAttributeGroupMap.get(goodsId);
                         if (CollectionUtils.isNotEmpty(goodsAttributeGroups)) {
                             List<Map<String, Object>> attributeGroups = GoodsUtils.buildGoodsAttributeGroups(goodsAttributeGroups, goodsAttributeMap.get(goodsId));
                             goodsInfo.put("attributeGroups", attributeGroups);
                         }
                     }
-                    Map<String, Object> specification = new HashMap<String, Object>();
-                    specification.put("id", MapUtils.getLongValue(detail, "goodsSpecificationId"));
-                    specification.put("name", MapUtils.getString(detail, "goodsSpecificationName"));
-                    specification.put("price", MapUtils.getDoubleValue(detail, "price"));
-                    specifications.add(specification);
+                    goodsInfo.put("specifications", specifications);
+                } else if (goodsType == Constants.GOODS_TYPE_PACKAGE) {
+                    goodsInfo.put("groups", GoodsUtils.buildPackageGroupInfos(packageGroupMap.get(goodsId), packageGroupDetailMap.get(goodsId)));
                 }
-                goodsInfo.put("specifications", specifications);
+
                 goodsInfos.add(goodsInfo);
             }
             item.put("goodsInfos", goodsInfos);

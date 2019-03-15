@@ -112,6 +112,13 @@ public class GoodsUtils {
         goodsInfo.put(Goods.FieldName.CATEGORY_NAME, goods.getCategoryName());
         goodsInfo.put(Goods.FieldName.IMAGE_URL, goods.getImageUrl());
 
+        List<Map<String, Object>> groups = buildPackageGroupInfos(packageGroups, packageGroupDetails);
+
+        goodsInfo.put("groups", groups);
+        return goodsInfo;
+    }
+
+    public static List<Map<String, Object>> buildPackageGroupInfos(List<PackageGroup> packageGroups, List<Map<String, Object>> packageGroupDetails) {
         Map<BigInteger, List<Map<String, Object>>> packageGroupDetailMap = new HashMap<BigInteger, List<Map<String, Object>>>();
         for (Map<String, Object> packageGroupDetail : packageGroupDetails) {
             BigInteger packageGroupId = BigInteger.valueOf(MapUtils.getLongValue(packageGroupDetail, "packageGroupId"));
@@ -136,9 +143,7 @@ public class GoodsUtils {
 
             groups.add(group);
         }
-
-        goodsInfo.put("groups", groups);
-        return goodsInfo;
+        return groups;
     }
 
     public static GoodsAttributeGroup buildGoodsAttributeGroup(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, SaveGoodsModel.AttributeGroupInfo attributeGroupInfo, BigInteger userId) {
@@ -297,8 +302,8 @@ public class GoodsUtils {
         }
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition(PackageGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_IN, tenantId);
-        searchModel.addSearchCondition(PackageGroup.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_IN, branchId);
+        searchModel.addSearchCondition(PackageGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(PackageGroup.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         searchModel.addSearchCondition(PackageGroup.ColumnName.PACKAGE_ID, Constants.SQL_OPERATION_SYMBOL_IN, packageIds);
         List<PackageGroup> packageGroups = DatabaseHelper.findAll(PackageGroup.class, searchModel);
 
