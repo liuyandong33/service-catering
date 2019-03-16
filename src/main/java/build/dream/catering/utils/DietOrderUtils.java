@@ -160,45 +160,45 @@ public class DietOrderUtils {
         }
 
         Map<String, Object> dietOrderInfo = new HashMap<String, Object>();
-        dietOrderInfo.put("id", dietOrder.getId());
-        dietOrderInfo.put("orderNumber", dietOrder.getOrderNumber());
-        dietOrderInfo.put("tenantId", dietOrder.getTenantId());
-        dietOrderInfo.put("tenantCode", dietOrder.getTenantCode());
-        dietOrderInfo.put("branchId", dietOrder.getBranchId());
-        dietOrderInfo.put("orderType", dietOrder.getOrderType());
-        dietOrderInfo.put("orderStatus", dietOrder.getOrderStatus());
-        dietOrderInfo.put("payStatus", dietOrder.getPayStatus());
-        dietOrderInfo.put("refundStatus", dietOrder.getRefundStatus());
-        dietOrderInfo.put("totalAmount", dietOrder.getTotalAmount());
-        dietOrderInfo.put("discountAmount", dietOrder.getDiscountAmount());
-        dietOrderInfo.put("payableAmount", dietOrder.getPayableAmount());
-        dietOrderInfo.put("paidAmount", dietOrder.getPaidAmount());
-        dietOrderInfo.put("paidType", dietOrder.getPaidType());
-        dietOrderInfo.put("remark", dietOrder.getRemark());
-        dietOrderInfo.put("deliveryAddress", dietOrder.getDeliveryAddress());
-        dietOrderInfo.put("deliveryLongitude", dietOrder.getDeliveryLongitude());
-        dietOrderInfo.put("deliveryLatitude", dietOrder.getDeliveryLatitude());
-        dietOrderInfo.put("deliverTime", dietOrder.getDeliverTime());
-        dietOrderInfo.put("activeTime", dietOrder.getActiveTime());
-        dietOrderInfo.put("deliverFee", dietOrder.getDeliverFee());
-        dietOrderInfo.put("telephoneNumber", dietOrder.getTelephoneNumber());
-        dietOrderInfo.put("daySerialNumber", dietOrder.getDaySerialNumber());
-        dietOrderInfo.put("consignee", dietOrder.getConsignee());
-        dietOrderInfo.put("invoiced", dietOrder.isInvoiced());
-        dietOrderInfo.put("invoiceType", dietOrder.getInvoiceType());
-        dietOrderInfo.put("invoice", dietOrder.getInvoice());
-        dietOrderInfo.put("vipId", dietOrder.getVipId());
-        dietOrderInfo.put("createTime", dietOrder.getCreatedTime());
-        dietOrderInfo.put("lastUpdateTime", dietOrder.getUpdatedTime());
-        dietOrderInfo.put("lastUpdateRemark", dietOrder.getUpdatedRemark());
+        dietOrderInfo.put(DietOrder.FieldName.ID, dietOrder.getId());
+        dietOrderInfo.put(DietOrder.FieldName.ORDER_NUMBER, dietOrder.getOrderNumber());
+        dietOrderInfo.put(DietOrder.FieldName.TENANT_ID, dietOrder.getTenantId());
+        dietOrderInfo.put(DietOrder.FieldName.TENANT_CODE, dietOrder.getTenantCode());
+        dietOrderInfo.put(DietOrder.FieldName.BRANCH_ID, dietOrder.getBranchId());
+        dietOrderInfo.put(DietOrder.FieldName.ORDER_TYPE, dietOrder.getOrderType());
+        dietOrderInfo.put(DietOrder.FieldName.ORDER_STATUS, dietOrder.getOrderStatus());
+        dietOrderInfo.put(DietOrder.FieldName.PAY_STATUS, dietOrder.getPayStatus());
+        dietOrderInfo.put(DietOrder.FieldName.REFUND_STATUS, dietOrder.getRefundStatus());
+        dietOrderInfo.put(DietOrder.FieldName.TOTAL_AMOUNT, dietOrder.getTotalAmount());
+        dietOrderInfo.put(DietOrder.FieldName.DISCOUNT_AMOUNT, dietOrder.getDiscountAmount());
+        dietOrderInfo.put(DietOrder.FieldName.PAYABLE_AMOUNT, dietOrder.getPayableAmount());
+        dietOrderInfo.put(DietOrder.FieldName.PAID_AMOUNT, dietOrder.getPaidAmount());
+        dietOrderInfo.put(DietOrder.FieldName.PAID_TYPE, dietOrder.getPaidType());
+        dietOrderInfo.put(DietOrder.FieldName.REMARK, dietOrder.getRemark());
+        dietOrderInfo.put(DietOrder.FieldName.DELIVERY_ADDRESS, dietOrder.getDeliveryAddress());
+        dietOrderInfo.put(DietOrder.FieldName.DELIVERY_LONGITUDE, dietOrder.getDeliveryLongitude());
+        dietOrderInfo.put(DietOrder.FieldName.DELIVERY_LATITUDE, dietOrder.getDeliveryLatitude());
+        dietOrderInfo.put(DietOrder.FieldName.DELIVER_TIME, dietOrder.getDeliverTime());
+        dietOrderInfo.put(DietOrder.FieldName.ACTIVE_TIME, dietOrder.getActiveTime());
+        dietOrderInfo.put(DietOrder.FieldName.DELIVER_FEE, dietOrder.getDeliverFee());
+        dietOrderInfo.put(DietOrder.FieldName.TELEPHONE_NUMBER, dietOrder.getTelephoneNumber());
+        dietOrderInfo.put(DietOrder.FieldName.DAY_SERIAL_NUMBER, dietOrder.getDaySerialNumber());
+        dietOrderInfo.put(DietOrder.FieldName.CONSIGNEE, dietOrder.getConsignee());
+        dietOrderInfo.put(DietOrder.FieldName.INVOICED, dietOrder.isInvoiced());
+        dietOrderInfo.put(DietOrder.FieldName.INVOICE_TYPE, dietOrder.getInvoiceType());
+        dietOrderInfo.put(DietOrder.FieldName.INVOICE, dietOrder.getInvoice());
+        dietOrderInfo.put(DietOrder.FieldName.VIP_ID, dietOrder.getVipId());
+        dietOrderInfo.put(DietOrder.FieldName.CREATED_TIME, dietOrder.getCreatedTime());
+        dietOrderInfo.put(DietOrder.FieldName.UPDATED_TIME, dietOrder.getUpdatedTime());
+        dietOrderInfo.put(DietOrder.FieldName.UPDATED_REMARK, dietOrder.getUpdatedRemark());
         dietOrderInfo.put("groups", buildDietOrderGroupInfos(dietOrderGroups, dietOrderDetailMap, dietOrderDetailGoodsAttributeMap));
         List<Map<String, Object>> orderActivities = new ArrayList<Map<String, Object>>();
         for (DietOrderActivity dietOrderActivity : dietOrderActivities) {
             Map<String, Object> orderActivity = new HashMap<String, Object>();
-            orderActivity.put("activityId", dietOrderActivity.getActivityId());
-            orderActivity.put("activityName", dietOrderActivity.getActivityName());
-            orderActivity.put("activityType", dietOrderActivity.getActivityType());
-            orderActivity.put("amount", dietOrderActivity.getAmount());
+            orderActivity.put(DietOrderActivity.FieldName.ACTIVITY_ID, dietOrderActivity.getActivityId());
+            orderActivity.put(DietOrderActivity.FieldName.ACTIVITY_NAME, dietOrderActivity.getActivityName());
+            orderActivity.put(DietOrderActivity.FieldName.ACTIVITY_TYPE, dietOrderActivity.getActivityType());
+            orderActivity.put(DietOrderActivity.FieldName.AMOUNT, dietOrderActivity.getAmount());
             orderActivities.add(orderActivity);
         }
         dietOrderInfo.put("orderActivities", orderActivities);
@@ -217,9 +217,9 @@ public class DietOrderUtils {
         List<Map<String, Object>> groups = new ArrayList<Map<String, Object>>();
         for (DietOrderGroup dietOrderGroup : dietOrderGroups) {
             Map<String, Object> group = new HashMap<String, Object>();
-            group.put("id", dietOrderGroup.getId());
-            group.put("name", dietOrderGroup.getName());
-            group.put("type", dietOrderGroup.getType());
+            group.put(DietOrderGroup.FieldName.ID, dietOrderGroup.getId());
+            group.put(DietOrderGroup.FieldName.NAME, dietOrderGroup.getName());
+            group.put(DietOrderGroup.FieldName.TYPE, dietOrderGroup.getType());
             group.put("details", buildDietOrderDetailInfos(dietOrderDetailMap.get(dietOrderGroup.getId()), dietOrderDetailGoodsAttributeMap));
             groups.add(group);
         }
@@ -399,8 +399,8 @@ public class DietOrderUtils {
         List<Map<String, Object>> optionalGroupInfos = new ArrayList<Map<String, Object>>();
         List<Map<String, Object>> requiredGroupInfos = new ArrayList<Map<String, Object>>();
         if (CollectionUtils.isNotEmpty(packageIds)) {
-            optionalGroupInfos = GoodsUtils.listPackageInfos(tenantId, branchId, packageIds, 1);
-            requiredGroupInfos = GoodsUtils.listPackageInfos(tenantId, branchId, packageIds, 2);
+            optionalGroupInfos = GoodsUtils.listPackageInfos(tenantId, branchId, packageIds, Constants.PACKAGE_GROUP_TYPE_OPTIONAL_GROUP);
+            requiredGroupInfos = GoodsUtils.listPackageInfos(tenantId, branchId, packageIds, Constants.PACKAGE_GROUP_TYPE_REQUIRED_GROUP);
         }
 
         Map<String, Map<String, Object>> optionalGroupInfoMap = new HashMap<String, Map<String, Object>>();

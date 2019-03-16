@@ -132,4 +132,13 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String ELASTICSEARCH_INDEX_BRANCH = "branch";
 
     public static final String KEY_FLASH_SALE_ORDERS = "_flash_sale_orders";
+
+    /**
+     * 套餐组类型
+     *
+     * @see #PACKAGE_GROUP_TYPE_OPTIONAL_GROUP: 可选组
+     * @see #PACKAGE_GROUP_TYPE_REQUIRED_GROUP: 必选组
+     */
+    public static final Integer PACKAGE_GROUP_TYPE_OPTIONAL_GROUP = 1;
+    public static final Integer PACKAGE_GROUP_TYPE_REQUIRED_GROUP = 2;
 }
