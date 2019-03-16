@@ -1,5 +1,6 @@
 package build.dream.catering.utils;
 
+import build.dream.catering.beans.PackageDetail;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.GoodsMapper;
 import build.dream.catering.models.goods.SaveGoodsModel;
@@ -9,7 +10,6 @@ import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.ValidateUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -100,7 +100,7 @@ public class GoodsUtils {
         return goodsSpecificationInfos;
     }
 
-    public static Map<String, Object> buildPackageInfo(Goods goods, List<PackageGroup> packageGroups, List<Map<String, Object>> packageGroupDetails) {
+    public static Map<String, Object> buildPackageInfo(Goods goods, List<PackageGroup> packageGroups, List<PackageDetail> packageDetails) {
         Map<String, Object> goodsInfo = new HashMap<String, Object>();
         goodsInfo.put(Goods.FieldName.ID, goods.getId());
         goodsInfo.put(Goods.FieldName.NAME, goods.getName());
@@ -112,22 +112,22 @@ public class GoodsUtils {
         goodsInfo.put(Goods.FieldName.CATEGORY_NAME, goods.getCategoryName());
         goodsInfo.put(Goods.FieldName.IMAGE_URL, goods.getImageUrl());
 
-        List<Map<String, Object>> groups = buildPackageGroupInfos(packageGroups, packageGroupDetails);
+        List<Map<String, Object>> groups = buildPackageGroupInfos(packageGroups, packageDetails);
 
         goodsInfo.put("groups", groups);
         return goodsInfo;
     }
 
-    public static List<Map<String, Object>> buildPackageGroupInfos(List<PackageGroup> packageGroups, List<Map<String, Object>> packageGroupDetails) {
-        Map<BigInteger, List<Map<String, Object>>> packageGroupDetailMap = new HashMap<BigInteger, List<Map<String, Object>>>();
-        for (Map<String, Object> packageGroupDetail : packageGroupDetails) {
-            BigInteger packageGroupId = BigInteger.valueOf(MapUtils.getLongValue(packageGroupDetail, "packageGroupId"));
-            List<Map<String, Object>> packageGroupDetailList = packageGroupDetailMap.get(packageGroupId);
-            if (CollectionUtils.isEmpty(packageGroupDetailList)) {
-                packageGroupDetailList = new ArrayList<Map<String, Object>>();
-                packageGroupDetailMap.put(packageGroupId, packageGroupDetailList);
+    public static List<Map<String, Object>> buildPackageGroupInfos(List<PackageGroup> packageGroups, List<PackageDetail> packageDetails) {
+        Map<BigInteger, List<PackageDetail>> packageDetailMap = new HashMap<BigInteger, List<PackageDetail>>();
+        for (PackageDetail packageDetail : packageDetails) {
+            BigInteger packageGroupId = packageDetail.getPackageGroupId();
+            List<PackageDetail> packageDetailList = packageDetailMap.get(packageGroupId);
+            if (CollectionUtils.isEmpty(packageDetailList)) {
+                packageDetailList = new ArrayList<PackageDetail>();
+                packageDetailMap.put(packageGroupId, packageDetailList);
             }
-            packageGroupDetailList.add(packageGroupDetail);
+            packageDetailList.add(packageDetail);
         }
 
         List<Map<String, Object>> groups = new ArrayList<Map<String, Object>>();
@@ -139,7 +139,7 @@ public class GoodsUtils {
             group.put(PackageGroup.FieldName.GROUP_NAME, packageGroup.getGroupName());
             group.put(PackageGroup.FieldName.GROUP_TYPE, packageGroup.getGroupType());
             group.put(PackageGroup.FieldName.OPTIONAL_QUANTITY, packageGroup.getOptionalQuantity());
-            group.put("details", packageGroupDetailMap.get(packageGroupId));
+            group.put("details", packageDetailMap.get(packageGroupId));
 
             groups.add(group);
         }
@@ -192,7 +192,7 @@ public class GoodsUtils {
         return goodsSpecification;
     }
 
-    public static List<Map<String, Object>> listPackageInfos(BigInteger tenantId, BigInteger branchId, Collection<BigInteger> packageIds, Integer groupType) {
+    public static List<PackageDetail> listPackageInfos(BigInteger tenantId, BigInteger branchId, Collection<BigInteger> packageIds, Integer groupType) {
         return obtainGoodsMapper().listPackageInfos(tenantId, branchId, packageIds, groupType);
     }
 
@@ -275,22 +275,22 @@ public class GoodsUtils {
         return goodsSpecificationMap;
     }
 
-    public static Map<BigInteger, List<Map<String, Object>>> obtainPackageGroupDetailInfos(BigInteger tenantId, BigInteger branchId, Collection<BigInteger> packageIds) {
-        Map<BigInteger, List<Map<String, Object>>> packageGroupDetailMap = new HashMap<BigInteger, List<Map<String, Object>>>();
+    public static Map<BigInteger, List<PackageDetail>> obtainPackageGroupDetailInfos(BigInteger tenantId, BigInteger branchId, Collection<BigInteger> packageIds) {
+        Map<BigInteger, List<PackageDetail>> packageGroupDetailMap = new HashMap<BigInteger, List<PackageDetail>>();
         if (CollectionUtils.isEmpty(packageIds)) {
             return packageGroupDetailMap;
         }
 
-        List<Map<String, Object>> packageInfos = listPackageInfos(tenantId, branchId, packageIds, null);
+        List<PackageDetail> packageDetails = listPackageInfos(tenantId, branchId, packageIds, null);
 
-        for (Map<String, Object> packageInfo : packageInfos) {
-            BigInteger packageId = BigInteger.valueOf(MapUtils.getLongValue(packageInfo, "packageId"));
-            List<Map<String, Object>> packageGroupDetails = packageGroupDetailMap.get(packageId);
+        for (PackageDetail packageDetail : packageDetails) {
+            BigInteger packageId = packageDetail.getPackageId();
+            List<PackageDetail> packageGroupDetails = packageGroupDetailMap.get(packageId);
             if (CollectionUtils.isEmpty(packageGroupDetails)) {
-                packageGroupDetails = new ArrayList<Map<String, Object>>();
+                packageGroupDetails = new ArrayList<PackageDetail>();
                 packageGroupDetailMap.put(packageId, packageGroupDetails);
             }
-            packageGroupDetails.add(packageInfo);
+            packageGroupDetails.add(packageDetail);
         }
         return packageGroupDetailMap;
     }

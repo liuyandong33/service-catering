@@ -1,5 +1,6 @@
 package build.dream.catering.services;
 
+import build.dream.catering.beans.PackageDetail;
 import build.dream.catering.beans.ZTreeNode;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.GoodsMapper;
@@ -181,16 +182,16 @@ public class GoodsService extends BasicService {
                     packageGroupList.add(packageGroup);
                 }
 
-                List<Map<String, Object>> packageInfos = goodsMapper.listPackageInfos(tenantId, branchId, packageIds, null);
-                Map<BigInteger, List<Map<String, Object>>> packageInfoMap = new HashMap<BigInteger, List<Map<String, Object>>>();
-                for (Map<String, Object> packageInfo : packageInfos) {
-                    BigInteger packageGroupId = BigInteger.valueOf(MapUtils.getLong(packageInfo, "packageGroupId"));
-                    List<Map<String, Object>> packageInfoList = packageInfoMap.get(packageGroupId);
+                List<PackageDetail> packageInfos = goodsMapper.listPackageInfos(tenantId, branchId, packageIds, null);
+                Map<BigInteger, List<PackageDetail>> packageInfoMap = new HashMap<BigInteger, List<PackageDetail>>();
+                for (PackageDetail packageDetail : packageInfos) {
+                    BigInteger packageGroupId = packageDetail.getPackageGroupId();
+                    List<PackageDetail> packageInfoList = packageInfoMap.get(packageGroupId);
                     if (CollectionUtils.isEmpty(packageInfoList)) {
-                        packageInfoList = new ArrayList<Map<String, Object>>();
+                        packageInfoList = new ArrayList<PackageDetail>();
                         packageInfoMap.put(packageGroupId, packageInfoList);
                     }
-                    packageInfoList.add(packageInfo);
+                    packageInfoList.add(packageDetail);
                 }
 
                 for (Goods goods : goodsList) {
@@ -282,17 +283,17 @@ public class GoodsService extends BasicService {
 
             List<BigInteger> packageIds = new ArrayList<BigInteger>();
             packageIds.add(goodsId);
-            List<Map<String, Object>> packageInfos = goodsMapper.listPackageInfos(tenantId, branchId, packageIds, null);
+            List<PackageDetail> packageInfos = goodsMapper.listPackageInfos(tenantId, branchId, packageIds, null);
 
-            Map<BigInteger, List<Map<String, Object>>> packageInfoMap = new HashMap<BigInteger, List<Map<String, Object>>>();
-            for (Map<String, Object> packageInfo : packageInfos) {
-                BigInteger packageGroupId = BigInteger.valueOf(MapUtils.getLong(packageInfo, "packageGroupId"));
-                List<Map<String, Object>> packageInfoList = packageInfoMap.get(packageGroupId);
+            Map<BigInteger, List<PackageDetail>> packageInfoMap = new HashMap<BigInteger, List<PackageDetail>>();
+            for (PackageDetail packageDetail : packageInfos) {
+                BigInteger packageGroupId = packageDetail.getPackageGroupId();
+                List<PackageDetail> packageInfoList = packageInfoMap.get(packageGroupId);
                 if (CollectionUtils.isEmpty(packageInfoList)) {
-                    packageInfoList = new ArrayList<Map<String, Object>>();
+                    packageInfoList = new ArrayList<PackageDetail>();
                     packageInfoMap.put(packageGroupId, packageInfoList);
                 }
-                packageInfoList.add(packageInfo);
+                packageInfoList.add(packageDetail);
             }
 
             List<Map<String, Object>> groups = new ArrayList<Map<String, Object>>();
@@ -331,7 +332,7 @@ public class GoodsService extends BasicService {
             Map<BigInteger, List<GoodsAttributeGroup>> goodsAttributeGroupMap = GoodsUtils.obtainGoodsAttributeGroupInfos(tenantId, branchId, goodsIds);
             Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = GoodsUtils.obtainGoodsAttributeInfos(tenantId, branchId, goodsIds);
 
-            Map<BigInteger, List<Map<String, Object>>> packageGroupDetailMap = GoodsUtils.obtainPackageGroupDetailInfos(tenantId, branchId, packageIds);
+            Map<BigInteger, List<PackageDetail>> packageDetailMap = GoodsUtils.obtainPackageGroupDetailInfos(tenantId, branchId, packageIds);
             Map<BigInteger, List<PackageGroup>> packageGroupMap = GoodsUtils.obtainPackageGroupInfos(tenantId, branchId, packageIds);
 
             for (Goods goods : goodsInfos) {
@@ -342,7 +343,7 @@ public class GoodsService extends BasicService {
                 if (type == Constants.GOODS_TYPE_ORDINARY_GOODS) {
                     goodsInfo = GoodsUtils.buildGoodsInfo(goods, goodsSpecificationMap.get(goodsId), goodsAttributeGroupMap.get(goodsId), goodsAttributeMap.get(goodsId));
                 } else if (type == Constants.GOODS_TYPE_PACKAGE) {
-                    goodsInfo = GoodsUtils.buildPackageInfo(goods, packageGroupMap.get(goodsId), packageGroupDetailMap.get(goodsId));
+                    goodsInfo = GoodsUtils.buildPackageInfo(goods, packageGroupMap.get(goodsId), packageDetailMap.get(goodsId));
                 }
                 data.add(goodsInfo);
             }

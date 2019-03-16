@@ -1,5 +1,6 @@
 package build.dream.catering.services;
 
+import build.dream.catering.beans.PackageDetail;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.MenuMapper;
 import build.dream.catering.models.menu.ObtainMenuInfoModel;
@@ -161,7 +162,7 @@ public class MenuService {
 
         Map<BigInteger, List<GoodsAttributeGroup>> goodsAttributeGroupMap = GoodsUtils.obtainGoodsAttributeGroupInfos(tenantId, branchId, goodsIds);
         Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = GoodsUtils.obtainGoodsAttributeInfos(tenantId, branchId, goodsIds);
-        Map<BigInteger, List<Map<String, Object>>> packageGroupDetailMap = GoodsUtils.obtainPackageGroupDetailInfos(tenantId, branchId, packageIds);
+        Map<BigInteger, List<PackageDetail>> packageDetailMap = GoodsUtils.obtainPackageGroupDetailInfos(tenantId, branchId, packageIds);
         Map<BigInteger, List<PackageGroup>> packageGroupMap = GoodsUtils.obtainPackageGroupInfos(tenantId, branchId, packageIds);
 
         List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
@@ -199,7 +200,7 @@ public class MenuService {
                     }
                     goodsInfo.put("specifications", specifications);
                 } else if (goodsType == Constants.GOODS_TYPE_PACKAGE) {
-                    goodsInfo.put("groups", GoodsUtils.buildPackageGroupInfos(packageGroupMap.get(goodsId), packageGroupDetailMap.get(goodsId)));
+                    goodsInfo.put("groups", GoodsUtils.buildPackageGroupInfos(packageGroupMap.get(goodsId), packageDetailMap.get(goodsId)));
                 }
 
                 goodsInfos.add(goodsInfo);
