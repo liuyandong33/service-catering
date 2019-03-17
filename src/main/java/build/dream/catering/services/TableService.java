@@ -78,7 +78,7 @@ public class TableService {
         String name = saveBranchTableModel.getName();
         Integer status = saveBranchTableModel.getStatus();
         Integer dinnersNumber = saveBranchTableModel.getDinnersNumber();
-        BigInteger userId = saveBranchTableModel.getId();
+        BigInteger userId = saveBranchTableModel.obtainUserId();
 
         BranchTable branchTable = null;
         if (id == null) {
@@ -125,6 +125,7 @@ public class TableService {
     public ApiRest listBranchTables(ListBranchTablesModel listBranchTablesModel) {
         BigInteger tenantId = listBranchTablesModel.obtainTenantId();
         BigInteger branchId = listBranchTablesModel.obtainBranchId();
+        BigInteger tableAreaId = listBranchTablesModel.getTableAreaId();
         int page = listBranchTablesModel.getPage();
         int rows = listBranchTablesModel.getRows();
 
@@ -132,6 +133,7 @@ public class TableService {
         searchConditions.add(new SearchCondition(BranchTable.ColumnName.DELETED, Constants.SQL_OPERATION_SYMBOL_EQUAL, 0));
         searchConditions.add(new SearchCondition(BranchTable.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
         searchConditions.add(new SearchCondition(BranchTable.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId));
+        searchConditions.add(new SearchCondition(BranchTable.ColumnName.TABLE_AREA_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tableAreaId));
 
         SearchModel searchModel = new SearchModel();
         searchModel.setSearchConditions(searchConditions);

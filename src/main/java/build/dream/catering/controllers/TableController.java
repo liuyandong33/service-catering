@@ -31,7 +31,7 @@ public class TableController {
      *
      * @return
      */
-    @RequestMapping(value = "/saveTableArea", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/saveBranchTable", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = SaveBranchTableModel.class, serviceClass = TableService.class, serviceMethodName = "saveBranchTable", error = "保存桌台失败")
     public String saveBranchTable() {
@@ -43,7 +43,7 @@ public class TableController {
      *
      * @return
      */
-    @RequestMapping(value = "/listBranchTables", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/listBranchTables", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ListBranchTablesModel.class, serviceClass = TableService.class, serviceMethodName = "listBranchTables", error = "查询桌台列表失败")
     public String listBranchTables() {
