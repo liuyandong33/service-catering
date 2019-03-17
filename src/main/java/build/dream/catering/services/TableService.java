@@ -168,6 +168,13 @@ public class TableService {
         BigInteger tableAreaId = deleteTableAreaModel.getTableAreaId();
         BigInteger userId = deleteTableAreaModel.obtainUserId();
 
+        SearchModel countSearchModel = new SearchModel(true);
+        countSearchModel.addSearchCondition(BranchTable.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        countSearchModel.addSearchCondition(BranchTable.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        countSearchModel.addSearchCondition(BranchTable.ColumnName.TABLE_AREA_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tableAreaId);
+        long count = DatabaseHelper.count(BranchTable.class, countSearchModel);
+        ValidateUtils.isTrue(count == 0, "该区域下已经创建桌台不能删除！");
+
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(TableArea.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition(TableArea.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);

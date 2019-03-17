@@ -60,6 +60,11 @@ public class TableController {
         return null;
     }
 
+    /**
+     * 删除桌台
+     *
+     * @return
+     */
     @RequestMapping(value = "/deleteBranchTable", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = DeleteBranchTableModel.class, serviceClass = TableService.class, serviceMethodName = "deleteBranchTable", error = "删除桌台失败")
