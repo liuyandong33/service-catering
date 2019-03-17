@@ -53,6 +53,7 @@ public class TableService {
             searchModel.addSearchCondition(TableArea.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, id);
             tableArea = DatabaseHelper.find(TableArea.class, searchModel);
             ValidateUtils.notNull(tableArea, "桌台区域不存在！");
+
             tableArea.setName(name);
             tableArea.setUpdatedUserId(userId);
             tableArea.setUpdatedRemark("修改桌台区域！");
