@@ -55,7 +55,7 @@ public class GoodsController {
      */
     @RequestMapping(value = "/obtainAllGoodsInfos", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ApiRestAction(modelClass = ObtainAllGoodsInfosModel.class, serviceClass = GoodsService.class, serviceMethodName = "obtainAllGoodsInfos", zipped = false, error = "获取商品信息失败")
+    @ApiRestAction(modelClass = ObtainAllGoodsInfosModel.class, serviceClass = GoodsService.class, serviceMethodName = "obtainAllGoodsInfos", zipped = true, error = "获取商品信息失败")
     public String obtainAllGoodsInfos() {
         return null;
     }
