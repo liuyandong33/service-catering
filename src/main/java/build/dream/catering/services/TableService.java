@@ -1,9 +1,7 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.models.table.ListBranchTablesModel;
-import build.dream.catering.models.table.SaveBranchTableModel;
-import build.dream.catering.models.table.SaveTableAreaModel;
+import build.dream.catering.models.table.*;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.BranchTable;
 import build.dream.common.catering.domains.TableArea;
@@ -155,5 +153,59 @@ public class TableService {
         data.put("total", count);
         data.put("rows", branchTables);
         return ApiRest.builder().data(data).message("查询桌台信息成功！").successful(true).build();
+    }
+
+    /**
+     * 删除桌台区域
+     *
+     * @param deleteTableAreaModel
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest deleteTableArea(DeleteTableAreaModel deleteTableAreaModel) {
+        BigInteger tenantId = deleteTableAreaModel.obtainTenantId();
+        BigInteger branchId = deleteTableAreaModel.obtainBranchId();
+        BigInteger tableAreaId = deleteTableAreaModel.getTableAreaId();
+        BigInteger userId = deleteTableAreaModel.obtainUserId();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(TableArea.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(TableArea.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(TableArea.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tableAreaId);
+        TableArea tableArea = DatabaseHelper.find(TableArea.class, searchModel);
+        ValidateUtils.notNull(tableArea, "桌台区域不存在！");
+
+        tableArea.setDeleted(true);
+        tableArea.setUpdatedUserId(userId);
+        tableArea.setUpdatedRemark("删除桌台区域！");
+        DatabaseHelper.update(tableArea);
+        return ApiRest.builder().message("删除桌台区域成功！").successful(true).build();
+    }
+
+    /**
+     * 删除桌台
+     *
+     * @param deleteBranchTableModel
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest deleteBranchTable(DeleteBranchTableModel deleteBranchTableModel) {
+        BigInteger tenantId = deleteBranchTableModel.obtainTenantId();
+        BigInteger branchId = deleteBranchTableModel.obtainBranchId();
+        BigInteger tableId = deleteBranchTableModel.getTableId();
+        BigInteger userId = deleteBranchTableModel.obtainUserId();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(TableArea.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(TableArea.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(TableArea.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tableId);
+        BranchTable branchTable = DatabaseHelper.find(BranchTable.class, searchModel);
+        ValidateUtils.notNull(branchTable, "桌台不存在！");
+
+        branchTable.setDeleted(true);
+        branchTable.setUpdatedUserId(userId);
+        branchTable.setUpdatedRemark("删除桌台！");
+        DatabaseHelper.update(branchTable);
+        return ApiRest.builder().message("删除桌台成功！").successful(true).build();
     }
 }

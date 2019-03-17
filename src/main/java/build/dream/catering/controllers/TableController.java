@@ -1,8 +1,6 @@
 package build.dream.catering.controllers;
 
-import build.dream.catering.models.table.ListBranchTablesModel;
-import build.dream.catering.models.table.SaveBranchTableModel;
-import build.dream.catering.models.table.SaveTableAreaModel;
+import build.dream.catering.models.table.*;
 import build.dream.catering.services.TableService;
 import build.dream.common.annotations.ApiRestAction;
 import org.springframework.http.MediaType;
@@ -47,6 +45,25 @@ public class TableController {
     @ResponseBody
     @ApiRestAction(modelClass = ListBranchTablesModel.class, serviceClass = TableService.class, serviceMethodName = "listBranchTables", error = "查询桌台列表失败")
     public String listBranchTables() {
+        return null;
+    }
+
+    /**
+     * 删除桌台区域
+     *
+     * @return
+     */
+    @RequestMapping(value = "/deleteTableArea", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = DeleteTableAreaModel.class, serviceClass = TableService.class, serviceMethodName = "deleteTableArea", error = "删除桌台区域失败")
+    public String deleteTableArea() {
+        return null;
+    }
+
+    @RequestMapping(value = "/deleteBranchTable", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = DeleteBranchTableModel.class, serviceClass = TableService.class, serviceMethodName = "deleteBranchTable", error = "删除桌台失败")
+    public String deleteBranchTable() {
         return null;
     }
 }
