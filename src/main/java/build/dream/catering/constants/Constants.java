@@ -141,4 +141,17 @@ public class Constants extends build.dream.common.constants.Constants {
      */
     public static final Integer PACKAGE_GROUP_TYPE_OPTIONAL_GROUP = 1;
     public static final Integer PACKAGE_GROUP_TYPE_REQUIRED_GROUP = 2;
+
+    /**
+     * 活动类型
+     *
+     * @see #ACTIVITY_TYPE_BUY_GIVE_ACTIVITY: 买A赠B活动
+     * @see #PACKAGE_GROUP_TYPE_OPTIONAL_GROUP: 整单满减活动
+     * @see #PACKAGE_GROUP_TYPE_OPTIONAL_GROUP: 特价商品活动
+     * @see #PACKAGE_GROUP_TYPE_OPTIONAL_GROUP: 支付促销
+     */
+    public static final Integer ACTIVITY_TYPE_BUY_GIVE_ACTIVITY = 1;
+    public static final Integer ACTIVITY_TYPE_FULL_REDUCTION_ACTIVITY = 2;
+    public static final Integer ACTIVITY_TYPE_SPECIAL_GOODS_ACTIVITY = 3;
+    public static final Integer ACTIVITY_TYPE_PAYMENT_ACTIVITY = 4;
 }

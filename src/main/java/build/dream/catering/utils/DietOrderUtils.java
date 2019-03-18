@@ -493,11 +493,11 @@ public class DietOrderUtils {
         Map<String, EffectiveActivity> effectiveActivityMap = new HashMap<String, EffectiveActivity>();
         for (EffectiveActivity effectiveActivity : effectiveActivities) {
             int type = effectiveActivity.getType();
-            if (type == 1 || type == 3) {
+            if (type == Constants.ACTIVITY_TYPE_BUY_GIVE_ACTIVITY || type == Constants.ACTIVITY_TYPE_SPECIAL_GOODS_ACTIVITY) {
                 effectiveActivityMap.put(effectiveActivity.getGoodsId() + "_" + effectiveActivity.getGoodsSpecificationId(), effectiveActivity);
-            } else if (type == 2) {
+            } else if (type == Constants.ACTIVITY_TYPE_FULL_REDUCTION_ACTIVITY) {
                 fullReductionActivities.add(effectiveActivity);
-            } else if (type == 4) {
+            } else if (type == Constants.ACTIVITY_TYPE_PAYMENT_ACTIVITY) {
                 paymentActivities.add(effectiveActivity);
             }
         }
@@ -642,7 +642,7 @@ public class DietOrderUtils {
             if (effectiveActivity != null) {
                 int type = effectiveActivity.getType();
                 // 买A赠B活动
-                if (type == 1) {
+                if (type == Constants.ACTIVITY_TYPE_BUY_GIVE_ACTIVITY) {
                     if (quantity.compareTo(effectiveActivity.getBuyQuantity()) >= 0) {
                         if (discountDietOrderGroup == null) {
                             discountDietOrderGroup = DietOrderGroup.builder()
@@ -730,7 +730,7 @@ public class DietOrderUtils {
                             .build();
                 }
 
-                if (type == 3) {
+                if (type == Constants.ACTIVITY_TYPE_SPECIAL_GOODS_ACTIVITY) {
                     Integer discountType = effectiveActivity.getDiscountType();
                     BigDecimal dietOrderDetailTotalAmount = price.add(attributeIncrease).multiply(quantity);
                     BigDecimal dietOrderDetailPayableAmount = null;
