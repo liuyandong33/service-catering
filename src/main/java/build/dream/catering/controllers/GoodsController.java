@@ -73,18 +73,6 @@ public class GoodsController {
     }
 
     /**
-     * 删除菜品规格
-     *
-     * @return
-     */
-    @RequestMapping(value = "/deleteGoodsSpecification", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    @ApiRestAction(modelClass = DeleteGoodsSpecificationModel.class, serviceClass = GoodsService.class, serviceMethodName = "deleteGoodsSpecification", error = "删除商品规格失败")
-    public String deleteGoodsSpecification() {
-        return null;
-    }
-
-    /**
      * 保存套餐
      *
      * @return

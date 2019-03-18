@@ -561,33 +561,6 @@ public class GoodsService extends BasicService {
     }
 
     /**
-     * 删除菜品规格
-     *
-     * @param deleteGoodsSpecificationModel
-     * @return
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public ApiRest deleteGoodsSpecification(DeleteGoodsSpecificationModel deleteGoodsSpecificationModel) {
-        BigInteger tenantId = deleteGoodsSpecificationModel.obtainTenantId();
-        BigInteger branchId = deleteGoodsSpecificationModel.obtainBranchId();
-        BigInteger userId = deleteGoodsSpecificationModel.obtainUserId();
-        BigInteger goodsSpecificationId = deleteGoodsSpecificationModel.getGoodsSpecificationId();
-
-        SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition(GoodsSpecification.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsSpecificationId);
-        searchModel.addSearchCondition(GoodsSpecification.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition(GoodsSpecification.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        GoodsSpecification goodsSpecification = DatabaseHelper.find(GoodsSpecification.class, searchModel);
-
-        ValidateUtils.notNull(goodsSpecification, "菜品规格不存在！");
-        goodsSpecification.setDeleted(true);
-        goodsSpecification.setUpdatedUserId(userId);
-        goodsSpecification.setUpdatedRemark("删除菜品规格信息！");
-        DatabaseHelper.update(goodsSpecification);
-        return ApiRest.builder().message("删除菜品规格成功！").successful(true).build();
-    }
-
-    /**
      * 保存套餐
      *
      * @param savePackageModel
