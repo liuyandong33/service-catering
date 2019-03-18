@@ -14,6 +14,7 @@ import org.apache.commons.collections.CollectionUtils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GoodsUtils {
     private static GoodsMapper goodsMapper;
@@ -55,7 +56,7 @@ public class GoodsUtils {
     }
 
     public static List<Map<String, Object>> buildGoodsAttributeGroups(List<GoodsAttributeGroup> goodsAttributeGroups, List<GoodsAttribute> goodsAttributes) {
-        Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = new HashMap<BigInteger, List<GoodsAttribute>>();
+        /*Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = new HashMap<BigInteger, List<GoodsAttribute>>();
         for (GoodsAttribute goodsAttribute : goodsAttributes) {
             BigInteger goodsAttributeGroupId = goodsAttribute.getGoodsAttributeGroupId();
             List<GoodsAttribute> goodsAttributeList = goodsAttributeMap.get(goodsAttributeGroupId);
@@ -64,7 +65,8 @@ public class GoodsUtils {
                 goodsAttributeMap.put(goodsAttributeGroupId, goodsAttributeList);
             }
             goodsAttributeList.add(goodsAttribute);
-        }
+        }*/
+        Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = goodsAttributes.stream().collect(Collectors.groupingBy(GoodsAttribute::getGoodsAttributeGroupId));
 
         List<Map<String, Object>> attributeGroups = new ArrayList<Map<String, Object>>();
         for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroups) {
@@ -119,7 +121,7 @@ public class GoodsUtils {
     }
 
     public static List<Map<String, Object>> buildPackageGroupInfos(List<PackageGroup> packageGroups, List<PackageDetail> packageDetails) {
-        Map<BigInteger, List<PackageDetail>> packageDetailMap = new HashMap<BigInteger, List<PackageDetail>>();
+        /*Map<BigInteger, List<PackageDetail>> packageDetailMap = new HashMap<BigInteger, List<PackageDetail>>();
         for (PackageDetail packageDetail : packageDetails) {
             BigInteger packageGroupId = packageDetail.getPackageGroupId();
             List<PackageDetail> packageDetailList = packageDetailMap.get(packageGroupId);
@@ -128,7 +130,9 @@ public class GoodsUtils {
                 packageDetailMap.put(packageGroupId, packageDetailList);
             }
             packageDetailList.add(packageDetail);
-        }
+        }*/
+
+        Map<BigInteger, List<PackageDetail>> packageDetailMap = packageDetails.stream().collect(Collectors.groupingBy(PackageDetail::getPackageGroupId));
 
         List<Map<String, Object>> groups = new ArrayList<Map<String, Object>>();
         for (PackageGroup packageGroup : packageGroups) {
@@ -213,7 +217,7 @@ public class GoodsUtils {
         List<GoodsAttributeGroup> goodsAttributeGroups = DatabaseHelper.findAll(GoodsAttributeGroup.class, searchModel);
 
         if (CollectionUtils.isNotEmpty(goodsAttributeGroups)) {
-            for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroups) {
+            /*for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroups) {
                 BigInteger goodsId = goodsAttributeGroup.getGoodsId();
                 List<GoodsAttributeGroup> goodsAttributeGroupList = goodsAttributeGroupMap.get(goodsId);
                 if (CollectionUtils.isEmpty(goodsAttributeGroupList)) {
@@ -221,7 +225,8 @@ public class GoodsUtils {
                     goodsAttributeGroupMap.put(goodsId, goodsAttributeGroupList);
                 }
                 goodsAttributeGroupList.add(goodsAttributeGroup);
-            }
+            }*/
+            goodsAttributeGroupMap = goodsAttributeGroups.stream().collect(Collectors.groupingBy(GoodsAttributeGroup::getGoodsId));
         }
         return goodsAttributeGroupMap;
     }
@@ -239,7 +244,7 @@ public class GoodsUtils {
         List<GoodsAttribute> goodsAttributes = DatabaseHelper.findAll(GoodsAttribute.class, searchModel);
 
         if (CollectionUtils.isNotEmpty(goodsAttributes)) {
-            for (GoodsAttribute goodsAttribute : goodsAttributes) {
+            /*for (GoodsAttribute goodsAttribute : goodsAttributes) {
                 BigInteger goodsId = goodsAttribute.getGoodsId();
                 List<GoodsAttribute> goodsAttributeList = goodsAttributeMap.get(goodsId);
                 if (CollectionUtils.isEmpty(goodsAttributeList)) {
@@ -247,7 +252,9 @@ public class GoodsUtils {
                     goodsAttributeMap.put(goodsId, goodsAttributeList);
                 }
                 goodsAttributeList.add(goodsAttribute);
-            }
+            }*/
+
+            goodsAttributeMap = goodsAttributes.stream().collect(Collectors.groupingBy(GoodsAttribute::getGoodsId));
         }
         return goodsAttributeMap;
     }
@@ -264,14 +271,16 @@ public class GoodsUtils {
         searchModel.addSearchCondition(GoodsSpecification.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
         List<GoodsSpecification> goodsSpecifications = DatabaseHelper.findAll(GoodsSpecification.class, searchModel);
 
-        for (GoodsSpecification goodsSpecification : goodsSpecifications) {
-            List<GoodsSpecification> goodsSpecificationList = goodsSpecificationMap.get(goodsSpecification.getGoodsId());
+        /*for (GoodsSpecification goodsSpecification : goodsSpecifications) {
+            BigInteger goodsId = goodsSpecification.getGoodsId();
+            List<GoodsSpecification> goodsSpecificationList = goodsSpecificationMap.get(goodsId);
             if (goodsSpecificationList == null) {
                 goodsSpecificationList = new ArrayList<GoodsSpecification>();
-                goodsSpecificationMap.put(goodsSpecification.getGoodsId(), goodsSpecificationList);
+                goodsSpecificationMap.put(goodsId, goodsSpecificationList);
             }
             goodsSpecificationList.add(goodsSpecification);
-        }
+        }*/
+        goodsSpecificationMap = goodsSpecifications.stream().collect(Collectors.groupingBy(GoodsSpecification::getGoodsId));
         return goodsSpecificationMap;
     }
 
@@ -283,7 +292,7 @@ public class GoodsUtils {
 
         List<PackageDetail> packageDetails = listPackageInfos(tenantId, branchId, packageIds, null);
 
-        for (PackageDetail packageDetail : packageDetails) {
+        /*for (PackageDetail packageDetail : packageDetails) {
             BigInteger packageId = packageDetail.getPackageId();
             List<PackageDetail> packageGroupDetails = packageGroupDetailMap.get(packageId);
             if (CollectionUtils.isEmpty(packageGroupDetails)) {
@@ -291,7 +300,8 @@ public class GoodsUtils {
                 packageGroupDetailMap.put(packageId, packageGroupDetails);
             }
             packageGroupDetails.add(packageDetail);
-        }
+        }*/
+        packageGroupDetailMap = packageDetails.stream().collect(Collectors.groupingBy(PackageDetail::getPackageId));
         return packageGroupDetailMap;
     }
 
@@ -307,7 +317,7 @@ public class GoodsUtils {
         searchModel.addSearchCondition(PackageGroup.ColumnName.PACKAGE_ID, Constants.SQL_OPERATION_SYMBOL_IN, packageIds);
         List<PackageGroup> packageGroups = DatabaseHelper.findAll(PackageGroup.class, searchModel);
 
-        for (PackageGroup packageGroup : packageGroups) {
+        /*for (PackageGroup packageGroup : packageGroups) {
             BigInteger packageId = packageGroup.getPackageId();
             List<PackageGroup> packageGroupList = packageGroupMap.get(packageId);
             if (CollectionUtils.isEmpty(packageGroupList)) {
@@ -315,7 +325,8 @@ public class GoodsUtils {
                 packageGroupMap.put(packageId, packageGroupList);
             }
             packageGroupList.add(packageGroup);
-        }
+        }*/
+        packageGroupMap = packageGroups.stream().collect(Collectors.groupingBy(PackageGroup::getPackageId));
         return packageGroupMap;
     }
 }

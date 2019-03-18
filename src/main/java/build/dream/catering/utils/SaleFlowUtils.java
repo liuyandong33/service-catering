@@ -13,10 +13,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SaleFlowUtils {
     public static void writeSaleFlow(DietOrder dietOrder, List<DietOrderGroup> dietOrderGroups, List<DietOrderDetail> dietOrderDetails, List<DietOrderActivity> dietOrderActivities, List<DietOrderPayment> dietOrderPayments) throws IOException {
-        Map<BigInteger, List<DietOrderDetail>> dietOrderDetailListMap = DietOrderUtils.splitDietOrderDetails(dietOrderDetails);
+        Map<BigInteger, List<DietOrderDetail>> dietOrderDetailListMap = dietOrderDetails.stream().collect(Collectors.groupingBy(DietOrderDetail::getDietOrderGroupId));
 
         List<DietOrderDetail> normalDietOrderDetails = new ArrayList<DietOrderDetail>();
         List<DietOrderDetail> extraDietOrderDetails = new ArrayList<DietOrderDetail>();

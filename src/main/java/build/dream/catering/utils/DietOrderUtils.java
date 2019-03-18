@@ -19,22 +19,9 @@ import org.dom4j.DocumentException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DietOrderUtils {
-    public static Map<BigInteger, List<DietOrderDetail>> splitDietOrderDetails(List<DietOrderDetail> dietOrderDetails) {
-        Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap = new HashMap<BigInteger, List<DietOrderDetail>>();
-        for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
-            BigInteger dietOrderGroupId = dietOrderDetail.getDietOrderGroupId();
-            List<DietOrderDetail> dietOrderDetailList = dietOrderDetailMap.get(dietOrderGroupId);
-            if (CollectionUtils.isEmpty(dietOrderDetailList)) {
-                dietOrderDetailList = new ArrayList<DietOrderDetail>();
-                dietOrderDetailMap.put(dietOrderGroupId, dietOrderDetailList);
-            }
-            dietOrderDetailList.add(dietOrderDetail);
-        }
-        return dietOrderDetailMap;
-    }
-
     public static void recoveryStock(DietOrder dietOrder) {
         BigInteger dietOrderId = dietOrder.getId();
 
@@ -49,7 +36,7 @@ public class DietOrderUtils {
         dietOrderDetailSearchModel.setSearchConditions(searchConditions);
         List<DietOrderDetail> dietOrderDetails = DatabaseHelper.findAll(DietOrderDetail.class, dietOrderDetailSearchModel);
 
-        Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap = DietOrderUtils.splitDietOrderDetails(dietOrderDetails);
+        Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap = dietOrderDetails.stream().collect(Collectors.groupingBy(DietOrderDetail::getDietOrderGroupId));
 
         List<DietOrderDetail> normalDietOrderDetails = new ArrayList<DietOrderDetail>();
         for (DietOrderGroup dietOrderGroup : dietOrderGroups) {
@@ -139,26 +126,10 @@ public class DietOrderUtils {
      */
     public static Map<String, Object> buildDietOrderInfo(DietOrder dietOrder, List<DietOrderGroup> dietOrderGroups, List<DietOrderDetail> dietOrderDetails, List<DietOrderDetailGoodsAttribute> dietOrderDetailGoodsAttributes, List<DietOrderActivity> dietOrderActivities) {
         // 封装订单分组与订单详情之间的map
-        Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap = new HashMap<BigInteger, List<DietOrderDetail>>();
-        for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
-            List<DietOrderDetail> dietOrderDetailList = dietOrderDetailMap.get(dietOrderDetail.getDietOrderGroupId());
-            if (dietOrderDetailList == null) {
-                dietOrderDetailList = new ArrayList<DietOrderDetail>();
-                dietOrderDetailMap.put(dietOrderDetail.getDietOrderGroupId(), dietOrderDetailList);
-            }
-            dietOrderDetailList.add(dietOrderDetail);
-        }
+        Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap = dietOrderDetails.stream().collect(Collectors.groupingBy(DietOrderDetail::getDietOrderGroupId));
 
         // 封装订单详情与订单口味之间的map
-        Map<BigInteger, List<DietOrderDetailGoodsAttribute>> dietOrderDetailGoodsAttributeMap = new HashMap<BigInteger, List<DietOrderDetailGoodsAttribute>>();
-        for (DietOrderDetailGoodsAttribute dietOrderDetailGoodsAttribute : dietOrderDetailGoodsAttributes) {
-            List<DietOrderDetailGoodsAttribute> dietOrderDetailGoodsAttributeList = dietOrderDetailGoodsAttributeMap.get(dietOrderDetailGoodsAttribute.getDietOrderDetailId());
-            if (dietOrderDetailGoodsAttributeList == null) {
-                dietOrderDetailGoodsAttributeList = new ArrayList<DietOrderDetailGoodsAttribute>();
-                dietOrderDetailGoodsAttributeMap.put(dietOrderDetailGoodsAttribute.getDietOrderDetailId(), dietOrderDetailGoodsAttributeList);
-            }
-            dietOrderDetailGoodsAttributeList.add(dietOrderDetailGoodsAttribute);
-        }
+        Map<BigInteger, List<DietOrderDetailGoodsAttribute>> dietOrderDetailGoodsAttributeMap = dietOrderDetailGoodsAttributes.stream().collect(Collectors.groupingBy(DietOrderDetailGoodsAttribute::getDietOrderDetailId));
 
         Map<String, Object> dietOrderInfo = new HashMap<String, Object>();
         dietOrderInfo.put(DietOrder.FieldName.ID, dietOrder.getId());
@@ -262,16 +233,7 @@ public class DietOrderUtils {
             packageGroupDietOrderDetails.add(packageGroupDietOrderDetail);
         }
 
-        Map<BigInteger, List<PackageGroupDietOrderDetail>> packageGroupDietOrderDetailMap = new HashMap<BigInteger, List<PackageGroupDietOrderDetail>>();
-        for (PackageGroupDietOrderDetail packageGroupDietOrderDetail : packageGroupDietOrderDetails) {
-            BigInteger packageId = packageGroupDietOrderDetail.getPackageId();
-            List<PackageGroupDietOrderDetail> packageGroupDietOrderDetailList = packageGroupDietOrderDetailMap.get(packageId);
-            if (CollectionUtils.isEmpty(packageGroupDietOrderDetailList)) {
-                packageGroupDietOrderDetailList = new ArrayList<PackageGroupDietOrderDetail>();
-                packageGroupDietOrderDetailMap.put(packageId, packageGroupDietOrderDetailList);
-            }
-            packageGroupDietOrderDetailList.add(packageGroupDietOrderDetail);
-        }
+        Map<BigInteger, List<PackageGroupDietOrderDetail>> packageGroupDietOrderDetailMap = packageGroupDietOrderDetails.stream().collect(Collectors.groupingBy(PackageGroupDietOrderDetail::getPackageId));
 
         List<Map<String, Object>> dietOrderDetailInfos = new ArrayList<Map<String, Object>>();
         for (DietOrderDetail dietOrderDetail : ordinaryGoodsDietOrderDetail) {
