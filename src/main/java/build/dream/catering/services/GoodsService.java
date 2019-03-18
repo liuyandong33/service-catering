@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class GoodsService extends BasicService {
@@ -105,42 +106,15 @@ public class GoodsService extends BasicService {
 
                 SearchModel goodsSpecificationSearchModel = new SearchModel(searchConditionList);
                 List<GoodsSpecification> goodsSpecifications = DatabaseHelper.findAll(GoodsSpecification.class, goodsSpecificationSearchModel);
-                Map<BigInteger, List<GoodsSpecification>> goodsSpecificationMap = new HashMap<BigInteger, List<GoodsSpecification>>();
-                for (GoodsSpecification goodsSpecification : goodsSpecifications) {
-                    BigInteger goodsId = goodsSpecification.getGoodsId();
-                    List<GoodsSpecification> goodsSpecificationList = goodsSpecificationMap.get(goodsId);
-                    if (CollectionUtils.isEmpty(goodsSpecificationList)) {
-                        goodsSpecificationList = new ArrayList<GoodsSpecification>();
-                        goodsSpecificationMap.put(goodsId, goodsSpecificationList);
-                    }
-                    goodsSpecificationList.add(goodsSpecification);
-                }
+                Map<BigInteger, List<GoodsSpecification>> goodsSpecificationMap = goodsSpecifications.stream().collect(Collectors.groupingBy(GoodsSpecification::getGoodsId));
 
                 SearchModel goodsAttributeGroupSearchModel = new SearchModel(searchConditionList);
                 List<GoodsAttributeGroup> goodsAttributeGroups = DatabaseHelper.findAll(GoodsAttributeGroup.class, goodsAttributeGroupSearchModel);
-                Map<BigInteger, List<GoodsAttributeGroup>> goodsAttributeGroupMap = new HashMap<BigInteger, List<GoodsAttributeGroup>>();
-                for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroups) {
-                    BigInteger goodsId = goodsAttributeGroup.getGoodsId();
-                    List<GoodsAttributeGroup> goodsAttributeGroupList = goodsAttributeGroupMap.get(goodsId);
-                    if (CollectionUtils.isEmpty(goodsAttributeGroupList)) {
-                        goodsAttributeGroupList = new ArrayList<GoodsAttributeGroup>();
-                        goodsAttributeGroupMap.put(goodsId, goodsAttributeGroupList);
-                    }
-                    goodsAttributeGroupList.add(goodsAttributeGroup);
-                }
+                Map<BigInteger, List<GoodsAttributeGroup>> goodsAttributeGroupMap = goodsAttributeGroups.stream().collect(Collectors.groupingBy(GoodsAttributeGroup::getGoodsId));
 
                 SearchModel goodsAttributeSearchModel = new SearchModel(searchConditionList);
                 List<GoodsAttribute> goodsAttributes = DatabaseHelper.findAll(GoodsAttribute.class, goodsAttributeSearchModel);
-                Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = new HashMap<BigInteger, List<GoodsAttribute>>();
-                for (GoodsAttribute goodsAttribute : goodsAttributes) {
-                    BigInteger goodsAttributeGroupId = goodsAttribute.getGoodsAttributeGroupId();
-                    List<GoodsAttribute> goodsAttributeList = goodsAttributeMap.get(goodsAttributeGroupId);
-                    if (CollectionUtils.isEmpty(goodsAttributeList)) {
-                        goodsAttributeList = new ArrayList<GoodsAttribute>();
-                        goodsAttributeMap.put(goodsAttributeGroupId, goodsAttributeList);
-                    }
-                    goodsAttributeList.add(goodsAttribute);
-                }
+                Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = goodsAttributes.stream().collect(Collectors.groupingBy(GoodsAttribute::getGoodsId));
 
                 for (Goods goods : goodsList) {
                     if (goods.getType() == Constants.GOODS_TYPE_PACKAGE) {
@@ -171,28 +145,10 @@ public class GoodsService extends BasicService {
                         TupleUtils.buildTuple3(PackageGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId),
                         TupleUtils.buildTuple3(PackageGroup.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId),
                         TupleUtils.buildTuple3(PackageGroup.ColumnName.PACKAGE_ID, Constants.SQL_OPERATION_SYMBOL_IN, packageIds));
-                Map<BigInteger, List<PackageGroup>> packageGroupMap = new HashMap<BigInteger, List<PackageGroup>>();
-                for (PackageGroup packageGroup : packageGroups) {
-                    BigInteger packageId = packageGroup.getPackageId();
-                    List<PackageGroup> packageGroupList = packageGroupMap.get(packageId);
-                    if (CollectionUtils.isEmpty(packageGroupList)) {
-                        packageGroupList = new ArrayList<PackageGroup>();
-                        packageGroupMap.put(packageId, packageGroupList);
-                    }
-                    packageGroupList.add(packageGroup);
-                }
+                Map<BigInteger, List<PackageGroup>> packageGroupMap = packageGroups.stream().collect(Collectors.groupingBy(PackageGroup::getPackageId));
 
-                List<PackageDetail> packageInfos = goodsMapper.listPackageInfos(tenantId, branchId, packageIds, null);
-                Map<BigInteger, List<PackageDetail>> packageInfoMap = new HashMap<BigInteger, List<PackageDetail>>();
-                for (PackageDetail packageDetail : packageInfos) {
-                    BigInteger packageGroupId = packageDetail.getPackageGroupId();
-                    List<PackageDetail> packageInfoList = packageInfoMap.get(packageGroupId);
-                    if (CollectionUtils.isEmpty(packageInfoList)) {
-                        packageInfoList = new ArrayList<PackageDetail>();
-                        packageInfoMap.put(packageGroupId, packageInfoList);
-                    }
-                    packageInfoList.add(packageDetail);
-                }
+                List<PackageDetail> packageDetails = goodsMapper.listPackageInfos(tenantId, branchId, packageIds, null);
+                Map<BigInteger, List<PackageDetail>> packageDetailMap = packageDetails.stream().collect(Collectors.groupingBy(PackageDetail::getPackageGroupId));
 
                 for (Goods goods : goodsList) {
                     if (goods.getType() == Constants.GOODS_TYPE_ORDINARY_GOODS) {
@@ -203,7 +159,7 @@ public class GoodsService extends BasicService {
                     for (PackageGroup packageGroup : packageGroupList) {
                         Map<String, Object> item = new HashMap<String, Object>();
                         item.put("group", packageGroup);
-                        item.put("details", packageInfoMap.get(packageGroup.getId()));
+                        item.put("details", packageDetailMap.get(packageGroup.getId()));
                         groups.add(item);
                     }
 
@@ -250,23 +206,19 @@ public class GoodsService extends BasicService {
             data.put("goods", goods);
             data.put("goodsSpecifications", goodsSpecifications);
             data.put("goodsUnits", goodsUnits);
+
             SearchModel goodsAttributeGroupSearchModel = new SearchModel(true);
             goodsAttributeGroupSearchModel.addSearchCondition(GoodsAttributeGroup.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
             List<GoodsAttributeGroup> goodsAttributeGroups = DatabaseHelper.findAll(GoodsAttributeGroup.class, goodsAttributeGroupSearchModel);
+
             if (CollectionUtils.isNotEmpty(goodsAttributeGroups)) {
                 SearchModel goodsAttributeSearchModel = new SearchModel(true);
+                goodsAttributeSearchModel.addSearchCondition(GoodsAttribute.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+                goodsAttributeSearchModel.addSearchCondition(GoodsAttribute.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
                 goodsAttributeSearchModel.addSearchCondition(GoodsAttribute.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
                 List<GoodsAttribute> goodsAttributes = DatabaseHelper.findAll(GoodsAttribute.class, goodsAttributeSearchModel);
-                Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = new HashMap<BigInteger, List<GoodsAttribute>>();
-                for (GoodsAttribute goodsAttribute : goodsAttributes) {
-                    BigInteger goodsAttributeGroupId = goodsAttribute.getGoodsAttributeGroupId();
-                    List<GoodsAttribute> goodsAttributeList = goodsAttributeMap.get(goodsAttributeGroupId);
-                    if (CollectionUtils.isEmpty(goodsAttributeList)) {
-                        goodsAttributeList = new ArrayList<GoodsAttribute>();
-                        goodsAttributeMap.put(goodsAttributeGroupId, goodsAttributeList);
-                    }
-                    goodsAttributeList.add(goodsAttribute);
-                }
+                Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = goodsAttributes.stream().collect(Collectors.groupingBy(GoodsAttribute::getGoodsAttributeGroupId));
+
                 List<Map<String, Object>> attributeGroups = new ArrayList<Map<String, Object>>();
                 for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroups) {
                     Map<String, Object> attributeGroup = new HashMap<String, Object>();
@@ -283,24 +235,16 @@ public class GoodsService extends BasicService {
 
             List<BigInteger> packageIds = new ArrayList<BigInteger>();
             packageIds.add(goodsId);
-            List<PackageDetail> packageInfos = goodsMapper.listPackageInfos(tenantId, branchId, packageIds, null);
 
-            Map<BigInteger, List<PackageDetail>> packageInfoMap = new HashMap<BigInteger, List<PackageDetail>>();
-            for (PackageDetail packageDetail : packageInfos) {
-                BigInteger packageGroupId = packageDetail.getPackageGroupId();
-                List<PackageDetail> packageInfoList = packageInfoMap.get(packageGroupId);
-                if (CollectionUtils.isEmpty(packageInfoList)) {
-                    packageInfoList = new ArrayList<PackageDetail>();
-                    packageInfoMap.put(packageGroupId, packageInfoList);
-                }
-                packageInfoList.add(packageDetail);
-            }
+            List<PackageDetail> packageDetails = goodsMapper.listPackageInfos(tenantId, branchId, packageIds, null);
+
+            Map<BigInteger, List<PackageDetail>> packageDetailMap = packageDetails.stream().collect(Collectors.groupingBy(PackageDetail::getPackageGroupId));
 
             List<Map<String, Object>> groups = new ArrayList<Map<String, Object>>();
             for (PackageGroup packageGroup : packageGroups) {
                 Map<String, Object> item = new HashMap<String, Object>();
                 item.put("group", packageGroup);
-                item.put("details", packageInfoMap.get(packageGroup.getId()));
+                item.put("details", packageDetailMap.get(packageGroup.getId()));
                 groups.add(item);
             }
             data.put("goods", goods);
