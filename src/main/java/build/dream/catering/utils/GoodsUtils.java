@@ -47,7 +47,7 @@ public class GoodsUtils {
         goodsInfo.put(Goods.FieldName.TYPE, goods.getType());
         goodsInfo.put(Goods.FieldName.CATEGORY_ID, goods.getCategoryId());
         goodsInfo.put(Goods.FieldName.CATEGORY_NAME, goods.getCategoryName());
-        goodsInfo.put("goodsSpecifications", buildGoodsSpecificationInfos(goodsSpecifications));
+        goodsInfo.put("specifications", buildGoodsSpecificationInfos(goodsSpecifications));
 
         if (CollectionUtils.isNotEmpty(goodsAttributeGroups)) {
             goodsInfo.put("attributeGroups", buildGoodsAttributeGroups(goodsAttributeGroups, goodsAttributes));
