@@ -927,25 +927,32 @@ public class GoodsService extends BasicService {
 
         for (Map<String, Object> goodsInfo : goodsInfos) {
             String uuid = UUID.randomUUID().toString();
-            Goods goods = new Goods();
-            goods.setTenantId(tenantId);
-            goods.setTenantCode(tenantCode);
-            goods.setBranchId(branchId);
-            goods.setName(MapUtils.getString(goodsInfo, "name"));
-            goods.setType(Constants.GOODS_TYPE_ORDINARY_GOODS);
-            goods.setCategoryId(BigInteger.ONE);
-            goods.setCreatedUserId(userId);
-            goods.setUpdatedUserId(userId);
+            Goods goods = Goods.builder()
+                    .tenantId(tenantId)
+                    .tenantCode(tenantCode)
+                    .branchId(branchId)
+                    .name(MapUtils.getString(goodsInfo, "name"))
+                    .type(Constants.GOODS_TYPE_ORDINARY_GOODS)
+                    .categoryId(BigInteger.ZERO)
+                    .imageUrl(Constants.VARCHAR_DEFAULT_VALUE)
+                    .stocked(false)
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
+                    .updatedRemark("导入商品信息！")
+                    .build();
             goodsMap.put(uuid, goods);
             goodsList.add(goods);
 
-            GoodsSpecification goodsSpecification = new GoodsSpecification();
-            goodsSpecification.setTenantId(tenantId);
-            goodsSpecification.setTenantCode(tenantCode);
-            goodsSpecification.setBranchId(branchId);
-            goodsSpecification.setPrice(BigDecimal.valueOf(MapUtils.getDoubleValue(goodsInfo, "price")));
-            goodsSpecification.setCreatedUserId(userId);
-            goodsSpecification.setUpdatedUserId(userId);
+            GoodsSpecification goodsSpecification = GoodsSpecification.builder()
+                    .tenantId(tenantId)
+                    .tenantCode(tenantCode)
+                    .branchId(branchId)
+                    .name(Constants.VARCHAR_DEFAULT_VALUE)
+                    .price(BigDecimal.valueOf(MapUtils.getDoubleValue(goodsInfo, "price")))
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
+                    .updatedRemark("导入商品信息！")
+                    .build();
             goodsSpecificationMap.put(uuid, goodsSpecification);
         }
 
