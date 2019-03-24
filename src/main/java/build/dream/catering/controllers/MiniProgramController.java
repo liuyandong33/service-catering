@@ -7,8 +7,10 @@ import build.dream.common.beans.WebResponse;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.HashMap;
@@ -17,7 +19,7 @@ import java.util.Map;
 @Controller
 @RequestMapping(value = "/miniProgram")
 public class MiniProgramController extends BasicController {
-    @RequestMapping(value = "/obtainSessionWithJsCode")
+    @RequestMapping(value = "/obtainSessionWithJsCode", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(error = "code换取session_key失败")
     public String obtainSessionWithJsCode() throws Exception {

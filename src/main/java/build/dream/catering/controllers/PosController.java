@@ -10,8 +10,10 @@ import build.dream.common.api.ApiRest;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.RedisUtils;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Map;
@@ -24,7 +26,7 @@ public class PosController {
      *
      * @return
      */
-    @RequestMapping(value = "/onlinePos")
+    @RequestMapping(value = "/onlinePos", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = OnlinePosModel.class, serviceClass = PosService.class, serviceMethodName = "onlinePos", error = "上线POS失败")
     public String onlinePos() {
@@ -36,7 +38,7 @@ public class PosController {
      *
      * @return
      */
-    @RequestMapping(value = "/offlinePos")
+    @RequestMapping(value = "/offlinePos", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = OfflinePosModel.class, serviceClass = PosService.class, serviceMethodName = "offlinePos", error = "下线POS失败")
     public String offlinePos() {
@@ -48,7 +50,7 @@ public class PosController {
      *
      * @return
      */
-    @RequestMapping(value = "/receipt")
+    @RequestMapping(value = "/receipt", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(error = "回执失败")
     public String receipt() throws Exception {
@@ -66,7 +68,7 @@ public class PosController {
      *
      * @return
      */
-    @RequestMapping(value = "/offlinePay")
+    @RequestMapping(value = "/offlinePay", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = OfflinePayModel.class, serviceClass = PosService.class, serviceMethodName = "scanCodePay", error = "扫码支付")
     public String offlinePay() {

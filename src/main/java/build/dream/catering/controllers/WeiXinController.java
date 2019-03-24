@@ -34,7 +34,7 @@ public class WeiXinController extends BasicController {
      * @param httpServletRequest
      * @return
      */
-    @RequestMapping(value = "/createMemberCard")
+    @RequestMapping(value = "/createMemberCard", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(error = "创建会员卡失败")
     public String createMemberCard(HttpServletRequest httpServletRequest) throws Exception {
@@ -59,7 +59,7 @@ public class WeiXinController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/addPayGiftCard")
+    @RequestMapping(value = "/addPayGiftCard", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = AddPayGiftCardModel.class, serviceClass = WeiXinService.class, serviceMethodName = "addPayGiftCard", error = "开通支付即会员失败")
     public String addPayGiftCard() {
@@ -71,7 +71,7 @@ public class WeiXinController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/deleteWeiXinMemberCard")
+    @RequestMapping(value = "/deleteWeiXinMemberCard", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = DeleteWeiXinMemberCardModel.class, serviceClass = WeiXinService.class, serviceMethodName = "deleteWeiXinMemberCard", error = "删除微信会员卡失败")
     public String deleteWeiXinMemberCard() {
@@ -83,7 +83,7 @@ public class WeiXinController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/listWeiXinMemberCards")
+    @RequestMapping(value = "/listWeiXinMemberCards", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ListWeiXinMemberCardsModel.class, serviceClass = WeiXinService.class, serviceMethodName = "listWeiXinMemberCards", error = "查询会员卡列表失败")
     public String listWeiXinMemberCards() {
@@ -95,7 +95,7 @@ public class WeiXinController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/obtainWeiXinAuthorizerInfo")
+    @RequestMapping(value = "/obtainWeiXinAuthorizerInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ObtainWeiXinAuthorizerInfoModel.class, serviceClass = WeiXinService.class, serviceMethodName = "obtainWeiXinAuthorizerInfo", error = "获取微信授权信息失败")
     public String obtainWeiXinAuthorizerInfo() {
@@ -108,7 +108,7 @@ public class WeiXinController extends BasicController {
      * @return
      * @throws Exception
      */
-    @RequestMapping(value = "/generateComponentLoginPageUrl")
+    @RequestMapping(value = "/generateComponentLoginPageUrl", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(error = "生成授权链接失败")
     public String generateComponentLoginPageUrl() throws Exception {

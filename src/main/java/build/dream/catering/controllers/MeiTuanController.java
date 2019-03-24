@@ -7,8 +7,10 @@ import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.controllers.BasicController;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.UUID;
@@ -24,7 +26,7 @@ public class MeiTuanController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/generateBindingStoreLink")
+    @RequestMapping(value = "/generateBindingStoreLink", method = {RequestMethod.GET, RequestMethod.POST}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = GenerateBindingStoreLinkModel.class, serviceClass = MeiTuanService.class, serviceMethodName = "generateBindingStoreLink", error = "生成门店绑定链接失败")
     public String generateBindingStoreLink() {
@@ -36,14 +38,14 @@ public class MeiTuanController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/checkIsBinding")
+    @RequestMapping(value = "/checkIsBinding", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = CheckIsBindingModel.class, serviceClass = MeiTuanService.class, serviceMethodName = "checkIsBinding", error = "查询门店是否绑定美团失败")
     public String checkIsBinding() {
         return null;
     }
 
-    @RequestMapping(value = "/queryPoiInfo")
+    @RequestMapping(value = "/queryPoiInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = QueryPoiInfoModel.class, serviceClass = MeiTuanService.class, serviceMethodName = "queryPoiInfo", error = "查询美团门店信息失败")
     public String queryPoiInfo() {
@@ -71,7 +73,7 @@ public class MeiTuanController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/confirmOrder")
+    @RequestMapping(value = "/confirmOrder", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ConfirmOrderModel.class, serviceClass = MeiTuanService.class, serviceMethodName = "confirmOrder", error = "确认订单失败")
     public String confirmOrder() {
@@ -83,7 +85,7 @@ public class MeiTuanController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/cancelOrder")
+    @RequestMapping(value = "/cancelOrder", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = CancelOrderModel.class, serviceClass = MeiTuanService.class, serviceMethodName = "cancelOrder", error = "取消订单失败")
     public String cancelOrder() {
@@ -95,7 +97,7 @@ public class MeiTuanController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/deliveringOrder")
+    @RequestMapping(value = "/deliveringOrder", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = DeliveringOrderModel.class, serviceClass = MeiTuanService.class, serviceMethodName = "deliveringOrder", error = "设置订单配送状态失败")
     public String deliveringOrder() {
@@ -107,7 +109,7 @@ public class MeiTuanController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/deliveredOrder")
+    @RequestMapping(value = "/deliveredOrder", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = DeliveredOrderModel.class, serviceClass = MeiTuanService.class, serviceMethodName = "deliveredOrder", error = "设置订单已送达失败")
     public String deliveredOrder() {
