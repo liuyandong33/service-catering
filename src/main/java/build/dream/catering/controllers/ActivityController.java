@@ -18,7 +18,7 @@ public class ActivityController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/saveBuyGiveActivity")
+    @RequestMapping(value = "/saveBuyGiveActivity", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = SaveBuyGiveActivityModel.class, serviceClass = ActivityService.class, serviceMethodName = "saveBuyGiveActivity", error = "保存买A赠B活动失败")
     public String saveBuyGiveActivity() {
@@ -30,7 +30,7 @@ public class ActivityController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/saveFullReductionActivity")
+    @RequestMapping(value = "/saveFullReductionActivity", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = SaveBuyGiveActivityModel.class, serviceClass = ActivityService.class, serviceMethodName = "saveBuyGiveActivity", error = "保存买A赠B活动失败")
     public String saveFullReductionActivity() {
@@ -42,7 +42,7 @@ public class ActivityController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/saveSpecialGoodsActivity")
+    @RequestMapping(value = "/saveSpecialGoodsActivity", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = SaveSpecialGoodsActivityModel.class, serviceClass = ActivityService.class, serviceMethodName = "saveSpecialGoodsActivity", error = "保存特价商品活动失败")
     public String saveSpecialGoodsActivity() {
@@ -66,7 +66,7 @@ public class ActivityController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/listFullReductionActivities")
+    @RequestMapping(value = "/listFullReductionActivities", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ListFullReductionActivitiesModel.class, serviceClass = ActivityService.class, serviceMethodName = "listFullReductionActivities", error = "查询所有生效的整单满减活动失败")
     public String listFullReductionActivities() {
@@ -78,7 +78,7 @@ public class ActivityController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/listPaymentActivities")
+    @RequestMapping(value = "/listPaymentActivities", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ListPaymentActivitiesModel.class, serviceClass = ActivityService.class, serviceMethodName = "listPaymentActivities", error = "查询所有生效的支付促销活动失败")
     public String listPaymentActivities() {
