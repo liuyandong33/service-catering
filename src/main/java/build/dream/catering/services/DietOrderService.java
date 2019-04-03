@@ -6,7 +6,7 @@ import build.dream.catering.utils.DietOrderUtils;
 import build.dream.catering.utils.ThreadUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.auth.AbstractUserDetails;
-import build.dream.common.auth.CustomUserDetails;
+import build.dream.common.auth.SystemUserUserDetails;
 import build.dream.common.auth.VipUserDetails;
 import build.dream.common.catering.domains.*;
 import build.dream.common.constants.DietOrderConstants;
@@ -17,8 +17,6 @@ import build.dream.common.models.alipay.AlipayTradeWapPayModel;
 import build.dream.common.models.aliyunpush.PushMessageToAndroidModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
 import build.dream.common.models.weixinpay.UnifiedOrderModel;
-import build.dream.common.saas.domains.SystemUser;
-import build.dream.common.saas.domains.Tenant;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -96,19 +94,15 @@ public class DietOrderService {
         AbstractUserDetails abstractUserDetails = WebSecurityUtils.obtainUserDetails();
         String clientType = abstractUserDetails.getClientType();
         if (Constants.CLIENT_TYPE_POS.equals(clientType) || Constants.CLIENT_TYPE_APP.equals(clientType) || Constants.CLIENT_TYPE_WEB.equals(clientType)) {
-            CustomUserDetails customUserDetails = (CustomUserDetails) abstractUserDetails;
-            Tenant tenant = customUserDetails.getTenant();
-            SystemUser systemUser = customUserDetails.getSystemUser();
-            saveDietOrderModel.setTenantId(tenant.getId());
-            saveDietOrderModel.setTenantCode(tenant.getCode());
-            saveDietOrderModel.setUserId(systemUser.getId());
+            SystemUserUserDetails systemUserUserDetails = (SystemUserUserDetails) abstractUserDetails;
+            saveDietOrderModel.setTenantId(systemUserUserDetails.getTenantId());
+            saveDietOrderModel.setTenantCode(systemUserUserDetails.getTenantCode());
+            saveDietOrderModel.setUserId(systemUserUserDetails.getUserId());
         } else if (Constants.CLIENT_TYPE_O2O.equals(clientType)) {
             VipUserDetails vipUserDetails = (VipUserDetails) abstractUserDetails;
-            Tenant tenant = vipUserDetails.getTenant();
-            Vip vip = vipUserDetails.getVip();
-            saveDietOrderModel.setTenantId(tenant.getId());
-            saveDietOrderModel.setTenantCode(tenant.getCode());
-            saveDietOrderModel.setVipId(vip.getId());
+            saveDietOrderModel.setTenantId(vipUserDetails.getTenantId());
+            saveDietOrderModel.setTenantCode(vipUserDetails.getTenantCode());
+            saveDietOrderModel.setVipId(vipUserDetails.getVipId());
         }
 
         DietOrder dietOrder = DietOrderUtils.saveDietOrder(saveDietOrderModel);
