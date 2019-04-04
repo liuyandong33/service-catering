@@ -9,10 +9,7 @@ import build.dream.common.catering.domains.DietOrderDetail;
 import build.dream.common.catering.domains.DietOrderGroup;
 import build.dream.common.catering.domains.FlashSaleActivity;
 import build.dream.common.constants.DietOrderConstants;
-import build.dream.common.utils.DatabaseHelper;
-import build.dream.common.utils.GsonUtils;
-import build.dream.common.utils.JacksonUtils;
-import build.dream.common.utils.RedisUtils;
+import build.dream.common.utils.*;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -134,7 +131,12 @@ public class FlashSaleService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void saveFlashSaleOrder(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger vipId, BigInteger activityId, String uuid) {
-        System.out.println("开始保存订单！");
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(FlashSaleActivity.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(FlashSaleActivity.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(FlashSaleActivity.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, activityId);
+        FlashSaleActivity flashSaleActivity = DatabaseHelper.find(FlashSaleActivity.class, searchModel);
+        ValidateUtils.notNull(flashSaleActivity, "秒杀活动不存在！");
 
         String orderNumber = "";
         int orderType = 1;
