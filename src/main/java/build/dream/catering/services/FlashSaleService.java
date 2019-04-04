@@ -1,6 +1,7 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
+import build.dream.catering.models.flashsale.ObtainAllFlashSaleActivitiesModel;
 import build.dream.catering.models.flashsale.SaveFlashSaleActivityModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.DietOrder;
@@ -10,13 +11,15 @@ import build.dream.common.catering.domains.FlashSaleActivity;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.GsonUtils;
+import build.dream.common.utils.JacksonUtils;
 import build.dream.common.utils.RedisUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Date;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -84,6 +87,39 @@ public class FlashSaleService {
         RedisUtils.hset(Constants.KEY_FLASH_SALE_ACTIVITY_IDS + "_" + tenantId + "_" + branchId, flashSaleActivityId.toString(), flashSaleActivityId.toString());
 
         return ApiRest.builder().data(flashSaleActivity).message("保存秒杀活动成功！").successful(true).build();
+    }
+
+    /**
+     * 获取所有秒杀活动
+     *
+     * @param obtainAllFlashSaleActivitiesModel
+     * @return
+     */
+    public ApiRest obtainAllFlashSaleActivities(ObtainAllFlashSaleActivitiesModel obtainAllFlashSaleActivitiesModel) {
+        BigInteger tenantId = obtainAllFlashSaleActivitiesModel.obtainTenantId();
+        BigInteger branchId = obtainAllFlashSaleActivitiesModel.obtainBranchId();
+        BigInteger vipId = obtainAllFlashSaleActivitiesModel.getVipId();
+
+        Map<String, String> flashSaleActivityIdsMap = RedisUtils.hgetAll(Constants.KEY_FLASH_SALE_ACTIVITY_IDS + "_" + tenantId + "_" + branchId);
+        Set<String> flashSaleActivityIds = flashSaleActivityIdsMap.keySet();
+
+        List<FlashSaleActivity> flashSaleActivities = new ArrayList<FlashSaleActivity>();
+        Map<String, Object> flashSaleStocks = new HashMap<String, Object>();
+        for (String flashSaleActivityId : flashSaleActivityIds) {
+            String flashSaleActivityJson = RedisUtils.get(Constants.KEY_FLASH_SALE_ACTIVITY + "_" + tenantId + "_" + branchId + "_" + flashSaleActivityId);
+            String flashSaleStock = RedisUtils.get(Constants.KEY_FLASH_SALE_STOCK + "_" + tenantId + "_" + branchId + "_" + flashSaleActivityId);
+            if (StringUtils.isBlank(flashSaleActivityJson)) {
+                RedisUtils.hdel(Constants.KEY_FLASH_SALE_ACTIVITY_IDS + "_" + tenantId + "_" + branchId, flashSaleActivityId);
+            } else {
+                flashSaleActivities.add(JacksonUtils.readValue(flashSaleActivityJson, FlashSaleActivity.class));
+                flashSaleStocks.put("_" + flashSaleActivityId, flashSaleStock);
+            }
+        }
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("flashSaleActivities", flashSaleActivities);
+        data.put("flashSaleStocks", flashSaleStocks);
+        return ApiRest.builder().data(data).message("获取秒杀活动列表成功！").successful(true).build();
     }
 
     /**

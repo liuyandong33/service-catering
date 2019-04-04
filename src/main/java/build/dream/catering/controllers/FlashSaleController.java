@@ -1,5 +1,6 @@
 package build.dream.catering.controllers;
 
+import build.dream.catering.models.flashsale.ObtainAllFlashSaleActivitiesModel;
 import build.dream.catering.models.flashsale.SaveFlashSaleActivityModel;
 import build.dream.catering.services.FlashSaleService;
 import build.dream.common.annotations.ApiRestAction;
@@ -20,6 +21,18 @@ public class FlashSaleController {
     @ResponseBody
     @ApiRestAction(modelClass = SaveFlashSaleActivityModel.class, serviceClass = FlashSaleService.class, serviceMethodName = "saveFlashSaleActivity", error = "保存秒杀活动失败", datePattern = "yyyy-MM-dd HH:mm")
     public String saveFlashSaleActivity() {
+        return null;
+    }
+
+    /**
+     * 获取所有秒杀活动
+     *
+     * @return
+     */
+    @RequestMapping(value = "/obtainAllFlashSaleActivities", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiRestAction(modelClass = ObtainAllFlashSaleActivitiesModel.class, serviceClass = FlashSaleService.class, serviceMethodName = "obtainAllFlashSaleActivities", error = "获取所有秒杀活动失败")
+    public String obtainAllFlashSaleActivities() {
         return null;
     }
 }
