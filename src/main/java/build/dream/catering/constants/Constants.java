@@ -131,8 +131,6 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String ELASTICSEARCH_INDEX_GOODS = "goods";
     public static final String ELASTICSEARCH_INDEX_BRANCH = "branch";
 
-    public static final String KEY_FLASH_SALE_ORDERS = "_flash_sale_orders";
-
     /**
      * 套餐组类型
      *
@@ -154,4 +152,10 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final Integer ACTIVITY_TYPE_FULL_REDUCTION_ACTIVITY = 2;
     public static final Integer ACTIVITY_TYPE_SPECIAL_GOODS_ACTIVITY = 3;
     public static final Integer ACTIVITY_TYPE_PAYMENT_ACTIVITY = 4;
+
+    public static final String KEY_FLASH_SALE_ACTIVITY = "_flash_sale_activity";
+    public static final String KEY_FLASH_SALE_STOCK = "_flash_sale_stock";
+    public static final String KEY_VIP_FLASH_SALE_HISTORY = "_vip_flash_sale_history";
+    public static final String KEY_FLASH_SALE_ORDERS = "_flash_sale_orders";
+    public static final String KEY_FLASH_SALE_ACTIVITY_IDS = "_flash_sale_activity_ids";
 }

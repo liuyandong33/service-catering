@@ -1,9 +1,12 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
+import build.dream.catering.models.flashsale.SaveFlashSaleActivityModel;
+import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.DietOrder;
 import build.dream.common.catering.domains.DietOrderDetail;
 import build.dream.common.catering.domains.DietOrderGroup;
+import build.dream.common.catering.domains.FlashSaleActivity;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.GsonUtils;
@@ -13,10 +16,86 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 @Service
 public class FlashSaleService {
+    /**
+     * 保存秒杀活动
+     *
+     * @param saveFlashSaleActivityModel
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest saveFlashSaleActivity(SaveFlashSaleActivityModel saveFlashSaleActivityModel) {
+        BigInteger tenantId = saveFlashSaleActivityModel.obtainTenantId();
+        String tenantCode = saveFlashSaleActivityModel.obtainTenantCode();
+        BigInteger branchId = saveFlashSaleActivityModel.obtainBranchId();
+        BigInteger userId = saveFlashSaleActivityModel.obtainUserId();
+        BigInteger goodsId = saveFlashSaleActivityModel.getGoodsId();
+        String goodsName = saveFlashSaleActivityModel.getGoodsName();
+        String imageUrl = saveFlashSaleActivityModel.getImageUrl();
+        String name = saveFlashSaleActivityModel.getName();
+        Date startTime = saveFlashSaleActivityModel.getStartTime();
+        Date endTime = saveFlashSaleActivityModel.getEndTime();
+        boolean limited = saveFlashSaleActivityModel.getLimited();
+        BigDecimal limitQuantity = saveFlashSaleActivityModel.getLimitQuantity();
+        Integer beforeShowTime = saveFlashSaleActivityModel.getBeforeShowTime();
+        Integer timeUnit = saveFlashSaleActivityModel.getTimeUnit();
+        BigDecimal originalPrice = saveFlashSaleActivityModel.getOriginalPrice();
+        BigDecimal flashSalePrice = saveFlashSaleActivityModel.getFlashSalePrice();
+        BigDecimal flashSaleStock = saveFlashSaleActivityModel.getFlashSaleStock();
+        String description = saveFlashSaleActivityModel.getDescription();
+
+        FlashSaleActivity flashSaleActivity = FlashSaleActivity.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .name(name)
+                .status(0)
+                .startTime(startTime)
+                .endTime(endTime)
+                .limited(limited)
+                .limitQuantity(limitQuantity)
+                .beforeShowTime(beforeShowTime)
+                .timeUnit(timeUnit)
+                .goodsId(goodsId)
+                .goodsName(goodsName)
+                .imageUrl(imageUrl)
+                .originalPrice(originalPrice)
+                .flashSalePrice(flashSalePrice)
+                .flashSaleStock(flashSaleStock)
+                .description(description)
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .updatedRemark("保存秒杀活动")
+                .build();
+        DatabaseHelper.insert(flashSaleActivity);
+
+        BigInteger flashSaleActivityId = flashSaleActivity.getId();
+        String flashSaleActivityKey = Constants.KEY_FLASH_SALE_ACTIVITY + "_" + tenantId + "_" + branchId + "_" + flashSaleActivityId;
+        long timeout = (endTime.getTime() - new Date().getTime()) / 1000;
+
+        String flashSaleStockKey = Constants.KEY_FLASH_SALE_STOCK + "_" + tenantId + "_" + branchId + "_" + flashSaleActivityId;
+
+        RedisUtils.setex(flashSaleActivityKey, GsonUtils.toJson(flashSaleActivity), timeout, TimeUnit.SECONDS);
+        RedisUtils.setex(flashSaleStockKey, flashSaleStock.toString(), timeout, TimeUnit.SECONDS);
+        RedisUtils.hset(Constants.KEY_FLASH_SALE_ACTIVITY_IDS + "_" + tenantId + "_" + branchId, flashSaleActivityId.toString(), flashSaleActivityId.toString());
+
+        return ApiRest.builder().data(flashSaleActivity).message("保存秒杀活动成功！").successful(true).build();
+    }
+
+    /**
+     * 保存秒杀订单
+     *
+     * @param tenantId
+     * @param tenantCode
+     * @param branchId
+     * @param vipId
+     * @param activityId
+     * @param uuid
+     */
     @Transactional(rollbackFor = Exception.class)
     public void saveFlashSaleOrder(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger vipId, BigInteger activityId, String uuid) {
         System.out.println("开始保存订单！");
