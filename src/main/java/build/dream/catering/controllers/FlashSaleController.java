@@ -1,7 +1,9 @@
 package build.dream.catering.controllers;
 
+import build.dream.catering.models.flashsale.DeleteFlashSaleActivityModel;
 import build.dream.catering.models.flashsale.ObtainAllFlashSaleActivitiesModel;
 import build.dream.catering.models.flashsale.SaveFlashSaleActivityModel;
+import build.dream.catering.models.flashsale.StopFlashSaleActivityModel;
 import build.dream.catering.services.FlashSaleService;
 import build.dream.common.annotations.ApiRestAction;
 import org.springframework.stereotype.Controller;
@@ -33,6 +35,30 @@ public class FlashSaleController {
     @ResponseBody
     @ApiRestAction(modelClass = ObtainAllFlashSaleActivitiesModel.class, serviceClass = FlashSaleService.class, serviceMethodName = "obtainAllFlashSaleActivities", error = "获取所有秒杀活动失败")
     public String obtainAllFlashSaleActivities() {
+        return null;
+    }
+
+    /**
+     * 终止秒杀活动
+     *
+     * @return
+     */
+    @RequestMapping(value = "/stopFlashSaleActivity", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiRestAction(modelClass = StopFlashSaleActivityModel.class, serviceClass = FlashSaleService.class, serviceMethodName = "stopFlashSaleActivity", error = "终止秒杀活动失败")
+    public String stopFlashSaleActivity() {
+        return null;
+    }
+
+    /**
+     * 删除秒杀活动
+     *
+     * @return
+     */
+    @RequestMapping(value = "/deleteFlashSaleActivity", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiRestAction(modelClass = DeleteFlashSaleActivityModel.class, serviceClass = FlashSaleService.class, serviceMethodName = "deleteFlashSaleActivity", error = "删除秒杀活动失败")
+    public String deleteFlashSaleActivity() {
         return null;
     }
 }

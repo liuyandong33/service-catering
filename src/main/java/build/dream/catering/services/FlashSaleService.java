@@ -1,8 +1,10 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
+import build.dream.catering.models.flashsale.DeleteFlashSaleActivityModel;
 import build.dream.catering.models.flashsale.ObtainAllFlashSaleActivitiesModel;
 import build.dream.catering.models.flashsale.SaveFlashSaleActivityModel;
+import build.dream.catering.models.flashsale.StopFlashSaleActivityModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.DietOrder;
 import build.dream.common.catering.domains.DietOrderDetail;
@@ -117,6 +119,62 @@ public class FlashSaleService {
         data.put("flashSaleActivities", flashSaleActivities);
         data.put("flashSaleStocks", flashSaleStocks);
         return ApiRest.builder().data(data).message("获取秒杀活动列表成功！").successful(true).build();
+    }
+
+    /**
+     * 终止秒杀活动
+     *
+     * @param stopFlashSaleActivityModel
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest stopFlashSaleActivity(StopFlashSaleActivityModel stopFlashSaleActivityModel) {
+        BigInteger tenantId = stopFlashSaleActivityModel.obtainTenantId();
+        BigInteger branchId = stopFlashSaleActivityModel.obtainBranchId();
+        BigInteger activityId = stopFlashSaleActivityModel.getActivityId();
+        BigInteger userId = stopFlashSaleActivityModel.obtainUserId();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(FlashSaleActivity.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(FlashSaleActivity.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(FlashSaleActivity.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, activityId);
+        FlashSaleActivity flashSaleActivity = DatabaseHelper.find(FlashSaleActivity.class, searchModel);
+        ValidateUtils.notNull(flashSaleActivity, "秒杀活动不存在！");
+
+        flashSaleActivity.setStatus(2);
+        flashSaleActivity.setUpdatedUserId(userId);
+        flashSaleActivity.setUpdatedRemark("终止秒杀活动！");
+        DatabaseHelper.update(flashSaleActivity);
+
+        return ApiRest.builder().message("终止秒杀活动成功！").successful(true).build();
+    }
+
+    /**
+     * 删除秒杀活动
+     *
+     * @param deleteFlashSaleActivityModel
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest deleteFlashSaleActivity(DeleteFlashSaleActivityModel deleteFlashSaleActivityModel) {
+        BigInteger tenantId = deleteFlashSaleActivityModel.obtainTenantId();
+        BigInteger branchId = deleteFlashSaleActivityModel.obtainBranchId();
+        BigInteger activityId = deleteFlashSaleActivityModel.getActivityId();
+        BigInteger userId = deleteFlashSaleActivityModel.obtainUserId();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(FlashSaleActivity.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(FlashSaleActivity.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(FlashSaleActivity.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, activityId);
+        FlashSaleActivity flashSaleActivity = DatabaseHelper.find(FlashSaleActivity.class, searchModel);
+        ValidateUtils.notNull(flashSaleActivity, "秒杀活动不存在！");
+
+        flashSaleActivity.setDeleted(true);
+        flashSaleActivity.setUpdatedUserId(userId);
+        flashSaleActivity.setUpdatedRemark("删除秒杀活动！");
+        DatabaseHelper.update(flashSaleActivity);
+
+        return ApiRest.builder().message("删除秒杀活动成功！").successful(true).build();
     }
 
     /**
