@@ -1,10 +1,7 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.models.flashsale.DeleteFlashSaleActivityModel;
-import build.dream.catering.models.flashsale.ObtainAllFlashSaleActivitiesModel;
-import build.dream.catering.models.flashsale.SaveFlashSaleActivityModel;
-import build.dream.catering.models.flashsale.StopFlashSaleActivityModel;
+import build.dream.catering.models.flashsale.*;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.DietOrder;
 import build.dream.common.catering.domains.DietOrderDetail;
@@ -86,6 +83,45 @@ public class FlashSaleService {
         RedisUtils.hset(Constants.KEY_FLASH_SALE_ACTIVITY_IDS + "_" + tenantId + "_" + branchId, flashSaleActivityId.toString(), flashSaleActivityId.toString());
 
         return ApiRest.builder().data(flashSaleActivity).message("保存秒杀活动成功！").successful(true).build();
+    }
+
+    /**
+     * 分页查询秒杀活动
+     *
+     * @param listFlashSaleActivitiesModel
+     * @return
+     */
+    public ApiRest listFlashSaleActivities(ListFlashSaleActivitiesModel listFlashSaleActivitiesModel) {
+        BigInteger tenantId = listFlashSaleActivitiesModel.obtainTenantId();
+        BigInteger branchId = listFlashSaleActivitiesModel.obtainBranchId();
+        int page = listFlashSaleActivitiesModel.getPage();
+        int rows = listFlashSaleActivitiesModel.getRows();
+
+        List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
+        searchConditions.add(new SearchCondition(FlashSaleActivity.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
+        searchConditions.add(new SearchCondition(FlashSaleActivity.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId));
+        searchConditions.add(new SearchCondition(FlashSaleActivity.ColumnName.DELETED, Constants.SQL_OPERATION_SYMBOL_EQUAL, 0));
+
+        SearchModel searchModel = new SearchModel();
+        searchModel.setSearchConditions(searchConditions);
+        long count = DatabaseHelper.count(FlashSaleActivity.class, searchModel);
+
+        List<FlashSaleActivity> flashSaleActivities = null;
+        if (count > 0) {
+            PagedSearchModel pagedSearchModel = new PagedSearchModel();
+            pagedSearchModel.setSearchConditions(searchConditions);
+            pagedSearchModel.setPage(page);
+            pagedSearchModel.setRows(rows);
+            flashSaleActivities = DatabaseHelper.findAllPaged(FlashSaleActivity.class, pagedSearchModel);
+        } else {
+            flashSaleActivities = new ArrayList<FlashSaleActivity>();
+        }
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("total", count);
+        data.put("rows", flashSaleActivities);
+
+        return ApiRest.builder().data(data).message("查询秒杀活动成功！").successful(true).build();
     }
 
     /**
