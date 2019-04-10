@@ -955,6 +955,27 @@ public class ElemeService {
 
         Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.product.item.queryItemByPage", params);
 
-        return ApiRest.builder().data(result).message("查询店铺信息成功！").successful(true).build();
+        return ApiRest.builder().data(result).message("分页获取店铺下的商品成功！").successful(true).build();
+    }
+
+    /**
+     * 查询商品详情
+     *
+     * @param getItemModel
+     * @return
+     */
+    public ApiRest getItem(GetItemModel getItemModel) {
+        BigInteger tenantId = getItemModel.obtainTenantId();
+        BigInteger branchId = getItemModel.obtainBranchId();
+        BigInteger itemId = getItemModel.getItemId();
+
+        Branch branch = findBranch(tenantId, branchId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("itemId", itemId);
+
+        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.product.item.getItem", params);
+
+        return ApiRest.builder().data(result).message("查询商品详情成功！").successful(true).build();
     }
 }
