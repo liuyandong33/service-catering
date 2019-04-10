@@ -34,7 +34,7 @@ public class MeiTuanService {
      * @throws IOException
      */
     @Transactional(readOnly = true)
-    public ApiRest generateBindingStoreLink(GenerateBindingStoreLinkModel generateBindingStoreLinkModel) throws IOException {
+    public ApiRest generateBindingStoreLink(GenerateBindingStoreLinkModel generateBindingStoreLinkModel) {
         BigInteger tenantId = generateBindingStoreLinkModel.obtainTenantId();
         BigInteger branchId = generateBindingStoreLinkModel.obtainBranchId();
 
@@ -571,8 +571,7 @@ public class MeiTuanService {
         String sign = MeiTuanUtils.generateSignature("01b7d2lgmdylgiee", requestParameters);
         requestParameters.put("sign", sign);
         String url = "http://api.open.cater.meituan.com/waimai/poi/queryPoiInfo";
-        System.out.println(WebUtils.buildQueryString(requestParameters, Constants.CHARSET_NAME_UTF_8));
-        WebResponse webResponse = WebUtils.doGetWithRequestParameters(url, requestParameters);
+        WebResponse webResponse = OutUtils.doGetWithRequestParameters(url, requestParameters);
         System.out.println(webResponse.getResult());
         return new ApiRest();
     }
