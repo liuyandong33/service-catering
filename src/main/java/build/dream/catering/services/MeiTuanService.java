@@ -76,8 +76,8 @@ public class MeiTuanService {
         BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
         BigInteger branchId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[1]);
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         ValidateUtils.notNull(branch, "门店不存在！");
 
