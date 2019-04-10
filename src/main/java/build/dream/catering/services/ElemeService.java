@@ -929,7 +929,31 @@ public class ElemeService {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("shopId", branch.getShopId());
 
-        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.shop.getShop", null);
+        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.shop.getShop", params);
+
+        return ApiRest.builder().data(result).message("查询店铺信息成功！").successful(true).build();
+    }
+
+    /**
+     * 分页获取店铺下的商品
+     *
+     * @param queryItemByPageModel
+     * @return
+     */
+    public ApiRest queryItemByPage(QueryItemByPageModel queryItemByPageModel) {
+        BigInteger tenantId = queryItemByPageModel.obtainTenantId();
+        BigInteger branchId = queryItemByPageModel.obtainBranchId();
+        int page = queryItemByPageModel.getPage();
+        int rows = queryItemByPageModel.getRows();
+
+        Branch branch = findBranch(tenantId, branchId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("shopId", branch.getShopId());
+        params.put("offset", (page - 1) * rows);
+        params.put("limit", rows);
+
+        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.product.item.queryItemByPage", params);
 
         return ApiRest.builder().data(result).message("查询店铺信息成功！").successful(true).build();
     }
