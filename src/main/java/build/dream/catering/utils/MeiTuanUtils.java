@@ -42,11 +42,11 @@ public class MeiTuanUtils {
             webResponse = OutUtils.doGetWithRequestParameters(url, params);
         } else if (Constants.REQUEST_METHOD_POST.equals(requestMethod)) {
             StringBuilder requestUrl = new StringBuilder(url);
-            requestUrl.append("?").append("appAuthToken").append("=").append(appAuthToken);
-            requestUrl.append("&").append("charset").append("=").append(charset);
-            requestUrl.append("&").append("timestamp").append("=").append(timestamp);
-            requestUrl.append("&").append("version").append("=").append(version);
-            requestUrl.append("&").append("sign").append("=").append(sign);
+            requestUrl.append("?appAuthToken=").append(appAuthToken);
+            requestUrl.append("&charset=").append(charset);
+            requestUrl.append("&timestamp=").append(timestamp);
+            requestUrl.append("&version=").append(version);
+            requestUrl.append("&sign=").append(sign);
             webResponse = OutUtils.doPostWithRequestParameters(requestUrl.toString(), requestParameters);
         }
         String result = webResponse.getResult();
