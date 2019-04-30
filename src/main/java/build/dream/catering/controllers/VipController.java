@@ -120,6 +120,11 @@ public class VipController {
         return null;
     }
 
+    /**
+     * 分页查询会员信息
+     *
+     * @return
+     */
     @RequestMapping(value = "/listVipInfos", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ListVipInfosModel.class, serviceClass = VipService.class, serviceMethodName = "listVipInfos", error = "获取会员信息失败")
