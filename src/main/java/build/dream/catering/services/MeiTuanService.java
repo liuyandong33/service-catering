@@ -34,13 +34,13 @@ public class MeiTuanService {
      * @throws IOException
      */
     @Transactional(readOnly = true)
-    public ApiRest generateBindingStoreLink(GenerateBindingStoreLinkModel generateBindingStoreLinkModel) throws IOException {
+    public ApiRest generateBindingStoreLink(GenerateBindingStoreLinkModel generateBindingStoreLinkModel) {
         BigInteger tenantId = generateBindingStoreLinkModel.obtainTenantId();
         BigInteger branchId = generateBindingStoreLinkModel.obtainBranchId();
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         ValidateUtils.notNull(branch, "门店不存在！");
         String meiTuanErpServiceUrl = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_ERP_SERVICE_URL);
@@ -76,8 +76,8 @@ public class MeiTuanService {
         BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
         BigInteger branchId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[1]);
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         ValidateUtils.notNull(branch, "门店不存在！");
 
@@ -408,9 +408,9 @@ public class MeiTuanService {
         BigInteger branchId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[1]);
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition("order_number", Constants.SQL_OPERATION_SYMBOL_EQUAL, "M" + orderId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.ORDER_NUMBER, Constants.SQL_OPERATION_SYMBOL_EQUAL, "M" + orderId);
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
         ValidateUtils.notNull(dietOrder, "订单不存在！");
 
@@ -446,9 +446,9 @@ public class MeiTuanService {
         BigInteger branchId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[1]);
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition("order_number", Constants.SQL_OPERATION_SYMBOL_EQUAL, "M" + orderId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.ORDER_NUMBER, Constants.SQL_OPERATION_SYMBOL_EQUAL, "M" + orderId);
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
         ValidateUtils.notNull(dietOrder, "订单不存在！");
 
@@ -480,9 +480,9 @@ public class MeiTuanService {
     @Transactional(readOnly = true)
     public void pushMeiTuanMessage(BigInteger tenantId, BigInteger branchId, BigInteger meiTuanOrderId, Integer type, String uuid, final int count, int interval) {
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition("online", Constants.SQL_OPERATION_SYMBOL_EQUAL, 1);
+        searchModel.addSearchCondition(Pos.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(Pos.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(Pos.ColumnName.ONLINE, Constants.SQL_OPERATION_SYMBOL_EQUAL, 1);
         List<Pos> poses = DatabaseHelper.findAll(Pos.class, searchModel);
         if (CollectionUtils.isNotEmpty(poses)) {
             List<String> deviceIds = new ArrayList<String>();
@@ -513,8 +513,8 @@ public class MeiTuanService {
         BigInteger branchId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[1]);
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         ValidateUtils.notNull(branch, "门店不存在！");
 
@@ -538,8 +538,8 @@ public class MeiTuanService {
         BigInteger branchId = checkIsBindingModel.obtainBranchId();
 
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         ValidateUtils.notNull(branch, "门店不存在！");
 
@@ -555,8 +555,8 @@ public class MeiTuanService {
         BigInteger tenantId = queryPoiInfoModel.obtainTenantId();
         BigInteger branchId = queryPoiInfoModel.obtainBranchId();
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         ValidateUtils.notNull(branch, "门店不存在！");
 
@@ -571,8 +571,7 @@ public class MeiTuanService {
         String sign = MeiTuanUtils.generateSignature("01b7d2lgmdylgiee", requestParameters);
         requestParameters.put("sign", sign);
         String url = "http://api.open.cater.meituan.com/waimai/poi/queryPoiInfo";
-        System.out.println(WebUtils.buildQueryString(requestParameters, Constants.CHARSET_NAME_UTF_8));
-        WebResponse webResponse = WebUtils.doGetWithRequestParameters(url, requestParameters);
+        WebResponse webResponse = OutUtils.doGetWithRequestParameters(url, requestParameters);
         System.out.println(webResponse.getResult());
         return new ApiRest();
     }

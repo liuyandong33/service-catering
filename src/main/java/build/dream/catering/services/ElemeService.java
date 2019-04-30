@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -35,7 +34,7 @@ public class ElemeService {
      * @throws IOException
      */
     @Transactional(readOnly = true)
-    public ApiRest tenantAuthorize(TenantAuthorizeModel tenantAuthorizeModel) throws IOException {
+    public ApiRest tenantAuthorize(TenantAuthorizeModel tenantAuthorizeModel) {
         BigInteger tenantId = tenantAuthorizeModel.obtainTenantId();
         BigInteger branchId = tenantAuthorizeModel.obtainBranchId();
         BigInteger userId = tenantAuthorizeModel.obtainUserId();
@@ -77,7 +76,7 @@ public class ElemeService {
             String elemeUrl = ConfigurationUtils.getConfiguration(Constants.ELEME_SERVICE_URL);
             String elemeAppKey = ConfigurationUtils.getConfiguration(Constants.ELEME_APP_KEY);
 
-            String redirectUri = URLEncoder.encode(CommonUtils.getOutsideUrl(apiServiceName, "proxy", "doGetPermit") + "/" + partitionCode + "/" + Constants.SERVICE_NAME_CATERING + "/eleme/tenantAuthorizeCallback", Constants.CHARSET_NAME_UTF_8);
+            String redirectUri = UrlUtils.encode(CommonUtils.getOutsideUrl(apiServiceName, "proxy", "doGetPermit") + "/" + partitionCode + "/" + Constants.SERVICE_NAME_CATERING + "/eleme/tenantAuthorizeCallback", Constants.CHARSET_NAME_UTF_8);
             String state = tenantId + "Z" + branchId + "Z" + userId + "Z" + elemeAccountType;
             data = String.format(Constants.ELEME_TENANT_AUTHORIZE_URL_FORMAT, elemeUrl + "/" + "authorize", "code", elemeAppKey, redirectUri, state, "all");
         }
@@ -120,9 +119,9 @@ public class ElemeService {
         BigInteger branchId = NumberUtils.createBigInteger(array[1]);
 
         SearchModel branchSearchModel = new SearchModel(true);
-        branchSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        branchSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        branchSearchModel.addSearchCondition("shop_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, elemeCallbackMessage.getShopId());
+        branchSearchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        branchSearchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        branchSearchModel.addSearchCondition(Branch.ColumnName.SHOP_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, elemeCallbackMessage.getShopId());
         Branch branch = DatabaseHelper.find(Branch.class, branchSearchModel);
         ValidateUtils.notNull(branch, "门店不存在！");
 
@@ -646,9 +645,9 @@ public class ElemeService {
     @Transactional(readOnly = true)
     public void pushElemeMessage(BigInteger tenantId, BigInteger branchId, BigInteger elemeOrderId, Integer type, String uuid, final int count, int interval) {
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition("online", Constants.SQL_OPERATION_SYMBOL_EQUAL, 1);
+        searchModel.addSearchCondition(Pos.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(Pos.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(Pos.ColumnName.ONLINE, Constants.SQL_OPERATION_SYMBOL_EQUAL, 1);
         List<Pos> poses = DatabaseHelper.findAll(Pos.class, searchModel);
         if (CollectionUtils.isNotEmpty(poses)) {
             List<String> deviceIds = new ArrayList<String>();
@@ -668,7 +667,7 @@ public class ElemeService {
      * @return
      */
     @Transactional(readOnly = true)
-    public ApiRest getOrder(GetOrderModel getOrderModel) throws IOException {
+    public ApiRest getOrder(GetOrderModel getOrderModel) {
         BigInteger tenantId = getOrderModel.obtainTenantId();
         BigInteger branchId = getOrderModel.obtainBranchId();
         BigInteger elemeOrderId = getOrderModel.getElemeOrderId();
@@ -692,7 +691,7 @@ public class ElemeService {
      * @throws IOException
      */
     @Transactional(readOnly = true)
-    public ApiRest batchGetOrders(BatchGetOrdersModel batchGetOrdersModel) throws IOException {
+    public ApiRest batchGetOrders(BatchGetOrdersModel batchGetOrdersModel) {
         BigInteger tenantId = batchGetOrdersModel.obtainTenantId();
         BigInteger branchId = batchGetOrdersModel.obtainBranchId();
         List<BigInteger> elemeOrderIds = batchGetOrdersModel.getElemeOrderIds();
@@ -717,7 +716,7 @@ public class ElemeService {
      * @throws IOException
      */
     @Transactional(readOnly = true)
-    public ApiRest confirmOrderLite(ConfirmOrderLiteModel confirmOrderLiteModel) throws IOException {
+    public ApiRest confirmOrderLite(ConfirmOrderLiteModel confirmOrderLiteModel) {
         BigInteger tenantId = confirmOrderLiteModel.obtainTenantId();
         BigInteger branchId = confirmOrderLiteModel.obtainBranchId();
         BigInteger elemeOrderId = confirmOrderLiteModel.getElemeOrderId();
@@ -740,7 +739,7 @@ public class ElemeService {
      * @throws IOException
      */
     @Transactional(readOnly = true)
-    public ApiRest cancelOrderLite(CancelOrderLiteModel cancelOrderLiteModel) throws IOException {
+    public ApiRest cancelOrderLite(CancelOrderLiteModel cancelOrderLiteModel) {
         BigInteger tenantId = cancelOrderLiteModel.obtainTenantId();
         BigInteger branchId = cancelOrderLiteModel.obtainBranchId();
         BigInteger elemeOrderId = cancelOrderLiteModel.getElemeOrderId();
@@ -766,7 +765,7 @@ public class ElemeService {
      * @throws IOException
      */
     @Transactional(readOnly = true)
-    public ApiRest agreeRefundLite(AgreeRefundLiteModel agreeRefundLiteModel) throws IOException {
+    public ApiRest agreeRefundLite(AgreeRefundLiteModel agreeRefundLiteModel) {
         BigInteger tenantId = agreeRefundLiteModel.obtainTenantId();
         BigInteger branchId = agreeRefundLiteModel.obtainBranchId();
         BigInteger elemeOrderId = agreeRefundLiteModel.getElemeOrderId();
@@ -789,7 +788,7 @@ public class ElemeService {
      * @throws IOException
      */
     @Transactional(readOnly = true)
-    public ApiRest disagreeRefundLite(DisagreeRefundLiteModel disagreeRefundLiteModel) throws IOException {
+    public ApiRest disagreeRefundLite(DisagreeRefundLiteModel disagreeRefundLiteModel) {
         BigInteger tenantId = disagreeRefundLiteModel.obtainTenantId();
         BigInteger branchId = disagreeRefundLiteModel.obtainBranchId();
 
@@ -811,7 +810,7 @@ public class ElemeService {
      * @throws IOException
      */
     @Transactional(readOnly = true)
-    public ApiRest deliveryBySelfLite(DeliveryBySelfLiteModel deliveryBySelfLiteModel) throws IOException {
+    public ApiRest deliveryBySelfLite(DeliveryBySelfLiteModel deliveryBySelfLiteModel) {
         BigInteger tenantId = deliveryBySelfLiteModel.obtainTenantId();
         BigInteger branchId = deliveryBySelfLiteModel.obtainBranchId();
         BigInteger elemeOrderId = deliveryBySelfLiteModel.getElemeOrderId();
@@ -834,7 +833,7 @@ public class ElemeService {
      * @throws IOException
      */
     @Transactional(readOnly = true)
-    public ApiRest noMoreDeliveryLite(NoMoreDeliveryLiteModel noMoreDeliveryLiteModel) throws IOException {
+    public ApiRest noMoreDeliveryLite(NoMoreDeliveryLiteModel noMoreDeliveryLiteModel) {
         BigInteger tenantId = noMoreDeliveryLiteModel.obtainTenantId();
         BigInteger branchId = noMoreDeliveryLiteModel.obtainBranchId();
 
@@ -856,7 +855,7 @@ public class ElemeService {
      * @throws IOException
      */
     @Transactional(readOnly = true)
-    public ApiRest receivedOrderLite(ReceivedOrderLiteModel receivedOrderLiteModel) throws IOException {
+    public ApiRest receivedOrderLite(ReceivedOrderLiteModel receivedOrderLiteModel) {
         BigInteger tenantId = receivedOrderLiteModel.obtainTenantId();
         BigInteger branchId = receivedOrderLiteModel.obtainBranchId();
 
@@ -878,7 +877,7 @@ public class ElemeService {
      * @throws IOException
      */
     @Transactional(readOnly = true)
-    public ApiRest replyReminder(ReplyReminderModel replyReminderModel) throws IOException {
+    public ApiRest replyReminder(ReplyReminderModel replyReminderModel) {
         BigInteger tenantId = replyReminderModel.obtainTenantId();
         BigInteger branchId = replyReminderModel.obtainBranchId();
 
@@ -902,7 +901,7 @@ public class ElemeService {
      * @throws IOException
      */
     @Transactional(readOnly = true)
-    public ApiRest getUser(GetUserModel getUserModel) throws IOException {
+    public ApiRest getUser(GetUserModel getUserModel) {
         BigInteger tenantId = getUserModel.obtainTenantId();
         BigInteger branchId = getUserModel.obtainBranchId();
 
@@ -921,7 +920,7 @@ public class ElemeService {
      * @throws IOException
      */
     @Transactional(readOnly = true)
-    public ApiRest getShop(GetShopModel getShopModel) throws IOException {
+    public ApiRest getShop(GetShopModel getShopModel) {
         BigInteger tenantId = getShopModel.obtainTenantId();
         BigInteger branchId = getShopModel.obtainBranchId();
 
@@ -930,8 +929,53 @@ public class ElemeService {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("shopId", branch.getShopId());
 
-        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.shop.getShop", null);
+        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.shop.getShop", params);
 
         return ApiRest.builder().data(result).message("查询店铺信息成功！").successful(true).build();
+    }
+
+    /**
+     * 分页获取店铺下的商品
+     *
+     * @param queryItemByPageModel
+     * @return
+     */
+    public ApiRest queryItemByPage(QueryItemByPageModel queryItemByPageModel) {
+        BigInteger tenantId = queryItemByPageModel.obtainTenantId();
+        BigInteger branchId = queryItemByPageModel.obtainBranchId();
+        int page = queryItemByPageModel.getPage();
+        int rows = queryItemByPageModel.getRows();
+
+        Branch branch = findBranch(tenantId, branchId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("shopId", branch.getShopId());
+        params.put("offset", (page - 1) * rows);
+        params.put("limit", rows);
+
+        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.product.item.queryItemByPage", params);
+
+        return ApiRest.builder().data(result).message("分页获取店铺下的商品成功！").successful(true).build();
+    }
+
+    /**
+     * 查询商品详情
+     *
+     * @param getItemModel
+     * @return
+     */
+    public ApiRest getItem(GetItemModel getItemModel) {
+        BigInteger tenantId = getItemModel.obtainTenantId();
+        BigInteger branchId = getItemModel.obtainBranchId();
+        BigInteger itemId = getItemModel.getItemId();
+
+        Branch branch = findBranch(tenantId, branchId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("itemId", itemId);
+
+        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.product.item.getItem", params);
+
+        return ApiRest.builder().data(result).message("查询商品详情成功！").successful(true).build();
     }
 }

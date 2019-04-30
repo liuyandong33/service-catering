@@ -272,4 +272,27 @@ public class ElemeController extends BasicController {
     public String getShop() {
         return null;
     }
+
+    /**
+     * 分页获取店铺下的商品
+     *
+     * @return
+     */
+    @RequestMapping(value = "/queryItemByPage", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = QueryItemByPageModel.class, serviceClass = ElemeService.class, serviceMethodName = "queryItemByPage", error = "分页获取店铺下的商品失败")
+    public String queryItemByPage() {
+        return null;
+    }
+
+    /**
+     * 查询商品详情
+     * @return
+     */
+    @RequestMapping(value = "/getItem", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = GetItemModel.class, serviceClass = ElemeService.class, serviceMethodName = "getItem", error = "查询商品详情失败")
+    public String getItem() {
+        return null;
+    }
 }
