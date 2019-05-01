@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class VipService {
@@ -621,5 +622,27 @@ public class VipService {
         data.put("rows", vipInfos);
 
         return ApiRest.builder().data(data).message("获取会员信息成功！").successful(true).build();
+    }
+
+    /**
+     * 生成付款码
+     *
+     * @param generatePayCodeModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest generatePayCode(GeneratePayCodeModel generatePayCodeModel) {
+        BigInteger tenantId = generatePayCodeModel.obtainTenantId();
+        BigInteger vipId = generatePayCodeModel.obtainVipId();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(Vip.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(Vip.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, vipId);
+        Vip vip = VipUtils.find(searchModel);
+
+        String payCode = "";
+        RedisUtils.setex(payCode, GsonUtils.toJson(vip), 1, TimeUnit.MINUTES);
+
+        return ApiRest.builder().data(payCode).message("生成付款码成功").successful(true).build();
     }
 }

@@ -131,4 +131,16 @@ public class VipController {
     public String listVipInfos() {
         return null;
     }
+
+    /**
+     * 生成付款码
+     *
+     * @return
+     */
+    @RequestMapping(value = "/generatePayCode", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = GeneratePayCodeModel.class, serviceClass = VipService.class, serviceMethodName = "generatePayCode", error = "生成付款码")
+    public String generatePayCode() {
+        return null;
+    }
 }
