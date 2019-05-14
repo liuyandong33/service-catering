@@ -158,4 +158,6 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String KEY_VIP_FLASH_SALE_HISTORY = "_vip_flash_sale_history";
     public static final String KEY_FLASH_SALE_ORDERS = "_flash_sale_orders";
     public static final String KEY_FLASH_SALE_ACTIVITY_IDS = "_flash_sale_activity_ids";
+
+    public static final String ORDER_INVALID_MESSAGE_TOPIC = "order.invalid.message.topic";
 }

@@ -2,16 +2,16 @@ package build.dream.catering.listeners;
 
 import build.dream.catering.models.dietorder.CancelOrderModel;
 import build.dream.catering.services.DietOrderService;
-import net.sf.json.JSONObject;
+import build.dream.common.utils.JacksonUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.dom4j.DocumentException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Map;
 
 @Component
 public class OrderInvalidMessageListener implements MessageListener<String, String> {
@@ -24,16 +24,12 @@ public class OrderInvalidMessageListener implements MessageListener<String, Stri
         String key = data.key();
         String value = data.value();
 
-        JSONObject info = JSONObject.fromObject(value);
+        Map<String, Object> info = JacksonUtils.readValueAsMap(value, String.class, Object.class);
         CancelOrderModel cancelOrderModel = new CancelOrderModel();
-//        cancelOrderModel.setTenantId(BigInteger.valueOf(info.getLong("tenantId")));
-//        cancelOrderModel.setTenantId(BigInteger.valueOf(info.getLong("branchId")));
-//        cancelOrderModel.setTenantId(BigInteger.valueOf(info.getLong("orderId")));
+        cancelOrderModel.setOrderId(BigInteger.valueOf(MapUtils.getLongValue(info, "orderId")));
         try {
             dietOrderService.cancelOrder(cancelOrderModel);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (DocumentException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

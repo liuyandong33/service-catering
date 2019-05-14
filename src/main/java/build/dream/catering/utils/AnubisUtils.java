@@ -57,7 +57,7 @@ public class AnubisUtils {
 
     public static String getAccessToken() throws IOException {
         String accessToken = null;
-        String accessTokenJson = RedisUtils.get(Constants.KEY_ANUBIS_TOKEN);
+        String accessTokenJson = CommonRedisUtils.get(Constants.KEY_ANUBIS_TOKEN);
         boolean isRetrieveAccessToken = false;
         if (StringUtils.isNotBlank(accessTokenJson)) {
             JSONObject accessTokenJsonObject = JSONObject.fromObject(accessTokenJson);
@@ -75,7 +75,7 @@ public class AnubisUtils {
         }
         if (isRetrieveAccessToken) {
             Map<String, Object> accessTokenMap = obtainAccessToken();
-            RedisUtils.set(Constants.KEY_ANUBIS_TOKEN, GsonUtils.toJson(accessTokenMap));
+            CommonRedisUtils.set(Constants.KEY_ANUBIS_TOKEN, GsonUtils.toJson(accessTokenMap));
             accessToken = MapUtils.getString(accessTokenMap, "access_token");
         }
         return accessToken;

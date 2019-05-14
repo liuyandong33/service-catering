@@ -62,7 +62,7 @@ public class MeiTuanUtils {
     }
 
     public static String getMeiTuanAppAuthToken(String tenantId, String branchId) {
-        String meiTuanAppAuthToken = RedisUtils.hget(Constants.KEY_MEI_TUAN_APP_AUTH_TOKENS, tenantId + "_" + branchId);
+        String meiTuanAppAuthToken = CommonRedisUtils.hget(Constants.KEY_MEI_TUAN_APP_AUTH_TOKENS, tenantId + "_" + branchId);
         ValidateUtils.notNull(meiTuanAppAuthToken, "门店未绑定美团！");
         return meiTuanAppAuthToken;
     }

@@ -2,8 +2,8 @@ package build.dream.catering.tasks;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.services.FlashSaleService;
+import build.dream.common.utils.CommonRedisUtils;
 import build.dream.common.utils.JacksonUtils;
-import build.dream.common.utils.RedisUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -22,7 +22,7 @@ public class SaveFlashSaleOrderTask implements Runnable {
     public void run() {
         while (true) {
             try {
-                String orderJson = RedisUtils.brpop(Constants.KEY_FLASH_SALE_ORDERS, 60, TimeUnit.SECONDS);
+                String orderJson = CommonRedisUtils.brpop(Constants.KEY_FLASH_SALE_ORDERS, 60, TimeUnit.SECONDS);
                 if (StringUtils.isNotBlank(orderJson)) {
                     Map<String, Object> orderInfo = JacksonUtils.readValueAsMap(orderJson, String.class, Object.class);
                     BigInteger tenantId = BigInteger.valueOf(MapUtils.getLongValue(orderInfo, "tenantId"));

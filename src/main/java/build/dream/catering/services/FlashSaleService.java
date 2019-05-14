@@ -78,9 +78,9 @@ public class FlashSaleService {
 
         String flashSaleStockKey = Constants.KEY_FLASH_SALE_STOCK + "_" + tenantId + "_" + branchId + "_" + flashSaleActivityId;
 
-        RedisUtils.setex(flashSaleActivityKey, GsonUtils.toJson(flashSaleActivity), timeout, TimeUnit.SECONDS);
-        RedisUtils.setex(flashSaleStockKey, flashSaleStock.toString(), timeout, TimeUnit.SECONDS);
-        RedisUtils.hset(Constants.KEY_FLASH_SALE_ACTIVITY_IDS + "_" + tenantId + "_" + branchId, flashSaleActivityId.toString(), flashSaleActivityId.toString());
+        CommonRedisUtils.setex(flashSaleActivityKey, GsonUtils.toJson(flashSaleActivity), timeout, TimeUnit.SECONDS);
+        CommonRedisUtils.setex(flashSaleStockKey, flashSaleStock.toString(), timeout, TimeUnit.SECONDS);
+        CommonRedisUtils.hset(Constants.KEY_FLASH_SALE_ACTIVITY_IDS + "_" + tenantId + "_" + branchId, flashSaleActivityId.toString(), flashSaleActivityId.toString());
 
         return ApiRest.builder().data(flashSaleActivity).message("保存秒杀活动成功！").successful(true).build();
     }
@@ -135,16 +135,16 @@ public class FlashSaleService {
         BigInteger branchId = obtainAllFlashSaleActivitiesModel.obtainBranchId();
         BigInteger vipId = obtainAllFlashSaleActivitiesModel.getVipId();
 
-        Map<String, String> flashSaleActivityIdsMap = RedisUtils.hgetAll(Constants.KEY_FLASH_SALE_ACTIVITY_IDS + "_" + tenantId + "_" + branchId);
+        Map<String, String> flashSaleActivityIdsMap = CommonRedisUtils.hgetAll(Constants.KEY_FLASH_SALE_ACTIVITY_IDS + "_" + tenantId + "_" + branchId);
         Set<String> flashSaleActivityIds = flashSaleActivityIdsMap.keySet();
 
         List<FlashSaleActivity> flashSaleActivities = new ArrayList<FlashSaleActivity>();
         Map<String, Object> flashSaleStocks = new HashMap<String, Object>();
         for (String flashSaleActivityId : flashSaleActivityIds) {
-            String flashSaleActivityJson = RedisUtils.get(Constants.KEY_FLASH_SALE_ACTIVITY + "_" + tenantId + "_" + branchId + "_" + flashSaleActivityId);
-            String flashSaleStock = RedisUtils.get(Constants.KEY_FLASH_SALE_STOCK + "_" + tenantId + "_" + branchId + "_" + flashSaleActivityId);
+            String flashSaleActivityJson = CommonRedisUtils.get(Constants.KEY_FLASH_SALE_ACTIVITY + "_" + tenantId + "_" + branchId + "_" + flashSaleActivityId);
+            String flashSaleStock = CommonRedisUtils.get(Constants.KEY_FLASH_SALE_STOCK + "_" + tenantId + "_" + branchId + "_" + flashSaleActivityId);
             if (StringUtils.isBlank(flashSaleActivityJson)) {
-                RedisUtils.hdel(Constants.KEY_FLASH_SALE_ACTIVITY_IDS + "_" + tenantId + "_" + branchId, flashSaleActivityId);
+                CommonRedisUtils.hdel(Constants.KEY_FLASH_SALE_ACTIVITY_IDS + "_" + tenantId + "_" + branchId, flashSaleActivityId);
             } else {
                 flashSaleActivities.add(JacksonUtils.readValue(flashSaleActivityJson, FlashSaleActivity.class));
                 flashSaleStocks.put("_" + flashSaleActivityId, flashSaleStock);
@@ -332,6 +332,6 @@ public class FlashSaleService {
                 .updatedUserId(userId)
                 .build();
         DatabaseHelper.insert(dietOrderDetail);
-        RedisUtils.setex(uuid, GsonUtils.toJson(dietOrder), 10, TimeUnit.MINUTES);
+        CommonRedisUtils.setex(uuid, GsonUtils.toJson(dietOrder), 10, TimeUnit.MINUTES);
     }
 }

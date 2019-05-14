@@ -55,7 +55,7 @@ public class ElemeService {
             tokenField = Constants.ELEME_TOKEN + "_" + tenantId + "_" + branchId;
         }
 
-        boolean tokenIsExists = RedisUtils.hexists(Constants.KEY_ELEME_TOKENS, tokenField);
+        boolean tokenIsExists = CommonRedisUtils.hexists(Constants.KEY_ELEME_TOKENS, tokenField);
         boolean isAuthorize = false;
         if (tokenIsExists) {
             Map<String, String> verifyTokenRequestParameters = new HashMap<String, String>();

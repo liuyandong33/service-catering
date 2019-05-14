@@ -641,7 +641,7 @@ public class VipService {
         Vip vip = VipUtils.find(searchModel);
 
         String payCode = "";
-        RedisUtils.setex(payCode, GsonUtils.toJson(vip), 1, TimeUnit.MINUTES);
+        CommonRedisUtils.setex(payCode, GsonUtils.toJson(vip), 1, TimeUnit.MINUTES);
 
         return ApiRest.builder().data(payCode).message("生成付款码成功").successful(true).build();
     }

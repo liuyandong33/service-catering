@@ -5,6 +5,7 @@ import build.dream.catering.beans.PackageGroupDietOrderDetail;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.dietorder.SaveDietOrderModel;
 import build.dream.catering.tools.PushMessageThread;
+import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.*;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.models.alipay.AlipayTradeRefundModel;
@@ -981,5 +982,76 @@ public class DietOrderUtils {
         DatabaseHelper.update(dietOrder);
 
         return dietOrder;
+    }
+
+    /**
+     * 开始失效订单定时任务
+     *
+     * @param tenantId
+     * @param branchId
+     * @param orderId
+     */
+    public static void startOrderInvalidJob(BigInteger tenantId, BigInteger branchId, BigInteger orderId) {
+        startOrderInvalidJob(tenantId.toString(), branchId.toString(), orderId.toString());
+    }
+
+    /**
+     * 开始失效订单定时任务
+     *
+     * @param tenantId
+     * @param branchId
+     * @param orderId
+     */
+    public static void startOrderInvalidJob(String tenantId, String branchId, String orderId) {
+        String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
+
+        Map<String, String> startSimpleJobRequestParameters = new HashMap<String, String>();
+        startSimpleJobRequestParameters.put("jobName", partitionCode + "_order_invalid_" + tenantId + "_" + branchId + "_" + orderId);
+        startSimpleJobRequestParameters.put("jobGroup", partitionCode + "_order_invalid");
+        startSimpleJobRequestParameters.put("triggerName", partitionCode + "_order_invalid_" + tenantId + "_" + branchId + "_" + orderId);
+        startSimpleJobRequestParameters.put("triggerGroup", partitionCode + "_order_invalid");
+        startSimpleJobRequestParameters.put("interval", String.valueOf(30 * 60));
+        startSimpleJobRequestParameters.put("topic", ConfigurationUtils.getConfiguration(Constants.ORDER_INVALID_MESSAGE_TOPIC));
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("tenantId", tenantId);
+        data.put("branchId", branchId);
+        data.put("orderId", orderId);
+
+        startSimpleJobRequestParameters.put("data", GsonUtils.toJson(data));
+
+        ApiRest apiRest = ProxyUtils.doPostWithRequestParameters(partitionCode, Constants.SERVICE_NAME_JOB, "job", "startSimpleJob", startSimpleJobRequestParameters);
+        ValidateUtils.isTrue(apiRest.isSuccessful(), apiRest.getError());
+    }
+
+    /**
+     * 开始失效订单定时任务
+     *
+     * @param tenantId
+     * @param branchId
+     * @param orderId
+     */
+    public static void stopOrderInvalidJob(BigInteger tenantId, BigInteger branchId, BigInteger orderId) {
+        stopOrderInvalidJob(tenantId.toString(), branchId.toString(), orderId.toString());
+    }
+
+    /**
+     * 开始失效订单定时任务
+     *
+     * @param tenantId
+     * @param branchId
+     * @param orderId
+     */
+    public static void stopOrderInvalidJob(String tenantId, String branchId, String orderId) {
+        String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
+
+        Map<String, String> stopJobRequestParameters = new HashMap<String, String>();
+        stopJobRequestParameters.put("jobName", partitionCode + "_order_invalid_" + tenantId + "_" + branchId + "_" + orderId);
+        stopJobRequestParameters.put("jobGroup", partitionCode + "_order_invalid");
+        stopJobRequestParameters.put("triggerName", partitionCode + "_order_invalid_" + tenantId + "_" + branchId + "_" + orderId);
+        stopJobRequestParameters.put("triggerGroup", partitionCode + "_order_invalid");
+
+        ApiRest apiRest = ProxyUtils.doPostWithRequestParameters(partitionCode, Constants.SERVICE_NAME_JOB, "job", "stopJob", stopJobRequestParameters);
+        ValidateUtils.isTrue(apiRest.isSuccessful(), apiRest.getError());
     }
 }
