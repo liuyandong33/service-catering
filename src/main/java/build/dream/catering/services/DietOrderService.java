@@ -20,7 +20,6 @@ import build.dream.common.models.weixinpay.UnifiedOrderModel;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
-import org.dom4j.DocumentException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -144,7 +143,7 @@ public class DietOrderService {
     }
 
     @Transactional(readOnly = true)
-    public ApiRest doPay(DoPayModel doPayModel) throws DocumentException {
+    public ApiRest doPay(DoPayModel doPayModel) {
         BigInteger tenantId = doPayModel.getTenantId();
         BigInteger branchId = doPayModel.getBranchId();
         BigInteger dietOrderId = doPayModel.getDietOrderId();
