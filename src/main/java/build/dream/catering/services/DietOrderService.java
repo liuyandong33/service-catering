@@ -130,25 +130,17 @@ public class DietOrderService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest cancelOrder(CancelOrderModel cancelOrderModel) throws IOException, DocumentException {
+    public ApiRest cancelOrder(CancelOrderModel cancelOrderModel) {
         BigInteger tenantId = cancelOrderModel.obtainTenantId();
         BigInteger branchId = cancelOrderModel.obtainBranchId();
         BigInteger orderId = cancelOrderModel.getOrderId();
-
-        SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition(DietOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition(DietOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, orderId);
-        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
-        ValidateUtils.notNull(dietOrder, "订单不存在！");
-
-        DietOrderUtils.recoveryStock(dietOrder);
-        DietOrderUtils.refund(dietOrder);
-
-        dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_INVALID);
-        DatabaseHelper.update(dietOrder);
-
+        DietOrderUtils.cancelOrder(tenantId, branchId, orderId);
         return ApiRest.builder().message("取消订单成功").successful(true).build();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void cancelOrder(BigInteger tenantId, BigInteger branchId, BigInteger orderId) {
+        DietOrderUtils.cancelOrder(tenantId, branchId, orderId);
     }
 
     @Transactional(readOnly = true)

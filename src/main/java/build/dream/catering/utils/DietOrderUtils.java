@@ -15,7 +15,6 @@ import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import org.dom4j.DocumentException;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -70,7 +69,7 @@ public class DietOrderUtils {
         }
     }
 
-    public static void refund(DietOrder dietOrder) throws DocumentException {
+    public static void refund(DietOrder dietOrder) {
         BigInteger tenantId = dietOrder.getTenantId();
         BigInteger branchId = dietOrder.getBranchId();
         BigInteger dietOrderId = dietOrder.getId();
@@ -991,8 +990,8 @@ public class DietOrderUtils {
      * @param branchId
      * @param orderId
      */
-    public static void startOrderInvalidJob(BigInteger tenantId, BigInteger branchId, BigInteger orderId) {
-        startOrderInvalidJob(tenantId.toString(), branchId.toString(), orderId.toString());
+    public static void startOrderInvalidJob(BigInteger tenantId, BigInteger branchId, BigInteger orderId, Date startTime) {
+        startOrderInvalidJob(tenantId.toString(), branchId.toString(), orderId.toString(), startTime);
     }
 
     /**
@@ -1002,7 +1001,7 @@ public class DietOrderUtils {
      * @param branchId
      * @param orderId
      */
-    public static void startOrderInvalidJob(String tenantId, String branchId, String orderId) {
+    public static void startOrderInvalidJob(String tenantId, String branchId, String orderId, Date startTime) {
         String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
 
         Map<String, String> startSimpleJobRequestParameters = new HashMap<String, String>();
@@ -1010,7 +1009,7 @@ public class DietOrderUtils {
         startSimpleJobRequestParameters.put("jobGroup", partitionCode + "_order_invalid");
         startSimpleJobRequestParameters.put("triggerName", partitionCode + "_order_invalid_" + tenantId + "_" + branchId + "_" + orderId);
         startSimpleJobRequestParameters.put("triggerGroup", partitionCode + "_order_invalid");
-        startSimpleJobRequestParameters.put("interval", String.valueOf(30 * 60));
+        startSimpleJobRequestParameters.put("startTime", CustomDateUtils.format(startTime, Constants.DEFAULT_DATE_PATTERN));
         startSimpleJobRequestParameters.put("topic", ConfigurationUtils.getConfiguration(Constants.ORDER_INVALID_MESSAGE_TOPIC));
 
         Map<String, Object> data = new HashMap<String, Object>();
@@ -1053,5 +1052,20 @@ public class DietOrderUtils {
 
         ApiRest apiRest = ProxyUtils.doPostWithRequestParameters(partitionCode, Constants.SERVICE_NAME_JOB, "job", "stopJob", stopJobRequestParameters);
         ValidateUtils.isTrue(apiRest.isSuccessful(), apiRest.getError());
+    }
+
+    public static void cancelOrder(BigInteger tenantId, BigInteger branchId, BigInteger orderId) {
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, orderId);
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
+
+        DietOrderUtils.recoveryStock(dietOrder);
+        DietOrderUtils.refund(dietOrder);
+
+        dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_INVALID);
+        DatabaseHelper.update(dietOrder);
     }
 }
