@@ -8,6 +8,7 @@ import build.dream.common.api.ApiRest;
 import build.dream.common.auth.AbstractUserDetails;
 import build.dream.common.auth.SystemUserUserDetails;
 import build.dream.common.auth.VipUserDetails;
+import build.dream.common.beans.KafkaFixedTimeSendResult;
 import build.dream.common.catering.domains.*;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.models.alipay.AlipayTradeAppPayModel;
@@ -20,10 +21,10 @@ import build.dream.common.models.weixinpay.UnifiedOrderModel;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
@@ -121,25 +122,41 @@ public class DietOrderService {
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
         ValidateUtils.notNull(dietOrder, "订单不存在！");
         ValidateUtils.isTrue(dietOrder.getOrderStatus() == DietOrderConstants.ORDER_STATUS_UNPROCESSED, "只有未处理的订单才能进行接单操作！");
+        ValidateUtils.isTrue(new Date().getTime() - dietOrder.getActiveTime().getTime() <= 5 * 60 * 100, "订单已超时！");
 
+        DietOrderUtils.stopOrderInvalidJob(dietOrder.getJobId(), dietOrder.getTriggerId());
+        dietOrder.setJobId(Constants.VARCHAR_DEFAULT_VALUE);
+        dietOrder.setTriggerId(Constants.VARCHAR_DEFAULT_VALUE);
         dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_VALID);
         DatabaseHelper.update(dietOrder);
 
         return ApiRest.builder().message("接单成功！").successful(true).build();
     }
 
+    /**
+     * 商户拒单取消订单
+     *
+     * @param cancelOrderModel
+     * @return
+     */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest cancelOrder(CancelOrderModel cancelOrderModel) {
         BigInteger tenantId = cancelOrderModel.obtainTenantId();
         BigInteger branchId = cancelOrderModel.obtainBranchId();
         BigInteger orderId = cancelOrderModel.getOrderId();
-        DietOrderUtils.cancelOrder(tenantId, branchId, orderId);
+        DietOrderUtils.cancelOrder(tenantId, branchId, orderId, 2);
         return ApiRest.builder().message("取消订单成功").successful(true).build();
     }
 
+    /**
+     * @param tenantId: 商户ID
+     * @param branchId: 门店ID
+     * @param orderId:  订单ID
+     * @param type:     类型，1-超时未付款自动取消，3-超时未接单自动取消
+     */
     @Transactional(rollbackFor = Exception.class)
-    public void cancelOrder(BigInteger tenantId, BigInteger branchId, BigInteger orderId) {
-        DietOrderUtils.cancelOrder(tenantId, branchId, orderId);
+    public void cancelOrder(BigInteger tenantId, BigInteger branchId, BigInteger orderId, int type) {
+        DietOrderUtils.cancelOrder(tenantId, branchId, orderId, type);
     }
 
     @Transactional(readOnly = true)
@@ -158,7 +175,8 @@ public class DietOrderService {
         searchModel.addSearchCondition(DietOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
         ValidateUtils.notNull(dietOrder, "订单不存在！");
-        ValidateUtils.isTrue(dietOrder.getOrderStatus() == DietOrderConstants.ORDER_STATUS_PENDING, "订单状态异常！");
+        ValidateUtils.isTrue(dietOrder.getOrderStatus() == DietOrderConstants.ORDER_STATUS_PENDING && dietOrder.getOrderStatus() == DietOrderConstants.ORDER_STATUS_PENDING, "订单状态异常！");
+        ValidateUtils.isTrue(new Date().getTime() - dietOrder.getCreatedTime().getTime() <= 15 * 60 * 1000, "订单已超时！");
 
         String orderNumber = dietOrder.getOrderNumber();
         BigDecimal payableAmount = dietOrder.getPayableAmount();
@@ -312,6 +330,10 @@ public class DietOrderService {
 
         BigInteger userId = CommonUtils.getServiceSystemUserId();
         dietOrder.setUpdatedUserId(userId);
+        DietOrderUtils.stopOrderInvalidJob(dietOrder.getJobId(), dietOrder.getTriggerId());
+        KafkaFixedTimeSendResult kafkaFixedTimeSendResult = DietOrderUtils.startOrderInvalidJob(tenantId, branchId, dietOrder.getId(), 3, DateUtils.addMinutes(occurrenceTime, 5));
+        dietOrder.setJobId(kafkaFixedTimeSendResult.getJobId());
+        dietOrder.setTriggerId(kafkaFixedTimeSendResult.getTriggerId());
         DatabaseHelper.update(dietOrder);
     }
 
@@ -322,7 +344,7 @@ public class DietOrderService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest obtainPosOrder(ObtainPosOrderModel obtainPosOrderModel) throws IOException {
+    public ApiRest obtainPosOrder(ObtainPosOrderModel obtainPosOrderModel) {
         BigInteger tenantId = obtainPosOrderModel.obtainTenantId();
         BigInteger branchId = obtainPosOrderModel.obtainBranchId();
         String tableCode = obtainPosOrderModel.obtainBranchCode();

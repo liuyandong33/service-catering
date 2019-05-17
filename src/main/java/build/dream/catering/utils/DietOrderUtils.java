@@ -5,7 +5,7 @@ import build.dream.catering.beans.PackageGroupDietOrderDetail;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.dietorder.SaveDietOrderModel;
 import build.dream.catering.tools.PushMessageThread;
-import build.dream.common.api.ApiRest;
+import build.dream.common.beans.KafkaFixedTimeSendResult;
 import build.dream.common.catering.domains.*;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.models.alipay.AlipayTradeRefundModel;
@@ -15,6 +15,7 @@ import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.time.DateUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -978,83 +979,54 @@ public class DietOrderUtils {
         dietOrder.setDiscountAmount(dietOrderDiscountAmount);
         dietOrder.setPayableAmount(dietOrderTotalAmount.subtract(dietOrderDiscountAmount));
         dietOrder.setPaidAmount(BigDecimal.ZERO);
-        DatabaseHelper.update(dietOrder);
 
+        KafkaFixedTimeSendResult kafkaFixedTimeSendResult = startOrderInvalidJob(tenantId, branchId, dietOrderId, 1, DateUtils.addMinutes(dietOrder.getCreatedTime(), 15));
+        dietOrder.setJobId(kafkaFixedTimeSendResult.getJobId());
+        dietOrder.setTriggerId(kafkaFixedTimeSendResult.getTriggerId());
+
+        DatabaseHelper.update(dietOrder);
         return dietOrder;
     }
 
     /**
      * 开始失效订单定时任务
      *
-     * @param tenantId
-     * @param branchId
-     * @param orderId
+     * @param tenantId: 商户ID
+     * @param branchId: 门店ID
+     * @param orderId:  订单ID
+     * @param type:     类型，1-超时未付款，3-超时未接单
+     * @param startTime
+     * @return
      */
-    public static void startOrderInvalidJob(BigInteger tenantId, BigInteger branchId, BigInteger orderId, Date startTime) {
-        startOrderInvalidJob(tenantId.toString(), branchId.toString(), orderId.toString(), startTime);
-    }
-
-    /**
-     * 开始失效订单定时任务
-     *
-     * @param tenantId
-     * @param branchId
-     * @param orderId
-     */
-    public static void startOrderInvalidJob(String tenantId, String branchId, String orderId, Date startTime) {
-        String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
-
-        Map<String, String> startSimpleJobRequestParameters = new HashMap<String, String>();
-        startSimpleJobRequestParameters.put("jobName", partitionCode + "_order_invalid_" + tenantId + "_" + branchId + "_" + orderId);
-        startSimpleJobRequestParameters.put("jobGroup", partitionCode + "_order_invalid");
-        startSimpleJobRequestParameters.put("triggerName", partitionCode + "_order_invalid_" + tenantId + "_" + branchId + "_" + orderId);
-        startSimpleJobRequestParameters.put("triggerGroup", partitionCode + "_order_invalid");
-        startSimpleJobRequestParameters.put("startTime", CustomDateUtils.format(startTime, Constants.DEFAULT_DATE_PATTERN));
-        startSimpleJobRequestParameters.put("topic", ConfigurationUtils.getConfiguration(Constants.ORDER_INVALID_MESSAGE_TOPIC));
-
+    public static KafkaFixedTimeSendResult startOrderInvalidJob(BigInteger tenantId, BigInteger branchId, BigInteger orderId, int type, Date startTime) {
+        String topic = ConfigurationUtils.getConfiguration(Constants.ORDER_INVALID_MESSAGE_TOPIC);
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("tenantId", tenantId);
         data.put("branchId", branchId);
         data.put("orderId", orderId);
-
-        startSimpleJobRequestParameters.put("data", GsonUtils.toJson(data));
-
-        ApiRest apiRest = ProxyUtils.doPostWithRequestParameters(partitionCode, Constants.SERVICE_NAME_JOB, "job", "startSimpleJob", startSimpleJobRequestParameters);
-        ValidateUtils.isTrue(apiRest.isSuccessful(), apiRest.getError());
+        data.put("type", type);
+        return KafkaUtils.fixedTimeSend(topic, GsonUtils.toJson(data), startTime);
     }
 
     /**
-     * 开始失效订单定时任务
+     * 停止失效订单定时任务
      *
-     * @param tenantId
-     * @param branchId
-     * @param orderId
+     * @param jobId
+     * @param triggerId
      */
-    public static void stopOrderInvalidJob(BigInteger tenantId, BigInteger branchId, BigInteger orderId) {
-        stopOrderInvalidJob(tenantId.toString(), branchId.toString(), orderId.toString());
+    public static void stopOrderInvalidJob(String jobId, String triggerId) {
+        KafkaUtils.cancelFixedTimeSend(jobId, triggerId);
     }
 
     /**
-     * 开始失效订单定时任务
+     * 取消订单
      *
-     * @param tenantId
-     * @param branchId
-     * @param orderId
+     * @param tenantId: 商户ID
+     * @param branchId: 门店ID
+     * @param orderId:  订单ID
+     * @param type:     类型，1-超时未付款自动取消，2-商户拒单取消订单，3-超时未接单自动取消
      */
-    public static void stopOrderInvalidJob(String tenantId, String branchId, String orderId) {
-        String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
-
-        Map<String, String> stopJobRequestParameters = new HashMap<String, String>();
-        stopJobRequestParameters.put("jobName", partitionCode + "_order_invalid_" + tenantId + "_" + branchId + "_" + orderId);
-        stopJobRequestParameters.put("jobGroup", partitionCode + "_order_invalid");
-        stopJobRequestParameters.put("triggerName", partitionCode + "_order_invalid_" + tenantId + "_" + branchId + "_" + orderId);
-        stopJobRequestParameters.put("triggerGroup", partitionCode + "_order_invalid");
-
-        ApiRest apiRest = ProxyUtils.doPostWithRequestParameters(partitionCode, Constants.SERVICE_NAME_JOB, "job", "stopJob", stopJobRequestParameters);
-        ValidateUtils.isTrue(apiRest.isSuccessful(), apiRest.getError());
-    }
-
-    public static void cancelOrder(BigInteger tenantId, BigInteger branchId, BigInteger orderId) {
+    public static void cancelOrder(BigInteger tenantId, BigInteger branchId, BigInteger orderId, int type) {
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition(DietOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -1062,10 +1034,18 @@ public class DietOrderUtils {
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
         ValidateUtils.notNull(dietOrder, "订单不存在！");
 
-        DietOrderUtils.recoveryStock(dietOrder);
-        DietOrderUtils.refund(dietOrder);
+        if (type == 1) {
 
+        } else if (type == 2) {
+            stopOrderInvalidJob(dietOrder.getJobId(), dietOrder.getTriggerId());
+            DietOrderUtils.refund(dietOrder);
+        } else if (type == 3) {
+            DietOrderUtils.refund(dietOrder);
+        }
+        DietOrderUtils.recoveryStock(dietOrder);
         dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_INVALID);
+        dietOrder.setJobId(Constants.VARCHAR_DEFAULT_VALUE);
+        dietOrder.setTriggerId(Constants.VARCHAR_DEFAULT_VALUE);
         DatabaseHelper.update(dietOrder);
     }
 }

@@ -20,12 +20,12 @@ public class OrderInvalidMessageListener implements MessageListener<String, Stri
     @KafkaListener(topics = "${order.invalid.message.topic}")
     @Override
     public void onMessage(ConsumerRecord<String, String> data) {
-        String key = data.key();
         String value = data.value();
         Map<String, Object> info = JacksonUtils.readValueAsMap(value, String.class, Object.class);
         BigInteger tenantId = BigInteger.valueOf(MapUtils.getLongValue(info, "tenantId"));
         BigInteger branchId = BigInteger.valueOf(MapUtils.getLongValue(info, "branchId"));
         BigInteger orderId = BigInteger.valueOf(MapUtils.getLongValue(info, "orderId"));
-        dietOrderService.cancelOrder(tenantId, branchId, orderId);
+        int type = MapUtils.getIntValue(info, "type");
+        dietOrderService.cancelOrder(tenantId, branchId, orderId, type);
     }
 }
