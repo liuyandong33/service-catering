@@ -23,6 +23,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class DietOrderUtils {
+    /**
+     * 恢复库存
+     *
+     * @param dietOrder
+     */
     public static void recoveryStock(DietOrder dietOrder) {
         BigInteger dietOrderId = dietOrder.getId();
 
@@ -70,6 +75,11 @@ public class DietOrderUtils {
         }
     }
 
+    /**
+     * 退款
+     *
+     * @param dietOrder
+     */
     public static void refund(DietOrder dietOrder) {
         BigInteger tenantId = dietOrder.getTenantId();
         BigInteger branchId = dietOrder.getBranchId();
@@ -309,6 +319,16 @@ public class DietOrderUtils {
         return packageGroups;
     }
 
+    /**
+     * 推送消息
+     *
+     * @param tenantId:    商户ID
+     * @param branchId:    门店ID
+     * @param dietOrderId: 订单ID
+     * @param uuid:        唯一ID
+     * @param count:       最大推送次数
+     * @param interval:    推送间隔
+     */
     public static void pushMessage(BigInteger tenantId, BigInteger branchId, BigInteger dietOrderId, String uuid, int count, int interval) {
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -326,6 +346,12 @@ public class DietOrderUtils {
         }
     }
 
+    /**
+     * 保存订单
+     *
+     * @param saveDietOrderModel
+     * @return
+     */
     public static DietOrder saveDietOrder(SaveDietOrderModel saveDietOrderModel) {
         BigInteger tenantId = saveDietOrderModel.getTenantId();
         String tenantCode = saveDietOrderModel.getTenantCode();
