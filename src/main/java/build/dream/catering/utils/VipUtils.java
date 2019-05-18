@@ -3,6 +3,8 @@ package build.dream.catering.utils;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.VipMapper;
 import build.dream.common.catering.domains.Vip;
+import build.dream.common.catering.domains.VipAccount;
+import build.dream.common.catering.domains.VipType;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SearchModel;
@@ -45,11 +47,13 @@ public class VipUtils {
     /**
      * 根据ID查询会员档案
      *
+     * @param tenantId
      * @param id
      * @return
      */
-    public static Vip find(BigInteger id) {
+    public static Vip find(BigInteger tenantId, BigInteger id) {
         SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(Vip.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition(Vip.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, id);
         return find(searchModel);
     }
@@ -98,13 +102,13 @@ public class VipUtils {
      * 扣减会员积分
      *
      * @param tenantId
-     * @param branchId
      * @param vipId
+     * @param vipAccountId
      * @param point
      * @return
      */
-    public static BigDecimal deductingVipPoint(BigInteger tenantId, BigInteger branchId, BigInteger vipId, BigDecimal point) {
-        BigDecimal surplusPoint = obtainVipMapper().callProcedureDeductingVipPoint(tenantId, branchId, vipId, point);
+    public static BigDecimal deductingVipPoint(BigInteger tenantId, BigInteger vipId, BigInteger vipAccountId, BigDecimal point) {
+        BigDecimal surplusPoint = obtainVipMapper().callProcedureDeductingVipPoint(tenantId, vipAccountId, vipId, point);
         ValidateUtils.isTrue(surplusPoint.compareTo(BigDecimal.ZERO) >= 0, "积分不足！");
         return surplusPoint;
     }
@@ -113,13 +117,13 @@ public class VipUtils {
      * 扣减会员储值
      *
      * @param tenantId
-     * @param branchId
      * @param vipId
+     * @param vipAccountId
      * @param balance
      * @return
      */
-    public static BigDecimal deductingVipBalance(BigInteger tenantId, BigInteger branchId, BigInteger vipId, BigDecimal balance) {
-        BigDecimal surplusBalance = obtainVipMapper().callProcedureDeductingVipBalance(tenantId, branchId, vipId, balance);
+    public static BigDecimal deductingVipBalance(BigInteger tenantId, BigInteger vipId, BigInteger vipAccountId, BigDecimal balance) {
+        BigDecimal surplusBalance = obtainVipMapper().callProcedureDeductingVipBalance(tenantId, vipAccountId, vipId, balance);
         ValidateUtils.isTrue(surplusBalance.compareTo(BigDecimal.ZERO) >= 0, "余额不足！");
         return surplusBalance;
     }
@@ -128,13 +132,13 @@ public class VipUtils {
      * 增加会员积分
      *
      * @param tenantId
-     * @param branchId
      * @param vipId
+     * @param vipAccountId
      * @param point
      * @return
      */
-    public static BigDecimal addVipPoint(BigInteger tenantId, BigInteger branchId, BigInteger vipId, BigDecimal point) {
-        BigDecimal surplusPoint = obtainVipMapper().callProcedureAddVipPoint(tenantId, branchId, vipId, point);
+    public static BigDecimal addVipPoint(BigInteger tenantId, BigInteger vipId, BigInteger vipAccountId, BigDecimal point) {
+        BigDecimal surplusPoint = obtainVipMapper().callProcedureAddVipPoint(tenantId, vipId, vipAccountId, point);
         return surplusPoint;
     }
 
@@ -142,13 +146,40 @@ public class VipUtils {
      * 增加会员储值
      *
      * @param tenantId
-     * @param branchId
      * @param vipId
+     * @param vipAccountId
      * @param balance
      * @return
      */
-    public static BigDecimal addVipBalance(BigInteger tenantId, BigInteger branchId, BigInteger vipId, BigDecimal balance) {
-        BigDecimal surplusBalance = obtainVipMapper().callProcedureAddVipBalance(tenantId, branchId, vipId, balance);
+    public static BigDecimal addVipBalance(BigInteger tenantId, BigInteger vipId, BigInteger vipAccountId, BigDecimal balance) {
+        BigDecimal surplusBalance = obtainVipMapper().callProcedureAddVipBalance(tenantId, vipId, vipAccountId, balance);
         return surplusBalance;
+    }
+
+    /**
+     * 获取会员账户
+     *
+     * @param tenantId:      商户ID
+     * @param branchId:      门店ID
+     * @param vipId:         会员ID
+     * @param vipSharedType: 会员共享类型，1-全部共享，2-全部独立，3-分组共享
+     * @return
+     */
+    public static VipAccount obtainVipAccount(BigInteger tenantId, BigInteger branchId, BigInteger vipId, int vipSharedType) {
+        return obtainVipMapper().obtainVipAccount(tenantId, branchId, vipId, vipSharedType);
+    }
+
+    /**
+     * 获取会员类型
+     *
+     * @param tenantId
+     * @param vipTypeId
+     * @return
+     */
+    public static VipType obtainVipType(BigInteger tenantId, BigInteger vipTypeId) {
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(VipType.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(VipType.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, vipTypeId);
+        return DatabaseHelper.find(VipType.class, searchModel);
     }
 }

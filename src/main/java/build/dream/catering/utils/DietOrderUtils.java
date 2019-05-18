@@ -11,6 +11,7 @@ import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.models.alipay.AlipayTradeRefundModel;
 import build.dream.common.models.jpush.PushModel;
 import build.dream.common.models.weixinpay.RefundModel;
+import build.dream.common.saas.domains.Tenant;
 import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
@@ -87,7 +88,7 @@ public class DietOrderUtils {
         BigInteger vipId = dietOrder.getVipId();
         Vip vip = null;
         if (vipId.compareTo(Constants.BIGINT_DEFAULT_VALUE) != 0) {
-            vip = VipUtils.find(vipId);
+            vip = VipUtils.find(tenantId, vipId);
         }
 
         SearchModel searchModel = new SearchModel(true);
@@ -98,9 +99,13 @@ public class DietOrderUtils {
             String paymentCode = dietOrderPayment.getPaymentCode();
             String extraInfo = dietOrderPayment.getExtraInfo();
             if (Constants.PAYMENT_CODE_HYJF.equals(paymentCode)) {
-                VipUtils.addVipPoint(vip.getTenantId(), vip.getBranchId(), vipId, dietOrderPayment.getPaidAmount().multiply(BigDecimal.valueOf(Double.valueOf(extraInfo))));
+                Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
+                VipAccount vipAccount = VipUtils.obtainVipAccount(tenantId, branchId, vipId, tenant.getVipSharedType());
+                VipUtils.addVipPoint(vip.getTenantId(), vipId, vipAccount.getId(), dietOrderPayment.getPaidAmount().multiply(BigDecimal.valueOf(Double.valueOf(extraInfo))));
             } else if (Constants.PAYMENT_CODE_HYQB.equals(paymentCode)) {
-                VipUtils.addVipBalance(vip.getTenantId(), vip.getBranchId(), vipId, dietOrderPayment.getPaidAmount());
+                Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
+                VipAccount vipAccount = VipUtils.obtainVipAccount(tenantId, branchId, vipId, tenant.getVipSharedType());
+                VipUtils.addVipBalance(vip.getTenantId(), vipId, vipAccount.getId(), dietOrderPayment.getPaidAmount());
             } else if (Constants.PAYMENT_CODE_WX.equals(paymentCode)) {
                 String orderNumber = dietOrder.getOrderNumber();
                 int payableAmount = dietOrder.getPayableAmount().intValue();

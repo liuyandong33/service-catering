@@ -2,19 +2,19 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.catering.mappers.VipMapper">
     <select id="callProcedureDeductingVipPoint" resultType="java.math.BigDecimal">
-        call procedure_deducting_vip_point(#{tenantId}, #{branchId}, #{vipId}, #{point});
+        call procedure_deducting_vip_point(#{tenantId}, #{vipId}, #{vipAccountId}, #{point});
     </select>
 
     <select id="callProcedureDeductingVipBalance" resultType="java.math.BigDecimal">
-        call procedure_deducting_vip_balance(#{tenantId}, #{branchId}, #{vipId}, #{balance});
+        call procedure_deducting_vip_balance(#{tenantId}, #{vipId}, #{vipAccountId}, #{balance});
     </select>
 
     <select id="callProcedureAddVipPoint" resultType="java.math.BigDecimal">
-        call procedure_add_vip_point(#{tenantId}, #{branchId}, #{vipId}, #{point});
+        call procedure_add_vip_point(#{tenantId}, #{vipId}, #{vipAccountId}, #{point});
     </select>
 
     <select id="callProcedureAddVipBalance" resultType="java.math.BigDecimal">
-        call procedure_add_vip_balance(#{tenantId}, #{branchId}, #{vipId}, #{balance});
+        call procedure_add_vip_balance(#{tenantId}, #{vipId}, #{vipAccountId}, #{balance});
     </select>
 
     <select id="listVipInfos" resultType="build.dream.common.utils.UnderscoreToCamelCaseMap">
@@ -97,6 +97,25 @@
                 WHERE vip_account.tenant_id = #{tenantId}
                 AND vip_account.deleted = 0
                 AND vip_account.vip_group_id = (SELECT vip_group_id FROM branch WHERE tenant_id = #{tenantId} AND id = #{branchId});
+            </when>
+        </choose>
+    </select>
+
+    <select id="obtainVipAccount">
+        <choose>
+            <when test="vipSharedType == 1">
+                SELECT * FROM vip_account WHERE tenant_id = #{tenantId} AND vip_id = #{vipId} AND deleted = 0;
+            </when>
+            <when test="vipSharedType == 2">
+                SELECT * FROM vip_account WHERE tenant_id = #{tenantId}  AND branch_id = #{branchId} AND vip_id = #{vipId} AND deleted = 0;
+            </when>
+            <when test="vipSharedType == 3">
+                SELECT
+                vip_account.*
+                FROM vip_account INNER JOIN branch ON vip_account.vip_group_id = branch.vip_group_id AND branch.id = #{branchId} AND branch.deleted = 0
+                WHERE vip_account.tenant_id = #{tenantId}
+                AND vip_account.vip_id = #{vipId}
+                AND vip_account.deleted = 0;
             </when>
         </choose>
     </select>

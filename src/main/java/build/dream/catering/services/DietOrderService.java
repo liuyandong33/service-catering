@@ -4,6 +4,7 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.models.dietorder.*;
 import build.dream.catering.utils.DietOrderUtils;
 import build.dream.catering.utils.ThreadUtils;
+import build.dream.catering.utils.VipUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.auth.AbstractUserDetails;
 import build.dream.common.auth.SystemUserUserDetails;
@@ -18,6 +19,7 @@ import build.dream.common.models.alipay.AlipayTradeWapPayModel;
 import build.dream.common.models.aliyunpush.PushMessageToAndroidModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
 import build.dream.common.models.weixinpay.UnifiedOrderModel;
+import build.dream.common.saas.domains.Tenant;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -447,5 +449,99 @@ public class DietOrderService {
 
         Map<String, Object> dietOrderInfo = DietOrderUtils.buildDietOrderInfo(dietOrder, dietOrderGroups, dietOrderDetails, dietOrderDetailGoodsAttributes, dietOrderActivities);
         return ApiRest.builder().data(dietOrderInfo).message("获取POS订单成功！").successful(true).build();
+    }
+
+    /**
+     * 组合付款
+     *
+     * @param doPayCombinedModel
+     * @return
+     */
+    public ApiRest doPayCombined(DoPayCombinedModel doPayCombinedModel) {
+        BigInteger tenantId = doPayCombinedModel.getTenantId();
+        BigInteger branchId = doPayCombinedModel.getBranchId();
+        BigInteger vipId = doPayCombinedModel.getVipId();
+        BigInteger dietOrderId = doPayCombinedModel.getDietOrderId();
+        List<DoPayCombinedModel.PaymentInfo> paymentInfos = doPayCombinedModel.getPaymentInfos();
+
+        SearchModel searchModel = new SearchModel(true);
+        searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
+        ValidateUtils.isTrue(dietOrder.getOrderStatus() == DietOrderConstants.ORDER_STATUS_PENDING && dietOrder.getOrderStatus() == DietOrderConstants.ORDER_STATUS_PENDING, "订单状态异常！");
+        ValidateUtils.isTrue(new Date().getTime() - dietOrder.getCreatedTime().getTime() <= 15 * 60 * 1000, "订单已超时！");
+
+        Vip vip = VipUtils.find(tenantId, vipId);
+        ValidateUtils.notNull(vip, "会员不存在！");
+        BigDecimal total = BigDecimal.ZERO;
+
+        List<String> paymentCodes = new ArrayList<String>();
+        for (DoPayCombinedModel.PaymentInfo paymentInfo : paymentInfos) {
+            total = total.add(paymentInfo.getPaidAmount());
+            paymentCodes.add(paymentInfo.getPaymentCode());
+        }
+        ValidateUtils.isTrue(total.compareTo(dietOrder.getPayableAmount()) == 0, "付款金额与订单金额不符！");
+        SearchModel paymentSearchModel = new SearchModel(true);
+        paymentSearchModel.addSearchCondition(Payment.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        paymentSearchModel.addSearchCondition(Payment.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        paymentSearchModel.addSearchCondition(Payment.ColumnName.CODE, Constants.SQL_OPERATION_SYMBOL_IN, paymentCodes);
+        List<Payment> payments = DatabaseHelper.findAll(Payment.class, paymentSearchModel);
+        Map<String, Payment> paymentMap = new HashMap<String, Payment>();
+        for (Payment payment : payments) {
+            paymentMap.put(payment.getCode(), payment);
+        }
+
+        Date now = new Date();
+        for (DoPayCombinedModel.PaymentInfo paymentInfo : paymentInfos) {
+            String paymentCode = paymentInfo.getPaymentCode();
+            BigDecimal paidAmount = paymentInfo.getPaidAmount();
+            if (Constants.PAYMENT_CODE_HYJF.equals(paymentCode)) {
+                Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
+                VipAccount vipAccount = VipUtils.obtainVipAccount(tenantId, branchId, vipId, tenant.getVipSharedType());
+                VipType vipType = VipUtils.obtainVipType(tenantId, vipAccount.getVipTypeId());
+                int bonusCoefficient = vipType.getBonusCoefficient();
+                BigDecimal point = paidAmount.multiply(BigDecimal.valueOf(bonusCoefficient));
+                VipUtils.deductingVipPoint(tenantId, branchId, vipId, point);
+
+                Payment payment = paymentMap.get(paymentCode);
+                DietOrderPayment dietOrderPayment = DietOrderPayment.builder()
+                        .tenantId(tenantId)
+                        .branchId(branchId)
+                        .tenantCode(tenant.getCode())
+                        .dietOrderId(dietOrderId)
+                        .paymentId(payment.getId())
+                        .paymentCode(payment.getCode())
+                        .paymentName(payment.getName())
+                        .paidAmount(paidAmount)
+                        .occurrenceTime(now)
+                        .extraInfo(String.valueOf(bonusCoefficient))
+                        .build();
+                DatabaseHelper.insert(dietOrderPayment);
+            } else if (Constants.PAYMENT_CODE_HYQB.equals(paymentCode)) {
+                VipUtils.deductingVipBalance(tenantId, branchId, vipId, paymentInfo.getPaidAmount());
+                Payment payment = paymentMap.get(paymentCode);
+
+                Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
+                DietOrderPayment dietOrderPayment = DietOrderPayment.builder()
+                        .tenantId(tenantId)
+                        .branchId(branchId)
+                        .tenantCode(tenant.getCode())
+                        .dietOrderId(dietOrderId)
+                        .paymentId(payment.getId())
+                        .paymentCode(payment.getCode())
+                        .paymentName(payment.getName())
+                        .paidAmount(paidAmount)
+                        .occurrenceTime(now)
+                        .build();
+                DatabaseHelper.insert(dietOrderPayment);
+            } else if (Constants.PAYMENT_CODE_ALIPAY.equals(paymentCode)) {
+
+            } else if (Constants.PAYMENT_CODE_WX.equals(paymentCode)) {
+
+            }
+        }
+        return ApiRest.builder().build();
     }
 }

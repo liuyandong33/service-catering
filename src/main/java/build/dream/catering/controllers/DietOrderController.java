@@ -133,4 +133,16 @@ public class DietOrderController extends BasicController {
     public String obtainPosOrder() {
         return null;
     }
+
+    /**
+     * 组合付款
+     *
+     * @return
+     */
+    @RequestMapping(value = "/doPayCombined", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = DoPayCombinedModel.class, serviceClass = DietOrderService.class, serviceMethodName = "doPayCombined", error = "发起支付失败")
+    public String doPayCombined() {
+        return null;
+    }
 }
