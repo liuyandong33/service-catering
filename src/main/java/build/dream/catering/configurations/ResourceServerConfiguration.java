@@ -24,7 +24,8 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
             "/eleme/bindingStore",
             "/eleme/doBindingStore",
             "/eleme/tenantAuthorizeCallback",
-            "/o2o/obtainVipInfo"
+            "/o2o/obtainVipInfo",
+            "/dietOrder/doPayCombined"
     };
 
     @Override
