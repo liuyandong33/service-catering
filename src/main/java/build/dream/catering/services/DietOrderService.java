@@ -7,7 +7,7 @@ import build.dream.catering.utils.ThreadUtils;
 import build.dream.catering.utils.VipUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.auth.AbstractUserDetails;
-import build.dream.common.auth.SystemUserUserDetails;
+import build.dream.common.auth.TenantUserDetails;
 import build.dream.common.auth.VipUserDetails;
 import build.dream.common.beans.KafkaFixedTimeSendResult;
 import build.dream.common.catering.domains.*;
@@ -96,10 +96,10 @@ public class DietOrderService {
         AbstractUserDetails abstractUserDetails = WebSecurityUtils.obtainUserDetails();
         String clientType = abstractUserDetails.getClientType();
         if (Constants.CLIENT_TYPE_POS.equals(clientType) || Constants.CLIENT_TYPE_APP.equals(clientType) || Constants.CLIENT_TYPE_WEB.equals(clientType)) {
-            SystemUserUserDetails systemUserUserDetails = (SystemUserUserDetails) abstractUserDetails;
-            saveDietOrderModel.setTenantId(systemUserUserDetails.getTenantId());
-            saveDietOrderModel.setTenantCode(systemUserUserDetails.getTenantCode());
-            saveDietOrderModel.setUserId(systemUserUserDetails.getUserId());
+            TenantUserDetails tenantUserDetails = (TenantUserDetails) abstractUserDetails;
+            saveDietOrderModel.setTenantId(tenantUserDetails.getTenantId());
+            saveDietOrderModel.setTenantCode(tenantUserDetails.getTenantCode());
+            saveDietOrderModel.setUserId(tenantUserDetails.getUserId());
         } else if (Constants.CLIENT_TYPE_O2O.equals(clientType)) {
             VipUserDetails vipUserDetails = (VipUserDetails) abstractUserDetails;
             saveDietOrderModel.setTenantId(vipUserDetails.getTenantId());
