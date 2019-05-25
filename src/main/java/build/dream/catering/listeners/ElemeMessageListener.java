@@ -5,6 +5,7 @@ import build.dream.catering.services.ElemeService;
 import build.dream.catering.tools.HandleElemeMessageRunnable;
 import build.dream.common.catering.domains.ElemeCallbackMessage;
 import build.dream.common.utils.ApplicationHandler;
+import build.dream.common.utils.ValidateUtils;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -29,11 +30,11 @@ public class ElemeMessageListener implements MessageListener<String, String> {
             return;
         }
 
-        if (!ApplicationHandler.isJson(elemeMessage)) {
+        if (!ValidateUtils.isJson(elemeMessage)) {
             return;
         }
 
-        if (!ApplicationHandler.isRightJson(elemeMessage, Constants.ELEME_MESSAGE_SCHEMA_FILE_PATH)) {
+        if (!ValidateUtils.isRightJson(elemeMessage, Constants.ELEME_MESSAGE_SCHEMA_FILE_PATH)) {
             return;
         }
 

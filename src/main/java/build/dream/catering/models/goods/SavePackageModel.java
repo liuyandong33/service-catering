@@ -2,6 +2,7 @@ package build.dream.catering.models.goods;
 
 import build.dream.catering.constants.Constants;
 import build.dream.common.annotations.JsonSchema;
+import build.dream.common.constraints.VerifyJsonSchema;
 import build.dream.common.models.BasicModel;
 import build.dream.common.models.CateringBasicModel;
 import build.dream.common.utils.ApplicationHandler;
@@ -33,7 +34,7 @@ public class SavePackageModel extends CateringBasicModel {
 
     private List<BigInteger> deleteGroupIds;
 
-    @JsonSchema(value = Constants.GROUPS_SCHEMA_FILE_PATH)
+    @VerifyJsonSchema(value = Constants.GROUPS_SCHEMA_FILE_PATH)
     @NotNull
     private List<Group> groups;
 

@@ -339,41 +339,44 @@ public class GoodsService extends BasicService {
 
             // 删除需要删除的规格
             if (CollectionUtils.isNotEmpty(deleteGoodsSpecificationIds)) {
-                UpdateModel updateModel = new UpdateModel(true);
-                updateModel.setTableName(GoodsSpecification.TABLE_NAME);
-                updateModel.addContentValue(GoodsSpecification.ColumnName.UPDATED_USER_ID, userId);
-                updateModel.addContentValue(GoodsSpecification.ColumnName.UPDATED_REMARK, "删除商品规格信息！");
-                updateModel.addContentValue(GoodsSpecification.ColumnName.DELETED_TIME, new Date());
-                updateModel.addContentValue(GoodsSpecification.ColumnName.DELETED, 1);
-                updateModel.addSearchCondition(GoodsSpecification.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-                updateModel.addSearchCondition(GoodsSpecification.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-                updateModel.addSearchCondition(GoodsSpecification.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, deleteGoodsSpecificationIds);
-                DatabaseHelper.universalUpdate(updateModel);
+                UpdateModel updateModel = new UpdateModel().builder()
+                        .autoSetDeletedFalse()
+                        .addContentValue(GoodsSpecification.ColumnName.UPDATED_USER_ID, userId, 1)
+                        .addContentValue(GoodsSpecification.ColumnName.UPDATED_REMARK, "删除商品规格信息！", 1)
+                        .addContentValue(GoodsSpecification.ColumnName.DELETED_TIME, new Date(), 1)
+                        .addContentValue(GoodsSpecification.ColumnName.DELETED, 1, 1)
+                        .addSearchCondition(GoodsSpecification.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)
+                        .addSearchCondition(GoodsSpecification.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId)
+                        .addSearchCondition(GoodsSpecification.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, deleteGoodsSpecificationIds)
+                        .build();
+                DatabaseHelper.universalUpdate(updateModel, GoodsSpecification.TABLE_NAME);
             }
 
             // 删除需要删除的口味组及其下的口味
             if (CollectionUtils.isNotEmpty(deleteGoodsAttributeGroupIds)) {
-                UpdateModel deleteGoodsAttributeGroupUpdateModel = new UpdateModel(true);
-                deleteGoodsAttributeGroupUpdateModel.setTableName(GoodsAttributeGroup.TABLE_NAME);
-                deleteGoodsAttributeGroupUpdateModel.addContentValue(GoodsAttributeGroup.ColumnName.UPDATED_USER_ID, userId);
-                deleteGoodsAttributeGroupUpdateModel.addContentValue(GoodsAttributeGroup.ColumnName.UPDATED_REMARK, "删除商品口味组信息！");
-                deleteGoodsAttributeGroupUpdateModel.addContentValue(GoodsAttributeGroup.ColumnName.DELETED_TIME, new Date());
-                deleteGoodsAttributeGroupUpdateModel.addContentValue(GoodsAttributeGroup.ColumnName.DELETED, 1);
-                deleteGoodsAttributeGroupUpdateModel.addSearchCondition(GoodsAttributeGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-                deleteGoodsAttributeGroupUpdateModel.addSearchCondition(GoodsAttributeGroup.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-                deleteGoodsAttributeGroupUpdateModel.addSearchCondition(GoodsAttributeGroup.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, deleteGoodsAttributeGroupIds);
-                DatabaseHelper.universalUpdate(deleteGoodsAttributeGroupUpdateModel);
+                UpdateModel deleteGoodsAttributeGroupUpdateModel = UpdateModel.builder()
+                        .autoSetDeletedFalse()
+                        .addContentValue(GoodsAttributeGroup.ColumnName.UPDATED_USER_ID, userId, 1)
+                        .addContentValue(GoodsAttributeGroup.ColumnName.UPDATED_REMARK, "删除商品口味组信息！", 1)
+                        .addContentValue(GoodsAttributeGroup.ColumnName.DELETED_TIME, new Date(), 1)
+                        .addContentValue(GoodsAttributeGroup.ColumnName.DELETED, 1, 1)
+                        .addSearchCondition(GoodsAttributeGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)
+                        .addSearchCondition(GoodsAttributeGroup.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId)
+                        .addSearchCondition(GoodsAttributeGroup.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, deleteGoodsAttributeGroupIds)
+                        .build();
+                DatabaseHelper.universalUpdate(deleteGoodsAttributeGroupUpdateModel, GoodsAttributeGroup.TABLE_NAME);
 
-                UpdateModel deleteGoodsAttributeUpdateModel = new UpdateModel(true);
-                deleteGoodsAttributeUpdateModel.setTableName(GoodsAttribute.TABLE_NAME);
-                deleteGoodsAttributeUpdateModel.addContentValue(GoodsAttribute.ColumnName.UPDATED_USER_ID, userId);
-                deleteGoodsAttributeUpdateModel.addContentValue(GoodsAttribute.ColumnName.UPDATED_REMARK, "删除商品口味信息！");
-                deleteGoodsAttributeUpdateModel.addContentValue(GoodsAttribute.ColumnName.DELETED_TIME, new Date());
-                deleteGoodsAttributeUpdateModel.addContentValue(GoodsAttribute.ColumnName.DELETED, 1);
-                deleteGoodsAttributeUpdateModel.addSearchCondition(GoodsAttribute.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-                deleteGoodsAttributeUpdateModel.addSearchCondition(GoodsAttribute.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-                deleteGoodsAttributeUpdateModel.addSearchCondition(GoodsAttribute.ColumnName.GOODS_ATTRIBUTE_GROUP_ID, Constants.SQL_OPERATION_SYMBOL_IN, deleteGoodsAttributeGroupIds);
-                DatabaseHelper.universalUpdate(deleteGoodsAttributeUpdateModel);
+                UpdateModel deleteGoodsAttributeUpdateModel = UpdateModel.builder()
+                        .autoSetDeletedFalse()
+                        .addContentValue(GoodsAttribute.ColumnName.UPDATED_USER_ID, userId, 1)
+                        .addContentValue(GoodsAttribute.ColumnName.UPDATED_REMARK, "删除商品口味信息！", 1)
+                        .addContentValue(GoodsAttribute.ColumnName.DELETED_TIME, new Date(), 1)
+                        .addContentValue(GoodsAttribute.ColumnName.DELETED, 1, 1)
+                        .addSearchCondition(GoodsAttribute.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)
+                        .addSearchCondition(GoodsAttribute.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId)
+                        .addSearchCondition(GoodsAttribute.ColumnName.GOODS_ATTRIBUTE_GROUP_ID, Constants.SQL_OPERATION_SYMBOL_IN, deleteGoodsAttributeGroupIds)
+                        .build();
+                DatabaseHelper.universalUpdate(deleteGoodsAttributeUpdateModel, GoodsAttribute.TABLE_NAME);
             }
 
             // 查询出需要修改的商品规格
@@ -441,16 +444,17 @@ public class GoodsService extends BasicService {
 
                 // 删除需要删除的口味
                 if (CollectionUtils.isNotEmpty(deleteGoodsAttributeIds)) {
-                    UpdateModel deleteGoodsAttributeUpdateModel = new UpdateModel(true);
-                    deleteGoodsAttributeUpdateModel.setTableName(GoodsAttribute.TABLE_NAME);
-                    deleteGoodsAttributeUpdateModel.addContentValue(GoodsAttribute.ColumnName.UPDATED_USER_ID, userId);
-                    deleteGoodsAttributeUpdateModel.addContentValue(GoodsAttribute.ColumnName.UPDATED_REMARK, "删除商品口味信息！");
-                    deleteGoodsAttributeUpdateModel.addContentValue(GoodsAttribute.ColumnName.DELETED_TIME, new Date());
-                    deleteGoodsAttributeUpdateModel.addContentValue(GoodsAttribute.ColumnName.DELETED, 1);
-                    deleteGoodsAttributeUpdateModel.addSearchCondition(GoodsAttribute.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-                    deleteGoodsAttributeUpdateModel.addSearchCondition(GoodsAttribute.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-                    deleteGoodsAttributeUpdateModel.addSearchCondition(GoodsAttribute.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, deleteGoodsAttributeIds);
-                    DatabaseHelper.universalUpdate(deleteGoodsAttributeUpdateModel);
+                    UpdateModel deleteGoodsAttributeUpdateModel = UpdateModel.builder()
+                            .autoSetDeletedFalse()
+                            .addContentValue(GoodsAttribute.ColumnName.UPDATED_USER_ID, userId, 1)
+                            .addContentValue(GoodsAttribute.ColumnName.UPDATED_REMARK, "删除商品口味信息！", 1)
+                            .addContentValue(GoodsAttribute.ColumnName.DELETED_TIME, new Date(), 1)
+                            .addContentValue(GoodsAttribute.ColumnName.DELETED, 1, 1)
+                            .addSearchCondition(GoodsAttribute.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)
+                            .addSearchCondition(GoodsAttribute.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId)
+                            .addSearchCondition(GoodsAttribute.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, deleteGoodsAttributeIds)
+                            .build();
+                    DatabaseHelper.universalUpdate(deleteGoodsAttributeUpdateModel, GoodsAttribute.TABLE_NAME);
                 }
 
                 // 查询出需要修改的口味组
@@ -596,19 +600,21 @@ public class GoodsService extends BasicService {
             ValidateUtils.notNull(goodsSpecification, "商品规格不存在！");
 
             if (CollectionUtils.isNotEmpty(deleteGroupIds)) {
-                UpdateModel packageGroupUpdateModel = new UpdateModel(true);
-                packageGroupUpdateModel.setTableName(PackageGroup.TABLE_NAME);
-                packageGroupUpdateModel.addContentValue(PackageGroup.ColumnName.DELETED_TIME, new Date());
-                packageGroupUpdateModel.addContentValue(PackageGroup.ColumnName.DELETED, 1);
-                packageGroupUpdateModel.addSearchCondition(PackageGroup.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, deleteGroupIds);
-                DatabaseHelper.universalUpdate(packageGroupUpdateModel);
+                UpdateModel packageGroupUpdateModel = UpdateModel.builder()
+                        .autoSetDeletedFalse()
+                        .addContentValue(PackageGroup.ColumnName.DELETED_TIME, new Date(), 1)
+                        .addContentValue(PackageGroup.ColumnName.DELETED, 1, 1)
+                        .addSearchCondition(PackageGroup.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, deleteGroupIds)
+                        .build();
+                DatabaseHelper.universalUpdate(packageGroupUpdateModel, PackageGroup.TABLE_NAME);
 
-                UpdateModel packageGroupDetailUpdateModel = new UpdateModel();
-                packageGroupDetailUpdateModel.setTableName(PackageGroupDetail.TABLE_NAME);
-                packageGroupDetailUpdateModel.addContentValue(PackageGroupDetail.ColumnName.DELETED_TIME, new Date());
-                packageGroupDetailUpdateModel.addContentValue(PackageGroupDetail.ColumnName.DELETED, 1);
-                packageGroupDetailUpdateModel.addSearchCondition(PackageGroupDetail.ColumnName.PACKAGE_GROUP_ID, Constants.SQL_OPERATION_SYMBOL_IN, deleteGroupIds);
-                DatabaseHelper.universalUpdate(packageGroupDetailUpdateModel);
+                UpdateModel packageGroupDetailUpdateModel = UpdateModel.builder()
+                        .autoSetDeletedFalse()
+                        .addContentValue(PackageGroupDetail.ColumnName.DELETED_TIME, new Date(), 1)
+                        .addContentValue(PackageGroupDetail.ColumnName.DELETED, 1, 1)
+                        .addSearchCondition(PackageGroupDetail.ColumnName.PACKAGE_GROUP_ID, Constants.SQL_OPERATION_SYMBOL_IN, deleteGroupIds)
+                        .build();
+                DatabaseHelper.universalUpdate(packageGroupDetailUpdateModel, PackageGroupDetail.TABLE_NAME);
             }
             SearchModel packageGroupSearchModel = new SearchModel(true);
             packageGroupSearchModel.addSearchCondition(PackageGroup.ColumnName.PACKAGE_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, id);
@@ -641,12 +647,13 @@ public class GoodsService extends BasicService {
                 List<SavePackageModel.GroupDetail> groupDetails = group.getGroupDetails();
 
                 if (CollectionUtils.isNotEmpty(deleteGroupDetailIds)) {
-                    UpdateModel packageGroupDetailUpdateModel = new UpdateModel();
-                    packageGroupDetailUpdateModel.setTableName(PackageGroupDetail.TABLE_NAME);
-                    packageGroupDetailUpdateModel.addContentValue(PackageGroupDetail.ColumnName.DELETED_TIME, new Date());
-                    packageGroupDetailUpdateModel.addContentValue(PackageGroupDetail.ColumnName.DELETED, 1);
-                    packageGroupDetailUpdateModel.addSearchCondition(PackageGroupDetail.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, deleteGroupDetailIds);
-                    DatabaseHelper.universalUpdate(packageGroupDetailUpdateModel);
+                    UpdateModel packageGroupDetailUpdateModel = UpdateModel.builder()
+                            .autoSetDeletedFalse()
+                            .addContentValue(PackageGroupDetail.ColumnName.DELETED_TIME, new Date(), 1)
+                            .addContentValue(PackageGroupDetail.ColumnName.DELETED, 1, 1)
+                            .addSearchCondition(PackageGroupDetail.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, deleteGroupDetailIds)
+                            .build();
+                    DatabaseHelper.universalUpdate(packageGroupDetailUpdateModel, PackageGroupDetail.TABLE_NAME);
                 }
 
                 PackageGroup packageGroup = null;
@@ -837,63 +844,69 @@ public class GoodsService extends BasicService {
         DatabaseHelper.update(goods);
 
         // 删除该商品的所有规格
-        UpdateModel goodsSpecificationUpdateModel = new UpdateModel(true);
-        goodsSpecificationUpdateModel.setTableName(GoodsSpecification.TABLE_NAME);
-        goodsSpecificationUpdateModel.addContentValue(GoodsSpecification.ColumnName.DELETED_TIME, currentTime);
-        goodsSpecificationUpdateModel.addContentValue(GoodsSpecification.ColumnName.DELETED, 1);
-        goodsSpecificationUpdateModel.addContentValue(GoodsSpecification.ColumnName.UPDATED_USER_ID, userId);
-        goodsSpecificationUpdateModel.addContentValue(GoodsSpecification.ColumnName.UPDATED_REMARK, "删除商品规格信息！");
-        goodsSpecificationUpdateModel.addSearchCondition(GoodsSpecification.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
-        goodsSpecificationUpdateModel.addSearchCondition(GoodsSpecification.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        goodsSpecificationUpdateModel.addSearchCondition(GoodsSpecification.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        DatabaseHelper.universalUpdate(goodsSpecificationUpdateModel);
+        UpdateModel goodsSpecificationUpdateModel = UpdateModel.builder()
+                .autoSetDeletedFalse()
+                .addContentValue(GoodsSpecification.ColumnName.DELETED_TIME, currentTime, 1)
+                .addContentValue(GoodsSpecification.ColumnName.DELETED, 1, 1)
+                .addContentValue(GoodsSpecification.ColumnName.UPDATED_USER_ID, userId, 1)
+                .addContentValue(GoodsSpecification.ColumnName.UPDATED_REMARK, "删除商品规格信息！", 1)
+                .addSearchCondition(GoodsSpecification.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId)
+                .addSearchCondition(GoodsSpecification.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)
+                .addSearchCondition(GoodsSpecification.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId)
+                .build();
+        DatabaseHelper.universalUpdate(goodsSpecificationUpdateModel, GoodsSpecification.TABLE_NAME);
 
         int type = goods.getType();
         if (type == Constants.GOODS_TYPE_ORDINARY_GOODS) {
             // 删除该商品的所有口味组
-            UpdateModel goodsAttributeGroupUpdateModel = new UpdateModel(true);
-            goodsAttributeGroupUpdateModel.setTableName(GoodsAttributeGroup.TABLE_NAME);
-            goodsAttributeGroupUpdateModel.addContentValue(GoodsAttributeGroup.ColumnName.DELETED_TIME, currentTime);
-            goodsAttributeGroupUpdateModel.addContentValue(GoodsAttributeGroup.ColumnName.DELETED, 1);
-            goodsAttributeGroupUpdateModel.addContentValue(GoodsAttributeGroup.ColumnName.UPDATED_USER_ID, userId);
-            goodsAttributeGroupUpdateModel.addContentValue(GoodsAttributeGroup.ColumnName.UPDATED_REMARK, "删除商品口味组信息！");
-            goodsAttributeGroupUpdateModel.addSearchCondition(GoodsAttributeGroup.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
-            goodsAttributeGroupUpdateModel.addSearchCondition(GoodsAttributeGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-            goodsAttributeGroupUpdateModel.addSearchCondition(GoodsAttributeGroup.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-            DatabaseHelper.universalUpdate(goodsAttributeGroupUpdateModel);
+            UpdateModel goodsAttributeGroupUpdateModel = UpdateModel.builder()
+                    .autoSetDeletedFalse()
+                    .addContentValue(GoodsAttributeGroup.ColumnName.DELETED_TIME, currentTime, 1)
+                    .addContentValue(GoodsAttributeGroup.ColumnName.DELETED, 1, 1)
+                    .addContentValue(GoodsAttributeGroup.ColumnName.UPDATED_USER_ID, userId, 1)
+                    .addContentValue(GoodsAttributeGroup.ColumnName.UPDATED_REMARK, "删除商品口味组信息！", 1)
+                    .addSearchCondition(GoodsAttributeGroup.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId)
+                    .addSearchCondition(GoodsAttributeGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)
+                    .addSearchCondition(GoodsAttributeGroup.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId)
+                    .build();
+            DatabaseHelper.universalUpdate(goodsAttributeGroupUpdateModel, GoodsAttributeGroup.TABLE_NAME);
 
             // 删除该商品的所有口味
-            UpdateModel goodsAttributeUpdateModel = new UpdateModel(true);
-            goodsAttributeUpdateModel.setTableName(GoodsAttribute.TABLE_NAME);
-            goodsAttributeUpdateModel.addContentValue(GoodsAttribute.ColumnName.DELETED_TIME, currentTime);
-            goodsAttributeUpdateModel.addContentValue(GoodsAttribute.ColumnName.DELETED, 1);
-            goodsAttributeUpdateModel.addContentValue(GoodsAttribute.ColumnName.UPDATED_USER_ID, userId);
-            goodsAttributeUpdateModel.addContentValue(GoodsAttribute.ColumnName.UPDATED_REMARK, "删除商品口味组信息！");
-            goodsAttributeUpdateModel.addSearchCondition(GoodsAttribute.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
-            goodsAttributeUpdateModel.addSearchCondition(GoodsAttribute.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-            goodsAttributeUpdateModel.addSearchCondition(GoodsAttribute.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-            DatabaseHelper.universalUpdate(goodsAttributeUpdateModel);
+            UpdateModel goodsAttributeUpdateModel = UpdateModel.builder()
+                    .autoSetDeletedFalse()
+                    .addContentValue(GoodsAttribute.ColumnName.DELETED_TIME, currentTime, 1)
+                    .addContentValue(GoodsAttribute.ColumnName.DELETED, 1, 1)
+                    .addContentValue(GoodsAttribute.ColumnName.UPDATED_USER_ID, userId, 1)
+                    .addContentValue(GoodsAttribute.ColumnName.UPDATED_REMARK, "删除商品口味组信息！", 1)
+                    .addSearchCondition(GoodsAttribute.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId)
+                    .addSearchCondition(GoodsAttribute.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)
+                    .addSearchCondition(GoodsAttribute.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId)
+                    .build();
+            DatabaseHelper.universalUpdate(goodsAttributeUpdateModel, GoodsAttribute.TABLE_NAME);
         } else if (type == Constants.GOODS_TYPE_PACKAGE) {
-            UpdateModel packageGroupUpdateModel = new UpdateModel(true);
-            packageGroupUpdateModel.setTableName(PackageGroup.TABLE_NAME);
-            packageGroupUpdateModel.addContentValue(PackageGroup.ColumnName.DELETED_TIME, currentTime);
-            packageGroupUpdateModel.addContentValue(PackageGroup.ColumnName.DELETED, 1);
-            packageGroupUpdateModel.addContentValue(PackageGroup.ColumnName.UPDATED_USER_ID, userId);
-            packageGroupUpdateModel.addContentValue(PackageGroup.ColumnName.UPDATED_REMARK, "删除套餐组信息！");
-            packageGroupUpdateModel.addSearchCondition(PackageGroup.ColumnName.PACKAGE_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
-            packageGroupUpdateModel.addSearchCondition(PackageGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-            packageGroupUpdateModel.addSearchCondition(PackageGroup.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-            DatabaseHelper.universalUpdate(packageGroupUpdateModel);
+            UpdateModel packageGroupUpdateModel = UpdateModel.builder()
+                    .autoSetDeletedFalse()
+                    .addContentValue(PackageGroup.ColumnName.DELETED_TIME, currentTime, 1)
+                    .addContentValue(PackageGroup.ColumnName.DELETED, 1, 1)
+                    .addContentValue(PackageGroup.ColumnName.UPDATED_USER_ID, userId, 1)
+                    .addContentValue(PackageGroup.ColumnName.UPDATED_REMARK, "删除套餐组信息！", 1)
+                    .addSearchCondition(PackageGroup.ColumnName.PACKAGE_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId)
+                    .addSearchCondition(PackageGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)
+                    .addSearchCondition(PackageGroup.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId)
+                    .build();
+            DatabaseHelper.universalUpdate(packageGroupUpdateModel, PackageGroup.TABLE_NAME);
 
-            UpdateModel packageGroupDetailUpdateModel = new UpdateModel(true);
-            packageGroupDetailUpdateModel.setTableName(PackageGroupDetail.TABLE_NAME);
-            packageGroupDetailUpdateModel.addContentValue(PackageGroupDetail.ColumnName.DELETED_TIME, currentTime);
-            packageGroupDetailUpdateModel.addContentValue(PackageGroupDetail.ColumnName.DELETED, 1);
-            packageGroupDetailUpdateModel.addContentValue(PackageGroupDetail.ColumnName.UPDATED_USER_ID, userId);
-            packageGroupDetailUpdateModel.addSearchCondition(PackageGroupDetail.ColumnName.PACKAGE_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
-            packageGroupDetailUpdateModel.addSearchCondition(PackageGroupDetail.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-            packageGroupDetailUpdateModel.addSearchCondition(PackageGroupDetail.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-            DatabaseHelper.universalUpdate(packageGroupDetailUpdateModel);
+            UpdateModel packageGroupDetailUpdateModel = UpdateModel.builder()
+                    .autoSetDeletedFalse()
+                    .addContentValue(PackageGroupDetail.ColumnName.DELETED_TIME, currentTime, 1)
+                    .addContentValue(PackageGroupDetail.ColumnName.DELETED, 1, 1)
+                    .addContentValue(PackageGroupDetail.ColumnName.UPDATED_USER_ID, userId, 1)
+                    .addContentValue(PackageGroupDetail.ColumnName.UPDATED_REMARK, "删除套餐明细信息！", 1)
+                    .addSearchCondition(PackageGroupDetail.ColumnName.PACKAGE_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId)
+                    .addSearchCondition(PackageGroupDetail.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)
+                    .addSearchCondition(PackageGroupDetail.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId)
+                    .build();
+            DatabaseHelper.universalUpdate(packageGroupDetailUpdateModel, PackageGroupDetail.TABLE_NAME);
         }
 
         ElasticsearchUtils.delete(Constants.ELASTICSEARCH_INDEX_GOODS, Goods.TABLE_NAME, goodsId.toString());

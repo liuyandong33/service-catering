@@ -4,6 +4,7 @@ import build.dream.catering.constants.Constants;
 import build.dream.common.annotations.InstantiateObjectIgnore;
 import build.dream.common.annotations.JsonSchema;
 import build.dream.common.constants.DietOrderConstants;
+import build.dream.common.constraints.VerifyJsonSchema;
 import build.dream.common.models.BasicModel;
 import build.dream.common.utils.ApplicationHandler;
 import org.hibernate.validator.constraints.Length;
@@ -39,7 +40,7 @@ public class SaveDietOrderModel extends BasicModel {
     private BigInteger userId;
 
     @NotEmpty
-    @JsonSchema(value = Constants.GOODS_INFOS_SCHEMA_FILE_PATH)
+    @VerifyJsonSchema(value = Constants.GOODS_INFOS_SCHEMA_FILE_PATH)
     private List<GoodsInfo> goodsInfos;
 
     public BigInteger getTenantId() {

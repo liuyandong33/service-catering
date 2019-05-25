@@ -532,7 +532,7 @@ public class VipService {
         pagedSearchModel.addSearchCondition(Branch.ColumnName.VIP_GROUP_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, vipGroupId);
         pagedSearchModel.setPage(1);
         pagedSearchModel.setRows(1);
-        List<Branch> branches = DatabaseHelper.findAllPaged(Branch.class, searchModel);
+        List<Branch> branches = DatabaseHelper.findAllPaged(Branch.class, pagedSearchModel);
         ValidateUtils.isTrue(CollectionUtils.isEmpty(branches), "会员分组【" + vipGroup.getName() + "】已存在门店，不能删除！");
 
         vipGroup.setUpdatedUserId(userId);

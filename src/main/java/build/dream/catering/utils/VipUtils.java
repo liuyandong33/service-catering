@@ -5,10 +5,7 @@ import build.dream.catering.mappers.VipMapper;
 import build.dream.common.catering.domains.Vip;
 import build.dream.common.catering.domains.VipAccount;
 import build.dream.common.catering.domains.VipType;
-import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.DatabaseHelper;
-import build.dream.common.utils.SearchModel;
-import build.dream.common.utils.ValidateUtils;
+import build.dream.common.utils.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -91,11 +88,11 @@ public class VipUtils {
     /**
      * 分页查询
      *
-     * @param searchModel
+     * @param pagedSearchModel
      * @return
      */
-    public static List<Vip> findAllPaged(SearchModel searchModel) {
-        return DatabaseHelper.findAllPaged(Vip.class, searchModel);
+    public static List<Vip> findAllPaged(PagedSearchModel pagedSearchModel) {
+        return DatabaseHelper.findAllPaged(Vip.class, pagedSearchModel);
     }
 
     /**

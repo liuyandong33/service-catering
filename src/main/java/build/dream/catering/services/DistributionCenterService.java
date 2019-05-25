@@ -5,6 +5,7 @@ import build.dream.catering.models.distributioncenter.SaveModel;
 import build.dream.catering.utils.SequenceUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.DistributionCenter;
+import build.dream.common.constants.ErrorConstants;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SerialNumberGenerator;
 import build.dream.common.utils.TupleUtils;
@@ -39,7 +40,7 @@ public class DistributionCenterService {
         DistributionCenter distributionCenter = null;
         if (id != null) {
             distributionCenter = DatabaseHelper.find(DistributionCenter.class, TupleUtils.buildTuple3(DistributionCenter.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, id), TupleUtils.buildTuple3(DistributionCenter.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
-            ValidateUtils.notNull(distributionCenter, "配送中心不存在！", Constants.ERROR_CODE_HANDLING_ERROR);
+            ValidateUtils.notNull(distributionCenter, "配送中心不存在！", ErrorConstants.ERROR_CODE_HANDLING_ERROR);
             distributionCenter.setName(name);
             distributionCenter.setStatus(status);
             distributionCenter.setProvinceCode(provinceCode);

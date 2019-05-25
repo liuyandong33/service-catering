@@ -2,6 +2,7 @@ package build.dream.catering.models.activity;
 
 import build.dream.catering.constants.Constants;
 import build.dream.common.annotations.JsonSchema;
+import build.dream.common.constraints.VerifyJsonSchema;
 import build.dream.common.models.CateringBasicModel;
 import org.hibernate.validator.constraints.Length;
 
@@ -40,7 +41,7 @@ public class SaveBuyGiveActivityModel extends CateringBasicModel {
     @NotNull
     private Integer weekSign;
 
-    @JsonSchema(value = Constants.BUY_GIVE_ACTIVITY_INFOS_SCHEMA_FILE_PATH)
+    @VerifyJsonSchema(value = Constants.BUY_GIVE_ACTIVITY_INFOS_SCHEMA_FILE_PATH)
     private List<BuyGiveActivityInfo> buyGiveActivityInfos;
 
     public List<BigInteger> getBranchIds() {

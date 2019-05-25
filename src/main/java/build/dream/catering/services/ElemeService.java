@@ -612,13 +612,13 @@ public class ElemeService {
         BigInteger userId = doBindingStoreModel.getUserId();
 
         String updatedRemark = "门店(" + branchId + ")绑定饿了么(" + shopId + ")，清除绑定关系！";
-        UpdateModel updateModel = new UpdateModel(true);
-        updateModel.setTableName(Branch.TABLE_NAME);
-        updateModel.addContentValue(Branch.ColumnName.SHOP_ID, BigInteger.ZERO);
-        updateModel.addContentValue(Branch.ColumnName.UPDATED_USER_ID, userId);
-        updateModel.addContentValue(Branch.ColumnName.UPDATED_REMARK, updatedRemark);
-        updateModel.addSearchCondition(Branch.ColumnName.SHOP_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, shopId);
-        DatabaseHelper.universalUpdate(updateModel);
+        UpdateModel updateModel = UpdateModel.builder()
+                .addContentValue(Branch.ColumnName.SHOP_ID, BigInteger.ZERO, 1)
+                .addContentValue(Branch.ColumnName.UPDATED_USER_ID, userId, 1)
+                .addContentValue(Branch.ColumnName.UPDATED_REMARK, updatedRemark, 1)
+                .addSearchCondition(Branch.ColumnName.SHOP_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, shopId)
+                .build();
+        DatabaseHelper.universalUpdate(updateModel, Branch.TABLE_NAME);
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);

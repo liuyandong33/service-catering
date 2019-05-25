@@ -4,6 +4,7 @@ import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.annotations.ModelAndViewAction;
 import build.dream.common.api.ApiRest;
 import build.dream.common.constants.Constants;
+import build.dream.common.constants.ErrorConstants;
 import build.dream.common.exceptions.CustomException;
 import build.dream.common.exceptions.Error;
 import build.dream.common.models.BasicModel;
@@ -60,7 +61,7 @@ public class CallActionAspect {
                 CustomException customException = (CustomException) throwable;
                 apiRest = ApiRest.builder().error(new Error(customException.getCode(), customException.getMessage())).build();
             } else {
-                apiRest = ApiRest.builder().error(new Error(Constants.ERROR_CODE_UNKNOWN_ERROR, apiRestAction.error())).build();
+                apiRest = ApiRest.builder().error(new Error(ErrorConstants.ERROR_CODE_UNKNOWN_ERROR, apiRestAction.error())).build();
             }
         }
 

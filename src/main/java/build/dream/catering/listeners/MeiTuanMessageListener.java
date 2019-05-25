@@ -4,6 +4,7 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.services.MeiTuanService;
 import build.dream.catering.tools.HandleMeiTuanMessageRunnable;
 import build.dream.common.utils.ApplicationHandler;
+import build.dream.common.utils.ValidateUtils;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -25,11 +26,11 @@ public class MeiTuanMessageListener implements MessageListener<String, String> {
             return;
         }
 
-        if (!ApplicationHandler.isJson(meiTuanMessage)) {
+        if (!ValidateUtils.isJson(meiTuanMessage)) {
             return;
         }
 
-        if (!ApplicationHandler.isRightJson(meiTuanMessage, Constants.MEI_TUAN_MESSAGE_SCHEMA_FILE_PATH)) {
+        if (!ValidateUtils.isRightJson(meiTuanMessage, Constants.MEI_TUAN_MESSAGE_SCHEMA_FILE_PATH)) {
             return;
         }
 
