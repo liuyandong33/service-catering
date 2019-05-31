@@ -1,10 +1,10 @@
 package build.dream.catering.listeners;
 
 import build.dream.catering.jobs.JobScheduler;
-import build.dream.catering.mappers.CommonMapper;
 import build.dream.catering.services.FlashSaleService;
 import build.dream.catering.tasks.SaveFlashSaleOrderTask;
 import build.dream.common.listeners.BasicServletContextListener;
+import build.dream.common.mappers.CommonMapper;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 

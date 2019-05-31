@@ -20,7 +20,7 @@ public class SaveFlashSaleOrderTask implements Runnable {
 
     @Override
     public void run() {
-        while (true) {
+        /*while (true) {
             try {
                 String orderJson = CommonRedisUtils.brpop(Constants.KEY_FLASH_SALE_ORDERS, 60, TimeUnit.SECONDS);
                 if (StringUtils.isNotBlank(orderJson)) {
@@ -37,7 +37,7 @@ public class SaveFlashSaleOrderTask implements Runnable {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
+        }*/
     }
 
     public void start() {

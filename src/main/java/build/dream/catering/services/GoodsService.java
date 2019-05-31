@@ -1036,7 +1036,7 @@ public class GoodsService extends BasicService {
 
         List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
         for (SearchHit searchHit : searchHits) {
-            Map<String, Object> result = searchHit.getSource();
+            Map<String, Object> result = searchHit.getSourceAsMap();
 
             if (highlight) {
                 Map<String, HighlightField> highlightFields = searchHit.getHighlightFields();
@@ -1052,7 +1052,7 @@ public class GoodsService extends BasicService {
         }
 
         Map<String, Object> data = new HashMap<String, Object>();
-        data.put("total", searchHits.totalHits);
+        data.put("total", searchHits.getTotalHits());
         data.put("rows", results);
 
         return ApiRest.builder().data(data).message("检索商品成功！").successful(true).build();

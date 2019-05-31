@@ -6,11 +6,11 @@
     </insert>
 
     <select id="countUsers" resultType="java.lang.Long">
-        SELECT COUNT(1) FROM merge_user_branch <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include>
+        SELECT COUNT(1) FROM merge_user_branch
     </select>
 
     <select id="findAllUserIds" resultType="java.math.BigInteger">
-        SELECT user_id FROM merge_user_branch <include refid="build.dream.catering.mappers.CommonMapper.searchConditionSql"></include> <include refid="build.dream.catering.mappers.CommonMapper.paginationSql"></include>
+        SELECT user_id FROM merge_user_branch
     </select>
 
     <select id="findByTenantIdAndUserId" resultType="build.dream.common.catering.domains.Branch">
