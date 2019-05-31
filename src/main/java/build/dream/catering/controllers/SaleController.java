@@ -30,10 +30,10 @@ public class SaleController {
     @ResponseBody
     public String index() throws IOException {
         boolean proceed = true;
-        BigInteger minId = BigInteger.valueOf(1074673661027422208L);
+        BigInteger minId = BigInteger.valueOf(0);
         while (proceed) {
             PagedSearchModel pagedSearchModel = new PagedSearchModel(true);
-            pagedSearchModel.addSearchCondition(SaleDetail.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, BigInteger.valueOf(3));
+            pagedSearchModel.addSearchCondition(SaleDetail.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, BigInteger.valueOf(33));
             pagedSearchModel.addSearchCondition(SaleDetail.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_GREATER_THAN, minId);
             pagedSearchModel.setPage(1);
             pagedSearchModel.setRows(5000);
