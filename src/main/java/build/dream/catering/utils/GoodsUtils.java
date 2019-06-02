@@ -180,7 +180,7 @@ public class GoodsUtils {
     }
 
     public static List<Goods> findAllByIdInList(BigInteger tenantId, BigInteger branchId, List<BigInteger> goodsIds) {
-        return goodsMapper.findAllByIdInList(tenantId, branchId, goodsIds);
+        return obtainGoodsMapper().findAllByIdInList(tenantId, branchId, goodsIds);
     }
 
     public static Map<BigInteger, List<GoodsAttributeGroup>> obtainGoodsAttributeGroupInfos(BigInteger tenantId, BigInteger branchId, Collection<BigInteger> goodsIds) {
