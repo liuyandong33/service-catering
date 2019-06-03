@@ -3,6 +3,8 @@ package build.dream.catering.services;
 import build.dream.catering.constants.Constants;
 import build.dream.common.catering.domains.Branch;
 import build.dream.common.catering.domains.DietOrder;
+import build.dream.common.catering.domains.DietOrderDetail;
+import build.dream.common.catering.domains.DietOrderGroup;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.models.beeleme.OrderGetModel;
 import build.dream.common.utils.*;
@@ -44,8 +46,8 @@ public class BeElemeService {
         Map<String, Object> shop = MapUtils.getMap(orderGetResultData, "shop");
         Map<String, Object> user = MapUtils.getMap(orderGetResultData, "user");
         Map<String, Object> order = MapUtils.getMap(orderGetResultData, "order");
-        List<Map<String, Object>> products = (List<Map<String, Object>>) orderGetResultData.get("products");
-        List<Map<String, Object>> discount = (List<Map<String, Object>>) orderGetResultData.get("discount");
+        List<List<Map<String, Object>>> products = (List<List<Map<String, Object>>>) orderGetResultData.get("products");
+        List<List<Map<String, Object>>> discount = (List<List<Map<String, Object>>>) orderGetResultData.get("discount");
         String id = MapUtils.getString(shop, "id");
         String[] array = id.split("Z");
         BigInteger tenantId = BigInteger.valueOf(Long.valueOf(array[0]));
@@ -59,9 +61,11 @@ public class BeElemeService {
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         ValidateUtils.notNull(branch, "门店不存在！");
 
+        String tenantCode = branch.getTenantCode();
+
         DietOrder dietOrder = DietOrder.builder()
                 .tenantId(tenantId)
-                .tenantCode(branch.getTenantCode())
+                .tenantCode(tenantCode)
                 .branchId(branchId)
                 .orderNumber("BE" + orderId)
                 .orderType(DietOrderConstants.ORDER_TYPE_ELEME_ORDER)
@@ -92,5 +96,36 @@ public class BeElemeService {
                 .updatedRemark("保存饿百新零售订单！")
                 .build();
         DatabaseHelper.insert(dietOrder);
+
+        BigInteger dietOrderId = dietOrder.getId();
+
+        Map<String, DietOrderGroup> dietOrderGroupMap = new HashMap<String, DietOrderGroup>();
+        for (List<Map<String, Object>> product : products) {
+            DietOrderGroup dietOrderGroup = DietOrderGroup.builder()
+                    .tenantId(tenantId)
+                    .tenantCode(tenantCode)
+                    .branchId(branchId)
+                    .dietOrderId(dietOrderId)
+                    .name("")
+                    .type(DietOrderConstants.GROUP_TYPE_NORMAL)
+                    .build();
+            DatabaseHelper.insert(dietOrderGroup);
+            BigInteger dietOrderGroupId = dietOrderGroup.getId();
+
+            for (Map<String, Object> goodsInfo : product) {
+                DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
+                        .tenantId(tenantId)
+                        .tenantCode(tenantCode)
+                        .branchId(branchId)
+                        .dietOrderId(dietOrderId)
+                        .dietOrderGroupId(dietOrderGroupId)
+                        .goodsType(Constants.GOODS_TYPE_ORDINARY_GOODS)
+                        .goodsId(BigInteger.valueOf(Long.valueOf(MapUtils.getShortValue(goodsInfo, "baidu_product_id"))))
+                        .goodsName(MapUtils.getString(goodsInfo, "goodsName"))
+                        .goodsSpecificationId(Constants.BIGINT_DEFAULT_VALUE)
+                        .goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE)
+                        .build();
+            }
+        }
     }
 }
