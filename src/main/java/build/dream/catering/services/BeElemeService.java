@@ -4,15 +4,14 @@ import build.dream.catering.constants.Constants;
 import build.dream.common.catering.domains.Branch;
 import build.dream.common.catering.domains.DietOrder;
 import build.dream.common.constants.DietOrderConstants;
-import build.dream.common.utils.DatabaseHelper;
-import build.dream.common.utils.JacksonUtils;
-import build.dream.common.utils.SearchModel;
-import build.dream.common.utils.ValidateUtils;
+import build.dream.common.models.beeleme.OrderGetModel;
+import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -35,12 +34,18 @@ public class BeElemeService {
 
         String orderId = MapUtils.getString(data, "order_id");
 
-        Map<String, Object> orderGetResult = new HashMap<String, Object>();
+        OrderGetModel orderGetModel = OrderGetModel.builder()
+                .source(source)
+                .orderId(orderId)
+                .build();
+        Map<String, Object> orderGetResult = BeElemeUtils.orderGet(orderGetModel);
         Map<String, Object> orderGetResultData = MapUtils.getMap(orderGetResult, "data");
 
         Map<String, Object> shop = MapUtils.getMap(orderGetResultData, "shop");
         Map<String, Object> user = MapUtils.getMap(orderGetResultData, "user");
         Map<String, Object> order = MapUtils.getMap(orderGetResultData, "order");
+        List<Map<String, Object>> products = (List<Map<String, Object>>) orderGetResultData.get("products");
+        List<Map<String, Object>> discount = (List<Map<String, Object>>) orderGetResultData.get("discount");
         String id = MapUtils.getString(shop, "id");
         String[] array = id.split("Z");
         BigInteger tenantId = BigInteger.valueOf(Long.valueOf(array[0]));
