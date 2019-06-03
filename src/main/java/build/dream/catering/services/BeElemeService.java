@@ -169,6 +169,7 @@ public class BeElemeService {
 
             if (CollectionUtils.isNotEmpty(discounts)) {
                 for (Map<String, Object> discount : discounts) {
+                    String type = MapUtils.getString(discount, "type");
                     DietOrderActivity dietOrderActivity = DietOrderActivity.builder()
                             .tenantId(tenantId)
                             .tenantCode(tenantCode)
