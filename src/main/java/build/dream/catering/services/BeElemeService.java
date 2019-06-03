@@ -1,16 +1,15 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.common.catering.domains.Branch;
-import build.dream.common.catering.domains.DietOrder;
-import build.dream.common.catering.domains.DietOrderDetail;
-import build.dream.common.catering.domains.DietOrderGroup;
+import build.dream.common.catering.domains.*;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.models.beeleme.OrderGetModel;
 import build.dream.common.utils.*;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
@@ -113,6 +112,11 @@ public class BeElemeService {
             BigInteger dietOrderGroupId = dietOrderGroup.getId();
 
             for (Map<String, Object> goodsInfo : product) {
+                BigDecimal price = BigDecimal.valueOf(MapUtils.getDoubleValue(goodsInfo, "product_fee"));
+                BigDecimal quantity = BigDecimal.valueOf(MapUtils.getDoubleValue(goodsInfo, "product_amount"));
+                BigDecimal totalAmount = price.multiply(quantity);
+                Map<String, Object> productSubsidy = MapUtils.getMap(goodsInfo, "product_subsidy");
+                BigDecimal discountAmount = BigDecimal.valueOf(MapUtils.getDoubleValue(productSubsidy, "shop_rate")).divide(Constants.BIG_DECIMAL_ONE_HUNDRED);
                 DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
                         .tenantId(tenantId)
                         .tenantCode(tenantCode)
@@ -120,11 +124,44 @@ public class BeElemeService {
                         .dietOrderId(dietOrderId)
                         .dietOrderGroupId(dietOrderGroupId)
                         .goodsType(Constants.GOODS_TYPE_ORDINARY_GOODS)
-                        .goodsId(BigInteger.valueOf(Long.valueOf(MapUtils.getShortValue(goodsInfo, "baidu_product_id"))))
+                        .goodsId(BigInteger.valueOf(MapUtils.getLongValue(goodsInfo, "baidu_product_id")))
                         .goodsName(MapUtils.getString(goodsInfo, "goodsName"))
                         .goodsSpecificationId(Constants.BIGINT_DEFAULT_VALUE)
                         .goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE)
+                        .categoryId(Constants.BIGINT_DEFAULT_VALUE)
+                        .categoryName(Constants.VARCHAR_DEFAULT_VALUE)
+                        .price(price)
+                        .quantity(quantity)
+                        .totalAmount(totalAmount)
+                        .discountAmount(discountAmount)
+                        .payableAmount(totalAmount.subtract(discountAmount))
                         .build();
+                DatabaseHelper.insert(dietOrderDetail);
+                List<Map<String, Object>> productFeatures = (List<Map<String, Object>>) goodsInfo.get("product_features");
+                if (MapUtils.isEmpty(productSubsidy)) {
+                    continue;
+                }
+
+                BigInteger dietOrderDetailId = dietOrderDetail.getId();
+                for (Map<String, Object> productFeature : productFeatures) {
+                    DietOrderDetailGoodsAttribute dietOrderDetailGoodsAttribute = DietOrderDetailGoodsAttribute.builder()
+                            .tenantId(tenantId)
+                            .tenantCode(tenantCode)
+                            .branchId(branchId)
+                            .dietOrderId(dietOrderId)
+                            .dietOrderGroupId(dietOrderGroupId)
+                            .dietOrderDetailId(dietOrderDetailId)
+                            .goodsAttributeGroupId(Constants.BIG_INTEGER_EIGHT)
+                            .goodsAttributeGroupName(MapUtils.getString(productFeature, "name"))
+                            .goodsAttributeId(BigInteger.valueOf(MapUtils.getLongValue(productFeature, "baidu_feature_id")))
+                            .goodsAttributeName(MapUtils.getString(productFeature, "option"))
+                            .build();
+                    DatabaseHelper.insert(dietOrderDetailGoodsAttribute);
+                }
+            }
+
+            if (CollectionUtils.isNotEmpty(discount)) {
+
             }
         }
     }
