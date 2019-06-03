@@ -39,6 +39,7 @@ public class BeElemeService {
         Map<String, Object> orderGetResultData = MapUtils.getMap(orderGetResult, "data");
 
         Map<String, Object> shop = MapUtils.getMap(orderGetResultData, "shop");
+        Map<String, Object> user = MapUtils.getMap(orderGetResultData, "user");
         Map<String, Object> order = MapUtils.getMap(orderGetResultData, "order");
         String id = MapUtils.getString(shop, "id");
         String[] array = id.split("Z");
