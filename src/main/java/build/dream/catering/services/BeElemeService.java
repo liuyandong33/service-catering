@@ -46,7 +46,7 @@ public class BeElemeService {
         Map<String, Object> user = MapUtils.getMap(orderGetResultData, "user");
         Map<String, Object> order = MapUtils.getMap(orderGetResultData, "order");
         List<List<Map<String, Object>>> products = (List<List<Map<String, Object>>>) orderGetResultData.get("products");
-        List<List<Map<String, Object>>> discount = (List<List<Map<String, Object>>>) orderGetResultData.get("discount");
+        List<Map<String, Object>> discounts = (List<Map<String, Object>>) orderGetResultData.get("discount");
         String id = MapUtils.getString(shop, "id");
         String[] array = id.split("Z");
         BigInteger tenantId = BigInteger.valueOf(Long.valueOf(array[0]));
@@ -62,6 +62,7 @@ public class BeElemeService {
 
         String tenantCode = branch.getTenantCode();
 
+        BigInteger userId = Constants.BIG_INTEGER_EIGHT;
         DietOrder dietOrder = DietOrder.builder()
                 .tenantId(tenantId)
                 .tenantCode(tenantCode)
@@ -90,8 +91,8 @@ public class BeElemeService {
                 .invoiceType(Constants.VARCHAR_DEFAULT_VALUE)
                 .invoice(Constants.VARCHAR_DEFAULT_VALUE)
                 .vipId(Constants.BIGINT_DEFAULT_VALUE)
-                .createdUserId(Constants.BIG_INTEGER_EIGHT)
-                .updatedUserId(Constants.BIG_INTEGER_EIGHT)
+                .createdUserId(userId)
+                .updatedUserId(userId)
                 .updatedRemark("保存饿百新零售订单！")
                 .build();
         DatabaseHelper.insert(dietOrder);
@@ -107,6 +108,8 @@ public class BeElemeService {
                     .dietOrderId(dietOrderId)
                     .name("")
                     .type(DietOrderConstants.GROUP_TYPE_NORMAL)
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
                     .build();
             DatabaseHelper.insert(dietOrderGroup);
             BigInteger dietOrderGroupId = dietOrderGroup.getId();
@@ -135,6 +138,8 @@ public class BeElemeService {
                         .totalAmount(totalAmount)
                         .discountAmount(discountAmount)
                         .payableAmount(totalAmount.subtract(discountAmount))
+                        .createdUserId(userId)
+                        .updatedUserId(userId)
                         .build();
                 DatabaseHelper.insert(dietOrderDetail);
                 List<Map<String, Object>> productFeatures = (List<Map<String, Object>>) goodsInfo.get("product_features");
@@ -155,13 +160,29 @@ public class BeElemeService {
                             .goodsAttributeGroupName(MapUtils.getString(productFeature, "name"))
                             .goodsAttributeId(BigInteger.valueOf(MapUtils.getLongValue(productFeature, "baidu_feature_id")))
                             .goodsAttributeName(MapUtils.getString(productFeature, "option"))
+                            .createdUserId(userId)
+                            .updatedUserId(userId)
                             .build();
                     DatabaseHelper.insert(dietOrderDetailGoodsAttribute);
                 }
             }
 
-            if (CollectionUtils.isNotEmpty(discount)) {
-
+            if (CollectionUtils.isNotEmpty(discounts)) {
+                for (Map<String, Object> discount : discounts) {
+                    DietOrderActivity dietOrderActivity = DietOrderActivity.builder()
+                            .tenantId(tenantId)
+                            .tenantCode(tenantCode)
+                            .branchId(branchId)
+                            .dietOrderId(dietOrderId)
+                            .activityId(Constants.BIGINT_DEFAULT_VALUE)
+                            .activityName(Constants.VARCHAR_DEFAULT_VALUE)
+                            .activityType(Constants.INT_DEFAULT_VALUE)
+                            .amount(BigDecimal.valueOf(MapUtils.getDoubleValue(discount, "shop_rate")).divide(Constants.BIG_DECIMAL_ONE_HUNDRED))
+                            .createdUserId(userId)
+                            .updatedUserId(userId)
+                            .build();
+                    DatabaseHelper.insert(dietOrderActivity);
+                }
             }
         }
     }
