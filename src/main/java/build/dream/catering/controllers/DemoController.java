@@ -1,5 +1,6 @@
 package build.dream.catering.controllers;
 
+import build.dream.catering.constants.Constants;
 import build.dream.catering.services.DemoService;
 import build.dream.common.api.ApiRest;
 import build.dream.common.models.weixinpay.RefundModel;
@@ -100,5 +101,12 @@ public class DemoController {
         BigInteger goodsSpecificationId = NumberUtils.createBigInteger(ApplicationHandler.getRequestParameter(httpServletRequest, "goodsSpecificationId"));
         BigDecimal quantity = NumberUtils.createBigDecimal(ApplicationHandler.getRequestParameter(httpServletRequest, "quantity"));
         return GsonUtils.toJson(demoService.addGoodsStock(goodsId, goodsSpecificationId, quantity));
+    }
+
+    @RequestMapping(value = "/testKafka")
+    @ResponseBody
+    public String testKafka() {
+        KafkaUtils.send("aaaa", UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        return Constants.SUCCESS;
     }
 }
