@@ -67,11 +67,15 @@ public class DemoController {
             } else if ("2".equals(paymentChannel)) {
 
             } else if ("3".equals(paymentChannel)) {
-                build.dream.common.models.miya.RefundModel refundModel = ApplicationHandler.instantiateObject(build.dream.common.models.miya.RefundModel.class, requestParameters);
-                refundModel.setRefundNumber(RandomStringUtils.randomAlphanumeric(32));
-                refundModel.setPosId(BigInteger.ONE.toString());
-                refundModel.setCashierId(BigInteger.TEN.toString());
-                data = MiyaUtils.refund(tenantId, branchId, refundModel);
+                build.dream.common.models.miya.RefundModel refundModel = build.dream.common.models.miya.RefundModel.builder()
+                        .tenantId(tenantId)
+                        .branchId(branchId)
+                        .a4(BigInteger.ONE.toString())
+                        .a5(BigInteger.TEN.toString())
+                        .b1("")
+                        .b2(RandomStringUtils.randomAlphanumeric(32))
+                        .build();
+                data = MiyaUtils.refund(refundModel);
             } else if ("4".equals(paymentChannel)) {
 
             }

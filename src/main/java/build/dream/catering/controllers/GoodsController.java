@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.IOException;
+
 @Controller
 @RequestMapping(value = "/goods")
 public class GoodsController {
@@ -137,7 +139,7 @@ public class GoodsController {
 
     @RequestMapping(value = "/test", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String test() {
+    public String test() throws IOException {
         String tenantId = ApplicationHandler.getRequestParameter("tenantId");
         String branchId = ApplicationHandler.getRequestParameter("branchId");
         ApiRest apiRest = goodsService.test(NumberUtils.createBigInteger(tenantId), NumberUtils.createBigInteger(branchId));
