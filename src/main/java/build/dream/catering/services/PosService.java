@@ -9,7 +9,9 @@ import build.dream.catering.utils.SequenceUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.OfflinePayRecord;
 import build.dream.common.catering.domains.Pos;
-import build.dream.common.models.aggregatepay.ScanCodePayModel;
+import build.dream.common.models.alipay.AlipayTradePayModel;
+import build.dream.common.models.jingdong.FkmPayModel;
+import build.dream.common.models.weixinpay.MicroPayModel;
 import build.dream.common.saas.domains.WeiXinPayAccount;
 import build.dream.common.utils.*;
 import org.apache.commons.lang.ArrayUtils;
@@ -17,6 +19,7 @@ import org.dom4j.DocumentException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
@@ -150,23 +153,52 @@ public class PosService {
                 .build();
         DatabaseHelper.insert(offlinePayRecord);
 
-        String ipAddress = ApplicationHandler.getRemoteAddress();
-        ScanCodePayModel scanCodePayModel = ScanCodePayModel.builder()
-                .tenantId(tenantId.toString())
-                .branchId(branchId.toString())
-                .channelType(channelType)
-                .outTradeNo(outTradeNo)
-                .authCode(authCode)
-                .subject(subject)
-                .totalAmount(totalAmount)
-                .topic("")
-                .ipAddress(ipAddress)
-                .build();
-
-        Map<String, ? extends Object> result = AggregatePayUtils.scanCodePay(scanCodePayModel);
+        String tradeState = null;
+        if (channelType == Constants.CHANNEL_TYPE_WEI_XIN) {
+            WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
+            ValidateUtils.notNull(weiXinPayAccount, "商户未配置微信支付账号！");
+            MicroPayModel microPayModel = MicroPayModel.builder()
+                    .appId(weiXinPayAccount.getAppId())
+                    .mchId(weiXinPayAccount.getMchId())
+                    .apiSecretKey(weiXinPayAccount.getApiSecretKey())
+                    .subAppId(weiXinPayAccount.getSubPublicAccountAppId())
+                    .subMchId(weiXinPayAccount.getSubMchId())
+                    .acceptanceModel(weiXinPayAccount.isAcceptanceModel())
+                    .body("订单支付")
+                    .outTradeNo(outTradeNo)
+                    .totalFee(totalAmount)
+                    .spbillCreateIp(ApplicationHandler.getRemoteAddress())
+                    .authCode(authCode)
+                    .build();
+            Map<String, String> microPayResult = WeiXinPayUtils.microPay(microPayModel);
+            String resultCode = microPayResult.get("result_code");
+            if (Constants.SUCCESS.equals(resultCode)) {
+                tradeState = Constants.SUCCESS;
+            } else {
+                tradeState = "PAYING";
+            }
+        } else if (channelType == Constants.CHANNEL_TYPE_ALIPAY) {
+            AlipayTradePayModel alipayTradePayModel = AlipayTradePayModel.builder()
+                    .tenantId(tenantId.toString())
+                    .branchId(branchId.toString())
+                    .topic("")
+                    .outTradeNo(outTradeNo)
+                    .authCode(authCode)
+                    .scene(build.dream.common.constants.Constants.SCENE_BAR_CODE)
+                    .subject(subject)
+                    .totalAmount(BigDecimal.valueOf(totalAmount).divide(Constants.BIG_DECIMAL_ONE_HUNDRED))
+                    .build();
+            Map<String, Object> alipayTradePayResult = AlipayUtils.alipayTradePay(alipayTradePayModel);
+        } else if (channelType == Constants.CHANNEL_TYPE_JING_DONG) {
+            FkmPayModel fkmPayModel = new FkmPayModel();
+            Map<String, Object> fkmPayResult = JingDongPayUtils.fkmPay(fkmPayModel);
+        }
 
         Map<String, Object> data = new HashMap<String, Object>();
+        data.put("channelType", channelType);
         data.put("outTradeNo", outTradeNo);
+        data.put("tradeState", tradeState);
+
         return ApiRest.builder().data(data).message("扫码支付成功！").successful(true).build();
     }
 
