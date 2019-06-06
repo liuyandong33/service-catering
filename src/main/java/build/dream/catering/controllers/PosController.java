@@ -1,9 +1,6 @@
 package build.dream.catering.controllers;
 
-import build.dream.catering.models.pos.OfflinePayModel;
-import build.dream.catering.models.pos.OfflinePosModel;
-import build.dream.catering.models.pos.OnlinePosModel;
-import build.dream.catering.models.pos.ReceiptModel;
+import build.dream.catering.models.pos.*;
 import build.dream.catering.services.PosService;
 import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.api.ApiRest;
@@ -68,10 +65,22 @@ public class PosController {
      *
      * @return
      */
-    @RequestMapping(value = "/offlinePay", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/offlinePay", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ApiRestAction(modelClass = OfflinePayModel.class, serviceClass = PosService.class, serviceMethodName = "scanCodePay", error = "扫码支付")
+    @ApiRestAction(modelClass = OfflinePayModel.class, serviceClass = PosService.class, serviceMethodName = "offlinePay", error = "扫码支付失败")
     public String offlinePay() {
+        return null;
+    }
+
+    /**
+     * 订单查询
+     *
+     * @return
+     */
+    @RequestMapping(value = "/orderQuery", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = OrderQueryModel.class, serviceClass = PosService.class, serviceMethodName = "orderQuery", error = "查询订单失败")
+    public String orderQuery() {
         return null;
     }
 }

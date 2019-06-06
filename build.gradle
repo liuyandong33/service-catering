@@ -70,6 +70,8 @@ dependencies {
     // https://mvnrepository.com/artifact/org.elasticsearch.client/elasticsearch-rest-high-level-client
     compile group: 'org.elasticsearch.client', name: 'elasticsearch-rest-high-level-client', version: '7.1.0'
     compile group: 'org.elasticsearch', name: 'elasticsearch', version: '7.1.0'
+
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
 }
 
 publishing {

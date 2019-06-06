@@ -20,6 +20,7 @@ import build.dream.common.models.aliyunpush.PushMessageToAndroidModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
 import build.dream.common.models.weixinpay.UnifiedOrderModel;
 import build.dream.common.saas.domains.Tenant;
+import build.dream.common.saas.domains.WeiXinPayAccount;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -183,13 +184,17 @@ public class DietOrderService {
         String orderNumber = dietOrder.getOrderNumber();
         BigDecimal payableAmount = dietOrder.getPayableAmount();
         String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
-        String serviceDomain = CommonUtils.getServiceDomain(partitionCode, Constants.SERVICE_NAME_CATERING);
 
         Object result = null;
         if (paidScene == Constants.PAID_SCENE_WEI_XIN_MICROPAY) {
+            WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
             MicroPayModel microPayModel = MicroPayModel.builder()
-                    .tenantId(tenantId.toString())
-                    .branchId(branchId.toString())
+                    .appId(weiXinPayAccount.getAppId())
+                    .subMchId(weiXinPayAccount.getSubMchId())
+                    .apiSecretKey(weiXinPayAccount.getApiSecretKey())
+                    .subAppId(weiXinPayAccount.getSubPublicAccountAppId())
+                    .subMchId(weiXinPayAccount.getSubMchId())
+                    .acceptanceModel(weiXinPayAccount.isAcceptanceModel())
                     .signType(Constants.MD5)
                     .body("订单支付")
                     .outTradeNo(orderNumber)
@@ -209,17 +214,22 @@ public class DietOrderService {
             } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_MWEB) {
                 tradeType = Constants.WEI_XIN_PAY_TRADE_TYPE_MWEB;
             } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_JSAPI_MINI_PROGRAM) {
-                tradeType = Constants.WEI_XIN_PAY_TRADE_TYPE_MINI_PROGRAM;
+                tradeType = Constants.WEI_XIN_PAY_TRADE_TYPE_JSAPI;
             }
+            WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
             UnifiedOrderModel unifiedOrderModel = UnifiedOrderModel.builder()
-                    .tenantId(tenantId.toString())
-                    .branchId(branchId.toString())
+                    .appId(weiXinPayAccount.getAppId())
+                    .mchId(weiXinPayAccount.getMchId())
+                    .apiSecretKey(weiXinPayAccount.getApiSecretKey())
+                    .subAppId(weiXinPayAccount.getSubPublicAccountAppId())
+                    .subMchId(weiXinPayAccount.getSubMchId())
+                    .acceptanceModel(weiXinPayAccount.isAcceptanceModel())
                     .signType(Constants.MD5)
                     .body("订单支付")
                     .outTradeNo(orderNumber)
                     .totalFee(payableAmount.multiply(Constants.BIG_DECIMAL_ONE_HUNDRED).intValue())
                     .spbillCreateIp(ApplicationHandler.getRemoteAddress())
-                    .notifyUrl(serviceDomain + "/dietOrder/weiXinPayCallback")
+                    .topic("")
                     .tradeType(tradeType)
                     .openId(openId)
                     .subOpenId(subOpenId)
@@ -232,7 +242,7 @@ public class DietOrderService {
                     .tenantId(tenantId.toString())
                     .branchId(branchId.toString())
                     .returnUrl(returnUrl)
-                    .notifyUrl(serviceDomain + "/dietOrder/alipayCallback")
+                    .topic("")
                     .subject("订单支付")
                     .outTradeNo(orderNumber)
                     .totalAmount(payableAmount)
@@ -246,7 +256,7 @@ public class DietOrderService {
                     .tenantId(tenantId.toString())
                     .branchId(branchId.toString())
                     .returnUrl(returnUrl)
-                    .notifyUrl(serviceDomain + "/dietOrder/alipayCallback")
+                    .topic("")
                     .outTradeNo(orderNumber)
                     .productCode(orderNumber)
                     .totalAmount(payableAmount)
@@ -257,7 +267,7 @@ public class DietOrderService {
             AlipayTradeAppPayModel alipayTradeAppPayModel = AlipayTradeAppPayModel.builder()
                     .tenantId(tenantId.toString())
                     .branchId(branchId.toString())
-                    .notifyUrl(serviceDomain + "/dietOrder/alipayCallback")
+                    .topic("")
                     .outTradeNo(orderNumber)
                     .totalAmount(payableAmount)
                     .subject("订单支付")
@@ -267,7 +277,7 @@ public class DietOrderService {
             AlipayTradePayModel alipayTradePayModel = AlipayTradePayModel.builder()
                     .tenantId(tenantId.toString())
                     .branchId(branchId.toString())
-                    .notifyUrl(serviceDomain + "/dietOrder/alipayCallback")
+                    .topic("")
                     .outTradeNo(orderNumber)
                     .totalAmount(payableAmount)
                     .scene(Constants.SCENE_BAR_CODE)

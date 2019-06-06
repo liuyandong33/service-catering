@@ -61,8 +61,6 @@ public class DemoController {
             Object data = null;
             if ("1".equals(paymentChannel)) {
                 RefundModel refundModel = ApplicationHandler.instantiateObject(RefundModel.class, requestParameters);
-                refundModel.setTenantId(tenantId);
-                refundModel.setBranchId(branchId);
                 refundModel.setOutRefundNo(UUID.randomUUID().toString());
                 data = WeiXinPayUtils.refund(refundModel);
             } else if ("2".equals(paymentChannel)) {

@@ -12,6 +12,7 @@ import build.dream.common.models.alipay.AlipayTradeRefundModel;
 import build.dream.common.models.jpush.PushModel;
 import build.dream.common.models.weixinpay.RefundModel;
 import build.dream.common.saas.domains.Tenant;
+import build.dream.common.saas.domains.WeiXinPayAccount;
 import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
@@ -113,14 +114,18 @@ public class DietOrderUtils {
                 JSONObject extraInfoJsonObject = JSONObject.fromObject(extraInfo);
                 JSONObject attachJsonObject = JSONObject.fromObject(extraInfoJsonObject.getString("attach"));
 
+                WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
                 RefundModel refundModel = RefundModel.builder()
-                        .tenantId(tenantId.toString())
-                        .branchId(branchId.toString())
+                        .appId(weiXinPayAccount.getAppId())
+                        .mchId(weiXinPayAccount.getMchId())
+                        .apiSecretKey(weiXinPayAccount.getApiSecretKey())
+                        .subAppId(weiXinPayAccount.getSubPublicAccountAppId())
+                        .subMchId(weiXinPayAccount.getSubMchId())
+                        .acceptanceModel(weiXinPayAccount.isAcceptanceModel())
                         .outTradeNo(orderNumber)
                         .outRefundNo(orderNumber)
                         .totalFee(payableAmount)
                         .refundFee(payableAmount)
-                        .tradeType(WeiXinPayUtils.obtainTradeType(attachJsonObject.getInt("paidScene")))
                         .build();
                 WeiXinPayUtils.refund(refundModel);
             } else if (Constants.PAYMENT_CODE_ALIPAY.equals(paymentCode)) {
