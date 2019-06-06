@@ -16,7 +16,6 @@ import org.apache.commons.lang.ArrayUtils;
 import org.dom4j.DocumentException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import scala.Tuple2;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -171,14 +170,6 @@ public class PosService {
         return ApiRest.builder().data(data).message("扫码支付成功！").successful(true).build();
     }
 
-    public <K, V> Map<K, V> buildMap(Tuple2<K, V>... tuple2s) {
-        Map<K, V> map = new HashMap<K, V>();
-        for (Tuple2<K, V> tuple2 : tuple2s) {
-            map.put(tuple2._1(), tuple2._2());
-        }
-        return map;
-    }
-
     /**
      * 订单查询
      *
@@ -203,12 +194,12 @@ public class PosService {
 
         int status = offlinePayRecord.getStatus();
         if (status == Constants.OFFLINE_PAY_STATUS_PAID) {
-            return ApiRest.builder().data(buildMap(TupleUtils.buildTuple2("tradeState", Constants.OFFLINE_PAY_STATUS_PAID))).message("查询订单成功！").successful(true).build();
+            return ApiRest.builder().data(ApplicationHandler.buildHashMap(TupleUtils.buildTuple2("tradeState", Constants.OFFLINE_PAY_STATUS_PAID))).message("查询订单成功！").successful(true).build();
         }
 
         int channelType = offlinePayRecord.getChannelType();
         if (channelType == Constants.CHANNEL_TYPE_ALIPAY) {
-            return ApiRest.builder().data(buildMap(TupleUtils.buildTuple2("tradeState", Constants.OFFLINE_PAY_STATUS_UNPAID))).message("查询订单成功！").successful(true).build();
+            return ApiRest.builder().data(ApplicationHandler.buildHashMap(TupleUtils.buildTuple2("tradeState", Constants.OFFLINE_PAY_STATUS_UNPAID))).message("查询订单成功！").successful(true).build();
         }
 
         WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
@@ -227,9 +218,9 @@ public class PosService {
             offlinePayRecord.setStatus(Constants.OFFLINE_PAY_STATUS_PAID);
             offlinePayRecord.setUpdatedUserId(userId);
             DatabaseHelper.update(offlinePayRecord);
-            return ApiRest.builder().data(buildMap(TupleUtils.buildTuple2("tradeState", Constants.OFFLINE_PAY_STATUS_PAID))).message("查询订单成功！").successful(true).build();
+            return ApiRest.builder().data(ApplicationHandler.buildHashMap(TupleUtils.buildTuple2("tradeState", Constants.OFFLINE_PAY_STATUS_PAID))).message("查询订单成功！").successful(true).build();
         }
 
-        return ApiRest.builder().data(buildMap(TupleUtils.buildTuple2("tradeState", Constants.OFFLINE_PAY_STATUS_UNPAID))).message("查询订单成功！").successful(true).build();
+        return ApiRest.builder().data(ApplicationHandler.buildHashMap(TupleUtils.buildTuple2("tradeState", Constants.OFFLINE_PAY_STATUS_UNPAID))).message("查询订单成功！").successful(true).build();
     }
 }
