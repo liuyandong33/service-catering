@@ -3,6 +3,7 @@ package build.dream.catering.controllers;
 import build.dream.catering.models.pos.*;
 import build.dream.catering.services.PosService;
 import build.dream.common.annotations.ApiRestAction;
+import build.dream.common.annotations.PermitAll;
 import build.dream.common.api.ApiRest;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.CommonRedisUtils;
@@ -80,6 +81,7 @@ public class PosController {
     @RequestMapping(value = "/orderQuery", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = OrderQueryModel.class, serviceClass = PosService.class, serviceMethodName = "orderQuery", error = "查询订单失败")
+    @PermitAll
     public String orderQuery() {
         return null;
     }
