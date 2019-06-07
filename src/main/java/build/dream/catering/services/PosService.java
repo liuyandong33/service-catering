@@ -15,6 +15,7 @@ import build.dream.common.models.weixinpay.MicroPayModel;
 import build.dream.common.saas.domains.AlipayAccount;
 import build.dream.common.saas.domains.WeiXinPayAccount;
 import build.dream.common.utils.*;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.dom4j.DocumentException;
 import org.springframework.stereotype.Service;
@@ -129,32 +130,18 @@ public class PosService {
         int payCodePrefix = Integer.parseInt(authCode.substring(0, 2));
 
         int channelType = 0;
+        int paidScene = 0;
         if (ArrayUtils.contains(Constants.WEI_XIN_PAY_CODE_PREFIXES, payCodePrefix)) {
+            paidScene = Constants.PAID_SCENE_WEI_XIN_MICROPAY;
             channelType = Constants.CHANNEL_TYPE_WEI_XIN;
         } else if (ArrayUtils.contains(Constants.ALIPAY_PAY_CODE_PREFIXES, payCodePrefix)) {
+            paidScene = Constants.PAID_SCENE_ALIPAY_FAC_TO_FACE;
             channelType = Constants.CHANNEL_TYPE_ALIPAY;
-        } else if (ArrayUtils.contains(Constants.JING_DONG_PAY_CODE_PREFIXES, payCodePrefix)) {
-            channelType = Constants.CHANNEL_TYPE_JING_DONG;
         }
-        ValidateUtils.isTrue(channelType != 0, "支付码错误！");
-
-        OfflinePayRecord offlinePayRecord = OfflinePayRecord.builder()
-                .tenantId(tenantId)
-                .tenantCode(tenantCode)
-                .branchId(branchId)
-                .userId(userId)
-                .orderNumber(orderNumber)
-                .channelType(channelType)
-                .outTradeNo(outTradeNo)
-                .totalAmount(totalAmount)
-                .authCode(authCode)
-                .status(Constants.OFFLINE_PAY_STATUS_UNPAID)
-                .createdUserId(userId)
-                .updatedUserId(userId)
-                .build();
-        DatabaseHelper.insert(offlinePayRecord);
+        ValidateUtils.isTrue(channelType != 0 && paidScene != 0, "支付码错误！");
 
         String tradeState = null;
+        Map<String, ?> channelResult = null;
         if (channelType == Constants.CHANNEL_TYPE_WEI_XIN) {
             WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
             ValidateUtils.notNull(weiXinPayAccount, "商户未配置微信支付账号！");
@@ -171,8 +158,8 @@ public class PosService {
                     .spbillCreateIp(ApplicationHandler.getRemoteAddress())
                     .authCode(authCode)
                     .build();
-            Map<String, String> microPayResult = WeiXinPayUtils.microPay(microPayModel);
-            String resultCode = microPayResult.get("result_code");
+            channelResult = WeiXinPayUtils.microPay(microPayModel);
+            String resultCode = MapUtils.getString(channelResult, "result_code");
             if (Constants.SUCCESS.equals(resultCode)) {
                 tradeState = Constants.SUCCESS;
             } else {
@@ -191,11 +178,26 @@ public class PosService {
                     .subject(subject)
                     .totalAmount(BigDecimal.valueOf(totalAmount).divide(Constants.BIG_DECIMAL_ONE_HUNDRED))
                     .build();
-            Map<String, Object> alipayTradePayResult = AlipayUtils.alipayTradePay(alipayTradePayModel);
-        } else if (channelType == Constants.CHANNEL_TYPE_JING_DONG) {
-            FkmPayModel fkmPayModel = new FkmPayModel();
-            Map<String, Object> fkmPayResult = JingDongPayUtils.fkmPay(fkmPayModel);
+            channelResult = AlipayUtils.alipayTradePay(alipayTradePayModel);
         }
+
+        OfflinePayRecord offlinePayRecord = OfflinePayRecord.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .userId(userId)
+                .orderNumber(orderNumber)
+                .paidScene(paidScene)
+                .channelType(channelType)
+                .outTradeNo(outTradeNo)
+                .totalAmount(totalAmount)
+                .authCode(authCode)
+                .status(Constants.OFFLINE_PAY_STATUS_UNPAID)
+                .channelResult(JacksonUtils.writeValueAsString(channelResult))
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .build();
+        DatabaseHelper.insert(offlinePayRecord);
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("channelType", channelType);
