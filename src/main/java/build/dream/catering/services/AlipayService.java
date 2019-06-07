@@ -21,22 +21,16 @@ public class AlipayService {
         BigInteger branchId = createMemberCardTemplateModel.obtainBranchId();
 
         AlipayMarketingCardTemplateCreateModel alipayMarketingCardTemplateCreateModel = AlipayMarketingCardTemplateCreateModel.builder()
-                .tenantId(tenantId.toString())
-                .branchId(branchId.toString())
                 .build();
 
         Map<String, Object> cardTemplateCreateResult = AlipayUtils.alipayMarketingCardTemplateCreate(alipayMarketingCardTemplateCreateModel);
         String templateId = MapUtils.getString(cardTemplateCreateResult, "template_id");
 
         AlipayMarketingCardFormTemplateSetModel alipayMarketingCardFormTemplateSetModel = AlipayMarketingCardFormTemplateSetModel.builder()
-                .tenantId(tenantId.toString())
-                .branchId(branchId.toString())
                 .build();
         Map<String, Object> cardFormTemplateSetResult = AlipayUtils.alipayMarketingCardFormTemplateSet(alipayMarketingCardFormTemplateSetModel);
 
         AlipayMarketingCardActivateUrlApplyModel alipayMarketingCardActivateUrlApplyModel = AlipayMarketingCardActivateUrlApplyModel.builder()
-                .tenantId(tenantId.toString())
-                .branchId(branchId.toString())
                 .build();
         Map<String, Object> cardActivateUrlApplyResult = AlipayUtils.alipayMarketingCardActivateUrlApply(alipayMarketingCardActivateUrlApplyModel);
 

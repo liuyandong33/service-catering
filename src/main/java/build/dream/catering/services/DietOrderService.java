@@ -239,8 +239,6 @@ public class DietOrderService {
             String returnUrl = "";
 
             AlipayTradeWapPayModel alipayTradeWapPayModel = AlipayTradeWapPayModel.builder()
-                    .tenantId(tenantId.toString())
-                    .branchId(branchId.toString())
                     .returnUrl(returnUrl)
                     .topic("")
                     .subject("订单支付")
@@ -253,8 +251,6 @@ public class DietOrderService {
             String returnUrl = "";
 
             AlipayTradePagePayModel alipayTradePagePayModel = AlipayTradePagePayModel.builder()
-                    .tenantId(tenantId.toString())
-                    .branchId(branchId.toString())
                     .returnUrl(returnUrl)
                     .topic("")
                     .outTradeNo(orderNumber)
@@ -265,8 +261,6 @@ public class DietOrderService {
             result = AlipayUtils.alipayTradePagePay(alipayTradePagePayModel);
         } else if (paidScene == Constants.PAID_SCENE_ALIPAY_APP) {
             AlipayTradeAppPayModel alipayTradeAppPayModel = AlipayTradeAppPayModel.builder()
-                    .tenantId(tenantId.toString())
-                    .branchId(branchId.toString())
                     .topic("")
                     .outTradeNo(orderNumber)
                     .totalAmount(payableAmount)
@@ -275,8 +269,6 @@ public class DietOrderService {
             result = AlipayUtils.alipayTradeAppPay(alipayTradeAppPayModel);
         } else if (paidScene == Constants.PAID_SCENE_ALIPAY_FAC_TO_FACE) {
             AlipayTradePayModel alipayTradePayModel = AlipayTradePayModel.builder()
-                    .tenantId(tenantId.toString())
-                    .branchId(branchId.toString())
                     .topic("")
                     .outTradeNo(orderNumber)
                     .totalAmount(payableAmount)

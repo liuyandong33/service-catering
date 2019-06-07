@@ -69,6 +69,7 @@ public class PosController {
     @RequestMapping(value = "/offlinePay", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = OfflinePayModel.class, serviceClass = PosService.class, serviceMethodName = "offlinePay", error = "扫码支付失败")
+    @PermitAll
     public String offlinePay() {
         return null;
     }

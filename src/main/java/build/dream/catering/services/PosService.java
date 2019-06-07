@@ -12,6 +12,7 @@ import build.dream.common.catering.domains.Pos;
 import build.dream.common.models.alipay.AlipayTradePayModel;
 import build.dream.common.models.jingdong.FkmPayModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
+import build.dream.common.saas.domains.AlipayAccount;
 import build.dream.common.saas.domains.WeiXinPayAccount;
 import build.dream.common.utils.*;
 import org.apache.commons.lang.ArrayUtils;
@@ -178,9 +179,11 @@ public class PosService {
                 tradeState = "PAYING";
             }
         } else if (channelType == Constants.CHANNEL_TYPE_ALIPAY) {
+            AlipayAccount alipayAccount = AlipayUtils.obtainAlipayAccount("2016121304213325");
             AlipayTradePayModel alipayTradePayModel = AlipayTradePayModel.builder()
-                    .tenantId(tenantId.toString())
-                    .branchId(branchId.toString())
+                    .appId(alipayAccount.getAppId())
+                    .appPrivateKey(alipayAccount.getApplicationPrivateKey())
+                    .alipayPublicKey(alipayAccount.getAlipayPublicKey())
                     .topic("")
                     .outTradeNo(outTradeNo)
                     .authCode(authCode)
