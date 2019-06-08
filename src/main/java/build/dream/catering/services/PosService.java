@@ -9,8 +9,10 @@ import build.dream.common.catering.domains.OfflinePayRecord;
 import build.dream.common.catering.domains.Pos;
 import build.dream.common.models.alipay.AlipayTradePayModel;
 import build.dream.common.models.alipay.AlipayTradeRefundModel;
+import build.dream.common.models.miya.OrderPayModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
 import build.dream.common.saas.domains.AlipayAccount;
+import build.dream.common.saas.domains.MiyaAccount;
 import build.dream.common.saas.domains.Tenant;
 import build.dream.common.saas.domains.WeiXinPayAccount;
 import build.dream.common.utils.*;
@@ -191,7 +193,20 @@ public class PosService {
                     .build();
             channelResult = AlipayUtils.alipayTradePay(alipayTradePayModel);
         } else if (channelType == Constants.CHANNEL_TYPE_MIYA) {
+            MiyaAccount miyaAccount = MiyaUtils.obtainMiyaAccount(tenantId.toString(), branchId.toString());
+            ValidateUtils.notNull(miyaAccount, "未配置米雅账号！");
 
+            OrderPayModel orderPayModel = OrderPayModel.builder()
+                    .a2(miyaAccount.getMiyaMerchantCode())
+                    .a3(miyaAccount.getMiyaBranchCode())
+                    .a4("0000")
+                    .a5("1111")
+                    .miyaKey(miyaAccount.getMiyaKey())
+                    .b1(outTradeNo)
+                    .b2(authCode)
+                    .b4(String.valueOf(totalAmount))
+                    .build();
+            channelResult = MiyaUtils.orderPay(orderPayModel);
         }
 
         OfflinePayRecord offlinePayRecord = OfflinePayRecord.builder()
