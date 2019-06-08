@@ -86,4 +86,17 @@ public class PosController {
     public String orderQuery() {
         return null;
     }
+
+    /**
+     * 退款
+     *
+     * @return
+     */
+    @RequestMapping(value = "/refund", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = RefundModel.class, serviceClass = PosService.class, serviceMethodName = "refund", error = "退款失败")
+    @PermitAll
+    public String refund() {
+        return null;
+    }
 }
