@@ -137,7 +137,7 @@ public class PosService {
         }
         ValidateUtils.isTrue(channelType != 0 && paidScene != 0, "支付码错误！");
 
-        int status = 0;
+        int paidStatus = 0;
         Map<String, ?> channelResult = null;
         if (channelType == Constants.CHANNEL_TYPE_WEI_XIN) {
             WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
@@ -158,9 +158,9 @@ public class PosService {
             channelResult = WeiXinPayUtils.microPay(microPayModel);
             String resultCode = MapUtils.getString(channelResult, "result_code");
             if (Constants.SUCCESS.equals(resultCode)) {
-                status = Constants.OFFLINE_PAY_STATUS_PAID_SUCCESS;
+                paidStatus = Constants.OFFLINE_PAY_PAID_STATUS_SUCCESS;
             } else {
-                status = Constants.OFFLINE_PAY_STATUS_PAYING;
+                paidStatus = Constants.OFFLINE_PAY_PAID_STATUS_PAYING;
             }
         } else if (channelType == Constants.CHANNEL_TYPE_ALIPAY) {
             AlipayAccount alipayAccount = AlipayUtils.obtainAlipayAccount("2016121304213325");
@@ -168,7 +168,7 @@ public class PosService {
                     .appId(alipayAccount.getAppId())
                     .appPrivateKey(alipayAccount.getAppPrivateKey())
                     .alipayPublicKey(alipayAccount.getAlipayPublicKey())
-                    .topic("aaa")
+                    .topic(ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC))
                     .outTradeNo(outTradeNo)
                     .authCode(authCode)
                     .scene(build.dream.common.constants.Constants.SCENE_BAR_CODE)
@@ -189,7 +189,8 @@ public class PosService {
                 .outTradeNo(outTradeNo)
                 .totalAmount(totalAmount)
                 .authCode(authCode)
-                .status(status)
+                .paidStatus(paidStatus)
+                .refundStatus(Constants.OFFLINE_PAY_REFUND_STATUS_NO_REFUND)
                 .createdUserId(userId)
                 .updatedUserId(userId)
                 .build();
@@ -209,7 +210,8 @@ public class PosService {
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("outTradeNo", outTradeNo);
-        data.put("status", status);
+        data.put("paidStatus", paidStatus);
+        data.put("refundStatus", Constants.OFFLINE_PAY_REFUND_STATUS_NO_REFUND);
 
         return ApiRest.builder().data(data).message("扫码支付成功！").successful(true).build();
     }
@@ -237,56 +239,60 @@ public class PosService {
         OfflinePayRecord offlinePayRecord = DatabaseHelper.find(OfflinePayRecord.class, searchModel);
         ValidateUtils.notNull(offlinePayRecord, "支付记录不存在！");
 
-        int status = offlinePayRecord.getStatus();
-        if (status == Constants.OFFLINE_PAY_STATUS_PAID_SUCCESS || status == Constants.OFFLINE_PAY_STATUS_PAID_FAILURE) {
-            return ApiRest.builder().data(ApplicationHandler.buildHashMap(TupleUtils.buildTuple2("status", status))).message("查询订单成功！").successful(true).build();
-        }
-
+        Map<String, Object> data = new HashMap<String, Object>();
+        int paidStatus = offlinePayRecord.getPaidStatus();
         int channelType = offlinePayRecord.getChannelType();
-        if (channelType == Constants.CHANNEL_TYPE_ALIPAY) {
-            return ApiRest.builder().data(ApplicationHandler.buildHashMap(TupleUtils.buildTuple2("status", Constants.OFFLINE_PAY_STATUS_PAYING))).message("查询订单成功！").successful(true).build();
+        if (paidStatus == Constants.OFFLINE_PAY_PAID_STATUS_PAYING && channelType == Constants.CHANNEL_TYPE_WEI_XIN) {
+            WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
+            build.dream.common.models.weixinpay.OrderQueryModel model = build.dream.common.models.weixinpay.OrderQueryModel.builder()
+                    .appId(weiXinPayAccount.getAppId())
+                    .mchId(weiXinPayAccount.getMchId())
+                    .apiSecretKey(weiXinPayAccount.getApiSecretKey())
+                    .subAppId(weiXinPayAccount.getSubPublicAccountAppId())
+                    .subMchId(weiXinPayAccount.getSubMchId())
+                    .acceptanceModel(weiXinPayAccount.isAcceptanceModel())
+                    .outTradeNo(outTradeNo)
+                    .build();
+            Map<String, String> result = WeiXinPayUtils.orderQuery(model);
+
+            OfflinePayLog offlinePayLog = OfflinePayLog.builder()
+                    .tenantId(tenantId)
+                    .tenantCode(tenantCode)
+                    .branchId(branchId)
+                    .offlinePayRecordId(offlinePayRecord.getId())
+                    .type(Constants.OFFLINE_PAY_LOG_TYPE_QUERY)
+                    .channelResult(JacksonUtils.writeValueAsString(result))
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
+                    .build();
+            DatabaseHelper.insert(offlinePayLog);
+
+            int status = 0;
+            String tradeState = result.get("trade_state");
+            if (Constants.SUCCESS.equals(tradeState)) {
+                offlinePayRecord.setPaidStatus(Constants.OFFLINE_PAY_PAID_STATUS_SUCCESS);
+                offlinePayRecord.setUpdatedUserId(userId);
+                DatabaseHelper.update(offlinePayRecord);
+                status = Constants.OFFLINE_PAY_PAID_STATUS_SUCCESS;
+            } else if (Constants.USERPAYING.equals(tradeState)) {
+                status = Constants.OFFLINE_PAY_PAID_STATUS_PAYING;
+            }
+            data.put("paidStatus", status);
+        } else {
+            data.put("refundStatus", offlinePayRecord.getRefundStatus());
         }
-
-        WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
-        build.dream.common.models.weixinpay.OrderQueryModel model = build.dream.common.models.weixinpay.OrderQueryModel.builder()
-                .appId(weiXinPayAccount.getAppId())
-                .mchId(weiXinPayAccount.getMchId())
-                .apiSecretKey(weiXinPayAccount.getApiSecretKey())
-                .subAppId(weiXinPayAccount.getSubPublicAccountAppId())
-                .subMchId(weiXinPayAccount.getSubMchId())
-                .acceptanceModel(weiXinPayAccount.isAcceptanceModel())
-                .outTradeNo(outTradeNo)
-                .build();
-        Map<String, String> result = WeiXinPayUtils.orderQuery(model);
-
-        OfflinePayLog offlinePayLog = OfflinePayLog.builder()
-                .tenantId(tenantId)
-                .tenantCode(tenantCode)
-                .branchId(branchId)
-                .offlinePayRecordId(offlinePayRecord.getId())
-                .type(Constants.OFFLINE_PAY_LOG_TYPE_QUERY)
-                .channelResult(JacksonUtils.writeValueAsString(result))
-                .createdUserId(userId)
-                .updatedUserId(userId)
-                .build();
-        DatabaseHelper.insert(offlinePayLog);
-
-        int newStatus = 0;
-        String tradeState = result.get("trade_state");
-        if (Constants.SUCCESS.equals(tradeState)) {
-            offlinePayRecord.setStatus(Constants.OFFLINE_PAY_STATUS_PAID_SUCCESS);
-            offlinePayRecord.setUpdatedUserId(userId);
-            DatabaseHelper.update(offlinePayRecord);
-            newStatus = Constants.OFFLINE_PAY_STATUS_PAID_SUCCESS;
-        } else if (Constants.USERPAYING.equals(tradeState)) {
-            newStatus = Constants.OFFLINE_PAY_STATUS_PAYING;
-        }
-        return ApiRest.builder().data(ApplicationHandler.buildHashMap(TupleUtils.buildTuple2("status", newStatus))).message("查询订单成功！").successful(true).build();
+        data.put("outTradeNo", outTradeNo);
+        data.put("paidStatus", paidStatus);
+        return ApiRest.builder().data(data).message("查询订单成功！").successful(true).build();
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void handleOfflinePayAsyncNotify(Map<String, String> params) {
-        String outTradeNo = params.get("out_trade_no");
+    public void handleOfflinePayAsyncNotify(Map<String, String> params, int channelType) {
+        String outTradeNo = null;
+        if (channelType == Constants.CHANNEL_TYPE_ALIPAY) {
+            outTradeNo = params.get("out_trade_no");
+        }
+
         SearchModel searchModel = SearchModel.builder()
                 .autoSetDeletedFalse()
                 .addSearchCondition(OfflinePayRecord.ColumnName.OUT_TRADE_NO, Constants.SQL_OPERATION_SYMBOL_EQUAL, outTradeNo)
@@ -306,9 +312,42 @@ public class PosService {
                 .build();
         DatabaseHelper.insert(offlinePayLog);
 
-        offlinePayRecord.setStatus(Constants.OFFLINE_PAY_STATUS_PAID_SUCCESS);
+        offlinePayRecord.setPaidStatus(Constants.OFFLINE_PAY_PAID_STATUS_SUCCESS);
         offlinePayRecord.setUpdatedUserId(BigInteger.ZERO);
         DatabaseHelper.update(offlinePayRecord);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void handleOfflineRefundPayAsyncNotify(Map<String, String> params, int channelType) {
+        String outTradeNo = null;
+        if (channelType == Constants.CHANNEL_TYPE_WEI_XIN) {
+            outTradeNo = params.get("out_trade_no");
+        } else if (channelType == Constants.CHANNEL_TYPE_ALIPAY) {
+            outTradeNo = params.get("out_trade_no");
+        }
+
+        SearchModel searchModel = SearchModel.builder()
+                .autoSetDeletedFalse()
+                .addSearchCondition(OfflinePayRecord.ColumnName.OUT_TRADE_NO, Constants.SQL_OPERATION_SYMBOL_EQUAL, outTradeNo)
+                .build();
+        OfflinePayRecord offlinePayRecord = DatabaseHelper.find(OfflinePayRecord.class, searchModel);
+        ValidateUtils.notNull(offlinePayRecord, "支付记录不存在！");
+
+        offlinePayRecord.setRefundStatus(Constants.OFFLINE_PAY_REFUND_STATUS_SUCCESS);
+        offlinePayRecord.setUpdatedUserId(BigInteger.ZERO);
+        DatabaseHelper.update(offlinePayRecord);
+
+        OfflinePayLog offlinePayLog = OfflinePayLog.builder()
+                .tenantId(offlinePayRecord.getTenantId())
+                .tenantCode(offlinePayRecord.getTenantCode())
+                .branchId(offlinePayRecord.getBranchId())
+                .offlinePayRecordId(offlinePayRecord.getId())
+                .type(Constants.OFFLINE_PAY_LOG_TYPE_PAID_CALLBACK)
+                .channelResult(JacksonUtils.writeValueAsString(params))
+                .createdUserId(BigInteger.ZERO)
+                .updatedUserId(BigInteger.ZERO)
+                .build();
+        DatabaseHelper.insert(offlinePayLog);
     }
 
     /**
@@ -332,7 +371,7 @@ public class PosService {
                 .build();
         OfflinePayRecord offlinePayRecord = DatabaseHelper.find(OfflinePayRecord.class, searchModel);
         ValidateUtils.notNull(offlinePayRecord, "支付记录不存在！");
-        ValidateUtils.isTrue(offlinePayRecord.getStatus() == Constants.OFFLINE_PAY_STATUS_PAID_SUCCESS, "未支付不能退款！");
+        ValidateUtils.isTrue(offlinePayRecord.getPaidStatus() == Constants.OFFLINE_PAY_PAID_STATUS_SUCCESS, "未支付不能退款！");
 
         Integer totalAmount = offlinePayRecord.getTotalAmount();
         Map<String, ?> channelResult = null;
@@ -347,11 +386,14 @@ public class PosService {
                     .apiSecretKey(weiXinPayAccount.getApiSecretKey())
                     .subAppId(weiXinPayAccount.getSubPublicAccountAppId())
                     .subMchId(weiXinPayAccount.getSubMchId())
-                    .operationCertificate(weiXinPayAccount.getOperationCertificate())
-                    .operationCertificatePassword(weiXinPayAccount.getOperationCertificatePassword())
-                    .outRefundNo("")
+                    .acceptanceModel(weiXinPayAccount.isAcceptanceModel())
+                    .outTradeNo(outTradeNo)
+                    .outRefundNo(outTradeNo)
                     .totalFee(totalAmount)
                     .refundFee(refundAmount == null ? totalAmount : refundAmount)
+                    .topic(ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC))
+                    .operationCertificate(weiXinPayAccount.getOperationCertificate())
+                    .operationCertificatePassword(weiXinPayAccount.getOperationCertificatePassword())
                     .build();
             channelResult = WeiXinPayUtils.refund(weiXinRefundModel);
         } else if (channelType == Constants.CHANNEL_TYPE_ALIPAY) {
@@ -359,14 +401,19 @@ public class PosService {
             ValidateUtils.notNull(alipayAccount, "未配置支付宝账号！");
             AlipayTradeRefundModel alipayTradeRefundModel = AlipayTradeRefundModel.builder()
                     .appId(alipayAccount.getAppId())
+                    .topic(ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC))
                     .appPrivateKey(alipayAccount.getAppPrivateKey())
                     .alipayPublicKey(alipayAccount.getAlipayPublicKey())
                     .refundAmount(refundAmount == null ? BigDecimal.valueOf(totalAmount).divide(Constants.BIG_DECIMAL_ONE_HUNDRED) : BigDecimal.valueOf(refundAmount).divide(Constants.BIG_DECIMAL_ONE_HUNDRED))
-                    .outRequestNo(outTradeNo)
-                    .tradeNo("")
+                    .outTradeNo(outTradeNo)
+//                    .tradeNo("")
                     .build();
             channelResult = AlipayUtils.alipayTradeRefund(alipayTradeRefundModel);
         }
+
+        offlinePayRecord.setRefundStatus(Constants.OFFLINE_PAY_REFUND_STATUS_APPLIED);
+        offlinePayRecord.setUpdatedUserId(userId);
+        DatabaseHelper.update(offlinePayRecord);
 
         OfflinePayLog offlinePayLog = OfflinePayLog.builder()
                 .tenantId(tenantId)
