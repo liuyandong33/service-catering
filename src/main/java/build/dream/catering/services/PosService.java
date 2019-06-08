@@ -11,6 +11,7 @@ import build.dream.common.models.alipay.AlipayTradePayModel;
 import build.dream.common.models.alipay.AlipayTradeRefundModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
 import build.dream.common.saas.domains.AlipayAccount;
+import build.dream.common.saas.domains.Tenant;
 import build.dream.common.saas.domains.WeiXinPayAccount;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
@@ -122,20 +123,33 @@ public class PosService {
 
         String sequenceName = SerialNumberGenerator.generatorTodaySequenceName(tenantId, branchId, "offline_pay_out_trade_no");
         String outTradeNo = SerialNumberGenerator.nextOrderNumber("OP", 8, SequenceUtils.nextValue(sequenceName));
-        String notifyUrl = "";
+
+        Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
+        Integer usedChannelType = tenant.getUsedChannelType();
 
         int payCodePrefix = Integer.parseInt(authCode.substring(0, 2));
-
-        int channelType = 0;
         int paidScene = 0;
         if (ArrayUtils.contains(Constants.WEI_XIN_PAY_CODE_PREFIXES, payCodePrefix)) {
             paidScene = Constants.PAID_SCENE_WEI_XIN_MICROPAY;
-            channelType = Constants.CHANNEL_TYPE_WEI_XIN;
         } else if (ArrayUtils.contains(Constants.ALIPAY_PAY_CODE_PREFIXES, payCodePrefix)) {
             paidScene = Constants.PAID_SCENE_ALIPAY_FAC_TO_FACE;
-            channelType = Constants.CHANNEL_TYPE_ALIPAY;
         }
-        ValidateUtils.isTrue(channelType != 0 && paidScene != 0, "支付码错误！");
+        ValidateUtils.isTrue(paidScene != 0, "支付码错误！");
+
+        int channelType = 0;
+        if (usedChannelType == Constants.TENANT_USED_CHANNEL_TYPE_NATIVE) {
+            if (paidScene == Constants.PAID_SCENE_WEI_XIN_MICROPAY) {
+                channelType = Constants.CHANNEL_TYPE_WEI_XIN;
+            } else if (paidScene == Constants.PAID_SCENE_ALIPAY_FAC_TO_FACE) {
+                channelType = Constants.CHANNEL_TYPE_ALIPAY;
+            }
+        } else if (usedChannelType == Constants.TENANT_USED_CHANNEL_TYPE_MIYA) {
+            channelType = Constants.CHANNEL_TYPE_MIYA;
+        } else if (usedChannelType == Constants.TENANT_USED_CHANNEL_TYPE_NEW_LAND) {
+            channelType = Constants.CHANNEL_TYPE_NEW_LAND;
+        } else if (usedChannelType == Constants.TENANT_USED_CHANNEL_TYPE_UMPAY) {
+            channelType = Constants.CHANNEL_TYPE_UMPAY;
+        }
 
         int paidStatus = 0;
         Map<String, ?> channelResult = null;
@@ -176,6 +190,8 @@ public class PosService {
                     .totalAmount(BigDecimal.valueOf(totalAmount).divide(Constants.BIG_DECIMAL_ONE_HUNDRED))
                     .build();
             channelResult = AlipayUtils.alipayTradePay(alipayTradePayModel);
+        } else if (channelType == Constants.CHANNEL_TYPE_MIYA) {
+
         }
 
         OfflinePayRecord offlinePayRecord = OfflinePayRecord.builder()
