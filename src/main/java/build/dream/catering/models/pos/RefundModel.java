@@ -10,6 +10,9 @@ public class RefundModel extends BasicModel {
     private BigInteger tenantId;
 
     @NotNull
+    private String tenantCode;
+
+    @NotNull
     private BigInteger branchId;
 
     @NotNull
@@ -26,6 +29,14 @@ public class RefundModel extends BasicModel {
 
     public void setTenantId(BigInteger tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public String getTenantCode() {
+        return tenantCode;
+    }
+
+    public void setTenantCode(String tenantCode) {
+        this.tenantCode = tenantCode;
     }
 
     public BigInteger getBranchId() {

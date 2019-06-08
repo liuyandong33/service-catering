@@ -4,6 +4,7 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.models.pos.*;
 import build.dream.catering.utils.SequenceUtils;
 import build.dream.common.api.ApiRest;
+import build.dream.common.catering.domains.OfflinePayLog;
 import build.dream.common.catering.domains.OfflinePayRecord;
 import build.dream.common.catering.domains.Pos;
 import build.dream.common.models.alipay.AlipayTradePayModel;
@@ -189,11 +190,22 @@ public class PosService {
                 .totalAmount(totalAmount)
                 .authCode(authCode)
                 .status(status)
-                .channelResult(JacksonUtils.writeValueAsString(channelResult))
                 .createdUserId(userId)
                 .updatedUserId(userId)
                 .build();
         DatabaseHelper.insert(offlinePayRecord);
+
+        OfflinePayLog offlinePayLog = OfflinePayLog.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .offlinePayRecordId(offlinePayRecord.getId())
+                .type(Constants.OFFLINE_PAY_LOG_TYPE_PAID)
+                .channelResult(JacksonUtils.writeValueAsString(channelResult))
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .build();
+        DatabaseHelper.insert(offlinePayLog);
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("outTradeNo", outTradeNo);
@@ -211,6 +223,7 @@ public class PosService {
     @Transactional(rollbackFor = Exception.class)
     public ApiRest orderQuery(OrderQueryModel orderQueryModel) {
         BigInteger tenantId = orderQueryModel.getTenantId();
+        String tenantCode = orderQueryModel.getTenantCode();
         BigInteger branchId = orderQueryModel.getBranchId();
         BigInteger userId = orderQueryModel.getUserId();
         String outTradeNo = orderQueryModel.getOutTradeNo();
@@ -246,6 +259,18 @@ public class PosService {
                 .build();
         Map<String, String> result = WeiXinPayUtils.orderQuery(model);
 
+        OfflinePayLog offlinePayLog = OfflinePayLog.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .offlinePayRecordId(offlinePayRecord.getId())
+                .type(Constants.OFFLINE_PAY_LOG_TYPE_QUERY)
+                .channelResult(JacksonUtils.writeValueAsString(result))
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .build();
+        DatabaseHelper.insert(offlinePayLog);
+
         int newStatus = 0;
         String tradeState = result.get("trade_state");
         if (Constants.SUCCESS.equals(tradeState)) {
@@ -269,6 +294,18 @@ public class PosService {
         OfflinePayRecord offlinePayRecord = DatabaseHelper.find(OfflinePayRecord.class, searchModel);
         ValidateUtils.notNull(offlinePayRecord, "支付记录不存在！");
 
+        OfflinePayLog offlinePayLog = OfflinePayLog.builder()
+                .tenantId(offlinePayRecord.getTenantId())
+                .tenantCode(offlinePayRecord.getTenantCode())
+                .branchId(offlinePayRecord.getBranchId())
+                .offlinePayRecordId(offlinePayRecord.getId())
+                .type(Constants.OFFLINE_PAY_LOG_TYPE_PAID_CALLBACK)
+                .channelResult(JacksonUtils.writeValueAsString(params))
+                .createdUserId(BigInteger.ZERO)
+                .updatedUserId(BigInteger.ZERO)
+                .build();
+        DatabaseHelper.insert(offlinePayLog);
+
         offlinePayRecord.setStatus(Constants.OFFLINE_PAY_STATUS_PAID_SUCCESS);
         offlinePayRecord.setUpdatedUserId(BigInteger.ZERO);
         DatabaseHelper.update(offlinePayRecord);
@@ -281,6 +318,7 @@ public class PosService {
      */
     public ApiRest refund(RefundModel refundModel) {
         BigInteger tenantId = refundModel.getTenantId();
+        String tenantCode = refundModel.getTenantCode();
         BigInteger branchId = refundModel.getBranchId();
         BigInteger userId = refundModel.getUserId();
         String outTradeNo = refundModel.getOutTradeNo();
@@ -297,6 +335,7 @@ public class PosService {
         ValidateUtils.isTrue(offlinePayRecord.getStatus() == Constants.OFFLINE_PAY_STATUS_PAID_SUCCESS, "未支付不能退款！");
 
         Integer totalAmount = offlinePayRecord.getTotalAmount();
+        Map<String, ?> channelResult = null;
         int channelType = offlinePayRecord.getChannelType();
         if (channelType == Constants.CHANNEL_TYPE_WEI_XIN) {
             WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
@@ -314,7 +353,7 @@ public class PosService {
                     .totalFee(totalAmount)
                     .refundFee(refundAmount == null ? totalAmount : refundAmount)
                     .build();
-            Map<String, String> result = WeiXinPayUtils.refund(weiXinRefundModel);
+            channelResult = WeiXinPayUtils.refund(weiXinRefundModel);
         } else if (channelType == Constants.CHANNEL_TYPE_ALIPAY) {
             AlipayAccount alipayAccount = AlipayUtils.obtainAlipayAccount("2016121304213325");
             ValidateUtils.notNull(alipayAccount, "未配置支付宝账号！");
@@ -326,8 +365,20 @@ public class PosService {
                     .outRequestNo(outTradeNo)
                     .tradeNo("")
                     .build();
-            Map<String, Object> result = AlipayUtils.alipayTradeRefund(alipayTradeRefundModel);
+            channelResult = AlipayUtils.alipayTradeRefund(alipayTradeRefundModel);
         }
+
+        OfflinePayLog offlinePayLog = OfflinePayLog.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .offlinePayRecordId(offlinePayRecord.getId())
+                .type(Constants.OFFLINE_PAY_LOG_TYPE_REFUND)
+                .channelResult(JacksonUtils.writeValueAsString(channelResult))
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .build();
+        DatabaseHelper.insert(offlinePayLog);
         return ApiRest.builder().message("退款成功！").successful(true).build();
     }
 }
