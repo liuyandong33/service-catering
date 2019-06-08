@@ -1,15 +1,13 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.models.pos.OfflinePayModel;
-import build.dream.catering.models.pos.OfflinePosModel;
-import build.dream.catering.models.pos.OnlinePosModel;
-import build.dream.catering.models.pos.OrderQueryModel;
+import build.dream.catering.models.pos.*;
 import build.dream.catering.utils.SequenceUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.OfflinePayRecord;
 import build.dream.common.catering.domains.Pos;
 import build.dream.common.models.alipay.AlipayTradePayModel;
+import build.dream.common.models.alipay.AlipayTradeRefundModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
 import build.dream.common.saas.domains.AlipayAccount;
 import build.dream.common.saas.domains.WeiXinPayAccount;
@@ -274,5 +272,62 @@ public class PosService {
         offlinePayRecord.setStatus(Constants.OFFLINE_PAY_STATUS_PAID_SUCCESS);
         offlinePayRecord.setUpdatedUserId(BigInteger.ZERO);
         DatabaseHelper.update(offlinePayRecord);
+    }
+
+    /**
+     * 退款
+     *
+     * @param refundModel
+     */
+    public ApiRest refund(RefundModel refundModel) {
+        BigInteger tenantId = refundModel.getTenantId();
+        BigInteger branchId = refundModel.getBranchId();
+        BigInteger userId = refundModel.getUserId();
+        String outTradeNo = refundModel.getOutTradeNo();
+        Integer refundAmount = refundModel.getRefundAmount();
+
+        SearchModel searchModel = SearchModel.builder()
+                .autoSetDeletedFalse()
+                .addSearchCondition(OfflinePayRecord.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)
+                .addSearchCondition(OfflinePayRecord.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId)
+                .addSearchCondition(OfflinePayRecord.ColumnName.OUT_TRADE_NO, Constants.SQL_OPERATION_SYMBOL_EQUAL, outTradeNo)
+                .build();
+        OfflinePayRecord offlinePayRecord = DatabaseHelper.find(OfflinePayRecord.class, searchModel);
+        ValidateUtils.notNull(offlinePayRecord, "支付记录不存在！");
+        ValidateUtils.isTrue(offlinePayRecord.getStatus() == Constants.OFFLINE_PAY_STATUS_PAID_SUCCESS, "未支付不能退款！");
+
+        Integer totalAmount = offlinePayRecord.getTotalAmount();
+        int channelType = offlinePayRecord.getChannelType();
+        if (channelType == Constants.CHANNEL_TYPE_WEI_XIN) {
+            WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
+            ValidateUtils.notNull(weiXinPayAccount, "未配置微信支付账号！");
+
+            build.dream.common.models.weixinpay.RefundModel weiXinRefundModel = build.dream.common.models.weixinpay.RefundModel.builder()
+                    .appId(weiXinPayAccount.getAppId())
+                    .mchId(weiXinPayAccount.getMchId())
+                    .apiSecretKey(weiXinPayAccount.getApiSecretKey())
+                    .subAppId(weiXinPayAccount.getSubPublicAccountAppId())
+                    .subMchId(weiXinPayAccount.getSubMchId())
+                    .operationCertificate(weiXinPayAccount.getOperationCertificate())
+                    .operationCertificatePassword(weiXinPayAccount.getOperationCertificatePassword())
+                    .outRefundNo("")
+                    .totalFee(totalAmount)
+                    .refundFee(refundAmount == null ? totalAmount : refundAmount)
+                    .build();
+            Map<String, String> result = WeiXinPayUtils.refund(weiXinRefundModel);
+        } else if (channelType == Constants.CHANNEL_TYPE_ALIPAY) {
+            AlipayAccount alipayAccount = AlipayUtils.obtainAlipayAccount("2016121304213325");
+            ValidateUtils.notNull(alipayAccount, "未配置支付宝账号！");
+            AlipayTradeRefundModel alipayTradeRefundModel = AlipayTradeRefundModel.builder()
+                    .appId(alipayAccount.getAppId())
+                    .appPrivateKey(alipayAccount.getAppPrivateKey())
+                    .alipayPublicKey(alipayAccount.getAlipayPublicKey())
+                    .refundAmount(refundAmount == null ? BigDecimal.valueOf(totalAmount).divide(Constants.BIG_DECIMAL_ONE_HUNDRED) : BigDecimal.valueOf(refundAmount).divide(Constants.BIG_DECIMAL_ONE_HUNDRED))
+                    .outRequestNo(outTradeNo)
+                    .tradeNo("")
+                    .build();
+            Map<String, Object> result = AlipayUtils.alipayTradeRefund(alipayTradeRefundModel);
+        }
+        return ApiRest.builder().message("退款成功！").successful(true).build();
     }
 }
