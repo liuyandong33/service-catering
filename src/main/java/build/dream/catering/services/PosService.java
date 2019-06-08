@@ -10,14 +10,12 @@ import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.OfflinePayRecord;
 import build.dream.common.catering.domains.Pos;
 import build.dream.common.models.alipay.AlipayTradePayModel;
-import build.dream.common.models.jingdong.FkmPayModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
 import build.dream.common.saas.domains.AlipayAccount;
 import build.dream.common.saas.domains.WeiXinPayAccount;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
-import org.dom4j.DocumentException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -113,7 +111,7 @@ public class PosService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest offlinePay(OfflinePayModel offlinePayModel) throws DocumentException {
+    public ApiRest offlinePay(OfflinePayModel offlinePayModel) {
         BigInteger tenantId = offlinePayModel.getTenantId();
         String tenantCode = offlinePayModel.getTenantCode();
         BigInteger branchId = offlinePayModel.getBranchId();
@@ -140,7 +138,7 @@ public class PosService {
         }
         ValidateUtils.isTrue(channelType != 0 && paidScene != 0, "支付码错误！");
 
-        String tradeState = null;
+        int status = 0;
         Map<String, ?> channelResult = null;
         if (channelType == Constants.CHANNEL_TYPE_WEI_XIN) {
             WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
@@ -161,17 +159,17 @@ public class PosService {
             channelResult = WeiXinPayUtils.microPay(microPayModel);
             String resultCode = MapUtils.getString(channelResult, "result_code");
             if (Constants.SUCCESS.equals(resultCode)) {
-                tradeState = Constants.SUCCESS;
+                status = Constants.OFFLINE_PAY_STATUS_PAID_SUCCESS;
             } else {
-                tradeState = "PAYING";
+                status = Constants.OFFLINE_PAY_STATUS_PAYING;
             }
         } else if (channelType == Constants.CHANNEL_TYPE_ALIPAY) {
             AlipayAccount alipayAccount = AlipayUtils.obtainAlipayAccount("2016121304213325");
             AlipayTradePayModel alipayTradePayModel = AlipayTradePayModel.builder()
                     .appId(alipayAccount.getAppId())
-                    .appPrivateKey(alipayAccount.getApplicationPrivateKey())
+                    .appPrivateKey(alipayAccount.getAppPrivateKey())
                     .alipayPublicKey(alipayAccount.getAlipayPublicKey())
-                    .topic("")
+                    .topic("aaa")
                     .outTradeNo(outTradeNo)
                     .authCode(authCode)
                     .scene(build.dream.common.constants.Constants.SCENE_BAR_CODE)
@@ -192,7 +190,7 @@ public class PosService {
                 .outTradeNo(outTradeNo)
                 .totalAmount(totalAmount)
                 .authCode(authCode)
-                .status(Constants.OFFLINE_PAY_STATUS_UNPAID)
+                .status(status)
                 .channelResult(JacksonUtils.writeValueAsString(channelResult))
                 .createdUserId(userId)
                 .updatedUserId(userId)
@@ -200,9 +198,8 @@ public class PosService {
         DatabaseHelper.insert(offlinePayRecord);
 
         Map<String, Object> data = new HashMap<String, Object>();
-        data.put("channelType", channelType);
         data.put("outTradeNo", outTradeNo);
-        data.put("tradeState", tradeState);
+        data.put("status", status);
 
         return ApiRest.builder().data(data).message("扫码支付成功！").successful(true).build();
     }
@@ -230,13 +227,13 @@ public class PosService {
         ValidateUtils.notNull(offlinePayRecord, "支付记录不存在！");
 
         int status = offlinePayRecord.getStatus();
-        if (status == Constants.OFFLINE_PAY_STATUS_PAID) {
-            return ApiRest.builder().data(ApplicationHandler.buildHashMap(TupleUtils.buildTuple2("tradeState", Constants.OFFLINE_PAY_STATUS_PAID))).message("查询订单成功！").successful(true).build();
+        if (status == Constants.OFFLINE_PAY_STATUS_PAID_SUCCESS || status == Constants.OFFLINE_PAY_STATUS_PAID_FAILURE) {
+            return ApiRest.builder().data(ApplicationHandler.buildHashMap(TupleUtils.buildTuple2("status", status))).message("查询订单成功！").successful(true).build();
         }
 
         int channelType = offlinePayRecord.getChannelType();
         if (channelType == Constants.CHANNEL_TYPE_ALIPAY) {
-            return ApiRest.builder().data(ApplicationHandler.buildHashMap(TupleUtils.buildTuple2("tradeState", Constants.OFFLINE_PAY_STATUS_UNPAID))).message("查询订单成功！").successful(true).build();
+            return ApiRest.builder().data(ApplicationHandler.buildHashMap(TupleUtils.buildTuple2("status", Constants.OFFLINE_PAY_STATUS_PAYING))).message("查询订单成功！").successful(true).build();
         }
 
         WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
@@ -250,14 +247,32 @@ public class PosService {
                 .outTradeNo(outTradeNo)
                 .build();
         Map<String, String> result = WeiXinPayUtils.orderQuery(model);
+
+        int newStatus = 0;
         String tradeState = result.get("trade_state");
         if (Constants.SUCCESS.equals(tradeState)) {
-            offlinePayRecord.setStatus(Constants.OFFLINE_PAY_STATUS_PAID);
+            offlinePayRecord.setStatus(Constants.OFFLINE_PAY_STATUS_PAID_SUCCESS);
             offlinePayRecord.setUpdatedUserId(userId);
             DatabaseHelper.update(offlinePayRecord);
-            return ApiRest.builder().data(ApplicationHandler.buildHashMap(TupleUtils.buildTuple2("tradeState", Constants.OFFLINE_PAY_STATUS_PAID))).message("查询订单成功！").successful(true).build();
+            newStatus = Constants.OFFLINE_PAY_STATUS_PAID_SUCCESS;
+        } else if (Constants.USERPAYING.equals(tradeState)) {
+            newStatus = Constants.OFFLINE_PAY_STATUS_PAYING;
         }
+        return ApiRest.builder().data(ApplicationHandler.buildHashMap(TupleUtils.buildTuple2("status", newStatus))).message("查询订单成功！").successful(true).build();
+    }
 
-        return ApiRest.builder().data(ApplicationHandler.buildHashMap(TupleUtils.buildTuple2("tradeState", Constants.OFFLINE_PAY_STATUS_UNPAID))).message("查询订单成功！").successful(true).build();
+    @Transactional(rollbackFor = Exception.class)
+    public void handleOfflinePayAsyncNotify(Map<String, String> params) {
+        String outTradeNo = params.get("out_trade_no");
+        SearchModel searchModel = SearchModel.builder()
+                .autoSetDeletedFalse()
+                .addSearchCondition(OfflinePayRecord.ColumnName.OUT_TRADE_NO, Constants.SQL_OPERATION_SYMBOL_EQUAL, outTradeNo)
+                .build();
+        OfflinePayRecord offlinePayRecord = DatabaseHelper.find(OfflinePayRecord.class, searchModel);
+        ValidateUtils.notNull(offlinePayRecord, "支付记录不存在！");
+
+        offlinePayRecord.setStatus(Constants.OFFLINE_PAY_STATUS_PAID_SUCCESS);
+        offlinePayRecord.setUpdatedUserId(BigInteger.ZERO);
+        DatabaseHelper.update(offlinePayRecord);
     }
 }
