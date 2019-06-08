@@ -159,6 +159,14 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String KEY_FLASH_SALE_ORDERS = "_flash_sale_orders";
     public static final String KEY_FLASH_SALE_ACTIVITY_IDS = "_flash_sale_activity_ids";
 
+    /**
+     * 消息队列消息主题
+     *
+     * @see #ORDER_INVALID_MESSAGE_TOPIC: 订单失效
+     * @see #OFFLINE_PAY_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC: 线下支付支付宝异步通知
+     * @see #OFFLINE_PAY_REFUND_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC: 线下支付支付宝退款异步通知
+     * @see #OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC: 线下支付微信退款异步通知
+     */
     public static final String ORDER_INVALID_MESSAGE_TOPIC = "order.invalid.message.topic";
     public static final String OFFLINE_PAY_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC = "offline.pay.alipay.async.notify.message.topic";
     public static final String OFFLINE_PAY_REFUND_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC = "offline.pay.refund.alipay.async.notify.message.topic";
