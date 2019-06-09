@@ -11,6 +11,9 @@ import build.dream.common.models.alipay.AlipayTradePayModel;
 import build.dream.common.models.alipay.AlipayTradeRefundModel;
 import build.dream.common.models.miya.OrderPayModel;
 import build.dream.common.models.newland.BarcodePayModel;
+import build.dream.common.models.newland.QryBarcodePayModel;
+import build.dream.common.models.newland.RefundBarcodePayModel;
+import build.dream.common.models.umpay.MerRefundModel;
 import build.dream.common.models.umpay.PassiveScanCodePayModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
 import build.dream.common.saas.domains.*;
@@ -320,18 +323,42 @@ public class PosService {
         Map<String, Object> data = new HashMap<String, Object>();
         int paidStatus = offlinePayRecord.getPaidStatus();
         int channelType = offlinePayRecord.getChannelType();
-        if (paidStatus == Constants.OFFLINE_PAY_PAID_STATUS_PAYING && channelType == Constants.CHANNEL_TYPE_WEI_XIN) {
-            WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
-            build.dream.common.models.weixinpay.OrderQueryModel model = build.dream.common.models.weixinpay.OrderQueryModel.builder()
-                    .appId(weiXinPayAccount.getAppId())
-                    .mchId(weiXinPayAccount.getMchId())
-                    .apiSecretKey(weiXinPayAccount.getApiSecretKey())
-                    .subAppId(weiXinPayAccount.getSubPublicAccountAppId())
-                    .subMchId(weiXinPayAccount.getSubMchId())
-                    .acceptanceModel(weiXinPayAccount.isAcceptanceModel())
-                    .outTradeNo(outTradeNo)
-                    .build();
-            Map<String, String> result = WeiXinPayUtils.orderQuery(model);
+        if (paidStatus == Constants.OFFLINE_PAY_PAID_STATUS_PAYING && (channelType == Constants.CHANNEL_TYPE_WEI_XIN || channelType == Constants.CHANNEL_TYPE_MIYA || channelType == Constants.CHANNEL_TYPE_NEW_LAND)) {
+            Map<String, ?> channelResult = null;
+            if (channelType == Constants.CHANNEL_TYPE_WEI_XIN) {
+                WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
+                build.dream.common.models.weixinpay.OrderQueryModel weiXinOrderQueryModel = build.dream.common.models.weixinpay.OrderQueryModel.builder()
+                        .appId(weiXinPayAccount.getAppId())
+                        .mchId(weiXinPayAccount.getMchId())
+                        .apiSecretKey(weiXinPayAccount.getApiSecretKey())
+                        .subAppId(weiXinPayAccount.getSubPublicAccountAppId())
+                        .subMchId(weiXinPayAccount.getSubMchId())
+                        .acceptanceModel(weiXinPayAccount.isAcceptanceModel())
+                        .outTradeNo(outTradeNo)
+                        .build();
+                channelResult = WeiXinPayUtils.orderQuery(weiXinOrderQueryModel);
+                String tradeState = MapUtils.getString(channelResult, "trade_state");
+                if (Constants.SUCCESS.equals(tradeState)) {
+                    offlinePayRecord.setPaidStatus(Constants.OFFLINE_PAY_PAID_STATUS_SUCCESS);
+                    offlinePayRecord.setUpdatedUserId(userId);
+                    DatabaseHelper.update(offlinePayRecord);
+                    data.put("paidStatus", Constants.OFFLINE_PAY_PAID_STATUS_SUCCESS);
+                } else if (Constants.USERPAYING.equals(tradeState)) {
+                    data.put("paidStatus", Constants.OFFLINE_PAY_PAID_STATUS_PAYING);
+                }
+            } else if (channelType == Constants.CHANNEL_TYPE_MIYA) {
+                MiyaAccount miyaAccount = MiyaUtils.obtainMiyaAccount(tenantId, branchId);
+                ValidateUtils.notNull(miyaAccount, "未配置米雅支付账号！");
+                build.dream.common.models.miya.OrderQueryModel miyaOrderQueryModel = build.dream.common.models.miya.OrderQueryModel.builder()
+                        .build();
+                channelResult = MiyaUtils.orderQuery(miyaOrderQueryModel);
+            } else if (channelType == Constants.CHANNEL_TYPE_NEW_LAND) {
+                NewLandAccount newLandAccount = NewLandUtils.obtainNewLandAccount(tenantId, branchId);
+                ValidateUtils.notNull(newLandAccount, "未配置新大陆支付账号！");
+                QryBarcodePayModel qryBarcodePayModel = QryBarcodePayModel.builder()
+                        .build();
+                channelResult = NewLandUtils.qryBarcodePay(qryBarcodePayModel);
+            }
 
             OfflinePayLog offlinePayLog = OfflinePayLog.builder()
                     .tenantId(tenantId)
@@ -339,23 +366,11 @@ public class PosService {
                     .branchId(branchId)
                     .offlinePayRecordId(offlinePayRecord.getId())
                     .type(Constants.OFFLINE_PAY_LOG_TYPE_QUERY)
-                    .channelResult(JacksonUtils.writeValueAsString(result))
+                    .channelResult(JacksonUtils.writeValueAsString(channelResult))
                     .createdUserId(userId)
                     .updatedUserId(userId)
                     .build();
             DatabaseHelper.insert(offlinePayLog);
-
-            int status = 0;
-            String tradeState = result.get("trade_state");
-            if (Constants.SUCCESS.equals(tradeState)) {
-                offlinePayRecord.setPaidStatus(Constants.OFFLINE_PAY_PAID_STATUS_SUCCESS);
-                offlinePayRecord.setUpdatedUserId(userId);
-                DatabaseHelper.update(offlinePayRecord);
-                status = Constants.OFFLINE_PAY_PAID_STATUS_SUCCESS;
-            } else if (Constants.USERPAYING.equals(tradeState)) {
-                status = Constants.OFFLINE_PAY_PAID_STATUS_PAYING;
-            }
-            data.put("paidStatus", status);
         } else {
             data.put("refundStatus", offlinePayRecord.getRefundStatus());
         }
@@ -369,6 +384,8 @@ public class PosService {
         String outTradeNo = null;
         if (channelType == Constants.CHANNEL_TYPE_ALIPAY) {
             outTradeNo = params.get("out_trade_no");
+        } else if (channelType == Constants.CHANNEL_TYPE_UMPAY) {
+            outTradeNo = params.get("order_id");
         }
 
         SearchModel searchModel = SearchModel.builder()
@@ -487,6 +504,32 @@ public class PosService {
 //                    .tradeNo("")
                     .build();
             channelResult = AlipayUtils.alipayTradeRefund(alipayTradeRefundModel);
+        } else if (channelType == Constants.CHANNEL_TYPE_MIYA) {
+            MiyaAccount miyaAccount = MiyaUtils.obtainMiyaAccount(tenantId, branchId);
+            ValidateUtils.notNull(miyaAccount, "未配置米雅支付账号！");
+            build.dream.common.models.miya.RefundModel miyaRefundModel = build.dream.common.models.miya.RefundModel.builder()
+                    .a2(miyaAccount.getMiyaMerchantCode())
+                    .a3(miyaAccount.getMiyaBranchCode())
+                    .a4("0000")
+                    .a5("1111")
+                    .miyaKey(miyaAccount.getMiyaKey())
+                    .b1(outTradeNo)
+                    .b2(outTradeNo)
+                    .b4(String.valueOf(totalAmount))
+                    .build();
+            channelResult = MiyaUtils.refund(miyaRefundModel);
+        } else if (channelType == Constants.CHANNEL_TYPE_NEW_LAND) {
+            NewLandAccount newLandAccount = NewLandUtils.obtainNewLandAccount(tenantId, branchId);
+            ValidateUtils.notNull(newLandAccount, "未配置新大陆支付账号！");
+            RefundBarcodePayModel refundBarcodePayModel = RefundBarcodePayModel.builder()
+                    .build();
+            channelResult = NewLandUtils.refundBarcodePay(refundBarcodePayModel);
+        } else if (channelType == Constants.CHANNEL_TYPE_UMPAY) {
+            UmPayAccount umPayAccount = UmPayUtils.obtainUmPayAccount(tenantId, branchId);
+            ValidateUtils.notNull(umPayAccount, "未配置联动支付账号！");
+            MerRefundModel merRefundModel = MerRefundModel.builder()
+                    .build();
+            channelResult = UmPayUtils.merRefund(merRefundModel);
         }
 
         offlinePayRecord.setRefundStatus(Constants.OFFLINE_PAY_REFUND_STATUS_APPLIED);
