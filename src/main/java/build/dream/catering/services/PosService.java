@@ -10,11 +10,9 @@ import build.dream.common.catering.domains.Pos;
 import build.dream.common.models.alipay.AlipayTradePayModel;
 import build.dream.common.models.alipay.AlipayTradeRefundModel;
 import build.dream.common.models.miya.OrderPayModel;
+import build.dream.common.models.newland.BarcodePayModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
-import build.dream.common.saas.domains.AlipayAccount;
-import build.dream.common.saas.domains.MiyaAccount;
-import build.dream.common.saas.domains.Tenant;
-import build.dream.common.saas.domains.WeiXinPayAccount;
+import build.dream.common.saas.domains.*;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -23,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -207,6 +207,31 @@ public class PosService {
                     .b4(String.valueOf(totalAmount))
                     .build();
             channelResult = MiyaUtils.orderPay(orderPayModel);
+        } else if (channelType == Constants.CHANNEL_TYPE_NEW_LAND) {
+            NewLandAccount newLandAccount = NewLandUtils.obtainNewLandAccount(tenantId.toString(), branchId.toString());
+            ValidateUtils.notNull(newLandAccount, "未配置新大陆账号！");
+
+            String payChannel = null;
+            if (paidScene == Constants.PAID_SCENE_WEI_XIN_MICROPAY) {
+                payChannel = Constants.NEW_LAND_PAY_CHANNEL_ALIPAY;
+            } else if (paidScene == Constants.PAID_SCENE_ALIPAY_FAC_TO_FACE) {
+                payChannel = Constants.NEW_LAND_PAY_CHANNEL_WXPAY;
+            }
+            BarcodePayModel barcodePayModel = BarcodePayModel.builder()
+                    .opSys(Constants.NEW_LAND_OP_SYS_ZHI_LIAN)
+                    .orgNo(newLandAccount.getOrgNo())
+                    .mercId(newLandAccount.getMchId())
+                    .trmNo(newLandAccount.getTrmNo())
+                    .tradeNo(outTradeNo)
+                    .txnTime(new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()))
+                    .amount(totalAmount)
+                    .totalAmount(totalAmount)
+                    .authCode(authCode)
+                    .payChannel(payChannel)
+                    .build();
+            channelResult = NewLandUtils.barcodePay(barcodePayModel);
+        } else if (channelType == Constants.CHANNEL_TYPE_UMPAY) {
+
         }
 
         OfflinePayRecord offlinePayRecord = OfflinePayRecord.builder()
