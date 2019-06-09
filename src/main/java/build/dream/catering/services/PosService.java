@@ -11,6 +11,7 @@ import build.dream.common.models.alipay.AlipayTradePayModel;
 import build.dream.common.models.alipay.AlipayTradeRefundModel;
 import build.dream.common.models.miya.OrderPayModel;
 import build.dream.common.models.newland.BarcodePayModel;
+import build.dream.common.models.umpay.PassiveScanCodePayModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
 import build.dream.common.saas.domains.*;
 import build.dream.common.utils.*;
@@ -193,7 +194,7 @@ public class PosService {
                     .build();
             channelResult = AlipayUtils.alipayTradePay(alipayTradePayModel);
         } else if (channelType == Constants.CHANNEL_TYPE_MIYA) {
-            MiyaAccount miyaAccount = MiyaUtils.obtainMiyaAccount(tenantId.toString(), branchId.toString());
+            MiyaAccount miyaAccount = MiyaUtils.obtainMiyaAccount(tenantId, branchId);
             ValidateUtils.notNull(miyaAccount, "未配置米雅账号！");
 
             OrderPayModel orderPayModel = OrderPayModel.builder()
@@ -208,7 +209,7 @@ public class PosService {
                     .build();
             channelResult = MiyaUtils.orderPay(orderPayModel);
         } else if (channelType == Constants.CHANNEL_TYPE_NEW_LAND) {
-            NewLandAccount newLandAccount = NewLandUtils.obtainNewLandAccount(tenantId.toString(), branchId.toString());
+            NewLandAccount newLandAccount = NewLandUtils.obtainNewLandAccount(tenantId, branchId);
             ValidateUtils.notNull(newLandAccount, "未配置新大陆账号！");
 
             String payChannel = null;
@@ -231,7 +232,29 @@ public class PosService {
                     .build();
             channelResult = NewLandUtils.barcodePay(barcodePayModel);
         } else if (channelType == Constants.CHANNEL_TYPE_UMPAY) {
+            UmPayAccount umPayAccount = UmPayUtils.obtainUmPayAccount(tenantId, branchId);
+            ValidateUtils.notNull(umPayAccount, "未配置联动支付账号！");
 
+            String scanCodeType = null;
+            if (paidScene == Constants.PAID_SCENE_WEI_XIN_MICROPAY) {
+                scanCodeType = Constants.UM_PAY_SCAN_CODE_TYPE_WECHAT;
+            } else if (paidScene == Constants.PAID_SCENE_ALIPAY_FAC_TO_FACE) {
+                scanCodeType = Constants.UM_PAY_SCAN_CODE_TYPE_ALIPAY;
+            }
+            PassiveScanCodePayModel passiveScanCodePayModel = PassiveScanCodePayModel.builder()
+                    .merId(umPayAccount.getMerId())
+                    .privateKey(umPayAccount.getPrivateKey())
+                    .platformPublicKey(umPayAccount.getPlatformPublicKey())
+                    .topic(ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_UMPAY_ASYNC_NOTIFY_MESSAGE_TOPIC))
+                    .goodsInf("")
+                    .orderId(outTradeNo)
+                    .merDate(new SimpleDateFormat("yyyyMMdd").format(new Date()))
+                    .amount(totalAmount)
+                    .authCode(authCode)
+                    .useDesc("订单支付")
+                    .scanCodeType(scanCodeType)
+                    .build();
+            channelResult = UmPayUtils.passiveScanCodePay(passiveScanCodePayModel);
         }
 
         OfflinePayRecord offlinePayRecord = OfflinePayRecord.builder()

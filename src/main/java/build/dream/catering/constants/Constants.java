@@ -163,12 +163,14 @@ public class Constants extends build.dream.common.constants.Constants {
      * 消息队列消息主题
      *
      * @see #ORDER_INVALID_MESSAGE_TOPIC: 订单失效
-     * @see #OFFLINE_PAY_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC: 线下支付支付宝异步通知
-     * @see #OFFLINE_PAY_REFUND_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC: 线下支付支付宝退款异步通知
-     * @see #OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC: 线下支付微信退款异步通知
+     * @see #OFFLINE_PAY_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC: 线下支付支付宝异步通知消息主题
+     * @see #OFFLINE_PAY_UMPAY_ASYNC_NOTIFY_MESSAGE_TOPIC: 线下支付联动异步通知消息主题
+     * @see #OFFLINE_PAY_REFUND_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC: 线下支付支付宝退款异步通知消息主题
+     * @see #OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC: 线下支付微信退款异步通知消息主题
      */
     public static final String ORDER_INVALID_MESSAGE_TOPIC = "order.invalid.message.topic";
     public static final String OFFLINE_PAY_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC = "offline.pay.alipay.async.notify.message.topic";
+    public static final String OFFLINE_PAY_UMPAY_ASYNC_NOTIFY_MESSAGE_TOPIC = "offline.pay.umpay.async.notify.message.topic";
     public static final String OFFLINE_PAY_REFUND_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC = "offline.pay.refund.alipay.async.notify.message.topic";
     public static final String OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC = "offline.pay.refund.wei.xin.async.notify.message.topic";
 }

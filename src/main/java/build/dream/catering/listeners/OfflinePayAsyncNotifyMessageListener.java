@@ -17,6 +17,7 @@ public class OfflinePayAsyncNotifyMessageListener implements MessageListener<Str
     @Autowired
     private PosService posService;
     private static final String OFFLINE_PAY_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC = ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC);
+    private static final String OFFLINE_PAY_UMPAY_ASYNC_NOTIFY_MESSAGE_TOPIC = ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_UMPAY_ASYNC_NOTIFY_MESSAGE_TOPIC);
 
     @KafkaListener(topics = "${offline.pay.alipay.async.notify.message.topic}")
     @Override
@@ -26,6 +27,9 @@ public class OfflinePayAsyncNotifyMessageListener implements MessageListener<Str
         if (OFFLINE_PAY_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC.equals(topic)) {
             Map<String, String> params = JacksonUtils.readValueAsMap(value, String.class, String.class);
             posService.handleOfflinePayAsyncNotify(params, Constants.CHANNEL_TYPE_ALIPAY);
+        } else if (OFFLINE_PAY_UMPAY_ASYNC_NOTIFY_MESSAGE_TOPIC.equals(topic)) {
+            Map<String, String> params = JacksonUtils.readValueAsMap(value, String.class, String.class);
+            posService.handleOfflinePayAsyncNotify(params, Constants.CHANNEL_TYPE_UMPAY);
         }
     }
 }
