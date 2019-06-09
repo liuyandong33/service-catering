@@ -248,7 +248,6 @@ public class PosService {
                     .topic(ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_UMPAY_ASYNC_NOTIFY_MESSAGE_TOPIC))
                     .goodsInf("")
                     .orderId(outTradeNo)
-                    .merDate(new SimpleDateFormat("yyyyMMdd").format(new Date()))
                     .amount(totalAmount)
                     .authCode(authCode)
                     .useDesc("订单支付")
