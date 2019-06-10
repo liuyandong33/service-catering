@@ -67,8 +67,6 @@ public class DemoController {
 
             } else if ("3".equals(paymentChannel)) {
                 build.dream.common.models.miya.RefundModel refundModel = build.dream.common.models.miya.RefundModel.builder()
-                        .tenantId(tenantId)
-                        .branchId(branchId)
                         .a4(BigInteger.ONE.toString())
                         .a5(BigInteger.TEN.toString())
                         .b1("")

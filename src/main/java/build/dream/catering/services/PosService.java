@@ -4,6 +4,7 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.models.pos.*;
 import build.dream.catering.utils.SequenceUtils;
 import build.dream.common.api.ApiRest;
+import build.dream.common.beans.AlipayAccount;
 import build.dream.common.catering.domains.OfflinePayLog;
 import build.dream.common.catering.domains.OfflinePayRecord;
 import build.dream.common.catering.domains.Pos;
@@ -160,7 +161,7 @@ public class PosService {
         int paidStatus = 0;
         Map<String, ?> channelResult = null;
         if (channelType == Constants.CHANNEL_TYPE_WEI_XIN) {
-            WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
+            WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId, branchId);
             ValidateUtils.notNull(weiXinPayAccount, "商户未配置微信支付账号！");
             MicroPayModel microPayModel = MicroPayModel.builder()
                     .appId(weiXinPayAccount.getAppId())
@@ -183,7 +184,8 @@ public class PosService {
                 paidStatus = Constants.OFFLINE_PAY_PAID_STATUS_PAYING;
             }
         } else if (channelType == Constants.CHANNEL_TYPE_ALIPAY) {
-            AlipayAccount alipayAccount = AlipayUtils.obtainAlipayAccount("2016121304213325");
+            AlipayAccount alipayAccount = AlipayUtils.obtainAlipayAccount(tenantId, branchId);
+            ValidateUtils.notNull(alipayAccount, "未配置支付宝账号！");
             AlipayTradePayModel alipayTradePayModel = AlipayTradePayModel.builder()
                     .appId(alipayAccount.getAppId())
                     .appPrivateKey(alipayAccount.getAppPrivateKey())
@@ -326,7 +328,7 @@ public class PosService {
         if (paidStatus == Constants.OFFLINE_PAY_PAID_STATUS_PAYING && (channelType == Constants.CHANNEL_TYPE_WEI_XIN || channelType == Constants.CHANNEL_TYPE_MIYA || channelType == Constants.CHANNEL_TYPE_NEW_LAND)) {
             Map<String, ?> channelResult = null;
             if (channelType == Constants.CHANNEL_TYPE_WEI_XIN) {
-                WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
+                WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId, branchId);
                 build.dream.common.models.weixinpay.OrderQueryModel weiXinOrderQueryModel = build.dream.common.models.weixinpay.OrderQueryModel.builder()
                         .appId(weiXinPayAccount.getAppId())
                         .mchId(weiXinPayAccount.getMchId())
@@ -472,7 +474,7 @@ public class PosService {
         Map<String, ?> channelResult = null;
         int channelType = offlinePayRecord.getChannelType();
         if (channelType == Constants.CHANNEL_TYPE_WEI_XIN) {
-            WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
+            WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId, branchId);
             ValidateUtils.notNull(weiXinPayAccount, "未配置微信支付账号！");
 
             build.dream.common.models.weixinpay.RefundModel weiXinRefundModel = build.dream.common.models.weixinpay.RefundModel.builder()
@@ -492,7 +494,7 @@ public class PosService {
                     .build();
             channelResult = WeiXinPayUtils.refund(weiXinRefundModel);
         } else if (channelType == Constants.CHANNEL_TYPE_ALIPAY) {
-            AlipayAccount alipayAccount = AlipayUtils.obtainAlipayAccount("2016121304213325");
+            AlipayAccount alipayAccount = AlipayUtils.obtainAlipayAccount(tenantId, branchId);
             ValidateUtils.notNull(alipayAccount, "未配置支付宝账号！");
             AlipayTradeRefundModel alipayTradeRefundModel = AlipayTradeRefundModel.builder()
                     .appId(alipayAccount.getAppId())
