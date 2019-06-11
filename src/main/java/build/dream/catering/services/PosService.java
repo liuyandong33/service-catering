@@ -478,7 +478,8 @@ public class PosService {
         ValidateUtils.notNull(offlinePayRecord, "支付记录不存在！");
         ValidateUtils.isTrue(offlinePayRecord.getPaidStatus() == Constants.OFFLINE_PAY_PAID_STATUS_SUCCESS, "未支付不能退款！");
 
-        String outRefundNo = SerialNumberGenerator.generateSerialNumber();;
+        String outRefundNo = SerialNumberGenerator.generateSerialNumber();
+        ;
         Integer totalAmount = offlinePayRecord.getTotalAmount();
         Map<String, ?> channelResult = null;
         int channelType = offlinePayRecord.getChannelType();
@@ -540,6 +541,7 @@ public class PosService {
                     .trmNo(newLandAccount.getTrmNo())
                     .tradeNo(UUID.randomUUID().toString())
                     .txnTime(new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()))
+                    .secretKey(newLandAccount.getSecretKey())
                     .orderNo(outTradeNo)
                     .txnAmt(offlinePayRecord.getTotalAmount())
                     .build();
