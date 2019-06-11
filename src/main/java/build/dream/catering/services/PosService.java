@@ -30,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class PosService {
@@ -477,6 +478,7 @@ public class PosService {
         ValidateUtils.notNull(offlinePayRecord, "支付记录不存在！");
         ValidateUtils.isTrue(offlinePayRecord.getPaidStatus() == Constants.OFFLINE_PAY_PAID_STATUS_SUCCESS, "未支付不能退款！");
 
+        String outRefundNo = SerialNumberGenerator.generateSerialNumber();;
         Integer totalAmount = offlinePayRecord.getTotalAmount();
         Map<String, ?> channelResult = null;
         int channelType = offlinePayRecord.getChannelType();
@@ -492,7 +494,7 @@ public class PosService {
                     .subMchId(weiXinPayAccount.getSubMchId())
                     .acceptanceModel(weiXinPayAccount.isAcceptanceModel())
                     .outTradeNo(outTradeNo)
-                    .outRefundNo(outTradeNo)
+                    .outRefundNo(outRefundNo)
                     .totalFee(totalAmount)
                     .refundFee(refundAmount == null ? totalAmount : refundAmount)
                     .topic(ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC))
@@ -503,6 +505,7 @@ public class PosService {
         } else if (channelType == Constants.CHANNEL_TYPE_ALIPAY) {
             AlipayAccount alipayAccount = AlipayUtils.obtainAlipayAccount(tenantId, branchId);
             ValidateUtils.notNull(alipayAccount, "未配置支付宝账号！");
+
             AlipayTradeRefundModel alipayTradeRefundModel = AlipayTradeRefundModel.builder()
                     .appId(alipayAccount.getAppId())
                     .topic(ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC))
@@ -510,7 +513,8 @@ public class PosService {
                     .alipayPublicKey(alipayAccount.getAlipayPublicKey())
                     .refundAmount(refundAmount == null ? BigDecimal.valueOf(totalAmount).divide(Constants.BIG_DECIMAL_ONE_HUNDRED) : BigDecimal.valueOf(refundAmount).divide(Constants.BIG_DECIMAL_ONE_HUNDRED))
                     .outTradeNo(outTradeNo)
-//                    .tradeNo("")
+                    .tradeNo(offlinePayRecord.getTradeNo())
+                    .outRequestNo(outRefundNo)
                     .build();
             channelResult = AlipayUtils.alipayTradeRefund(alipayTradeRefundModel);
         } else if (channelType == Constants.CHANNEL_TYPE_MIYA) {
@@ -523,7 +527,7 @@ public class PosService {
                     .a5("1111")
                     .miyaKey(miyaAccount.getMiyaKey())
                     .b1(outTradeNo)
-                    .b2(outTradeNo)
+                    .b2(outRefundNo)
                     .b4(String.valueOf(totalAmount))
                     .build();
             channelResult = MiyaUtils.refund(miyaRefundModel);
@@ -531,12 +535,27 @@ public class PosService {
             NewLandAccount newLandAccount = NewLandUtils.obtainNewLandAccount(tenantId, branchId);
             ValidateUtils.notNull(newLandAccount, "未配置新大陆支付账号！");
             RefundBarcodePayModel refundBarcodePayModel = RefundBarcodePayModel.builder()
+                    .orgNo(newLandAccount.getOrgNo())
+                    .mercId(newLandAccount.getMercId())
+                    .trmNo(newLandAccount.getTrmNo())
+                    .tradeNo(UUID.randomUUID().toString())
+                    .txnTime(new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()))
+                    .orderNo(outTradeNo)
+                    .txnAmt(offlinePayRecord.getTotalAmount())
                     .build();
             channelResult = NewLandUtils.refundBarcodePay(refundBarcodePayModel);
         } else if (channelType == Constants.CHANNEL_TYPE_UMPAY) {
             UmPayAccount umPayAccount = UmPayUtils.obtainUmPayAccount(tenantId, branchId);
             ValidateUtils.notNull(umPayAccount, "未配置联动支付账号！");
             MerRefundModel merRefundModel = MerRefundModel.builder()
+                    .merId(umPayAccount.getMerId())
+                    .privateKey(umPayAccount.getPrivateKey())
+                    .platformCertificate(umPayAccount.getPlatformCertificate())
+                    .refundNo(outRefundNo)
+                    .orderId(outTradeNo)
+                    .merDate(new SimpleDateFormat("yyyyMMdd").format(offlinePayRecord.getCreatedTime()))
+                    .refundAmount(offlinePayRecord.getTotalAmount())
+                    .orgAmount(offlinePayRecord.getTotalAmount())
                     .build();
             channelResult = UmPayUtils.merRefund(merRefundModel);
         }
