@@ -1,7 +1,6 @@
 package build.dream.catering.models.pos;
 
 import build.dream.common.models.BasicModel;
-import build.dream.common.models.CateringBasicModel;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -19,9 +18,6 @@ public class OfflinePayModel extends BasicModel {
 
     @NotNull
     private BigInteger userId;
-
-    @NotNull
-    private String orderNumber;
 
     @NotNull
     @Min(value = 0)
@@ -63,14 +59,6 @@ public class OfflinePayModel extends BasicModel {
 
     public void setUserId(BigInteger userId) {
         this.userId = userId;
-    }
-
-    public String getOrderNumber() {
-        return orderNumber;
-    }
-
-    public void setOrderNumber(String orderNumber) {
-        this.orderNumber = orderNumber;
     }
 
     public Integer getTotalAmount() {

@@ -123,7 +123,6 @@ public class PosService {
         String tenantCode = offlinePayModel.getTenantCode();
         BigInteger branchId = offlinePayModel.getBranchId();
         BigInteger userId = offlinePayModel.getUserId();
-        String orderNumber = offlinePayModel.getOrderNumber();
         String authCode = offlinePayModel.getAuthCode();
         String subject = offlinePayModel.getSubject();
         int totalAmount = offlinePayModel.getTotalAmount();
@@ -160,6 +159,7 @@ public class PosService {
 
         int paidStatus = 0;
         Map<String, ?> channelResult = null;
+        String tradeNo = null;
         if (channelType == Constants.CHANNEL_TYPE_WEI_XIN) {
             WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId, branchId);
             ValidateUtils.notNull(weiXinPayAccount, "商户未配置微信支付账号！");
@@ -183,6 +183,7 @@ public class PosService {
             } else {
                 paidStatus = Constants.OFFLINE_PAY_PAID_STATUS_PAYING;
             }
+            tradeNo = MapUtils.getString(channelResult, "transaction_id");
         } else if (channelType == Constants.CHANNEL_TYPE_ALIPAY) {
             AlipayAccount alipayAccount = AlipayUtils.obtainAlipayAccount(tenantId, branchId);
             ValidateUtils.notNull(alipayAccount, "未配置支付宝账号！");
@@ -198,6 +199,7 @@ public class PosService {
                     .totalAmount(BigDecimal.valueOf(totalAmount).divide(Constants.BIG_DECIMAL_ONE_HUNDRED))
                     .build();
             channelResult = AlipayUtils.alipayTradePay(alipayTradePayModel);
+            tradeNo = MapUtils.getString(channelResult, "trade_no");
         } else if (channelType == Constants.CHANNEL_TYPE_MIYA) {
             MiyaAccount miyaAccount = MiyaUtils.obtainMiyaAccount(tenantId, branchId);
             ValidateUtils.notNull(miyaAccount, "未配置米雅账号！");
@@ -213,6 +215,7 @@ public class PosService {
                     .b4(String.valueOf(totalAmount))
                     .build();
             channelResult = MiyaUtils.orderPay(orderPayModel);
+            tradeNo = MapUtils.getString(channelResult, "C6");
         } else if (channelType == Constants.CHANNEL_TYPE_NEW_LAND) {
             NewLandAccount newLandAccount = NewLandUtils.obtainNewLandAccount(tenantId, branchId);
             ValidateUtils.notNull(newLandAccount, "未配置新大陆账号！");
@@ -236,6 +239,7 @@ public class PosService {
                     .payChannel(payChannel)
                     .build();
             channelResult = NewLandUtils.barcodePay(barcodePayModel);
+            tradeNo = MapUtils.getString(channelResult, "orderNo");
         } else if (channelType == Constants.CHANNEL_TYPE_UMPAY) {
             UmPayAccount umPayAccount = UmPayUtils.obtainUmPayAccount(tenantId, branchId);
             ValidateUtils.notNull(umPayAccount, "未配置联动支付账号！");
@@ -266,10 +270,12 @@ public class PosService {
                 .tenantCode(tenantCode)
                 .branchId(branchId)
                 .userId(userId)
-                .orderNumber(orderNumber)
                 .paidScene(paidScene)
                 .channelType(channelType)
+                .tradeNo(tradeNo)
                 .outTradeNo(outTradeNo)
+                .refundNo(Constants.VARCHAR_DEFAULT_VALUE)
+                .outRefundNo(Constants.VARCHAR_DEFAULT_VALUE)
                 .totalAmount(totalAmount)
                 .authCode(authCode)
                 .paidStatus(paidStatus)
@@ -292,6 +298,7 @@ public class PosService {
         DatabaseHelper.insert(offlinePayLog);
 
         Map<String, Object> data = new HashMap<String, Object>();
+        data.put("tradeNo", tradeNo);
         data.put("outTradeNo", outTradeNo);
         data.put("paidStatus", paidStatus);
         data.put("refundStatus", Constants.OFFLINE_PAY_REFUND_STATUS_NO_REFUND);
