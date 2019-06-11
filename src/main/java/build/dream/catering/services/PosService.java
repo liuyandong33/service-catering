@@ -183,7 +183,7 @@ public class PosService {
             } else {
                 paidStatus = Constants.OFFLINE_PAY_PAID_STATUS_PAYING;
             }
-            tradeNo = MapUtils.getString(channelResult, "transaction_id");
+            tradeNo = MapUtils.getString(channelResult, "transaction_id", "");
         } else if (channelType == Constants.CHANNEL_TYPE_ALIPAY) {
             AlipayAccount alipayAccount = AlipayUtils.obtainAlipayAccount(tenantId, branchId);
             ValidateUtils.notNull(alipayAccount, "未配置支付宝账号！");
@@ -350,6 +350,7 @@ public class PosService {
                 if (Constants.SUCCESS.equals(tradeState)) {
                     offlinePayRecord.setPaidStatus(Constants.OFFLINE_PAY_PAID_STATUS_SUCCESS);
                     offlinePayRecord.setUpdatedUserId(userId);
+                    offlinePayRecord.setTradeNo(MapUtils.getString(channelResult, "transaction_id"));
                     DatabaseHelper.update(offlinePayRecord);
                     data.put("paidStatus", Constants.OFFLINE_PAY_PAID_STATUS_SUCCESS);
                 } else if (Constants.USERPAYING.equals(tradeState)) {
@@ -381,7 +382,7 @@ public class PosService {
                     .build();
             DatabaseHelper.insert(offlinePayLog);
         } else {
-            data.put("refundStatus", offlinePayRecord.getRefundStatus());
+            data.put("paidStatus", offlinePayRecord.getPaidStatus());
         }
         data.put("outTradeNo", outTradeNo);
         data.put("paidStatus", paidStatus);
