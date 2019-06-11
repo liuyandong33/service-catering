@@ -20,4 +20,12 @@ public class SequenceUtils {
     public static Integer currentValue(String sequenceName) {
         return obtainSequenceMapper().currentValue(sequenceName);
     }
+
+    public static Integer currentValueToday(String sequenceName) {
+        return obtainSequenceMapper().currentValueToday(sequenceName);
+    }
+
+    public static Integer nextValueToday(String sequenceName) {
+        return obtainSequenceMapper().nextValueToday(sequenceName);
+    }
 }

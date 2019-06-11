@@ -486,8 +486,8 @@ public class DietOrderUtils {
             orderNumberPrefix = "SC";
         }
 
-        Integer daySerialNumber = SequenceUtils.nextValue(SerialNumberGenerator.generatorTodaySequenceName(tenantId, branchId, "diet_order_number"));
-        String orderNumber = SerialNumberGenerator.nextOrderNumber(orderNumberPrefix, 8, daySerialNumber);
+        Integer daySerialNumber = SequenceUtils.nextValueToday(tenantId + "_" + branchId);
+        String orderNumber = SerialNumberGenerator.generateSerialNumber(orderNumberPrefix);
 
         DietOrder.Builder builder = DietOrder.builder()
                 .tenantId(tenantId)

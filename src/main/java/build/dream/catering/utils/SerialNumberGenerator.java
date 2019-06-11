@@ -8,4 +8,8 @@ public class SerialNumberGenerator {
     public static String generateSerialNumber() {
         return SNOWFLAKE_ID_GENERATOR.nextId().toString();
     }
+
+    public static String generateSerialNumber(String prefix) {
+        return prefix + SNOWFLAKE_ID_GENERATOR.nextId();
+    }
 }
