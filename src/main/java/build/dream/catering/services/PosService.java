@@ -2,7 +2,7 @@ package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.pos.*;
-import build.dream.catering.utils.SequenceUtils;
+import build.dream.catering.utils.SerialNumberGenerator;
 import build.dream.common.api.ApiRest;
 import build.dream.common.beans.AlipayAccount;
 import build.dream.common.catering.domains.OfflinePayLog;
@@ -127,8 +127,7 @@ public class PosService {
         String subject = offlinePayModel.getSubject();
         int totalAmount = offlinePayModel.getTotalAmount();
 
-        String sequenceName = SerialNumberGenerator.generatorTodaySequenceName(tenantId, branchId, "offline_pay_out_trade_no");
-        String outTradeNo = SerialNumberGenerator.nextOrderNumber("OP", 8, SequenceUtils.nextValue(sequenceName));
+        String outTradeNo = SerialNumberGenerator.generateSerialNumber();
 
         Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
         Integer usedChannelType = tenant.getUsedChannelType();
