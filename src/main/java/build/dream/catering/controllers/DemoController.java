@@ -105,4 +105,10 @@ public class DemoController {
         KafkaUtils.send("aaaa", UUID.randomUUID().toString(), UUID.randomUUID().toString());
         return Constants.SUCCESS;
     }
+
+    @RequestMapping(value = "/testRedis")
+    @ResponseBody
+    public String testRedis() {
+        return Constants.SUCCESS;
+    }
 }
