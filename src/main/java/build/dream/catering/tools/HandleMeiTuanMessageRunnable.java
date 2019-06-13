@@ -53,7 +53,7 @@ public class HandleMeiTuanMessageRunnable implements Runnable {
             } catch (Exception e) {
                 isNormal = false;
                 if (count == 1) {
-                    DingtalkUtils.send(String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "饿了么消息处理失败", GsonUtils.toJson(callbackParameters), e.getClass().getName(), e.getMessage()));
+                    DingtalkUtils.send(String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "美团消息处理失败", GsonUtils.toJson(callbackParameters), e.getClass().getName(), e.getMessage()));
                 }
             }
             if (isNormal) {
