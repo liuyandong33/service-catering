@@ -3,15 +3,17 @@ package build.dream.catering.listeners;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.services.MeiTuanService;
 import build.dream.catering.tools.HandleMeiTuanMessageRunnable;
-import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.ValidateUtils;
 import net.sf.json.JSONObject;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Component
 public class MeiTuanMessageListener implements MessageListener<String, String> {
@@ -34,11 +36,11 @@ public class MeiTuanMessageListener implements MessageListener<String, String> {
             return;
         }
 
-        JSONObject meiTuanMessageJsonObject = JSONObject.fromObject(meiTuanMessage);
-        JSONObject callbackParametersJsonObject = meiTuanMessageJsonObject.getJSONObject("callbackParameters");
-        String uuid = meiTuanMessageJsonObject.getString("uuid");
-        int count = meiTuanMessageJsonObject.getInt("count");
-        int type = meiTuanMessageJsonObject.getInt("type");
-        new Thread(new HandleMeiTuanMessageRunnable(meiTuanService, callbackParametersJsonObject, count, 1000, uuid, type)).start();
+        Map<String, Object> meiTuanMessageMap = JSONObject.fromObject(meiTuanMessage);
+        Map<String, Object> callbackParameters = MapUtils.getMap(meiTuanMessageMap, "callbackParameters");
+        String uuid = MapUtils.getString(meiTuanMessageMap, "uuid");
+        int count = MapUtils.getIntValue(meiTuanMessageMap, "count");
+        int type = MapUtils.getIntValue(meiTuanMessageMap, "type");
+        new Thread(new HandleMeiTuanMessageRunnable(meiTuanService, callbackParameters, count, 1000, uuid, type)).start();
     }
 }

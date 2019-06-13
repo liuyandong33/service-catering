@@ -5,20 +5,21 @@ import build.dream.catering.services.MeiTuanService;
 import build.dream.catering.utils.DingtalkUtils;
 import build.dream.catering.utils.ThreadUtils;
 import build.dream.common.utils.GsonUtils;
-import net.sf.json.JSONObject;
+
+import java.util.Map;
 
 public class HandleMeiTuanMessageRunnable implements Runnable {
     private MeiTuanService meiTuanService;
-    private JSONObject callbackParametersJsonObject;
+    private Map<String, Object> callbackParameters;
     private boolean continued = true;
     private int count;
     private int interval;
     private String uuid;
     private int type;
 
-    public HandleMeiTuanMessageRunnable(MeiTuanService meiTuanService, JSONObject callbackParametersJsonObject, int count, int interval, String uuid, int type) {
+    public HandleMeiTuanMessageRunnable(MeiTuanService meiTuanService, Map<String, Object> callbackParameters, int count, int interval, String uuid, int type) {
         this.meiTuanService = meiTuanService;
-        this.callbackParametersJsonObject = callbackParametersJsonObject;
+        this.callbackParameters = callbackParameters;
         this.count = count;
         this.interval = interval;
         this.uuid = uuid;
@@ -31,18 +32,28 @@ public class HandleMeiTuanMessageRunnable implements Runnable {
             boolean isNormal = true;
             try {
                 if (type == Constants.MEI_TUAN_CALLBACK_TYPE_ORDER_EFFECTIVE) {
-                    meiTuanService.handleOrderEffectiveCallback(callbackParametersJsonObject, uuid, type);
+                    meiTuanService.handleOrderEffectiveCallback(callbackParameters, uuid, type);
                 } else if (type == Constants.MEI_TUAN_CALLBACK_TYPE_ORDER_CANCEL) {
-                    meiTuanService.handleOrderCancelCallback(callbackParametersJsonObject, uuid, type);
+                    meiTuanService.handleOrderCancelCallback(callbackParameters, uuid, type);
                 } else if (type == Constants.MEI_TUAN_CALLBACK_TYPE_ORDER_REFUND) {
-                    meiTuanService.handleOrderRefundCallback(callbackParametersJsonObject, uuid, type);
-                } else if (type == 8) {
-                    meiTuanService.handleBindingStoreCallback(callbackParametersJsonObject, uuid, type);
+                    meiTuanService.handleOrderRefundCallback(callbackParameters, uuid, type);
+                } else if (type == Constants.MEI_TUAN_CALLBACK_TYPE_ORDER_CONFIRM) {
+                    meiTuanService.handleOrderConfirmCallback(callbackParameters, uuid, type);
+                } else if (type == Constants.MEI_TUAN_CALLBACK_TYPE_ORDER_SETTLED) {
+                    meiTuanService.handleOrderSettledCallback(callbackParameters, uuid, type);
+                } else if (type == Constants.MEI_TUAN_CALLBACK_TYPE_ORDER_SHIPPING_STATUS) {
+                    meiTuanService.handleOrderShippingStatusCallback(callbackParameters, uuid, type);
+                } else if (type == Constants.MEI_TUAN_CALLBACK_TYPE_POI_STATUS) {
+                    meiTuanService.handlePoiStatusCallback(callbackParameters, uuid, type);
+                } else if (type == Constants.MEI_TUAN_CALLBACK_TYPE_PART_ORDER_REFUND) {
+                    meiTuanService.handlePartOrderRefundCallback(callbackParameters, uuid, type);
+                } else if (type == Constants.MEI_TUAN_CALLBACK_TYPE_BINDING_STORE) {
+                    meiTuanService.handleBindingStoreCallback(callbackParameters, uuid, type);
                 }
             } catch (Exception e) {
                 isNormal = false;
                 if (count == 1) {
-                    DingtalkUtils.send(String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "饿了么消息处理失败", GsonUtils.toJson(callbackParametersJsonObject), e.getClass().getName(), e.getMessage()));
+                    DingtalkUtils.send(String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "饿了么消息处理失败", GsonUtils.toJson(callbackParameters), e.getClass().getName(), e.getMessage()));
                 }
             }
             if (isNormal) {

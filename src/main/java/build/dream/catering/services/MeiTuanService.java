@@ -65,12 +65,9 @@ public class MeiTuanService {
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleOrderEffectiveCallback(JSONObject callbackParametersJsonObject, String uuid, Integer type) {
-//        String ePoiId = callbackParametersJsonObject.getString("ePoiId");
-//        JSONObject orderJsonObject = callbackParametersJsonObject.getJSONObject("order");
-
-        String ePoiId = "1Z1074954252843094017";
-        JSONObject orderJsonObject = callbackParametersJsonObject;
+    public void handleOrderEffectiveCallback(Map<String, Object> callbackParameters, String uuid, Integer type) {
+        String ePoiId = MapUtils.getString(callbackParameters, "ePoiId");
+        Map<String, Object> orderMap = MapUtils.getMap(callbackParameters, "order");
 
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
         BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
@@ -83,7 +80,7 @@ public class MeiTuanService {
 
         String tenantCode = branch.getTenantCode();
 
-        int status = orderJsonObject.getInt("status");
+        int status = MapUtils.getIntValue(orderMap, "status");
         int orderStatus = Constants.INT_DEFAULT_VALUE;
         if (status == 1) {
             orderStatus = DietOrderConstants.ORDER_STATUS_PENDING;
@@ -99,10 +96,10 @@ public class MeiTuanService {
 
         BigInteger userId = CommonUtils.getServiceSystemUserId();
 
-        BigDecimal totalAmount = BigDecimal.valueOf(orderJsonObject.getDouble("originalPrice"));
+        BigDecimal totalAmount = BigDecimal.valueOf(MapUtils.getDoubleValue(orderMap, "originalPrice"));
         BigDecimal discountAmount = Constants.DECIMAL_DEFAULT_VALUE;
 
-        String extras = orderJsonObject.getString("extras");
+        String extras = MapUtils.getString(orderMap, "extras");
         List<DietOrderActivity> dietOrderActivities = new ArrayList<DietOrderActivity>();
         if (StringUtils.isNotBlank(extras)) {
             JSONArray extrasJsonArray = JSONArray.fromObject(extras);
@@ -134,7 +131,7 @@ public class MeiTuanService {
         BigDecimal payableAmount = totalAmount.subtract(discountAmount);
         BigDecimal paidAmount = Constants.DECIMAL_DEFAULT_VALUE;
 
-        int payType = orderJsonObject.getInt("payType");
+        int payType = MapUtils.getIntValue(orderMap, "payType");
         int payStatus = Constants.INT_DEFAULT_VALUE;
         int paidType = Constants.INT_DEFAULT_VALUE;
         if (payType == 1) {
@@ -147,28 +144,28 @@ public class MeiTuanService {
 
         int refundStatus = DietOrderConstants.REFUND_STATUS_NO_REFUND;
 
-        String caution = orderJsonObject.getString("caution");
+        String caution = MapUtils.getString(orderMap, "caution");
 
-        long deliveryTime = orderJsonObject.optLong("deliveryTime");
+        long deliveryTime = MapUtils.getLongValue(orderMap, "deliveryTime");
         Calendar deliveryTimeCalendar = Calendar.getInstance();
         deliveryTimeCalendar.setTimeInMillis(deliveryTime * 1000);
 
         Date activeTime = null;
-        if (orderJsonObject.has("orderSendTime")) {
-            long orderSendTime = orderJsonObject.getLong("orderSendTime");
+        if (orderMap.containsKey("orderSendTime")) {
+            long orderSendTime = MapUtils.getLongValue(orderMap, "orderSendTime");
             Calendar orderSendTimeCalendar = Calendar.getInstance();
             orderSendTimeCalendar.setTimeInMillis(orderSendTime * 1000);
             activeTime = orderSendTimeCalendar.getTime();
         } else {
-            long ctime = orderJsonObject.getLong("ctime");
+            long ctime = MapUtils.getLongValue(orderMap, "ctime");
             Calendar ctimeCalendar = Calendar.getInstance();
             ctimeCalendar.setTimeInMillis(ctime * 1000);
             activeTime = ctimeCalendar.getTime();
         }
 
-        BigDecimal shippingFee = BigDecimal.valueOf(orderJsonObject.getDouble("shippingFee"));
+        BigDecimal shippingFee = BigDecimal.valueOf(MapUtils.getDoubleValue(orderMap, "shippingFee"));
 
-        int hasInvoiced = orderJsonObject.optInt("hasInvoiced");
+        int hasInvoiced = MapUtils.getIntValue(orderMap, "hasInvoiced");
         boolean invoiced = false;
         String invoiceType = Constants.VARCHAR_DEFAULT_VALUE;
         String invoice = Constants.VARCHAR_DEFAULT_VALUE;
@@ -176,14 +173,14 @@ public class MeiTuanService {
             invoiced = false;
         } else {
             invoiced = true;
-            invoice = orderJsonObject.getString("invoiceTitle");
+            invoice = MapUtils.getString(orderMap, "invoiceTitle");
         }
 
         DietOrder dietOrder = DietOrder.builder()
                 .tenantId(tenantId)
                 .tenantCode(tenantCode)
                 .branchId(branchId)
-                .orderNumber("M" + orderJsonObject.get("orderId"))
+                .orderNumber("M" + MapUtils.getLong(orderMap, "orderId"))
                 .orderType(DietOrderConstants.ORDER_TYPE_MEI_TUAN_ORDER)
                 .orderStatus(orderStatus)
                 .payStatus(payStatus)
@@ -194,15 +191,15 @@ public class MeiTuanService {
                 .paidAmount(paidAmount)
                 .paidType(paidType)
                 .remark(StringUtils.isNotBlank(caution) ? caution : Constants.VARCHAR_DEFAULT_VALUE)
-                .deliveryAddress(orderJsonObject.getString("recipientAddress"))
-                .deliveryLongitude(orderJsonObject.getString("longitude"))
-                .deliveryLatitude(orderJsonObject.getString("latitude"))
+                .deliveryAddress(MapUtils.getString(orderMap, "recipientAddress"))
+                .deliveryLongitude(MapUtils.getString(orderMap, "longitude"))
+                .deliveryLatitude(MapUtils.getString(orderMap, "latitude"))
                 .deliverTime(deliveryTimeCalendar.getTime())
                 .activeTime(activeTime)
                 .deliverFee(shippingFee)
-                .telephoneNumber(orderJsonObject.getString("recipientPhone"))
-                .daySerialNumber(orderJsonObject.getString("daySeq"))
-                .consignee(orderJsonObject.getString("recipientName"))
+                .telephoneNumber(MapUtils.getString(orderMap, "recipientPhone"))
+                .daySerialNumber(MapUtils.getString(orderMap, "daySeq"))
+                .consignee(MapUtils.getString(orderMap, "recipientName"))
                 .invoiced(invoiced)
                 .invoiceType(invoiceType)
                 .invoice(invoice)
@@ -240,7 +237,7 @@ public class MeiTuanService {
 
 //        JSONObject poiReceiveDetailJsonObject = orderJsonObject.optJSONObject("poiReceiveDetail");
 
-        String detail = orderJsonObject.getString("detail");
+        String detail = MapUtils.getString(orderMap, "detail");
         JSONArray detailJsonArray = JSONArray.fromObject(detail);
         int detailSize = detailJsonArray.size();
 
@@ -391,17 +388,17 @@ public class MeiTuanService {
     /**
      * 处理订单取消回调
      *
-     * @param callbackParametersJsonObject
-     * @return
-     * @throws IOException
+     * @param callbackParameters
+     * @param uuid
+     * @param type
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleOrderCancelCallback(JSONObject callbackParametersJsonObject, String uuid, int type) {
-        String developerId = callbackParametersJsonObject.getString("developerId");
-        String ePoiId = callbackParametersJsonObject.getString("ePoiId");
-        String sign = callbackParametersJsonObject.getString("sign");
-        JSONObject orderCancelJsonObject = callbackParametersJsonObject.getJSONObject("orderCancel");
-        BigInteger orderId = BigInteger.valueOf(orderCancelJsonObject.getLong("orderId"));
+    public void handleOrderCancelCallback(Map<String, Object> callbackParameters, String uuid, int type) {
+        String developerId = MapUtils.getString(callbackParameters, "developerId");
+        String ePoiId = MapUtils.getString(callbackParameters, "ePoiId");
+        String sign = MapUtils.getString(callbackParameters, "sign");
+        Map<String, Object> orderCancelMap = MapUtils.getMap(callbackParameters, "orderCancel");
+        BigInteger orderId = BigInteger.valueOf(MapUtils.getLongValue(orderCancelMap, "orderId"));
 
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
         BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
@@ -429,17 +426,17 @@ public class MeiTuanService {
     /**
      * 处理订单退款回调
      *
-     * @param callbackParametersJsonObject
-     * @return
-     * @throws IOException
+     * @param callbackParameters
+     * @param uuid
+     * @param type
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleOrderRefundCallback(JSONObject callbackParametersJsonObject, String uuid, int type) {
-        String developerId = callbackParametersJsonObject.getString("developerId");
-        String ePoiId = callbackParametersJsonObject.getString("ePoiId");
-        String sign = callbackParametersJsonObject.getString("sign");
-        JSONObject orderRefundJsonObject = callbackParametersJsonObject.getJSONObject("orderCancel");
-        BigInteger orderId = BigInteger.valueOf(orderRefundJsonObject.getLong("orderId"));
+    public void handleOrderRefundCallback(Map<String, Object> callbackParameters, String uuid, int type) {
+        String developerId = MapUtils.getString(callbackParameters, "developerId");
+        String ePoiId = MapUtils.getString(callbackParameters, "ePoiId");
+        String sign = MapUtils.getString(callbackParameters, "sign");
+        Map<String, Object> orderRefundMap = MapUtils.getMap(callbackParameters, "orderRefund");
+        BigInteger orderId = BigInteger.valueOf(MapUtils.getLongValue(orderRefundMap, "orderId"));
 
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
         BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
@@ -456,7 +453,7 @@ public class MeiTuanService {
 
         BigInteger dietOrderId = dietOrder.getId();
 
-        String notifyType = orderRefundJsonObject.getString("notifyType");
+        String notifyType = MapUtils.getString(orderRefundMap, "notifyType");
         int refundStatus = Constants.INT_DEFAULT_VALUE;
         if (DietOrderConstants.APPLY.equals(notifyType)) {
             refundStatus = DietOrderConstants.REFUND_STATUS_APPLIED;
@@ -498,15 +495,16 @@ public class MeiTuanService {
     /**
      * 处理门店绑定回调
      *
-     * @param callbackParametersJsonObject
-     * @return
+     * @param callbackParameters
+     * @param uuid
+     * @param type
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleBindingStoreCallback(JSONObject callbackParametersJsonObject, String uuid, int type) {
-        String ePoiId = callbackParametersJsonObject.getString("ePoiId");
-        String appAuthToken = callbackParametersJsonObject.getString("appAuthToken");
-        String poiId = callbackParametersJsonObject.getString("poiId");
-        String poiName = callbackParametersJsonObject.getString("poiName");
+    public void handleBindingStoreCallback(Map<String, Object> callbackParameters, String uuid, int type) {
+        String ePoiId = MapUtils.getString(callbackParameters, "ePoiId");
+        String appAuthToken = MapUtils.getString(callbackParameters, "appAuthToken");
+        String poiId = MapUtils.getString(callbackParameters, "poiId");
+        String poiName = MapUtils.getString(callbackParameters, "poiName");
 
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
         BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
@@ -704,5 +702,56 @@ public class MeiTuanService {
         String data = MapUtils.getString(result, "data");
         ValidateUtils.isTrue(Constants.OK.equals(data), "设置订单已送达状态失败！");
         return ApiRest.builder().message("设置订单已送达状态成功！").successful(true).build();
+    }
+
+    /**
+     * 处理订单确认回调
+     *
+     * @param callbackParameters
+     * @param uuid
+     * @param type
+     */
+    public void handleOrderConfirmCallback(Map<String, Object> callbackParameters, String uuid, int type) {
+    }
+
+    /**
+     * 处理订单完成回调
+     *
+     * @param callbackParameters
+     * @param uuid
+     * @param type
+     */
+    public void handleOrderSettledCallback(Map<String, Object> callbackParameters, String uuid, int type) {
+    }
+
+    /**
+     * 处理订单配送状态改变回调
+     *
+     * @param callbackParameters
+     * @param uuid
+     * @param type
+     */
+    public void handleOrderShippingStatusCallback(Map<String, Object> callbackParameters, String uuid, int type) {
+    }
+
+    /**
+     * 处理门店状态回调
+     *
+     * @param callbackParameters
+     * @param uuid
+     * @param type
+     */
+    public void handlePoiStatusCallback(Map<String, Object> callbackParameters, String uuid, int type) {
+    }
+
+    /**
+     * 处理部分退款回调
+     *
+     * @param callbackParameters
+     * @param uuid
+     * @param type
+     */
+    public void handlePartOrderRefundCallback(Map<String, Object> callbackParameters, String uuid, int type) {
+
     }
 }
