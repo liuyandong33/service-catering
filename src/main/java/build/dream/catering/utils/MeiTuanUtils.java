@@ -2,11 +2,15 @@ package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
 import build.dream.common.beans.WebResponse;
+import build.dream.common.catering.domains.DietOrder;
 import build.dream.common.utils.*;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import scala.Tuple2;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -65,5 +69,33 @@ public class MeiTuanUtils {
         String meiTuanAppAuthToken = CommonRedisUtils.hget(Constants.KEY_MEI_TUAN_APP_AUTH_TOKENS, tenantId + "_" + branchId);
         ValidateUtils.notNull(meiTuanAppAuthToken, "门店未绑定美团！");
         return meiTuanAppAuthToken;
+    }
+
+    public static Tuple2<BigInteger, BigInteger> obtainTenantAndBranchId(Map<String, Object> callbackParameters) {
+        String ePoiId = MapUtils.getString(callbackParameters, "ePoiId");
+        return obtainTenantAndBranchId(ePoiId);
+    }
+
+    public static Tuple2<BigInteger, BigInteger> obtainTenantAndBranchId(String ePoiId) {
+        String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
+        BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
+        BigInteger branchId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[1]);
+        return TupleUtils.buildTuple2(tenantId, branchId);
+    }
+
+    public static DietOrder obtainDietOrder(Map<String, Object> callbackParameters) {
+        Tuple2<BigInteger, BigInteger> tuple2 = MeiTuanUtils.obtainTenantAndBranchId(callbackParameters);
+        BigInteger tenantId = tuple2._1();
+        BigInteger branchId = tuple2._2();
+        Map<String, Object> orderMap = MapUtils.getMap(callbackParameters, "order");
+        String orderId = MapUtils.getString(orderMap, "orderId");
+
+        SearchModel searchModel = SearchModel.builder()
+                .autoSetDeletedFalse()
+                .addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)
+                .addSearchCondition(DietOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId)
+                .addSearchCondition(DietOrder.ColumnName.ORDER_NUMBER, Constants.SQL_OPERATION_SYMBOL_EQUAL, "M" + orderId)
+                .build();
+        return DatabaseHelper.find(DietOrder.class, searchModel);
     }
 }

@@ -712,6 +712,15 @@ public class MeiTuanService {
      * @param type
      */
     public void handleOrderConfirmCallback(Map<String, Object> callbackParameters, String uuid, int type) {
+        DietOrder dietOrder = MeiTuanUtils.obtainDietOrder(callbackParameters);
+        if (dietOrder == null) {
+            return;
+        }
+
+        dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_VALID);
+        dietOrder.setUpdatedUserId(CommonUtils.getServiceSystemUserId());
+        dietOrder.setUpdatedRemark("接收美团订单已确认消息。");
+        DatabaseHelper.update(dietOrder);
     }
 
     /**
@@ -722,6 +731,15 @@ public class MeiTuanService {
      * @param type
      */
     public void handleOrderSettledCallback(Map<String, Object> callbackParameters, String uuid, int type) {
+        DietOrder dietOrder = MeiTuanUtils.obtainDietOrder(callbackParameters);
+        if (dietOrder == null) {
+            return;
+        }
+
+        dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_SETTLED);
+        dietOrder.setUpdatedUserId(CommonUtils.getServiceSystemUserId());
+        dietOrder.setUpdatedRemark("接收美团订单完成消息。");
+        DatabaseHelper.update(dietOrder);
     }
 
     /**

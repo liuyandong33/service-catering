@@ -10,9 +10,10 @@
         <connectionSource class="ch.qos.logback.core.db.DataSourceConnectionSource">
             <dataSource class="com.alibaba.druid.pool.DruidDataSource">
                 <driverClassName>com.mysql.cj.jdbc.Driver</driverClassName>
-                <url><![CDATA[jdbc:mysql://localhost:3306/hua-neng?serverTimezone=GMT%2B8&useSSL=true]]></url>
+                <url><![CDATA[jdbc:mysql://192.168.51.126:3306/log-test_51-z1-ui-o2o-portal?serverTimezone=GMT%2B8&useSSL=true]]></url>
                 <username>root</username>
                 <password>root</password>
+                <initialSize>3</initialSize>
             </dataSource>
         </connectionSource>
     </appender>-->
@@ -21,8 +22,8 @@
         <discardingThreshold>0</discardingThreshold>
         <queueSize>512</queueSize>
         <appender-ref ref="database"></appender-ref>
-    </appender>-->
-
+    </appender>
+-->
     <root level="INFO">
         <appender-ref ref="console"></appender-ref>
         <!--<appender-ref ref="async"></appender-ref>-->
