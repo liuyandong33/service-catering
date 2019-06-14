@@ -750,16 +750,6 @@ public class MeiTuanService {
      * @param type
      */
     public void handleOrderShippingStatusCallback(Map<String, Object> callbackParameters, String uuid, int type) {
-    }
-
-    /**
-     * 处理门店状态回调
-     *
-     * @param callbackParameters
-     * @param uuid
-     * @param type
-     */
-    public void handlePoiStatusCallback(Map<String, Object> callbackParameters, String uuid, int type) {
         DietOrder dietOrder = MeiTuanUtils.obtainDietOrder(callbackParameters);
         if (dietOrder == null) {
             return;
@@ -782,6 +772,17 @@ public class MeiTuanService {
                 .deliverPhone(StringUtils.isBlank(dispatcherMobile) ? Constants.VARCHAR_DEFAULT_VALUE : dispatcherMobile)
                 .build();
         DatabaseHelper.insert(dietOrderDeliveryRecord);
+    }
+
+    /**
+     * 处理门店状态回调
+     *
+     * @param callbackParameters
+     * @param uuid
+     * @param type
+     */
+    public void handlePoiStatusCallback(Map<String, Object> callbackParameters, String uuid, int type) {
+
     }
 
     /**
