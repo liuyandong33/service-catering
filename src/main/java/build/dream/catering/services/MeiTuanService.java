@@ -782,7 +782,22 @@ public class MeiTuanService {
      * @param type
      */
     public void handlePoiStatusCallback(Map<String, Object> callbackParameters, String uuid, int type) {
+        Branch branch = MeiTuanUtils.obtainBranch(callbackParameters);
+        if (branch == null) {
+            return;
+        }
 
+        Map<String, Object> poiStatusMap = MapUtils.getMap(callbackParameters, "poiStatus");
+        int poiStatus = MapUtils.getIntValue(poiStatusMap, "poiStatus");
+        if (poiStatus == 121) {
+
+        } else if (poiStatus == 120) {
+
+        } else if (poiStatus == 18) {
+
+        } else if (poiStatus == 19) {
+
+        }
     }
 
     /**

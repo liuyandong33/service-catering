@@ -2,6 +2,7 @@ package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
 import build.dream.common.beans.WebResponse;
+import build.dream.common.catering.domains.Branch;
 import build.dream.common.catering.domains.DietOrder;
 import build.dream.common.utils.*;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -97,5 +98,22 @@ public class MeiTuanUtils {
                 .addSearchCondition(DietOrder.ColumnName.ORDER_NUMBER, Constants.SQL_OPERATION_SYMBOL_EQUAL, "M" + orderId)
                 .build();
         return DatabaseHelper.find(DietOrder.class, searchModel);
+    }
+
+    public static Branch obtainBranch(String ePoiId) {
+        Tuple2<BigInteger, BigInteger> tuple2 = MeiTuanUtils.obtainTenantAndBranchId(ePoiId);
+        BigInteger tenantId = tuple2._1();
+        BigInteger branchId = tuple2._2();
+
+        SearchModel searchModel = SearchModel.builder()
+                .addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)
+                .addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId)
+                .build();
+        return DatabaseHelper.find(Branch.class, searchModel);
+    }
+
+    public static Branch obtainBranch(Map<String, Object> callbackParameters) {
+        String ePoiId = MapUtils.getString(callbackParameters, "ePoiId");
+        return obtainBranch(ePoiId);
     }
 }
