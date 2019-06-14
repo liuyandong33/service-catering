@@ -3,6 +3,7 @@ package build.dream.catering.controllers;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.services.DemoService;
 import build.dream.common.api.ApiRest;
+import build.dream.common.models.weixinpay.OrderQueryModel;
 import build.dream.common.models.weixinpay.RefundModel;
 import build.dream.common.utils.*;
 import org.apache.commons.lang.RandomStringUtils;
@@ -110,5 +111,37 @@ public class DemoController {
     @ResponseBody
     public String testRedis() {
         return Constants.SUCCESS;
+    }
+
+    @RequestMapping(value = "/testMiya")
+    @ResponseBody
+    public String testMiya() {
+        build.dream.common.models.miya.OrderQueryModel orderQueryModel = build.dream.common.models.miya.OrderQueryModel.builder()
+                .a2("1508732761")
+                .a3("000")
+                .a4("0000")
+                .a5("1111")
+                .miyaKey("RM2T04rS5z5Tt6d24Pcn8v92XQR427K9")
+                .b1(ApplicationHandler.getRequestParameter("b1"))
+                .build();
+        Map<String, String> result = MiyaUtils.orderQuery(orderQueryModel);
+        return JacksonUtils.writeValueAsString(result);
+    }
+
+    @RequestMapping(value = "/testWeiXinPay")
+    @ResponseBody
+    public String testWeiXinPay() {
+        OrderQueryModel orderQueryModel = OrderQueryModel.builder()
+                .appId("wx63f5194332cc0f1b")
+                .mchId("1312787601")
+                .apiSecretKey("qingdaozhihuifangxiangruanjian12")
+                .subAppId("wx7d300c39c2a9c146")
+                .subMchId("1512374851")
+                .acceptanceModel(true)
+                .transactionId(ApplicationHandler.getRequestParameter("transactionId"))
+//                .outTradeNo("111670884821319061318450420572")
+                .build();
+        Map<String, String> result = WeiXinPayUtils.orderQuery(orderQueryModel);
+        return JacksonUtils.writeValueAsString(result);
     }
 }

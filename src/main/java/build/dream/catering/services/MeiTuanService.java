@@ -760,6 +760,28 @@ public class MeiTuanService {
      * @param type
      */
     public void handlePoiStatusCallback(Map<String, Object> callbackParameters, String uuid, int type) {
+        DietOrder dietOrder = MeiTuanUtils.obtainDietOrder(callbackParameters);
+        if (dietOrder == null) {
+            return;
+        }
+
+        Map<String, Object> shippingStatusMap = MapUtils.getMap(callbackParameters, "shippingStatus");
+        int shippingStatus = MapUtils.getIntValue(shippingStatusMap, "shippingStatus");
+        String dispatcherName = MapUtils.getString(shippingStatusMap, "dispatcherName");
+        String dispatcherMobile = MapUtils.getString(shippingStatusMap, "dispatcherMobile");
+
+        DietOrderDeliveryRecord dietOrderDeliveryRecord = DietOrderDeliveryRecord.builder()
+                .tenantId(dietOrder.getTenantId())
+                .tenantCode(dietOrder.getTenantCode())
+                .branchId(dietOrder.getBranchId())
+                .dietOrderId(dietOrder.getId())
+                .elemeState(Constants.VARCHAR_DEFAULT_VALUE)
+                .elemeSubState(Constants.VARCHAR_DEFAULT_VALUE)
+                .meiTuanShippingStatus(shippingStatus)
+                .deliverName(StringUtils.isBlank(dispatcherName) ? Constants.VARCHAR_DEFAULT_VALUE : dispatcherName)
+                .deliverPhone(StringUtils.isBlank(dispatcherMobile) ? Constants.VARCHAR_DEFAULT_VALUE : dispatcherMobile)
+                .build();
+        DatabaseHelper.insert(dietOrderDeliveryRecord);
     }
 
     /**
