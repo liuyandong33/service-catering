@@ -12,8 +12,8 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -429,7 +429,16 @@ public class ElemeService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void handleElemeRefundOrderMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
+        BigInteger tenantId = elemeCallbackMessage.getTenantId();
+        BigInteger branchId = elemeCallbackMessage.getBranchId();
+        String message = elemeCallbackMessage.getMessage();
 
+        Map<String, Object> messageMap = JacksonUtils.readValueAsMap(message, String.class, Object.class);
+        String orderId = MapUtils.getString(messageMap, "orderId");
+
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, "E" + orderId);
+        DatabaseHelper.update(dietOrder);
+        DatabaseHelper.insert(elemeCallbackMessage);
     }
 
     /**
@@ -533,6 +542,26 @@ public class ElemeService {
         searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition(DietOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         searchModel.addSearchCondition(DietOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, elemeOrderId);
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
+        return dietOrder;
+    }
+
+    /**
+     * 查询订单信息，并校验非空
+     *
+     * @param tenantId
+     * @param branchId
+     * @param orderNumber
+     * @return
+     */
+    private DietOrder obtainDietOrder(BigInteger tenantId, BigInteger branchId, String orderNumber) {
+        SearchModel searchModel = SearchModel.builder()
+                .autoSetDeletedFalse()
+                .addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)
+                .addSearchCondition(DietOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId)
+                .addSearchCondition(DietOrder.ColumnName.ORDER_NUMBER, Constants.SQL_OPERATION_SYMBOL_EQUAL, orderNumber)
+                .build();
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
         ValidateUtils.notNull(dietOrder, "订单不存在！");
         return dietOrder;
