@@ -1133,6 +1133,6 @@ public class ElemeService {
 
         Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.product.item.batchGetItems", params);
 
-        return ApiRest.builder().data(result).message("查询商品详情成功！").successful(true).build();
+        return ApiRest.builder().data(result).message("批量查询商品详情成功！").successful(true).build();
     }
 }
