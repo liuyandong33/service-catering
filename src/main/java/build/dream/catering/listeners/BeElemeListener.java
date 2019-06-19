@@ -16,7 +16,7 @@ public class BeElemeListener implements MessageListener<String, String> {
     @Autowired
     private BeElemeService beElemeService;
 
-    @KafkaListener(topics = "${eleme.message.topic}")
+    @KafkaListener(topics = "${be.eleme.message.topic}")
     @Override
     public void onMessage(ConsumerRecord<String, String> data) {
         String message = data.value();

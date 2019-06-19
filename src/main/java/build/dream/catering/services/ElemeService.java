@@ -111,21 +111,20 @@ public class ElemeService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void saveElemeOrder(ElemeCallbackMessage elemeCallbackMessage, String uuid) throws ParseException {
-        JSONObject messageJsonObject = JSONObject.fromObject(elemeCallbackMessage.getMessage());
+        BigInteger tenantId = elemeCallbackMessage.getTenantId();
+        String tenantCode = elemeCallbackMessage.getTenantCode();
+        BigInteger branchId = elemeCallbackMessage.getBranchId();
+        String message = elemeCallbackMessage.getMessage();
+        BigInteger shopId = elemeCallbackMessage.getShopId();
 
-        String openId = messageJsonObject.getString("openId");
-        String[] array = openId.split("Z");
-        BigInteger tenantId = NumberUtils.createBigInteger(array[0]);
-        BigInteger branchId = NumberUtils.createBigInteger(array[1]);
-
+        JSONObject messageJsonObject = JSONObject.fromObject(message);
         SearchModel branchSearchModel = new SearchModel(true);
         branchSearchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         branchSearchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        branchSearchModel.addSearchCondition(Branch.ColumnName.SHOP_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, elemeCallbackMessage.getShopId());
+        branchSearchModel.addSearchCondition(Branch.ColumnName.SHOP_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, shopId);
         Branch branch = DatabaseHelper.find(Branch.class, branchSearchModel);
         ValidateUtils.notNull(branch, "门店不存在！");
 
-        String tenantCode = branch.getTenantCode();
 
         // 开始保存饿了么订单
         JSONArray phoneList = messageJsonObject.optJSONArray("phoneList");
@@ -416,7 +415,6 @@ public class ElemeService {
                     .build();
             DatabaseHelper.insert(dietOrderDetail);
         }
-        elemeCallbackMessage.setBranchId(branchId);
         elemeCallbackMessage.setCreatedUserId(userId);
         elemeCallbackMessage.setUpdatedUserId(userId);
         DatabaseHelper.insert(elemeCallbackMessage);
