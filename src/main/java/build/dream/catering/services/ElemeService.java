@@ -1114,4 +1114,25 @@ public class ElemeService {
 
         return ApiRest.builder().data(result).message("查询商品详情成功！").successful(true).build();
     }
+
+    /**
+     * 批量查询商品详情
+     *
+     * @param batchGetItemsModel
+     * @return
+     */
+    public ApiRest batchGetItems(BatchGetItemsModel batchGetItemsModel) {
+        BigInteger tenantId = batchGetItemsModel.obtainTenantId();
+        BigInteger branchId = batchGetItemsModel.obtainBranchId();
+        List<BigInteger> itemIds = batchGetItemsModel.getItemIds();
+
+        Branch branch = obtainBranch(tenantId, branchId);
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("itemIds", itemIds);
+
+        Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.product.item.batchGetItems", params);
+
+        return ApiRest.builder().data(result).message("查询商品详情成功！").successful(true).build();
+    }
 }

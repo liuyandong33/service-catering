@@ -272,4 +272,16 @@ public class ElemeController extends BasicController {
     public String getItem() {
         return null;
     }
+
+    /**
+     * 批量查询商品详情
+     *
+     * @return
+     */
+    @RequestMapping(value = "/batchGetItems", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = BatchGetItemsModel.class, serviceClass = ElemeService.class, serviceMethodName = "batchGetItems", error = "批量查询商品详情失败")
+    public String batchGetItems() {
+        return null;
+    }
 }
