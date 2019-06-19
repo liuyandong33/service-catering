@@ -432,13 +432,63 @@ public class ElemeService {
         BigInteger tenantId = elemeCallbackMessage.getTenantId();
         BigInteger branchId = elemeCallbackMessage.getBranchId();
         String message = elemeCallbackMessage.getMessage();
+        int type = elemeCallbackMessage.getType();
+        BigInteger userId = CommonUtils.getServiceSystemUserId();
 
         Map<String, Object> messageMap = JacksonUtils.readValueAsMap(message, String.class, Object.class);
         String orderId = MapUtils.getString(messageMap, "orderId");
 
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, "E" + orderId);
-        DatabaseHelper.update(dietOrder);
+
+        elemeCallbackMessage.setCreatedUserId(userId);
+        elemeCallbackMessage.setUpdatedUserId(userId);
         DatabaseHelper.insert(elemeCallbackMessage);
+
+        if (dietOrder == null) {
+            return;
+        }
+
+        if (type == 30) {
+            dietOrder.setRefundStatus(DietOrderConstants.REFUND_STATUS_APPLIED);
+            dietOrder.setUpdatedUserId(userId);
+            DatabaseHelper.update(dietOrder);
+        }
+
+        if (type == 31) {
+            dietOrder.setRefundStatus(DietOrderConstants.REFUND_STATUS_NO_REFUND);
+            dietOrder.setUpdatedUserId(userId);
+            DatabaseHelper.update(dietOrder);
+        }
+
+        if (type == 32) {
+            dietOrder.setRefundStatus(DietOrderConstants.REFUND_STATUS_REJECTED);
+            dietOrder.setUpdatedUserId(userId);
+            DatabaseHelper.update(dietOrder);
+        }
+
+        if (type == 33) {
+            dietOrder.setRefundStatus(DietOrderConstants.REFUND_STATUS_SUCCESSFUL);
+            dietOrder.setUpdatedUserId(userId);
+            DatabaseHelper.update(dietOrder);
+        }
+
+        if (type == 34) {
+            dietOrder.setRefundStatus(DietOrderConstants.REFUND_STATUS_ARBITRATING);
+            dietOrder.setUpdatedUserId(userId);
+            DatabaseHelper.update(dietOrder);
+        }
+
+        if (type == 35) {
+            dietOrder.setRefundStatus(DietOrderConstants.REFUND_STATUS_SUCCESSFUL);
+            dietOrder.setUpdatedUserId(userId);
+            DatabaseHelper.update(dietOrder);
+        }
+
+        if (type == 36) {
+            dietOrder.setRefundStatus(DietOrderConstants.REFUND_STATUS_NO_REFUND);
+            dietOrder.setUpdatedUserId(userId);
+            DatabaseHelper.update(dietOrder);
+        }
     }
 
     /**
@@ -450,7 +500,10 @@ public class ElemeService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void handleElemeReminderMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
-
+        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        elemeCallbackMessage.setCreatedUserId(userId);
+        elemeCallbackMessage.setUpdatedUserId(userId);
+        DatabaseHelper.insert(elemeCallbackMessage);
     }
 
     /**
@@ -462,7 +515,24 @@ public class ElemeService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void handleElemeCancelOrderMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
+        BigInteger tenantId = elemeCallbackMessage.getTenantId();
+        BigInteger branchId = elemeCallbackMessage.getBranchId();
+        String message = elemeCallbackMessage.getMessage();
+        int type = elemeCallbackMessage.getType();
+        BigInteger userId = CommonUtils.getServiceSystemUserId();
 
+        Map<String, Object> messageMap = JacksonUtils.readValueAsMap(message, String.class, Object.class);
+        String orderId = MapUtils.getString(messageMap, "orderId");
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, "E" + orderId);
+        if (dietOrder != null && (type == 23 || type == 25)) {
+            dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_INVALID);
+            dietOrder.setUpdatedUserId(userId);
+            DatabaseHelper.update(dietOrder);
+        }
+
+        elemeCallbackMessage.setCreatedUserId(userId);
+        elemeCallbackMessage.setUpdatedUserId(userId);
+        DatabaseHelper.insert(elemeCallbackMessage);
     }
 
     /**
@@ -474,7 +544,42 @@ public class ElemeService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void handleElemeOrderStateChangeMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
+        BigInteger tenantId = elemeCallbackMessage.getTenantId();
+        BigInteger branchId = elemeCallbackMessage.getBranchId();
+        String message = elemeCallbackMessage.getMessage();
+        int type = elemeCallbackMessage.getType();
+        BigInteger userId = CommonUtils.getServiceSystemUserId();
 
+        Map<String, Object> messageMap = JacksonUtils.readValueAsMap(message, String.class, Object.class);
+        String orderId = MapUtils.getString(messageMap, "orderId");
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, "E" + orderId);
+
+        elemeCallbackMessage.setCreatedUserId(userId);
+        elemeCallbackMessage.setUpdatedUserId(userId);
+        DatabaseHelper.insert(elemeCallbackMessage);
+
+        if (dietOrder == null) {
+            return;
+        }
+
+        if (type == 12) {
+            dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_VALID);
+            dietOrder.setUpdatedUserId(userId);
+            DatabaseHelper.update(dietOrder);
+        }
+
+        if (type == 14 || type == 15 || type == 17) {
+            dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_INVALID);
+            dietOrder.setUpdatedUserId(userId);
+            dietOrder.setRefundStatus(DietOrderConstants.REFUND_STATUS_SUCCESSFUL);
+            DatabaseHelper.update(dietOrder);
+        }
+
+        if (type == 18) {
+            dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_SETTLED);
+            dietOrder.setUpdatedUserId(userId);
+            DatabaseHelper.update(dietOrder);
+        }
     }
 
     /**
@@ -486,7 +591,41 @@ public class ElemeService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void handleElemeDeliveryOrderStateChangeMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
+        BigInteger tenantId = elemeCallbackMessage.getTenantId();
+        String tenantCode = elemeCallbackMessage.getTenantCode();
+        BigInteger branchId = elemeCallbackMessage.getBranchId();
+        String message = elemeCallbackMessage.getMessage();
+        BigInteger userId = CommonUtils.getServiceSystemUserId();
 
+        Map<String, Object> messageMap = JacksonUtils.readValueAsMap(message, String.class, Object.class);
+        String orderId = MapUtils.getString(messageMap, "orderId");
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, "E" + orderId);
+
+        elemeCallbackMessage.setCreatedUserId(userId);
+        elemeCallbackMessage.setUpdatedUserId(userId);
+        DatabaseHelper.insert(elemeCallbackMessage);
+
+        if (dietOrder == null) {
+            return;
+        }
+
+        String state = MapUtils.getString(messageMap, "state");
+        String subState = MapUtils.getString(messageMap, "subState");
+        String name = MapUtils.getString(messageMap, "name");
+        String phone = MapUtils.getString(messageMap, "phone");
+
+        DietOrderDeliveryRecord dietOrderDeliveryRecord = DietOrderDeliveryRecord.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .dietOrderId(dietOrder.getId())
+                .elemeState(state)
+                .elemeSubState(subState)
+                .meiTuanShippingStatus(-1)
+                .deliverName(StringUtils.isBlank(name) ? Constants.VARCHAR_DEFAULT_VALUE : name)
+                .deliverPhone(StringUtils.isBlank(phone) ? Constants.VARCHAR_DEFAULT_VALUE : phone)
+                .build();
+        DatabaseHelper.insert(dietOrderDeliveryRecord);
     }
 
     public void handleElemeShopStateChangeMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
@@ -548,7 +687,7 @@ public class ElemeService {
     }
 
     /**
-     * 查询订单信息，并校验非空
+     * 查询订单信息
      *
      * @param tenantId
      * @param branchId
@@ -562,9 +701,7 @@ public class ElemeService {
                 .addSearchCondition(DietOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId)
                 .addSearchCondition(DietOrder.ColumnName.ORDER_NUMBER, Constants.SQL_OPERATION_SYMBOL_EQUAL, orderNumber)
                 .build();
-        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
-        ValidateUtils.notNull(dietOrder, "订单不存在！");
-        return dietOrder;
+        return DatabaseHelper.find(DietOrder.class, searchModel);
     }
 
     /**
@@ -597,38 +734,6 @@ public class ElemeService {
             orderIds.add(dietOrder.getOrderNumber().substring(1));
         }
         return orderIds;
-    }
-
-    @Transactional(readOnly = true)
-    public ApiRest obtainElemeCallbackMessage(ObtainElemeCallbackMessageModel obtainElemeCallbackMessageModel) {
-        BigInteger tenantId = obtainElemeCallbackMessageModel.obtainTenantId();
-        BigInteger branchId = obtainElemeCallbackMessageModel.obtainBranchId();
-        BigInteger elemeCallbackMessageId = obtainElemeCallbackMessageModel.getElemeCallbackMessageId();
-
-        SearchModel searchModel = new SearchModel(false);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, elemeCallbackMessageId);
-        ElemeCallbackMessage elemeCallbackMessage = DatabaseHelper.find(ElemeCallbackMessage.class, searchModel);
-
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("id", elemeCallbackMessage.getId());
-        data.put("orderId", elemeCallbackMessage.getOrderId());
-        data.put("requestId", elemeCallbackMessage.getRequestId());
-        data.put("type", elemeCallbackMessage.getType());
-        data.put("appId", elemeCallbackMessage.getAppId());
-        data.put("message", JSONObject.fromObject(elemeCallbackMessage.getMessage()));
-        data.put("shopId", elemeCallbackMessage.getShopId());
-        data.put("timestamp", elemeCallbackMessage.getTimestamp());
-        data.put("signature", elemeCallbackMessage.getSignature());
-        data.put("userId", elemeCallbackMessage.getUserId());
-
-        return ApiRest.builder().data(data).message("获取饿了么回调消息成功！").successful(true).build();
-    }
-
-    @Transactional(readOnly = true)
-    public ApiRest obtainElemeOrder(ObtainElemeOrderModel obtainElemeOrderModel) {
-        return null;
     }
 
     @Transactional(rollbackFor = Exception.class)

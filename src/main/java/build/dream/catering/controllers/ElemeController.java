@@ -78,30 +78,6 @@ public class ElemeController extends BasicController {
     }
 
     /**
-     * 获取饿了么回调消息
-     *
-     * @return
-     */
-    @RequestMapping(value = "/obtainElemeCallbackMessage", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    @ApiRestAction(modelClass = ObtainElemeCallbackMessageModel.class, serviceClass = ElemeService.class, serviceMethodName = "obtainElemeCallbackMessage", error = "获取饿了么回调消息失败")
-    public String obtainElemeCallbackMessage() {
-        return null;
-    }
-
-    /**
-     * 拉取饿了么订单
-     *
-     * @return
-     */
-    @RequestMapping(value = "/obtainElemeOrder", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    @ApiRestAction(modelClass = ObtainElemeOrderModel.class, serviceClass = ElemeService.class, serviceMethodName = "obtainElemeOrder", error = "拉取饿了么订单失败")
-    public String obtainElemeOrder() {
-        return null;
-    }
-
-    /**
      * 进入门店绑定门店
      *
      * @return
@@ -287,6 +263,7 @@ public class ElemeController extends BasicController {
 
     /**
      * 查询商品详情
+     *
      * @return
      */
     @RequestMapping(value = "/getItem", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
