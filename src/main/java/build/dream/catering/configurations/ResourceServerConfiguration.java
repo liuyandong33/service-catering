@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Configuration
@@ -49,7 +48,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
     @Override
     public void configure(HttpSecurity http) throws Exception {
         Map<RequestMappingInfo, HandlerMethod> requestMappingInfoHandlerMethodMap = requestMappingHandlerMapping.getHandlerMethods();
-        Map<Class<?>, List<Map.Entry<RequestMappingInfo, HandlerMethod>>> map = requestMappingInfoHandlerMethodMap.entrySet().stream().collect(Collectors.groupingBy((Function<Map.Entry<RequestMappingInfo, HandlerMethod>, Class<?>>) requestMappingInfoHandlerMethodEntry -> requestMappingInfoHandlerMethodEntry.getValue().getBeanType()));
+        Map<Class<?>, List<Map.Entry<RequestMappingInfo, HandlerMethod>>> map = requestMappingInfoHandlerMethodMap.entrySet().stream().collect(Collectors.groupingBy(requestMappingInfoHandlerMethodEntry -> requestMappingInfoHandlerMethodEntry.getValue().getBeanType()));
 
         List<String> permitAllAntPatterns = new ArrayList<String>();
         permitAllAntPatterns.addAll(Arrays.asList(PERMIT_ALL_ANT_PATTERNS));
