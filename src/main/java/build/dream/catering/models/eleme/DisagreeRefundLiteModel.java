@@ -7,16 +7,16 @@ import java.math.BigInteger;
 
 public class DisagreeRefundLiteModel extends CateringBasicModel {
     @NotNull
-    private BigInteger elemeOrderId;
+    private BigInteger orderId;
 
     private String reason;
 
-    public BigInteger getElemeOrderId() {
-        return elemeOrderId;
+    public BigInteger getOrderId() {
+        return orderId;
     }
 
-    public void setElemeOrderId(BigInteger elemeOrderId) {
-        this.elemeOrderId = elemeOrderId;
+    public void setOrderId(BigInteger orderId) {
+        this.orderId = orderId;
     }
 
     public String getReason() {

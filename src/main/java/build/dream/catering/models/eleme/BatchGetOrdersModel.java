@@ -8,13 +8,13 @@ import java.util.List;
 
 public class BatchGetOrdersModel extends CateringBasicModel {
     @NotEmpty
-    private List<BigInteger> elemeOrderIds;
+    private List<BigInteger> orderIds;
 
-    public List<BigInteger> getElemeOrderIds() {
-        return elemeOrderIds;
+    public List<BigInteger> getOrderIds() {
+        return orderIds;
     }
 
-    public void setElemeOrderIds(List<BigInteger> elemeOrderIds) {
-        this.elemeOrderIds = elemeOrderIds;
+    public void setOrderIds(List<BigInteger> orderIds) {
+        this.orderIds = orderIds;
     }
 }

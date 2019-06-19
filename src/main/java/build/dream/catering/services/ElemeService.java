@@ -659,7 +659,7 @@ public class ElemeService {
      * @param branchId
      * @return
      */
-    private Branch findBranch(BigInteger tenantId, BigInteger branchId) {
+    private Branch obtainBranch(BigInteger tenantId, BigInteger branchId) {
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -673,14 +673,14 @@ public class ElemeService {
      *
      * @param tenantId
      * @param branchId
-     * @param elemeOrderId
+     * @param orderId
      * @return
      */
-    private DietOrder findElemeOrder(BigInteger tenantId, BigInteger branchId, BigInteger elemeOrderId) {
+    private DietOrder obtainDietOrder(BigInteger tenantId, BigInteger branchId, BigInteger orderId) {
         SearchModel searchModel = new SearchModel();
         searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition(DietOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition(DietOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, elemeOrderId);
+        searchModel.addSearchCondition(DietOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, orderId);
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
         ValidateUtils.notNull(dietOrder, "订单不存在！");
         return dietOrder;
@@ -728,12 +728,12 @@ public class ElemeService {
      * @param dietOrders
      * @return
      */
-    public List<String> obtainOrderIds(List<DietOrder> dietOrders) {
-        List<String> orderIds = new ArrayList<String>();
+    public List<String> obtainElemeOrderIds(List<DietOrder> dietOrders) {
+        List<String> elemeOrderIds = new ArrayList<String>();
         for (DietOrder dietOrder : dietOrders) {
-            orderIds.add(dietOrder.getOrderNumber().substring(1));
+            elemeOrderIds.add(dietOrder.getOrderNumber().substring(1));
         }
-        return orderIds;
+        return elemeOrderIds;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -802,11 +802,11 @@ public class ElemeService {
     public ApiRest getOrder(GetOrderModel getOrderModel) {
         BigInteger tenantId = getOrderModel.obtainTenantId();
         BigInteger branchId = getOrderModel.obtainBranchId();
-        BigInteger elemeOrderId = getOrderModel.getElemeOrderId();
+        BigInteger orderId = getOrderModel.getOrderId();
 
 
-        Branch branch = findBranch(tenantId, branchId);
-        DietOrder dietOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
+        Branch branch = obtainBranch(tenantId, branchId);
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("orderId", dietOrder.getOrderNumber().substring(1));
 
@@ -826,14 +826,14 @@ public class ElemeService {
     public ApiRest batchGetOrders(BatchGetOrdersModel batchGetOrdersModel) {
         BigInteger tenantId = batchGetOrdersModel.obtainTenantId();
         BigInteger branchId = batchGetOrdersModel.obtainBranchId();
-        List<BigInteger> elemeOrderIds = batchGetOrdersModel.getElemeOrderIds();
+        List<BigInteger> orderIds = batchGetOrdersModel.getOrderIds();
 
-        Branch branch = findBranch(tenantId, branchId);
-        List<DietOrder> dietOrders = findAllElemeOrders(tenantId, branchId, elemeOrderIds);
-        List<String> orderIds = obtainOrderIds(dietOrders);
+        Branch branch = obtainBranch(tenantId, branchId);
+        List<DietOrder> dietOrders = findAllElemeOrders(tenantId, branchId, orderIds);
+        List<String> elemeOrderIds = obtainElemeOrderIds(dietOrders);
 
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("orderIds", orderIds);
+        params.put("orderIds", elemeOrderIds);
 
         Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.mgetOrders", params);
 
@@ -851,10 +851,10 @@ public class ElemeService {
     public ApiRest confirmOrderLite(ConfirmOrderLiteModel confirmOrderLiteModel) {
         BigInteger tenantId = confirmOrderLiteModel.obtainTenantId();
         BigInteger branchId = confirmOrderLiteModel.obtainBranchId();
-        BigInteger elemeOrderId = confirmOrderLiteModel.getElemeOrderId();
+        BigInteger orderId = confirmOrderLiteModel.getOrderId();
 
-        Branch branch = findBranch(tenantId, branchId);
-        DietOrder dietOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
+        Branch branch = obtainBranch(tenantId, branchId);
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("orderId", dietOrder.getOrderNumber().substring(1));
@@ -874,10 +874,10 @@ public class ElemeService {
     public ApiRest cancelOrderLite(CancelOrderLiteModel cancelOrderLiteModel) {
         BigInteger tenantId = cancelOrderLiteModel.obtainTenantId();
         BigInteger branchId = cancelOrderLiteModel.obtainBranchId();
-        BigInteger elemeOrderId = cancelOrderLiteModel.getElemeOrderId();
+        BigInteger orderId = cancelOrderLiteModel.getOrderId();
 
-        Branch branch = findBranch(tenantId, branchId);
-        DietOrder dietOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
+        Branch branch = obtainBranch(tenantId, branchId);
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("orderId", dietOrder.getOrderNumber().substring(1));
@@ -900,10 +900,10 @@ public class ElemeService {
     public ApiRest agreeRefundLite(AgreeRefundLiteModel agreeRefundLiteModel) {
         BigInteger tenantId = agreeRefundLiteModel.obtainTenantId();
         BigInteger branchId = agreeRefundLiteModel.obtainBranchId();
-        BigInteger elemeOrderId = agreeRefundLiteModel.getElemeOrderId();
+        BigInteger orderId = agreeRefundLiteModel.getOrderId();
 
-        Branch branch = findBranch(tenantId, branchId);
-        DietOrder dietOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
+        Branch branch = obtainBranch(tenantId, branchId);
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("orderId", dietOrder.getOrderNumber().substring(1));
@@ -923,9 +923,10 @@ public class ElemeService {
     public ApiRest disagreeRefundLite(DisagreeRefundLiteModel disagreeRefundLiteModel) {
         BigInteger tenantId = disagreeRefundLiteModel.obtainTenantId();
         BigInteger branchId = disagreeRefundLiteModel.obtainBranchId();
+        BigInteger orderId = disagreeRefundLiteModel.getOrderId();
 
-        Branch branch = findBranch(tenantId, branchId);
-        DietOrder dietOrder = findElemeOrder(tenantId, branchId, disagreeRefundLiteModel.getElemeOrderId());
+        Branch branch = obtainBranch(tenantId, branchId);
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("orderId", dietOrder.getOrderNumber().substring(1));
@@ -945,10 +946,10 @@ public class ElemeService {
     public ApiRest deliveryBySelfLite(DeliveryBySelfLiteModel deliveryBySelfLiteModel) {
         BigInteger tenantId = deliveryBySelfLiteModel.obtainTenantId();
         BigInteger branchId = deliveryBySelfLiteModel.obtainBranchId();
-        BigInteger elemeOrderId = deliveryBySelfLiteModel.getElemeOrderId();
+        BigInteger orderId = deliveryBySelfLiteModel.getOrderId();
 
-        Branch branch = findBranch(tenantId, branchId);
-        DietOrder dietOrder = findElemeOrder(tenantId, branchId, elemeOrderId);
+        Branch branch = obtainBranch(tenantId, branchId);
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("orderId", dietOrder.getOrderNumber().substring(1));
@@ -968,9 +969,10 @@ public class ElemeService {
     public ApiRest noMoreDeliveryLite(NoMoreDeliveryLiteModel noMoreDeliveryLiteModel) {
         BigInteger tenantId = noMoreDeliveryLiteModel.obtainTenantId();
         BigInteger branchId = noMoreDeliveryLiteModel.obtainBranchId();
+        BigInteger orderId = noMoreDeliveryLiteModel.getOrderId();
 
-        Branch branch = findBranch(tenantId, branchId);
-        DietOrder dietOrder = findElemeOrder(tenantId, branchId, noMoreDeliveryLiteModel.getElemeOrderId());
+        Branch branch = obtainBranch(tenantId, branchId);
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("orderId", dietOrder.getOrderNumber().substring(1));
@@ -990,9 +992,10 @@ public class ElemeService {
     public ApiRest receivedOrderLite(ReceivedOrderLiteModel receivedOrderLiteModel) {
         BigInteger tenantId = receivedOrderLiteModel.obtainTenantId();
         BigInteger branchId = receivedOrderLiteModel.obtainBranchId();
+        BigInteger orderId = receivedOrderLiteModel.getOrderId();
 
-        Branch branch = findBranch(tenantId, branchId);
-        DietOrder dietOrder = findElemeOrder(tenantId, branchId, receivedOrderLiteModel.getElemeOrderId());
+        Branch branch = obtainBranch(tenantId, branchId);
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("orderId", dietOrder.getOrderNumber().substring(1));
@@ -1012,9 +1015,10 @@ public class ElemeService {
     public ApiRest replyReminder(ReplyReminderModel replyReminderModel) {
         BigInteger tenantId = replyReminderModel.obtainTenantId();
         BigInteger branchId = replyReminderModel.obtainBranchId();
+        BigInteger orderId = replyReminderModel.getOrderId();
 
-        Branch branch = findBranch(tenantId, branchId);
-        DietOrder dietOrder = findElemeOrder(tenantId, branchId, replyReminderModel.getElemeOrderId());
+        Branch branch = obtainBranch(tenantId, branchId);
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("orderId", dietOrder.getOrderNumber().substring(1));
@@ -1037,7 +1041,7 @@ public class ElemeService {
         BigInteger tenantId = getUserModel.obtainTenantId();
         BigInteger branchId = getUserModel.obtainBranchId();
 
-        Branch branch = findBranch(tenantId, branchId);
+        Branch branch = obtainBranch(tenantId, branchId);
 
         Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.user.getUser", null);
 
@@ -1056,7 +1060,7 @@ public class ElemeService {
         BigInteger tenantId = getShopModel.obtainTenantId();
         BigInteger branchId = getShopModel.obtainBranchId();
 
-        Branch branch = findBranch(tenantId, branchId);
+        Branch branch = obtainBranch(tenantId, branchId);
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("shopId", branch.getShopId());
@@ -1078,7 +1082,7 @@ public class ElemeService {
         int page = queryItemByPageModel.getPage();
         int rows = queryItemByPageModel.getRows();
 
-        Branch branch = findBranch(tenantId, branchId);
+        Branch branch = obtainBranch(tenantId, branchId);
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("shopId", branch.getShopId());
@@ -1101,7 +1105,7 @@ public class ElemeService {
         BigInteger branchId = getItemModel.obtainBranchId();
         BigInteger itemId = getItemModel.getItemId();
 
-        Branch branch = findBranch(tenantId, branchId);
+        Branch branch = obtainBranch(tenantId, branchId);
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("itemId", itemId);

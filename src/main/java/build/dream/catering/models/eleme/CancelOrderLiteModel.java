@@ -9,18 +9,18 @@ import java.math.BigInteger;
 public class CancelOrderLiteModel extends CateringBasicModel {
     private static final String[] TYPES = {"others", "fakeOrder", "contactUserFailed", "foodSoldOut", "restaurantClosed", "distanceTooFar", "restaurantTooBusy", "forceRejectOrder", "deliveryFault", "notSatisfiedDeliveryRequirement"};
     @NotNull
-    private BigInteger elemeOrderId;
+    private BigInteger orderId;
 
     private String type;
 
     private String remark;
 
-    public BigInteger getElemeOrderId() {
-        return elemeOrderId;
+    public BigInteger getOrderId() {
+        return orderId;
     }
 
-    public void setElemeOrderId(BigInteger elemeOrderId) {
-        this.elemeOrderId = elemeOrderId;
+    public void setOrderId(BigInteger orderId) {
+        this.orderId = orderId;
     }
 
     public String getType() {

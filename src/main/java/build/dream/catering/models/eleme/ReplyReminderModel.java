@@ -12,19 +12,19 @@ public class ReplyReminderModel extends CateringBasicModel {
     private static final String CUSTOM = "custom";
 
     @NotNull
-    private BigInteger elemeOrderId;
+    private BigInteger orderId;
 
     private String type;
 
     @Length(max = 30)
     private String content;
 
-    public BigInteger getElemeOrderId() {
-        return elemeOrderId;
+    public BigInteger getOrderId() {
+        return orderId;
     }
 
-    public void setElemeOrderId(BigInteger elemeOrderId) {
-        this.elemeOrderId = elemeOrderId;
+    public void setOrderId(BigInteger orderId) {
+        this.orderId = orderId;
     }
 
     public String getType() {

@@ -7,13 +7,13 @@ import java.math.BigInteger;
 
 public class GetOrderModel extends CateringBasicModel {
     @NotNull
-    private BigInteger elemeOrderId;
+    private BigInteger orderId;
 
-    public BigInteger getElemeOrderId() {
-        return elemeOrderId;
+    public BigInteger getOrderId() {
+        return orderId;
     }
 
-    public void setElemeOrderId(BigInteger elemeOrderId) {
-        this.elemeOrderId = elemeOrderId;
+    public void setOrderId(BigInteger orderId) {
+        this.orderId = orderId;
     }
 }
