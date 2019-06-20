@@ -159,7 +159,6 @@ public class DemoController {
     @RequestMapping(value = "/addMerchant", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String addMerchant() {
-        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         AddMerchantModel addMerchantModel = AddMerchantModel.builder()
                 .sourceId("")
                 .mobile("13789871965")
