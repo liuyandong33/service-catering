@@ -3,6 +3,7 @@ package build.dream.catering.controllers;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.services.DemoService;
 import build.dream.common.api.ApiRest;
+import build.dream.common.models.data.ListCitiesModel;
 import build.dream.common.models.weixinpay.OrderQueryModel;
 import build.dream.common.models.weixinpay.RefundModel;
 import build.dream.common.utils.*;
@@ -143,5 +144,14 @@ public class DemoController {
                 .build();
         Map<String, String> result = WeiXinPayUtils.orderQuery(orderQueryModel);
         return JacksonUtils.writeValueAsString(result);
+    }
+
+    @RequestMapping(value = "/listCities")
+    @ResponseBody
+    public String listCities() {
+        ListCitiesModel listCitiesModel = ListCitiesModel.builder()
+                .sourceId("73753")
+                .build();
+        return JacksonUtils.writeValueAsString(DadaUtils.listCities(listCitiesModel));
     }
 }
