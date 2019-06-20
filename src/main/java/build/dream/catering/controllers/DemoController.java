@@ -3,6 +3,7 @@ package build.dream.catering.controllers;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.services.DemoService;
 import build.dream.common.api.ApiRest;
+import build.dream.common.models.data.AddMerchantModel;
 import build.dream.common.models.data.ListCitiesModel;
 import build.dream.common.models.weixinpay.OrderQueryModel;
 import build.dream.common.models.weixinpay.RefundModel;
@@ -146,12 +147,29 @@ public class DemoController {
         return JacksonUtils.writeValueAsString(result);
     }
 
-    @RequestMapping(value = "/listCities")
+    @RequestMapping(value = "/listCities", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String listCities() {
         ListCitiesModel listCitiesModel = ListCitiesModel.builder()
                 .sourceId("73753")
                 .build();
         return JacksonUtils.writeValueAsString(DadaUtils.listCities(listCitiesModel));
+    }
+
+    @RequestMapping(value = "/addMerchant", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String addMerchant() {
+        Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
+        AddMerchantModel addMerchantModel = AddMerchantModel.builder()
+                .sourceId("")
+                .mobile("13789871965")
+                .cityName("青岛")
+                .enterpriseName("筑梦实验室")
+                .enterpriseAddress("西姜")
+                .contactName("刘艳东")
+                .contactPhone("13789871965")
+                .email("554030404@qq.com")
+                .build();
+        return JacksonUtils.writeValueAsString(DadaUtils.addMerchant(addMerchantModel));
     }
 }
