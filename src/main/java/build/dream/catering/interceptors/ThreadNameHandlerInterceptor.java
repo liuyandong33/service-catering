@@ -16,10 +16,10 @@ public class ThreadNameHandlerInterceptor implements HandlerInterceptor {
         }
 
         HandlerMethod handlerMethod = (HandlerMethod) handler;
-        String controllerClassName = handlerMethod.getBeanType().getName();
-        String actionMethodName = handlerMethod.getMethod().getName();
+        String className = handlerMethod.getBeanType().getName();
+        String methodName = handlerMethod.getMethod().getName();
         Thread thread = Thread.currentThread();
-        thread.setName(controllerClassName + "." + actionMethodName + "@" + thread.getId());
+        thread.setName(className + "." + methodName + "@" + thread.getId());
         return true;
     }
 }
