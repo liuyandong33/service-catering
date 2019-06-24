@@ -256,7 +256,7 @@ public class AnubisService {
         BigInteger userId = orderCancelModel.getUserId();
         BigInteger dietOrderId = orderCancelModel.getDietOrderId();
 
-        DietOrder dietOrder = findDietOrder(tenantId, branchId, dietOrderId);
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, dietOrderId);
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("partner_order_code", dietOrder.getOrderNumber());
@@ -284,7 +284,7 @@ public class AnubisService {
         BigInteger branchId = orderQueryModel.getBranchId();
         BigInteger dietOrderId = orderQueryModel.getDietOrderId();
 
-        DietOrder dietOrder = findDietOrder(tenantId, branchId, dietOrderId);
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, dietOrderId);
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("partner_order_code", dietOrder.getOrderNumber());
@@ -299,14 +299,16 @@ public class AnubisService {
      *
      * @param tenantId
      * @param branchId
-     * @param dietOrderId
+     * @param orderId
      * @return
      */
-    private DietOrder findDietOrder(BigInteger tenantId, BigInteger branchId, BigInteger dietOrderId) {
-        SearchModel dietOrderSearchModel = new SearchModel(true);
-        dietOrderSearchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        dietOrderSearchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        dietOrderSearchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
+    private DietOrder obtainDietOrder(BigInteger tenantId, BigInteger branchId, BigInteger orderId) {
+        SearchModel dietOrderSearchModel = SearchModel.builder()
+                .autoSetDeletedFalse()
+                .addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)
+                .addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId)
+                .addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, orderId)
+                .build();
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, dietOrderSearchModel);
         ValidateUtils.notNull(dietOrder, "订单不存在！");
         return dietOrder;
@@ -321,21 +323,26 @@ public class AnubisService {
      */
     @Transactional(readOnly = true)
     public ApiRest orderComplaint(OrderComplaintModel orderComplaintModel) throws IOException {
-        BigInteger tenantId = orderComplaintModel.getTenantId();
-        BigInteger branchId = orderComplaintModel.getBranchId();
-        BigInteger dietOrderId = orderComplaintModel.getDietOrderId();
+        BigInteger tenantId = orderComplaintModel.obtainTenantId();
+        BigInteger branchId = orderComplaintModel.obtainBranchId();
+        BigInteger orderId = orderComplaintModel.getOrderId();
+        Integer orderComplaintCode = orderComplaintModel.getOrderComplaintCode();
+        String orderComplaintDesc = orderComplaintModel.getOrderComplaintDesc();
 
-        DietOrder dietOrder = findDietOrder(tenantId, branchId, dietOrderId);
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
 
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("partner_order_code", dietOrder.getOrderNumber());
-        data.put("order_complaint_code", orderComplaintModel.getOrderComplaintCode());
-        ApplicationHandler.ifNotNullPut(data, "order_complaint_desc", orderComplaintModel.getOrderComplaintDesc());
-        data.put("order_complaint_time", System.currentTimeMillis());
+        build.dream.common.models.anubis.OrderComplaintModel model = build.dream.common.models.anubis.OrderComplaintModel.builder()
+                .partnerOrderCode(dietOrder.getOrderNumber())
+                .orderComplaintCode(orderComplaintCode)
+                .orderComplaintTime(System.currentTimeMillis())
+                .build();
 
-        String url = ConfigurationUtils.getConfiguration(Constants.ANUBIS_SERVICE_URL) + Constants.ANUBIS_ORDER_COMPLAINT_URI;
-        String appId = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_ID);
-        return AnubisUtils.callAnubisSystem(url, appId, data);
+        if (StringUtils.isNotBlank(orderComplaintDesc)) {
+            model.setOrderComplaintDesc(orderComplaintDesc);
+        }
+
+        Map<String, Object> result = build.dream.common.utils.AnubisUtils.orderComplaint(model);
+        return ApiRest.builder().data(result).message("订单投诉成功！").successful(true).build();
     }
 
     /**
@@ -429,17 +436,17 @@ public class AnubisService {
      * @throws IOException
      */
     @Transactional(readOnly = true)
-    public ApiRest orderCarrier(OrderCarrierModel orderCarrierModel) throws IOException {
+    public ApiRest orderCarrier(OrderCarrierModel orderCarrierModel) {
         BigInteger tenantId = orderCarrierModel.obtainTenantId();
         BigInteger branchId = orderCarrierModel.obtainBranchId();
         BigInteger dietOrderId = orderCarrierModel.getOrderId();
 
-        DietOrder dietOrder = findDietOrder(tenantId, branchId, dietOrderId);
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("partner_order_code", dietOrder.getOrderNumber());
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, dietOrderId);
 
-        String url = ConfigurationUtils.getConfiguration(Constants.ANUBIS_SERVICE_URL) + Constants.ANUBIS_ORDER_CARRIER_URI;
-        String appId = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_ID);
-        return AnubisUtils.callAnubisSystem(url, appId, data);
+        build.dream.common.models.anubis.OrderCarrierModel model = build.dream.common.models.anubis.OrderCarrierModel.builder()
+                .partnerOrderCode(dietOrder.getOrderNumber())
+                .build();
+        Map<String, Object> result = build.dream.common.utils.AnubisUtils.orderCarrier(model);
+        return ApiRest.builder().data(result).message("获取订单骑手位置成功！").successful(true).build();
     }
 }
