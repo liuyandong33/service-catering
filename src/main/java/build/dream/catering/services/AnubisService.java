@@ -430,9 +430,9 @@ public class AnubisService {
      */
     @Transactional(readOnly = true)
     public ApiRest orderCarrier(OrderCarrierModel orderCarrierModel) throws IOException {
-        BigInteger tenantId = orderCarrierModel.getTenantId();
-        BigInteger branchId = orderCarrierModel.getBranchId();
-        BigInteger dietOrderId = orderCarrierModel.getDietOrderId();
+        BigInteger tenantId = orderCarrierModel.obtainTenantId();
+        BigInteger branchId = orderCarrierModel.obtainBranchId();
+        BigInteger dietOrderId = orderCarrierModel.getOrderId();
 
         DietOrder dietOrder = findDietOrder(tenantId, branchId, dietOrderId);
         Map<String, Object> data = new HashMap<String, Object>();

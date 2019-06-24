@@ -85,13 +85,16 @@ public class DadaService {
         BigInteger tenantId = signedDadaModel.getTenantId();
         Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
 
+        String contactPhone = tenant.getContactPhone();
+        String cityName = tenant.getCityName();
+        String enterpriseAddress = tenant.getProvinceName() + cityName + tenant.getDistrictName() + tenant.getAddress();
         AddMerchantModel addMerchantModel = AddMerchantModel.builder()
-                .mobile("")
-                .cityName("")
+                .mobile(contactPhone)
+                .cityName(cityName)
                 .enterpriseName(tenant.getName())
-                .enterpriseAddress("")
-                .contactName("")
-                .contactPhone("")
+                .enterpriseAddress(enterpriseAddress)
+                .contactName(tenant.getLinkman())
+                .contactPhone(contactPhone)
                 .build();
 
         Map<String, Object> result = DadaUtils.addMerchant(addMerchantModel);
