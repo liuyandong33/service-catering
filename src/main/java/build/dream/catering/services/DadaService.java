@@ -1,9 +1,11 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
+import build.dream.catering.models.dada.SignedDadaModel;
 import build.dream.catering.models.dada.SyncShopModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.Branch;
+import build.dream.common.models.data.AddMerchantModel;
 import build.dream.common.models.data.AddShopModel;
 import build.dream.common.models.data.DadaCommonParamsModel;
 import build.dream.common.saas.domains.Tenant;
@@ -71,5 +73,31 @@ public class DadaService {
         }
 
         return ApiRest.builder().message("同步门店成功！").successful(true).build();
+    }
+
+    /**
+     * 签约达达配送
+     *
+     * @param signedDadaModel
+     * @return
+     */
+    public ApiRest signedDada(SignedDadaModel signedDadaModel) {
+        BigInteger tenantId = signedDadaModel.getTenantId();
+        Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
+
+        AddMerchantModel addMerchantModel = AddMerchantModel.builder()
+                .mobile("")
+                .cityName("")
+                .enterpriseName(tenant.getName())
+                .enterpriseAddress("")
+                .contactName("")
+                .contactPhone("")
+                .build();
+
+        Map<String, Object> result = DadaUtils.addMerchant(addMerchantModel);
+        String dadaSourceId = MapUtils.getString(result, "result");
+        TenantUtils.updateTenantInfo(tenant.getId(), TupleUtils.buildTuple2("dadaSourceId", dadaSourceId));
+
+        return ApiRest.builder().message("签约达达配送成功！").successful(true).build();
     }
 }

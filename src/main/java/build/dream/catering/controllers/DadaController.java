@@ -1,5 +1,6 @@
 package build.dream.catering.controllers;
 
+import build.dream.catering.models.dada.SignedDadaModel;
 import build.dream.catering.models.dada.SyncShopModel;
 import build.dream.catering.services.DadaService;
 import build.dream.common.annotations.ApiRestAction;
@@ -21,6 +22,18 @@ public class DadaController {
     @ResponseBody
     @ApiRestAction(modelClass = SyncShopModel.class, serviceClass = DadaService.class, serviceMethodName = "syncShop", error = "同步门店失败")
     public String syncShop() {
+        return null;
+    }
+
+    /**
+     * 签约达达配送
+     *
+     * @return
+     */
+    @RequestMapping(value = "/signedDada", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = SignedDadaModel.class, serviceClass = DadaService.class, serviceMethodName = "signedDada", error = "签约达达配送失败")
+    public String signedDada() {
         return null;
     }
 }
