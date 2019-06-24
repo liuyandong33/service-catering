@@ -12,6 +12,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping(value = "/dada")
 public class DadaController {
+    /**
+     * 同步门店信息
+     *
+     * @return
+     */
     @RequestMapping(value = "/syncShop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = SyncShopModel.class, serviceClass = DadaService.class, serviceMethodName = "syncShop", error = "同步门店失败")
