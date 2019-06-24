@@ -4,8 +4,11 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.models.dada.SyncShopModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.Branch;
-import build.dream.common.utils.DatabaseHelper;
-import build.dream.common.utils.SearchModel;
+import build.dream.common.models.data.AddShopModel;
+import build.dream.common.models.data.DadaCommonParamsModel;
+import build.dream.common.saas.domains.Tenant;
+import build.dream.common.utils.*;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,26 +25,49 @@ public class DadaService {
         BigInteger tenantId = syncShopModel.obtainTenantId();
         List<BigInteger> branchIds = syncShopModel.getBranchIds();
 
+        Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
+        BigInteger dadaSourceId = tenant.getDadaSourceId();
+        ValidateUtils.isTrue(dadaSourceId.compareTo(BigInteger.ZERO) != 0, "未开通达达配送！");
+
         SearchModel searchModel = SearchModel.builder()
                 .autoSetDeletedFalse()
                 .addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)
                 .addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, branchIds)
                 .build();
         List<Branch> branches = DatabaseHelper.findAll(Branch.class, searchModel);
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        List<AddShopModel> addShopModels = new ArrayList<AddShopModel>();
+
+        DadaCommonParamsModel dadaCommonParamsModel = DadaCommonParamsModel.builder()
+                .sourceId(dadaSourceId.toString())
+                .build();
+
+        Map<String, Branch> branchMap = new HashMap<String, Branch>();
         for (Branch branch : branches) {
-            Map<String, Object> map = new HashMap<String, Object>();
-            map.put("station_name", branch.getName());
-            map.put("business", 1);
-            map.put("city_name", branch.getCityName());
-            map.put("area_name", branch.getDistrictName());
-            map.put("station_address", branch.getAddress());
-            map.put("lng", Double.valueOf(branch.getLongitude()));
-            map.put("lat", Double.valueOf(branch.getLatitude()));
-            map.put("contact_name", branch.getLinkman());
-            map.put("phone", branch.getContactPhone());
-            map.put("origin_shop_id", tenantId + "Z" + branch.getId());
-            list.add(map);
+            String originShopId = tenantId + "Z" + branch.getId();
+            AddShopModel addShopModel = AddShopModel.builder()
+                    .stationName(branch.getName())
+                    .business(1)
+                    .cityName(branch.getCityName())
+                    .areaName(branch.getDistrictName())
+                    .stationAddress(branch.getAddress())
+                    .lng(Double.valueOf(branch.getLongitude()))
+                    .lat(Double.valueOf(branch.getLatitude()))
+                    .contactName(branch.getLinkman())
+                    .phone(branch.getContactPhone())
+                    .originShopId(originShopId)
+                    .build();
+            addShopModels.add(addShopModel);
+            branchMap.put(originShopId, branch);
+        }
+        Map<String, Object> addShopResult = DadaUtils.addShop(dadaCommonParamsModel, addShopModels);
+        Map<String, Object> result = MapUtils.getMap(addShopResult, "result");
+        List<Map<String, Object>> successList = (List<Map<String, Object>>) result.get("successList");
+
+        for (Map<String, Object> map : successList) {
+            String originShopId = MapUtils.getString(map, "originShopId");
+            Branch branch = branchMap.get(originShopId);
+            branch.setDadaOriginShopId(originShopId);
+            DatabaseHelper.update(branch);
         }
 
         return ApiRest.builder().message("同步门店成功！").successful(true).build();
