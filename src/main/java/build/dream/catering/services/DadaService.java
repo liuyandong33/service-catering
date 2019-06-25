@@ -89,17 +89,19 @@ public class DadaService {
         String cityName = tenant.getCityName();
         String enterpriseAddress = tenant.getProvinceName() + cityName + tenant.getDistrictName() + tenant.getAddress();
         AddMerchantModel addMerchantModel = AddMerchantModel.builder()
+                .sourceId("")
                 .mobile(contactPhone)
                 .cityName(cityName)
                 .enterpriseName(tenant.getName())
                 .enterpriseAddress(enterpriseAddress)
                 .contactName(tenant.getLinkman())
                 .contactPhone(contactPhone)
+                .email(tenant.getEmail())
                 .build();
 
         Map<String, Object> result = DadaUtils.addMerchant(addMerchantModel);
         String dadaSourceId = MapUtils.getString(result, "result");
-        TenantUtils.updateTenantInfo(tenant.getId(), TupleUtils.buildTuple2("dadaSourceId", dadaSourceId));
+        TenantUtils.updateTenantInfo(tenant.getId(), BigInteger.ZERO, TupleUtils.buildTuple2("dadaSourceId", dadaSourceId));
 
         return ApiRest.builder().message("签约达达配送成功！").successful(true).build();
     }

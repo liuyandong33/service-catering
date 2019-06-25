@@ -4,6 +4,7 @@ import build.dream.catering.models.dada.SignedDadaModel;
 import build.dream.catering.models.dada.SyncShopModel;
 import build.dream.catering.services.DadaService;
 import build.dream.common.annotations.ApiRestAction;
+import build.dream.common.annotations.PermitAll;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +31,7 @@ public class DadaController {
      *
      * @return
      */
+    @PermitAll
     @RequestMapping(value = "/signedDada", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = SignedDadaModel.class, serviceClass = DadaService.class, serviceMethodName = "signedDada", error = "签约达达配送失败")
