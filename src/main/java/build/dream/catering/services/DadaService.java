@@ -22,6 +22,12 @@ import java.util.Map;
 
 @Service
 public class DadaService {
+    /**
+     * 同步门店信息
+     *
+     * @param syncShopModel
+     * @return
+     */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest syncShop(SyncShopModel syncShopModel) {
         BigInteger tenantId = syncShopModel.obtainTenantId();
