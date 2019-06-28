@@ -9,6 +9,7 @@ import build.dream.common.beans.KafkaFixedTimeSendResult;
 import build.dream.common.catering.domains.*;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.models.alipay.AlipayTradeRefundModel;
+import build.dream.common.models.data.AddOrderModel;
 import build.dream.common.models.jpush.PushModel;
 import build.dream.common.models.weixinpay.RefundModel;
 import build.dream.common.saas.domains.Tenant;
@@ -1083,5 +1084,34 @@ public class DietOrderUtils {
         dietOrder.setJobId(Constants.VARCHAR_DEFAULT_VALUE);
         dietOrder.setTriggerId(Constants.VARCHAR_DEFAULT_VALUE);
         DatabaseHelper.update(dietOrder);
+    }
+
+    /**
+     * 呼叫配送
+     *
+     * @param tenant
+     * @param branch
+     * @param dietOrder
+     * @return
+     */
+    public static Map<String, Object> callDelivery(Tenant tenant, Branch branch, DietOrder dietOrder) {
+        AddOrderModel addOrderModel = AddOrderModel.builder()
+                .sourceId(tenant.getDadaSourceId().toString())
+                .shopNo(branch.getDadaOriginShopId())
+                .originId(dietOrder.getOrderNumber())
+                .cityCode("")
+                .cargoPrice(dietOrder.getPayableAmount().doubleValue())
+                .isPrepay(0)
+                .receiverName(dietOrder.getConsignee())
+                .receiverAddress(dietOrder.getDeliveryAddress())
+                .receiverLat(Double.valueOf(dietOrder.getDeliveryLatitude()))
+                .receiverLng(Double.valueOf(dietOrder.getDeliveryLongitude()))
+                .topic(ConfigurationUtils.getConfiguration(Constants.DADA_ORDER_CALLBACK_MESSAGE_TOPIC))
+                .receiverPhone(dietOrder.getTelephoneNumber())
+                .build();
+        if (dietOrder.isInvoiced()) {
+            addOrderModel.setInvoiceTitle(dietOrder.getInvoice());
+        }
+        return DadaUtils.addOrder(addOrderModel);
     }
 }
