@@ -60,7 +60,7 @@ public class MeiTuanService {
     /**
      * 处理订单生效回调
      *
-     * @param callbackParametersJsonObject
+     * @param callbackParameters
      * @return
      * @throws IOException
      */
