@@ -32,6 +32,7 @@ public class JDDJService {
 
         Map<String, Object> orderInfo = resultList.get(0);
         List<Map<String, Object>> products = (List<Map<String, Object>>) orderInfo.get("product");
+        Map<String, Object> orderInvoice = MapUtils.getMap(orderInfo, "orderInvoice");
 
         DietOrder dietOrder = DietOrder.builder()
                 .tenantId(tenantId)
