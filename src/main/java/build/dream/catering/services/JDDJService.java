@@ -1,24 +1,31 @@
 package build.dream.catering.services;
 
+import build.dream.catering.mappers.BranchMapper;
+import build.dream.common.catering.domains.Branch;
 import build.dream.common.catering.domains.DietOrder;
 import build.dream.common.catering.domains.DietOrderDetail;
 import build.dream.common.catering.domains.DietOrderGroup;
 import build.dream.common.constants.Constants;
 import build.dream.common.constants.DietOrderConstants;
-import build.dream.common.utils.DatabaseHelper;
-import build.dream.common.utils.ValidateUtils;
+import build.dream.common.saas.domains.Tenant;
+import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class JDDJService {
+    @Autowired
+    private BranchMapper branchMapper;
+
     @Transactional
     public void handleNewOrder() {
         Map<String, Object> resultMap = null;
@@ -89,5 +96,38 @@ public class JDDJService {
             dietOrderDetails.add(dietOrderDetail);
         }
         DatabaseHelper.insertAll(dietOrderDetails);
+    }
+
+    @Transactional(readOnly = true)
+    public void cacheJDDJVenderInfo() {
+        List<Branch> branches = branchMapper.obtainAllBindJDDJBranches();
+        Map<String, String> venderInfos = new HashMap<String, String>();
+        Map<BigInteger, Tenant> tenantMap = new HashMap<BigInteger, Tenant>();
+        for (Branch branch : branches) {
+            BigInteger tenantId = branch.getTenantId();
+            Tenant tenant = tenantMap.get(tenantId);
+            if (tenant == null) {
+                tenant = TenantUtils.obtainTenantInfo(tenantId);
+                tenantMap.put(tenantId, tenant);
+            }
+
+            BigInteger branchId = branch.getId();
+            String appKey = branch.getJddjAppKey();
+            Map<String, Object> venderInfo = new HashMap<String, Object>();
+            venderInfo.put("tenantId", tenantId);
+            venderInfo.put("tenantCode", tenant.getCode());
+            venderInfo.put("partitionCode", tenant.getPartitionCode());
+            venderInfo.put("branchId", branchId);
+            venderInfo.put("venderId", appKey);
+            venderInfo.put("appKey", branch.getJddjAppKey());
+            venderInfo.put("appSecret", branch.getJddjAppSecret());
+
+            String info = JacksonUtils.writeValueAsString(venderInfo);
+            venderInfos.put(appKey, info);
+            venderInfos.put(tenantId + "_" + branchId, info);
+        }
+        if (MapUtils.isNotEmpty(venderInfos)) {
+            CommonRedisUtils.hmset(Constants.KEY_JDDJ_VENDER_INFOS, venderInfos);
+        }
     }
 }
