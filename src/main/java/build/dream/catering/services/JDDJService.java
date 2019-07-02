@@ -1,6 +1,7 @@
 package build.dream.catering.services;
 
 import build.dream.catering.mappers.BranchMapper;
+import build.dream.common.beans.JDDJVenderInfo;
 import build.dream.common.catering.domains.Branch;
 import build.dream.common.catering.domains.DietOrder;
 import build.dream.common.catering.domains.DietOrderDetail;
@@ -113,16 +114,18 @@ public class JDDJService {
 
             BigInteger branchId = branch.getId();
             String appKey = branch.getJddjAppKey();
-            Map<String, Object> venderInfo = new HashMap<String, Object>();
-            venderInfo.put("tenantId", tenantId);
-            venderInfo.put("tenantCode", tenant.getCode());
-            venderInfo.put("partitionCode", tenant.getPartitionCode());
-            venderInfo.put("branchId", branchId);
-            venderInfo.put("venderId", appKey);
-            venderInfo.put("appKey", branch.getJddjAppKey());
-            venderInfo.put("appSecret", branch.getJddjAppSecret());
 
-            String info = JacksonUtils.writeValueAsString(venderInfo);
+            JDDJVenderInfo jddjVenderInfo = JDDJVenderInfo.builder()
+                    .tenantId(tenantId)
+                    .tenantCode(tenant.getCode())
+                    .partitionCode(tenant.getPartitionCode())
+                    .branchId(branchId)
+                    .venderId(branch.getJddjVenderId())
+                    .appKey(appKey)
+                    .appSecret(branch.getJddjAppSecret())
+                    .build();
+
+            String info = JacksonUtils.writeValueAsString(jddjVenderInfo);
             venderInfos.put(appKey, info);
             venderInfos.put(tenantId + "_" + branchId, info);
         }
