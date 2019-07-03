@@ -16,14 +16,4 @@
     <select id="findByTenantIdAndUserId" resultType="build.dream.common.catering.domains.Branch">
         SELECT * FROM branch WHERE id = (SELECT branch_id FROM merge_user_branch WHERE tenant_id = #{tenantId} AND user_id = #{userId} AND deleted = 0) AND tenant_id = #{tenantId} AND deleted = 0;
     </select>
-
-    <select id="obtainAllBindJDDJBranches" resultType="build.dream.common.catering.domains.Branch">
-        SELECT
-        *
-        FROM branch
-        WHERE jddj_vender_id IS NOT NULL and jddj_vender_id != ''
-        AND jddj_app_key IS NOT NULL and jddj_app_key != ''
-        AND jddj_app_secret IS NOT NULL and jddj_app_secret != ''
-        AND deleted = 0
-    </select>
 </mapper>

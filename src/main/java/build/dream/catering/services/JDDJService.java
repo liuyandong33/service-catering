@@ -101,7 +101,13 @@ public class JDDJService {
 
     @Transactional(readOnly = true)
     public void cacheJDDJVenderInfo() {
-        List<Branch> branches = branchMapper.obtainAllBindJDDJBranches();
+        SearchModel searchModel = SearchModel.builder()
+                .autoSetDeletedFalse()
+                .isNotNull(Branch.ColumnName.JDDJ_VENDER_ID)
+                .isNotNull(Branch.ColumnName.JDDJ_APP_KEY)
+                .isNotNull(Branch.ColumnName.JDDJ_APP_SECRET)
+                .build();
+        List<Branch> branches = DatabaseHelper.findAll(Branch.class, searchModel);
         Map<String, String> venderInfos = new HashMap<String, String>();
         Map<BigInteger, Tenant> tenantMap = new HashMap<BigInteger, Tenant>();
         for (Branch branch : branches) {

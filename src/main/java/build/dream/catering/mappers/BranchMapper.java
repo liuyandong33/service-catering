@@ -22,6 +22,4 @@ public interface BranchMapper {
     long countUsers(@Param("searchConditions") List<SearchCondition> searchConditions);
 
     Branch findByTenantIdAndUserId(@Param("tenantId") BigInteger tenantId, @Param("userId") BigInteger userId);
-
-    List<Branch> obtainAllBindJDDJBranches();
 }
