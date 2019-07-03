@@ -28,7 +28,7 @@ public class JDDJService {
     private BranchMapper branchMapper;
 
     @Transactional
-    public void handleNewOrder() {
+    public void handleNewOrder(Map<String, Object> message) {
         Map<String, Object> resultMap = null;
         Map<String, Object> result = MapUtils.getMap(resultMap, "result");
         List<Map<String, Object>> resultList = (List<Map<String, Object>>) result.get("resultList");
