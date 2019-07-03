@@ -2,6 +2,7 @@ package build.dream.catering.listeners;
 
 import build.dream.catering.jobs.JobScheduler;
 import build.dream.catering.services.FlashSaleService;
+import build.dream.catering.services.JDDJService;
 import build.dream.catering.tasks.SaveFlashSaleOrderTask;
 import build.dream.common.listeners.BasicServletContextListener;
 import build.dream.common.mappers.CommonMapper;
@@ -18,6 +19,8 @@ public class CateringServletContextListener extends BasicServletContextListener 
     private JobScheduler jobScheduler;
     @Autowired
     private FlashSaleService flashSaleService;
+    @Autowired
+    private JDDJService jddjService;
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
@@ -32,6 +35,7 @@ public class CateringServletContextListener extends BasicServletContextListener 
         }
 
         new SaveFlashSaleOrderTask(flashSaleService).start();
+        jddjService.cacheJDDJVenderInfos();
     }
 
     @Override

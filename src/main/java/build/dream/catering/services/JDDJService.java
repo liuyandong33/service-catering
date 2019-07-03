@@ -100,7 +100,7 @@ public class JDDJService {
     }
 
     @Transactional(readOnly = true)
-    public void cacheJDDJVenderInfo() {
+    public void cacheJDDJVenderInfos() {
         SearchModel searchModel = SearchModel.builder()
                 .autoSetDeletedFalse()
                 .isNotNull(Branch.ColumnName.JDDJ_VENDER_ID)
