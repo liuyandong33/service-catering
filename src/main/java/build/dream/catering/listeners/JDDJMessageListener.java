@@ -1,7 +1,7 @@
 package build.dream.catering.listeners;
 
-import build.dream.catering.constants.Constants;
 import build.dream.catering.services.JDDJService;
+import build.dream.catering.tools.HandleJDDJMessageRunnable;
 import build.dream.common.utils.JacksonUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -22,11 +22,9 @@ public class JDDJMessageListener implements MessageListener<String, String> {
     public void onMessage(ConsumerRecord<String, String> data) {
         String value = data.value();
         Map<String, Object> message = JacksonUtils.readValueAsMap(value, String.class, Object.class);
-        int type = MapUtils.getIntValue(message, "type");
-        switch (type) {
-            case Constants.DJSW_TYPE_NEW_ORDER:
-                jddjService.handleNewOrder(message);
-                break;
-        }
+        Map<String, Object> body = MapUtils.getMap(message, "body");
+        int count = MapUtils.getIntValue(message, "count");
+        long interval = MapUtils.getLongValue(message, "interval");
+        new Thread(new HandleJDDJMessageRunnable(jddjService, body, count, interval)).start();
     }
 }
