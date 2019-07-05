@@ -1,9 +1,9 @@
 package build.dream.catering.services;
 
+import build.dream.catering.constants.Constants;
 import build.dream.common.catering.domains.DietOrder;
 import build.dream.common.catering.domains.DietOrderDetail;
 import build.dream.common.catering.domains.DietOrderGroup;
-import build.dream.common.constants.Constants;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.ValidateUtils;
@@ -73,7 +73,7 @@ public class JDDJService {
                     .branchId(branchId)
                     .dietOrderId(dietOrderId)
                     .dietOrderGroupId(dietOrderGroupId)
-                    .goodsType(1)
+                    .goodsType(Constants.GOODS_TYPE_ORDINARY_GOODS)
                     .goodsId(skuIdIsv)
                     .goodsName(skuName)
                     .goodsSpecificationId(BigInteger.ZERO)
