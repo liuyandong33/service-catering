@@ -1,6 +1,5 @@
 package build.dream.catering.services;
 
-import build.dream.catering.mappers.BranchMapper;
 import build.dream.common.catering.domains.DietOrder;
 import build.dream.common.catering.domains.DietOrderDetail;
 import build.dream.common.catering.domains.DietOrderGroup;
@@ -9,7 +8,6 @@ import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.ValidateUtils;
 import org.apache.commons.collections.MapUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,9 +19,6 @@ import java.util.Map;
 
 @Service
 public class JDDJService {
-    @Autowired
-    private BranchMapper branchMapper;
-
     @Transactional
     public void handleNewOrder(Map<String, Object> message) {
         Map<String, Object> resultMap = null;
