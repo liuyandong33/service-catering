@@ -19,8 +19,6 @@ public class CateringServletContextListener extends BasicServletContextListener 
     private JobScheduler jobScheduler;
     @Autowired
     private FlashSaleService flashSaleService;
-    @Autowired
-    private JDDJService jddjService;
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
@@ -35,7 +33,6 @@ public class CateringServletContextListener extends BasicServletContextListener 
         }
 
         new SaveFlashSaleOrderTask(flashSaleService).start();
-        jddjService.cacheJDDJVenderInfos();
     }
 
     @Override

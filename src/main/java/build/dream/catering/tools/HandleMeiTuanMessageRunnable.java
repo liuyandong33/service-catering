@@ -2,8 +2,9 @@ package build.dream.catering.tools;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.services.MeiTuanService;
-import build.dream.catering.utils.DingtalkUtils;
 import build.dream.catering.utils.ThreadUtils;
+import build.dream.common.utils.ConfigurationUtils;
+import build.dream.common.utils.DingtalkUtils;
 import build.dream.common.utils.GsonUtils;
 
 import java.util.Map;
@@ -53,7 +54,7 @@ public class HandleMeiTuanMessageRunnable implements Runnable {
             } catch (Exception e) {
                 isNormal = false;
                 if (count == 1) {
-                    DingtalkUtils.send(String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "美团消息处理失败", GsonUtils.toJson(callbackParameters), e.getClass().getName(), e.getMessage()));
+                    DingtalkUtils.send(ConfigurationUtils.getConfiguration(Constants.DINGTALK_ERROR_CHAT_ID), String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "美团消息处理失败", GsonUtils.toJson(callbackParameters), e.getClass().getName(), e.getMessage()));
                 }
             }
             if (isNormal) {

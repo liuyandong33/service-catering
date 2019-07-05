@@ -1,15 +1,13 @@
 package build.dream.catering.services;
 
 import build.dream.catering.mappers.BranchMapper;
-import build.dream.common.beans.JDDJVenderInfo;
-import build.dream.common.catering.domains.Branch;
 import build.dream.common.catering.domains.DietOrder;
 import build.dream.common.catering.domains.DietOrderDetail;
 import build.dream.common.catering.domains.DietOrderGroup;
 import build.dream.common.constants.Constants;
 import build.dream.common.constants.DietOrderConstants;
-import build.dream.common.saas.domains.Tenant;
-import build.dream.common.utils.*;
+import build.dream.common.utils.DatabaseHelper;
+import build.dream.common.utils.ValidateUtils;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -97,46 +94,5 @@ public class JDDJService {
             dietOrderDetails.add(dietOrderDetail);
         }
         DatabaseHelper.insertAll(dietOrderDetails);
-    }
-
-    @Transactional(readOnly = true)
-    public void cacheJDDJVenderInfos() {
-        SearchModel searchModel = SearchModel.builder()
-                .autoSetDeletedFalse()
-                .isNotNull(Branch.ColumnName.JDDJ_VENDER_ID)
-                .isNotNull(Branch.ColumnName.JDDJ_APP_KEY)
-                .isNotNull(Branch.ColumnName.JDDJ_APP_SECRET)
-                .build();
-        List<Branch> branches = DatabaseHelper.findAll(Branch.class, searchModel);
-        Map<String, String> venderInfos = new HashMap<String, String>();
-        Map<BigInteger, Tenant> tenantMap = new HashMap<BigInteger, Tenant>();
-        for (Branch branch : branches) {
-            BigInteger tenantId = branch.getTenantId();
-            Tenant tenant = tenantMap.get(tenantId);
-            if (tenant == null) {
-                tenant = TenantUtils.obtainTenantInfo(tenantId);
-                tenantMap.put(tenantId, tenant);
-            }
-
-            BigInteger branchId = branch.getId();
-            String appKey = branch.getJddjAppKey();
-
-            JDDJVenderInfo jddjVenderInfo = JDDJVenderInfo.builder()
-                    .tenantId(tenantId)
-                    .tenantCode(tenant.getCode())
-                    .partitionCode(tenant.getPartitionCode())
-                    .branchId(branchId)
-                    .venderId(branch.getJddjVenderId())
-                    .appKey(appKey)
-                    .appSecret(branch.getJddjAppSecret())
-                    .build();
-
-            String info = JacksonUtils.writeValueAsString(jddjVenderInfo);
-            venderInfos.put(appKey, info);
-            venderInfos.put(tenantId + "_" + branchId, info);
-        }
-        if (MapUtils.isNotEmpty(venderInfos)) {
-            CommonRedisUtils.hmset(Constants.KEY_JDDJ_VENDER_INFOS, venderInfos);
-        }
     }
 }

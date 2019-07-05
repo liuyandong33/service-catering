@@ -88,17 +88,6 @@ public class Constants extends build.dream.common.constants.Constants {
     public static Integer POSITION_SOURCE_BAIDU_MAP = 2;
     public static Integer POSITION_SOURCE_GAODE_MAP = 3;
 
-    public static final String KEY_DINGTALK_TOKEN = "_dingtalk_token";
-    public static final String DINGTALK_CORP_ID = "dingtalk.corp.id";
-    public static final String DINGTALK_CORP_SECRET = "dingtalk.corp.secret";
-    public static final String DINGTALK_SERVICE_URL = "dingtalk.service.url";
-    public static final String DINGTALK_GET_TOKEN_URI = "/gettoken";
-    public static final String DINGTALK_CHAT_SEND_URI = "/chat/send";
-    public static final String DINGTALK_SENDER = "dingtalk.sender";
-    public static final String DINGTALK_CHAT_ID = "dingtalk.chat.id";
-
-    public static final String DINGTALK_ERROR_MESSAGE_FORMAT = "%s-%s-%s-%s";
-
     public static final String MESSAGE_CODE_ELEME_MESSAGE = "1001";
     public static final String MESSAGE_CODE_MEI_TUAN_MESSAGE = "2001";
     public static final String MESSAGE_CODE_UPLOAD_LOG = "3001";
@@ -175,4 +164,7 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String OFFLINE_PAY_REFUND_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC = "offline.pay.refund.alipay.async.notify.message.topic";
     public static final String OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC = "offline.pay.refund.wei.xin.async.notify.message.topic";
     public static final String DADA_ORDER_CALLBACK_MESSAGE_TOPIC = "dada.order.callback.message.topic";
+
+    public static final String DINGTALK_ERROR_MESSAGE_FORMAT = "%s-%s-%s-%s";
+    public static final String DINGTALK_ERROR_CHAT_ID = "dingtalk.error.chat.id";
 }

@@ -2,7 +2,8 @@ package build.dream.catering.listeners;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.services.DataService;
-import build.dream.catering.utils.DingtalkUtils;
+import build.dream.common.utils.ConfigurationUtils;
+import build.dream.common.utils.DingtalkUtils;
 import build.dream.common.utils.GsonUtils;
 import net.sf.json.JSONObject;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -28,7 +29,7 @@ public class UploadDataMessageListener implements MessageListener<String, String
                 dataService.saveDietOrder(data);
             }
         } catch (Exception e) {
-            DingtalkUtils.send(String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "保存POS上传的数据失败", GsonUtils.toJson(value), e.getClass().getName(), e.getMessage()));
+            DingtalkUtils.send(ConfigurationUtils.getConfiguration(Constants.DINGTALK_ERROR_CHAT_ID), String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "保存POS上传的数据失败", GsonUtils.toJson(value), e.getClass().getName(), e.getMessage()));
         }
     }
 }
