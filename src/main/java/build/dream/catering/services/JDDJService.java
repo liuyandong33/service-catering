@@ -109,8 +109,8 @@ public class JDDJService {
 
     @Transactional(readOnly = true)
     public ApiRest orderAcceptOperate(OrderAcceptOperateModel orderAcceptOperateModel) {
-        BigInteger tenantId = orderAcceptOperateModel.getTenantId();
-        BigInteger branchId = orderAcceptOperateModel.getBranchId();
+        BigInteger tenantId = orderAcceptOperateModel.obtainTenantId();
+        BigInteger branchId = orderAcceptOperateModel.obtainBranchId();
         BigInteger orderId = orderAcceptOperateModel.getOrderId();
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
         build.dream.common.models.jddj.OrderAcceptOperateModel jddjOrderAcceptOperateModel = build.dream.common.models.jddj.OrderAcceptOperateModel.builder()
