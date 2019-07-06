@@ -1,11 +1,15 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
+import build.dream.catering.models.jddj.OrderAcceptOperateModel;
+import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.DietOrder;
 import build.dream.common.catering.domains.DietOrderDetail;
 import build.dream.common.catering.domains.DietOrderGroup;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.utils.DatabaseHelper;
+import build.dream.common.utils.JDDJUtils;
+import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.ValidateUtils;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Service;
@@ -89,5 +93,33 @@ public class JDDJService {
             dietOrderDetails.add(dietOrderDetail);
         }
         DatabaseHelper.insertAll(dietOrderDetails);
+    }
+
+    private DietOrder obtainDietOrder(BigInteger tenantId, BigInteger branchId, BigInteger orderId) {
+        SearchModel searchModel = SearchModel.builder()
+                .autoSetDeletedFalse()
+                .equal(DietOrder.ColumnName.TENANT_ID, tenantId)
+                .equal(DietOrder.ColumnName.BRANCH_ID, branchId)
+                .equal(DietOrder.ColumnName.ID, orderId)
+                .build();
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
+        return dietOrder;
+    }
+
+    @Transactional(readOnly = true)
+    public ApiRest orderAcceptOperate(OrderAcceptOperateModel orderAcceptOperateModel) {
+        BigInteger tenantId = orderAcceptOperateModel.getTenantId();
+        BigInteger branchId = orderAcceptOperateModel.getBranchId();
+        BigInteger orderId = orderAcceptOperateModel.getOrderId();
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
+        build.dream.common.models.jddj.OrderAcceptOperateModel jddjOrderAcceptOperateModel = build.dream.common.models.jddj.OrderAcceptOperateModel.builder()
+                .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
+                .isAgreed(Boolean.TRUE)
+                .operator("")
+                .build();
+        Map<String, Object> result = JDDJUtils.orderAcceptOperate(jddjOrderAcceptOperateModel);
+
+        return ApiRest.builder().message("确认订单成功！").successful(true).build();
     }
 }
