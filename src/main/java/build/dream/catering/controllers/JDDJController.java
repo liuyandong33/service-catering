@@ -1,7 +1,8 @@
 package build.dream.catering.controllers;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.models.jddj.OrderAcceptOperateModel;
+import build.dream.catering.models.jddj.CancelOrderModel;
+import build.dream.catering.models.jddj.ConfirmOrderModel;
 import build.dream.catering.services.JDDJService;
 import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.annotations.PermitAll;
@@ -21,10 +22,27 @@ public class JDDJController {
         return Constants.SUCCESS;
     }
 
-    @RequestMapping(value = "/orderAcceptOperate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    /**
+     * 确认订单
+     *
+     * @return
+     */
+    @RequestMapping(value = "/confirmOrder", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ApiRestAction(modelClass = OrderAcceptOperateModel.class, serviceClass = JDDJService.class, serviceMethodName = "orderAcceptOperate", error = "确认接单失败")
-    public String orderAcceptOperate() {
+    @ApiRestAction(modelClass = ConfirmOrderModel.class, serviceClass = JDDJService.class, serviceMethodName = "confirmOrder", error = "确认订单失败")
+    public String confirmOrder() {
+        return null;
+    }
+
+    /**
+     * 取消订单
+     *
+     * @return
+     */
+    @RequestMapping(value = "/cancelOrder", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = CancelOrderModel.class, serviceClass = JDDJService.class, serviceMethodName = "cancelOrder", error = "取消订单失败")
+    public String cancelOrder() {
         return null;
     }
 }

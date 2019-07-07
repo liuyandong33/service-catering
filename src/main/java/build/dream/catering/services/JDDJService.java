@@ -1,12 +1,14 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.models.jddj.OrderAcceptOperateModel;
+import build.dream.catering.models.jddj.CancelOrderModel;
+import build.dream.catering.models.jddj.ConfirmOrderModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.DietOrder;
 import build.dream.common.catering.domains.DietOrderDetail;
 import build.dream.common.catering.domains.DietOrderGroup;
 import build.dream.common.constants.DietOrderConstants;
+import build.dream.common.models.jddj.OrderAcceptOperateModel;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.JDDJUtils;
 import build.dream.common.utils.SearchModel;
@@ -107,15 +109,42 @@ public class JDDJService {
         return dietOrder;
     }
 
+    /**
+     * 确认订单
+     *
+     * @param confirmOrderModel
+     * @return
+     */
     @Transactional(readOnly = true)
-    public ApiRest orderAcceptOperate(OrderAcceptOperateModel orderAcceptOperateModel) {
-        BigInteger tenantId = orderAcceptOperateModel.obtainTenantId();
-        BigInteger branchId = orderAcceptOperateModel.obtainBranchId();
-        BigInteger orderId = orderAcceptOperateModel.getOrderId();
+    public ApiRest confirmOrder(ConfirmOrderModel confirmOrderModel) {
+        BigInteger tenantId = confirmOrderModel.obtainTenantId();
+        BigInteger branchId = confirmOrderModel.obtainBranchId();
+        BigInteger orderId = confirmOrderModel.getOrderId();
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
-        build.dream.common.models.jddj.OrderAcceptOperateModel jddjOrderAcceptOperateModel = build.dream.common.models.jddj.OrderAcceptOperateModel.builder()
+        OrderAcceptOperateModel jddjOrderAcceptOperateModel = OrderAcceptOperateModel.builder()
                 .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
                 .isAgreed(Boolean.TRUE)
+                .operator("")
+                .build();
+        Map<String, Object> result = JDDJUtils.orderAcceptOperate(jddjOrderAcceptOperateModel);
+
+        return ApiRest.builder().message("确认订单成功！").successful(true).build();
+    }
+
+    /**
+     * 取消订单
+     *
+     * @param cancelOrderModel
+     * @return
+     */
+    public ApiRest cancelOrder(CancelOrderModel cancelOrderModel) {
+        BigInteger tenantId = cancelOrderModel.obtainTenantId();
+        BigInteger branchId = cancelOrderModel.obtainBranchId();
+        BigInteger orderId = cancelOrderModel.getOrderId();
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
+        OrderAcceptOperateModel jddjOrderAcceptOperateModel = OrderAcceptOperateModel.builder()
+                .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
+                .isAgreed(Boolean.FALSE)
                 .operator("")
                 .build();
         Map<String, Object> result = JDDJUtils.orderAcceptOperate(jddjOrderAcceptOperateModel);
