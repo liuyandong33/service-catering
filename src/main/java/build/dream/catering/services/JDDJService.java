@@ -137,6 +137,7 @@ public class JDDJService {
      * @param cancelOrderModel
      * @return
      */
+    @Transactional(readOnly = true)
     public ApiRest cancelOrder(CancelOrderModel cancelOrderModel) {
         BigInteger tenantId = cancelOrderModel.obtainTenantId();
         BigInteger branchId = cancelOrderModel.obtainBranchId();
