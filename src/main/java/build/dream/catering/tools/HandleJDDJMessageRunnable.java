@@ -43,7 +43,7 @@ public class HandleJDDJMessageRunnable implements Runnable {
             } catch (Exception e) {
                 isNormal = false;
                 if (count == 1) {
-                    DingtalkUtils.send(ConfigurationUtils.getConfiguration(Constants.DINGTALK_ERROR_CHAT_ID), String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "京东到家消息处理失败", GsonUtils.toJson(body), e.getClass().getName(), e.getMessage()));
+                    DingtalkUtils.send(ConfigurationUtils.getConfiguration(Constants.DINGTALK_ERROR_NOTIFY_CHAT_ID), String.format(Constants.DINGTALK_ERROR_NOTIFY_MESSAGE_FORMAT, "京东到家消息处理失败", GsonUtils.toJson(body), e.getClass().getName(), e.getMessage()));
                 }
             }
 

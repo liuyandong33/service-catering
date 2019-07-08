@@ -165,6 +165,6 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC = "offline.pay.refund.wei.xin.async.notify.message.topic";
     public static final String DADA_ORDER_CALLBACK_MESSAGE_TOPIC = "dada.order.callback.message.topic";
 
-    public static final String DINGTALK_ERROR_MESSAGE_FORMAT = "%s-%s-%s-%s";
-    public static final String DINGTALK_ERROR_CHAT_ID = "dingtalk.error.chat.id";
+    public static final String DINGTALK_ERROR_NOTIFY_MESSAGE_FORMAT = "%s-%s-%s-%s";
+    public static final String DINGTALK_ERROR_NOTIFY_CHAT_ID = "dingtalk.error.notify.chat.id";
 }

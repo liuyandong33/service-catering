@@ -29,7 +29,7 @@ public class UploadDataMessageListener implements MessageListener<String, String
                 dataService.saveDietOrder(data);
             }
         } catch (Exception e) {
-            DingtalkUtils.send(ConfigurationUtils.getConfiguration(Constants.DINGTALK_ERROR_CHAT_ID), String.format(Constants.DINGTALK_ERROR_MESSAGE_FORMAT, "保存POS上传的数据失败", GsonUtils.toJson(value), e.getClass().getName(), e.getMessage()));
+            DingtalkUtils.send(ConfigurationUtils.getConfiguration(Constants.DINGTALK_ERROR_NOTIFY_CHAT_ID), String.format(Constants.DINGTALK_ERROR_NOTIFY_MESSAGE_FORMAT, "保存POS上传的数据失败", GsonUtils.toJson(value), e.getClass().getName(), e.getMessage()));
         }
     }
 }
