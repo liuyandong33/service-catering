@@ -27,7 +27,6 @@ public class JDDJMessageListener implements MessageListener<String, String> {
         BigInteger tenantId = BigInteger.valueOf(MapUtils.getLongValue(message, "tenantId"));
         String tenantCode = MapUtils.getString(message, "tenantCode");
         int count = MapUtils.getIntValue(message, "count");
-        long interval = MapUtils.getLongValue(message, "interval");
-        new Thread(new HandleJDDJMessageRunnable(jddjService, tenantId, tenantCode, body, count, interval)).start();
+        new Thread(new HandleJDDJMessageRunnable(jddjService, tenantId, tenantCode, body, count, 1000)).start();
     }
 }
