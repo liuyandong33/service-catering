@@ -39,6 +39,9 @@ public class HandleJDDJMessageRunnable implements Runnable {
                     case Constants.DJSW_TYPE_NEW_ORDER:
                         jddjService.handleNewOrder(tenantId, tenantCode, body);
                         break;
+                    case Constants.DJSW_TYPE_ORDER_ADJUST:
+                        jddjService.handleOrderAdjust(tenantId, tenantCode, body);
+                        break;
                 }
             } catch (Exception e) {
                 isNormal = false;

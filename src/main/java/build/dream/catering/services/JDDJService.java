@@ -130,6 +130,10 @@ public class JDDJService {
         }
     }
 
+    public void handleOrderAdjust(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+
+    }
+
     private DietOrder obtainDietOrder(BigInteger tenantId, BigInteger branchId, BigInteger orderId) {
         SearchModel searchModel = SearchModel.builder()
                 .autoSetDeletedFalse()
