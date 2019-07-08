@@ -5,6 +5,7 @@ import build.dream.catering.models.jddj.CancelOrderModel;
 import build.dream.catering.models.jddj.ConfirmOrderModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.DietOrder;
+import build.dream.common.catering.domains.DietOrderActivity;
 import build.dream.common.catering.domains.DietOrderDetail;
 import build.dream.common.catering.domains.DietOrderGroup;
 import build.dream.common.constants.DietOrderConstants;
@@ -13,6 +14,7 @@ import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.JDDJUtils;
 import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.ValidateUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class JDDJService {
@@ -33,10 +36,13 @@ public class JDDJService {
         ValidateUtils.isTrue(resultList.size() == 1, "订单不存在！");
 
         BigInteger branchId = BigInteger.ZERO;
+        BigInteger userId = BigInteger.ZERO;
 
         Map<String, Object> orderInfo = resultList.get(0);
         List<Map<String, Object>> products = (List<Map<String, Object>>) orderInfo.get("product");
         Map<String, Object> orderInvoice = MapUtils.getMap(orderInfo, "orderInvoice");
+
+        boolean invoiced = MapUtils.isNotEmpty(orderInvoice);
 
         DietOrder dietOrder = DietOrder.builder()
                 .tenantId(tenantId)
@@ -47,6 +53,9 @@ public class JDDJService {
                 .orderStatus(DietOrderConstants.ORDER_STATUS_UNPROCESSED)
                 .payStatus(DietOrderConstants.PAY_STATUS_PAID)
                 .refundStatus(DietOrderConstants.REFUND_STATUS_NO_REFUND)
+                .invoiced(invoiced)
+                .invoiceType(invoiced ? (MapUtils.getIntValue(orderInvoice, "invoiceType") == 0 ? DietOrderConstants.INVOICE_TYPE_PERSONAL : DietOrderConstants.INVOICE_TYPE_COMPANY) : Constants.VARCHAR_DEFAULT_VALUE)
+                .invoice(invoiced ? MapUtils.getString(orderInvoice, "invoiceTitle") : Constants.VARCHAR_DEFAULT_VALUE)
                 .build();
 
         DatabaseHelper.insert(dietOrder);
@@ -93,6 +102,32 @@ public class JDDJService {
             dietOrderDetails.add(dietOrderDetail);
         }
         DatabaseHelper.insertAll(dietOrderDetails);
+
+        List<Map<String, Object>> discounts = (List<Map<String, Object>>) orderInfo.get("discount");
+        List<DietOrderActivity> dietOrderActivities = new ArrayList<DietOrderActivity>();
+        for (Map<String, Object> discount : discounts) {
+            Double venderPayMoney = MapUtils.getDouble(discount, "venderPayMoney");
+            if (Objects.isNull(venderPayMoney)) {
+                continue;
+            }
+
+            DietOrderActivity dietOrderActivity = DietOrderActivity.builder()
+                    .tenantId(tenantId)
+                    .tenantCode(tenantCode)
+                    .branchId(branchId)
+                    .dietOrderId(dietOrderId)
+                    .activityId(BigInteger.ZERO)
+                    .activityName("")
+                    .activityType(1)
+                    .amount(BigDecimal.valueOf(venderPayMoney).divide(Constants.BIG_DECIMAL_ONE_HUNDRED))
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
+                    .build();
+            dietOrderActivities.add(dietOrderActivity);
+        }
+        if (CollectionUtils.isNotEmpty(dietOrderActivities)) {
+            DatabaseHelper.insertAll(dietOrderActivities);
+        }
     }
 
     private DietOrder obtainDietOrder(BigInteger tenantId, BigInteger branchId, BigInteger orderId) {
