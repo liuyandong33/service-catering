@@ -26,14 +26,12 @@ import java.util.Map;
 @Service
 public class JDDJService {
     @Transactional
-    public void handleNewOrder(Map<String, Object> message) {
+    public void handleNewOrder(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
         Map<String, Object> resultMap = null;
         Map<String, Object> result = MapUtils.getMap(resultMap, "result");
         List<Map<String, Object>> resultList = (List<Map<String, Object>>) result.get("resultList");
         ValidateUtils.isTrue(resultList.size() == 1, "订单不存在！");
 
-        BigInteger tenantId = BigInteger.ZERO;
-        String tenantCode = "";
         BigInteger branchId = BigInteger.ZERO;
 
         Map<String, Object> orderInfo = resultList.get(0);
