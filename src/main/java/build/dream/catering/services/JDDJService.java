@@ -660,4 +660,28 @@ public class JDDJService {
         Map<String, Object> result = JDDJUtils.urgeDispatching(jddjUrgeDispatchingModel);
         return ApiRest.builder().message("催配送员抢单成功！").successful(true).build();
     }
+
+    /**
+     * 订单商家加小费
+     *
+     * @param addTipsModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest addTips(AddTipsModel addTipsModel) {
+        BigInteger tenantId = addTipsModel.obtainTenantId();
+        BigInteger branchId = addTipsModel.obtainBranchId();
+        BigInteger orderId = addTipsModel.getOrderId();
+        Integer tips = addTipsModel.getTips();
+
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
+
+        build.dream.common.models.jddj.AddTipsModel jddjAddTipsModel = build.dream.common.models.jddj.AddTipsModel.builder()
+                .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
+                .tips(tips)
+                .operator("")
+                .build();
+        Map<String, Object> result = JDDJUtils.addTips(jddjAddTipsModel);
+        return ApiRest.builder().message("订单加小费成功！").successful(true).build();
+    }
 }

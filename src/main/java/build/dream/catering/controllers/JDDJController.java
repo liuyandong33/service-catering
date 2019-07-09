@@ -215,4 +215,16 @@ public class JDDJController {
     public String urgeDispatching() {
         return null;
     }
+
+    /**
+     * 订单商家加小费
+     *
+     * @return
+     */
+    @RequestMapping(value = "/addTips", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = AddTipsModel.class, serviceClass = JDDJService.class, serviceMethodName = "addTips", error = "订单加小费失败")
+    public String addTips() {
+        return null;
+    }
 }
