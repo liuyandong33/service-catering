@@ -397,6 +397,7 @@ public class JDDJService {
      * @param agreeCancelOrderModel
      * @return
      */
+    @Transactional(readOnly = true)
     public ApiRest agreeCancelOrder(AgreeCancelOrderModel agreeCancelOrderModel) {
         BigInteger tenantId = agreeCancelOrderModel.obtainTenantId();
         BigInteger branchId = agreeCancelOrderModel.obtainBranchId();
@@ -421,6 +422,7 @@ public class JDDJService {
      * @param disagreeCancelOrderModel
      * @return
      */
+    @Transactional(readOnly = true)
     public ApiRest disagreeCancelOrder(DisagreeCancelOrderModel disagreeCancelOrderModel) {
         BigInteger tenantId = disagreeCancelOrderModel.obtainTenantId();
         BigInteger branchId = disagreeCancelOrderModel.obtainBranchId();
@@ -445,6 +447,7 @@ public class JDDJService {
      * @param adjustOrderModel
      * @return
      */
+    @Transactional(readOnly = true)
     public ApiRest adjustOrder(AdjustOrderModel adjustOrderModel) {
         return ApiRest.builder().message("订单调整成功！").build();
     }
@@ -455,6 +458,7 @@ public class JDDJService {
      * @param orderJDZBDeliveryModel
      * @return
      */
+    @Transactional(readOnly = true)
     public ApiRest orderJDZBDelivery(OrderJDZBDeliveryModel orderJDZBDeliveryModel) {
         BigInteger tenantId = orderJDZBDeliveryModel.obtainTenantId();
         BigInteger branchId = orderJDZBDeliveryModel.obtainBranchId();
@@ -475,6 +479,7 @@ public class JDDJService {
      * @param orderDDTCDeliveryModel
      * @return
      */
+    @Transactional(readOnly = true)
     public ApiRest orderDDTCDelivery(OrderDDTCDeliveryModel orderDDTCDeliveryModel) {
         BigInteger tenantId = orderDDTCDeliveryModel.obtainTenantId();
         BigInteger branchId = orderDDTCDeliveryModel.obtainBranchId();
