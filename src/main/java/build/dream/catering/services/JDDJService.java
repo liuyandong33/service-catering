@@ -1,10 +1,7 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.catering.models.jddj.CancelAndRefundModel;
-import build.dream.catering.models.jddj.CancelOrderModel;
-import build.dream.catering.models.jddj.ConfirmOrderModel;
-import build.dream.catering.models.jddj.PrintOrderModel;
+import build.dream.catering.models.jddj.*;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.DietOrder;
 import build.dream.common.catering.domains.DietOrderActivity;
@@ -12,6 +9,7 @@ import build.dream.common.catering.domains.DietOrderDetail;
 import build.dream.common.catering.domains.DietOrderGroup;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.models.jddj.OrderAcceptOperateModel;
+import build.dream.common.models.jddj.OrderCancelOperateModel;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.JDDJUtils;
 import build.dream.common.utils.SearchModel;
@@ -391,5 +389,104 @@ public class JDDJService {
                 .build();
         Map<String, Object> result = JDDJUtils.printOrder(jddjPrintOrderModel);
         return ApiRest.builder().message("订单已打印成功！").successful(true).build();
+    }
+
+    /**
+     * 同意取消订单
+     *
+     * @param agreeCancelOrderModel
+     * @return
+     */
+    public ApiRest agreeCancelOrder(AgreeCancelOrderModel agreeCancelOrderModel) {
+        BigInteger tenantId = agreeCancelOrderModel.obtainTenantId();
+        BigInteger branchId = agreeCancelOrderModel.obtainBranchId();
+        BigInteger orderId = agreeCancelOrderModel.getOrderId();
+        String remark = agreeCancelOrderModel.getRemark();
+
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
+
+        OrderCancelOperateModel orderCancelOperateModel = OrderCancelOperateModel.builder()
+                .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
+                .isAgreed(Boolean.TRUE)
+                .operator("")
+                .remark(remark)
+                .build();
+        Map<String, Object> result = JDDJUtils.orderCancelOperate(orderCancelOperateModel);
+        return ApiRest.builder().message("同意取消订单成功！").successful(true).build();
+    }
+
+    /**
+     * 不同意取消订单
+     *
+     * @param disagreeCancelOrderModel
+     * @return
+     */
+    public ApiRest disagreeCancelOrder(DisagreeCancelOrderModel disagreeCancelOrderModel) {
+        BigInteger tenantId = disagreeCancelOrderModel.obtainTenantId();
+        BigInteger branchId = disagreeCancelOrderModel.obtainBranchId();
+        BigInteger orderId = disagreeCancelOrderModel.getOrderId();
+        String remark = disagreeCancelOrderModel.getRemark();
+
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
+
+        OrderCancelOperateModel orderCancelOperateModel = OrderCancelOperateModel.builder()
+                .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
+                .isAgreed(Boolean.FALSE)
+                .operator("")
+                .remark(remark)
+                .build();
+        Map<String, Object> result = JDDJUtils.orderCancelOperate(orderCancelOperateModel);
+        return ApiRest.builder().message("不同意取消订单成功！").successful(true).build();
+    }
+
+    /**
+     * 订单调整
+     *
+     * @param adjustOrderModel
+     * @return
+     */
+    public ApiRest adjustOrder(AdjustOrderModel adjustOrderModel) {
+        return ApiRest.builder().message("订单调整成功！").build();
+    }
+
+    /**
+     * 拣货完成且众包配送
+     *
+     * @param orderJDZBDeliveryModel
+     * @return
+     */
+    public ApiRest orderJDZBDelivery(OrderJDZBDeliveryModel orderJDZBDeliveryModel) {
+        BigInteger tenantId = orderJDZBDeliveryModel.obtainTenantId();
+        BigInteger branchId = orderJDZBDeliveryModel.obtainBranchId();
+        BigInteger orderId = orderJDZBDeliveryModel.getOrderId();
+
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
+        build.dream.common.models.jddj.OrderJDZBDeliveryModel jddjOrderJDZBDeliveryModel = build.dream.common.models.jddj.OrderJDZBDeliveryModel.builder()
+                .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
+                .operator("")
+                .build();
+        Map<String, Object> result = JDDJUtils.orderJDZBDelivery(jddjOrderJDZBDeliveryModel);
+        return ApiRest.builder().message("拣货完成且众包配送成功！").successful(true).build();
+    }
+
+    /**
+     * 拣货完成且达达同城配送
+     *
+     * @param orderDDTCDeliveryModel
+     * @return
+     */
+    public ApiRest orderDDTCDelivery(OrderDDTCDeliveryModel orderDDTCDeliveryModel) {
+        BigInteger tenantId = orderDDTCDeliveryModel.obtainTenantId();
+        BigInteger branchId = orderDDTCDeliveryModel.obtainBranchId();
+        BigInteger orderId = orderDDTCDeliveryModel.getOrderId();
+
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
+
+        build.dream.common.models.jddj.OrderDDTCDeliveryModel jddjOrderDDTCDeliveryModel = build.dream.common.models.jddj.OrderDDTCDeliveryModel.builder()
+                .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
+                .operator("")
+                .build();
+        Map<String, Object> result = JDDJUtils.orderDDTCDelivery(jddjOrderDDTCDeliveryModel);
+        return ApiRest.builder().message("拣货完成且达达同城配送失败！").successful(true).build();
     }
 }
