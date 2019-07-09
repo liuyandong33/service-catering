@@ -42,6 +42,46 @@ public class HandleJDDJMessageRunnable implements Runnable {
                     case Constants.DJSW_TYPE_ORDER_ADJUST:
                         jddjService.handleOrderAdjust(tenantId, tenantCode, body);
                         break;
+                    case Constants.DJSW_TYPE_APPLY_CANCELORDER:
+                        jddjService.handleApplyCancelOrder(tenantId, tenantCode, body);
+                        break;
+                    case Constants.DJSW_TYPE_ORDER_WAIT_OUT_STORE:
+                        jddjService.handleOrderWaitOutStore(tenantId, tenantCode, body);
+                        break;
+                    case Constants.DJSW_TYPE_DELIVERY_ORDER:
+                        jddjService.handleDeliveryOrder(tenantId, tenantCode, body);
+                        break;
+                    case Constants.DJSW_TYPE_PICK_FINISH_ORDER:
+                        jddjService.handlePickFinishOrder(tenantId, tenantCode, body);
+                        break;
+                    case Constants.DJSW_TYPE_FINISH_ORDER:
+                        jddjService.handleFinishOrder(tenantId, tenantCode, body);
+                        break;
+                    case Constants.DJSW_TYPE_LOCK_ORDER:
+                        jddjService.handleLockOrder(tenantId, tenantCode, body);
+                        break;
+                    case Constants.DJSW_TYPE_UNLOCK_ORDER:
+                        jddjService.handleUnlockOrder(tenantId, tenantCode, body);
+                        break;
+                    case Constants.DJSW_TYPE_USER_CANCEL_ORDER:
+                        jddjService.handleUserCancelOrder(tenantId, tenantCode, body);
+                        break;
+                    case Constants.DJSW_TYPE_PUSH_DELIVERY_STATUS:
+                        jddjService.handlePushDeliveryStatus(tenantId, tenantCode, body);
+                        break;
+                    case Constants.DJSW_TYPE_ORDER_INFO_CHANGE:
+                        jddjService.handleOrderInfoChange(tenantId, tenantCode, body);
+                        break;
+                    case Constants.DJSW_TYPE_ORDER_ADD_TIPS:
+                        jddjService.handleOrderAddTips(tenantId, tenantCode, body);
+                        break;
+                    case Constants.DJSW_TYPE_ORDER_ACCOUNTING:
+                        jddjService.handleOrderAccounting(tenantId, tenantCode, body);
+                        break;
+                    case Constants.DJSW_TYPE_DELIVERY_CARRIER_MODIFY:
+                        jddjService.handleDeliveryCarrierModify(tenantId, tenantCode, body);
+                        break;
+
                 }
             } catch (Exception e) {
                 isNormal = false;

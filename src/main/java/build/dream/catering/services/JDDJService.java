@@ -28,6 +28,13 @@ import java.util.Objects;
 
 @Service
 public class JDDJService {
+    /**
+     * 处理新订单回调
+     *
+     * @param tenantId
+     * @param tenantCode
+     * @param message
+     */
     @Transactional
     public void handleNewOrder(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
         Map<String, Object> resultMap = null;
@@ -130,7 +137,157 @@ public class JDDJService {
         }
     }
 
+    /**
+     * 处理订单调整消息
+     *
+     * @param tenantId
+     * @param tenantCode
+     * @param message
+     */
     public void handleOrderAdjust(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+
+    }
+
+    /**
+     * 处理用户取消申请消息
+     *
+     * @param tenantId
+     * @param tenantCode
+     * @param message
+     */
+    public void handleApplyCancelOrder(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+
+    }
+
+    /**
+     * 处理订单等待出库消息
+     *
+     * @param tenantId
+     * @param tenantCode
+     * @param message
+     */
+    public void handleOrderWaitOutStore(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+
+    }
+
+    /**
+     * 处理订单开始配送消息
+     *
+     * @param tenantId
+     * @param tenantCode
+     * @param message
+     */
+    public void handleDeliveryOrder(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+
+    }
+
+    /**
+     * 处理订单拣货完成消息
+     *
+     * @param tenantId
+     * @param tenantCode
+     * @param message
+     */
+    public void handlePickFinishOrder(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+
+    }
+
+    /**
+     * 处理订单妥投消息
+     *
+     * @param tenantId
+     * @param tenantCode
+     * @param message
+     */
+    public void handleFinishOrder(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+
+    }
+
+    /**
+     * 处理订单锁定消息
+     *
+     * @param tenantId
+     * @param tenantCode
+     * @param message
+     */
+    public void handleLockOrder(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+
+    }
+
+    /**
+     * 处理订单解锁消息
+     *
+     * @param tenantId
+     * @param tenantCode
+     * @param message
+     */
+    public void handleUnlockOrder(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+
+    }
+
+    /**
+     * 处理用户取消消息
+     *
+     * @param tenantId
+     * @param tenantCode
+     * @param message
+     */
+    public void handleUserCancelOrder(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+
+    }
+
+    /**
+     * 处理订单运单状态消息
+     *
+     * @param tenantId
+     * @param tenantCode
+     * @param message
+     */
+    public void handlePushDeliveryStatus(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+
+    }
+
+    /**
+     * 处理订单信息变更消息
+     *
+     * @param tenantId
+     * @param tenantCode
+     * @param message
+     */
+    public void handleOrderInfoChange(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+
+    }
+
+    /**
+     * 订单商家小费消息
+     *
+     * @param tenantId
+     * @param tenantCode
+     * @param message
+     */
+    public void handleOrderAddTips(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+
+    }
+
+    /**
+     * 订单应结消息
+     *
+     * @param tenantId
+     * @param tenantCode
+     * @param message
+     */
+    public void handleOrderAccounting(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+
+    }
+
+    /**
+     * 订单转自送消息
+     *
+     * @param tenantId
+     * @param tenantCode
+     * @param message
+     */
+    public void handleDeliveryCarrierModify(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
 
     }
 
