@@ -1,8 +1,10 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
+import build.dream.catering.models.jddj.CancelAndRefundModel;
 import build.dream.catering.models.jddj.CancelOrderModel;
 import build.dream.catering.models.jddj.ConfirmOrderModel;
+import build.dream.catering.models.jddj.PrintOrderModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.DietOrder;
 import build.dream.common.catering.domains.DietOrderActivity;
@@ -21,10 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class JDDJService {
@@ -315,12 +314,12 @@ public class JDDJService {
         BigInteger branchId = confirmOrderModel.obtainBranchId();
         BigInteger orderId = confirmOrderModel.getOrderId();
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
-        OrderAcceptOperateModel jddjOrderAcceptOperateModel = OrderAcceptOperateModel.builder()
+        OrderAcceptOperateModel orderAcceptOperateModel = OrderAcceptOperateModel.builder()
                 .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
                 .isAgreed(Boolean.TRUE)
                 .operator("")
                 .build();
-        Map<String, Object> result = JDDJUtils.orderAcceptOperate(jddjOrderAcceptOperateModel);
+        Map<String, Object> result = JDDJUtils.orderAcceptOperate(orderAcceptOperateModel);
 
         return ApiRest.builder().message("确认订单成功！").successful(true).build();
     }
@@ -337,13 +336,60 @@ public class JDDJService {
         BigInteger branchId = cancelOrderModel.obtainBranchId();
         BigInteger orderId = cancelOrderModel.getOrderId();
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
-        OrderAcceptOperateModel jddjOrderAcceptOperateModel = OrderAcceptOperateModel.builder()
+        OrderAcceptOperateModel orderAcceptOperateModel = OrderAcceptOperateModel.builder()
                 .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
                 .isAgreed(Boolean.FALSE)
                 .operator("")
                 .build();
-        Map<String, Object> result = JDDJUtils.orderAcceptOperate(jddjOrderAcceptOperateModel);
+        Map<String, Object> result = JDDJUtils.orderAcceptOperate(orderAcceptOperateModel);
 
         return ApiRest.builder().message("确认订单成功！").successful(true).build();
+    }
+
+    /**
+     * 订单取消且退款接口
+     * 1、商家自送订单在配送流程中，若用户拒收，商家可调用接口进行取消；
+     * 2、非商家自送订单，调用接口取消失败，仅可用户进行取消；
+     * 3、达达配送转商家自送的订单，若用户拒收，商家可调用接口进行取消；
+     *
+     * @param cancelAndRefundModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest cancelAndRefund(CancelAndRefundModel cancelAndRefundModel) {
+        BigInteger tenantId = cancelAndRefundModel.obtainTenantId();
+        BigInteger branchId = cancelAndRefundModel.obtainBranchId();
+        BigInteger orderId = cancelAndRefundModel.getOrderId();
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
+
+        build.dream.common.models.jddj.CancelAndRefundModel jddjCancelAndRefundModel = build.dream.common.models.jddj.CancelAndRefundModel.builder()
+                .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
+                .operPin("")
+                .operRemark("")
+                .operTime(new Date())
+                .build();
+
+        Map<String, Object> result = JDDJUtils.cancelAndRefund(jddjCancelAndRefundModel);
+        return ApiRest.builder().message("订单取消且退款成功！").successful(true).build();
+    }
+
+    /**
+     * 订单已打印接口
+     *
+     * @param printOrderModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest printOrder(PrintOrderModel printOrderModel) {
+        BigInteger tenantId = printOrderModel.obtainTenantId();
+        BigInteger branchId = printOrderModel.obtainBranchId();
+        BigInteger orderId = printOrderModel.getOrderId();
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
+
+        build.dream.common.models.jddj.PrintOrderModel jddjPrintOrderModel = build.dream.common.models.jddj.PrintOrderModel.builder()
+                .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
+                .build();
+        Map<String, Object> result = JDDJUtils.printOrder(jddjPrintOrderModel);
+        return ApiRest.builder().message("订单已打印成功！").successful(true).build();
     }
 }
