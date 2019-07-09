@@ -10,6 +10,8 @@ import build.dream.common.catering.domains.DietOrderGroup;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.models.jddj.OrderAcceptOperateModel;
 import build.dream.common.models.jddj.OrderCancelOperateModel;
+import build.dream.common.models.jddj.OrderSerllerDeliveryModel;
+import build.dream.common.models.jddj.ReceiveFailedAuditModel;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.JDDJUtils;
 import build.dream.common.utils.SearchModel;
@@ -492,6 +494,125 @@ public class JDDJService {
                 .operator("")
                 .build();
         Map<String, Object> result = JDDJUtils.orderDDTCDelivery(jddjOrderDDTCDeliveryModel);
-        return ApiRest.builder().message("拣货完成且达达同城配送失败！").successful(true).build();
+        return ApiRest.builder().message("拣货完成且达达同城配送成功！").successful(true).build();
+    }
+
+    /**
+     * 拣货完成且商家自送
+     *
+     * @param orderSellerDeliveryModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest orderSellerDelivery(OrderSellerDeliveryModel orderSellerDeliveryModel) {
+        BigInteger tenantId = orderSellerDeliveryModel.obtainTenantId();
+        BigInteger branchId = orderSellerDeliveryModel.obtainBranchId();
+        BigInteger orderId = orderSellerDeliveryModel.getOrderId();
+
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
+
+        OrderSerllerDeliveryModel orderSerllerDeliveryModel = OrderSerllerDeliveryModel.builder()
+                .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
+                .operator("")
+                .build();
+        Map<String, Object> result = JDDJUtils.orderSerllerDelivery(orderSerllerDeliveryModel);
+        return ApiRest.builder().message("拣货完成且商家自送成功！").successful(true).build();
+    }
+
+    /**
+     * 订单达达配送转商家自送
+     *
+     * @param modifySellerDeliveryModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest modifySellerDelivery(ModifySellerDeliveryModel modifySellerDeliveryModel) {
+        BigInteger tenantId = modifySellerDeliveryModel.obtainTenantId();
+        BigInteger branchId = modifySellerDeliveryModel.obtainBranchId();
+        BigInteger orderId = modifySellerDeliveryModel.getOrderId();
+
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
+
+        build.dream.common.models.jddj.ModifySellerDeliveryModel jddjModifySellerDeliveryModel = build.dream.common.models.jddj.ModifySellerDeliveryModel.builder()
+                .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
+                .updatePin("")
+                .build();
+        Map<String, Object> result = JDDJUtils.modifySellerDelivery(jddjModifySellerDeliveryModel);
+        return ApiRest.builder().message("订单达达配送转商家自送成功！").successful(true).build();
+    }
+
+    /**
+     * 同意配送员取货失败
+     *
+     * @param agreePickUpFailedModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest agreePickUpFailed(AgreePickUpFailedModel agreePickUpFailedModel) {
+        BigInteger tenantId = agreePickUpFailedModel.obtainTenantId();
+        BigInteger branchId = agreePickUpFailedModel.obtainBranchId();
+        BigInteger orderId = agreePickUpFailedModel.getOrderId();
+        String remark = agreePickUpFailedModel.getRemark();
+
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
+
+        ReceiveFailedAuditModel receiveFailedAuditModel = ReceiveFailedAuditModel.builder()
+                .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
+                .isAgreed(Boolean.TRUE)
+                .operator("")
+                .remark(remark)
+                .build();
+
+        Map<String, Object> result = JDDJUtils.receiveFailedAudit(receiveFailedAuditModel);
+        return ApiRest.builder().message("同意配送员取货失败成功！").successful(true).build();
+    }
+
+    /**
+     * 不同意配送员取货失败
+     *
+     * @param disagreePickUpFailedModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest disagreePickUpFailed(DisagreePickUpFailedModel disagreePickUpFailedModel) {
+        BigInteger tenantId = disagreePickUpFailedModel.obtainTenantId();
+        BigInteger branchId = disagreePickUpFailedModel.obtainBranchId();
+        BigInteger orderId = disagreePickUpFailedModel.getOrderId();
+        String remark = disagreePickUpFailedModel.getRemark();
+
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
+
+        ReceiveFailedAuditModel receiveFailedAuditModel = ReceiveFailedAuditModel.builder()
+                .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
+                .isAgreed(Boolean.FALSE)
+                .operator("")
+                .remark(remark)
+                .build();
+
+        Map<String, Object> result = JDDJUtils.receiveFailedAudit(receiveFailedAuditModel);
+        return ApiRest.builder().message("不同意配送员取货失败成功！").successful(true).build();
+    }
+
+    /**
+     * 订单妥投
+     *
+     * @param deliveryEndOrderModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest deliveryEndOrder(DeliveryEndOrderModel deliveryEndOrderModel) {
+        BigInteger tenantId = deliveryEndOrderModel.obtainTenantId();
+        BigInteger branchId = deliveryEndOrderModel.obtainBranchId();
+        BigInteger orderId = deliveryEndOrderModel.getOrderId();
+
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
+
+        build.dream.common.models.jddj.DeliveryEndOrderModel jddjDeliveryEndOrderModel = build.dream.common.models.jddj.DeliveryEndOrderModel.builder()
+                .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
+                .operPin("")
+                .operTime(new Date())
+                .build();
+        Map<String, Object> result = JDDJUtils.deliveryEndOrder(jddjDeliveryEndOrderModel);
+        return ApiRest.builder().message("不同意配送员取货失败成功！").successful(true).build();
     }
 }

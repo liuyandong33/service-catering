@@ -131,4 +131,64 @@ public class JDDJController {
     public String orderDDTCDelivery() {
         return null;
     }
+
+    /**
+     * 拣货完成且商家自送
+     *
+     * @return
+     */
+    @RequestMapping(value = "/orderSellerDelivery", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = OrderSellerDeliveryModel.class, serviceClass = JDDJService.class, serviceMethodName = "orderSellerDelivery", error = "拣货完成且商家自送失败")
+    public String orderSellerDelivery() {
+        return null;
+    }
+
+    /**
+     * 订单达达配送转商家自送
+     *
+     * @return
+     */
+    @RequestMapping(value = "/modifySellerDelivery", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = ModifySellerDeliveryModel.class, serviceClass = JDDJService.class, serviceMethodName = "modifySellerDelivery", error = "订单达达配送转商家自送失败")
+    public String modifySellerDelivery() {
+        return null;
+    }
+
+    /**
+     * 同意配送员取货失败
+     *
+     * @return
+     */
+    @RequestMapping(value = "/agreePickUpFailed", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = AgreePickUpFailedModel.class, serviceClass = JDDJService.class, serviceMethodName = "agreePickUpFailed", error = "同意配送员取货失败错误")
+    public String agreePickUpFailed() {
+        return null;
+    }
+
+    /**
+     * 不同意配送员取货失败
+     *
+     * @return
+     */
+    @RequestMapping(value = "/disagreePickUpFailed", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = DisagreePickUpFailedModel.class, serviceClass = JDDJService.class, serviceMethodName = "disagreePickUpFailed", error = "不同意配送员取货失败错误")
+    public String disagreePickUpFailed() {
+        return null;
+    }
+
+    /**
+     * 订单妥投
+     *
+     * @return
+     */
+    @RequestMapping(value = "/deliveryEndOrder", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = DeliveryEndOrderModel.class, serviceClass = JDDJService.class, serviceMethodName = "deliveryEndOrder", error = "订单妥投失败")
+    public String deliveryEndOrder() {
+        return null;
+    }
 }
