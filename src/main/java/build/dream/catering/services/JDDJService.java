@@ -615,4 +615,49 @@ public class JDDJService {
         Map<String, Object> result = JDDJUtils.deliveryEndOrder(jddjDeliveryEndOrderModel);
         return ApiRest.builder().message("不同意配送员取货失败成功！").successful(true).build();
     }
+
+    /**
+     * 商家确认收到拒收退回（或取消）的商品
+     *
+     * @param confirmReceiveGoodsModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest confirmReceiveGoods(ConfirmReceiveGoodsModel confirmReceiveGoodsModel) {
+        BigInteger tenantId = confirmReceiveGoodsModel.obtainTenantId();
+        BigInteger branchId = confirmReceiveGoodsModel.obtainBranchId();
+        BigInteger orderId = confirmReceiveGoodsModel.getOrderId();
+
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
+
+        build.dream.common.models.jddj.ConfirmReceiveGoodsModel jddjConfirmReceiveGoodsModel = build.dream.common.models.jddj.ConfirmReceiveGoodsModel.builder()
+                .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
+                .operateTime(new Date())
+                .build();
+
+        Map<String, Object> result = JDDJUtils.confirmReceiveGoods(jddjConfirmReceiveGoodsModel);
+        return ApiRest.builder().message("确认收到拒收退回（或取消）的商品成功！").successful(true).build();
+    }
+
+    /**
+     * 取货失败后催配送员抢单
+     *
+     * @param urgeDispatchingModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest urgeDispatching(UrgeDispatchingModel urgeDispatchingModel) {
+        BigInteger tenantId = urgeDispatchingModel.obtainTenantId();
+        BigInteger branchId = urgeDispatchingModel.obtainBranchId();
+        BigInteger orderId = urgeDispatchingModel.getOrderId();
+
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
+
+        build.dream.common.models.jddj.UrgeDispatchingModel jddjUrgeDispatchingModel = build.dream.common.models.jddj.UrgeDispatchingModel.builder()
+                .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
+                .updatePin("")
+                .build();
+        Map<String, Object> result = JDDJUtils.urgeDispatching(jddjUrgeDispatchingModel);
+        return ApiRest.builder().message("催配送员抢单成功！").successful(true).build();
+    }
 }

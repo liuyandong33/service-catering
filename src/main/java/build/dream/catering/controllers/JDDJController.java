@@ -191,4 +191,28 @@ public class JDDJController {
     public String deliveryEndOrder() {
         return null;
     }
+
+    /**
+     * 商家确认收到拒收退回（或取消）的商品
+     *
+     * @return
+     */
+    @RequestMapping(value = "/confirmReceiveGoods", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = ConfirmReceiveGoodsModel.class, serviceClass = JDDJService.class, serviceMethodName = "confirmReceiveGoods", error = "确认收到拒收退回（或取消）的商品失败")
+    public String confirmReceiveGoods() {
+        return null;
+    }
+
+    /**
+     * 取货失败后催配送员抢单
+     *
+     * @return
+     */
+    @RequestMapping(value = "/urgeDispatching", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = ConfirmReceiveGoodsModel.class, serviceClass = JDDJService.class, serviceMethodName = "urgeDispatching", error = "催配送员抢单失败")
+    public String urgeDispatching() {
+        return null;
+    }
 }
