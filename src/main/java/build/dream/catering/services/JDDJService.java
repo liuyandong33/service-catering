@@ -1,17 +1,25 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
+import build.dream.catering.models.jddj.AddTipsModel;
+import build.dream.catering.models.jddj.AdjustOrderModel;
 import build.dream.catering.models.jddj.*;
+import build.dream.catering.models.jddj.CancelAndRefundModel;
+import build.dream.catering.models.jddj.CheckSelfPickCodeModel;
+import build.dream.catering.models.jddj.ConfirmReceiveGoodsModel;
+import build.dream.catering.models.jddj.DeliveryEndOrderModel;
+import build.dream.catering.models.jddj.ModifySellerDeliveryModel;
+import build.dream.catering.models.jddj.OrderDDTCDeliveryModel;
+import build.dream.catering.models.jddj.OrderJDZBDeliveryModel;
+import build.dream.catering.models.jddj.PrintOrderModel;
+import build.dream.catering.models.jddj.UrgeDispatchingModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.DietOrder;
 import build.dream.common.catering.domains.DietOrderActivity;
 import build.dream.common.catering.domains.DietOrderDetail;
 import build.dream.common.catering.domains.DietOrderGroup;
 import build.dream.common.constants.DietOrderConstants;
-import build.dream.common.models.jddj.OrderAcceptOperateModel;
-import build.dream.common.models.jddj.OrderCancelOperateModel;
-import build.dream.common.models.jddj.OrderSerllerDeliveryModel;
-import build.dream.common.models.jddj.ReceiveFailedAuditModel;
+import build.dream.common.models.jddj.*;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.JDDJUtils;
 import build.dream.common.utils.SearchModel;
@@ -683,5 +691,52 @@ public class JDDJService {
                 .build();
         Map<String, Object> result = JDDJUtils.addTips(jddjAddTipsModel);
         return ApiRest.builder().message("订单加小费成功！").successful(true).build();
+    }
+
+    /**
+     * 应结金额接口
+     *
+     * @param orderShouldSettlementServiceModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest orderShouldSettlementService(OrderShouldSettlementServiceModel orderShouldSettlementServiceModel) {
+        BigInteger tenantId = orderShouldSettlementServiceModel.obtainTenantId();
+        BigInteger branchId = orderShouldSettlementServiceModel.obtainBranchId();
+        BigInteger orderId = orderShouldSettlementServiceModel.getOrderId();
+
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
+
+        OrderShoudSettlementServiceModel orderShoudSettlementServiceModel = OrderShoudSettlementServiceModel.builder()
+                .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
+                .build();
+
+        Map<String, Object> result = JDDJUtils.orderShoudSettlementService(orderShoudSettlementServiceModel);
+        return ApiRest.builder().message("获取订单应结金额成功！").successful(true).build();
+    }
+
+    /**
+     * 订单自提码核验
+     *
+     * @param checkSelfPickCodeModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest checkSelfPickCode(CheckSelfPickCodeModel checkSelfPickCodeModel) {
+        BigInteger tenantId = checkSelfPickCodeModel.obtainTenantId();
+        BigInteger branchId = checkSelfPickCodeModel.obtainBranchId();
+        String selfPickCode = checkSelfPickCodeModel.getSelfPickCode();
+        BigInteger orderId = checkSelfPickCodeModel.getOrderId();
+
+        DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
+
+        build.dream.common.models.jddj.CheckSelfPickCodeModel jddjCheckSelfPickCodeModel = build.dream.common.models.jddj.CheckSelfPickCodeModel.builder()
+                .selfPickCode(selfPickCode)
+                .orderId(dietOrder.getOrderNumber().substring(4))
+                .operPin("")
+                .build();
+
+        Map<String, Object> result = JDDJUtils.checkSelfPickCode(jddjCheckSelfPickCodeModel);
+        return ApiRest.builder().message("自提码核验成功！").successful(true).build();
     }
 }

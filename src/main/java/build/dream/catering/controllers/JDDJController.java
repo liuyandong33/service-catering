@@ -227,4 +227,28 @@ public class JDDJController {
     public String addTips() {
         return null;
     }
+
+    /**
+     * 应结金额接口
+     *
+     * @return
+     */
+    @RequestMapping(value = "/orderShouldSettlementService", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = OrderShouldSettlementServiceModel.class, serviceClass = JDDJService.class, serviceMethodName = "orderShouldSettlementService", error = "获取订单应结金额失败")
+    public String orderShouldSettlementService() {
+        return null;
+    }
+
+    /**
+     * 订单自提码核验
+     *
+     * @return
+     */
+    @RequestMapping(value = "/checkSelfPickCode", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = CheckSelfPickCodeModel.class, serviceClass = JDDJService.class, serviceMethodName = "checkSelfPickCode", error = "自提码核验失败")
+    public String checkSelfPickCode() {
+        return null;
+    }
 }
