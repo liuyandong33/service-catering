@@ -5,6 +5,7 @@ import build.dream.catering.mappers.BranchMapper;
 import build.dream.catering.models.branch.*;
 import build.dream.catering.utils.SequenceUtils;
 import build.dream.common.api.ApiRest;
+import build.dream.common.beans.District;
 import build.dream.common.catering.domains.Branch;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
@@ -31,11 +32,8 @@ public class BranchService {
         Integer status = initializeBranchModel.getStatus();
         String name = initializeBranchModel.getName();
         String provinceCode = initializeBranchModel.getProvinceCode();
-        String provinceName = initializeBranchModel.getProvinceName();
         String cityCode = initializeBranchModel.getCityCode();
-        String cityName = initializeBranchModel.getCityName();
         String districtCode = initializeBranchModel.getDistrictCode();
-        String districtName = initializeBranchModel.getDistrictName();
         String address = initializeBranchModel.getAddress();
         String longitude = initializeBranchModel.getLongitude();
         String latitude = initializeBranchModel.getLatitude();
@@ -46,29 +44,39 @@ public class BranchService {
         BigInteger userId = initializeBranchModel.getUserId();
         List<InitializeBranchModel.BusinessTime> businessTimes = initializeBranchModel.getBusinessTimes();
 
-        Branch branch = new Branch();
-        branch.setTenantId(tenantId);
-        branch.setTenantCode(tenantCode);
+        District province = DistrictUtils.obtainDistrictById(provinceCode);
+        ValidateUtils.notNull(province, "省编码错误！");
+
+        District city = DistrictUtils.obtainDistrictById(cityCode);
+        ValidateUtils.notNull(province, "市编码错误！");
+
+        District district = DistrictUtils.obtainDistrictById(districtCode);
+        ValidateUtils.notNull(province, "区域编码错误！");
 
         String code = SerialNumberGenerator.nextSerialNumber(4, SequenceUtils.nextValue(tenantCode + "_branch_code"));
-        branch.setCode(code);
-        branch.setName(name);
-        branch.setType(type);
-        branch.setStatus(status);
-        branch.setProvinceCode(provinceCode);
-        branch.setProvinceName(provinceName);
-        branch.setCityCode(cityCode);
-        branch.setCityName(cityName);
-        branch.setDistrictCode(districtCode);
-        branch.setDistrictName(districtName);
-        branch.setAddress(address);
-        branch.setLongitude(longitude);
-        branch.setLatitude(latitude);
-        branch.setLinkman(linkman);
-        branch.setContactPhone(contactPhone);
-        branch.setSmartRestaurantStatus(smartRestaurantStatus);
-        branch.setCreatedUserId(userId);
-        branch.setUpdatedUserId(userId);
+
+        Branch branch = Branch.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .code(code)
+                .name(name)
+                .type(type)
+                .status(status)
+                .provinceCode(provinceCode)
+                .provinceName(province.getName())
+                .cityCode(cityCode)
+                .cityName(city.getName())
+                .districtCode(districtCode)
+                .districtName(district.getName())
+                .address(address)
+                .longitude(longitude)
+                .latitude(latitude)
+                .linkman(linkman)
+                .contactPhone(contactPhone)
+                .smartRestaurantStatus(smartRestaurantStatus)
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .build();
         List<Map<String, Object>> businessTimeList = new ArrayList<Map<String, Object>>();
         for (InitializeBranchModel.BusinessTime businessTime : businessTimes) {
             Map<String, Object> map = new HashMap<String, Object>();
