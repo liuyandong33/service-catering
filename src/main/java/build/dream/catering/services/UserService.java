@@ -11,7 +11,6 @@ import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.Branch;
 import build.dream.common.saas.domains.SystemUser;
 import build.dream.common.utils.*;
-import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,32 +40,30 @@ public class UserService {
 
         long count = branchMapper.countUsers(searchConditions);
 
-        List<Map<String, Object>> userInfos = null;
+        List<SystemUser> systemUsers = null;
         if (count > 0) {
             List<BigInteger> userIds = branchMapper.findAllUserIds(searchConditions, (page - 1) * rows, rows);
-            userInfos = UserUtils.batchGetUsers(userIds);
+            systemUsers = UserUtils.batchGetUsers(userIds);
         } else {
-            userInfos = new ArrayList<Map<String, Object>>();
+            systemUsers = new ArrayList<SystemUser>();
         }
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("total", count);
-        data.put("rows", userInfos);
+        data.put("rows", systemUsers);
         return ApiRest.builder().data(data).message("查询员工列表成功！").successful(true).build();
     }
 
     @Transactional(readOnly = true)
     public ApiRest obtainUserInfo(ObtainUserInfoModel obtainUserInfoModel) {
         BigInteger userId = obtainUserInfoModel.obtainUserId();
-        Map<String, Object> userInfo = UserUtils.obtainUserInfo(userId);
+        SystemUser systemUser = UserUtils.obtainUserInfo(userId);
 
-        Map<String, Object> data = new HashMap<String, Object>(userInfo);
-        Map<String, Object> user = MapUtils.getMap(userInfo, "user");
-        BigInteger tenantId = BigInteger.valueOf(MapUtils.getLongValue(user, "tenantId"));
-
-        Branch branch = branchMapper.findByTenantIdAndUserId(tenantId, userId);
+        Map<String, Object> data = new HashMap<String, Object>();
+        Branch branch = branchMapper.findByTenantIdAndUserId(systemUser.getTenantId(), userId);
         ValidateUtils.notNull(branch, "门店信息不存在！");
 
+        data.put("user", systemUser);
         data.put("branch", branch);
         return ApiRest.builder().data(data).message("获取用户信息成功！").successful(true).build();
     }
