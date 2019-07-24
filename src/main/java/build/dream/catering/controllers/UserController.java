@@ -1,5 +1,6 @@
 package build.dream.catering.controllers;
 
+import build.dream.catering.models.user.AddUserModel;
 import build.dream.catering.models.user.ListUsersModel;
 import build.dream.catering.models.user.ObtainBranchInfoModel;
 import build.dream.catering.models.user.ObtainUserInfoModel;
@@ -44,7 +45,7 @@ public class UserController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/obtainBranchInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/obtainBranchInfo", method = {RequestMethod.GET, RequestMethod.POST}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ObtainBranchInfoModel.class, serviceClass = UserService.class, serviceMethodName = "obtainBranchInfo", error = "获取门店信息失败")
     public String obtainBranchInfo() {
@@ -53,11 +54,12 @@ public class UserController extends BasicController {
 
     /**
      * 增加员工
+     *
      * @return
      */
     @RequestMapping(value = "/addUser", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ApiRestAction(modelClass = ObtainBranchInfoModel.class, serviceClass = UserService.class, serviceMethodName = "addUser", error = "增加员工失败")
+    @ApiRestAction(modelClass = AddUserModel.class, serviceClass = UserService.class, serviceMethodName = "addUser", error = "增加员工失败")
     public String addUser() {
         return null;
     }

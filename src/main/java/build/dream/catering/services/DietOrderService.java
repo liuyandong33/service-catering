@@ -16,7 +16,7 @@ import build.dream.common.models.alipay.AlipayTradeAppPayModel;
 import build.dream.common.models.alipay.AlipayTradePagePayModel;
 import build.dream.common.models.alipay.AlipayTradePayModel;
 import build.dream.common.models.alipay.AlipayTradeWapPayModel;
-import build.dream.common.models.aliyunpush.PushMessageToAndroidModel;
+import build.dream.common.models.aliyunpush.PushMessageModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
 import build.dream.common.models.weixinpay.UnifiedOrderModel;
 import build.dream.common.saas.domains.Tenant;
@@ -353,14 +353,9 @@ public class DietOrderService {
         BigInteger branchId = obtainPosOrderModel.obtainBranchId();
         String tableCode = obtainPosOrderModel.obtainBranchCode();
         BigInteger vipId = obtainPosOrderModel.getVipId();
-        PushMessageToAndroidModel pushMessageToAndroidModel = new PushMessageToAndroidModel();
-        pushMessageToAndroidModel.setAppKey("");
-        pushMessageToAndroidModel.setTarget(AliyunPushUtils.TAG);
-        pushMessageToAndroidModel.setTargetValue("POS" + tenantId + "_" + branchId);
-        pushMessageToAndroidModel.setTitle("获取POS订单");
 
-        Map<String, Object> body = new HashMap<String, Object>();
-        body.put("code", "");
+        Map<String, Object> bodyMap = new HashMap<String, Object>();
+        bodyMap.put("code", "");
 
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("tableCode", tableCode);
@@ -368,10 +363,17 @@ public class DietOrderService {
         String uuid = UUID.randomUUID().toString();
         map.put("uuid", uuid);
 
-        body.put("data", map);
+        bodyMap.put("data", map);
 
-        pushMessageToAndroidModel.setBody(GsonUtils.toJson(body));
-        Map<String, Object> result = AliyunPushUtils.pushMessageToAndroid(pushMessageToAndroidModel);
+        String body = JacksonUtils.writeValueAsString(bodyMap);
+        PushMessageModel pushMessageModel = PushMessageModel.builder()
+                .appKey("")
+                .target(AliyunPushUtils.TARGET_TAG)
+                .targetValue("pos_" + tenantId + "_" + branchId)
+                .title("获取POS订单")
+                .body(body)
+                .build();
+        Map<String, Object> result = AliyunPushUtils.pushMessageToAndroid(pushMessageModel);
 
         String dataJson = null;
         int times = 0;
