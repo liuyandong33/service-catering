@@ -1,5 +1,6 @@
 package build.dream.catering.configurations;
 
+import build.dream.catering.constants.Constants;
 import build.dream.common.annotations.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -7,6 +8,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
@@ -44,6 +46,11 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
             "/dietOrder/doPayCombined",
             "/sale/**"
     };
+
+    @Override
+    public void configure(ResourceServerSecurityConfigurer resources) {
+        resources.resourceId(Constants.RESOURCE_ID_CATERING);
+    }
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
