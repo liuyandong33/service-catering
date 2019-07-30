@@ -10,6 +10,7 @@ import build.dream.catering.utils.SequenceUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.Branch;
 import build.dream.common.saas.domains.SystemUser;
+import build.dream.common.saas.domains.Tenant;
 import build.dream.common.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,12 +58,15 @@ public class UserService {
     @Transactional(readOnly = true)
     public ApiRest obtainUserInfo(ObtainUserInfoModel obtainUserInfoModel) {
         BigInteger userId = obtainUserInfoModel.obtainUserId();
+        BigInteger tenantId = obtainUserInfoModel.obtainTenantId();
         SystemUser systemUser = UserUtils.obtainUserInfo(userId);
+        Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
 
         Map<String, Object> data = new HashMap<String, Object>();
         Branch branch = branchMapper.findByTenantIdAndUserId(systemUser.getTenantId(), userId);
         ValidateUtils.notNull(branch, "门店信息不存在！");
 
+        data.put("tenant", tenant);
         data.put("user", systemUser);
         data.put("branch", branch);
         return ApiRest.builder().data(data).message("获取用户信息成功！").successful(true).build();
