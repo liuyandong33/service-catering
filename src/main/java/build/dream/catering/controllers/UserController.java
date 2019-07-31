@@ -6,7 +6,6 @@ import build.dream.catering.models.user.ObtainBranchInfoModel;
 import build.dream.catering.models.user.ObtainUserInfoModel;
 import build.dream.catering.services.UserService;
 import build.dream.common.annotations.ApiRestAction;
-import build.dream.common.controllers.BasicController;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(value = "/user")
-public class UserController extends BasicController {
+public class UserController {
     /**
      * 查询用户列表
      *
