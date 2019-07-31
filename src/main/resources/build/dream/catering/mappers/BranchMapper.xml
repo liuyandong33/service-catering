@@ -6,11 +6,11 @@
     </insert>
 
     <select id="countUsers" resultType="java.lang.Long">
-        SELECT COUNT(1) FROM merge_user_branch
+        SELECT COUNT(1) FROM merge_user_branch WHERE tenant_id = #{tenantId} AND branch_id = #{branchId} AND deleted = 0
     </select>
 
     <select id="findAllUserIds" resultType="java.math.BigInteger">
-        SELECT user_id FROM merge_user_branch
+        SELECT user_id FROM merge_user_branch WHERE tenant_id = #{tenantId} AND branch_id = #{branchId} AND deleted = 0
     </select>
 
     <select id="findByTenantIdAndUserId" resultType="build.dream.common.catering.domains.Branch">

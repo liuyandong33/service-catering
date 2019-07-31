@@ -1,7 +1,6 @@
 package build.dream.catering.mappers;
 
 import build.dream.common.catering.domains.Branch;
-import build.dream.common.utils.SearchCondition;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -17,9 +16,12 @@ public interface BranchMapper {
                                @Param("currentUserId") BigInteger currentUserId,
                                @Param("updatedRemark") String updatedRemark);
 
-    List<BigInteger> findAllUserIds(@Param("searchConditions") List<SearchCondition> searchConditions, @Param("offset") int offset, @Param("maxResults") int maxResults);
+    List<BigInteger> findAllUserIds(@Param("tenantId") BigInteger tenantId,
+                                    @Param("branchId") BigInteger branchId,
+                                    @Param("offset") int offset,
+                                    @Param("maxResults") int maxResults);
 
-    long countUsers(@Param("searchConditions") List<SearchCondition> searchConditions);
+    long countUsers(@Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId);
 
     Branch findByTenantIdAndUserId(@Param("tenantId") BigInteger tenantId, @Param("userId") BigInteger userId);
 }

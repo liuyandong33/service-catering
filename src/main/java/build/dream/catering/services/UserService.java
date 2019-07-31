@@ -34,16 +34,11 @@ public class UserService {
         Integer page = listUsersModel.getPage();
         Integer rows = listUsersModel.getRows();
 
-        List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
-        searchConditions.add(new SearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
-        searchConditions.add(new SearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId));
-        searchConditions.add(new SearchCondition("delete", Constants.SQL_OPERATION_SYMBOL_EQUAL, 0));
-
-        long count = branchMapper.countUsers(searchConditions);
+        long count = branchMapper.countUsers(tenantId, branchId);
 
         List<SystemUser> systemUsers = null;
         if (count > 0) {
-            List<BigInteger> userIds = branchMapper.findAllUserIds(searchConditions, (page - 1) * rows, rows);
+            List<BigInteger> userIds = branchMapper.findAllUserIds(tenantId, branchId, (page - 1) * rows, rows);
             systemUsers = UserUtils.batchGetUsers(userIds);
         } else {
             systemUsers = new ArrayList<SystemUser>();
