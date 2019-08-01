@@ -5,7 +5,6 @@ import build.dream.catering.models.pos.*;
 import build.dream.catering.utils.SerialNumberGenerator;
 import build.dream.common.api.ApiRest;
 import build.dream.common.beans.AlipayAccount;
-import build.dream.common.catering.domains.MqttConfig;
 import build.dream.common.catering.domains.OfflinePayLog;
 import build.dream.common.catering.domains.OfflinePayRecord;
 import build.dream.common.catering.domains.Pos;
@@ -18,6 +17,7 @@ import build.dream.common.models.newland.RefundBarcodePayModel;
 import build.dream.common.models.umpay.MerRefundModel;
 import build.dream.common.models.umpay.PassiveScanCodePayModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
+import build.dream.common.mqtt.MqttInfo;
 import build.dream.common.saas.domains.*;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
@@ -28,10 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class PosService {
@@ -52,16 +49,17 @@ public class PosService {
         String type = onlinePosModel.getType();
         String version = onlinePosModel.getVersion();
 
-        MqttConfig mqttConfig = MQTTUtils.obtainMqttConfig();
-        String groupId = mqttConfig.getGroupId();
-        String mqttClientId = groupId + "@@@" + UUID.randomUUID().toString();
+        MqttInfo mqttInfo = MqttUtils.obtainMqttInfo();
+        String mqttClientId = mqttInfo.getClientId();
 
-        SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition(Pos.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition(Pos.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition(Pos.ColumnName.USER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, userId);
+        SearchModel searchModel = SearchModel.builder()
+                .autoSetDeletedFalse()
+                .addSearchCondition(Pos.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)
+                .addSearchCondition(Pos.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId)
+                .addSearchCondition(Pos.ColumnName.USER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, userId)
+                .build();
         Pos pos = DatabaseHelper.find(Pos.class, searchModel);
-        if (pos == null) {
+        if (Objects.isNull(pos)) {
             pos = Pos.builder()
                     .tenantId(tenantId)
                     .tenantCode(tenantCode)
@@ -91,8 +89,7 @@ public class PosService {
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("pos", pos);
-        data.put("mqttConfig", mqttConfig);
-        data.put("mqttClientId", mqttClientId);
+        data.put("mqttInfo", mqttInfo);
         return ApiRest.builder().data(pos).message("上线POS成功！").successful(true).build();
     }
 
@@ -108,16 +105,21 @@ public class PosService {
         BigInteger branchId = offlinePosModel.obtainBranchId();
         BigInteger userId = offlinePosModel.obtainUserId();
 
-        SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition(Pos.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition(Pos.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition(Pos.ColumnName.USER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, userId);
+        SearchModel searchModel = SearchModel.builder()
+                .autoSetDeletedFalse()
+                .addSearchCondition(Pos.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)
+                .addSearchCondition(Pos.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId)
+                .addSearchCondition(Pos.ColumnName.USER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, userId)
+                .build();
 
         Pos pos = DatabaseHelper.find(Pos.class, searchModel);
         ValidateUtils.notNull(pos, "POS不存在！");
 
         pos.setDeviceId(Constants.VARCHAR_DEFAULT_VALUE);
+        pos.setType(Constants.VARCHAR_DEFAULT_VALUE);
+        pos.setVersion(Constants.VARCHAR_DEFAULT_VALUE);
         pos.setOnline(false);
+        pos.setMqttClientId(Constants.VARCHAR_DEFAULT_VALUE);
         pos.setUpdatedRemark("下线POS");
         DatabaseHelper.update(pos);
 
