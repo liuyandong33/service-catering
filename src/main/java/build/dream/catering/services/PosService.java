@@ -5,6 +5,7 @@ import build.dream.catering.models.pos.*;
 import build.dream.catering.utils.SerialNumberGenerator;
 import build.dream.common.api.ApiRest;
 import build.dream.common.beans.AlipayAccount;
+import build.dream.common.catering.domains.MqttConfig;
 import build.dream.common.catering.domains.OfflinePayLog;
 import build.dream.common.catering.domains.OfflinePayRecord;
 import build.dream.common.catering.domains.Pos;
@@ -51,36 +52,47 @@ public class PosService {
         String type = onlinePosModel.getType();
         String version = onlinePosModel.getVersion();
 
+        MqttConfig mqttConfig = MQTTUtils.obtainMqttConfig();
+        String groupId = mqttConfig.getGroupId();
+        String mqttClientId = groupId + "@@@" + UUID.randomUUID().toString();
+
         SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition("user_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, userId);
+        searchModel.addSearchCondition(Pos.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(Pos.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        searchModel.addSearchCondition(Pos.ColumnName.USER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, userId);
         Pos pos = DatabaseHelper.find(Pos.class, searchModel);
         if (pos == null) {
-            pos = new Pos();
-            pos.setTenantId(tenantId);
-            pos.setTenantCode(tenantCode);
-            pos.setBranchId(branchId);
-            pos.setBranchCode(branchCode);
-            pos.setUserId(userId);
-            pos.setDeviceId(deviceId);
-            pos.setType(type);
-            pos.setVersion(version);
-            pos.setOnline(true);
-            pos.setCreatedUserId(userId);
-            pos.setUpdatedUserId(userId);
-            pos.setUpdatedRemark("POS不存在，新增POS并且设置为在线状态！");
+            pos = Pos.builder()
+                    .tenantId(tenantId)
+                    .tenantCode(tenantCode)
+                    .branchId(branchId)
+                    .branchCode(branchCode)
+                    .userId(userId)
+                    .deviceId(deviceId)
+                    .type(type)
+                    .version(version)
+                    .online(true)
+                    .mqttClientId(mqttClientId)
+                    .createdUserId(userId)
+                    .updatedUserId(userId)
+                    .updatedRemark("POS不存在，新增POS并且设置为在线状态！")
+                    .build();
             DatabaseHelper.insert(pos);
         } else {
-            pos.setUserId(userId);
             pos.setDeviceId(deviceId);
             pos.setType(type);
             pos.setVersion(version);
             pos.setOnline(true);
+            pos.setMqttClientId(mqttClientId);
             pos.setUpdatedUserId(userId);
             pos.setUpdatedRemark("POS存在，设置为在线状态！");
             DatabaseHelper.update(pos);
         }
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("pos", pos);
+        data.put("mqttConfig", mqttConfig);
+        data.put("mqttClientId", mqttClientId);
         return ApiRest.builder().data(pos).message("上线POS成功！").successful(true).build();
     }
 
