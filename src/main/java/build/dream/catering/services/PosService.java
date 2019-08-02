@@ -26,6 +26,7 @@ import build.dream.common.saas.domains.*;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,23 +56,32 @@ public class PosService {
         String version = onlinePosModel.getVersion();
         String cloudPushDeviceId = onlinePosModel.getCloudPushDeviceId();
 
-        MqttConfig mqttConfig = MqttUtils.obtainMqttConfig();
+        if (StringUtils.isNotBlank(cloudPushDeviceId)) {
+            cloudPushDeviceId = Constants.VARCHAR_DEFAULT_VALUE;
+        }
 
-        ApplyTokenModel applyTokenModel = ApplyTokenModel.builder()
-                .actions("R")
-                .resources(mqttConfig.getTopic() + "/#")
-                .expireTime(DateUtils.addDays(new Date(), 1).getTime())
-                .proxyType("MQTT")
-                .serviceName("mq")
-                .instanceId(mqttConfig.getInstanceId())
-                .build();
-        String mqttToken = MqttUtils.applyToken(applyTokenModel);
-        Map<String, String> tokenInfos = new HashMap<String, String>();
-        tokenInfos.put("R", mqttToken);
+        Map<String, Object> data = new HashMap<String, Object>();
+        String mqttToken = Constants.VARCHAR_DEFAULT_VALUE;
+        String mqttClientId = Constants.VARCHAR_DEFAULT_VALUE;
+        if (Constants.POS_TYPE_WINDOWS.equals(type)) {
+            MqttConfig mqttConfig = MqttUtils.obtainMqttConfig();
+            ApplyTokenModel applyTokenModel = ApplyTokenModel.builder()
+                    .actions("R")
+                    .resources(mqttConfig.getTopic() + "/#")
+                    .expireTime(DateUtils.addDays(new Date(), 1).getTime())
+                    .proxyType("MQTT")
+                    .serviceName("mq")
+                    .instanceId(mqttConfig.getInstanceId())
+                    .build();
+            mqttToken = MqttUtils.applyToken(applyTokenModel);
+            Map<String, String> tokenInfos = new HashMap<String, String>();
+            tokenInfos.put("R", mqttToken);
 
-        MqttInfo mqttInfo = MqttUtils.obtainMqttInfo(mqttConfig, tokenInfos);
-        String mqttClientId = mqttInfo.getClientId();
+            MqttInfo mqttInfo = MqttUtils.obtainMqttInfo(mqttConfig, tokenInfos);
+            mqttClientId = mqttInfo.getClientId();
 
+            data.put("mqttInfo", mqttInfo);
+        }
         SearchModel searchModel = SearchModel.builder()
                 .autoSetDeletedFalse()
                 .addSearchCondition(Pos.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)
@@ -111,9 +121,7 @@ public class PosService {
             DatabaseHelper.update(pos);
         }
 
-        Map<String, Object> data = new HashMap<String, Object>();
         data.put("pos", pos);
-        data.put("mqttInfo", mqttInfo);
         return ApiRest.builder().data(data).message("上线POS成功！").successful(true).build();
     }
 
