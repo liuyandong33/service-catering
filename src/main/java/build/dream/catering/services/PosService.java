@@ -156,7 +156,7 @@ public class PosService {
         pos.setUpdatedRemark("下线POS");
         DatabaseHelper.update(pos);
 
-        return ApiRest.builder().data(pos).message("下线POS成功！").build();
+        return ApiRest.builder().data(pos).message("下线POS成功！").successful(true).build();
     }
 
     /**
