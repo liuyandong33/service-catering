@@ -53,6 +53,7 @@ public class PosService {
         String deviceId = onlinePosModel.getDeviceId();
         String type = onlinePosModel.getType();
         String version = onlinePosModel.getVersion();
+        String cloudPushDeviceId = onlinePosModel.getCloudPushDeviceId();
 
         MqttConfig mqttConfig = MqttUtils.obtainMqttConfig();
 
@@ -89,6 +90,7 @@ public class PosService {
                     .type(type)
                     .version(version)
                     .online(true)
+                    .cloudPushDeviceId(cloudPushDeviceId)
                     .mqttClientId(mqttClientId)
                     .mqttToken(mqttToken)
                     .createdUserId(userId)
@@ -101,6 +103,7 @@ public class PosService {
             pos.setType(type);
             pos.setVersion(version);
             pos.setOnline(true);
+            pos.setCloudPushDeviceId(cloudPushDeviceId);
             pos.setMqttClientId(mqttClientId);
             pos.setMqttToken(mqttToken);
             pos.setUpdatedUserId(userId);
@@ -151,6 +154,7 @@ public class PosService {
         pos.setType(Constants.VARCHAR_DEFAULT_VALUE);
         pos.setVersion(Constants.VARCHAR_DEFAULT_VALUE);
         pos.setOnline(false);
+        pos.setCloudPushDeviceId(Constants.VARCHAR_DEFAULT_VALUE);
         pos.setMqttClientId(Constants.VARCHAR_DEFAULT_VALUE);
         pos.setMqttToken(Constants.VARCHAR_DEFAULT_VALUE);
         pos.setUpdatedRemark("下线POS");
