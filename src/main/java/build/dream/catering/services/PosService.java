@@ -13,6 +13,8 @@ import build.dream.common.models.alipay.AlipayTradePayModel;
 import build.dream.common.models.alipay.AlipayTradeRefundModel;
 import build.dream.common.models.miya.OrderPayModel;
 import build.dream.common.models.mqtt.ApplyTokenModel;
+import build.dream.common.models.mqtt.QueryTokenModel;
+import build.dream.common.models.mqtt.RevokeTokenModel;
 import build.dream.common.models.newland.BarcodePayModel;
 import build.dream.common.models.newland.QryBarcodePayModel;
 import build.dream.common.models.newland.RefundBarcodePayModel;
@@ -134,11 +136,23 @@ public class PosService {
         Pos pos = DatabaseHelper.find(Pos.class, searchModel);
         ValidateUtils.notNull(pos, "POS不存在！");
 
+        String mqttToken = pos.getMqttToken();
+        QueryTokenModel queryTokenModel = QueryTokenModel.builder()
+                .token(mqttToken)
+                .build();
+        if (MqttUtils.queryToken(queryTokenModel)) {
+            RevokeTokenModel revokeTokenModel = RevokeTokenModel.builder()
+                    .token(mqttToken)
+                    .build();
+            MqttUtils.revokeToken(revokeTokenModel);
+        }
+
         pos.setDeviceId(Constants.VARCHAR_DEFAULT_VALUE);
         pos.setType(Constants.VARCHAR_DEFAULT_VALUE);
         pos.setVersion(Constants.VARCHAR_DEFAULT_VALUE);
         pos.setOnline(false);
         pos.setMqttClientId(Constants.VARCHAR_DEFAULT_VALUE);
+        pos.setMqttToken(Constants.VARCHAR_DEFAULT_VALUE);
         pos.setUpdatedRemark("下线POS");
         DatabaseHelper.update(pos);
 
