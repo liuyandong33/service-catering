@@ -2,11 +2,9 @@ package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.eleme.*;
-import build.dream.catering.tools.PushMessageThread;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.*;
 import build.dream.common.constants.DietOrderConstants;
-import build.dream.common.models.jpush.PushModel;
 import build.dream.common.utils.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONNull;
@@ -418,6 +416,8 @@ public class ElemeService {
         elemeCallbackMessage.setCreatedUserId(userId);
         elemeCallbackMessage.setUpdatedUserId(userId);
         DatabaseHelper.insert(elemeCallbackMessage);
+
+        ElemeUtils.pushMessage(tenantId, branchId, dietOrderId, 1, uuid, 10, 60000);
     }
 
     /**
@@ -772,24 +772,6 @@ public class ElemeService {
         ValidateUtils.isTrue(saveElemeBranchMappingApiRest.isSuccessful(), saveElemeBranchMappingApiRest.getError());
 
         return ApiRest.builder().message("饿了么门店绑定成功！").successful(true).build();
-    }
-
-    @Transactional(readOnly = true)
-    public void pushElemeMessage(BigInteger tenantId, BigInteger branchId, BigInteger elemeOrderId, Integer type, String uuid, final int count, int interval) {
-        SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition(Pos.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition(Pos.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        searchModel.addSearchCondition(Pos.ColumnName.ONLINE, Constants.SQL_OPERATION_SYMBOL_EQUAL, 1);
-        List<Pos> poses = DatabaseHelper.findAll(Pos.class, searchModel);
-        if (CollectionUtils.isNotEmpty(poses)) {
-            List<String> deviceIds = new ArrayList<String>();
-            for (Pos pos : poses) {
-                deviceIds.add(pos.getDeviceId());
-            }
-            PushModel pushModel = new PushModel();
-            PushMessageThread pushMessageThread = new PushMessageThread(pushModel, uuid, count, interval);
-            new Thread(pushMessageThread).start();
-        }
     }
 
     /**

@@ -5,12 +5,14 @@ import build.dream.catering.models.pos.*;
 import build.dream.catering.utils.SerialNumberGenerator;
 import build.dream.common.api.ApiRest;
 import build.dream.common.beans.AlipayAccount;
+import build.dream.common.catering.domains.MqttConfig;
 import build.dream.common.catering.domains.OfflinePayLog;
 import build.dream.common.catering.domains.OfflinePayRecord;
 import build.dream.common.catering.domains.Pos;
 import build.dream.common.models.alipay.AlipayTradePayModel;
 import build.dream.common.models.alipay.AlipayTradeRefundModel;
 import build.dream.common.models.miya.OrderPayModel;
+import build.dream.common.models.mqtt.ApplyTokenModel;
 import build.dream.common.models.newland.BarcodePayModel;
 import build.dream.common.models.newland.QryBarcodePayModel;
 import build.dream.common.models.newland.RefundBarcodePayModel;
@@ -22,6 +24,7 @@ import build.dream.common.saas.domains.*;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,7 +52,21 @@ public class PosService {
         String type = onlinePosModel.getType();
         String version = onlinePosModel.getVersion();
 
-        MqttInfo mqttInfo = MqttUtils.obtainMqttInfo();
+        MqttConfig mqttConfig = MqttUtils.obtainMqttConfig();
+
+        ApplyTokenModel applyTokenModel = ApplyTokenModel.builder()
+                .actions("R")
+                .resources(mqttConfig.getTopic() + "/#")
+                .expireTime(DateUtils.addDays(new Date(), 1).getTime())
+                .proxyType("MQTT")
+                .serviceName("mq")
+                .instanceId(mqttConfig.getInstanceId())
+                .build();
+        String mqttToken = MqttUtils.applyToken(applyTokenModel);
+        Map<String, String> tokenInfos = new HashMap<String, String>();
+        tokenInfos.put("R", mqttToken);
+
+        MqttInfo mqttInfo = MqttUtils.obtainMqttInfo(mqttConfig, tokenInfos);
         String mqttClientId = mqttInfo.getClientId();
 
         SearchModel searchModel = SearchModel.builder()
@@ -71,6 +88,7 @@ public class PosService {
                     .version(version)
                     .online(true)
                     .mqttClientId(mqttClientId)
+                    .mqttToken(mqttToken)
                     .createdUserId(userId)
                     .updatedUserId(userId)
                     .updatedRemark("POS不存在，新增POS并且设置为在线状态！")
@@ -82,6 +100,7 @@ public class PosService {
             pos.setVersion(version);
             pos.setOnline(true);
             pos.setMqttClientId(mqttClientId);
+            pos.setMqttToken(mqttToken);
             pos.setUpdatedUserId(userId);
             pos.setUpdatedRemark("POS存在，设置为在线状态！");
             DatabaseHelper.update(pos);
@@ -90,7 +109,7 @@ public class PosService {
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("pos", pos);
         data.put("mqttInfo", mqttInfo);
-        return ApiRest.builder().data(pos).message("上线POS成功！").successful(true).build();
+        return ApiRest.builder().data(data).message("上线POS成功！").successful(true).build();
     }
 
     /**
