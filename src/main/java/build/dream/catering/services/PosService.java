@@ -56,10 +56,6 @@ public class PosService {
         String version = onlinePosModel.getVersion();
         String cloudPushDeviceId = onlinePosModel.getCloudPushDeviceId();
 
-        if (StringUtils.isNotBlank(cloudPushDeviceId)) {
-            cloudPushDeviceId = Constants.VARCHAR_DEFAULT_VALUE;
-        }
-
         Map<String, Object> data = new HashMap<String, Object>();
         String mqttToken = Constants.VARCHAR_DEFAULT_VALUE;
         String mqttClientId = Constants.VARCHAR_DEFAULT_VALUE;
@@ -79,6 +75,7 @@ public class PosService {
 
             MqttInfo mqttInfo = MqttUtils.obtainMqttInfo(mqttConfig, tokenInfos);
             mqttClientId = mqttInfo.getClientId();
+            cloudPushDeviceId = Constants.VARCHAR_DEFAULT_VALUE;
 
             data.put("mqttInfo", mqttInfo);
         }
