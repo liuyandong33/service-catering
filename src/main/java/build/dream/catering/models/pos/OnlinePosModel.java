@@ -31,7 +31,6 @@ public class OnlinePosModel extends CateringBasicModel {
     /**
      * 阿里云推送服务设备ID
      */
-    @NotNull
     private String cloudPushDeviceId;
 
     public String getDeviceId() {
