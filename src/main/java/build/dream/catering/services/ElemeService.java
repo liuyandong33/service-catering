@@ -5,6 +5,7 @@ import build.dream.catering.models.eleme.*;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.*;
 import build.dream.common.constants.DietOrderConstants;
+import build.dream.common.models.eleme.ElemeMessageModel;
 import build.dream.common.utils.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONNull;
@@ -417,7 +418,12 @@ public class ElemeService {
         elemeCallbackMessage.setUpdatedUserId(userId);
         DatabaseHelper.insert(elemeCallbackMessage);
 
-        ElemeUtils.pushMessage(tenantId, branchId, dietOrderId, 1, uuid, 10, 60000);
+        ElemeMessageModel elemeMessageModel = new ElemeMessageModel();
+        elemeMessageModel.setType(1);
+        elemeMessageModel.setOrderId(dietOrderId);
+        elemeMessageModel.setUuid(uuid);
+
+        ElemeUtils.pushMessage(tenantId, branchId, elemeMessageModel, 10, 60000);
     }
 
     /**
@@ -834,6 +840,7 @@ public class ElemeService {
         BigInteger tenantId = confirmOrderLiteModel.obtainTenantId();
         BigInteger branchId = confirmOrderLiteModel.obtainBranchId();
         BigInteger orderId = confirmOrderLiteModel.getOrderId();
+        String uuid = confirmOrderLiteModel.getUuid();
 
         Branch branch = obtainBranch(tenantId, branchId);
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
@@ -841,6 +848,8 @@ public class ElemeService {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("orderId", dietOrder.getOrderNumber().substring(1));
         Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.confirmOrderLite", params);
+
+        CommonRedisUtils.del(uuid);
 
         return ApiRest.builder().data(result).message("确认订单成功！").successful(true).build();
     }
@@ -857,6 +866,7 @@ public class ElemeService {
         BigInteger tenantId = cancelOrderLiteModel.obtainTenantId();
         BigInteger branchId = cancelOrderLiteModel.obtainBranchId();
         BigInteger orderId = cancelOrderLiteModel.getOrderId();
+        String uuid = cancelOrderLiteModel.getUuid();
 
         Branch branch = obtainBranch(tenantId, branchId);
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
@@ -867,6 +877,8 @@ public class ElemeService {
         ApplicationHandler.ifNotNullPut(params, "remark", cancelOrderLiteModel.getRemark());
 
         Map<String, Object> result = ElemeUtils.callElemeSystem(tenantId.toString(), branchId.toString(), branch.getElemeAccountType(), "eleme.order.cancelOrderLite", params);
+
+        CommonRedisUtils.del(uuid);
 
         return ApiRest.builder().data(result).message("取消订单成功！").successful(true).build();
     }

@@ -15,6 +15,9 @@ public class CancelOrderLiteModel extends CateringBasicModel {
 
     private String remark;
 
+    @NotNull
+    private String uuid;
+
     public BigInteger getOrderId() {
         return orderId;
     }
@@ -37,6 +40,14 @@ public class CancelOrderLiteModel extends CateringBasicModel {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     @Override
