@@ -842,6 +842,8 @@ public class ElemeService {
         BigInteger orderId = confirmOrderLiteModel.getOrderId();
         String uuid = confirmOrderLiteModel.getUuid();
 
+        CommonRedisUtils.del(uuid);
+
         Branch branch = obtainBranch(tenantId, branchId);
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
 

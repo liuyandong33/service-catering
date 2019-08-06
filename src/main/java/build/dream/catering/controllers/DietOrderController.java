@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Map;
@@ -27,7 +26,7 @@ public class DietOrderController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/obtainDietOrderInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/obtainDietOrderInfo", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ObtainDietOrderInfoModel.class, serviceClass = DietOrderService.class, serviceMethodName = "obtainDietOrderInfo", error = "获取订单信息失败")
     public String obtainDietOrderInfo() {
@@ -39,7 +38,7 @@ public class DietOrderController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/saveDietOrder", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/saveDietOrder", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = SaveDietOrderModel.class, serviceClass = DietOrderService.class, serviceMethodName = "saveDietOrder", error = "保存订单失败")
     public String saveDietOrder() {
@@ -51,7 +50,7 @@ public class DietOrderController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/confirmOrder", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/confirmOrder", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ConfirmOrderModel.class, serviceClass = DietOrderService.class, serviceMethodName = "confirmOrder", error = "确认订单失败")
     public String confirmOrder() {
@@ -63,7 +62,7 @@ public class DietOrderController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/cancelOrder", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/cancelOrder", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = CancelOrderModel.class, serviceClass = DietOrderService.class, serviceMethodName = "cancelOrder", error = "取消订单失败")
     public String cancelOrder() {
@@ -75,7 +74,7 @@ public class DietOrderController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/doPay", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/doPay", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = DoPayModel.class, serviceClass = DietOrderService.class, serviceMethodName = "doPay", error = "发起支付失败")
     public String doPay() {
@@ -87,7 +86,7 @@ public class DietOrderController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/alipayCallback", method = RequestMethod.POST)
+    @RequestMapping(value = "/alipayCallback")
     @ResponseBody
     public String alipayCallback() {
         String returnValue = null;
@@ -107,7 +106,7 @@ public class DietOrderController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/weiXinPayCallback", method = RequestMethod.POST)
+    @RequestMapping(value = "/weiXinPayCallback")
     @ResponseBody
     public String weiXinPayCallback() {
         String returnValue = null;
@@ -127,7 +126,7 @@ public class DietOrderController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/obtainPosOrder", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/obtainPosOrder", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ObtainPosOrderModel.class, serviceClass = DietOrderService.class, serviceMethodName = "obtainPosOrder", error = "获取POS订单失败")
     public String obtainPosOrder() {
@@ -139,10 +138,22 @@ public class DietOrderController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/doPayCombined", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/doPayCombined", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = DoPayCombinedModel.class, serviceClass = DietOrderService.class, serviceMethodName = "doPayCombined", error = "发起支付失败")
     public String doPayCombined() {
+        return null;
+    }
+
+    /**
+     * 拉取订单信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "/pullOrder", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = PullOrderModel.class, serviceClass = DietOrderService.class, serviceMethodName = "pullOrder", error = "拉取订单信息失败")
+    public String pullOrder() {
         return null;
     }
 }

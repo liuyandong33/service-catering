@@ -22,6 +22,7 @@ import build.dream.common.models.weixinpay.UnifiedOrderModel;
 import build.dream.common.saas.domains.Tenant;
 import build.dream.common.saas.domains.WeiXinPayAccount;
 import build.dream.common.utils.*;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -547,5 +548,76 @@ public class DietOrderService {
             }
         }
         return ApiRest.builder().build();
+    }
+
+    /**
+     * 拉取订单信息
+     *
+     * @param pullOrderModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest pullOrder(PullOrderModel pullOrderModel) {
+        BigInteger tenantId = pullOrderModel.obtainTenantId();
+        BigInteger branchId = pullOrderModel.obtainBranchId();
+        BigInteger orderId = pullOrderModel.getOrderId();
+
+        SearchModel dietOrderSearchModel = SearchModel.builder()
+                .equal(DietOrder.ColumnName.TENANT_ID, tenantId)
+                .equal(DietOrder.ColumnName.BRANCH_ID, branchId)
+                .equal(DietOrder.ColumnName.ID, orderId)
+                .build();
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, dietOrderSearchModel);
+        ValidateUtils.notNull(dietOrder, "订单不存在！");
+
+        SearchModel dietOrderGroupSearchModel = SearchModel.builder()
+                .equal(DietOrderGroup.ColumnName.TENANT_ID, tenantId)
+                .equal(DietOrderGroup.ColumnName.BRANCH_ID, branchId)
+                .equal(DietOrderGroup.ColumnName.DIET_ORDER_ID, orderId)
+                .build();
+        List<DietOrderGroup> dietOrderGroups = DatabaseHelper.findAll(DietOrderGroup.class, dietOrderGroupSearchModel);
+
+        SearchModel dietOrderDetailSearchModel = SearchModel.builder()
+                .equal(DietOrderDetail.ColumnName.TENANT_ID, tenantId)
+                .equal(DietOrderDetail.ColumnName.BRANCH_ID, branchId)
+                .equal(DietOrderDetail.ColumnName.DIET_ORDER_ID, orderId)
+                .build();
+        List<DietOrderDetail> dietOrderDetails = DatabaseHelper.findAll(DietOrderDetail.class, dietOrderDetailSearchModel);
+
+        SearchModel dietOrderDetailGoodsAttributeSearchModel = SearchModel.builder()
+                .equal(DietOrderDetailGoodsAttribute.ColumnName.TENANT_ID, tenantId)
+                .equal(DietOrderDetailGoodsAttribute.ColumnName.BRANCH_ID, branchId)
+                .equal(DietOrderDetailGoodsAttribute.ColumnName.DIET_ORDER_ID, orderId)
+                .build();
+        List<DietOrderDetailGoodsAttribute> dietOrderDetailGoodsAttributes = DatabaseHelper.findAll(DietOrderDetailGoodsAttribute.class, dietOrderDetailGoodsAttributeSearchModel);
+
+        SearchModel dietOrderActivityAttributeSearchModel = SearchModel.builder()
+                .equal(DietOrderActivity.ColumnName.TENANT_ID, tenantId)
+                .equal(DietOrderActivity.ColumnName.BRANCH_ID, branchId)
+                .equal(DietOrderActivity.ColumnName.DIET_ORDER_ID, orderId)
+                .build();
+        List<DietOrderActivity> dietOrderActivities = DatabaseHelper.findAll(DietOrderActivity.class, dietOrderActivityAttributeSearchModel);
+
+        SearchModel dietOrderPaymentAttributeSearchModel = SearchModel.builder()
+                .equal(DietOrderPayment.ColumnName.TENANT_ID, tenantId)
+                .equal(DietOrderPayment.ColumnName.BRANCH_ID, branchId)
+                .equal(DietOrderPayment.ColumnName.DIET_ORDER_ID, orderId)
+                .build();
+        List<DietOrderPayment> dietOrderPayments = DatabaseHelper.findAll(DietOrderPayment.class, dietOrderPaymentAttributeSearchModel);
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("dietOrder", dietOrder);
+        data.put("dietOrderGroups", dietOrderGroups);
+        data.put("dietOrderDetails", dietOrderDetails);
+        if (CollectionUtils.isNotEmpty(dietOrderDetailGoodsAttributes)) {
+            data.put("dietOrderDetailGoodsAttributes", dietOrderDetailGoodsAttributes);
+        }
+        if (CollectionUtils.isNotEmpty(dietOrderActivities)) {
+            data.put("dietOrderActivities", dietOrderActivities);
+        }
+        if (CollectionUtils.isNotEmpty(dietOrderPayments)) {
+            data.put("dietOrderPayments", dietOrderPayments);
+        }
+        return ApiRest.builder().data(data).message("拉取订单成功！").successful(true).build();
     }
 }

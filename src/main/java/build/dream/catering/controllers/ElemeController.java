@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -32,14 +31,14 @@ public class ElemeController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/tenantAuthorize", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/tenantAuthorize", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = TenantAuthorizeModel.class, serviceClass = ElemeService.class, serviceMethodName = "tenantAuthorize", error = "生成授权链接失败")
     public String tenantAuthorize() {
         return null;
     }
 
-    @RequestMapping(value = "/tenantAuthorizeCallback", method = RequestMethod.GET)
+    @RequestMapping(value = "/tenantAuthorizeCallback")
     public ModelAndView tenantAuthorizeCallback() {
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         String clientType = requestParameters.get(Constants.CLIENT_TYPE);
@@ -83,7 +82,7 @@ public class ElemeController extends BasicController {
      * @return
      * @throws IOException
      */
-    @RequestMapping(value = "/bindingStore", method = RequestMethod.GET)
+    @RequestMapping(value = "/bindingStore")
     public ModelAndView bindingStore() {
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         String tenantId = requestParameters.get("tenantId");
@@ -98,7 +97,7 @@ public class ElemeController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/doBindingStore", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/doBindingStore", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = DoBindingStoreModel.class, serviceClass = ElemeService.class, serviceMethodName = "doBindingStore", error = "绑定饿了么门店失败")
     public String doBindingStore() {
@@ -110,7 +109,7 @@ public class ElemeController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/getOrder", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/getOrder", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = GetOrderModel.class, serviceClass = ElemeService.class, serviceMethodName = "getOrder", error = "获取订单失败")
     public String getOrder() {
@@ -122,7 +121,7 @@ public class ElemeController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/batchGetOrders", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/batchGetOrders", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = BatchGetOrdersModel.class, serviceClass = ElemeService.class, serviceMethodName = "batchGetOrders", error = "批量获取订单失败")
     public String batchGetOrders() {
@@ -134,7 +133,7 @@ public class ElemeController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/confirmOrderLite", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/confirmOrderLite", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ConfirmOrderLiteModel.class, serviceClass = ElemeService.class, serviceMethodName = "confirmOrderLite", error = "确认订单失败")
     public String confirmOrderLite() {
@@ -146,7 +145,7 @@ public class ElemeController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/cancelOrderLite", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/cancelOrderLite", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = CancelOrderLiteModel.class, serviceClass = ElemeService.class, serviceMethodName = "cancelOrderLite", error = "取消订单失败")
     public String cancelOrderLite() {
@@ -158,7 +157,7 @@ public class ElemeController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/agreeRefundLite", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/agreeRefundLite", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = AgreeRefundLiteModel.class, serviceClass = ElemeService.class, serviceMethodName = "agreeRefundLite", error = "同意退单/同意取消单失败")
     public String agreeRefundLite() {
@@ -170,7 +169,7 @@ public class ElemeController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/disagreeRefundLite", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/disagreeRefundLite", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = DisagreeRefundLiteModel.class, serviceClass = ElemeService.class, serviceMethodName = "disagreeRefundLite", error = "不同意退单/不同意取消单失败")
     public String disagreeRefundLite() {
@@ -182,7 +181,7 @@ public class ElemeController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/deliveryBySelfLite", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/deliveryBySelfLite", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = DeliveryBySelfLiteModel.class, serviceClass = ElemeService.class, serviceMethodName = "deliveryBySelfLite", error = "配送异常或者物流拒单后选择自行配送失败")
     public String deliveryBySelfLite() {
@@ -194,7 +193,7 @@ public class ElemeController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/noMoreDeliveryLite", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/noMoreDeliveryLite", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = NoMoreDeliveryLiteModel.class, serviceClass = ElemeService.class, serviceMethodName = "noMoreDeliveryLite", error = "配送异常或者物流拒单后选择不再配送失败")
     public String noMoreDeliveryLite() {
@@ -206,7 +205,7 @@ public class ElemeController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/receivedOrderLite", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/receivedOrderLite", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ReceivedOrderLiteModel.class, serviceClass = ElemeService.class, serviceMethodName = "receivedOrderLite", error = "订单确认送达失败")
     public String receivedOrderLite() {
@@ -218,7 +217,7 @@ public class ElemeController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/replyReminder", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/replyReminder", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ReplyReminderModel.class, serviceClass = ElemeService.class, serviceMethodName = "replyReminder", error = "回复催单失败")
     public String replyReminder() {
@@ -230,7 +229,7 @@ public class ElemeController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/getUser", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/getUser", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = GetUserModel.class, serviceClass = ElemeService.class, serviceMethodName = "getUser", error = "获取商户账号信息失败")
     public String getUser() {
@@ -242,7 +241,7 @@ public class ElemeController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/getShop", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/getShop", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = GetShopModel.class, serviceClass = ElemeService.class, serviceMethodName = "getShop", error = "查询店铺信息失败")
     public String getShop() {
@@ -254,7 +253,7 @@ public class ElemeController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/queryItemByPage", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/queryItemByPage", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = QueryItemByPageModel.class, serviceClass = ElemeService.class, serviceMethodName = "queryItemByPage", error = "分页获取店铺下的商品失败")
     public String queryItemByPage() {
@@ -266,7 +265,7 @@ public class ElemeController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/getItem", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/getItem", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = GetItemModel.class, serviceClass = ElemeService.class, serviceMethodName = "getItem", error = "查询商品详情失败")
     public String getItem() {
@@ -278,7 +277,7 @@ public class ElemeController extends BasicController {
      *
      * @return
      */
-    @RequestMapping(value = "/batchGetItems", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/batchGetItems", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = BatchGetItemsModel.class, serviceClass = ElemeService.class, serviceMethodName = "batchGetItems", error = "批量查询商品详情失败")
     public String batchGetItems() {
