@@ -3,12 +3,16 @@ package build.dream.catering.configurations;
 import build.dream.catering.constants.Constants;
 import build.dream.common.annotations.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
@@ -25,6 +29,8 @@ import java.util.stream.Collectors;
 public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
     @Autowired
     private RequestMappingHandlerMapping requestMappingHandlerMapping;
+    @Autowired
+    private RedisConnectionFactory redisConnectionFactory;
 
     private static final String[] PERMIT_ALL_ANT_PATTERNS = {
             "/favicon.ico",
@@ -47,9 +53,15 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
             "/sale/**"
     };
 
+    @Bean
+    public TokenStore tokenStore() {
+        return new RedisTokenStore(redisConnectionFactory);
+    }
+
     @Override
     public void configure(ResourceServerSecurityConfigurer resources) {
         resources.resourceId(Constants.RESOURCE_ID_CATERING);
+        resources.tokenStore(tokenStore());
     }
 
     @Override
