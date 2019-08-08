@@ -6,9 +6,6 @@ import build.dream.catering.utils.DietOrderUtils;
 import build.dream.catering.utils.ThreadUtils;
 import build.dream.catering.utils.VipUtils;
 import build.dream.common.api.ApiRest;
-import build.dream.common.auth.AbstractUserDetails;
-import build.dream.common.auth.TenantUserDetails;
-import build.dream.common.auth.VipUserDetails;
 import build.dream.common.beans.KafkaFixedTimeSendResult;
 import build.dream.common.catering.domains.*;
 import build.dream.common.constants.DietOrderConstants;
@@ -95,20 +92,6 @@ public class DietOrderService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveDietOrder(SaveDietOrderModel saveDietOrderModel) {
-        AbstractUserDetails abstractUserDetails = WebSecurityUtils.obtainUserDetails();
-        String clientType = abstractUserDetails.getClientType();
-        if (Constants.CLIENT_TYPE_POS.equals(clientType) || Constants.CLIENT_TYPE_APP.equals(clientType) || Constants.CLIENT_TYPE_WEB.equals(clientType)) {
-            TenantUserDetails tenantUserDetails = (TenantUserDetails) abstractUserDetails;
-            saveDietOrderModel.setTenantId(tenantUserDetails.getTenantId());
-            saveDietOrderModel.setTenantCode(tenantUserDetails.getTenantCode());
-            saveDietOrderModel.setUserId(tenantUserDetails.getUserId());
-        } else if (Constants.CLIENT_TYPE_O2O.equals(clientType)) {
-            VipUserDetails vipUserDetails = (VipUserDetails) abstractUserDetails;
-            saveDietOrderModel.setTenantId(vipUserDetails.getTenantId());
-            saveDietOrderModel.setTenantCode(vipUserDetails.getTenantCode());
-            saveDietOrderModel.setVipId(vipUserDetails.getVipId());
-        }
-
         DietOrder dietOrder = DietOrderUtils.saveDietOrder(saveDietOrderModel);
         return ApiRest.builder().data(dietOrder).message("保存订单成功！").successful(true).build();
     }

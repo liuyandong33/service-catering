@@ -80,7 +80,7 @@ public class UserService {
         Branch branch = branchMapper.findByTenantIdAndUserId(tenantId, userId);
         ValidateUtils.notNull(branch, "门店不存在！");
 
-        return ApiRest.builder().data(branch).className(Branch.class.getName()).message("获取门店信息成功！").successful(true).build();
+        return ApiRest.builder().data(branch).message("获取门店信息成功！").successful(true).build();
     }
 
     /**

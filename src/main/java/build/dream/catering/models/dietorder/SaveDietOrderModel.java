@@ -2,10 +2,9 @@ package build.dream.catering.models.dietorder;
 
 import build.dream.catering.constants.Constants;
 import build.dream.common.annotations.InstantiateObjectIgnore;
-import build.dream.common.annotations.JsonSchema;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.constraints.VerifyJsonSchema;
-import build.dream.common.models.BasicModel;
+import build.dream.common.models.CateringBasicModel;
 import build.dream.common.utils.ApplicationHandler;
 import org.hibernate.validator.constraints.Length;
 
@@ -15,7 +14,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
-public class SaveDietOrderModel extends BasicModel {
+public class SaveDietOrderModel extends CateringBasicModel {
     private static final String[] INVOICE_TYPES = {DietOrderConstants.INVOICE_TYPE_PERSONAL, DietOrderConstants.INVOICE_TYPE_COMPANY};
 
     @InstantiateObjectIgnore

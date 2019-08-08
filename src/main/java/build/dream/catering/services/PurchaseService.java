@@ -8,11 +8,11 @@ import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.PurchaseOrder;
 import build.dream.common.catering.domains.PurchaseOrderDetail;
 import build.dream.common.catering.domains.StockFlow;
+import build.dream.common.tuples.Tuple3;
 import build.dream.common.utils.*;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import scala.Tuple3;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

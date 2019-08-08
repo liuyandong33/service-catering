@@ -4,12 +4,12 @@ import build.dream.catering.constants.Constants;
 import build.dream.common.beans.WebResponse;
 import build.dream.common.catering.domains.Branch;
 import build.dream.common.catering.domains.DietOrder;
+import build.dream.common.tuples.Tuple2;
 import build.dream.common.utils.*;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import scala.Tuple2;
 
 import java.math.BigInteger;
 import java.util.HashMap;
