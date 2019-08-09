@@ -54,11 +54,12 @@ public class UserService {
     public ApiRest obtainUserInfo(ObtainUserInfoModel obtainUserInfoModel) {
         BigInteger userId = obtainUserInfoModel.obtainUserId();
         BigInteger tenantId = obtainUserInfoModel.obtainTenantId();
+
         SystemUser systemUser = UserUtils.obtainUserInfo(userId);
         Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
 
         Map<String, Object> data = new HashMap<String, Object>();
-        Branch branch = branchMapper.findByTenantIdAndUserId(systemUser.getTenantId(), userId);
+        Branch branch = branchMapper.findByTenantIdAndUserId(tenantId, userId);
         ValidateUtils.notNull(branch, "门店信息不存在！");
 
         data.put("tenant", tenant);
