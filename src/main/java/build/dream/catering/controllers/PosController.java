@@ -44,6 +44,18 @@ public class PosController {
     }
 
     /**
+     * 获取MQTT连接信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "/obtainMqttInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = ObtainMqttInfoModel.class, serviceClass = PosService.class, serviceMethodName = "obtainMqttInfo", error = "获取MQTT连接信息失败")
+    public String obtainMqttInfo() {
+        return null;
+    }
+
+    /**
      * 回执
      *
      * @return

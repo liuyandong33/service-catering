@@ -23,6 +23,7 @@ import build.dream.common.models.umpay.PassiveScanCodePayModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
 import build.dream.common.mqtt.MqttInfo;
 import build.dream.common.saas.domains.*;
+import build.dream.common.tuples.Tuple2;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -59,20 +60,10 @@ public class PosService {
         String mqttToken = Constants.VARCHAR_DEFAULT_VALUE;
         String mqttClientId = Constants.VARCHAR_DEFAULT_VALUE;
         if (Constants.POS_TYPE_WINDOWS.equals(type)) {
-            MqttConfig mqttConfig = MqttUtils.obtainMqttConfig();
-            ApplyTokenModel applyTokenModel = ApplyTokenModel.builder()
-                    .actions("R")
-                    .resources(mqttConfig.getTopic() + "/#")
-                    .expireTime(DateUtils.addDays(new Date(), 1).getTime())
-                    .proxyType("MQTT")
-                    .serviceName("mq")
-                    .instanceId(mqttConfig.getInstanceId())
-                    .build();
-            mqttToken = MqttUtils.applyToken(applyTokenModel);
-            Map<String, String> tokenInfos = new HashMap<String, String>();
-            tokenInfos.put("R", mqttToken);
+            Tuple2<String, MqttInfo> tuple2 = obtainMqttInfo();
+            mqttToken = tuple2._1();
+            MqttInfo mqttInfo = tuple2._2();
 
-            MqttInfo mqttInfo = MqttUtils.obtainMqttInfo(mqttConfig, tokenInfos);
             mqttClientId = mqttInfo.getClientId();
             cloudPushDeviceId = Constants.VARCHAR_DEFAULT_VALUE;
 
@@ -119,6 +110,59 @@ public class PosService {
 
         data.put("pos", pos);
         return ApiRest.builder().data(data).message("上线POS成功！").successful(true).build();
+    }
+
+    /**
+     * 获取mqtt连接信息
+     *
+     * @param obtainMqttInfoModel
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ApiRest obtainMqttInfo(ObtainMqttInfoModel obtainMqttInfoModel) {
+        BigInteger tenantId = obtainMqttInfoModel.obtainTenantId();
+        BigInteger branchId = obtainMqttInfoModel.obtainBranchId();
+        BigInteger userId = obtainMqttInfoModel.obtainUserId();
+        BigInteger posId = obtainMqttInfoModel.getPosId();
+
+        SearchModel searchModel = SearchModel.builder()
+                .autoSetDeletedFalse()
+                .equal(Pos.ColumnName.TENANT_ID, tenantId)
+                .equal(Pos.ColumnName.BRANCH_ID, branchId)
+                .equal(Pos.ColumnName.ID, posId)
+                .equal(Pos.ColumnName.USER_ID, userId)
+                .build();
+        Pos pos = DatabaseHelper.find(Pos.class, searchModel);
+        ValidateUtils.notNull(pos, "POS 不存在！");
+
+        Tuple2<String, MqttInfo> tuple2 = obtainMqttInfo();
+        String mqttToken = tuple2._1();
+        MqttInfo mqttInfo = tuple2._2();
+
+        pos.setMqttToken(mqttToken);
+        pos.setMqttClientId(mqttInfo.getClientId());
+        pos.setUpdatedUserId(userId);
+        DatabaseHelper.update(pos);
+
+        return ApiRest.builder().data(mqttInfo).message("获取MQTT连接信息成功！").successful(true).build();
+    }
+
+    private Tuple2<String, MqttInfo> obtainMqttInfo() {
+        MqttConfig mqttConfig = MqttUtils.obtainMqttConfig();
+        ApplyTokenModel applyTokenModel = ApplyTokenModel.builder()
+                .actions("R")
+                .resources(mqttConfig.getTopic() + "/#")
+                .expireTime(DateUtils.addDays(new Date(), 1).getTime())
+                .proxyType("MQTT")
+                .serviceName("mq")
+                .instanceId(mqttConfig.getInstanceId())
+                .build();
+        String mqttToken = MqttUtils.applyToken(applyTokenModel);
+        Map<String, String> tokenInfos = new HashMap<String, String>();
+        tokenInfos.put("R", mqttToken);
+
+        MqttInfo mqttInfo = MqttUtils.obtainMqttInfo(mqttConfig, tokenInfos);
+        return TupleUtils.buildTuple2(mqttToken, mqttInfo);
     }
 
     /**
@@ -635,6 +679,11 @@ public class PosService {
         return ApiRest.builder().message("退款成功！").successful(true).build();
     }
 
+    /**
+     * 处理POS token 失效，通知POS重新申请token
+     *
+     * @param info
+     */
     @Transactional(readOnly = true)
     public void tokenInvalid(Map<String, Object> info) {
         BigInteger tenantId = BigInteger.valueOf(MapUtils.getLongValue(info, "tenantId"));
