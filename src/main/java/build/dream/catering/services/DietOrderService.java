@@ -136,13 +136,14 @@ public class DietOrderService {
     }
 
     /**
-     * @param tenantId: 商户ID
-     * @param branchId: 门店ID
-     * @param orderId:  订单ID
-     * @param type:     类型，1-超时未付款自动取消，3-超时未接单自动取消
+     * @param info
      */
     @Transactional(rollbackFor = Exception.class)
-    public void cancelOrder(BigInteger tenantId, BigInteger branchId, BigInteger orderId, int type) {
+    public void cancelOrder(Map<String, Object> info) {
+        BigInteger tenantId = BigInteger.valueOf(MapUtils.getLongValue(info, "tenantId"));
+        BigInteger branchId = BigInteger.valueOf(MapUtils.getLongValue(info, "branchId"));
+        BigInteger orderId = BigInteger.valueOf(MapUtils.getLongValue(info, "orderId"));
+        int type = MapUtils.getIntValue(info, "type");
         DietOrderUtils.cancelOrder(tenantId, branchId, orderId, type);
     }
 

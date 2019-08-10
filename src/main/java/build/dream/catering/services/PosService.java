@@ -26,7 +26,6 @@ import build.dream.common.saas.domains.*;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -634,5 +633,23 @@ public class PosService {
                 .build();
         DatabaseHelper.insert(offlinePayLog);
         return ApiRest.builder().message("退款成功！").successful(true).build();
+    }
+
+    @Transactional(readOnly = true)
+    public void tokenInvalid(Map<String, Object> info) {
+        BigInteger tenantId = BigInteger.valueOf(MapUtils.getLongValue(info, "tenantId"));
+        BigInteger branchId = BigInteger.valueOf(MapUtils.getLongValue(info, "branchId"));
+        BigInteger posId = BigInteger.valueOf(MapUtils.getLongValue(info, "posId"));
+
+        SearchModel searchModel = SearchModel.builder()
+                .autoSetDeletedFalse()
+                .equal(Pos.ColumnName.TENANT_ID, tenantId)
+                .equal(Pos.ColumnName.BRANCH_ID, branchId)
+                .equal(Pos.ColumnName.ID, posId)
+                .build();
+        Pos pos = DatabaseHelper.find(Pos.class, searchModel);
+        if (Objects.nonNull(pos) && pos.isOnline()) {
+
+        }
     }
 }
