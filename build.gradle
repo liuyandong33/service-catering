@@ -67,6 +67,7 @@ dependencies {
     compile("commons-io:commons-io:2.6")
     compile("org.jsoup:jsoup:1.11.2")
     compile("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0")
+    compile("org.apache.rocketmq:rocketmq-spring-boot-starter:2.0.3")
 }
 
 publishing {
