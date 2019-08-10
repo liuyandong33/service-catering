@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @Component
-public class BeElemeListener implements MessageListener<String, String> {
+public class BeElemeMessageListener implements MessageListener<String, String> {
     @Autowired
     private BeElemeService beElemeService;
 
