@@ -1,28 +1,33 @@
 package build.dream.catering.listeners;
 
+import build.dream.catering.constants.Constants;
 import build.dream.catering.services.DietOrderService;
 import build.dream.catering.services.PosService;
+import build.dream.common.annotations.RocketMQMessageListener;
 import build.dream.common.models.rocketmq.DelayedOrTimedModel;
 import build.dream.common.models.rocketmq.DelayedOrTimedType;
 import build.dream.common.utils.JacksonUtils;
-import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
-import org.apache.rocketmq.spring.core.RocketMQListener;
+import com.aliyun.openservices.ons.api.Action;
+import com.aliyun.openservices.ons.api.ConsumeContext;
+import com.aliyun.openservices.ons.api.Message;
+import com.aliyun.openservices.ons.api.MessageListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 @Component
-@RocketMQMessageListener(topic = "${delayed.or.timed.rocket.mq.topic}", consumerGroup = "${rocketmq.consumer.group}")
-public class DelayedOrTimedRocketMQListener implements RocketMQListener<String> {
+@RocketMQMessageListener(topic = "${delayed.or.timed.rocket.mq.topic}")
+public class DelayedOrTimedRocketMQListener implements MessageListener {
     @Autowired
     private DietOrderService dietOrderService;
     @Autowired
     private PosService posService;
 
     @Override
-    public void onMessage(String message) {
-        DelayedOrTimedModel delayedOrTimedModel = JacksonUtils.readValue(message, DelayedOrTimedModel.class);
+    public Action consume(Message message, ConsumeContext context) {
+        String body = new String(message.getBody(), Constants.CHARSET_UTF_8);
+        DelayedOrTimedModel delayedOrTimedModel = JacksonUtils.readValue(body, DelayedOrTimedModel.class);
         DelayedOrTimedType delayedOrTimedType = delayedOrTimedModel.getType();
         Map<String, Object> data = delayedOrTimedModel.getData();
 
@@ -34,5 +39,6 @@ public class DelayedOrTimedRocketMQListener implements RocketMQListener<String> 
                 posService.tokenInvalid(data);
                 break;
         }
+        return Action.CommitMessage;
     }
 }
