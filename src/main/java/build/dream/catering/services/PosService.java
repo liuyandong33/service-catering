@@ -149,10 +149,12 @@ public class PosService {
 
     private Tuple2<String, MqttInfo> obtainMqttInfo() {
         MqttConfig mqttConfig = MqttUtils.obtainMqttConfig();
+
+        Date expireTime = DateUtils.addDays(new Date(), 1);
         ApplyTokenModel applyTokenModel = ApplyTokenModel.builder()
                 .actions("R")
                 .resources(mqttConfig.getTopic() + "/#")
-                .expireTime(DateUtils.addDays(new Date(), 1).getTime())
+                .expireTime(expireTime.getTime())
                 .proxyType("MQTT")
                 .serviceName("mq")
                 .instanceId(mqttConfig.getInstanceId())
@@ -162,6 +164,7 @@ public class PosService {
         tokenInfos.put("R", mqttToken);
 
         MqttInfo mqttInfo = MqttUtils.obtainMqttInfo(mqttConfig, tokenInfos);
+        mqttInfo.setExpireTime(expireTime);
         return TupleUtils.buildTuple2(mqttToken, mqttInfo);
     }
 
