@@ -5,7 +5,7 @@ import build.dream.catering.models.eleme.*;
 import build.dream.common.api.ApiRest;
 import build.dream.common.catering.domains.*;
 import build.dream.common.constants.DietOrderConstants;
-import build.dream.common.models.eleme.ElemeMessageModel;
+import build.dream.common.models.push.OrderMessageModel;
 import build.dream.common.utils.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONNull;
@@ -418,12 +418,12 @@ public class ElemeService {
         elemeCallbackMessage.setUpdatedUserId(userId);
         DatabaseHelper.insert(elemeCallbackMessage);
 
-        ElemeMessageModel elemeMessageModel = new ElemeMessageModel();
-        elemeMessageModel.setType(1);
-        elemeMessageModel.setOrderId(dietOrderId);
-        elemeMessageModel.setUuid(uuid);
+        OrderMessageModel orderMessageModel = new OrderMessageModel();
+        orderMessageModel.setType(1);
+        orderMessageModel.setOrderId(dietOrderId);
+        orderMessageModel.setUuid(uuid);
 
-        ElemeUtils.pushMessage(tenantId, branchId, elemeMessageModel, 10, 60000);
+        PushUtils.pushOrderMessage(tenantId, branchId, orderMessageModel, 10, 60000);
     }
 
     /**
