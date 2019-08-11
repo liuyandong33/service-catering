@@ -698,7 +698,7 @@ public class PosService {
                 .build();
         Pos pos = DatabaseHelper.find(Pos.class, searchModel);
         if (Objects.nonNull(pos) && pos.isOnline()) {
-
+            PushUtils.pushMqttTokenInvalidMessage(pos, 10, 60000);
         }
     }
 }
