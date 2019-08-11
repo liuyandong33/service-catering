@@ -18,6 +18,8 @@ import build.dream.common.models.mqtt.RevokeTokenModel;
 import build.dream.common.models.newland.BarcodePayModel;
 import build.dream.common.models.newland.QryBarcodePayModel;
 import build.dream.common.models.newland.RefundBarcodePayModel;
+import build.dream.common.models.rocketmq.DelayedOrTimedModel;
+import build.dream.common.models.rocketmq.DelayedOrTimedType;
 import build.dream.common.models.umpay.MerRefundModel;
 import build.dream.common.models.umpay.PassiveScanCodePayModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
@@ -25,6 +27,7 @@ import build.dream.common.mqtt.MqttInfo;
 import build.dream.common.saas.domains.*;
 import build.dream.common.tuples.Tuple2;
 import build.dream.common.utils.*;
+import com.aliyun.openservices.ons.api.Message;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -59,6 +62,7 @@ public class PosService {
         Map<String, Object> data = new HashMap<String, Object>();
         String mqttToken = Constants.VARCHAR_DEFAULT_VALUE;
         String mqttClientId = Constants.VARCHAR_DEFAULT_VALUE;
+        long startDeliverTime = 0;
         if (Constants.POS_TYPE_WINDOWS.equals(type)) {
             Tuple2<String, MqttInfo> tuple2 = obtainMqttInfo();
             mqttToken = tuple2._1();
@@ -66,6 +70,8 @@ public class PosService {
 
             mqttClientId = mqttInfo.getClientId();
             cloudPushDeviceId = Constants.VARCHAR_DEFAULT_VALUE;
+
+            startDeliverTime = mqttInfo.getExpireTime().getTime() - 10 * 60 * 1000;
 
             data.put("mqttInfo", mqttInfo);
         }
@@ -108,6 +114,10 @@ public class PosService {
             DatabaseHelper.update(pos);
         }
 
+        if (Constants.POS_TYPE_WINDOWS.equals(type)) {
+            sendPosTokenInvalidMessage(tenantId, branchId, pos.getId(), startDeliverTime);
+        }
+
         data.put("pos", pos);
         return ApiRest.builder().data(data).message("上线POS成功！").successful(true).build();
     }
@@ -138,6 +148,8 @@ public class PosService {
         Tuple2<String, MqttInfo> tuple2 = obtainMqttInfo();
         String mqttToken = tuple2._1();
         MqttInfo mqttInfo = tuple2._2();
+
+        sendPosTokenInvalidMessage(tenantId, branchId, posId, mqttInfo.getExpireTime().getTime() - 10 * 60 - 1000);
 
         pos.setMqttToken(mqttToken);
         pos.setMqttClientId(mqttInfo.getClientId());
@@ -703,5 +715,25 @@ public class PosService {
         if (Objects.nonNull(pos) && pos.isOnline()) {
             PushUtils.pushMqttTokenInvalidMessage(pos, 10, 60000);
         }
+    }
+
+    public void sendPosTokenInvalidMessage(BigInteger tenantId, BigInteger branchId, BigInteger posId, long startDeliverTime) {
+        DelayedOrTimedModel delayedOrTimedModel = new DelayedOrTimedModel();
+        delayedOrTimedModel.setType(DelayedOrTimedType.DELAYED_OR_TIMED_TYPE_POS_MQTT_TOKEN_INVALID);
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("tenantId", tenantId);
+        data.put("branchId", branchId);
+        data.put("posId", posId);
+
+        delayedOrTimedModel.setData(data);
+
+        String body = JacksonUtils.writeValueAsString(data);
+
+        Message message = new Message();
+        message.setBody(body.getBytes(Constants.CHARSET_UTF_8));
+        message.setStartDeliverTime(startDeliverTime);
+        message.setTopic(ConfigurationUtils.getConfiguration("delayed.or.timed.rocket.mq.topic"));
+        RocketMQUtils.send(message);
     }
 }
