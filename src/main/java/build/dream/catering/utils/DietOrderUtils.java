@@ -364,11 +364,16 @@ public class DietOrderUtils {
      * @return
      */
     public static DietOrder saveDietOrder(SaveDietOrderModel saveDietOrderModel) {
-        BigInteger tenantId = saveDietOrderModel.getTenantId();
-        String tenantCode = saveDietOrderModel.getTenantCode();
-        BigInteger branchId = saveDietOrderModel.getBranchId();
-        BigInteger userId = saveDietOrderModel.getUserId();
-        BigInteger vipId = saveDietOrderModel.getVipId();
+        BigInteger tenantId = saveDietOrderModel.obtainTenantId();
+        String tenantCode = saveDietOrderModel.obtainTenantCode();
+        BigInteger branchId = saveDietOrderModel.obtainTenantId();
+        BigInteger userId = saveDietOrderModel.obtainVipId();
+        BigInteger vipId = saveDietOrderModel.obtainVipId();
+        Integer orderType = saveDietOrderModel.getOrderType();
+        boolean invoiced = saveDietOrderModel.getInvoiced();
+        String invoiceType = saveDietOrderModel.getInvoiceType();
+        String invoice = saveDietOrderModel.getInvoice();
+        List<SaveDietOrderModel.GoodsInfo> goodsInfos = saveDietOrderModel.getGoodsInfos();
 
         // 查询出门店信息
         Branch branch = DatabaseHelper.find(Branch.class, branchId);
@@ -379,7 +384,6 @@ public class DietOrderUtils {
         List<BigInteger> goodsSpecificationIds = new ArrayList<BigInteger>();
         List<BigInteger> goodsAttributeGroupIds = new ArrayList<BigInteger>();
         List<BigInteger> goodsAttributeIds = new ArrayList<BigInteger>();
-        List<SaveDietOrderModel.GoodsInfo> goodsInfos = saveDietOrderModel.getGoodsInfos();
         for (SaveDietOrderModel.GoodsInfo goodsInfo : goodsInfos) {
             BigInteger goodsId = goodsInfo.getGoodsId();
             goodsIds.add(goodsInfo.getGoodsId());
@@ -482,7 +486,6 @@ public class DietOrderUtils {
         }
 
         String orderNumberPrefix = null;
-        Integer orderType = saveDietOrderModel.getOrderType();
         if (orderType == DietOrderConstants.ORDER_TYPE_SCAN_CODE_ORDER) {
             orderNumberPrefix = "SC";
         }
@@ -501,10 +504,9 @@ public class DietOrderUtils {
                 .refundStatus(DietOrderConstants.REFUND_STATUS_NO_REFUND)
                 .daySerialNumber(daySerialNumber.toString());
 
-        boolean invoiced = saveDietOrderModel.getInvoiced();
         builder.invoiced(invoiced);
         if (invoiced) {
-            builder.invoiceType(saveDietOrderModel.getInvoiceType()).invoice(saveDietOrderModel.getInvoice());
+            builder.invoiceType(invoiceType).invoice(invoice);
         }
         if (vipId != null) {
             builder.vipId(vipId);

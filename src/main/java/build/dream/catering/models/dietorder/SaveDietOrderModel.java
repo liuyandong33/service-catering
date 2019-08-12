@@ -1,10 +1,9 @@
 package build.dream.catering.models.dietorder;
 
 import build.dream.catering.constants.Constants;
-import build.dream.common.annotations.InstantiateObjectIgnore;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.constraints.VerifyJsonSchema;
-import build.dream.common.models.CateringBasicModel;
+import build.dream.common.models.VipBasicModel;
 import build.dream.common.utils.ApplicationHandler;
 import org.hibernate.validator.constraints.Length;
 
@@ -14,14 +13,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
-public class SaveDietOrderModel extends CateringBasicModel {
+public class SaveDietOrderModel extends VipBasicModel {
     private static final String[] INVOICE_TYPES = {DietOrderConstants.INVOICE_TYPE_PERSONAL, DietOrderConstants.INVOICE_TYPE_COMPANY};
-
-    @InstantiateObjectIgnore
-    private BigInteger tenantId;
-    @InstantiateObjectIgnore
-    private String tenantCode;
-    private BigInteger branchId;
 
     @NotNull
     private Integer orderType;
@@ -33,38 +26,10 @@ public class SaveDietOrderModel extends CateringBasicModel {
 
     @Length(max = 30)
     private String invoice;
-    private BigInteger vipId;
-
-    @InstantiateObjectIgnore
-    private BigInteger userId;
 
     @NotEmpty
     @VerifyJsonSchema(value = Constants.GOODS_INFOS_SCHEMA_FILE_PATH)
     private List<GoodsInfo> goodsInfos;
-
-    public BigInteger getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(BigInteger tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public String getTenantCode() {
-        return tenantCode;
-    }
-
-    public void setTenantCode(String tenantCode) {
-        this.tenantCode = tenantCode;
-    }
-
-    public BigInteger getBranchId() {
-        return branchId;
-    }
-
-    public void setBranchId(BigInteger branchId) {
-        this.branchId = branchId;
-    }
 
     public Integer getOrderType() {
         return orderType;
@@ -96,22 +61,6 @@ public class SaveDietOrderModel extends CateringBasicModel {
 
     public void setInvoice(String invoice) {
         this.invoice = invoice;
-    }
-
-    public BigInteger getVipId() {
-        return vipId;
-    }
-
-    public void setVipId(BigInteger vipId) {
-        this.vipId = vipId;
-    }
-
-    public BigInteger getUserId() {
-        return userId;
-    }
-
-    public void setUserId(BigInteger userId) {
-        this.userId = userId;
     }
 
     public List<GoodsInfo> getGoodsInfos() {
