@@ -700,7 +700,7 @@ public class PosService {
      * @param info
      */
     @Transactional(readOnly = true)
-    public void tokenInvalid(Map<String, Object> info) {
+    public void handleMqttTokenInvalid(Map<String, Object> info) {
         BigInteger tenantId = BigInteger.valueOf(MapUtils.getLongValue(info, "tenantId"));
         BigInteger branchId = BigInteger.valueOf(MapUtils.getLongValue(info, "branchId"));
         BigInteger posId = BigInteger.valueOf(MapUtils.getLongValue(info, "posId"));

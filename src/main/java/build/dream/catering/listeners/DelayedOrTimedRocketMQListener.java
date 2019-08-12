@@ -36,7 +36,7 @@ public class DelayedOrTimedRocketMQListener implements MessageListener {
                 dietOrderService.cancelOrder(data);
                 break;
             case DELAYED_OR_TIMED_TYPE_POS_MQTT_TOKEN_INVALID:
-                posService.tokenInvalid(data);
+                posService.handleMqttTokenInvalid(data);
                 break;
         }
         return Action.CommitMessage;
