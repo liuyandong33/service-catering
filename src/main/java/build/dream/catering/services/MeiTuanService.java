@@ -5,7 +5,7 @@ import build.dream.catering.models.meituan.*;
 import build.dream.catering.utils.MeiTuanUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.beans.WebResponse;
-import build.dream.common.catering.domains.*;
+import build.dream.common.domains.catering.*;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.utils.*;
 import net.sf.json.JSONArray;

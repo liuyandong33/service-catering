@@ -1,7 +1,7 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.common.catering.domains.*;
+import build.dream.common.domains.catering.*;
 import build.dream.common.utils.CommonRedisUtils;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.JacksonUtils;

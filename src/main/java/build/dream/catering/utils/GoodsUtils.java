@@ -4,7 +4,7 @@ import build.dream.catering.beans.PackageDetail;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.GoodsMapper;
 import build.dream.catering.models.goods.SaveGoodsModel;
-import build.dream.common.catering.domains.*;
+import build.dream.common.domains.catering.*;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SearchModel;

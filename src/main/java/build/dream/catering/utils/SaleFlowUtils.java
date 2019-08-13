@@ -1,7 +1,7 @@
 package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
-import build.dream.common.catering.domains.*;
+import build.dream.common.domains.catering.*;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;

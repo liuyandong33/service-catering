@@ -1,6 +1,6 @@
 package build.dream.catering.mappers;
 
-import build.dream.common.catering.domains.VipAccount;
+import build.dream.common.domains.catering.VipAccount;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

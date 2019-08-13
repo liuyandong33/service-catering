@@ -6,7 +6,7 @@ import build.dream.catering.models.branch.*;
 import build.dream.catering.utils.SequenceUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.beans.District;
-import build.dream.common.catering.domains.Branch;
+import build.dream.common.domains.catering.Branch;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;

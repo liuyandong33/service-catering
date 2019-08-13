@@ -1,6 +1,6 @@
 package build.dream.catering.utils;
 
-import build.dream.common.catering.domains.CanNotOperateReason;
+import build.dream.common.domains.catering.CanNotOperateReason;
 
 import java.math.BigInteger;
 

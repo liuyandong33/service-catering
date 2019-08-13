@@ -1,7 +1,7 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.common.catering.domains.*;
+import build.dream.common.domains.catering.*;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.models.beeleme.OrderGetModel;
 import build.dream.common.utils.*;

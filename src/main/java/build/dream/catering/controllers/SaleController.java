@@ -1,7 +1,7 @@
 package build.dream.catering.controllers;
 
 import build.dream.catering.constants.Constants;
-import build.dream.common.catering.domains.SaleDetail;
+import build.dream.common.domains.catering.SaleDetail;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.JacksonUtils;
 import build.dream.common.utils.PagedSearchModel;

@@ -3,7 +3,7 @@ package build.dream.catering.listeners;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.services.ElemeService;
 import build.dream.catering.tools.HandleElemeMessageRunnable;
-import build.dream.common.catering.domains.ElemeCallbackMessage;
+import build.dream.common.domains.catering.ElemeCallbackMessage;
 import build.dream.common.utils.JacksonUtils;
 import build.dream.common.utils.ValidateUtils;
 import org.apache.commons.collections.MapUtils;

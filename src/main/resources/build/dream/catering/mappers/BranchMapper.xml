@@ -13,7 +13,7 @@
         SELECT user_id FROM merge_user_branch WHERE tenant_id = #{tenantId} AND branch_id = #{branchId} AND deleted = 0
     </select>
 
-    <select id="findByTenantIdAndUserId" resultType="build.dream.common.catering.domains.Branch">
+    <select id="findByTenantIdAndUserId" resultType="build.dream.common.domains.catering.Branch">
         SELECT * FROM branch WHERE id = (SELECT branch_id FROM merge_user_branch WHERE tenant_id = #{tenantId} AND user_id = #{userId} AND deleted = 0) AND tenant_id = #{tenantId} AND deleted = 0;
     </select>
 </mapper>

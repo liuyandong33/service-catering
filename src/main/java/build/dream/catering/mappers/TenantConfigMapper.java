@@ -1,6 +1,6 @@
 package build.dream.catering.mappers;
 
-import build.dream.common.catering.domains.TenantConfig;
+import build.dream.common.domains.catering.TenantConfig;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

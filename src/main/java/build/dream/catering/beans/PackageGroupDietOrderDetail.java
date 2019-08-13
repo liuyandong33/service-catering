@@ -1,6 +1,6 @@
 package build.dream.catering.beans;
 
-import build.dream.common.catering.domains.DietOrderDetail;
+import build.dream.common.domains.catering.DietOrderDetail;
 
 import java.math.BigInteger;
 import java.util.List;

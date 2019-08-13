@@ -31,7 +31,7 @@
         AND package_group_detail.branch_id = #{branchId}
     </select>
 
-    <select id="findAllByIdInList" resultType="build.dream.common.catering.domains.Goods">
+    <select id="findAllByIdInList" resultType="build.dream.common.domains.catering.Goods">
         SELECT
         goods.*,
         goods_category.name AS category_name
@@ -46,7 +46,7 @@
         </foreach>
     </select>
 
-    <select id="findAllByCategoryId" resultType="build.dream.common.catering.domains.Goods">
+    <select id="findAllByCategoryId" resultType="build.dream.common.domains.catering.Goods">
         SELECT
         goods.*,
         goods_category.name AS category_name

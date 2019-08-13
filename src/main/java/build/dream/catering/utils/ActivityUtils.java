@@ -1,9 +1,9 @@
 package build.dream.catering.utils;
 
 import build.dream.catering.mappers.ActivityMapper;
-import build.dream.common.catering.domains.Activity;
-import build.dream.common.catering.domains.EffectiveActivity;
-import build.dream.common.catering.domains.FullReductionActivity;
+import build.dream.common.domains.catering.Activity;
+import build.dream.common.domains.catering.EffectiveActivity;
+import build.dream.common.domains.catering.FullReductionActivity;
 import build.dream.common.utils.ApplicationHandler;
 
 import java.math.BigDecimal;

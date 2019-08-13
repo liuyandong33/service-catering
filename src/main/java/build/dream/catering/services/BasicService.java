@@ -4,7 +4,7 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.exceptions.CanNotDeleteException;
 import build.dream.catering.exceptions.CanNotEditAndDeleteException;
 import build.dream.catering.exceptions.CanNotEditException;
-import build.dream.common.catering.domains.CanNotOperateReason;
+import build.dream.common.domains.catering.CanNotOperateReason;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.DeleteModel;
 import build.dream.common.utils.SearchModel;

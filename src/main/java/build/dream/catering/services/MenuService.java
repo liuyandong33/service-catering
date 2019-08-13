@@ -7,7 +7,7 @@ import build.dream.catering.models.menu.ObtainMenuInfoModel;
 import build.dream.catering.models.menu.SaveMenuModel;
 import build.dream.catering.utils.GoodsUtils;
 import build.dream.common.api.ApiRest;
-import build.dream.common.catering.domains.*;
+import build.dream.common.domains.catering.*;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.DeleteModel;
 import build.dream.common.utils.SearchModel;

@@ -5,7 +5,7 @@ import build.dream.common.api.ApiRest;
 import build.dream.common.models.alipay.AlipayMarketingCardActivateUrlApplyModel;
 import build.dream.common.models.alipay.AlipayMarketingCardFormTemplateSetModel;
 import build.dream.common.models.alipay.AlipayMarketingCardTemplateCreateModel;
-import build.dream.common.saas.domains.AlipayDeveloperAccount;
+import build.dream.common.domains.saas.AlipayDeveloperAccount;
 import build.dream.common.utils.AlipayUtils;
 import build.dream.common.utils.ValidateUtils;
 import org.apache.commons.collections.MapUtils;

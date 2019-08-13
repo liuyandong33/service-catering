@@ -2,8 +2,8 @@ package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
 import build.dream.common.beans.WebResponse;
-import build.dream.common.catering.domains.Branch;
-import build.dream.common.catering.domains.DietOrder;
+import build.dream.common.domains.catering.Branch;
+import build.dream.common.domains.catering.DietOrder;
 import build.dream.common.tuples.Tuple2;
 import build.dream.common.utils.*;
 import org.apache.commons.codec.digest.DigestUtils;

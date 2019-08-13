@@ -1,7 +1,7 @@
 package build.dream.catering.mappers;
 
 import build.dream.catering.beans.PackageDetail;
-import build.dream.common.catering.domains.Goods;
+import build.dream.common.domains.catering.Goods;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

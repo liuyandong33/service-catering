@@ -3,7 +3,7 @@ package build.dream.catering.services;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.eleme.*;
 import build.dream.common.api.ApiRest;
-import build.dream.common.catering.domains.*;
+import build.dream.common.domains.catering.*;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.models.push.OrderMessageModel;
 import build.dream.common.utils.*;

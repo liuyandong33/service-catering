@@ -2,9 +2,9 @@ package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.VipMapper;
-import build.dream.common.catering.domains.Vip;
-import build.dream.common.catering.domains.VipAccount;
-import build.dream.common.catering.domains.VipType;
+import build.dream.common.domains.catering.Vip;
+import build.dream.common.domains.catering.VipAccount;
+import build.dream.common.domains.catering.VipType;
 import build.dream.common.utils.*;
 
 import java.math.BigDecimal;

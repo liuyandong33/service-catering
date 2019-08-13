@@ -12,7 +12,7 @@
         DELETE FROM menu_branch_r WHERE menu_id = #{menuId} AND tenant_id = #{tenantId}
     </insert>
     
-    <select id="findEffectiveMenu" resultType="build.dream.common.catering.domains.Menu">
+    <select id="findEffectiveMenu" resultType="build.dream.common.domains.catering.Menu">
         SELECT
         menu.*
         FROM menu

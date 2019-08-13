@@ -4,7 +4,7 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.models.distributioncenter.SaveModel;
 import build.dream.catering.utils.SequenceUtils;
 import build.dream.common.api.ApiRest;
-import build.dream.common.catering.domains.DistributionCenter;
+import build.dream.common.domains.catering.DistributionCenter;
 import build.dream.common.constants.ErrorConstants;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SerialNumberGenerator;

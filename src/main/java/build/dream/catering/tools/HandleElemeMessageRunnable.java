@@ -3,7 +3,7 @@ package build.dream.catering.tools;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.services.ElemeService;
 import build.dream.catering.utils.ThreadUtils;
-import build.dream.common.catering.domains.ElemeCallbackMessage;
+import build.dream.common.domains.catering.ElemeCallbackMessage;
 import build.dream.common.utils.ConfigurationUtils;
 import build.dream.common.utils.DingtalkUtils;
 import build.dream.common.utils.GsonUtils;

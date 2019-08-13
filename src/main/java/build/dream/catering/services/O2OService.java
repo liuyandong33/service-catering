@@ -4,7 +4,7 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.models.o2o.ObtainVipInfoModel;
 import build.dream.catering.utils.VipUtils;
 import build.dream.common.api.ApiRest;
-import build.dream.common.catering.domains.Vip;
+import build.dream.common.domains.catering.Vip;
 import build.dream.common.utils.SearchModel;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
