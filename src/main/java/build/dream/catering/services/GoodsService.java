@@ -71,7 +71,7 @@ public class GoodsService extends BasicService {
     @Transactional(readOnly = true)
     public ApiRest list(ListModel listModel) {
         BigInteger tenantId = listModel.obtainTenantId();
-        BigInteger branchId = listModel.obtainTenantId();
+        BigInteger branchId = listModel.obtainBranchId();
         int page = listModel.getPage();
         int rows = listModel.getRows();
 
@@ -83,101 +83,106 @@ public class GoodsService extends BasicService {
         SearchModel searchModel = new SearchModel(searchConditions);
         long count = DatabaseHelper.count(Goods.class, searchModel);
 
+        Map<String, Object> data = new HashMap<String, Object>();
         List<Map<String, Object>> goodsInfos = new ArrayList<Map<String, Object>>();
-        if (count > 0) {
-            PagedSearchModel pagedSearchModel = new PagedSearchModel(searchConditions, page, rows);
-            List<Goods> goodsList = DatabaseHelper.findAllPaged(Goods.class, pagedSearchModel);
 
-            List<BigInteger> goodsIds = new ArrayList<BigInteger>();
-            List<BigInteger> packageIds = new ArrayList<BigInteger>();
-            for (Goods goods : goodsList) {
-                int type = goods.getType();
-                if (type == Constants.GOODS_TYPE_ORDINARY_GOODS) {
-                    goodsIds.add(goods.getId());
-                } else if (type == Constants.GOODS_TYPE_PACKAGE) {
-                    packageIds.add(goods.getId());
-                }
-            }
+        data.put("total", count);
+        data.put("rows", goodsInfos);
 
-            if (CollectionUtils.isNotEmpty(goodsIds)) {
-                List<SearchCondition> searchConditionList = new ArrayList<SearchCondition>();
-                searchConditionList.add(new SearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
-                searchConditionList.add(new SearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId));
-                searchConditionList.add(new SearchCondition("deleted", Constants.SQL_OPERATION_SYMBOL_EQUAL, 0));
-                searchConditionList.add(new SearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds));
+        ApiRest apiRest = ApiRest.builder().data(data).message("查询商品列表成功！").successful(true).build();
+        if (count <= 0) {
+            return apiRest;
+        }
 
-                SearchModel goodsSpecificationSearchModel = new SearchModel(searchConditionList);
-                List<GoodsSpecification> goodsSpecifications = DatabaseHelper.findAll(GoodsSpecification.class, goodsSpecificationSearchModel);
-                Map<BigInteger, List<GoodsSpecification>> goodsSpecificationMap = goodsSpecifications.stream().collect(Collectors.groupingBy(GoodsSpecification::getGoodsId));
+        PagedSearchModel pagedSearchModel = new PagedSearchModel(searchConditions, page, rows);
+        List<Goods> goodsList = DatabaseHelper.findAllPaged(Goods.class, pagedSearchModel);
 
-                SearchModel goodsAttributeGroupSearchModel = new SearchModel(searchConditionList);
-                List<GoodsAttributeGroup> goodsAttributeGroups = DatabaseHelper.findAll(GoodsAttributeGroup.class, goodsAttributeGroupSearchModel);
-                Map<BigInteger, List<GoodsAttributeGroup>> goodsAttributeGroupMap = goodsAttributeGroups.stream().collect(Collectors.groupingBy(GoodsAttributeGroup::getGoodsId));
-
-                SearchModel goodsAttributeSearchModel = new SearchModel(searchConditionList);
-                List<GoodsAttribute> goodsAttributes = DatabaseHelper.findAll(GoodsAttribute.class, goodsAttributeSearchModel);
-                Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = goodsAttributes.stream().collect(Collectors.groupingBy(GoodsAttribute::getGoodsId));
-
-                for (Goods goods : goodsList) {
-                    if (goods.getType() == Constants.GOODS_TYPE_PACKAGE) {
-                        continue;
-                    }
-                    BigInteger goodsId = goods.getId();
-                    Map<String, Object> goodsInfo = new HashMap<String, Object>();
-                    goodsInfo.put("goods", goods);
-                    goodsInfo.put("goodsSpecifications", goodsSpecificationMap.get(goodsId));
-
-                    List<GoodsAttributeGroup> goodsAttributeGroupList = goodsAttributeGroupMap.get(goodsId);
-                    List<Map<String, Object>> goodsAttributeGroupInfos = new ArrayList<Map<String, Object>>();
-                    if (CollectionUtils.isNotEmpty(goodsAttributeGroupList)) {
-                        for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroupList) {
-                            Map<String, Object> goodsAttributeGroupInfo = ApplicationHandler.toMap(goodsAttributeGroup);
-                            goodsAttributeGroupInfo.put("goodsAttributes", goodsAttributeMap.get(goodsAttributeGroup.getId()));
-                            goodsAttributeGroupInfos.add(goodsAttributeGroupInfo);
-                        }
-                    }
-
-                    goodsInfo.put("attributeGroups", goodsAttributeGroupInfos);
-                    goodsInfos.add(goodsInfo);
-                }
-            }
-
-            if (CollectionUtils.isNotEmpty(packageIds)) {
-                List<PackageGroup> packageGroups = DatabaseHelper.findAll(PackageGroup.class,
-                        TupleUtils.buildTuple3(PackageGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId),
-                        TupleUtils.buildTuple3(PackageGroup.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId),
-                        TupleUtils.buildTuple3(PackageGroup.ColumnName.PACKAGE_ID, Constants.SQL_OPERATION_SYMBOL_IN, packageIds));
-                Map<BigInteger, List<PackageGroup>> packageGroupMap = packageGroups.stream().collect(Collectors.groupingBy(PackageGroup::getPackageId));
-
-                List<PackageDetail> packageDetails = goodsMapper.listPackageInfos(tenantId, branchId, packageIds, null);
-                Map<BigInteger, List<PackageDetail>> packageDetailMap = packageDetails.stream().collect(Collectors.groupingBy(PackageDetail::getPackageGroupId));
-
-                for (Goods goods : goodsList) {
-                    if (goods.getType() == Constants.GOODS_TYPE_ORDINARY_GOODS) {
-                        continue;
-                    }
-                    List<Map<String, Object>> groups = new ArrayList<Map<String, Object>>();
-                    List<PackageGroup> packageGroupList = packageGroupMap.get(goods.getId());
-                    for (PackageGroup packageGroup : packageGroupList) {
-                        Map<String, Object> item = new HashMap<String, Object>();
-                        item.put("group", packageGroup);
-                        item.put("details", packageDetailMap.get(packageGroup.getId()));
-                        groups.add(item);
-                    }
-
-                    Map<String, Object> goodsInfo = new HashMap<String, Object>();
-                    goodsInfo.put("goods", goods);
-                    goodsInfo.put("groups", groups);
-
-                    goodsInfos.add(goodsInfo);
-                }
+        List<BigInteger> goodsIds = new ArrayList<BigInteger>();
+        List<BigInteger> packageIds = new ArrayList<BigInteger>();
+        for (Goods goods : goodsList) {
+            int type = goods.getType();
+            if (type == Constants.GOODS_TYPE_ORDINARY_GOODS) {
+                goodsIds.add(goods.getId());
+            } else if (type == Constants.GOODS_TYPE_PACKAGE) {
+                packageIds.add(goods.getId());
             }
         }
 
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("total", count);
-        data.put("rows", goodsInfos);
-        return ApiRest.builder().data(data).message("查询商品列表成功！").successful(true).build();
+        if (CollectionUtils.isNotEmpty(goodsIds)) {
+            List<SearchCondition> searchConditionList = new ArrayList<SearchCondition>();
+            searchConditionList.add(new SearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
+            searchConditionList.add(new SearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId));
+            searchConditionList.add(new SearchCondition("deleted", Constants.SQL_OPERATION_SYMBOL_EQUAL, 0));
+            searchConditionList.add(new SearchCondition("goods_id", Constants.SQL_OPERATION_SYMBOL_IN, goodsIds));
+
+            SearchModel goodsSpecificationSearchModel = new SearchModel(searchConditionList);
+            List<GoodsSpecification> goodsSpecifications = DatabaseHelper.findAll(GoodsSpecification.class, goodsSpecificationSearchModel);
+            Map<BigInteger, List<GoodsSpecification>> goodsSpecificationMap = goodsSpecifications.stream().collect(Collectors.groupingBy(GoodsSpecification::getGoodsId));
+
+            SearchModel goodsAttributeGroupSearchModel = new SearchModel(searchConditionList);
+            List<GoodsAttributeGroup> goodsAttributeGroups = DatabaseHelper.findAll(GoodsAttributeGroup.class, goodsAttributeGroupSearchModel);
+            Map<BigInteger, List<GoodsAttributeGroup>> goodsAttributeGroupMap = goodsAttributeGroups.stream().collect(Collectors.groupingBy(GoodsAttributeGroup::getGoodsId));
+
+            SearchModel goodsAttributeSearchModel = new SearchModel(searchConditionList);
+            List<GoodsAttribute> goodsAttributes = DatabaseHelper.findAll(GoodsAttribute.class, goodsAttributeSearchModel);
+            Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = goodsAttributes.stream().collect(Collectors.groupingBy(GoodsAttribute::getGoodsId));
+
+            for (Goods goods : goodsList) {
+                if (goods.getType() == Constants.GOODS_TYPE_PACKAGE) {
+                    continue;
+                }
+                BigInteger goodsId = goods.getId();
+                Map<String, Object> goodsInfo = new HashMap<String, Object>();
+                goodsInfo.put("goods", goods);
+                goodsInfo.put("goodsSpecifications", goodsSpecificationMap.get(goodsId));
+
+                List<GoodsAttributeGroup> goodsAttributeGroupList = goodsAttributeGroupMap.get(goodsId);
+                List<Map<String, Object>> goodsAttributeGroupInfos = new ArrayList<Map<String, Object>>();
+                if (CollectionUtils.isNotEmpty(goodsAttributeGroupList)) {
+                    for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroupList) {
+                        Map<String, Object> goodsAttributeGroupInfo = new HashMap<String, Object>();
+                        goodsAttributeGroupInfo.put("attributeGroup", goodsAttributeGroup);
+                        goodsAttributeGroupInfo.put("attributes", goodsAttributeMap.get(goodsAttributeGroup.getId()));
+                        goodsAttributeGroupInfos.add(goodsAttributeGroupInfo);
+                    }
+                }
+
+                goodsInfo.put("attributeGroups", goodsAttributeGroupInfos);
+                goodsInfos.add(goodsInfo);
+            }
+        }
+
+        if (CollectionUtils.isNotEmpty(packageIds)) {
+            List<PackageGroup> packageGroups = DatabaseHelper.findAll(PackageGroup.class,
+                    TupleUtils.buildTuple3(PackageGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId),
+                    TupleUtils.buildTuple3(PackageGroup.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId),
+                    TupleUtils.buildTuple3(PackageGroup.ColumnName.PACKAGE_ID, Constants.SQL_OPERATION_SYMBOL_IN, packageIds));
+            Map<BigInteger, List<PackageGroup>> packageGroupMap = packageGroups.stream().collect(Collectors.groupingBy(PackageGroup::getPackageId));
+
+            List<PackageDetail> packageDetails = goodsMapper.listPackageInfos(tenantId, branchId, packageIds, null);
+            Map<BigInteger, List<PackageDetail>> packageDetailMap = packageDetails.stream().collect(Collectors.groupingBy(PackageDetail::getPackageGroupId));
+
+            for (Goods goods : goodsList) {
+                if (goods.getType() == Constants.GOODS_TYPE_ORDINARY_GOODS) {
+                    continue;
+                }
+                List<Map<String, Object>> groups = new ArrayList<Map<String, Object>>();
+                List<PackageGroup> packageGroupList = packageGroupMap.get(goods.getId());
+                for (PackageGroup packageGroup : packageGroupList) {
+                    Map<String, Object> item = new HashMap<String, Object>();
+                    item.put("group", packageGroup);
+                    item.put("details", packageDetailMap.get(packageGroup.getId()));
+                    groups.add(item);
+                }
+
+                Map<String, Object> goodsInfo = new HashMap<String, Object>();
+                goodsInfo.put("goods", goods);
+                goodsInfo.put("groups", groups);
+
+                goodsInfos.add(goodsInfo);
+            }
+        }
+        return apiRest;
     }
 
 
@@ -263,36 +268,41 @@ public class GoodsService extends BasicService {
         List<Goods> goodsInfos = goodsMapper.findAllByCategoryId(tenantId, branchId, categoryId);
 
         List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
-        if (CollectionUtils.isNotEmpty(goodsInfos)) {
-            List<BigInteger> goodsIds = new ArrayList<BigInteger>();
-            List<BigInteger> packageIds = new ArrayList<BigInteger>();
-            for (Goods goods : goodsInfos) {
-                goodsIds.add(goods.getId());
-                int type = goods.getType();
-                if (type == Constants.GOODS_TYPE_PACKAGE) {
-                    packageIds.add(goods.getId());
-                }
+        if (CollectionUtils.isEmpty(goodsInfos)) {
+            return ApiRest.builder().data(data).message("获取菜品信息成功！").successful(true).build();
+        }
+
+        List<BigInteger> goodsIds = new ArrayList<BigInteger>();
+        List<BigInteger> packageIds = new ArrayList<BigInteger>();
+        for (Goods goods : goodsInfos) {
+            BigInteger goodsId = goods.getId();
+            int type = goods.getType();
+
+            if (type == Constants.GOODS_TYPE_ORDINARY_GOODS) {
+                goodsIds.add(goodsId);
+            } else if (type == Constants.GOODS_TYPE_PACKAGE) {
+                packageIds.add(goodsId);
             }
+        }
 
-            Map<BigInteger, List<GoodsSpecification>> goodsSpecificationMap = GoodsUtils.obtainGoodsSpecificationInfos(tenantId, branchId, goodsIds);
-            Map<BigInteger, List<GoodsAttributeGroup>> goodsAttributeGroupMap = GoodsUtils.obtainGoodsAttributeGroupInfos(tenantId, branchId, goodsIds);
-            Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = GoodsUtils.obtainGoodsAttributeInfos(tenantId, branchId, goodsIds);
+        Map<BigInteger, List<GoodsSpecification>> goodsSpecificationMap = GoodsUtils.obtainGoodsSpecificationInfos(tenantId, branchId, goodsIds);
+        Map<BigInteger, List<GoodsAttributeGroup>> goodsAttributeGroupMap = GoodsUtils.obtainGoodsAttributeGroupInfos(tenantId, branchId, goodsIds);
+        Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = GoodsUtils.obtainGoodsAttributeInfos(tenantId, branchId, goodsIds);
 
-            Map<BigInteger, List<PackageDetail>> packageDetailMap = GoodsUtils.obtainPackageGroupDetailInfos(tenantId, branchId, packageIds);
-            Map<BigInteger, List<PackageGroup>> packageGroupMap = GoodsUtils.obtainPackageGroupInfos(tenantId, branchId, packageIds);
+        Map<BigInteger, List<PackageDetail>> packageDetailMap = GoodsUtils.obtainPackageGroupDetailInfos(tenantId, branchId, packageIds);
+        Map<BigInteger, List<PackageGroup>> packageGroupMap = GoodsUtils.obtainPackageGroupInfos(tenantId, branchId, packageIds);
 
-            for (Goods goods : goodsInfos) {
-                BigInteger goodsId = goods.getId();
-                int type = goods.getType();
+        for (Goods goods : goodsInfos) {
+            BigInteger goodsId = goods.getId();
+            int type = goods.getType();
 
-                Map<String, Object> goodsInfo = null;
-                if (type == Constants.GOODS_TYPE_ORDINARY_GOODS) {
-                    goodsInfo = GoodsUtils.buildGoodsInfo(goods, goodsSpecificationMap.get(goodsId), goodsAttributeGroupMap.get(goodsId), goodsAttributeMap.get(goodsId));
-                } else if (type == Constants.GOODS_TYPE_PACKAGE) {
-                    goodsInfo = GoodsUtils.buildPackageInfo(goods, packageGroupMap.get(goodsId), packageDetailMap.get(goodsId));
-                }
-                data.add(goodsInfo);
+            Map<String, Object> goodsInfo = null;
+            if (type == Constants.GOODS_TYPE_ORDINARY_GOODS) {
+                goodsInfo = GoodsUtils.buildGoodsInfo(goods, goodsSpecificationMap.get(goodsId), goodsAttributeGroupMap.get(goodsId), goodsAttributeMap.get(goodsId));
+            } else if (type == Constants.GOODS_TYPE_PACKAGE) {
+                goodsInfo = GoodsUtils.buildPackageInfo(goods, packageGroupMap.get(goodsId), packageDetailMap.get(goodsId));
             }
+            data.add(goodsInfo);
         }
         return ApiRest.builder().data(data).message("获取菜品信息成功！").successful(true).build();
     }
