@@ -34,8 +34,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 
     private static final String[] PERMIT_ALL_ANT_PATTERNS = {
             "/favicon.ico",
-            "/user/obtainBranchInfo",
-            "/demo/**",
+            "/actuator/**",
             "/weiXin/authCallback",
             "/images/**",
             "/libraries/**",

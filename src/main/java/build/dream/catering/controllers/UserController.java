@@ -6,6 +6,7 @@ import build.dream.catering.models.user.ObtainBranchInfoModel;
 import build.dream.catering.models.user.ObtainUserInfoModel;
 import build.dream.catering.services.UserService;
 import build.dream.common.annotations.ApiRestAction;
+import build.dream.common.annotations.PermitAll;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,6 +44,7 @@ public class UserController {
      *
      * @return
      */
+    @PermitAll
     @RequestMapping(value = "/obtainBranchInfo", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = ObtainBranchInfoModel.class, serviceClass = UserService.class, serviceMethodName = "obtainBranchInfo", error = "获取门店信息失败")
