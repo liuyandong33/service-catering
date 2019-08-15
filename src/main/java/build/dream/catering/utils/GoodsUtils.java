@@ -13,7 +13,11 @@ import org.apache.commons.collections.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class GoodsUtils {
@@ -47,7 +51,9 @@ public class GoodsUtils {
         goodsInfo.put(Goods.FieldName.TYPE, goods.getType());
         goodsInfo.put(Goods.FieldName.CATEGORY_ID, goods.getCategoryId());
         goodsInfo.put(Goods.FieldName.CATEGORY_NAME, goods.getCategoryName());
-        goodsInfo.put("specifications", buildGoodsSpecificationInfos(goodsSpecifications));
+        goodsInfo.put(Goods.FieldName.IMAGE_URL, goods.getImageUrl());
+        goodsInfo.put(Goods.FieldName.STOCKED, goods.isStocked());
+        goodsInfo.put("specifications", buildGoodsSpecificationInfos(goods, goodsSpecifications));
 
         if (CollectionUtils.isNotEmpty(goodsAttributeGroups)) {
             goodsInfo.put("attributeGroups", buildGoodsAttributeGroups(goodsAttributeGroups, goodsAttributes));
@@ -57,39 +63,42 @@ public class GoodsUtils {
 
     public static List<Map<String, Object>> buildGoodsAttributeGroups(List<GoodsAttributeGroup> goodsAttributeGroups, List<GoodsAttribute> goodsAttributes) {
         Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = goodsAttributes.stream().collect(Collectors.groupingBy(GoodsAttribute::getGoodsAttributeGroupId));
+        Function<GoodsAttribute, Map<String, Object>> goodsAttributeMapFunction = goodsAttribute -> {
+            Map<String, Object> attribute = new HashMap<String, Object>();
+            attribute.put(GoodsAttribute.FieldName.ID, goodsAttribute.getId());
+            attribute.put(GoodsAttribute.FieldName.NAME, goodsAttribute.getName());
+            attribute.put(GoodsAttribute.FieldName.PRICE, goodsAttribute.getPrice());
+            return attribute;
+        };
 
-        List<Map<String, Object>> attributeGroups = new ArrayList<Map<String, Object>>();
-        for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroups) {
+        Function<GoodsAttributeGroup, Map<String, Object>> goodsAttributeGroupMapFunction = goodsAttributeGroup -> {
             BigInteger goodsAttributeGroupId = goodsAttributeGroup.getId();
+            List<GoodsAttribute> goodsAttributeList = goodsAttributeMap.get(goodsAttributeGroupId);
+
             Map<String, Object> attributeGroup = new HashMap<String, Object>();
             attributeGroup.put(GoodsAttributeGroup.FieldName.ID, goodsAttributeGroup.getId());
             attributeGroup.put(GoodsAttributeGroup.FieldName.NAME, goodsAttributeGroup.getName());
 
-            List<GoodsAttribute> goodsAttributeList = goodsAttributeMap.get(goodsAttributeGroupId);
-            List<Map<String, Object>> attributes = new ArrayList<Map<String, Object>>();
-            for (GoodsAttribute goodsAttribute : goodsAttributeList) {
-                Map<String, Object> attribute = new HashMap<String, Object>();
-                attribute.put(GoodsAttribute.FieldName.ID, goodsAttribute.getId());
-                attribute.put(GoodsAttribute.FieldName.NAME, goodsAttribute.getName());
-                attribute.put(GoodsAttribute.FieldName.PRICE, goodsAttribute.getPrice());
-                attributes.add(attribute);
-            }
+            List<Map<String, Object>> attributes = goodsAttributeList.stream().map(goodsAttributeMapFunction).collect(Collectors.toList());
             attributeGroup.put("attributes", attributes);
-            attributeGroups.add(attributeGroup);
-        }
-        return attributeGroups;
+            return attributeGroup;
+        };
+
+        return goodsAttributeGroups.stream().map(goodsAttributeGroupMapFunction).collect(Collectors.toList());
     }
 
-    public static List<Map<String, Object>> buildGoodsSpecificationInfos(List<GoodsSpecification> goodsSpecifications) {
-        List<Map<String, Object>> goodsSpecificationInfos = new ArrayList<Map<String, Object>>();
-        for (GoodsSpecification goodsSpecification : goodsSpecifications) {
+    public static List<Map<String, Object>> buildGoodsSpecificationInfos(Goods goods, List<GoodsSpecification> goodsSpecifications) {
+        Function<GoodsSpecification, Map<String, Object>> mapFunction = goodsSpecification -> {
             Map<String, Object> goodsSpecificationInfo = new HashMap<String, Object>();
             goodsSpecificationInfo.put(GoodsSpecification.FieldName.ID, goodsSpecification.getId());
             goodsSpecificationInfo.put(GoodsSpecification.FieldName.NAME, goodsSpecification.getName());
             goodsSpecificationInfo.put(GoodsSpecification.FieldName.PRICE, goodsSpecification.getPrice());
-            goodsSpecificationInfos.add(goodsSpecificationInfo);
-        }
-        return goodsSpecificationInfos;
+            if (goods.isStocked()) {
+                goodsSpecificationInfo.put(GoodsSpecification.FieldName.STOCK, goodsSpecification.getStock());
+            }
+            return goodsSpecificationInfo;
+        };
+        return goodsSpecifications.stream().map(mapFunction).collect(Collectors.toList());
     }
 
     public static Map<String, Object> buildPackageInfo(Goods goods, List<PackageGroup> packageGroups, List<PackageDetail> packageDetails) {
@@ -113,20 +122,17 @@ public class GoodsUtils {
     public static List<Map<String, Object>> buildPackageGroupInfos(List<PackageGroup> packageGroups, List<PackageDetail> packageDetails) {
         Map<BigInteger, List<PackageDetail>> packageDetailMap = packageDetails.stream().collect(Collectors.groupingBy(PackageDetail::getPackageGroupId));
 
-        List<Map<String, Object>> groups = new ArrayList<Map<String, Object>>();
-        for (PackageGroup packageGroup : packageGroups) {
+        Function<PackageGroup, Map<String, Object>> mapFunction = packageGroup -> {
             BigInteger packageGroupId = packageGroup.getId();
-
             Map<String, Object> group = new HashMap<String, Object>();
             group.put(PackageGroup.FieldName.ID, packageGroup.getId());
             group.put(PackageGroup.FieldName.GROUP_NAME, packageGroup.getGroupName());
             group.put(PackageGroup.FieldName.GROUP_TYPE, packageGroup.getGroupType());
             group.put(PackageGroup.FieldName.OPTIONAL_QUANTITY, packageGroup.getOptionalQuantity());
             group.put("details", packageDetailMap.get(packageGroupId));
-
-            groups.add(group);
-        }
-        return groups;
+            return group;
+        };
+        return packageGroups.stream().map(mapFunction).collect(Collectors.toList());
     }
 
     public static GoodsAttributeGroup buildGoodsAttributeGroup(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, SaveGoodsModel.AttributeGroupInfo attributeGroupInfo, BigInteger userId) {
