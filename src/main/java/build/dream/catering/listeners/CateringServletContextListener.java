@@ -32,9 +32,9 @@ public class CateringServletContextListener extends BasicServletContextListener 
             e.printStackTrace();
         }
 
-        new SaveFlashSaleOrderTask(flashSaleService).start();
+//        new SaveFlashSaleOrderTask(flashSaleService).start();
 
-        new Thread(() -> MqttUtils.mqttConnect()).start();
+//        new Thread(() -> MqttUtils.mqttConnect()).start();
     }
 
     @Override

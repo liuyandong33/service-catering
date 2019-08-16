@@ -1066,11 +1066,4 @@ public class GoodsService extends BasicService {
 
         return ApiRest.builder().data(data).message("检索商品成功！").successful(true).build();
     }
-
-    @Transactional(readOnly = true)
-    public ApiRest test(BigInteger tenantId, BigInteger branchId) throws IOException {
-        List<Goods> goodsList = DatabaseHelper.callMapperMethod(GoodsMapper.class, "findAllGoodsInfos", TupleUtils.buildTuple2(BigInteger.class, tenantId), TupleUtils.buildTuple2(BigInteger.class, branchId), TupleUtils.buildTuple2(List.class, null));
-        ElasticsearchUtils.indexAll(Constants.ELASTICSEARCH_INDEX_GOODS, goodsList);
-        return ApiRest.builder().message("操作成功！").successful(true).build();
-    }
 }
