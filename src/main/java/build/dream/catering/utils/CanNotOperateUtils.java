@@ -1,6 +1,5 @@
 package build.dream.catering.utils;
 
-import build.dream.catering.constants.Constants;
 import build.dream.catering.exceptions.CanNotDeleteException;
 import build.dream.catering.exceptions.CanNotEditAndDeleteException;
 import build.dream.catering.exceptions.CanNotEditException;
@@ -44,19 +43,25 @@ public class CanNotOperateUtils {
         String reason = canNotOperateReason.getReason();
         if (persistenceOperateType == 1) {
             throw new CanNotDeleteException(reason);
-        } else if (persistenceOperateType == 2) {
+        }
+
+        if (persistenceOperateType == 2) {
             throw new CanNotEditException(reason);
-        } else if (persistenceOperateType == 3) {
+        }
+
+        if (persistenceOperateType == 3) {
             throw new CanNotEditAndDeleteException(String.format(reason, operateType == 1 ? "编辑" : "删除"));
         }
     }
 
     public static void deleteCanNotOperateReason(BigInteger tenantId, BigInteger branchId, String causeTableName, BigInteger causeTableId) {
-        DeleteModel deleteModel = new DeleteModel();
-        deleteModel.addSearchCondition(CanNotOperateReason.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        deleteModel.addSearchCondition(CanNotOperateReason.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
-        deleteModel.addSearchCondition(CanNotOperateReason.ColumnName.CAUSE_TABLE_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, causeTableId);
-        deleteModel.addSearchCondition(CanNotOperateReason.ColumnName.CAUSE_TABLE_NAME, Constants.SQL_OPERATION_SYMBOL_EQUAL, causeTableName);
+        DeleteModel deleteModel = DeleteModel.builder()
+                .autoSetDeletedFalse()
+                .equal(CanNotOperateReason.ColumnName.TENANT_ID, tenantId)
+                .equal(CanNotOperateReason.ColumnName.BRANCH_ID, branchId)
+                .equal(CanNotOperateReason.ColumnName.CAUSE_TABLE_ID, causeTableId)
+                .equal(CanNotOperateReason.ColumnName.TABLE_NAME, causeTableName)
+                .build();
         DatabaseHelper.delete(CanNotOperateReason.class, deleteModel);
     }
 }
