@@ -841,26 +841,28 @@ public class GoodsService extends BasicService {
         BigInteger userId = deleteGoodsModel.obtainUserId();
         BigInteger goodsId = deleteGoodsModel.getGoodsId();
 
-        SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition(Goods.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
-        searchModel.addSearchCondition(Goods.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition(Goods.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        SearchModel searchModel = SearchModel.builder()
+                .autoSetDeletedFalse()
+                .equal(Goods.ColumnName.ID, goodsId)
+                .equal(Goods.ColumnName.TENANT_ID, tenantId)
+                .equal(Goods.ColumnName.BRANCH_ID, branchId)
+                .build();
         Goods goods = DatabaseHelper.find(Goods.class, searchModel);
         ValidateUtils.notNull(goods, "商品不存在！");
 
         validateCanNotOperate(tenantId, branchId, Goods.TABLE_NAME, goodsId, 2);
 
-        Date currentTime = new Date();
+        Date now = new Date();
         goods.setUpdatedUserId(userId);
         goods.setUpdatedRemark("删除商品信息！");
-        goods.setDeletedTime(currentTime);
+        goods.setDeletedTime(now);
         goods.setDeleted(true);
         DatabaseHelper.update(goods);
 
         // 删除该商品的所有规格
         UpdateModel goodsSpecificationUpdateModel = UpdateModel.builder()
                 .autoSetDeletedFalse()
-                .addContentValue(GoodsSpecification.ColumnName.DELETED_TIME, currentTime, 1)
+                .addContentValue(GoodsSpecification.ColumnName.DELETED_TIME, now, 1)
                 .addContentValue(GoodsSpecification.ColumnName.DELETED, 1, 1)
                 .addContentValue(GoodsSpecification.ColumnName.UPDATED_USER_ID, userId, 1)
                 .addContentValue(GoodsSpecification.ColumnName.UPDATED_REMARK, "删除商品规格信息！", 1)
@@ -875,7 +877,7 @@ public class GoodsService extends BasicService {
             // 删除该商品的所有口味组
             UpdateModel goodsAttributeGroupUpdateModel = UpdateModel.builder()
                     .autoSetDeletedFalse()
-                    .addContentValue(GoodsAttributeGroup.ColumnName.DELETED_TIME, currentTime, 1)
+                    .addContentValue(GoodsAttributeGroup.ColumnName.DELETED_TIME, now, 1)
                     .addContentValue(GoodsAttributeGroup.ColumnName.DELETED, 1, 1)
                     .addContentValue(GoodsAttributeGroup.ColumnName.UPDATED_USER_ID, userId, 1)
                     .addContentValue(GoodsAttributeGroup.ColumnName.UPDATED_REMARK, "删除商品口味组信息！", 1)
@@ -888,7 +890,7 @@ public class GoodsService extends BasicService {
             // 删除该商品的所有口味
             UpdateModel goodsAttributeUpdateModel = UpdateModel.builder()
                     .autoSetDeletedFalse()
-                    .addContentValue(GoodsAttribute.ColumnName.DELETED_TIME, currentTime, 1)
+                    .addContentValue(GoodsAttribute.ColumnName.DELETED_TIME, now, 1)
                     .addContentValue(GoodsAttribute.ColumnName.DELETED, 1, 1)
                     .addContentValue(GoodsAttribute.ColumnName.UPDATED_USER_ID, userId, 1)
                     .addContentValue(GoodsAttribute.ColumnName.UPDATED_REMARK, "删除商品口味组信息！", 1)
@@ -900,7 +902,7 @@ public class GoodsService extends BasicService {
         } else if (type == Constants.GOODS_TYPE_PACKAGE) {
             UpdateModel packageGroupUpdateModel = UpdateModel.builder()
                     .autoSetDeletedFalse()
-                    .addContentValue(PackageGroup.ColumnName.DELETED_TIME, currentTime, 1)
+                    .addContentValue(PackageGroup.ColumnName.DELETED_TIME, now, 1)
                     .addContentValue(PackageGroup.ColumnName.DELETED, 1, 1)
                     .addContentValue(PackageGroup.ColumnName.UPDATED_USER_ID, userId, 1)
                     .addContentValue(PackageGroup.ColumnName.UPDATED_REMARK, "删除套餐组信息！", 1)
@@ -912,7 +914,7 @@ public class GoodsService extends BasicService {
 
             UpdateModel packageGroupDetailUpdateModel = UpdateModel.builder()
                     .autoSetDeletedFalse()
-                    .addContentValue(PackageGroupDetail.ColumnName.DELETED_TIME, currentTime, 1)
+                    .addContentValue(PackageGroupDetail.ColumnName.DELETED_TIME, now, 1)
                     .addContentValue(PackageGroupDetail.ColumnName.DELETED, 1, 1)
                     .addContentValue(PackageGroupDetail.ColumnName.UPDATED_USER_ID, userId, 1)
                     .addContentValue(PackageGroupDetail.ColumnName.UPDATED_REMARK, "删除套餐明细信息！", 1)
