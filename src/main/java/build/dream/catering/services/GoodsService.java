@@ -814,9 +814,11 @@ public class GoodsService extends BasicService {
         BigInteger tenantId = listCategoriesModel.obtainTenantId();
         BigInteger branchId = listCategoriesModel.obtainBranchId();
 
-        SearchModel searchModel = new SearchModel(true);
-        searchModel.addSearchCondition(GoodsCategory.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
-        searchModel.addSearchCondition(GoodsCategory.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
+        SearchModel searchModel = SearchModel.builder()
+                .autoSetDeletedFalse()
+                .equal(GoodsCategory.ColumnName.TENANT_ID, tenantId)
+                .equal(GoodsCategory.ColumnName.BRANCH_ID, branchId)
+                .build();
         List<GoodsCategory> goodsCategories = DatabaseHelper.findAll(GoodsCategory.class, searchModel);
 
         List<ZTreeNode> zTreeNodes = new ArrayList<ZTreeNode>();
