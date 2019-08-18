@@ -1,21 +1,18 @@
 package build.dream.catering.beans;
 
-import com.google.gson.annotations.SerializedName;
-
 public class ZTreeNode {
     private String id;
     private String name;
-    @SerializedName(value = "pId", alternate = "parentId")
-    private String parentId;
+    private String pId;
 
     public ZTreeNode() {
 
     }
 
-    public ZTreeNode(String id, String name, String parentId) {
+    public ZTreeNode(String id, String name, String pId) {
         this.id = id;
         this.name = name;
-        this.parentId = parentId;
+        this.pId = pId;
     }
 
     public String getId() {
@@ -34,11 +31,11 @@ public class ZTreeNode {
         this.name = name;
     }
 
-    public String getParentId() {
-        return parentId;
+    public String getPId() {
+        return pId;
     }
 
-    public void setParentId(String parentId) {
-        this.parentId = parentId;
+    public void setPId(String pId) {
+        this.pId = pId;
     }
 }
