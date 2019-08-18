@@ -5,6 +5,7 @@ import build.dream.catering.beans.ZTreeNode;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.GoodsMapper;
 import build.dream.catering.models.goods.*;
+import build.dream.catering.utils.CanNotOperateUtils;
 import build.dream.catering.utils.GoodsUtils;
 import build.dream.catering.utils.TenantConfigUtils;
 import build.dream.common.api.ApiRest;
@@ -39,7 +40,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class GoodsService extends BasicService {
+public class GoodsService {
     @Autowired
     private GoodsMapper goodsMapper;
 
@@ -341,7 +342,7 @@ public class GoodsService extends BasicService {
             ValidateUtils.notNull(goods, "商品不存在！");
 
             // 验证商品是否可以编辑
-            validateCanNotOperate(tenantId, branchId, Goods.TABLE_NAME, id, 2);
+            CanNotOperateUtils.validateCanNotOperate(tenantId, branchId, Goods.TABLE_NAME, id, 2);
 
             goods.setName(name);
             goods.setCategoryId(categoryId);
@@ -850,7 +851,7 @@ public class GoodsService extends BasicService {
         Goods goods = DatabaseHelper.find(Goods.class, searchModel);
         ValidateUtils.notNull(goods, "商品不存在！");
 
-        validateCanNotOperate(tenantId, branchId, Goods.TABLE_NAME, goodsId, 2);
+        CanNotOperateUtils.validateCanNotOperate(tenantId, branchId, Goods.TABLE_NAME, goodsId, 2);
 
         Date now = new Date();
         goods.setUpdatedUserId(userId);

@@ -4,7 +4,7 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.mappers.ActivityMapper;
 import build.dream.catering.models.activity.*;
 import build.dream.catering.utils.ActivityUtils;
-import build.dream.catering.utils.CanNotOperateReasonUtils;
+import build.dream.catering.utils.CanNotOperateUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.domains.catering.*;
 import build.dream.common.utils.DatabaseHelper;
@@ -129,8 +129,8 @@ public class ActivityService {
             buyGiveActivities.add(buyGiveActivity);
 
             String reason = "该商品已参与促销活动【" + activity.getName() + "】，活动期间不可%s！如需更改，请先取消活动！";
-            canNotOperateReasons.add(CanNotOperateReasonUtils.constructCanNotOperateReason(tenantId, tenantCode, BigInteger.ZERO, buyGoods.getId(), "goods", activityId, "activity", 3, reason));
-            canNotOperateReasons.add(CanNotOperateReasonUtils.constructCanNotOperateReason(tenantId, tenantCode, BigInteger.ZERO, giveGoods.getId(), "goods", activityId, "activity", 3, reason));
+            canNotOperateReasons.add(CanNotOperateUtils.buildCanNotOperateReason(tenantId, tenantCode, BigInteger.ZERO, buyGoods.getId(), "goods", activityId, "activity", 3, reason));
+            canNotOperateReasons.add(CanNotOperateUtils.buildCanNotOperateReason(tenantId, tenantCode, BigInteger.ZERO, giveGoods.getId(), "goods", activityId, "activity", 3, reason));
         }
         DatabaseHelper.insertAll(buyGiveActivities);
         DatabaseHelper.insertAll(canNotOperateReasons);
@@ -310,11 +310,11 @@ public class ActivityService {
             specialGoodsActivities.add(specialGoodsActivity);
 
             String reason = "该商品已参与促销活动【" + activity.getName() + "】，活动期间不可%s！如需更改，请先取消活动！";
-            CanNotOperateReason canNotOperateReason = CanNotOperateReasonUtils.constructCanNotOperateReason(tenantId, tenantCode, BigInteger.ZERO, goods.getId(), "goods", activityId, "activity", 3, reason);
+            CanNotOperateReason canNotOperateReason = CanNotOperateUtils.buildCanNotOperateReason(tenantId, tenantCode, BigInteger.ZERO, goods.getId(), "goods", activityId, "activity", 3, reason);
             canNotOperateReasons.add(canNotOperateReason);
 
-            String usedOtherActivityReason = "商品【%s】已参与促销活动【" + activity.getName() + "】，不可参与其他促销活动！";
-            CanNotOperateReason canNotUsedOtherActivityReason = CanNotOperateReasonUtils.constructCanNotOperateReason(tenantId, tenantCode, BigInteger.ZERO, goods.getId(), "goods", activityId, "activity", 4, usedOtherActivityReason);
+            String usedOtherActivityReason = "该商品已参与促销活动【" + activity.getName() + "】，不可参与其他促销活动！";
+            CanNotOperateReason canNotUsedOtherActivityReason = CanNotOperateUtils.buildCanNotOperateReason(tenantId, tenantCode, BigInteger.ZERO, goods.getId(), "goods", activityId, "activity", 4, usedOtherActivityReason);
             canNotOperateReasons.add(canNotUsedOtherActivityReason);
         }
 
