@@ -13,16 +13,17 @@ import java.util.Objects;
 
 public class CanNotOperateUtils {
     public static CanNotOperateReason buildCanNotOperateReason(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger tableId, String tableName, BigInteger causeTableId, String causeTableName, Integer operateType, String reason) {
-        CanNotOperateReason canNotOperateReason = new CanNotOperateReason();
-        canNotOperateReason.setTenantId(tenantId);
-        canNotOperateReason.setTenantCode(tenantCode);
-        canNotOperateReason.setBranchId(branchId);
-        canNotOperateReason.setTableId(tableId);
-        canNotOperateReason.setTableName(tableName);
-        canNotOperateReason.setCauseTableId(causeTableId);
-        canNotOperateReason.setCauseTableName(causeTableName);
-        canNotOperateReason.setOperateType(operateType);
-        canNotOperateReason.setReason(reason);
+        CanNotOperateReason canNotOperateReason = CanNotOperateReason.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .tableId(tableId)
+                .tableName(tableName)
+                .causeTableId(causeTableId)
+                .causeTableName(causeTableName)
+                .operateType(operateType)
+                .reason(reason)
+                .build();
         return canNotOperateReason;
     }
 
