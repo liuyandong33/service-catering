@@ -50,6 +50,12 @@ public class UserService {
         return ApiRest.builder().data(data).message("查询员工列表成功！").successful(true).build();
     }
 
+    /**
+     * 获取用户信息
+     *
+     * @param obtainUserInfoModel
+     * @return
+     */
     @Transactional(readOnly = true)
     public ApiRest obtainUserInfo(ObtainUserInfoModel obtainUserInfoModel) {
         BigInteger userId = obtainUserInfoModel.obtainUserId();
