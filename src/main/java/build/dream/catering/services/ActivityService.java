@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
 import java.text.ParseException;
@@ -141,46 +142,64 @@ public class ActivityService {
     public ApiRest saveFullReductionActivity(SaveFullReductionActivityModel saveFullReductionActivityModel) throws ParseException {
         BigInteger tenantId = saveFullReductionActivityModel.obtainTenantId();
         String tenantCode = saveFullReductionActivityModel.obtainTenantCode();
+        BigInteger userId = saveFullReductionActivityModel.obtainUserId();
         List<BigInteger> branchIds = saveFullReductionActivityModel.getBranchIds();
-        BigInteger userId = saveFullReductionActivityModel.getUserId();
+
+        String name = saveFullReductionActivityModel.getName();
+        String startDate = saveFullReductionActivityModel.getStartDate();
+        String startTime = saveFullReductionActivityModel.getStartTime();
+        String endDate = saveFullReductionActivityModel.getEndDate();
+        String endTime = saveFullReductionActivityModel.getEndTime();
+        Integer weekSign = saveFullReductionActivityModel.getWeekSign();
+        BigDecimal totalAmount = saveFullReductionActivityModel.getTotalAmount();
+        Integer discountType = saveFullReductionActivityModel.getDiscountType();
+        BigDecimal discountRate = saveFullReductionActivityModel.getDiscountRate();
+        BigDecimal discountAmount = saveFullReductionActivityModel.getDiscountAmount();
+
+
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date startDate = simpleDateFormat.parse(saveFullReductionActivityModel.getStartTime());
-        Date endDate = simpleDateFormat.parse(saveFullReductionActivityModel.getEndTime());
-        Time startTime = Time.valueOf(saveFullReductionActivityModel.getStartTime());
-        Time endTime = Time.valueOf(saveFullReductionActivityModel.getEndTime());
+        Date _startDate = simpleDateFormat.parse(startDate);
+        Date _endDate = simpleDateFormat.parse(endDate);
+        Time _startTime = Time.valueOf(startTime);
+        Time _endTime = Time.valueOf(endTime);
 
-        ValidateUtils.isTrue(endDate.after(startDate), "活动结束日期必须大于开始日期！");
-        ValidateUtils.isTrue(endTime.after(startTime), "活动结束时间必须大于开始时间！");
+        ValidateUtils.isTrue(_endDate.after(_startDate), "活动结束日期必须大于开始日期！");
+        ValidateUtils.isTrue(_endTime.after(_startTime), "活动结束时间必须大于开始时间！");
 
-        int weekSign = saveFullReductionActivityModel.getWeekSign();
+//        throw new RuntimeException("活动日期与促销活动【" + "" + "】在时间上冲突！");
 
-        String sql = "SELECT * " +
-                "FROM activity " +
-                "WHERE tenant_id = #{tenantId} " +
-                "AND deleted = 0 " +
-                "AND type = 2 " +
-                "AND status IN (1, 2) " +
-                "AND ((start_time <= #{startTime} AND end_time >= #{endTime}) OR (start_time >= #{startTime} AND start_time <= #{endTime}) OR (end_time >= #{startTime} AND end_time <= #{endTime})) " +
-                "LIMIT 0, 1";
-        Map<String, Object> findActivityParameters = new HashMap<String, Object>();
-        findActivityParameters.put("sql", sql);
-        findActivityParameters.put("tenantId", tenantId);
-        findActivityParameters.put("startTime", startTime);
-        findActivityParameters.put("endTime", endTime);
-        Map<String, Object> activityMap = DatabaseHelper.executeUniqueResultQuery(findActivityParameters);
-        if (MapUtils.isNotEmpty(activityMap)) {
-            throw new RuntimeException("活动日期与促销活动【" + activityMap.get("name") + "】在时间上冲突！");
-        }
-
-
-        Activity activity = ActivityUtils.constructActivity(tenantId, tenantCode, saveFullReductionActivityModel.getName(), 2, startDate, startTime, endDate, endTime, weekSign, userId, "保存活动信息！");
+        Activity activity = Activity.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .name(name)
+                .type(2)
+                .startDate(_startDate)
+                .startTime(_startTime)
+                .endDate(_endDate)
+                .endTime(_endTime)
+                .weekSign(weekSign)
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .updatedRemark("保存活动信息！")
+                .build();
         DatabaseHelper.insert(activity);
 
         BigInteger activityId = activity.getId();
 
         activityMapper.insertAllActivityBranchR(activityId, tenantId, branchIds);
 
-        FullReductionActivity fullReductionActivity = ActivityUtils.constructFullReductionActivity(tenantId, tenantCode, activityId, saveFullReductionActivityModel.getTotalAmount(), saveFullReductionActivityModel.getDiscountType(), saveFullReductionActivityModel.getDiscountRate(), saveFullReductionActivityModel.getDiscountAmount(), userId, "保存满减活动！");
+        FullReductionActivity fullReductionActivity = FullReductionActivity.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .activityId(activityId)
+                .totalAmount(totalAmount)
+                .discountType(discountType)
+                .discountRate(discountRate)
+                .discountAmount(discountAmount)
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .updatedRemark("保存满减活动！")
+                .build();
         DatabaseHelper.insert(fullReductionActivity);
 
         return ApiRest.builder().message("保存满减活动成功！").successful(true).build();

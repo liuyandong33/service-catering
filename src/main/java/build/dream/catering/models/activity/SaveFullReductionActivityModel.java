@@ -16,9 +16,6 @@ public class SaveFullReductionActivityModel extends CateringBasicModel {
     private List<BigInteger> branchIds;
 
     @NotNull
-    private BigInteger userId;
-
-    @NotNull
     @Length(max = 20)
     private String name;
 
@@ -55,14 +52,6 @@ public class SaveFullReductionActivityModel extends CateringBasicModel {
 
     public void setBranchIds(List<BigInteger> branchIds) {
         this.branchIds = branchIds;
-    }
-
-    public BigInteger getUserId() {
-        return userId;
-    }
-
-    public void setUserId(BigInteger userId) {
-        this.userId = userId;
     }
 
     public BigDecimal getTotalAmount() {
