@@ -125,4 +125,16 @@ public class GoodsController {
     public String searchGoods() {
         return null;
     }
+
+    /**
+     * 检索商品
+     *
+     * @return
+     */
+    @RequestMapping(value = "/indexAll", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiRestAction(modelClass = IndexAllModel.class, serviceClass = GoodsService.class, serviceMethodName = "indexAll", error = "保存失败")
+    public String indexAll() {
+        return null;
+    }
 }

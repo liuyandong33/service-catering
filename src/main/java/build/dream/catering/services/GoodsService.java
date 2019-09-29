@@ -3,8 +3,10 @@ package build.dream.catering.services;
 import build.dream.catering.beans.PackageDetail;
 import build.dream.catering.beans.ZTreeNode;
 import build.dream.catering.constants.Constants;
+import build.dream.catering.domains.ElasticSearchGoods;
 import build.dream.catering.mappers.GoodsMapper;
 import build.dream.catering.models.goods.*;
+import build.dream.catering.repositories.ElasticSearchGoodsRepository;
 import build.dream.catering.utils.CanNotOperateUtils;
 import build.dream.catering.utils.GoodsUtils;
 import build.dream.catering.utils.TenantConfigUtils;
@@ -14,26 +16,20 @@ import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.text.Text;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
-import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -43,6 +39,8 @@ import java.util.stream.Collectors;
 public class GoodsService {
     @Autowired
     private GoodsMapper goodsMapper;
+    @Autowired
+    private ElasticSearchGoodsRepository elasticSearchGoodsRepository;
 
     /**
      * 查询商品数量
@@ -997,7 +995,9 @@ public class GoodsService {
 
         DatabaseHelper.insertAll(goodsSpecifications);
 
-//        ElasticsearchUtils.indexAll(Constants.ELASTICSEARCH_INDEX_GOODS, goodsList);
+        // 将数据保存到 ElasticSearch 中一份
+        List<ElasticSearchGoods> elasticSearchGoods = goodsList.stream().map(goods -> ElasticSearchGoods.build(goods)).collect(Collectors.toList());
+        elasticSearchGoodsRepository.saveAll(elasticSearchGoods);
         return ApiRest.builder().message("导入商品信息成功！").successful(true).build();
     }
 
@@ -1007,7 +1007,7 @@ public class GoodsService {
      * @param searchGoodsModel
      * @return
      */
-    public ApiRest searchGoods(SearchGoodsModel searchGoodsModel) throws IOException {
+    public ApiRest searchGoods(SearchGoodsModel searchGoodsModel) {
         BigInteger tenantId = searchGoodsModel.obtainTenantId();
         BigInteger branchId = searchGoodsModel.obtainBranchId();
         int page = searchGoodsModel.getPage();
@@ -1017,58 +1017,51 @@ public class GoodsService {
         boolean highlight = searchGoodsModel.getHighlight();
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        boolQueryBuilder.must(QueryBuilders.termQuery(Goods.FieldName.TENANT_ID, tenantId.longValue()));
-        boolQueryBuilder.must(QueryBuilders.termQuery(Goods.FieldName.BRANCH_ID, branchId.longValue()));
+        boolQueryBuilder.must(QueryBuilders.termQuery(ElasticSearchGoods.FieldName.TENANT_ID, tenantId.longValue()));
+        boolQueryBuilder.must(QueryBuilders.termQuery(ElasticSearchGoods.FieldName.BRANCH_ID, branchId.longValue()));
 
         if (categoryId != null) {
-            boolQueryBuilder.must(QueryBuilders.termQuery(Goods.FieldName.CATEGORY_ID, categoryId.longValue()));
+            boolQueryBuilder.must(QueryBuilders.termQuery(ElasticSearchGoods.FieldName.CATEGORY_ID, categoryId.longValue()));
         }
 
         if (StringUtils.isNotBlank(searchString)) {
-            boolQueryBuilder.must(QueryBuilders.matchQuery(Goods.FieldName.NAME, searchString));
+            boolQueryBuilder.must(QueryBuilders.matchQuery(ElasticSearchGoods.FieldName.NAME, searchString));
         }
 
-        SortBuilder sortBuilder = SortBuilders.fieldSort(Goods.FieldName.UPDATED_TIME).order(SortOrder.DESC);
-
-        RestHighLevelClient restHighLevelClient = ElasticsearchUtils.obtainRestHighLevelClient();
-
-        SearchRequest searchRequest = new SearchRequest();
-        searchRequest.indices(Constants.ELASTICSEARCH_INDEX_GOODS);
-        searchRequest.searchType(SearchType.QUERY_THEN_FETCH);
-
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+                .withQuery(boolQueryBuilder);
         if (highlight) {
-            HighlightBuilder highlightBuilder = new HighlightBuilder();
-            highlightBuilder.preTags(Constants.ELASTICSEARCH_HIGHLIGHT_PRE_TAG);
-            highlightBuilder.postTags(Constants.ELASTICSEARCH_HIGHLIGHT_POST_TAG);
-            highlightBuilder.field(Goods.FieldName.NAME);
-
-//            searchRequestBuilder.highlighter(highlightBuilder);
+            nativeSearchQueryBuilder.withHighlightFields(new HighlightBuilder.Field(ElasticSearchGoods.FieldName.NAME).preTags(Constants.ELASTICSEARCH_HIGHLIGHT_PRE_TAG).postTags(Constants.ELASTICSEARCH_HIGHLIGHT_POST_TAG));
         }
 
-        SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-        SearchHits searchHits = searchResponse.getHits();
+        Pageable pageable = PageRequest.of(page - 1, rows);
+        nativeSearchQueryBuilder.withPageable(pageable);
+        nativeSearchQueryBuilder.withSort(SortBuilders.fieldSort(ElasticSearchGoods.FieldName.UPDATED_TIME).order(SortOrder.DESC));
 
-        List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
-        for (SearchHit searchHit : searchHits) {
-            Map<String, Object> result = searchHit.getSourceAsMap();
-
-            if (highlight) {
-                Map<String, HighlightField> highlightFields = searchHit.getHighlightFields();
-                HighlightField nameHighlightField = highlightFields.get(Goods.FieldName.NAME);
-
-                if (nameHighlightField != null) {
-                    Text[] nameFragments = nameHighlightField.getFragments();
-                    result.put(Goods.FieldName.NAME, StringUtils.join(nameFragments, ""));
-                }
-            }
-
-            results.add(result);
-        }
+        SearchQuery searchQuery = nativeSearchQueryBuilder.build();
+        Page<ElasticSearchGoods> elasticSearchGoodsPage = elasticSearchGoodsRepository.search(searchQuery);
 
         Map<String, Object> data = new HashMap<String, Object>();
-        data.put("total", searchHits.getTotalHits());
-        data.put("rows", results);
+        data.put("total", elasticSearchGoodsPage.getTotalElements());
+        data.put("rows", elasticSearchGoodsPage.getContent());
 
         return ApiRest.builder().data(data).message("检索商品成功！").successful(true).build();
+    }
+
+    /**
+     * 保存所有
+     *
+     * @param indexAllModel
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public ApiRest indexAll(IndexAllModel indexAllModel) {
+        BigInteger tenantId = indexAllModel.obtainTenantId();
+        BigInteger branchId = indexAllModel.obtainBranchId();
+
+        List<Goods> goodsList = goodsMapper.findAll(tenantId, branchId);
+        List<ElasticSearchGoods> elasticSearchGoodsList = goodsList.stream().map(goods -> ElasticSearchGoods.build(goods)).collect(Collectors.toList());
+        elasticSearchGoodsRepository.saveAll(elasticSearchGoodsList);
+        return ApiRest.builder().message("保存成功！").successful(true).build();
     }
 }

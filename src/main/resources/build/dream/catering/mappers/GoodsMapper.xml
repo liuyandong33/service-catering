@@ -21,7 +21,8 @@
         </if>
         AND package_group.deleted = 0
         INNER JOIN goods ON goods.id = package_group_detail.goods_id AND goods.deleted = 0
-        INNER JOIN goods_specification ON goods_specification.id = package_group_detail.goods_specification_id AND goods_specification.deleted = 0
+        INNER JOIN goods_specification ON goods_specification.id = package_group_detail.goods_specification_id AND
+        goods_specification.deleted = 0
         WHERE package_group_detail.package_id IN
         <foreach collection="packageIds" index="index" item="packageId" open="(" separator="," close=")">
             #{packageId}
@@ -64,5 +65,16 @@
 
     <select id="addGoodsStock" resultType="java.math.BigDecimal">
         CALL procedure_execute_sql_2('UPDATE goods_specification SET stock = stock + ${quantity} WHERE goods_id = ${goodsId} AND id = ${goodsSpecificationId} AND deleted = 0', 'SELECT stock FROM goods_specification WHERE goods_id = ${goodsId} AND id = ${goodsSpecificationId} AND deleted = 0')
+    </select>
+
+    <select id="findAll" resultType="build.dream.common.domains.catering.Goods">
+        SELECT
+        goods.*,
+        goods_category.name AS category_name
+        FROM goods
+        INNER JOIN goods_category ON goods_category.id = goods.category_id AND goods_category.deleted = 0
+        WHERE goods.deleted = 0
+        AND goods.tenant_id = #{tenantId}
+        AND goods.branch_id = #{branchId}
     </select>
 </mapper>

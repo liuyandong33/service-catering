@@ -28,4 +28,6 @@ public interface GoodsMapper {
     BigDecimal addGoodsStock(@Param("goodsId") BigInteger goodsId,
                              @Param("goodsSpecificationId") BigInteger goodsSpecificationId,
                              @Param("quantity") BigDecimal quantity);
+
+    List<Goods> findAll(@Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId);
 }
