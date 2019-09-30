@@ -25,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,8 @@ public class GoodsService {
     private GoodsMapper goodsMapper;
     @Autowired
     private ElasticSearchGoodsRepository elasticSearchGoodsRepository;
+    @Autowired
+    private ElasticsearchTemplate elasticsearchTemplate;
 
     /**
      * 查询商品数量
@@ -1041,9 +1045,11 @@ public class GoodsService {
         SearchQuery searchQuery = nativeSearchQueryBuilder.build();
         Page<ElasticSearchGoods> elasticSearchGoodsPage = elasticSearchGoodsRepository.search(searchQuery);
 
+        AggregatedPage<ElasticSearchGoods> aggregatedPage = elasticsearchTemplate.queryForPage(searchQuery, ElasticSearchGoods.class, ElasticSearchGoods.SEARCH_RESULT_MAPPER);
+
         Map<String, Object> data = new HashMap<String, Object>();
-        data.put("total", elasticSearchGoodsPage.getTotalElements());
-        data.put("rows", elasticSearchGoodsPage.getContent());
+        data.put("total", aggregatedPage.getTotalElements());
+        data.put("rows", aggregatedPage.getContent());
 
         return ApiRest.builder().data(data).message("检索商品成功！").successful(true).build();
     }

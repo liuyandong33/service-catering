@@ -3,14 +3,27 @@ package build.dream.catering.domains;
 import build.dream.catering.constants.Constants;
 import build.dream.common.domains.catering.Goods;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.core.SearchResultMapper;
+import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
+import org.springframework.data.elasticsearch.core.aggregation.impl.AggregatedPageImpl;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Document(indexName = "goods", type = "goods")
 public class ElasticSearchGoods implements Serializable, Cloneable {
@@ -266,4 +279,39 @@ public class ElasticSearchGoods implements Serializable, Cloneable {
         elasticSearchGoods.setStocked(goods.isStocked());
         return elasticSearchGoods;
     }
+
+    public static SearchResultMapper SEARCH_RESULT_MAPPER = new SearchResultMapper() {
+        @Override
+        public <T> AggregatedPage<T> mapResults(SearchResponse response, Class<T> clazz, Pageable pageable) {
+            List<ElasticSearchGoods> elasticSearchGoodsList = new ArrayList<ElasticSearchGoods>();
+            SearchHits searchHits = response.getHits();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DEFAULT_DATE_PATTERN);
+            for (SearchHit searchHit : searchHits) {
+                Map<String, Object> source = searchHit.getSource();
+                ElasticSearchGoods elasticSearchGoods = new ElasticSearchGoods();
+                elasticSearchGoods.setId(Long.parseLong(searchHit.getId()));
+                elasticSearchGoods.setCreatedTime(null);
+                elasticSearchGoods.setCreatedUserId(MapUtils.getLongValue(source, "createdUserId"));
+                elasticSearchGoods.setUpdatedTime(null);
+                elasticSearchGoods.setUpdatedUserId(MapUtils.getLongValue(source, "updatedUserId"));
+                elasticSearchGoods.setUpdatedRemark(MapUtils.getString(source, "updatedRemark"));
+                elasticSearchGoods.setDeletedTime(null);
+                elasticSearchGoods.setDeleted(MapUtils.getBooleanValue(source, "deleted"));
+                elasticSearchGoods.setTenantId(MapUtils.getLongValue(source, "tenantId"));
+                elasticSearchGoods.setTenantCode(MapUtils.getString(source, "tenantCode"));
+                elasticSearchGoods.setBranchId(MapUtils.getLongValue(source, "branchId"));
+                elasticSearchGoods.setName(MapUtils.getString(source, "name"));
+                elasticSearchGoods.setType(MapUtils.getIntValue(source, "type"));
+                elasticSearchGoods.setCategoryId(MapUtils.getLongValue(source, "categoryId"));
+                elasticSearchGoods.setCategoryName(MapUtils.getString(source, "categoryName"));
+                elasticSearchGoods.setImageUrl(MapUtils.getString(source, "imageUrl"));
+                elasticSearchGoods.setStocked(MapUtils.getBooleanValue(source, "stocked"));
+                elasticSearchGoodsList.add(elasticSearchGoods);
+            }
+            if (CollectionUtils.isEmpty(elasticSearchGoodsList)) {
+                return null;
+            }
+            return new AggregatedPageImpl<T>((List<T>) elasticSearchGoodsList);
+        }
+    };
 }
