@@ -8,6 +8,7 @@ import build.dream.catering.mappers.GoodsMapper;
 import build.dream.catering.models.goods.*;
 import build.dream.catering.repositories.ElasticSearchGoodsRepository;
 import build.dream.catering.utils.CanNotOperateUtils;
+import build.dream.catering.utils.ElasticSearchUtils;
 import build.dream.catering.utils.GoodsUtils;
 import build.dream.catering.utils.TenantConfigUtils;
 import build.dream.common.api.ApiRest;
@@ -1045,7 +1046,7 @@ public class GoodsService {
         SearchQuery searchQuery = nativeSearchQueryBuilder.build();
         Page<ElasticSearchGoods> elasticSearchGoodsPage = elasticSearchGoodsRepository.search(searchQuery);
 
-        AggregatedPage<ElasticSearchGoods> aggregatedPage = elasticsearchTemplate.queryForPage(searchQuery, ElasticSearchGoods.class, ElasticSearchGoods.SEARCH_RESULT_MAPPER);
+        AggregatedPage<ElasticSearchGoods> aggregatedPage = elasticsearchTemplate.queryForPage(searchQuery, ElasticSearchGoods.class, ElasticSearchUtils.SEARCH_RESULT_MAPPER);
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("total", aggregatedPage.getTotalElements());
