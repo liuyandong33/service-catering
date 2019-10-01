@@ -1020,6 +1020,8 @@ public class GoodsService {
         BigInteger categoryId = searchGoodsModel.getCategoryId();
         String searchString = searchGoodsModel.getSearchString();
         boolean highlight = searchGoodsModel.getHighlight();
+        String preTag = searchGoodsModel.getPreTag();
+        String postTag = searchGoodsModel.getPostTag();
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must(QueryBuilders.termQuery(ElasticSearchGoods.FieldName.TENANT_ID, tenantId.longValue()));
@@ -1036,7 +1038,7 @@ public class GoodsService {
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
                 .withQuery(boolQueryBuilder);
         if (highlight) {
-            nativeSearchQueryBuilder.withHighlightFields(new HighlightBuilder.Field(ElasticSearchGoods.FieldName.NAME).preTags(Constants.ELASTICSEARCH_HIGHLIGHT_PRE_TAG).postTags(Constants.ELASTICSEARCH_HIGHLIGHT_POST_TAG));
+            nativeSearchQueryBuilder.withHighlightFields(new HighlightBuilder.Field(ElasticSearchGoods.FieldName.NAME).preTags(preTag).postTags(postTag));
         }
 
         Pageable pageable = PageRequest.of(page - 1, rows);

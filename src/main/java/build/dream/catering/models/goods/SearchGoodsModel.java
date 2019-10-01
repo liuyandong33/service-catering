@@ -1,6 +1,8 @@
 package build.dream.catering.models.goods;
 
 import build.dream.common.models.CateringBasicModel;
+import build.dream.common.utils.ApplicationHandler;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Max;
@@ -27,6 +29,10 @@ public class SearchGoodsModel extends CateringBasicModel {
 
     @NotNull
     private Boolean highlight;
+
+    private String preTag;
+
+    private String postTag;
 
     public Integer getPage() {
         return page;
@@ -74,5 +80,38 @@ public class SearchGoodsModel extends CateringBasicModel {
 
     public void setHighlight(Boolean highlight) {
         this.highlight = highlight;
+    }
+
+    public String getPreTag() {
+        return preTag;
+    }
+
+    public void setPreTag(String preTag) {
+        this.preTag = preTag;
+    }
+
+    public String getPostTag() {
+        return postTag;
+    }
+
+    public void setPostTag(String postTag) {
+        this.postTag = postTag;
+    }
+
+    @Override
+    public boolean validate() {
+        if (highlight) {
+            return super.validate() && StringUtils.isNotBlank(preTag) && StringUtils.isNotBlank(postTag);
+        }
+        return super.validate();
+    }
+
+    @Override
+    public void validateAndThrow() {
+        super.validateAndThrow();
+        if (highlight) {
+            ApplicationHandler.notBlank(preTag, "preTag");
+            ApplicationHandler.notBlank(postTag, "postTag");
+        }
     }
 }
