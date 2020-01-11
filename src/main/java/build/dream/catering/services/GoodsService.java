@@ -576,7 +576,7 @@ public class GoodsService {
                 DatabaseHelper.insertAll(insertGoodsAttributes);
             }
         }
-//        ElasticsearchUtils.index(Constants.ELASTICSEARCH_INDEX_GOODS, goods);
+        elasticSearchGoodsRepository.save(ElasticSearchGoods.build(goods));
         return ApiRest.builder().data(goods).message("保存商品信息成功！").successful(true).build();
     }
 
@@ -929,7 +929,7 @@ public class GoodsService {
             DatabaseHelper.universalUpdate(packageGroupDetailUpdateModel, PackageGroupDetail.TABLE_NAME);
         }
 
-//        ElasticsearchUtils.delete(Constants.ELASTICSEARCH_INDEX_GOODS, goodsId.toString());
+        elasticSearchGoodsRepository.deleteById(goodsId.longValue());
         return ApiRest.builder().message("删除商品信息成功！").successful(true).build();
     }
 
@@ -945,8 +945,8 @@ public class GoodsService {
         String tenantCode = importGoodsModel.obtainTenantCode();
         BigInteger branchId = importGoodsModel.obtainBranchId();
         BigInteger userId = importGoodsModel.obtainUserId();
-        String zipGoodsInfos = importGoodsModel.getZipGoodsInfos();
-        List<Map<String, Object>> goodsInfos = GsonUtils.fromJson(ZipUtils.unzipText(zipGoodsInfos), List.class);
+        String zippedGoodsInfos = importGoodsModel.getZippedGoodsInfos();
+        List<Map<String, Object>> goodsInfos = GsonUtils.fromJson(ZipUtils.unzipText(zippedGoodsInfos), List.class);
         int count = goodsInfos.size();
 
         TenantConfig tenantConfig = TenantConfigUtils.addTenantConfig(tenantId, "goods_num", count);
@@ -1044,9 +1044,7 @@ public class GoodsService {
         Pageable pageable = PageRequest.of(page - 1, rows);
         nativeSearchQueryBuilder.withPageable(pageable);
         nativeSearchQueryBuilder.withSort(SortBuilders.fieldSort(ElasticSearchGoods.FieldName.UPDATED_TIME).order(SortOrder.DESC));
-
         SearchQuery searchQuery = nativeSearchQueryBuilder.build();
-        Page<ElasticSearchGoods> elasticSearchGoodsPage = elasticSearchGoodsRepository.search(searchQuery);
 
         AggregatedPage<ElasticSearchGoods> aggregatedPage = elasticsearchTemplate.queryForPage(searchQuery, ElasticSearchGoods.class, ElasticSearchUtils.SEARCH_RESULT_MAPPER);
 

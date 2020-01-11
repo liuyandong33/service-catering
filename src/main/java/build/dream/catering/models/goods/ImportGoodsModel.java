@@ -6,13 +6,13 @@ import javax.validation.constraints.NotNull;
 
 public class ImportGoodsModel extends CateringBasicModel {
     @NotNull
-    private String zipGoodsInfos;
+    private String zippedGoodsInfos;
 
-    public String getZipGoodsInfos() {
-        return zipGoodsInfos;
+    public String getZippedGoodsInfos() {
+        return zippedGoodsInfos;
     }
 
-    public void setZipGoodsInfos(String zipGoodsInfos) {
-        this.zipGoodsInfos = zipGoodsInfos;
+    public void setZippedGoodsInfos(String zippedGoodsInfos) {
+        this.zippedGoodsInfos = zippedGoodsInfos;
     }
 }

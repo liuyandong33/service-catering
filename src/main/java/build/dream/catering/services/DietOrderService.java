@@ -31,6 +31,8 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class DietOrderService {
@@ -477,10 +479,7 @@ public class DietOrderService {
         paymentSearchModel.addSearchCondition(Payment.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         paymentSearchModel.addSearchCondition(Payment.ColumnName.CODE, Constants.SQL_OPERATION_SYMBOL_IN, paymentCodes);
         List<Payment> payments = DatabaseHelper.findAll(Payment.class, paymentSearchModel);
-        Map<String, Payment> paymentMap = new HashMap<String, Payment>();
-        for (Payment payment : payments) {
-            paymentMap.put(payment.getCode(), payment);
-        }
+        Map<String, Payment> paymentMap = payments.stream().collect(Collectors.toMap(payment -> payment.getCode(), payment -> payment));
 
         Date now = new Date();
         for (DoPayCombinedModel.PaymentInfo paymentInfo : paymentInfos) {
@@ -528,7 +527,25 @@ public class DietOrderService {
             } else if (Constants.PAYMENT_CODE_ALIPAY.equals(paymentCode)) {
 
             } else if (Constants.PAYMENT_CODE_WX.equals(paymentCode)) {
+                WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId, branchId);
+                ValidateUtils.notNull(weiXinPayAccount, "商户未配置微信支付！");
 
+                UnifiedOrderModel unifiedOrderModel = UnifiedOrderModel.builder()
+                        .appId(weiXinPayAccount.getAppId())
+                        .mchId(weiXinPayAccount.getMchId())
+                        .apiSecretKey(weiXinPayAccount.getApiSecretKey())
+                        .subAppId(weiXinPayAccount.getSubOpenPlatformAppId())
+                        .subMchId(weiXinPayAccount.getSubMchId())
+                        .acceptanceModel(weiXinPayAccount.isAcceptanceModel())
+                        .body("订单支付")
+                        .outTradeNo(dietOrder.getOrderNumber())
+                        .totalFee(paidAmount.multiply(Constants.BIG_DECIMAL_ONE_HUNDRED).intValue())
+                        .spbillCreateIp(ApplicationHandler.getRemoteAddress())
+                        .topic(UUID.randomUUID().toString())
+                        .tradeType(Constants.WEI_XIN_PAY_TRADE_TYPE_APP)
+                        .build();
+                Map<String, String> result = WeiXinPayUtils.unifiedOrder(unifiedOrderModel);
+                System.out.println(UUID.randomUUID().toString());
             }
         }
         return ApiRest.builder().build();

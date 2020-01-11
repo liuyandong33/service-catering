@@ -85,10 +85,6 @@ public class ElasticSearchGoods implements Serializable, Cloneable {
     @Field(type = FieldType.Boolean)
     private boolean stocked;
 
-    public ElasticSearchGoods() {
-
-    }
-
     public Long getId() {
         return id;
     }
