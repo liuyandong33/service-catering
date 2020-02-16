@@ -261,10 +261,21 @@ public class InitializeBranchModel extends BasicModel {
 
     public static class BusinessTime extends BasicModel {
         @NotNull
+        private Integer weekSign;
+
+        @NotNull
         private Date start;
 
         @NotNull
         private Date end;
+
+        public Integer getWeekSign() {
+            return weekSign;
+        }
+
+        public void setWeekSign(Integer weekSign) {
+            this.weekSign = weekSign;
+        }
 
         public Date getStart() {
             return start;

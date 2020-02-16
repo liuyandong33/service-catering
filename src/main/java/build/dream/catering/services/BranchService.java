@@ -1,8 +1,10 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
+import build.dream.catering.domains.ElasticSearchBranch;
 import build.dream.catering.mappers.BranchMapper;
 import build.dream.catering.models.branch.*;
+import build.dream.catering.repositories.ElasticSearchBranchRepository;
 import build.dream.catering.utils.SequenceUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.beans.District;
@@ -23,6 +25,8 @@ import java.util.*;
 public class BranchService {
     @Autowired
     private BranchMapper branchMapper;
+    @Autowired
+    private ElasticSearchBranchRepository elasticSearchBranchRepository;
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest initializeBranch(InitializeBranchModel initializeBranchModel) {
@@ -79,7 +83,6 @@ public class BranchService {
                 .build();
         List<Map<String, Object>> businessTimeList = new ArrayList<Map<String, Object>>();
         for (InitializeBranchModel.BusinessTime businessTime : businessTimes) {
-            Map<String, Object> map = new HashMap<String, Object>();
             Date start = businessTime.getStart();
             Date end = businessTime.getEnd();
 
@@ -90,6 +93,8 @@ public class BranchService {
             Calendar endCalendar = Calendar.getInstance();
             endCalendar.setTime(businessTime.getEnd());
 
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("weekSign", businessTime.getWeekSign());
             map.put("startMinute", startCalendar.get(Calendar.HOUR_OF_DAY) * 60 + startCalendar.get(Calendar.MINUTE));
             map.put("endMinute", endCalendar.get(Calendar.HOUR_OF_DAY) * 60 + endCalendar.get(Calendar.MINUTE));
             map.put("startTime", simpleDateFormat.format(start));
@@ -99,6 +104,7 @@ public class BranchService {
         branch.setBusinessTimes(GsonUtils.toJson(businessTimeList));
         DatabaseHelper.insert(branch);
         branchMapper.insertMergeUserBranch(userId, tenantId, tenantCode, branch.getId(), currentUserId, "初始化门店，增加店长所属门店！");
+        elasticSearchBranchRepository.save(ElasticSearchBranch.build(branch));
 
         return ApiRest.builder().data(branch).className(Branch.class.getName()).message("初始化门店成功！").successful(true).build();
     }
@@ -180,6 +186,8 @@ public class BranchService {
         batchDeleteUserRequestParameters.put("userIds", StringUtils.join(userIds, ","));
         ApiRest batchDeleteUserApiRest = ProxyUtils.doPostWithRequestParameters(Constants.SERVICE_NAME_PLATFORM, "user", "batchDeleteUser", batchDeleteUserRequestParameters);
         ValidateUtils.isTrue(batchDeleteUserApiRest.isSuccessful(), batchDeleteUserApiRest.getError());
+
+        elasticSearchBranchRepository.deleteById(branchId.longValue());
 
         return ApiRest.builder().message("删除门店信息成功！").successful(true).build();
     }
