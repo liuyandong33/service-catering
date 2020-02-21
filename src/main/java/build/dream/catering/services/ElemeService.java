@@ -3,13 +3,10 @@ package build.dream.catering.services;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.eleme.*;
 import build.dream.common.api.ApiRest;
-import build.dream.common.domains.catering.*;
 import build.dream.common.constants.DietOrderConstants;
+import build.dream.common.domains.catering.*;
 import build.dream.common.models.push.OrderMessageModel;
 import build.dream.common.utils.*;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONNull;
-import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -116,7 +113,7 @@ public class ElemeService {
         String message = elemeCallbackMessage.getMessage();
         BigInteger shopId = elemeCallbackMessage.getShopId();
 
-        JSONObject messageJsonObject = JSONObject.fromObject(message);
+        Map<String, Object> messageMap = JacksonUtils.readValueAsMap(message, String.class, Object.class);
         SearchModel branchSearchModel = new SearchModel(true);
         branchSearchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         branchSearchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -126,13 +123,13 @@ public class ElemeService {
 
 
         // 开始保存饿了么订单
-        JSONArray phoneList = messageJsonObject.optJSONArray("phoneList");
+        List<String> phoneList = (List<String>) messageMap.get("phoneList");
 
         BigInteger userId = CommonUtils.getServiceSystemUserId();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         int orderType = DietOrderConstants.ORDER_TYPE_ELEME_ORDER;
         int orderStatus = Constants.INT_DEFAULT_VALUE;
-        String elemeOrderStatus = messageJsonObject.getString("status");
+        String elemeOrderStatus = MapUtils.getString(messageMap, "status");
         if (DietOrderConstants.PENDING.equals(elemeOrderStatus)) {
             orderStatus = DietOrderConstants.ORDER_STATUS_PENDING;
         } else if (DietOrderConstants.UNPROCESSED.equals(elemeOrderStatus)) {
@@ -148,11 +145,11 @@ public class ElemeService {
         }
         int payStatus = 0;
         int paidType = 0;
-        BigDecimal totalAmount = BigDecimal.valueOf(messageJsonObject.getDouble("originalPrice"));
-        BigDecimal discountAmount = BigDecimal.valueOf(messageJsonObject.getDouble("shopPart")).abs();
+        BigDecimal totalAmount = BigDecimal.valueOf(MapUtils.getDoubleValue(messageMap, "originalPrice"));
+        BigDecimal discountAmount = BigDecimal.valueOf(Math.abs(MapUtils.getDoubleValue(messageMap, "shopPart")));
         BigDecimal payableAmount = totalAmount.subtract(discountAmount);
         BigDecimal paidAmount = BigDecimal.ZERO;
-        boolean onlinePaid = messageJsonObject.getBoolean("onlinePaid");
+        boolean onlinePaid = MapUtils.getBooleanValue(messageMap, "onlinePaid");
         if (onlinePaid) {
             payStatus = DietOrderConstants.PAY_STATUS_PAID;
             paidType = Constants.PAID_TYPE_ELM;
@@ -161,7 +158,7 @@ public class ElemeService {
             payStatus = DietOrderConstants.PAY_STATUS_UNPAID;
         }
         int refundStatus = 0;
-        String elemeRefundStatus = messageJsonObject.getString("refundStatus");
+        String elemeRefundStatus = MapUtils.getString(messageMap, "refundStatus");
         if (DietOrderConstants.NO_REFUND.equals(elemeRefundStatus)) {
             refundStatus = DietOrderConstants.REFUND_STATUS_NO_REFUND;
         } else if (DietOrderConstants.APPLIED.equals(elemeOrderStatus)) {
@@ -176,31 +173,31 @@ public class ElemeService {
             refundStatus = DietOrderConstants.REFUND_STATUS_SUCCESSFUL;
         }
 
-        String description = messageJsonObject.getString("description");
-        String deliveryGeo = messageJsonObject.getString("deliveryGeo");
+        String description = MapUtils.getString(messageMap, "description");
+        String deliveryGeo = MapUtils.getString(messageMap, "deliveryGeo");
         String[] geolocation = deliveryGeo.split(",");
         String deliveryLongitude = geolocation[0];
         String deliveryLatitude = geolocation[1];
         Date deliverTime = Constants.DATETIME_DEFAULT_VALUE;
-        Object deliverTimeObject = messageJsonObject.opt("deliverTime");
-        if (deliverTimeObject != null && !(deliverTimeObject instanceof JSONNull)) {
-            deliverTime = simpleDateFormat.parse(deliverTimeObject.toString());
+        String deliverTimeObject = MapUtils.getString(messageMap, "deliverTime");
+        if (StringUtils.isNotBlank(deliverTimeObject)) {
+            deliverTime = simpleDateFormat.parse(deliverTimeObject);
         }
-        Date activeTime = simpleDateFormat.parse(messageJsonObject.getString("activeAt"));
-        boolean invoiced = messageJsonObject.getBoolean("invoiced");
+        Date activeTime = simpleDateFormat.parse(MapUtils.getString(messageMap, "activeAt"));
+        boolean invoiced = MapUtils.getBooleanValue(messageMap, "invoiced");
         String invoiceType = Constants.VARCHAR_DEFAULT_VALUE;
         String invoice = Constants.VARCHAR_DEFAULT_VALUE;
         if (invoiced) {
-            invoiceType = messageJsonObject.getString("invoiceType");
-            invoice = messageJsonObject.getString("invoice");
+            invoiceType = MapUtils.getString(messageMap, "invoiceType");
+            invoice = MapUtils.getString(messageMap, "invoice");
         }
-        BigDecimal deliverFee = BigDecimal.valueOf(messageJsonObject.getDouble("deliverFee"));
+        BigDecimal deliverFee = BigDecimal.valueOf(MapUtils.getDoubleValue(messageMap, "deliverFee"));
 
         DietOrder dietOrder = DietOrder.builder()
                 .tenantId(tenantId)
                 .tenantCode(tenantCode)
                 .branchId(branchId)
-                .orderNumber("E" + messageJsonObject.get("id"))
+                .orderNumber("E" + messageMap.get("id"))
                 .orderType(orderType)
                 .orderStatus(orderStatus)
                 .payStatus(payStatus)
@@ -211,15 +208,15 @@ public class ElemeService {
                 .paidAmount(paidAmount)
                 .paidType(paidType)
                 .remark(StringUtils.isNotBlank(description) ? description : Constants.VARCHAR_DEFAULT_VALUE)
-                .deliveryAddress(messageJsonObject.getString("address"))
+                .deliveryAddress(MapUtils.getString(messageMap, "address"))
                 .deliveryLongitude(deliveryLongitude)
                 .deliveryLatitude(deliveryLatitude)
                 .deliverTime(deliverTime)
                 .activeTime(activeTime)
                 .deliverFee(deliverFee)
                 .telephoneNumber(StringUtils.join(phoneList, ","))
-                .daySerialNumber(messageJsonObject.getString("daySn"))
-                .consignee(messageJsonObject.getString("consignee"))
+                .daySerialNumber(MapUtils.getString(messageMap, "daySn"))
+                .consignee(MapUtils.getString(messageMap, "consignee"))
                 .invoiced(invoiced)
                 .invoiceType(invoiceType)
                 .invoice(invoice)
@@ -230,21 +227,18 @@ public class ElemeService {
         DatabaseHelper.insert(dietOrder);
         BigInteger dietOrderId = dietOrder.getId();
 
-        JSONArray orderActivitiesJsonArray = messageJsonObject.optJSONArray("orderActivities");
-        if (orderActivitiesJsonArray != null) {
-            int orderActivitiesSize = orderActivitiesJsonArray.size();
-            for (int orderActivitiesIndex = 0; orderActivitiesIndex < orderActivitiesSize; orderActivitiesIndex++) {
-                JSONObject elemeActivityJsonObject = orderActivitiesJsonArray.optJSONObject(orderActivitiesIndex);
-                int categoryId = elemeActivityJsonObject.getInt("categoryId");
+        List<Map<String, Object>> orderActivities = (List<Map<String, Object>>) messageMap.get("orderActivities");
+        if (CollectionUtils.isNotEmpty(orderActivities)) {
+            for (Map<String, Object> orderActivity : orderActivities) {
                 DietOrderActivity dietOrderActivity = DietOrderActivity.builder()
                         .tenantId(tenantId)
                         .tenantCode(tenantCode)
                         .branchId(branchId)
                         .dietOrderId(dietOrderId)
-                        .activityId(BigInteger.valueOf(elemeActivityJsonObject.getLong("id")))
-                        .activityName(elemeActivityJsonObject.getString("name"))
-                        .activityType(categoryId)
-                        .amount(BigDecimal.valueOf(elemeActivityJsonObject.getDouble("restaurantPart")).abs())
+                        .activityId(BigInteger.valueOf(MapUtils.getLongValue(orderActivity, "id")))
+                        .activityName(MapUtils.getString(orderActivity, "name"))
+                        .activityType(MapUtils.getIntValue(orderActivity, "categoryId"))
+                        .amount(BigDecimal.valueOf(MapUtils.getDoubleValue(orderActivity, "restaurantPart")).abs())
                         .createdUserId(userId)
                         .updatedUserId(userId)
                         .build();
@@ -269,21 +263,18 @@ public class ElemeService {
             DatabaseHelper.insert(dietOrderPayment);
         }
 
-        JSONArray groupsJsonArray = messageJsonObject.optJSONArray("groups");
+        List<Map<String, Object>> groups = (List<Map<String, Object>>) messageMap.get("groups");
         DietOrderGroup extraDietOrderGroup = null;
-        int groupsSize = groupsJsonArray.size();
         BigInteger packageFeeItemId = BigInteger.valueOf(-70000);
         BigInteger packageFeeSkuId = Constants.BIG_INTEGER_MINUS_ONE;
-        for (int groupsIndex = 0; groupsIndex < groupsSize; groupsIndex++) {
-            JSONObject elemeGroupJsonObject = groupsJsonArray.getJSONObject(groupsIndex);
-            String name = elemeGroupJsonObject.getString("name");
-            String type = elemeGroupJsonObject.getString("type");
+        for (Map<String, Object> group : groups) {
+            String type = MapUtils.getString(group, "type");
             DietOrderGroup dietOrderGroup = DietOrderGroup.builder()
                     .tenantId(tenantId)
                     .tenantCode(tenantCode)
                     .branchId(branchId)
                     .dietOrderId(dietOrderId)
-                    .name(name)
+                    .name(MapUtils.getString(group, "name"))
                     .type(type)
                     .createdUserId(userId)
                     .updatedUserId(userId)
@@ -292,19 +283,17 @@ public class ElemeService {
 
             BigInteger dietOrderGroupId = dietOrderGroup.getId();
 
-            JSONArray itemsJsonArray = elemeGroupJsonObject.optJSONArray("items");
-            int itemsSize = itemsJsonArray.size();
-            for (int itemsIndex = 0; itemsIndex < itemsSize; itemsIndex++) {
-                JSONObject elemeOrderItemJsonObject = itemsJsonArray.optJSONObject(itemsIndex);
-                JSONArray newSpecsJsonArray = elemeOrderItemJsonObject.optJSONArray("newSpecs");
+            List<Map<String, Object>> items = (List<Map<String, Object>>) group.get("items");
+            for (Map<String, Object> item : items) {
+                List<Map<String, Object>> newSpecs = (List<Map<String, Object>>) item.get("newSpecs");
                 String goodsSpecificationName = "";
                 BigInteger categoryId = Constants.ELEME_GOODS_CATEGORY_ID;
                 String categoryName = Constants.ELEME_GOODS_CATEGORY_NAME;
-                if (CollectionUtils.isNotEmpty(newSpecsJsonArray)) {
-                    goodsSpecificationName = newSpecsJsonArray.getJSONObject(0).getString("value");
+                if (CollectionUtils.isNotEmpty(newSpecs)) {
+                    goodsSpecificationName = MapUtils.getString(newSpecs.get(0), "value");
                 }
 
-                BigDecimal total = BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("total"));
+                BigDecimal total = BigDecimal.valueOf(MapUtils.getDoubleValue(item, "total"));
 
                 DietOrderDetail.Builder dietOrderDetailBuilder = DietOrderDetail.builder()
                         .tenantId(tenantId)
@@ -312,19 +301,19 @@ public class ElemeService {
                         .branchId(branchId)
                         .dietOrderId(dietOrderId)
                         .dietOrderGroupId(dietOrderGroupId)
-                        .goodsName(elemeOrderItemJsonObject.getString("name"))
+                        .goodsName(MapUtils.getString(item, "name"))
                         .goodsSpecificationName(goodsSpecificationName)
-                        .price(BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("price")))
+                        .price(BigDecimal.valueOf(MapUtils.getDoubleValue(item, "price")))
                         .attributeIncrease(BigDecimal.ZERO)
-                        .quantity(BigDecimal.valueOf(elemeOrderItemJsonObject.getDouble("quantity")))
+                        .quantity(BigDecimal.valueOf(MapUtils.getDoubleValue(item, "quantity")))
                         .totalAmount(total)
                         .discountAmount(BigDecimal.ZERO)
                         .payableAmount(total)
                         .createdUserId(userId)
                         .updatedUserId(userId);
 
-                BigInteger id = BigInteger.valueOf(elemeOrderItemJsonObject.getLong("id"));
-                BigInteger skuId = BigInteger.valueOf(elemeOrderItemJsonObject.getLong("skuId"));
+                BigInteger id = BigInteger.valueOf(MapUtils.getLongValue(item, "id"));
+                BigInteger skuId = BigInteger.valueOf(MapUtils.getLongValue(item, "skuId"));
                 boolean isPackageFee = packageFeeItemId.compareTo(id) == 0 && packageFeeSkuId.compareTo(skuId) == 0;
 
                 DietOrderDetail dietOrderDetail = null;
@@ -346,11 +335,9 @@ public class ElemeService {
                 DatabaseHelper.insert(dietOrderDetail);
 
                 BigInteger dietOrderDetailId = dietOrderDetail.getId();
-                JSONArray attributesJsonArray = elemeOrderItemJsonObject.optJSONArray("attributes");
-                if (CollectionUtils.isNotEmpty(attributesJsonArray)) {
-                    int attributesSize = attributesJsonArray.size();
-                    for (int attributesIndex = 0; attributesIndex < attributesSize; attributesIndex++) {
-                        JSONObject attributeJsonObject = attributesJsonArray.optJSONObject(attributesIndex);
+                List<Map<String, Object>> attributes = (List<Map<String, Object>>) item.get("attributes");
+                if (CollectionUtils.isNotEmpty(attributes)) {
+                    for (Map<String, Object> attribute : attributes) {
                         DietOrderDetailGoodsAttribute dietOrderDetailGoodsAttribute = DietOrderDetailGoodsAttribute.builder()
                                 .tenantId(tenantId)
                                 .tenantCode(tenantCode)
@@ -359,9 +346,9 @@ public class ElemeService {
                                 .dietOrderGroupId(dietOrderGroupId)
                                 .dietOrderDetailId(dietOrderDetailId)
                                 .goodsAttributeGroupId(BigInteger.ZERO)
-                                .goodsAttributeGroupName(attributeJsonObject.getString("name"))
+                                .goodsAttributeGroupName(MapUtils.getString(attribute, "name"))
                                 .goodsAttributeId(BigInteger.ZERO)
-                                .goodsAttributeName(attributeJsonObject.getString("value"))
+                                .goodsAttributeName(MapUtils.getString(attribute, "value"))
                                 .price(BigDecimal.ZERO)
                                 .createdUserId(userId)
                                 .updatedUserId(userId)
