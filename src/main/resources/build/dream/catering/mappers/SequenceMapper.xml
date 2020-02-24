@@ -2,18 +2,18 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.catering.mappers.SequenceMapper">
     <select id="nextValue" resultType="java.lang.Integer">
-        SELECT next_value(#{sequenceName})
+        /*!mycat: sql=SELECT 1 FROM sequence LIMIT 1 */SELECT next_value(#{sequenceName})
     </select>
 
     <select id="currentValue" resultType="java.lang.Integer">
-        SELECT current_value(#{sequenceName})
+        /*!mycat: sql=SELECT 1 FROM sequence LIMIT 1 */SELECT current_value(#{sequenceName})
     </select>
 
     <select id="currentValueToday" resultType="java.lang.Integer">
-        SELECT next_value(#{sequenceName})
+        /*!mycat: sql=SELECT 1 FROM sequence LIMIT 1 */SELECT next_value(#{sequenceName})
     </select>
 
     <select id="nextValueToday" resultType="java.lang.Integer">
-        SELECT next_value_today(#{sequenceName})
+        /*!mycat: sql=SELECT 1 FROM sequence LIMIT 1 */SELECT next_value_today(#{sequenceName})
     </select>
 </mapper>

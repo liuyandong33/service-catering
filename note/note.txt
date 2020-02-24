@@ -243,3 +243,14 @@ f853bf47-6a64-4ce8-84ea-ba9bfe67f1ea======25ef58b0-6f80-40ca-9603-36e7ab1eb467
 da6dd725-8e9c-4abc-a80d-591eb7e889ad======a68baca1-5f5c-402d-beab-054f6b4db4c9
 9323d412-c295-4a6c-a322-9e40c83b63ea======fa255380-592f-48d9-b801-3913708d948d
 608f63de-78ba-495d-999d-1e8f7e082387======a7bed282-0408-4660-b46c-01e97dda7495
+
+saas-db
+quartz-db
+catering-db * 6
+
+auth
+platform
+webapi
+posapi
+appapi
+catering

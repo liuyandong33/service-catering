@@ -4,6 +4,7 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.models.dietorder.*;
 import build.dream.catering.services.DietOrderService;
 import build.dream.common.annotations.ApiRestAction;
+import build.dream.common.annotations.PermitAll;
 import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.LogUtils;
@@ -77,6 +78,7 @@ public class DietOrderController extends BasicController {
     @RequestMapping(value = "/doPay", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ApiRestAction(modelClass = DoPayModel.class, serviceClass = DietOrderService.class, serviceMethodName = "doPay", error = "发起支付失败")
+    @PermitAll
     public String doPay() {
         return null;
     }

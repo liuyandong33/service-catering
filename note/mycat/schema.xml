@@ -1,0 +1,195 @@
+<?xml version="1.0"?>
+<!DOCTYPE mycat:schema SYSTEM "schema.dtd">
+<mycat:schema xmlns:mycat="http://io.mycat/">
+	<schema name="catering-db" checkSQLschema="false" sqlMaxLimit="10000">
+		<table name="activity" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="activity_branch_r" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="branch" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="branch_table" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="business_time" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="buy_give_activity" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="can_not_operate_reason" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="coupon" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="data_handle_history" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="diet_order" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="diet_order_activity" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="diet_order_delivery_record" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="diet_order_delivery_state" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="diet_order_detail" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="diet_order_detail_goods_attribute" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="diet_order_group" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="diet_order_payment" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="distribution_center" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="eleme_callback_message" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="eleme_goods_mapping" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="flash_sale_activity" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="full_reduction_activity" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="goods" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="goods_attribute" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="goods_attribute_group" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="goods_category" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="goods_specification" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="goods_unit" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="menu" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="menu_branch_r" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="menu_detail" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="merge_user_branch" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="offline_pay_log" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="offline_pay_record" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="package_group" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="package_group_detail" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="payment" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="payment_activity" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="pos" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="purchase_order" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="purchase_order_detail" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="require_goods_order" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="require_goods_order_detail" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="sale" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="sale_detail" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="sale_payment" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="special_goods_activity" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="table_area" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="tenant_config" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="vip" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="vip_account" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="vip_group" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="vip_group_branch_r" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="vip_point_book" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="vip_point_history" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="vip_type" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="wei_xin_member_card" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+		<table name="wei_xin_menu" dataNode="catering-primary1,catering-primary2,catering-primary3" rule="tenant-id-mod-long"></table>
+
+		<table name="qrtz_blob_triggers" dataNode="catering-secondary"></table>
+		<table name="qrtz_calendars" dataNode="catering-secondary"></table>
+		<table name="qrtz_cron_triggers" dataNode="catering-secondary"></table>
+		<table name="qrtz_fired_triggers" dataNode="catering-secondary"></table>
+		<table name="qrtz_job_details" dataNode="catering-secondary"></table>
+		<table name="qrtz_locks" dataNode="catering-secondary"></table>
+		<table name="qrtz_paused_trigger_grps" dataNode="catering-secondary"></table>
+		<table name="qrtz_scheduler_state" dataNode="catering-secondary"></table>
+		<table name="qrtz_simple_triggers" dataNode="catering-secondary"></table>
+		<table name="qrtz_simprop_triggers" dataNode="catering-secondary"></table>
+		<table name="qrtz_triggers" dataNode="catering-secondary"></table>
+		<table name="sequence" dataNode="catering-secondary"></table>
+	</schema>
+
+	<schema name="saas-db" checkSQLschema="false" sqlMaxLimit="10000">
+		<table name="activation_code_info" dataNode="saas"></table>
+		<table name="activity" dataNode="saas"></table>
+		<table name="agent" dataNode="saas"></table>
+		<table name="agent_contract" dataNode="saas"></table>
+		<table name="agent_contract_price_info" dataNode="saas"></table>
+		<table name="agent_form" dataNode="saas"></table>
+		<table name="alipay_authorizer_info" dataNode="saas"></table>
+		<table name="alipay_developer_account" dataNode="saas"></table>
+		<table name="alipay_material_image" dataNode="saas"></table>
+		<table name="alipay_open_auth_token" dataNode="saas"></table>
+		<table name="app_privilege" dataNode="saas"></table>
+		<table name="app_role" dataNode="saas"></table>
+		<table name="app_role_privilege_r" dataNode="saas"></table>
+		<table name="async_notify" dataNode="saas"></table>
+		<table name="background_privilege" dataNode="saas"></table>
+		<table name="background_role" dataNode="saas"></table>
+		<table name="background_role_privilege_r" dataNode="saas"></table>
+		<table name="bank_account" dataNode="saas"></table>
+		<table name="eleme_branch_mapping" dataNode="saas"></table>
+		<table name="eleme_callback_message" dataNode="saas"></table>
+		<table name="eleme_token" dataNode="saas"></table>
+		<table name="goods" dataNode="saas"></table>
+		<table name="goods_specification" dataNode="saas"></table>
+		<table name="goods_type" dataNode="saas"></table>
+		<table name="jddj_code" dataNode="saas"></table>
+		<table name="jddj_token" dataNode="saas"></table>
+		<table name="miya_pay_account" dataNode="saas"></table>
+		<table name="mqtt_config" dataNode="saas"></table>
+		<table name="new_land_account" dataNode="saas"></table>
+		<table name="oauth_client_detail" dataNode="saas"></table>
+		<table name="order_detail" dataNode="saas"></table>
+		<table name="order_info" dataNode="saas"></table>
+		<table name="pos_privilege" dataNode="saas"></table>
+		<table name="pos_role" dataNode="saas"></table>
+		<table name="pos_role_privilege_r" dataNode="saas"></table>
+		<table name="request_log" dataNode="saas"></table>
+		<table name="response_log" dataNode="saas"></table>
+		<table name="sale_flow" dataNode="saas"></table>
+		<table name="sequence" dataNode="saas"></table>
+		<table name="sequence_today" dataNode="saas"></table>
+		<table name="snowflake_id_config" dataNode="saas"></table>
+		<table name="special_goods_activity" dataNode="saas"></table>
+		<table name="system_parameter" dataNode="saas"></table>
+		<table name="system_user" dataNode="saas"></table>
+		<table name="tenant" dataNode="saas"></table>
+		<table name="tenant_goods" dataNode="saas"></table>
+		<table name="tenant_secret_key" dataNode="saas"></table>
+		<table name="um_pay_account" dataNode="saas"></table>
+		<table name="user_app_role_r" dataNode="saas"></table>
+		<table name="user_background_role_r" dataNode="saas"></table>
+		<table name="user_pos_role_r" dataNode="saas"></table>
+		<table name="wei_xin_authorizer_info" dataNode="saas"></table>
+		<table name="wei_xin_authorizer_token" dataNode="saas"></table>
+		<table name="wei_xin_open_platform_application" dataNode="saas"></table>
+		<table name="wei_xin_pay_account" dataNode="saas"></table>
+		<table name="wei_xin_public_account" dataNode="saas"></table>
+		<table name="wei_xin_public_platform_application" dataNode="saas"></table>
+		<table name="wei_xin_template_message" dataNode="saas"></table>
+		<table name="qrtz_blob_triggers" dataNode="saas"></table>
+		<table name="qrtz_calendars" dataNode="saas"></table>
+		<table name="qrtz_cron_triggers" dataNode="saas"></table>
+		<table name="qrtz_fired_triggers" dataNode="saas"></table>
+		<table name="qrtz_job_details" dataNode="saas"></table>
+		<table name="qrtz_locks" dataNode="saas"></table>
+		<table name="qrtz_paused_trigger_grps" dataNode="saas"></table>
+		<table name="qrtz_scheduler_state" dataNode="saas"></table>
+		<table name="qrtz_simple_triggers" dataNode="saas"></table>
+		<table name="qrtz_simprop_triggers" dataNode="saas"></table>
+		<table name="qrtz_triggers" dataNode="saas"></table>
+	</schema>
+
+	<dataNode name="catering-primary1" dataHost="catering-primary1" database="catering-db"></dataNode>
+	<dataNode name="catering-primary2" dataHost="catering-primary2" database="catering-db"></dataNode>
+	<dataNode name="catering-primary3" dataHost="catering-primary3" database="catering-db"></dataNode>
+	<dataNode name="catering-secondary" dataHost="catering-secondary" database="catering-db"></dataNode>
+	<dataNode name="saas" dataHost="saas" database="saas-db"></dataNode>
+
+	<dataHost name="catering-primary1" maxCon="1000" minCon="10" balance="3" writeType="0" dbType="mysql" dbDriver="native" switchType="1" slaveThreshold="100">
+		<heartbeat>select user()</heartbeat>
+		<writeHost host="node1" url="node1:3306" user="root" password="root">
+			<readHost host="node2" url="node2:3306" user="root" password="root"></readHost>
+		</writeHost>
+		<writeHost host="node3" url="node3:3306" user="root" password="root">
+			<readHost host="node4" url="node4:3306" user="root" password="root"></readHost>
+		</writeHost>
+	</dataHost>
+
+	<dataHost name="catering-primary2" maxCon="1000" minCon="10" balance="3" writeType="0" dbType="mysql" dbDriver="native" switchType="1" slaveThreshold="100">
+		<heartbeat>select user()</heartbeat>
+		<writeHost host="node1" url="node1:3306" user="root" password="root">
+			<readHost host="node2" url="node2:3306" user="root" password="root"></readHost>
+		</writeHost>
+		<writeHost host="node3" url="node3:3306" user="root" password="root">
+			<readHost host="node4" url="node4:3306" user="root" password="root"></readHost>
+		</writeHost>
+	</dataHost>
+
+	<dataHost name="catering-primary3" maxCon="1000" minCon="10" balance="3" writeType="0" dbType="mysql" dbDriver="native" switchType="1" slaveThreshold="100">
+		<heartbeat>select user()</heartbeat>
+		<writeHost host="node1" url="node1:3306" user="root" password="root">
+			<readHost host="node2" url="node2:3306" user="root" password="root"></readHost>
+		</writeHost>
+		<writeHost host="node3" url="node3:3306" user="root" password="root">
+			<readHost host="node4" url="node4:3306" user="root" password="root"></readHost>
+		</writeHost>
+	</dataHost>
+
+	<dataHost name="catering-secondary" maxCon="100" minCon="10" balance="0" writeType="0" dbType="mysql" dbDriver="native">
+		<heartbeat>select user()</heartbeat>
+		<writeHost host="leopard" url="leopard:3306" user="root" password="root"></writeHost>
+	</dataHost>
+
+	<dataHost name="saas" maxCon="100" minCon="10" balance="0" writeType="0" dbType="mysql" dbDriver="native">
+		<heartbeat>select user()</heartbeat>
+		<writeHost host="leopard" url="leopard:3306" user="root" password="root"></writeHost>
+	</dataHost>
+</mycat:schema>

@@ -7,17 +7,19 @@ import build.dream.catering.utils.ThreadUtils;
 import build.dream.catering.utils.VipUtils;
 import build.dream.common.api.ApiRest;
 import build.dream.common.beans.KafkaFixedTimeSendResult;
-import build.dream.common.domains.catering.*;
 import build.dream.common.constants.DietOrderConstants;
+import build.dream.common.domains.catering.*;
+import build.dream.common.domains.saas.MiyaAccount;
+import build.dream.common.domains.saas.Tenant;
+import build.dream.common.domains.saas.WeiXinPayAccount;
 import build.dream.common.models.alipay.AlipayTradeAppPayModel;
 import build.dream.common.models.alipay.AlipayTradePagePayModel;
 import build.dream.common.models.alipay.AlipayTradePayModel;
 import build.dream.common.models.alipay.AlipayTradeWapPayModel;
 import build.dream.common.models.aliyunpush.PushMessageModel;
+import build.dream.common.models.miya.CreateOrderModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
 import build.dream.common.models.weixinpay.UnifiedOrderModel;
-import build.dream.common.domains.saas.Tenant;
-import build.dream.common.domains.saas.WeiXinPayAccount;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -31,7 +33,6 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -76,6 +77,7 @@ public class DietOrderService {
         dietOrderDetailGoodsAttributeSearchModel.addSearchCondition(DietOrderDetailGoodsAttribute.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         List<DietOrderDetailGoodsAttribute> dietOrderDetailGoodsAttributes = DatabaseHelper.findAll(DietOrderDetailGoodsAttribute.class, dietOrderDetailGoodsAttributeSearchModel);
 
+        // 查询出订单活动信息
         SearchModel dietOrderActivitySearchModel = new SearchModel(true);
         dietOrderActivitySearchModel.addSearchCondition(DietOrderActivity.ColumnName.DIET_ORDER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
         dietOrderActivitySearchModel.addSearchCondition(DietOrderActivity.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -165,107 +167,145 @@ public class DietOrderService {
         searchModel.addSearchCondition(DietOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
         ValidateUtils.notNull(dietOrder, "订单不存在！");
-        ValidateUtils.isTrue(dietOrder.getOrderStatus() == DietOrderConstants.ORDER_STATUS_PENDING && dietOrder.getOrderStatus() == DietOrderConstants.ORDER_STATUS_PENDING, "订单状态异常！");
+        ValidateUtils.isTrue(dietOrder.getOrderStatus() == DietOrderConstants.ORDER_STATUS_PENDING, "订单状态异常！");
+        ValidateUtils.isTrue(dietOrder.getPayStatus() == DietOrderConstants.PAY_STATUS_UNPAID, "订单状态异常！");
         ValidateUtils.isTrue(new Date().getTime() - dietOrder.getCreatedTime().getTime() <= 15 * 60 * 1000, "订单已超时！");
 
         String orderNumber = dietOrder.getOrderNumber();
         BigDecimal payableAmount = dietOrder.getPayableAmount();
         String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
 
+        Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
+        Integer usedChannelType = tenant.getUsedChannelType();
+
         Object result = null;
-        if (paidScene == Constants.PAID_SCENE_WEI_XIN_MICROPAY) {
-            WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
-            MicroPayModel microPayModel = MicroPayModel.builder()
-                    .appId(weiXinPayAccount.getAppId())
-                    .subMchId(weiXinPayAccount.getSubMchId())
-                    .apiSecretKey(weiXinPayAccount.getApiSecretKey())
-                    .subAppId(weiXinPayAccount.getSubPublicAccountAppId())
-                    .subMchId(weiXinPayAccount.getSubMchId())
-                    .acceptanceModel(weiXinPayAccount.isAcceptanceModel())
-                    .signType(Constants.MD5)
-                    .body("订单支付")
-                    .outTradeNo(orderNumber)
-                    .totalFee(payableAmount.multiply(Constants.BIG_DECIMAL_ONE_HUNDRED).intValue())
-                    .spbillCreateIp(ApplicationHandler.getRemoteAddress())
-                    .authCode(authCode)
-                    .build();
-            result = WeiXinPayUtils.microPay(microPayModel);
-        } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_JSAPI_PUBLIC_ACCOUNT || paidScene == Constants.PAID_SCENE_WEI_XIN_NATIVE || paidScene == Constants.PAID_SCENE_WEI_XIN_APP || paidScene == Constants.PAID_SCENE_WEI_XIN_MWEB || paidScene == Constants.PAID_SCENE_WEI_XIN_JSAPI_MINI_PROGRAM) {
-            String tradeType = null;
-            if (paidScene == Constants.PAID_SCENE_WEI_XIN_JSAPI_PUBLIC_ACCOUNT) {
-                tradeType = Constants.WEI_XIN_PAY_TRADE_TYPE_JSAPI;
-            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_NATIVE) {
-                tradeType = Constants.WEI_XIN_PAY_TRADE_TYPE_NATIVE;
-            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_APP) {
-                tradeType = Constants.WEI_XIN_PAY_TRADE_TYPE_APP;
-            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_MWEB) {
-                tradeType = Constants.WEI_XIN_PAY_TRADE_TYPE_MWEB;
-            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_JSAPI_MINI_PROGRAM) {
-                tradeType = Constants.WEI_XIN_PAY_TRADE_TYPE_JSAPI;
+        if (usedChannelType == Constants.TENANT_USED_CHANNEL_TYPE_NATIVE) {
+            if (paidScene == Constants.PAID_SCENE_WEI_XIN_MICROPAY) {
+                WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
+                MicroPayModel microPayModel = MicroPayModel.builder()
+                        .appId(weiXinPayAccount.getAppId())
+                        .subMchId(weiXinPayAccount.getSubMchId())
+                        .apiSecretKey(weiXinPayAccount.getApiSecretKey())
+                        .subAppId(weiXinPayAccount.getSubPublicAccountAppId())
+                        .subMchId(weiXinPayAccount.getSubMchId())
+                        .acceptanceModel(weiXinPayAccount.isAcceptanceModel())
+                        .signType(Constants.MD5)
+                        .body("订单支付")
+                        .outTradeNo(orderNumber)
+                        .totalFee(payableAmount.multiply(Constants.BIG_DECIMAL_ONE_HUNDRED).intValue())
+                        .spbillCreateIp(ApplicationHandler.getRemoteAddress())
+                        .authCode(authCode)
+                        .build();
+                result = WeiXinPayUtils.microPay(microPayModel);
+            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_JSAPI_PUBLIC_ACCOUNT || paidScene == Constants.PAID_SCENE_WEI_XIN_NATIVE || paidScene == Constants.PAID_SCENE_WEI_XIN_APP || paidScene == Constants.PAID_SCENE_WEI_XIN_MWEB || paidScene == Constants.PAID_SCENE_WEI_XIN_JSAPI_MINI_PROGRAM) {
+                String tradeType = null;
+                if (paidScene == Constants.PAID_SCENE_WEI_XIN_JSAPI_PUBLIC_ACCOUNT) {
+                    tradeType = Constants.WEI_XIN_PAY_TRADE_TYPE_JSAPI;
+                } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_NATIVE) {
+                    tradeType = Constants.WEI_XIN_PAY_TRADE_TYPE_NATIVE;
+                } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_APP) {
+                    tradeType = Constants.WEI_XIN_PAY_TRADE_TYPE_APP;
+                } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_MWEB) {
+                    tradeType = Constants.WEI_XIN_PAY_TRADE_TYPE_MWEB;
+                } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_JSAPI_MINI_PROGRAM) {
+                    tradeType = Constants.WEI_XIN_PAY_TRADE_TYPE_JSAPI;
+                }
+                WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
+                ValidateUtils.notNull(weiXinPayAccount, "商户未配置微信支付账号！");
+                UnifiedOrderModel unifiedOrderModel = UnifiedOrderModel.builder()
+                        .appId(weiXinPayAccount.getAppId())
+                        .mchId(weiXinPayAccount.getMchId())
+                        .apiSecretKey(weiXinPayAccount.getApiSecretKey())
+                        .subAppId(weiXinPayAccount.getSubPublicAccountAppId())
+                        .subMchId(weiXinPayAccount.getSubMchId())
+                        .acceptanceModel(weiXinPayAccount.isAcceptanceModel())
+                        .signType(Constants.MD5)
+                        .body("订单支付")
+                        .outTradeNo(orderNumber)
+                        .totalFee(payableAmount.multiply(Constants.BIG_DECIMAL_ONE_HUNDRED).intValue())
+                        .spbillCreateIp(ApplicationHandler.getRemoteAddress())
+                        .topic("")
+                        .tradeType(tradeType)
+                        .openId(openId)
+                        .subOpenId(subOpenId)
+                        .build();
+                result = WeiXinPayUtils.unifiedOrder(unifiedOrderModel);
+            } else if (paidScene == Constants.PAID_SCENE_ALIPAY_MOBILE_WEBSITE) {
+                String returnUrl = "";
+
+                AlipayTradeWapPayModel alipayTradeWapPayModel = AlipayTradeWapPayModel.builder()
+                        .returnUrl(returnUrl)
+                        .topic("")
+                        .subject("订单支付")
+                        .outTradeNo(orderNumber)
+                        .totalAmount(payableAmount)
+                        .productCode(orderNumber)
+                        .build();
+                result = AlipayUtils.alipayTradeWapPay(alipayTradeWapPayModel);
+            } else if (paidScene == Constants.PAID_SCENE_ALIPAY_PC_WEBSITE) {
+                String returnUrl = "";
+
+                AlipayTradePagePayModel alipayTradePagePayModel = AlipayTradePagePayModel.builder()
+                        .returnUrl(returnUrl)
+                        .topic("")
+                        .outTradeNo(orderNumber)
+                        .productCode(orderNumber)
+                        .totalAmount(payableAmount)
+                        .subject("订单支付")
+                        .build();
+                result = AlipayUtils.alipayTradePagePay(alipayTradePagePayModel);
+            } else if (paidScene == Constants.PAID_SCENE_ALIPAY_APP) {
+                AlipayTradeAppPayModel alipayTradeAppPayModel = AlipayTradeAppPayModel.builder()
+                        .topic("")
+                        .outTradeNo(orderNumber)
+                        .totalAmount(payableAmount)
+                        .subject("订单支付")
+                        .build();
+                result = AlipayUtils.alipayTradeAppPay(alipayTradeAppPayModel);
+            } else if (paidScene == Constants.PAID_SCENE_ALIPAY_FAC_TO_FACE) {
+                AlipayTradePayModel alipayTradePayModel = AlipayTradePayModel.builder()
+                        .topic("")
+                        .outTradeNo(orderNumber)
+                        .totalAmount(payableAmount)
+                        .scene(Constants.SCENE_BAR_CODE)
+                        .authCode(authCode)
+                        .subject("订单支付")
+                        .build();
+                result = AlipayUtils.alipayTradePay(alipayTradePayModel);
             }
-            WeiXinPayAccount weiXinPayAccount = WeiXinPayUtils.obtainWeiXinPayAccount(tenantId.toString(), branchId.toString());
-            UnifiedOrderModel unifiedOrderModel = UnifiedOrderModel.builder()
-                    .appId(weiXinPayAccount.getAppId())
-                    .mchId(weiXinPayAccount.getMchId())
-                    .apiSecretKey(weiXinPayAccount.getApiSecretKey())
-                    .subAppId(weiXinPayAccount.getSubPublicAccountAppId())
-                    .subMchId(weiXinPayAccount.getSubMchId())
-                    .acceptanceModel(weiXinPayAccount.isAcceptanceModel())
-                    .signType(Constants.MD5)
-                    .body("订单支付")
-                    .outTradeNo(orderNumber)
-                    .totalFee(payableAmount.multiply(Constants.BIG_DECIMAL_ONE_HUNDRED).intValue())
-                    .spbillCreateIp(ApplicationHandler.getRemoteAddress())
-                    .topic("")
-                    .tradeType(tradeType)
-                    .openId(openId)
-                    .subOpenId(subOpenId)
-                    .build();
-            result = WeiXinPayUtils.unifiedOrder(unifiedOrderModel);
-        } else if (paidScene == Constants.PAID_SCENE_ALIPAY_MOBILE_WEBSITE) {
-            String returnUrl = "";
+        } else if (usedChannelType == Constants.TENANT_USED_CHANNEL_TYPE_MIYA) {
+            if (paidScene == Constants.PAID_SCENE_WEI_XIN_MICROPAY) {
 
-            AlipayTradeWapPayModel alipayTradeWapPayModel = AlipayTradeWapPayModel.builder()
-                    .returnUrl(returnUrl)
-                    .topic("")
-                    .subject("订单支付")
-                    .outTradeNo(orderNumber)
-                    .totalAmount(payableAmount)
-                    .productCode(orderNumber)
-                    .build();
-            result = AlipayUtils.alipayTradeWapPay(alipayTradeWapPayModel);
-        } else if (paidScene == Constants.PAID_SCENE_ALIPAY_PC_WEBSITE) {
-            String returnUrl = "";
+            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_JSAPI_PUBLIC_ACCOUNT) {
 
-            AlipayTradePagePayModel alipayTradePagePayModel = AlipayTradePagePayModel.builder()
-                    .returnUrl(returnUrl)
-                    .topic("")
-                    .outTradeNo(orderNumber)
-                    .productCode(orderNumber)
-                    .totalAmount(payableAmount)
-                    .subject("订单支付")
+            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_NATIVE) {
+
+            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_APP) {
+
+            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_MWEB) {
+
+            } else if (paidScene == Constants.PAID_SCENE_WEI_XIN_JSAPI_MINI_PROGRAM) {
+
+            } else if (paidScene == Constants.PAID_SCENE_ALIPAY_MOBILE_WEBSITE) {
+
+            } else if (paidScene == Constants.PAID_SCENE_ALIPAY_PC_WEBSITE) {
+
+            } else if (paidScene == Constants.PAID_SCENE_ALIPAY_APP) {
+
+            } else if (paidScene == Constants.PAID_SCENE_ALIPAY_FAC_TO_FACE) {
+
+            }
+
+            MiyaAccount miyaAccount = MiyaUtils.obtainMiyaAccount(tenantId, branchId);
+            ValidateUtils.notNull(miyaAccount, "商户为配置米雅支付账号！");
+            CreateOrderModel createOrderModel = CreateOrderModel.builder()
                     .build();
-            result = AlipayUtils.alipayTradePagePay(alipayTradePagePayModel);
-        } else if (paidScene == Constants.PAID_SCENE_ALIPAY_APP) {
-            AlipayTradeAppPayModel alipayTradeAppPayModel = AlipayTradeAppPayModel.builder()
-                    .topic("")
-                    .outTradeNo(orderNumber)
-                    .totalAmount(payableAmount)
-                    .subject("订单支付")
-                    .build();
-            result = AlipayUtils.alipayTradeAppPay(alipayTradeAppPayModel);
-        } else if (paidScene == Constants.PAID_SCENE_ALIPAY_FAC_TO_FACE) {
-            AlipayTradePayModel alipayTradePayModel = AlipayTradePayModel.builder()
-                    .topic("")
-                    .outTradeNo(orderNumber)
-                    .totalAmount(payableAmount)
-                    .scene(Constants.SCENE_BAR_CODE)
-                    .authCode(authCode)
-                    .subject("订单支付")
-                    .build();
-            result = AlipayUtils.alipayTradePay(alipayTradePayModel);
+            result = MiyaUtils.createOrder(createOrderModel);
+        } else if (usedChannelType == Constants.TENANT_USED_CHANNEL_TYPE_NEW_LAND) {
+
+        } else if (usedChannelType == Constants.TENANT_USED_CHANNEL_TYPE_UMPAY) {
+
         }
-
         return ApiRest.builder().data(result).message("发起支付成功！").successful(true).build();
     }
 
