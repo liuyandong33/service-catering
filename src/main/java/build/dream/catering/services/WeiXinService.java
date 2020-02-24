@@ -3,12 +3,11 @@ package build.dream.catering.services;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.weixin.*;
 import build.dream.common.api.ApiRest;
-import build.dream.common.beans.WebResponse;
 import build.dream.common.domains.catering.WeiXinMemberCard;
 import build.dream.common.domains.catering.WeiXinMenu;
-import build.dream.common.models.weixin.CreateMenuModel;
 import build.dream.common.domains.saas.WeiXinAuthorizerInfo;
 import build.dream.common.domains.saas.WeiXinAuthorizerToken;
+import build.dream.common.models.weixin.CreateMenuModel;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -42,8 +41,7 @@ public class WeiXinService {
             uploadBackgroundPicRequestParameters.put("buffer", backgroundPicFile);
             uploadBackgroundPicRequestParameters.put("access_token", accessToken);
 
-            WebResponse uploadBackgroundPicWebResponse = OutUtils.doPostWithRequestParametersAndFiles(uploadImgUrl, null, uploadBackgroundPicRequestParameters);
-            String uploadBackgroundPicResult = uploadBackgroundPicWebResponse.getResult();
+            String uploadBackgroundPicResult = OutUtils.doPostWithMultipartForm(uploadImgUrl, uploadBackgroundPicRequestParameters);
             Map<String, Object> uploadBackgroundPicResultMap = JacksonUtils.readValueAsMap(uploadBackgroundPicResult, String.class, Object.class);
             ValidateUtils.isTrue(!uploadBackgroundPicResultMap.containsKey("errcode"), MapUtils.getString(uploadBackgroundPicResultMap, "errmsg"));
 
@@ -54,8 +52,7 @@ public class WeiXinService {
         uploadLogoRequestParameters.put("buffer", logoFile);
         uploadLogoRequestParameters.put("access_token", accessToken);
 
-        WebResponse uploadLogoWebResponse = OutUtils.doPostWithRequestParametersAndFiles(uploadImgUrl, null, uploadLogoRequestParameters);
-        String uploadLogoResult = uploadLogoWebResponse.getResult();
+        String uploadLogoResult = OutUtils.doPostWithMultipartForm(uploadImgUrl, uploadLogoRequestParameters);
         Map<String, Object> uploadLogoResultMap = JacksonUtils.readValueAsMap(uploadLogoResult, String.class, Object.class);
         ValidateUtils.isTrue(!uploadLogoResultMap.containsKey("errcode"), MapUtils.getString(uploadLogoResultMap, "errmsg"));
 
@@ -167,8 +164,7 @@ public class WeiXinService {
         String weiXinApiUrl = ConfigurationUtils.getConfiguration(Constants.WEI_XIN_API_URL);
         String createMemberCardUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_CREATE_URI + "?access_token=" + accessToken;
 
-        WebResponse createMemberCardWebResponse = OutUtils.doPostWithRequestBody(createMemberCardUrl, null, GsonUtils.toJson(createMemberCardRequestBody));
-        String createMemberCardResult = createMemberCardWebResponse.getResult();
+        String createMemberCardResult = OutUtils.doPostWithRequestBody(createMemberCardUrl, JacksonUtils.writeValueAsString(createMemberCardRequestBody), Constants.CHARSET_NAME_UTF_8, Constants.CONTENT_TYPE_APPLICATION_JSON_UTF8);
         Map<String, Object> createMemberCardResultMap = JacksonUtils.readValueAsMap(createMemberCardResult, String.class, Object.class);
         ValidateUtils.isTrue(MapUtils.getIntValue(createMemberCardResultMap, "errcode") == 0, MapUtils.getString(createMemberCardResultMap, "errmsg"));
 
@@ -222,8 +218,8 @@ public class WeiXinService {
 
         String activateUserFormUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_MEMBER_CARD_ACTIVATE_USER_FORM_SET_URI + "?access_token=" + accessToken;
 
-        WebResponse activateUserFormWebResponse = OutUtils.doPostWithRequestBody(activateUserFormUrl, null, GsonUtils.toJson(activateUserFormRequestBody));
-        String activateUserFormResult = activateUserFormWebResponse.getResult();
+        String activateUserFormResult = OutUtils.doPostWithRequestBody(activateUserFormUrl, JacksonUtils.writeValueAsString(activateUserFormRequestBody), Constants.CHARSET_NAME_UTF_8, Constants.CONTENT_TYPE_APPLICATION_JSON_UTF8);
+
         Map<String, Object> activateUserFormResultMap = JacksonUtils.readValueAsMap(activateUserFormResult, String.class, Object.class);
         ValidateUtils.isTrue(MapUtils.getIntValue(activateUserFormResultMap, "errcode") == 0, MapUtils.getString(activateUserFormResultMap, "errmsg"));
 
@@ -239,8 +235,7 @@ public class WeiXinService {
 
         String createQrCodeUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_QRCODE_CREATE_URI + "?access_token=" + accessToken;
 
-        WebResponse createQrCodeWebResponse = OutUtils.doPostWithRequestBody(createQrCodeUrl, null, GsonUtils.toJson(createQRcodeRequestBody));
-        String createQrCodeResult = createQrCodeWebResponse.getResult();
+        String createQrCodeResult = OutUtils.doPostWithRequestBody(createQrCodeUrl, JacksonUtils.writeValueAsString(createQRcodeRequestBody), Constants.CHARSET_NAME_UTF_8, Constants.CONTENT_TYPE_APPLICATION_JSON_UTF8);
         Map<String, Object> createQrCodeResultMap = JacksonUtils.readValueAsMap(createQrCodeResult, String.class, Object.class);
         ValidateUtils.isTrue(MapUtils.getIntValue(createQrCodeResultMap, "errcode") == 0, MapUtils.getString(createQrCodeResultMap, "errmsg"));
 
@@ -304,8 +299,7 @@ public class WeiXinService {
         String weiXinApiUrl = ConfigurationUtils.getConfiguration(Constants.WEI_XIN_API_URL);
         String weiXinAddPayGiftCardUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_PAY_GIFT_CARD_ADD_URI + "?access_token=" + accessToken;
 
-        WebResponse payGiftCardWebResponse = OutUtils.doPostWithRequestBody(weiXinAddPayGiftCardUrl, null, GsonUtils.toJson(payGiftCardRequestBody));
-        String payGiftCardResult = payGiftCardWebResponse.getResult();
+        String payGiftCardResult = OutUtils.doPostWithRequestBody(weiXinAddPayGiftCardUrl, JacksonUtils.writeValueAsString(payGiftCardRequestBody), Constants.CHARSET_NAME_UTF_8, Constants.CONTENT_TYPE_APPLICATION_JSON_UTF8);
         Map<String, Object> payGiftCardResultMap = JacksonUtils.readValueAsMap(payGiftCardResult, String.class, Object.class);
         ValidateUtils.isTrue(MapUtils.getIntValue(payGiftCardResultMap, "errcode") == 0, MapUtils.getString(payGiftCardResultMap, "errmsg"));
 
@@ -336,8 +330,7 @@ public class WeiXinService {
         String weiXinApiUrl = ConfigurationUtils.getConfiguration(Constants.WEI_XIN_API_URL);
         String deleteCardUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_DELETE_URI + "?access_token=" + accessToken;
 
-        WebResponse deleteCardWebResponse = OutUtils.doPostWithRequestBody(deleteCardUrl, null, GsonUtils.toJson(deleteCardRequestBody));
-        String deleteCardResult = deleteCardWebResponse.getResult();
+        String deleteCardResult = OutUtils.doPostWithRequestBody(deleteCardUrl, JacksonUtils.writeValueAsString(deleteCardRequestBody), Constants.CHARSET_NAME_UTF_8, Constants.CONTENT_TYPE_APPLICATION_JSON_UTF8);
         Map<String, Object> deleteCardResultMap = JacksonUtils.readValueAsMap(deleteCardResult, String.class, Object.class);
         ValidateUtils.isTrue(MapUtils.getIntValue(deleteCardResultMap, "errcode") == 0, MapUtils.getString(deleteCardResultMap, "errmsg"));
 

@@ -1,7 +1,6 @@
 package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
-import build.dream.common.beans.WebResponse;
 import build.dream.common.domains.catering.Branch;
 import build.dream.common.domains.catering.DietOrder;
 import build.dream.common.tuples.Tuple2;
@@ -35,16 +34,15 @@ public class MeiTuanUtils {
         Map<String, String> params = new HashMap<String, String>(requestParameters);
         params.put("appAuthToken", appAuthToken);
         params.put("charset", charset);
-        params.put("charset", charset);
         params.put("timestamp", timestamp);
         params.put("version", version);
 
         String sign = generateSignature(signKey, params);
         params.put("sign", sign);
 
-        WebResponse webResponse = null;
+        String result = null;
         if (Constants.REQUEST_METHOD_GET.equals(requestMethod)) {
-            webResponse = OutUtils.doGetWithRequestParameters(url, params);
+            result = OutUtils.doGet(url, params);
         } else if (Constants.REQUEST_METHOD_POST.equals(requestMethod)) {
             StringBuilder requestUrl = new StringBuilder(url);
             requestUrl.append("?appAuthToken=").append(appAuthToken);
@@ -52,9 +50,8 @@ public class MeiTuanUtils {
             requestUrl.append("&timestamp=").append(timestamp);
             requestUrl.append("&version=").append(version);
             requestUrl.append("&sign=").append(sign);
-            webResponse = OutUtils.doPostWithRequestParameters(requestUrl.toString(), requestParameters);
+            result = OutUtils.doPostWithForm(requestUrl.toString(), requestParameters);
         }
-        String result = webResponse.getResult();
         Map<String, Object> resultMap = JacksonUtils.readValueAsMap(result, String.class, Object.class);
         String code = MapUtils.getString(resultMap, "code");
         ValidateUtils.isTrue(StringUtils.isBlank(code), MapUtils.getString(resultMap, "msg"));
@@ -72,8 +69,8 @@ public class MeiTuanUtils {
         return meiTuanAppAuthToken;
     }
 
-    public static Tuple2<BigInteger, BigInteger> obtainTenantAndBranchId(Map<String, Object> callbackParameters) {
-        String ePoiId = MapUtils.getString(callbackParameters, "ePoiId");
+    public static Tuple2<BigInteger, BigInteger> obtainTenantAndBranchId(Map<String, String> callbackParameters) {
+        String ePoiId = callbackParameters.get("ePoiId");
         return obtainTenantAndBranchId(ePoiId);
     }
 
@@ -84,11 +81,12 @@ public class MeiTuanUtils {
         return TupleUtils.buildTuple2(tenantId, branchId);
     }
 
-    public static DietOrder obtainDietOrder(Map<String, Object> callbackParameters) {
+    public static DietOrder obtainDietOrder(Map<String, String> callbackParameters) {
         Tuple2<BigInteger, BigInteger> tuple2 = MeiTuanUtils.obtainTenantAndBranchId(callbackParameters);
         BigInteger tenantId = tuple2._1();
         BigInteger branchId = tuple2._2();
-        Map<String, Object> orderMap = MapUtils.getMap(callbackParameters, "order");
+        String order = callbackParameters.get("order");
+        Map<String, Object> orderMap = JacksonUtils.readValueAsMap(order, String.class, Object.class);
         String orderId = MapUtils.getString(orderMap, "orderId");
 
         SearchModel searchModel = SearchModel.builder()
@@ -112,8 +110,8 @@ public class MeiTuanUtils {
         return DatabaseHelper.find(Branch.class, searchModel);
     }
 
-    public static Branch obtainBranch(Map<String, Object> callbackParameters) {
-        String ePoiId = MapUtils.getString(callbackParameters, "ePoiId");
+    public static Branch obtainBranch(Map<String, String> callbackParameters) {
+        String ePoiId = callbackParameters.get("ePoiId");
         return obtainBranch(ePoiId);
     }
 }

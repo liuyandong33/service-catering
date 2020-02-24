@@ -4,12 +4,9 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.models.meituan.*;
 import build.dream.catering.utils.MeiTuanUtils;
 import build.dream.common.api.ApiRest;
-import build.dream.common.beans.WebResponse;
-import build.dream.common.domains.catering.*;
 import build.dream.common.constants.DietOrderConstants;
+import build.dream.common.domains.catering.*;
 import build.dream.common.utils.*;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -35,24 +32,28 @@ public class MeiTuanService {
     public ApiRest generateBindingStoreLink(GenerateBindingStoreLinkModel generateBindingStoreLinkModel) {
         BigInteger tenantId = generateBindingStoreLinkModel.obtainTenantId();
         BigInteger branchId = generateBindingStoreLinkModel.obtainBranchId();
+        String businessId = generateBindingStoreLinkModel.getBusinessId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         ValidateUtils.notNull(branch, "门店不存在！");
+
         String meiTuanErpServiceUrl = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_ERP_SERVICE_URL);
-        String meiTuanDeveloperId = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_DEVELOPER_ID);
-        String meiTuanSignKey = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_SIGN_KEY);
-        StringBuffer bindingStoreLink = new StringBuffer(meiTuanErpServiceUrl);
-        bindingStoreLink.append(Constants.MEI_TUAN_STORE_MAP_URI);
-        bindingStoreLink.append("?developerId=").append(meiTuanDeveloperId);
-        bindingStoreLink.append("&businessId=").append(generateBindingStoreLinkModel.getBusinessId());
-        bindingStoreLink.append("&ePoiId=").append(tenantId).append("Z").append(branchId);
-        bindingStoreLink.append("&signKey=").append(meiTuanSignKey);
-        bindingStoreLink.append("&ePoiName=").append(branch.getName());
-        bindingStoreLink.append("&timestamp=").append(System.currentTimeMillis());
-        return ApiRest.builder().data(bindingStoreLink.toString()).message("生成门店绑定链接成功！").successful(true).build();
+        String developerId = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_DEVELOPER_ID);
+        String signKey = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_SIGN_KEY);
+
+        Map<String, String> requestParameters = new HashMap<String, String>();
+        requestParameters.put("developerId", developerId);
+        requestParameters.put("businessId", businessId);
+        requestParameters.put("ePoiId", tenantId + "Z" + branchId);
+        requestParameters.put("ePoiName", branch.getName());
+        requestParameters.put("timestamp", String.valueOf(System.currentTimeMillis()));
+        requestParameters.put("sign", MeiTuanUtils.generateSignature(signKey, requestParameters));
+
+        String bindingStoreLink = meiTuanErpServiceUrl + "/storemap?" + WebUtils.buildQueryString(requestParameters);
+        return ApiRest.builder().data(bindingStoreLink).message("生成门店绑定链接成功！").successful(true).build();
     }
 
     /**
@@ -63,9 +64,10 @@ public class MeiTuanService {
      * @throws IOException
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleOrderEffectiveCallback(Map<String, Object> callbackParameters, String uuid, Integer type) {
-        String ePoiId = MapUtils.getString(callbackParameters, "ePoiId");
-        Map<String, Object> orderMap = MapUtils.getMap(callbackParameters, "order");
+    public void handleOrderEffectiveCallback(Map<String, String> callbackParameters, String uuid, Integer type) {
+        String ePoiId = callbackParameters.get("ePoiId");
+        String order = callbackParameters.get("order");
+        Map<String, Object> orderMap = JacksonUtils.readValueAsMap(order, String.class, Object.class);
 
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
         BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
@@ -100,14 +102,12 @@ public class MeiTuanService {
         String extras = MapUtils.getString(orderMap, "extras");
         List<DietOrderActivity> dietOrderActivities = new ArrayList<DietOrderActivity>();
         if (StringUtils.isNotBlank(extras)) {
-            JSONArray extrasJsonArray = JSONArray.fromObject(extras);
-            int extrasSize = extrasJsonArray.size();
-            for (int index = 0; index < extrasSize; index++) {
-                JSONObject extraJsonObject = extrasJsonArray.getJSONObject(index);
-                if (extraJsonObject.isEmpty()) {
+            List<Map> extraList = JacksonUtils.readValueAsList(extras, Map.class);
+            for (Map extraMap : extraList) {
+                if (MapUtils.isEmpty(extraMap)) {
                     continue;
                 }
-                BigDecimal poiCharge = BigDecimal.valueOf(extraJsonObject.optDouble("poi_charge", 0));
+                BigDecimal poiCharge = BigDecimal.valueOf(MapUtils.getDoubleValue(extraMap, "poi_charge"));
                 if (poiCharge.compareTo(BigDecimal.ZERO) > 0) {
                     discountAmount = discountAmount.add(poiCharge);
                     DietOrderActivity dietOrderActivity = DietOrderActivity.builder()
@@ -115,8 +115,8 @@ public class MeiTuanService {
                             .tenantCode(tenantCode)
                             .branchId(branchId)
                             .activityId(Constants.BIGINT_DEFAULT_VALUE)
-                            .activityName(extraJsonObject.getString("remark"))
-                            .activityType(extraJsonObject.getInt("type"))
+                            .activityName(MapUtils.getString(extraMap, "remark"))
+                            .activityType(MapUtils.getIntValue(extraMap, "type"))
                             .amount(poiCharge)
                             .createdUserId(userId)
                             .updatedUserId(userId)
@@ -233,19 +233,15 @@ public class MeiTuanService {
             DatabaseHelper.insertAll(dietOrderActivities);
         }
 
-//        JSONObject poiReceiveDetailJsonObject = orderJsonObject.optJSONObject("poiReceiveDetail");
-
         String detail = MapUtils.getString(orderMap, "detail");
-        JSONArray detailJsonArray = JSONArray.fromObject(detail);
-        int detailSize = detailJsonArray.size();
+        List<Map> detailList = JacksonUtils.readValueAsList(detail, Map.class);
 
         Map<Integer, DietOrderGroup> dietOrderGroupMap = new HashMap<Integer, DietOrderGroup>();
         BigDecimal packageFee = BigDecimal.ZERO;
         BigDecimal boxQuantity = BigDecimal.ZERO;
 
-        for (int index = 0; index < detailSize; index++) {
-            JSONObject detailJsonObject = detailJsonArray.getJSONObject(index);
-            int cartId = detailJsonObject.getInt("cart_id");
+        for (Map detailMap : detailList) {
+            int cartId = MapUtils.getIntValue(detailMap, "cart_id");
             DietOrderGroup dietOrderGroup = dietOrderGroupMap.get(cartId);
             if (dietOrderGroup == null) {
                 dietOrderGroup = DietOrderGroup.builder()
@@ -261,13 +257,13 @@ public class MeiTuanService {
                 DatabaseHelper.insert(dietOrderGroup);
                 dietOrderGroupMap.put(cartId, dietOrderGroup);
             }
-            BigDecimal boxNum = BigDecimal.valueOf(detailJsonObject.getDouble("box_num"));
-            BigDecimal boxPrice = BigDecimal.valueOf(detailJsonObject.getDouble("box_price"));
+            BigDecimal boxNum = BigDecimal.valueOf(MapUtils.getDoubleValue(detailMap, "box_num"));
+            BigDecimal boxPrice = BigDecimal.valueOf(MapUtils.getDoubleValue(detailMap, "box_price"));
             packageFee = packageFee.add(boxNum.multiply(boxPrice));
             boxQuantity = boxQuantity.add(boxNum);
 
-            BigDecimal price = BigDecimal.valueOf(detailJsonObject.getDouble("price"));
-            BigDecimal quantity = BigDecimal.valueOf(detailJsonObject.getDouble("quantity"));
+            BigDecimal price = BigDecimal.valueOf(MapUtils.getDoubleValue(detailMap, "price"));
+            BigDecimal quantity = BigDecimal.valueOf(MapUtils.getDoubleValue(detailMap, "quantity"));
             BigDecimal dietOrderDetailTotalAmount = price.multiply(quantity);
             DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
                     .tenantId(tenantId)
@@ -277,7 +273,7 @@ public class MeiTuanService {
                     .dietOrderGroupId(dietOrderGroup.getId())
                     .goodsType(Constants.GOODS_TYPE_ORDINARY_GOODS)
                     .goodsId(Constants.BIGINT_DEFAULT_VALUE)
-                    .goodsName(detailJsonObject.getString("food_name"))
+                    .goodsName(MapUtils.getString(detailMap, "food_name"))
                     .goodsSpecificationId(Constants.BIGINT_DEFAULT_VALUE)
                     .goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE)
                     .categoryId(Constants.MEI_TUAN_GOODS_CATEGORY_ID)
@@ -293,7 +289,7 @@ public class MeiTuanService {
                     .build();
             DatabaseHelper.insert(dietOrderDetail);
 
-            String foodProperty = detailJsonObject.getString("food_property");
+            String foodProperty = MapUtils.getString(detailMap, "food_property");
             if (StringUtils.isNotBlank(foodProperty)) {
                 String[] foodProperties = foodProperty.split(",");
                 List<DietOrderDetailGoodsAttribute> dietOrderDetailGoodsAttributes = new ArrayList<DietOrderDetailGoodsAttribute>();
@@ -391,11 +387,12 @@ public class MeiTuanService {
      * @param type
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleOrderCancelCallback(Map<String, Object> callbackParameters, String uuid, int type) {
-        String developerId = MapUtils.getString(callbackParameters, "developerId");
-        String ePoiId = MapUtils.getString(callbackParameters, "ePoiId");
-        String sign = MapUtils.getString(callbackParameters, "sign");
-        Map<String, Object> orderCancelMap = MapUtils.getMap(callbackParameters, "orderCancel");
+    public void handleOrderCancelCallback(Map<String, String> callbackParameters, String uuid, int type) {
+        String developerId = callbackParameters.get("developerId");
+        String ePoiId = callbackParameters.get("ePoiId");
+        String sign = callbackParameters.get("sign");
+        String orderCancel = callbackParameters.get("orderCancel");
+        Map<String, Object> orderCancelMap = JacksonUtils.readValueAsMap(orderCancel, String.class, Object.class);
         BigInteger orderId = BigInteger.valueOf(MapUtils.getLongValue(orderCancelMap, "orderId"));
 
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
@@ -425,11 +422,12 @@ public class MeiTuanService {
      * @param type
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleOrderRefundCallback(Map<String, Object> callbackParameters, String uuid, int type) {
-        String developerId = MapUtils.getString(callbackParameters, "developerId");
-        String ePoiId = MapUtils.getString(callbackParameters, "ePoiId");
-        String sign = MapUtils.getString(callbackParameters, "sign");
-        Map<String, Object> orderRefundMap = MapUtils.getMap(callbackParameters, "orderRefund");
+    public void handleOrderRefundCallback(Map<String, String> callbackParameters, String uuid, int type) {
+        String developerId = callbackParameters.get("developerId");
+        String ePoiId = callbackParameters.get("ePoiId");
+        String sign = callbackParameters.get("sign");
+        String orderRefund = callbackParameters.get("orderRefund");
+        Map<String, Object> orderRefundMap = JacksonUtils.readValueAsMap(orderRefund, String.class, Object.class);
         BigInteger orderId = BigInteger.valueOf(MapUtils.getLongValue(orderRefundMap, "orderId"));
 
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
@@ -474,11 +472,11 @@ public class MeiTuanService {
      * @param type
      */
     @Transactional(rollbackFor = Exception.class)
-    public void handleBindingStoreCallback(Map<String, Object> callbackParameters, String uuid, int type) {
-        String ePoiId = MapUtils.getString(callbackParameters, "ePoiId");
-        String appAuthToken = MapUtils.getString(callbackParameters, "appAuthToken");
-        String poiId = MapUtils.getString(callbackParameters, "poiId");
-        String poiName = MapUtils.getString(callbackParameters, "poiName");
+    public void handleBindingStoreCallback(Map<String, String> callbackParameters, String uuid, int type) {
+        String ePoiId = callbackParameters.get("ePoiId");
+        String appAuthToken = callbackParameters.get("appAuthToken");
+        String poiId = callbackParameters.get("poiId");
+        String poiName = callbackParameters.get("poiName");
 
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
         BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
@@ -495,6 +493,7 @@ public class MeiTuanService {
         branch.setPoiId(poiId);
         branch.setPoiName(poiName);
         branch.setUpdatedUserId(userId);
+        branch.setUpdatedRemark("处理美团店铺绑定回调，保存appAuthToken、poiId、poiName");
         DatabaseHelper.update(branch);
     }
 
@@ -543,8 +542,8 @@ public class MeiTuanService {
         String sign = MeiTuanUtils.generateSignature("01b7d2lgmdylgiee", requestParameters);
         requestParameters.put("sign", sign);
         String url = "http://api.open.cater.meituan.com/waimai/poi/queryPoiInfo";
-        WebResponse webResponse = OutUtils.doGetWithRequestParameters(url, requestParameters);
-        System.out.println(webResponse.getResult());
+        String result = OutUtils.doGet(url, requestParameters);
+        System.out.println(result);
         return new ApiRest();
     }
 
@@ -685,7 +684,7 @@ public class MeiTuanService {
      * @param uuid
      * @param type
      */
-    public void handleOrderConfirmCallback(Map<String, Object> callbackParameters, String uuid, int type) {
+    public void handleOrderConfirmCallback(Map<String, String> callbackParameters, String uuid, int type) {
         DietOrder dietOrder = MeiTuanUtils.obtainDietOrder(callbackParameters);
         if (dietOrder == null) {
             return;
@@ -704,7 +703,7 @@ public class MeiTuanService {
      * @param uuid
      * @param type
      */
-    public void handleOrderSettledCallback(Map<String, Object> callbackParameters, String uuid, int type) {
+    public void handleOrderSettledCallback(Map<String, String> callbackParameters, String uuid, int type) {
         DietOrder dietOrder = MeiTuanUtils.obtainDietOrder(callbackParameters);
         if (dietOrder == null) {
             return;
@@ -723,7 +722,7 @@ public class MeiTuanService {
      * @param uuid
      * @param type
      */
-    public void handleOrderShippingStatusCallback(Map<String, Object> callbackParameters, String uuid, int type) {
+    public void handleOrderShippingStatusCallback(Map<String, String> callbackParameters, String uuid, int type) {
         DietOrder dietOrder = MeiTuanUtils.obtainDietOrder(callbackParameters);
         if (dietOrder == null) {
             return;
@@ -755,7 +754,7 @@ public class MeiTuanService {
      * @param uuid
      * @param type
      */
-    public void handlePoiStatusCallback(Map<String, Object> callbackParameters, String uuid, int type) {
+    public void handlePoiStatusCallback(Map<String, String> callbackParameters, String uuid, int type) {
         Branch branch = MeiTuanUtils.obtainBranch(callbackParameters);
         if (branch == null) {
             return;
@@ -781,7 +780,7 @@ public class MeiTuanService {
      * @param uuid
      * @param type
      */
-    public void handlePartOrderRefundCallback(Map<String, Object> callbackParameters, String uuid, int type) {
+    public void handlePartOrderRefundCallback(Map<String, String> callbackParameters, String uuid, int type) {
 
     }
 }

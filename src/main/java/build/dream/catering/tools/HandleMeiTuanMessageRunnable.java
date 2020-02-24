@@ -11,14 +11,14 @@ import java.util.Map;
 
 public class HandleMeiTuanMessageRunnable implements Runnable {
     private MeiTuanService meiTuanService;
-    private Map<String, Object> callbackParameters;
+    private Map<String, String> callbackParameters;
     private boolean continued = true;
     private int count;
     private int interval;
     private String uuid;
     private int type;
 
-    public HandleMeiTuanMessageRunnable(MeiTuanService meiTuanService, Map<String, Object> callbackParameters, int count, int interval, String uuid, int type) {
+    public HandleMeiTuanMessageRunnable(MeiTuanService meiTuanService, Map<String, String> callbackParameters, int count, int interval, String uuid, int type) {
         this.meiTuanService = meiTuanService;
         this.callbackParameters = callbackParameters;
         this.count = count;

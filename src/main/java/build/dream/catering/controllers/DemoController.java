@@ -138,7 +138,7 @@ public class DemoController {
         OrderQueryModel orderQueryModel = OrderQueryModel.builder()
                 .appId("wx63f5194332cc0f1b")
                 .mchId("1312787601")
-                .apiSecretKey("qingdaozhihuifangxiangruanjian12")
+                .apiKey("qingdaozhihuifangxiangruanjian12")
                 .subAppId("wx7d300c39c2a9c146")
                 .subMchId("1512374851")
                 .acceptanceModel(true)

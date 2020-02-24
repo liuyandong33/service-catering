@@ -3,6 +3,7 @@ package build.dream.catering.listeners;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.services.MeiTuanService;
 import build.dream.catering.tools.HandleMeiTuanMessageRunnable;
+import build.dream.common.utils.JacksonUtils;
 import build.dream.common.utils.ValidateUtils;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.MapUtils;
@@ -36,8 +37,8 @@ public class MeiTuanMessageListener implements MessageListener<String, String> {
             return;
         }
 
-        Map<String, Object> meiTuanMessageMap = JSONObject.fromObject(meiTuanMessage);
-        Map<String, Object> callbackParameters = MapUtils.getMap(meiTuanMessageMap, "callbackParameters");
+        Map<String, Object> meiTuanMessageMap = JacksonUtils.readValueAsMap(meiTuanMessage, String.class, Object.class);
+        Map<String, String> callbackParameters = MapUtils.getMap(meiTuanMessageMap, "callbackParameters");
         String uuid = MapUtils.getString(meiTuanMessageMap, "uuid");
         int count = MapUtils.getIntValue(meiTuanMessageMap, "count");
         int type = MapUtils.getIntValue(meiTuanMessageMap, "type");
