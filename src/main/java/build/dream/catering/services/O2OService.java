@@ -26,7 +26,7 @@ public class O2OService {
         BigInteger vipId = obtainVipInfoModel.getVipId();
         String vipCode = obtainVipInfoModel.getVipCode();
         String phoneNumber = obtainVipInfoModel.getPhoneNumber();
-        String openId = obtainVipInfoModel.getOpenId();
+        String mainOpenId = obtainVipInfoModel.getMainOpenId();
         String alipayUserId = obtainVipInfoModel.getAlipayUserId();
 
         SearchModel searchModel = new SearchModel(true);
@@ -40,8 +40,8 @@ public class O2OService {
         if (StringUtils.isNotBlank(phoneNumber)) {
             searchModel.addSearchCondition(Vip.ColumnName.PHONE_NUMBER, Constants.SQL_OPERATION_SYMBOL_EQUAL, phoneNumber);
         }
-        if (StringUtils.isNotBlank(openId)) {
-            searchModel.addSearchCondition(Vip.ColumnName.OPEN_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, openId);
+        if (StringUtils.isNotBlank(mainOpenId)) {
+            searchModel.addSearchCondition(Vip.ColumnName.MAIN_OPEN_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, mainOpenId);
         }
         if (StringUtils.isNotBlank(alipayUserId)) {
             searchModel.addSearchCondition(Vip.ColumnName.ALIPAY_USER_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, alipayUserId);

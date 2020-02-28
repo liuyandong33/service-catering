@@ -18,7 +18,7 @@ public class ObtainVipInfoModel extends BasicModel {
 
     private String phoneNumber;
 
-    private String openId;
+    private String mainOpenId;
 
     private String alipayUserId;
 
@@ -54,12 +54,12 @@ public class ObtainVipInfoModel extends BasicModel {
         this.phoneNumber = phoneNumber;
     }
 
-    public String getOpenId() {
-        return openId;
+    public String getMainOpenId() {
+        return mainOpenId;
     }
 
-    public void setOpenId(String openId) {
-        this.openId = openId;
+    public void setMainOpenId(String mainOpenId) {
+        this.mainOpenId = mainOpenId;
     }
 
     public String getAlipayUserId() {
@@ -73,6 +73,6 @@ public class ObtainVipInfoModel extends BasicModel {
     @Override
     public void validateAndThrow() {
         super.validateAndThrow();
-        ValidateUtils.isTrue(vipId != null || StringUtils.isNotBlank(vipCode) || StringUtils.isNotBlank(phoneNumber) || StringUtils.isNotBlank(openId) || StringUtils.isNotBlank(alipayUserId), "参数【vipId、vipCode、phoneNumber、openId、alipayUserId】不能同时为空！");
+        ValidateUtils.isTrue(vipId != null || StringUtils.isNotBlank(vipCode) || StringUtils.isNotBlank(phoneNumber) || StringUtils.isNotBlank(mainOpenId) || StringUtils.isNotBlank(alipayUserId), "参数【vipId、vipCode、phoneNumber、mainOpenId、alipayUserId】不能同时为空！");
     }
 }

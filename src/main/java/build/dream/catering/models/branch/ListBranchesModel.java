@@ -1,6 +1,5 @@
 package build.dream.catering.models.branch;
 
-import build.dream.common.models.BasicModel;
 import build.dream.common.models.CateringBasicModel;
 
 import javax.validation.constraints.Max;
