@@ -5,7 +5,7 @@ import build.dream.catering.services.DietOrderService;
 import build.dream.catering.services.PosService;
 import build.dream.common.annotations.RocketMQMessageListener;
 import build.dream.common.models.rocketmq.DelayedMessageModel;
-import build.dream.common.models.rocketmq.DelayedOrTimedType;
+import build.dream.common.models.rocketmq.DelayedType;
 import build.dream.common.utils.JacksonUtils;
 import com.aliyun.openservices.ons.api.Action;
 import com.aliyun.openservices.ons.api.ConsumeContext;
@@ -28,14 +28,14 @@ public class DelayedRocketMQMessageListener implements MessageListener {
     public Action consume(Message message, ConsumeContext context) {
         String body = new String(message.getBody(), Constants.CHARSET_UTF_8);
         DelayedMessageModel delayedMessageModel = JacksonUtils.readValue(body, DelayedMessageModel.class);
-        DelayedOrTimedType delayedOrTimedType = delayedMessageModel.getType();
+        DelayedType delayedType = delayedMessageModel.getType();
         Map<String, Object> data = delayedMessageModel.getData();
 
-        switch (delayedOrTimedType) {
-            case DELAYED_OR_TIMED_TYPE_DIET_ORDER_INVALID:
+        switch (delayedType) {
+            case DELAYED_TYPE_DIET_ORDER_INVALID:
                 dietOrderService.cancelOrder(data);
                 break;
-            case DELAYED_OR_TIMED_TYPE_POS_MQTT_TOKEN_INVALID:
+            case DELAYED_TYPE_POS_MQTT_TOKEN_INVALID:
                 posService.handleMqttTokenInvalid(data);
                 break;
         }

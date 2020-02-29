@@ -19,8 +19,8 @@ import build.dream.common.models.mqtt.RevokeTokenModel;
 import build.dream.common.models.newland.BarcodePayModel;
 import build.dream.common.models.newland.QryBarcodePayModel;
 import build.dream.common.models.newland.RefundBarcodePayModel;
-import build.dream.common.models.rocketmq.DelayedOrTimedModel;
-import build.dream.common.models.rocketmq.DelayedOrTimedType;
+import build.dream.common.models.rocketmq.DelayedMessageModel;
+import build.dream.common.models.rocketmq.DelayedType;
 import build.dream.common.models.umpay.MerRefundModel;
 import build.dream.common.models.umpay.PassiveScanCodePayModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
@@ -719,15 +719,15 @@ public class PosService {
     }
 
     public void sendPosTokenInvalidMessage(BigInteger tenantId, BigInteger branchId, BigInteger posId, long startDeliverTime) {
-        DelayedOrTimedModel delayedOrTimedModel = new DelayedOrTimedModel();
-        delayedOrTimedModel.setType(DelayedOrTimedType.DELAYED_OR_TIMED_TYPE_POS_MQTT_TOKEN_INVALID);
+        DelayedMessageModel delayedMessageModel = new DelayedMessageModel();
+        delayedMessageModel.setType(DelayedType.DELAYED_TYPE_POS_MQTT_TOKEN_INVALID);
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("tenantId", tenantId);
         data.put("branchId", branchId);
         data.put("posId", posId);
 
-        delayedOrTimedModel.setData(data);
+        delayedMessageModel.setData(data);
 
         String body = JacksonUtils.writeValueAsString(data);
 
