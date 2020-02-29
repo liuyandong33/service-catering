@@ -4,7 +4,7 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.services.DietOrderService;
 import build.dream.catering.services.PosService;
 import build.dream.common.annotations.RocketMQMessageListener;
-import build.dream.common.models.rocketmq.DelayedOrTimedModel;
+import build.dream.common.models.rocketmq.DelayedMessageModel;
 import build.dream.common.models.rocketmq.DelayedOrTimedType;
 import build.dream.common.utils.JacksonUtils;
 import com.aliyun.openservices.ons.api.Action;
@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @Component
-@RocketMQMessageListener(topic = "${delayed.or.timed.rocket.mq.topic}")
-public class DelayedOrTimedRocketMQListener implements MessageListener {
+@RocketMQMessageListener(topic = "${delayed.rocketmq.message.topic}")
+public class DelayedRocketMQMessageListener implements MessageListener {
     @Autowired
     private DietOrderService dietOrderService;
     @Autowired
@@ -27,9 +27,9 @@ public class DelayedOrTimedRocketMQListener implements MessageListener {
     @Override
     public Action consume(Message message, ConsumeContext context) {
         String body = new String(message.getBody(), Constants.CHARSET_UTF_8);
-        DelayedOrTimedModel delayedOrTimedModel = JacksonUtils.readValue(body, DelayedOrTimedModel.class);
-        DelayedOrTimedType delayedOrTimedType = delayedOrTimedModel.getType();
-        Map<String, Object> data = delayedOrTimedModel.getData();
+        DelayedMessageModel delayedMessageModel = JacksonUtils.readValue(body, DelayedMessageModel.class);
+        DelayedOrTimedType delayedOrTimedType = delayedMessageModel.getType();
+        Map<String, Object> data = delayedMessageModel.getData();
 
         switch (delayedOrTimedType) {
             case DELAYED_OR_TIMED_TYPE_DIET_ORDER_INVALID:
