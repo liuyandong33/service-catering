@@ -2,6 +2,7 @@ package build.dream.catering.utils;
 
 import build.dream.catering.beans.PackageDetail;
 import build.dream.catering.beans.PackageGroupDietOrderDetail;
+import build.dream.catering.constants.ConfigurationKeys;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.dietorder.SaveDietOrderModel;
 import build.dream.catering.tools.PushMessageThread;
@@ -14,12 +15,15 @@ import build.dream.common.domains.saas.WeiXinPayAccount;
 import build.dream.common.models.alipay.AlipayTradeRefundModel;
 import build.dream.common.models.data.AddOrderModel;
 import build.dream.common.models.jpush.PushModel;
+import build.dream.common.models.rocketmq.DelayedMessageModel;
+import build.dream.common.models.rocketmq.DelayedType;
 import build.dream.common.models.weixinpay.RefundModel;
 import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang3.time.DateUtils;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -1021,11 +1025,27 @@ public class DietOrderUtils {
         dietOrder.setPayableAmount(dietOrderTotalAmount.subtract(dietOrderDiscountAmount));
         dietOrder.setPaidAmount(BigDecimal.ZERO);
 
-        KafkaFixedTimeSendResult kafkaFixedTimeSendResult = startOrderInvalidJob(tenantId, branchId, dietOrderId, 1, DateUtils.addMinutes(dietOrder.getCreatedTime(), 15));
-        dietOrder.setJobId(kafkaFixedTimeSendResult.getJobId());
-        dietOrder.setTriggerId(kafkaFixedTimeSendResult.getTriggerId());
+//        KafkaFixedTimeSendResult kafkaFixedTimeSendResult = startOrderInvalidJob(tenantId, branchId, dietOrderId, 1, DateUtils.addMinutes(dietOrder.getCreatedTime(), 15));
+//        dietOrder.setJobId(kafkaFixedTimeSendResult.getJobId());
+//        dietOrder.setTriggerId(kafkaFixedTimeSendResult.getTriggerId());
 
         DatabaseHelper.update(dietOrder);
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("tenantId", tenantId);
+        data.put("branchId", branchId);
+        data.put("orderId", dietOrderId);
+        DelayedMessageModel delayedMessageModel = new DelayedMessageModel();
+        delayedMessageModel.setType(DelayedType.DELAYED_TYPE_DIET_ORDER_INVALID);
+        delayedMessageModel.setData(data);
+
+        MessageProperties messageProperties = new MessageProperties();
+        messageProperties.setDelay(5 * 60 * 1000);
+        Message message = new Message(JacksonUtils.writeValueAsString(delayedMessageModel).getBytes(Constants.CHARSET_UTF_8), messageProperties);
+
+        String exchange = ConfigurationUtils.getConfiguration(ConfigurationKeys.DELAYED_EXCHANGE);
+        String routingKey = ConfigurationUtils.getConfiguration(ConfigurationKeys.DELAYED_EXCHANGE_TO_DELAYED_QUEUE_ROUTING_KEY);
+        RabbitUtils.send(exchange, routingKey, message);
         return dietOrder;
     }
 

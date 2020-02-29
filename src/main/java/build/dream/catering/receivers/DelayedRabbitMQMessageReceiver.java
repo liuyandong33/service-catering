@@ -20,7 +20,7 @@ public class DelayedRabbitMQMessageReceiver {
     @Autowired
     private PosService posService;
 
-    @RabbitListener(queues = "${delayed.rabbitmq.message.queue}")
+    @RabbitListener(queues = "${delayed.queue}")
     public void messageReceived(Message message) {
         String body = new String(message.getBody(), Constants.CHARSET_UTF_8);
         DelayedMessageModel delayedMessageModel = JacksonUtils.readValue(body, DelayedMessageModel.class);

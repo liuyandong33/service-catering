@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @Component
-@RocketMQMessageListener(topic = "${delayed.rocketmq.message.topic}")
+@RocketMQMessageListener(topic = "${delayed.topic}")
 public class DelayedRocketMQMessageListener implements MessageListener {
     @Autowired
     private DietOrderService dietOrderService;
