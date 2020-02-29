@@ -5,10 +5,11 @@ import build.dream.catering.models.pos.*;
 import build.dream.catering.utils.SerialNumberGenerator;
 import build.dream.common.api.ApiRest;
 import build.dream.common.beans.AlipayAccount;
-import build.dream.common.domains.saas.MqttConfig;
+import build.dream.common.beans.MqConfig;
 import build.dream.common.domains.catering.OfflinePayLog;
 import build.dream.common.domains.catering.OfflinePayRecord;
 import build.dream.common.domains.catering.Pos;
+import build.dream.common.domains.saas.*;
 import build.dream.common.models.alipay.AlipayTradePayModel;
 import build.dream.common.models.alipay.AlipayTradeRefundModel;
 import build.dream.common.models.miya.OrderPayModel;
@@ -24,7 +25,6 @@ import build.dream.common.models.umpay.MerRefundModel;
 import build.dream.common.models.umpay.PassiveScanCodePayModel;
 import build.dream.common.models.weixinpay.MicroPayModel;
 import build.dream.common.mqtt.MqttInfo;
-import build.dream.common.domains.saas.*;
 import build.dream.common.tuples.Tuple2;
 import build.dream.common.utils.*;
 import com.aliyun.openservices.ons.api.Message;
@@ -305,7 +305,7 @@ public class PosService {
                     .appId(alipayAccount.getAppId())
                     .appPrivateKey(alipayAccount.getAppPrivateKey())
                     .alipayPublicKey(alipayAccount.getAlipayPublicKey())
-                    .topic(ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC))
+                    .mqConfig(MqConfig.builder().mqType(Constants.MQ_TYPE_KAFKA).topic(ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC)).build())
                     .outTradeNo(outTradeNo)
                     .authCode(authCode)
                     .scene(build.dream.common.constants.Constants.SCENE_BAR_CODE)
@@ -368,7 +368,7 @@ public class PosService {
                     .merId(umPayAccount.getMerId())
                     .privateKey(umPayAccount.getPrivateKey())
                     .platformCertificate(umPayAccount.getPlatformCertificate())
-                    .topic(ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_UMPAY_ASYNC_NOTIFY_MESSAGE_TOPIC))
+                    .mqConfig(MqConfig.builder().mqType(Constants.MQ_TYPE_KAFKA).topic(ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_UMPAY_ASYNC_NOTIFY_MESSAGE_TOPIC)).build())
                     .goodsInf("")
                     .orderId(outTradeNo)
                     .amount(totalAmount)
@@ -613,7 +613,7 @@ public class PosService {
                     .outRefundNo(outRefundNo)
                     .totalFee(totalAmount)
                     .refundFee(refundAmount == null ? totalAmount : refundAmount)
-                    .topic(ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC))
+                    .mqConfig(MqConfig.builder().mqType(Constants.MQ_TYPE_KAFKA).topic(ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC)).build())
                     .operationCertificate(weiXinPayAccount.getOperationCertificate())
                     .operationCertificatePassword(weiXinPayAccount.getOperationCertificatePassword())
                     .build();
@@ -624,7 +624,7 @@ public class PosService {
 
             AlipayTradeRefundModel alipayTradeRefundModel = AlipayTradeRefundModel.builder()
                     .appId(alipayAccount.getAppId())
-                    .topic(ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC))
+                    .mqConfig(MqConfig.builder().mqType(Constants.MQ_TYPE_KAFKA).topic(ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC)).build())
                     .appPrivateKey(alipayAccount.getAppPrivateKey())
                     .alipayPublicKey(alipayAccount.getAlipayPublicKey())
                     .refundAmount(refundAmount == null ? BigDecimal.valueOf(totalAmount).divide(Constants.BIG_DECIMAL_ONE_HUNDRED) : BigDecimal.valueOf(refundAmount).divide(Constants.BIG_DECIMAL_ONE_HUNDRED))

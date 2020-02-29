@@ -224,7 +224,7 @@ public class DietOrderService {
                         .outTradeNo(orderNumber)
                         .totalFee(payableAmount.multiply(Constants.BIG_DECIMAL_ONE_HUNDRED).intValue())
                         .spbillCreateIp(ApplicationHandler.getRemoteAddress())
-                        .topic("")
+                        .mqConfig(null)
                         .tradeType(tradeType)
                         .openId(openId)
                         .subOpenId(subOpenId)
@@ -235,7 +235,7 @@ public class DietOrderService {
 
                 AlipayTradeWapPayModel alipayTradeWapPayModel = AlipayTradeWapPayModel.builder()
                         .returnUrl(returnUrl)
-                        .topic("")
+                        .mqConfig(null)
                         .subject("订单支付")
                         .outTradeNo(orderNumber)
                         .totalAmount(payableAmount)
@@ -247,7 +247,7 @@ public class DietOrderService {
 
                 AlipayTradePagePayModel alipayTradePagePayModel = AlipayTradePagePayModel.builder()
                         .returnUrl(returnUrl)
-                        .topic("")
+                        .mqConfig(null)
                         .outTradeNo(orderNumber)
                         .productCode(orderNumber)
                         .totalAmount(payableAmount)
@@ -256,7 +256,7 @@ public class DietOrderService {
                 result = AlipayUtils.alipayTradePagePay(alipayTradePagePayModel);
             } else if (paidScene == Constants.PAID_SCENE_ALIPAY_APP) {
                 AlipayTradeAppPayModel alipayTradeAppPayModel = AlipayTradeAppPayModel.builder()
-                        .topic("")
+                        .mqConfig(null)
                         .outTradeNo(orderNumber)
                         .totalAmount(payableAmount)
                         .subject("订单支付")
@@ -264,7 +264,7 @@ public class DietOrderService {
                 result = AlipayUtils.alipayTradeAppPay(alipayTradeAppPayModel);
             } else if (paidScene == Constants.PAID_SCENE_ALIPAY_FAC_TO_FACE) {
                 AlipayTradePayModel alipayTradePayModel = AlipayTradePayModel.builder()
-                        .topic("")
+                        .mqConfig(null)
                         .outTradeNo(orderNumber)
                         .totalAmount(payableAmount)
                         .scene(Constants.SCENE_BAR_CODE)
@@ -581,7 +581,7 @@ public class DietOrderService {
                         .outTradeNo(dietOrder.getOrderNumber())
                         .totalFee(paidAmount.multiply(Constants.BIG_DECIMAL_ONE_HUNDRED).intValue())
                         .spbillCreateIp(ApplicationHandler.getRemoteAddress())
-                        .topic(UUID.randomUUID().toString())
+                        .mqConfig(null)
                         .tradeType(Constants.WEI_XIN_PAY_TRADE_TYPE_APP)
                         .build();
                 Map<String, String> result = WeiXinPayUtils.unifiedOrder(unifiedOrderModel);

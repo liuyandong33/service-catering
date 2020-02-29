@@ -6,14 +6,15 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.models.dietorder.SaveDietOrderModel;
 import build.dream.catering.tools.PushMessageThread;
 import build.dream.common.beans.KafkaFixedTimeSendResult;
-import build.dream.common.domains.catering.*;
+import build.dream.common.beans.MqConfig;
 import build.dream.common.constants.DietOrderConstants;
+import build.dream.common.domains.catering.*;
+import build.dream.common.domains.saas.Tenant;
+import build.dream.common.domains.saas.WeiXinPayAccount;
 import build.dream.common.models.alipay.AlipayTradeRefundModel;
 import build.dream.common.models.data.AddOrderModel;
 import build.dream.common.models.jpush.PushModel;
 import build.dream.common.models.weixinpay.RefundModel;
-import build.dream.common.domains.saas.Tenant;
-import build.dream.common.domains.saas.WeiXinPayAccount;
 import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
@@ -1109,7 +1110,7 @@ public class DietOrderUtils {
                 .receiverAddress(dietOrder.getDeliveryAddress())
                 .receiverLat(Double.valueOf(dietOrder.getDeliveryLatitude()))
                 .receiverLng(Double.valueOf(dietOrder.getDeliveryLongitude()))
-                .topic(ConfigurationUtils.getConfiguration(Constants.DADA_ORDER_CALLBACK_MESSAGE_TOPIC))
+                .mqConfig(MqConfig.builder().mqType(Constants.MQ_TYPE_KAFKA).topic(ConfigurationUtils.getConfiguration(Constants.DADA_ORDER_CALLBACK_MESSAGE_TOPIC)).build())
                 .receiverPhone(dietOrder.getTelephoneNumber())
                 .build();
         if (dietOrder.isInvoiced()) {

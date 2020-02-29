@@ -2,6 +2,7 @@ package build.dream.catering.controllers;
 
 import build.dream.catering.constants.Constants;
 import build.dream.common.annotations.PermitAll;
+import build.dream.common.utils.LogUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -12,7 +13,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class PingController {
     @RequestMapping(value = "/ok")
     @ResponseBody
-    public String ok() {
+    public String ok() throws InterruptedException {
+        LogUtils.info(Thread.currentThread().getId() + "");
+        Thread.sleep(30000);
         return Constants.OK;
     }
 
