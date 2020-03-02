@@ -1,7 +1,7 @@
 package build.dream.catering.controllers;
 
 import build.dream.catering.models.init.InitTenantConfigModel;
-import build.dream.catering.receivers.InitService;
+import build.dream.catering.services.InitService;
 import build.dream.common.annotations.ApiRestAction;
 import build.dream.common.annotations.PermitAll;
 import org.springframework.stereotype.Controller;

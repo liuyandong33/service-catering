@@ -1,4 +1,4 @@
-package build.dream.catering.receivers;
+package build.dream.catering.services;
 
 import build.dream.catering.models.init.InitTenantConfigModel;
 import build.dream.common.api.ApiRest;
