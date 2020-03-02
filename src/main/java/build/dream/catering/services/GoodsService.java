@@ -23,7 +23,6 @@ import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
@@ -949,7 +948,7 @@ public class GoodsService {
         List<Map<String, Object>> goodsInfos = GsonUtils.fromJson(ZipUtils.unzipText(zippedGoodsInfos), List.class);
         int count = goodsInfos.size();
 
-        TenantConfig tenantConfig = TenantConfigUtils.addTenantConfig(tenantId, "goods_num", count);
+        TenantConfig tenantConfig = TenantConfigUtils.addTenantConfig(tenantId,  "goods_num", count);
         int currentValue = tenantConfig.getCurrentValue();
         int maxValue = tenantConfig.getMaxValue();
         ValidateUtils.isTrue(currentValue <= maxValue, "您最多可以添加" + (maxValue - currentValue + count) + "条商品信息！");

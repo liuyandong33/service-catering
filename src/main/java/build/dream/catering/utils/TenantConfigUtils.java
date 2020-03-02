@@ -10,23 +10,24 @@ import build.dream.common.utils.SearchModel;
 import java.math.BigInteger;
 
 public class TenantConfigUtils {
-    public static TenantConfigMapper TENANT_CONFIG_MAPPER = null;
+    public static TenantConfigMapper tenantConfigMapper = null;
 
     public static TenantConfigMapper obtainTenantConfigMapper() {
-        if (TENANT_CONFIG_MAPPER == null) {
-            TENANT_CONFIG_MAPPER = ApplicationHandler.getBean(TenantConfigMapper.class);
+        if (tenantConfigMapper == null) {
+            tenantConfigMapper = ApplicationHandler.getBean(TenantConfigMapper.class);
         }
-        return TENANT_CONFIG_MAPPER;
+        return tenantConfigMapper;
     }
 
     public static TenantConfig obtainTenantConfig(BigInteger tenantId, String name) {
         SearchModel searchModel = new SearchModel();
-        searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
+        searchModel.addSearchCondition(TenantConfig.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition("name", Constants.SQL_OPERATION_SYMBOL_EQUAL, name);
         return DatabaseHelper.find(TenantConfig.class, searchModel);
     }
 
     public static TenantConfig addTenantConfig(BigInteger tenantId, String name, int increment) {
-        return obtainTenantConfigMapper().addTenantConfig(tenantId, name, increment);
+        obtainTenantConfigMapper().updateTenantConfig(tenantId, name, increment);
+        return obtainTenantConfig(tenantId, name);
     }
 }
