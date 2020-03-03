@@ -254,3 +254,53 @@ webapi
 posapi
 appapi
 catering
+
+{sign=258d441662143d63a06f193336cb540a64c0b626, developerId=100139, ePoiId=100015201, order={"avgSendTime":2612.0,"backupRecipientPhone":"[\"17085392494_4203\"]","caution":"请挂门把手上  收餐人隐私号 17806162984_0847，手机号 178****8200 ","cityId":371300,"ctime":1582525160,"daySeq":"2","deliveryTime":0,"detail":"[{\"app_food_code\":\"芒果班戟\",\"box_num\":1.0,\"box_price\":0.0,\"cart_id\":0,\"food_discount\":1.0,\"food_name\":\"芒果班戟\",\"food_property\":\"\",\"price\":9.9,\"quantity\":1,\"sku_id\":\"\",\"spec\":\"\",\"unit\":\"\"},{\"app_food_code\":\"九宫格\",\"box_num\":1.0,\"box_price\":0.0,\"cart_id\":0,\"food_discount\":1.0,\"food_name\":\"九宫格\",\"food_property\":\"\",\"price\":6.0,\"quantity\":1,\"sku_id\":\"\",\"spec\":\"\",\"unit\":\"\"},{\"app_food_code\":\"草莓班戟\",\"box_num\":1.0,\"box_price\":0.0,\"cart_id\":0,\"food_discount\":1.0,\"food_name\":\"草莓班戟\",\"food_property\":\"\",\"price\":9.9,\"quantity\":1,\"sku_id\":\"\",\"spec\":\"\",\"unit\":\"\"}]","dinnersNumber":0,"ePoiId":"12616Z100015201","extras":"[{\"act_detail_id\":1545572086,\"mt_charge\":0.0,\"poi_charge\":6.0,\"reduce_fee\":6.0,\"remark\":\"满20.0元减6.0元\",\"type\":2},{}]","favorites":false,"hasInvoiced":0,"invoiceTitle":"","isFavorites":false,"isPoiFirstOrder":false,"isThirdShipping":0,"latitude":35.18042,"logisticsCode":"1004","longitude":118.848728,"orderId":65098060596451688,"orderIdView":65098060596451688,"originalPrice":29.8,"payType":2,"poiAddress":"山东省临沂市莒南县石泉路东段路南","poiFirstOrder":false,"poiId":6509806,"poiName":"贝诺蒂法式烘焙","poiPhone":"13792977567","poiReceiveDetail":"{\"actOrderChargeByMt\":[{\"comment\":\"活动款\",\"feeTypeDesc\":\"活动款\",\"feeTypeId\":10019,\"moneyCent\":0}],\"actOrderChargeByPoi\":[{\"comment\":\"满20.0元减6.0元\",\"feeTypeDesc\":\"活动款\",\"feeTypeId\":10019,\"moneyCent\":600}],\"foodShareFeeChargeByPoi\":568,\"logisticsFee\":400,\"onlinePayment\":2380,\"reconciliationExtras\":\"{\\\"performanceServiceFee\\\":0.0}\",\"wmPoiReceiveCent\":1412}","recipientAddress":"华泉祥和苑 (2号楼3单元601)@#山东省临沂市莒南县站前路站前路华泉祥和苑","recipientName":"徐晓斐(女士)","recipientPhone":"17806162984_0847","shipperPhone":"","shippingFee":4.0,"status":2,"taxpayerId":"","total":23.8,"utime":1582525160}}
+
+https://open-erp.meituan.com/storemap?businessId=2&developerId=100139&ePoiId=1576Z65367&ePoiName=%E6%80%BB%E9%83%A8&timestamp=1582533125665&sign=8b466160127a86841c52c56a28cc46dc5c9324f7
+
+-Xms1024M -Xmx3072M -XX:+UseParallelGC -XX:ParallelGCThreads=4
+
+DROP TABLE IF EXISTS jvm_configuration;
+CREATE TABLE jvm_configuration
+(
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT 'ID',
+    xms VARCHAR(20) NOT NULL COMMENT 'JVM启动时申请的初始Heap值，默认为操作系统物理内存的1/64但小于1G。默认当空余堆内存大于70%时，JVM会减小heap的大小到-Xms指定的大小，可通过-XX:MaxHeapFreeRation=来指定这个比列。Server端JVM最好将-Xms和-Xmx设为相同值，避免每次垃圾回收完成后JVM重新分配内存；开发测试机JVM可以保留默认值。(例如：-Xms4g)',
+    xmx VARCHAR(20) NOT NULL COMMENT 'JVM可申请的最大Heap值，默认值为物理内存的1/4但小于1G，默认当空余堆内存小于40%时，JVM会增大Heap到-Xmx指定的大小，可通过-XX:MinHeapFreeRation=来指定这个比列。最佳设值应该视物理内存大小及计算机内其他内存开销而定。(例如：-Xmx4g)',
+    xmn VARCHAR(20) NOT NULL COMMENT 'Java Heap Young区大小。整个堆大小=年轻代大小 + 年老代大小 + 持久代大小(相对于HotSpot 类型的虚拟机来说)。持久代一般固定大小为64m，所以增大年轻代后，将会减小年老代大小。此值对系统性能影响较大，Sun官方推荐配置为整个堆的3/8。(例如：-Xmn2g)',
+    xss VARCHAR(20) NOT NULL COMMENT 'Java每个线程的Stack大小。JDK5.0以后每个线程堆栈大小为1M，以前每个线程堆栈大小为256K。根据应用的线程所需内存大小进行调整。在相同物理内存下，减小这个值能生成更多的线程。但是操作系统对一个进程内的线程数还是有限制的，不能无限生成，经验值在3000~5000左右。(例如：-Xss1024K)',
+    xx_perm_size VARCHAR(20) NOT NULL COMMENT '持久代（方法区）的初始内存大小。（例如：-XX:PermSize=64m）',
+    xx_max_perm_size VARCHAR(20) NOT NULL COMMENT '持久代（方法区）的最大内存大小。（例如：-XX:MaxPermSize=512m）',
+    xx_use_serial_gc VARCHAR(20) NOT NULL COMMENT '串行（SerialGC）是jvm的默认GC方式，一般适用于小型应用和单处理器，算法比较简单，GC效率也较高，但可能会给应用带来停顿。',
+    xx_use_parallel_gc VARCHAR(20) NOT NULL COMMENT '并行（ParallelGC）是指多个线程并行执行GC，一般适用于多处理器系统中，可以提高GC的效率，但算法复杂，系统消耗较大。（配合使用：-XX:ParallelGCThreads=8，并行收集器的线程数，此值最好配置与处理器数目相等）',
+    xx_parallel_gc_threads VARCHAR(20) NOT NULL COMMENT '并行收集器的线程数，此值最好配置与处理器数目相等',
+    xx_use_par_new_gc VARCHAR(20) NOT NULL COMMENT '设置年轻代为并行收集，JKD5.0以上，JVM会根据系统配置自行设置，所以无需设置此值。',
+    xx_use_parallel_old_gc VARCHAR(20) NOT NULL COMMENT '设置年老代为并行收集，JKD6.0出现的参数选项。',
+    xx_use_conc_mark_sweep_gc VARCHAR(20) NOT NULL COMMENT '并发（ConcMarkSweepGC）是指GC运行时，对应用程序运行几乎没有影响（也会造成停顿，不过很小而已），GC和app两者的线程在并发执行，这样可以最大限度不影响app的运行。',
+    xx_use_cms_compact_at_full_collection VARCHAR(20) NOT NULL COMMENT '在Full GC的时候，对老年代进行压缩整理。因为CMS是不会移动内存的，因此非常容易产生内存碎片。因此增加这个参数就可以在FullGC后对内存进行压缩整理，消除内存碎片。当然这个操作也有一定缺点，就是会增加CPU开销与GC时间，所以可以通过-XX:CMSFullGCsBeforeCompaction=3 这个参数来控制多少次Full GC以后进行一次碎片整理。',
+    xx_cms_initiating_occupancy_fraction VARCHAR(20) NOT NULL COMMENT '代表老年代使用空间达到80%后，就进行Full GC。CMS收集器在进行垃圾收集时，和应用程序一起工作，所以，不能等到老年代几乎完全被填满了再进行收集，这样会影响并发的应用线程的空间使用，从而再次触发不必要的Full GC。',
+    xx_max_tenuring_threshold VARCHAR(20) NOT NULL COMMENT '垃圾的最大年龄，代表对象在Survivor区经过10次复制以后才进入老年代。如果设置为0，则年轻代对象不经过Survivor区，直接进入老年代。',
+    created_time DATETIME NOT NULL DEFAULT NOW() COMMENT '创建时间',
+    created_user_id BIGINT NOT NULL COMMENT '创建人id',
+    updated_time DATETIME NOT NULL DEFAULT NOW() ON UPDATE NOW() COMMENT '最后更新时间',
+    updated_user_id BIGINT NOT NULL COMMENT '最后更新人id',
+    updated_remark VARCHAR(255) NOT NULL COMMENT '最后更新备注',
+    deleted_time DATETIME NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT '删除时间，只有当 deleted = 1 时有意义，默认值为1970-01-01 00:00:00',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除，0-未删除，1-已删除'
+) COMMENT = 'JVM内存参数';
+
+-Xms
+-Xmx
+-Xmn
+-Xss
+-XX:PermSize
+-XX:MaxPermSize
+-XX:+UseSerialGC
+-XX:+UseParallelGC
+-XX:ParallelGCThreads
+-XX:+UseParNewGC
+-XX:+UseParallelOldGC
+-XX:+UseConcMarkSweepGC
+-XX:+UseCMSCompactAtFullCollection
+-XX:+CMSInitiatingOccupancyFraction=80
+-XX:+MaxTenuringThreshold=10

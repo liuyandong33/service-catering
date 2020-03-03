@@ -1,28 +1,35 @@
 package build.dream.catering.jobs;
 
-import build.dream.common.utils.ConfigurationUtils;
-import build.dream.catering.constants.Constants;
-import org.apache.commons.lang.StringUtils;
-import org.quartz.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.quartz.SchedulerFactoryBean;
+import build.dream.common.models.job.ScheduleCronJobModel;
+import build.dream.common.utils.JobUtils;
+import org.quartz.JobKey;
+import org.quartz.SchedulerException;
+import org.quartz.TriggerKey;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
 
 @Component
 public class JobScheduler {
-    @Autowired
-    SchedulerFactoryBean schedulerFactoryBean;
+    public void scheduler() {
+//        ApplicationHandler.callMethodSuppressThrow(() -> startTestJob());
+    }
 
-    public void scheduler() throws IOException, SchedulerException {
-        /*Scheduler scheduler = schedulerFactoryBean.getScheduler();
-        String dataJobCronExpression = ConfigurationUtils.getConfiguration(Constants.DATA_JOB_CRON_EXPRESSION);
-        if (StringUtils.isNotBlank(dataJobCronExpression)) {
-            JobDetail dataJobDetail = JobBuilder.newJob(DataJob.class).withIdentity("dataJob", "cateringJobGroup").build();
-            CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(dataJobCronExpression);
-            Trigger dataJobCronTrigger = TriggerBuilder.newTrigger().withIdentity("dataJobTrigger", "cateringJobGroup").withSchedule(cronScheduleBuilder).build();
-            scheduler.scheduleJob(dataJobDetail, dataJobCronTrigger);
-        }*/
+    public void startTestJob() throws SchedulerException {
+        JobKey jobKey = JobKey.jobKey("Test_Job", "Test_Job");
+        TriggerKey triggerKey = TriggerKey.triggerKey("Test_Trigger", "Test_Trigger");
+        if (JobUtils.checkExists(jobKey) || JobUtils.checkExists(triggerKey)) {
+            JobUtils.pauseTrigger(triggerKey);
+            JobUtils.unscheduleJob(triggerKey);
+            JobUtils.deleteJob(jobKey);
+        }
+
+        ScheduleCronJobModel scheduleCronJobModel = ScheduleCronJobModel.builder()
+                .jobName("Test_Job")
+                .jobGroup("Test_Job")
+                .jobClass(TestJob.class)
+                .triggerName("Test_Trigger")
+                .triggerGroup("Test_Trigger")
+                .cronExpression("*/5 * * * * ?")
+                .build();
+        JobUtils.scheduleCronJob(scheduleCronJobModel);
     }
 }
