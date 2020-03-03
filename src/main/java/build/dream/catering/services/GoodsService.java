@@ -3,6 +3,7 @@ package build.dream.catering.services;
 import build.dream.catering.beans.PackageDetail;
 import build.dream.catering.beans.ZTreeNode;
 import build.dream.catering.constants.Constants;
+import build.dream.catering.constants.TenantConfigNames;
 import build.dream.catering.domains.ElasticSearchGoods;
 import build.dream.catering.mappers.GoodsMapper;
 import build.dream.catering.models.goods.*;
@@ -948,7 +949,7 @@ public class GoodsService {
         List<Map<String, Object>> goodsInfos = GsonUtils.fromJson(ZipUtils.unzipText(zippedGoodsInfos), List.class);
         int count = goodsInfos.size();
 
-        TenantConfig tenantConfig = TenantConfigUtils.addTenantConfig(tenantId,  "goods_num", count);
+        TenantConfig tenantConfig = TenantConfigUtils.addTenantConfig(tenantId, TenantConfigNames.GOODS_NUM, count);
         int currentValue = tenantConfig.getCurrentValue();
         int maxValue = tenantConfig.getMaxValue();
         ValidateUtils.isTrue(currentValue <= maxValue, "您最多可以添加" + (maxValue - currentValue + count) + "条商品信息！");

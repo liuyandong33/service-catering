@@ -5,7 +5,6 @@ import build.dream.common.annotations.PermitAll;
 import build.dream.common.models.rocketmq.DelayedMessageModel;
 import build.dream.common.models.rocketmq.DelayedType;
 import build.dream.common.utils.JacksonUtils;
-import build.dream.common.utils.LogUtils;
 import build.dream.common.utils.RabbitUtils;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
@@ -24,9 +23,7 @@ import java.util.Map;
 public class PingController {
     @RequestMapping(value = "/ok")
     @ResponseBody
-    public String ok() throws InterruptedException {
-        LogUtils.info(Thread.currentThread().getId() + "");
-        Thread.sleep(30000);
+    public String ok() {
         return Constants.OK;
     }
 

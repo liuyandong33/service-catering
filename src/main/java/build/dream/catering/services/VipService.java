@@ -1,6 +1,7 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
+import build.dream.catering.constants.TenantConfigNames;
 import build.dream.catering.mappers.VipMapper;
 import build.dream.catering.models.vip.*;
 import build.dream.catering.utils.SequenceUtils;
@@ -71,7 +72,7 @@ public class VipService {
             vipType.setUpdatedUserId(userId);
             DatabaseHelper.update(vipType);
         } else {
-            TenantConfig tenantConfig = TenantConfigUtils.addTenantConfig(tenantId, "vip_type_num", 1);
+            TenantConfig tenantConfig = TenantConfigUtils.addTenantConfig(tenantId, TenantConfigNames.VIP_TYPE_NUM, 1);
             ValidateUtils.isTrue(tenantConfig.getCurrentValue() <= tenantConfig.getMaxValue(), "会员类型数量不能超过" + tenantConfig.getMaxValue() + "个！");
             vipType = new VipType();
             vipType.setTenantId(tenantId);
