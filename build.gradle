@@ -41,6 +41,7 @@ configurations.all {
 dependencies {
     compile("build.dream:lib-common:0.1.0-SNAPSHOT")
     compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.springframework.boot:spring-boot-starter-actuator")
     compile("org.mybatis.spring.boot:mybatis-spring-boot-starter:1.3.0")
     compile("org.springframework.boot:spring-boot-starter-data-redis")
     compile("org.springframework.boot:spring-boot-starter-data-elasticsearch")
