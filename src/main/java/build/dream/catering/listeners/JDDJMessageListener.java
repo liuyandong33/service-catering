@@ -10,7 +10,6 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.stereotype.Component;
 
-import java.math.BigInteger;
 import java.util.Map;
 
 @Component
@@ -24,7 +23,7 @@ public class JDDJMessageListener implements MessageListener<String, String> {
         String value = data.value();
         Map<String, Object> message = JacksonUtils.readValueAsMap(value, String.class, Object.class);
         Map<String, Object> body = MapUtils.getMap(message, "body");
-        BigInteger tenantId = BigInteger.valueOf(MapUtils.getLongValue(message, "tenantId"));
+        Long tenantId = MapUtils.getLongValue(message, "tenantId");
         String tenantCode = MapUtils.getString(message, "tenantCode");
         int count = MapUtils.getIntValue(message, "count");
         new Thread(new HandleJDDJMessageRunnable(jddjService, tenantId, tenantCode, body, count, 1000)).start();

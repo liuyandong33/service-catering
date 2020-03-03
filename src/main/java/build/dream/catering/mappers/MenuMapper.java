@@ -4,20 +4,19 @@ import build.dream.common.domains.catering.Menu;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
 @Mapper
 public interface MenuMapper {
-    long insertAllMenuBranchR(@Param("menuId") BigInteger menuId,
-                              @Param("tenantId") BigInteger tenantId,
+    long insertAllMenuBranchR(@Param("menuId") Long menuId,
+                              @Param("tenantId") Long tenantId,
                               @Param("tenantCode") String tenantCode,
-                              @Param("branchIds") List<BigInteger> branchIds);
+                              @Param("branchIds") List<Long> branchIds);
 
-    long deleteAllMenuBranchR(@Param("menuId") BigInteger menuId, @Param("tenantId") BigInteger tenantId);
+    long deleteAllMenuBranchR(@Param("menuId") Long menuId, @Param("tenantId") Long tenantId);
 
-    Menu findEffectiveMenu(@Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId, @Param("effectiveScope") int effectiveScope);
+    Menu findEffectiveMenu(@Param("tenantId") Long tenantId, @Param("branchId") Long branchId, @Param("effectiveScope") int effectiveScope);
 
-    List<Map<String, Object>> findAllMenuDetails(@Param("tenantId") BigInteger tenantId, @Param("menuId") BigInteger menuId);
+    List<Map<String, Object>> findAllMenuDetails(@Param("tenantId") Long tenantId, @Param("menuId") Long menuId);
 }

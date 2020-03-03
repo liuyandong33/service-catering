@@ -6,13 +6,12 @@ import org.hibernate.validator.constraints.Length;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class SaveBranchTableModel extends CateringBasicModel {
-    private BigInteger id;
+    private Long id;
 
     @NotNull
-    private BigInteger tableAreaId;
+    private Long tableAreaId;
 
     @NotNull
     @Length(max = 20)
@@ -31,19 +30,19 @@ public class SaveBranchTableModel extends CateringBasicModel {
     @Min(1)
     private Integer dinnersNumber;
 
-    public BigInteger getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(BigInteger id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public BigInteger getTableAreaId() {
+    public Long getTableAreaId() {
         return tableAreaId;
     }
 
-    public void setTableAreaId(BigInteger tableAreaId) {
+    public void setTableAreaId(Long tableAreaId) {
         this.tableAreaId = tableAreaId;
     }
 

@@ -1,22 +1,20 @@
 package build.dream.catering.models.activity;
 
 import build.dream.catering.constants.Constants;
-import build.dream.common.annotations.JsonSchema;
 import build.dream.common.constraints.VerifyJsonSchema;
 import build.dream.common.models.CateringBasicModel;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 import java.util.List;
 
 public class SaveBuyGiveActivityModel extends CateringBasicModel {
     @NotEmpty
-    private List<BigInteger> branchIds;
+    private List<Long> branchIds;
 
     @NotNull
-    private BigInteger userId;
+    private Long userId;
 
     @NotNull
     @Length(max = 20)
@@ -44,19 +42,19 @@ public class SaveBuyGiveActivityModel extends CateringBasicModel {
     @VerifyJsonSchema(value = Constants.BUY_GIVE_ACTIVITY_INFOS_SCHEMA_FILE_PATH)
     private List<BuyGiveActivityInfo> buyGiveActivityInfos;
 
-    public List<BigInteger> getBranchIds() {
+    public List<Long> getBranchIds() {
         return branchIds;
     }
 
-    public void setBranchIds(List<BigInteger> branchIds) {
+    public void setBranchIds(List<Long> branchIds) {
         this.branchIds = branchIds;
     }
 
-    public BigInteger getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(BigInteger userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
@@ -117,26 +115,26 @@ public class SaveBuyGiveActivityModel extends CateringBasicModel {
     }
 
     public static class BuyGiveActivityInfo {
-        private BigInteger buyGoodsId;
-        private BigInteger buyGoodsSpecificationId;
+        private Long buyGoodsId;
+        private Long buyGoodsSpecificationId;
         private Integer buyQuantity;
-        private BigInteger giveGoodsId;
-        private BigInteger giveGoodsSpecificationId;
+        private Long giveGoodsId;
+        private Long giveGoodsSpecificationId;
         private Integer giveQuantity;
 
-        public BigInteger getBuyGoodsId() {
+        public Long getBuyGoodsId() {
             return buyGoodsId;
         }
 
-        public void setBuyGoodsId(BigInteger buyGoodsId) {
+        public void setBuyGoodsId(Long buyGoodsId) {
             this.buyGoodsId = buyGoodsId;
         }
 
-        public BigInteger getBuyGoodsSpecificationId() {
+        public Long getBuyGoodsSpecificationId() {
             return buyGoodsSpecificationId;
         }
 
-        public void setBuyGoodsSpecificationId(BigInteger buyGoodsSpecificationId) {
+        public void setBuyGoodsSpecificationId(Long buyGoodsSpecificationId) {
             this.buyGoodsSpecificationId = buyGoodsSpecificationId;
         }
 
@@ -148,19 +146,19 @@ public class SaveBuyGiveActivityModel extends CateringBasicModel {
             this.buyQuantity = buyQuantity;
         }
 
-        public BigInteger getGiveGoodsId() {
+        public Long getGiveGoodsId() {
             return giveGoodsId;
         }
 
-        public void setGiveGoodsId(BigInteger giveGoodsId) {
+        public void setGiveGoodsId(Long giveGoodsId) {
             this.giveGoodsId = giveGoodsId;
         }
 
-        public BigInteger getGiveGoodsSpecificationId() {
+        public Long getGiveGoodsSpecificationId() {
             return giveGoodsSpecificationId;
         }
 
-        public void setGiveGoodsSpecificationId(BigInteger giveGoodsSpecificationId) {
+        public void setGiveGoodsSpecificationId(Long giveGoodsSpecificationId) {
             this.giveGoodsSpecificationId = giveGoodsSpecificationId;
         }
 

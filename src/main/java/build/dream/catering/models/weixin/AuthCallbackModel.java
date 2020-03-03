@@ -4,14 +4,13 @@ import build.dream.common.annotations.InstantiateObjectKey;
 import build.dream.common.models.BasicModel;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class AuthCallbackModel extends BasicModel {
     @NotNull
     private String clientType;
 
     @NotNull
-    private BigInteger tenantId;
+    private Long tenantId;
 
     @NotNull
     private String componentAppId;
@@ -28,11 +27,11 @@ public class AuthCallbackModel extends BasicModel {
         this.clientType = clientType;
     }
 
-    public BigInteger getTenantId() {
+    public Long getTenantId() {
         return tenantId;
     }
 
-    public void setTenantId(BigInteger tenantId) {
+    public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
     }
 

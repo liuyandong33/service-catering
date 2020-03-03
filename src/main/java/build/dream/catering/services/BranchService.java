@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -30,7 +29,7 @@ public class BranchService {
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest initializeBranch(InitializeBranchModel initializeBranchModel) {
-        BigInteger tenantId = initializeBranchModel.getTenantId();
+        Long tenantId = initializeBranchModel.getTenantId();
         String tenantCode = initializeBranchModel.getTenantCode();
         Integer type = initializeBranchModel.getType();
         Integer status = initializeBranchModel.getStatus();
@@ -44,8 +43,8 @@ public class BranchService {
         String linkman = initializeBranchModel.getLinkman();
         String contactPhone = initializeBranchModel.getContactPhone();
         Integer smartRestaurantStatus = initializeBranchModel.getSmartRestaurantStatus();
-        BigInteger currentUserId = initializeBranchModel.getCurrentUserId();
-        BigInteger userId = initializeBranchModel.getUserId();
+        Long currentUserId = initializeBranchModel.getCurrentUserId();
+        Long userId = initializeBranchModel.getUserId();
         List<InitializeBranchModel.BusinessTime> businessTimes = initializeBranchModel.getBusinessTimes();
 
         District province = DistrictUtils.obtainDistrictById(provinceCode);
@@ -111,7 +110,7 @@ public class BranchService {
 
     @Transactional(readOnly = true)
     public ApiRest listBranches(ListBranchesModel listBranchesModel) {
-        BigInteger tenantId = listBranchesModel.obtainTenantId();
+        Long tenantId = listBranchesModel.obtainTenantId();
         String searchString = listBranchesModel.getSearchString();
         int page = listBranchesModel.getPage();
         int rows = listBranchesModel.getRows();
@@ -148,9 +147,9 @@ public class BranchService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest deleteBranch(DeleteBranchModel deleteBranchModel) throws IOException {
-        BigInteger tenantId = deleteBranchModel.obtainTenantId();
-        BigInteger branchId = deleteBranchModel.getBranchId();
-        BigInteger userId = deleteBranchModel.obtainUserId();
+        Long tenantId = deleteBranchModel.obtainTenantId();
+        Long branchId = deleteBranchModel.getBranchId();
+        Long userId = deleteBranchModel.obtainUserId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -169,9 +168,9 @@ public class BranchService {
         findUserIdsParameters.put("tenantId", tenantId);
         findUserIdsParameters.put("branchId", branchId);
         List<Map<String, Object>> results = DatabaseHelper.executeQuery(findUserIdsParameters);
-        List<BigInteger> userIds = new ArrayList<BigInteger>();
+        List<Long> userIds = new ArrayList<Long>();
         for (Map<String, Object> map : results) {
-            userIds.add(BigInteger.valueOf(MapUtils.getLongValue(map, "userId")));
+            userIds.add(Long.valueOf(MapUtils.getLongValue(map, "userId")));
         }
 
 
@@ -261,8 +260,8 @@ public class BranchService {
      */
     @Transactional(readOnly = true)
     public ApiRest obtainBranchInfo(ObtainBranchInfoModel obtainBranchInfoModel) {
-        BigInteger tenantId = obtainBranchInfoModel.obtainTenantId();
-        BigInteger branchId = obtainBranchInfoModel.getBranchId();
+        Long tenantId = obtainBranchInfoModel.obtainTenantId();
+        Long branchId = obtainBranchInfoModel.getBranchId();
         Branch branch = DatabaseHelper.find(Branch.class, TupleUtils.buildTuple3(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId), TupleUtils.buildTuple3(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId));
         ValidateUtils.notNull(branch, "门店不存在！");
 
@@ -277,7 +276,7 @@ public class BranchService {
      */
     @Transactional(readOnly = true)
     public ApiRest obtainAllSmartRestaurants(ObtainAllSmartRestaurantsModel obtainAllSmartRestaurantsModel) {
-        BigInteger tenantId = obtainAllSmartRestaurantsModel.getTenantId();
+        Long tenantId = obtainAllSmartRestaurantsModel.getTenantId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -296,8 +295,8 @@ public class BranchService {
      */
     @Transactional(readOnly = true)
     public ApiRest obtainSmartRestaurant(ObtainSmartRestaurantModel obtainSmartRestaurantModel) {
-        BigInteger tenantId = obtainSmartRestaurantModel.obtainTenantId();
-        BigInteger branchId = obtainSmartRestaurantModel.getBranchId();
+        Long tenantId = obtainSmartRestaurantModel.obtainTenantId();
+        Long branchId = obtainSmartRestaurantModel.getBranchId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -315,7 +314,7 @@ public class BranchService {
      */
     @Transactional(readOnly = true)
     public ApiRest obtainHeadquartersInfo(ObtainHeadquartersInfoModel obtainHeadquartersInfoModel) {
-        BigInteger tenantId = obtainHeadquartersInfoModel.getTenantId();
+        Long tenantId = obtainHeadquartersInfoModel.getTenantId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);

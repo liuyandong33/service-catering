@@ -4,7 +4,6 @@ import build.dream.common.models.CateringBasicModel;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
@@ -19,7 +18,7 @@ public class AddPayGiftCardModel extends CateringBasicModel {
     private Date endTime;
 
     @NotNull
-    private BigInteger weiXinCardId;
+    private Long weiXinCardId;
 
     @NotNull
     private Integer leastCost;
@@ -51,11 +50,11 @@ public class AddPayGiftCardModel extends CateringBasicModel {
         this.endTime = endTime;
     }
 
-    public BigInteger getWeiXinCardId() {
+    public Long getWeiXinCardId() {
         return weiXinCardId;
     }
 
-    public void setWeiXinCardId(BigInteger weiXinCardId) {
+    public void setWeiXinCardId(Long weiXinCardId) {
         this.weiXinCardId = weiXinCardId;
     }
 

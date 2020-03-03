@@ -5,25 +5,24 @@ import build.dream.common.utils.ApplicationHandler;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class ReplyReminderModel extends CateringBasicModel {
     private static final String[] TYPES = {"custom", "hasOut", "inCooking", "weather", "shortHand"};
     private static final String CUSTOM = "custom";
 
     @NotNull
-    private BigInteger orderId;
+    private Long orderId;
 
     private String type;
 
     @Length(max = 30)
     private String content;
 
-    public BigInteger getOrderId() {
+    public Long getOrderId() {
         return orderId;
     }
 
-    public void setOrderId(BigInteger orderId) {
+    public void setOrderId(Long orderId) {
         this.orderId = orderId;
     }
 

@@ -6,16 +6,15 @@ import build.dream.common.domains.catering.PaymentActivity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.math.BigInteger;
 import java.util.List;
 
 @Mapper
 public interface ActivityMapper {
-    List<EffectiveActivity> listEffectiveActivities(@Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId);
+    List<EffectiveActivity> listEffectiveActivities(@Param("tenantId") Long tenantId, @Param("branchId") Long branchId);
 
-    long insertAllActivityBranchR(@Param("activityId") BigInteger activityId, @Param("tenantId") BigInteger tenantId, @Param("branchIds") List<BigInteger> branchIds);
+    long insertAllActivityBranchR(@Param("activityId") Long activityId, @Param("tenantId") Long tenantId, @Param("branchIds") List<Long> branchIds);
 
-    List<FullReductionActivity> listFullReductionActivities(@Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId);
+    List<FullReductionActivity> listFullReductionActivities(@Param("tenantId") Long tenantId, @Param("branchId") Long branchId);
 
-    List<PaymentActivity> listPaymentActivities(@Param("tenantId") BigInteger tenantId, @Param("branchId") BigInteger branchId);
+    List<PaymentActivity> listPaymentActivities(@Param("tenantId") Long tenantId, @Param("branchId") Long branchId);
 }

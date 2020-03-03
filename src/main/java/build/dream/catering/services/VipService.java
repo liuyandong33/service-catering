@@ -17,8 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -36,16 +34,16 @@ public class VipService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveVipType(SaveVipTypeModel saveVipTypeModel) {
-        BigInteger id = saveVipTypeModel.getId();
-        BigInteger tenantId = saveVipTypeModel.obtainTenantId();
+        Long id = saveVipTypeModel.getId();
+        Long tenantId = saveVipTypeModel.obtainTenantId();
         String tenantCode = saveVipTypeModel.obtainTenantCode();
-        BigInteger branchId = saveVipTypeModel.obtainBranchId();
+        Long branchId = saveVipTypeModel.obtainBranchId();
         String name = saveVipTypeModel.getName();
         Integer discountPolicy = saveVipTypeModel.getDiscountPolicy();
-        BigDecimal discountRate = saveVipTypeModel.getDiscountRate();
+        Double discountRate = saveVipTypeModel.getDiscountRate();
         Boolean enableBonus = saveVipTypeModel.getEnableBonus();
         Integer bonusCoefficient = saveVipTypeModel.getBonusCoefficient();
-        BigInteger userId = saveVipTypeModel.obtainUserId();
+        Long userId = saveVipTypeModel.obtainUserId();
         Integer vipSharedType = saveVipTypeModel.obtainVipSharedType();
 
         VipType vipType = null;
@@ -109,9 +107,9 @@ public class VipService {
      */
     @Transactional(readOnly = true)
     public ApiRest obtainVipInfo(ObtainVipInfoModel obtainVipInfoModel) {
-        BigInteger tenantId = obtainVipInfoModel.obtainTenantId();
-        BigInteger branchId = obtainVipInfoModel.obtainBranchId();
-        BigInteger vipId = obtainVipInfoModel.getVipId();
+        Long tenantId = obtainVipInfoModel.obtainTenantId();
+        Long branchId = obtainVipInfoModel.obtainBranchId();
+        Long vipId = obtainVipInfoModel.getVipId();
         String vipCode = obtainVipInfoModel.getVipCode();
         String phoneNumber = obtainVipInfoModel.getPhoneNumber();
         String openId = obtainVipInfoModel.getOpenId();
@@ -164,18 +162,18 @@ public class VipService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveVipInfo(SaveVipInfoModel saveVipInfoModel) {
-        BigInteger tenantId = saveVipInfoModel.obtainTenantId();
+        Long tenantId = saveVipInfoModel.obtainTenantId();
         String tenantCode = saveVipInfoModel.obtainTenantCode();
-        BigInteger branchId = saveVipInfoModel.obtainBranchId();
-        BigInteger vipId = saveVipInfoModel.getVipId();
-        BigInteger vipTypeId = saveVipInfoModel.getVipTypeId();
+        Long branchId = saveVipInfoModel.obtainBranchId();
+        Long vipId = saveVipInfoModel.getVipId();
+        Long vipTypeId = saveVipInfoModel.getVipTypeId();
         String vipName = saveVipInfoModel.getVipName();
         Date birthday = saveVipInfoModel.getBirthday();
         String phoneNumber = saveVipInfoModel.getPhoneNumber();
         String openId = saveVipInfoModel.getOpenId();
         String mainOpenId = saveVipInfoModel.getMainOpenId();
         String alipayUserId = saveVipInfoModel.getAlipayUserId();
-        BigInteger userId = saveVipInfoModel.obtainUserId();
+        Long userId = saveVipInfoModel.obtainUserId();
         int vipSharedType = saveVipInfoModel.obtainVipSharedType();
 
         VipType vipType = DatabaseHelper.find(VipType.class, TupleUtils.buildTuple3(VipType.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId), TupleUtils.buildTuple3(VipType.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, vipTypeId));
@@ -229,22 +227,22 @@ public class VipService {
         vipAccountSearchModel.addSearchCondition(VipAccount.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         vipAccountSearchModel.addSearchCondition(VipAccount.ColumnName.VIP_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, vip.getId());
 
-        BigInteger vipAccountBranchId = null;
-        BigInteger vipAccountVipGroupId = null;
+        Long vipAccountBranchId = null;
+        Long vipAccountVipGroupId = null;
         if (vipSharedType == 1) {
-            vipAccountBranchId = BigInteger.ZERO;
-            vipAccountVipGroupId = BigInteger.ZERO;
+            vipAccountBranchId = 0L;
+            vipAccountVipGroupId = 0L;
         } else if (vipSharedType == 2) {
             vipAccountSearchModel.addSearchCondition(VipAccount.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
 
             vipAccountBranchId = branchId;
-            vipAccountVipGroupId = BigInteger.ZERO;
+            vipAccountVipGroupId = 0L;
         } else if (vipSharedType == 3) {
             Branch branch = DatabaseHelper.find(Branch.class, TupleUtils.buildTuple3(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId), TupleUtils.buildTuple3(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId));
-            BigInteger vipGroupId = branch.getVipGroupId();
+            Long vipGroupId = branch.getVipGroupId();
             vipAccountSearchModel.addSearchCondition(VipAccount.ColumnName.VIP_GROUP_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, vipGroupId);
 
-            vipAccountBranchId = BigInteger.ZERO;
+            vipAccountBranchId = 0L;
             vipAccountVipGroupId = vipGroupId;
         }
 
@@ -256,10 +254,10 @@ public class VipService {
                     .branchId(vipAccountBranchId)
                     .vipTypeId(vipTypeId)
                     .vipGroupId(vipAccountVipGroupId)
-                    .point(BigDecimal.ZERO)
-                    .accumulativePoint(BigDecimal.ZERO)
-                    .balance(BigDecimal.ZERO)
-                    .accumulativeRecharge(BigDecimal.ZERO)
+                    .point(0D)
+                    .accumulativePoint(0D)
+                    .balance(0D)
+                    .accumulativeRecharge(0D)
                     .createdUserId(userId)
                     .updatedUserId(userId)
                     .updatedRemark("创建会员账户！")
@@ -287,8 +285,8 @@ public class VipService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest changeVipSharedType(ChangeVipSharedTypeModel changeVipSharedTypeModel) {
-        BigInteger tenantId = changeVipSharedTypeModel.obtainTenantId();
-        BigInteger userId = changeVipSharedTypeModel.obtainUserId();
+        Long tenantId = changeVipSharedTypeModel.obtainTenantId();
+        Long userId = changeVipSharedTypeModel.obtainUserId();
         int vipSharedType = changeVipSharedTypeModel.getVipSharedType();
 
         Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
@@ -302,15 +300,15 @@ public class VipService {
         searchModel.addSearchCondition(Branch.ColumnName.TYPE, Constants.SQL_OPERATION_SYMBOL_EQUAL, Constants.BRANCH_TYPE_HEADQUARTERS);
         Branch headquartersBranch = DatabaseHelper.find(Branch.class, searchModel);
 
-        BigInteger headquartersBranchId = headquartersBranch.getId();
+        Long headquartersBranchId = headquartersBranch.getId();
         String tenantCode = tenant.getCode();
 
         if (vipSharedType == 1) {
             List<VipAccount> vipAccounts = DatabaseHelper.findAll(VipAccount.class, TupleUtils.buildTuple3(VipAccount.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
-            Map<BigInteger, List<VipAccount>> vipAccountsMap = new HashMap<BigInteger, List<VipAccount>>();
-            Map<BigInteger, VipAccount> vipAccountMap = new HashMap<BigInteger, VipAccount>();
+            Map<Long, List<VipAccount>> vipAccountsMap = new HashMap<Long, List<VipAccount>>();
+            Map<Long, VipAccount> vipAccountMap = new HashMap<Long, VipAccount>();
             for (VipAccount vipAccount : vipAccounts) {
-                BigInteger vipId = vipAccount.getVipId();
+                Long vipId = vipAccount.getVipId();
                 List<VipAccount> vipAccountList = vipAccountsMap.get(vipId);
                 if (CollectionUtils.isEmpty(vipAccountList)) {
                     vipAccountList = new ArrayList<VipAccount>();
@@ -325,19 +323,19 @@ public class VipService {
                 }
             }
 
-            for (Map.Entry<BigInteger, List<VipAccount>> entry : vipAccountsMap.entrySet()) {
-                BigDecimal pointSum = BigDecimal.ZERO;
-                BigDecimal accumulativePointSum = BigDecimal.ZERO;
-                BigDecimal balanceSum = BigDecimal.ZERO;
-                BigDecimal accumulativeRechargeSum = BigDecimal.ZERO;
+            for (Map.Entry<Long, List<VipAccount>> entry : vipAccountsMap.entrySet()) {
+                Double pointSum = 0D;
+                Double accumulativePointSum = 0D;
+                Double balanceSum = 0D;
+                Double accumulativeRechargeSum = 0D;
 
-                BigInteger vipId = entry.getKey();
+                Long vipId = entry.getKey();
                 List<VipAccount> vipAccountList = entry.getValue();
                 for (VipAccount vipAccount : vipAccountList) {
-                    pointSum = pointSum.add(vipAccount.getPoint());
-                    accumulativePointSum = accumulativePointSum.add(vipAccount.getAccumulativePoint());
-                    balanceSum = balanceSum.add(vipAccount.getBalance());
-                    accumulativeRechargeSum = accumulativeRechargeSum.add(vipAccount.getAccumulativeRecharge());
+                    pointSum = pointSum + vipAccount.getPoint();
+                    accumulativePointSum = accumulativePointSum + vipAccount.getAccumulativePoint();
+                    balanceSum = balanceSum + vipAccount.getBalance();
+                    accumulativeRechargeSum = accumulativeRechargeSum + vipAccount.getAccumulativeRecharge();
                 }
 
                 VipAccount vipAccount = vipAccountMap.get(vipId);
@@ -369,9 +367,9 @@ public class VipService {
                 }
             } else if (oldVipSharedType == 3) {
                 List<VipAccount> vipAccounts = DatabaseHelper.findAll(VipAccount.class, TupleUtils.buildTuple3(VipAccount.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
-                Map<BigInteger, List<VipAccount>> vipAccountsMap = new HashMap<BigInteger, List<VipAccount>>();
+                Map<Long, List<VipAccount>> vipAccountsMap = new HashMap<Long, List<VipAccount>>();
                 for (VipAccount vipAccount : vipAccounts) {
-                    BigInteger vipId = vipAccount.getVipId();
+                    Long vipId = vipAccount.getVipId();
                     List<VipAccount> vipAccountList = vipAccountsMap.get(vipId);
                     if (CollectionUtils.isEmpty(vipAccountList)) {
                         vipAccountList = new ArrayList<VipAccount>();
@@ -382,19 +380,19 @@ public class VipService {
                     DatabaseHelper.update(vipAccount);
                 }
 
-                for (Map.Entry<BigInteger, List<VipAccount>> entry : vipAccountsMap.entrySet()) {
-                    BigDecimal pointSum = BigDecimal.ZERO;
-                    BigDecimal accumulativePointSum = BigDecimal.ZERO;
-                    BigDecimal balanceSum = BigDecimal.ZERO;
-                    BigDecimal accumulativeRechargeSum = BigDecimal.ZERO;
+                for (Map.Entry<Long, List<VipAccount>> entry : vipAccountsMap.entrySet()) {
+                    Double pointSum = 0D;
+                    Double accumulativePointSum = 0D;
+                    Double balanceSum = 0D;
+                    Double accumulativeRechargeSum = 0D;
 
-                    BigInteger vipId = entry.getKey();
+                    Long vipId = entry.getKey();
                     List<VipAccount> vipAccountList = entry.getValue();
                     for (VipAccount vipAccount : vipAccountList) {
-                        pointSum = pointSum.add(vipAccount.getPoint());
-                        accumulativePointSum = accumulativePointSum.add(vipAccount.getAccumulativePoint());
-                        balanceSum = balanceSum.add(vipAccount.getBalance());
-                        accumulativeRechargeSum = accumulativeRechargeSum.add(vipAccount.getAccumulativeRecharge());
+                        pointSum = pointSum + vipAccount.getPoint();
+                        accumulativePointSum = accumulativePointSum + vipAccount.getAccumulativePoint();
+                        balanceSum = balanceSum + vipAccount.getBalance();
+                        accumulativeRechargeSum = accumulativeRechargeSum + vipAccount.getAccumulativeRecharge();
                     }
 
                     VipAccount vipAccount = VipAccount.builder()
@@ -410,8 +408,8 @@ public class VipService {
                 }
             }
         } else if (vipSharedType == 3) {
-            BigInteger vipGroupId = headquartersBranch.getVipGroupId();
-            ValidateUtils.isTrue(BigInteger.ONE.compareTo(vipGroupId) != 0, "请设置总部所在的会员分组！");
+            Long vipGroupId = headquartersBranch.getVipGroupId();
+            ValidateUtils.isTrue(vipGroupId != 0, "请设置总部所在的会员分组！");
             if (oldVipSharedType == 1) {
                 List<VipAccount> vipAccounts = DatabaseHelper.findAll(VipAccount.class, TupleUtils.buildTuple3(VipAccount.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
                 for (VipAccount vipAccount : vipAccounts) {
@@ -420,10 +418,10 @@ public class VipService {
                 }
             } else if (oldVipSharedType == 2) {
                 List<VipAccount> vipAccounts = DatabaseHelper.findAll(VipAccount.class, TupleUtils.buildTuple3(VipAccount.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
-                Map<BigInteger, List<VipAccount>> vipAccountsMap = new HashMap<BigInteger, List<VipAccount>>();
-                Map<BigInteger, VipAccount> vipAccountMap = new HashMap<BigInteger, VipAccount>();
+                Map<Long, List<VipAccount>> vipAccountsMap = new HashMap<Long, List<VipAccount>>();
+                Map<Long, VipAccount> vipAccountMap = new HashMap<Long, VipAccount>();
                 for (VipAccount vipAccount : vipAccounts) {
-                    BigInteger vipId = vipAccount.getVipId();
+                    Long vipId = vipAccount.getVipId();
                     List<VipAccount> vipAccountList = vipAccountsMap.get(vipId);
                     if (CollectionUtils.isEmpty(vipAccountList)) {
                         vipAccountList = new ArrayList<VipAccount>();
@@ -451,8 +449,8 @@ public class VipService {
      */
     @Transactional(readOnly = true)
     public ApiRest listVipTypes(ListVipTypesModel listVipTypesModel) {
-        BigInteger tenantId = listVipTypesModel.obtainTenantId();
-        BigInteger branchId = listVipTypesModel.obtainBranchId();
+        Long tenantId = listVipTypesModel.obtainTenantId();
+        Long branchId = listVipTypesModel.obtainBranchId();
         Integer vipSharedType = listVipTypesModel.obtainVipSharedType();
 
         SearchModel searchModel = new SearchModel(true);
@@ -477,10 +475,10 @@ public class VipService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest deleteVipType(DeleteVipTypeModel deleteVipTypeModel) {
-        BigInteger tenantId = deleteVipTypeModel.obtainTenantId();
-        BigInteger branchId = deleteVipTypeModel.obtainBranchId();
-        BigInteger vipTypeId = deleteVipTypeModel.getVipTypeId();
-        BigInteger userId = deleteVipTypeModel.obtainUserId();
+        Long tenantId = deleteVipTypeModel.obtainTenantId();
+        Long branchId = deleteVipTypeModel.obtainBranchId();
+        Long vipTypeId = deleteVipTypeModel.getVipTypeId();
+        Long userId = deleteVipTypeModel.obtainUserId();
         Integer vipSharedType = deleteVipTypeModel.obtainVipSharedType();
 
         SearchModel searchModel = new SearchModel(true);
@@ -522,9 +520,9 @@ public class VipService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest deleteVipGroup(DeleteVipGroupModel deleteVipGroupModel) {
-        BigInteger tenantId = deleteVipGroupModel.obtainTenantId();
-        BigInteger vipGroupId = deleteVipGroupModel.getVipGroupId();
-        BigInteger userId = deleteVipGroupModel.obtainUserId();
+        Long tenantId = deleteVipGroupModel.obtainTenantId();
+        Long vipGroupId = deleteVipGroupModel.getVipGroupId();
+        Long userId = deleteVipGroupModel.obtainUserId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(VipGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -557,7 +555,7 @@ public class VipService {
      */
     @Transactional(readOnly = true)
     public ApiRest listVipGroups(ListVipGroupsModel listVipGroupsModel) {
-        BigInteger tenantId = listVipGroupsModel.obtainTenantId();
+        Long tenantId = listVipGroupsModel.obtainTenantId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(VipGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -574,10 +572,10 @@ public class VipService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveVipGroup(SaveVipGroupModel saveVipGroupModel) {
-        BigInteger tenantId = saveVipGroupModel.obtainTenantId();
+        Long tenantId = saveVipGroupModel.obtainTenantId();
         String tenantCode = saveVipGroupModel.obtainTenantCode();
-        BigInteger userId = saveVipGroupModel.obtainUserId();
-        BigInteger id = saveVipGroupModel.getId();
+        Long userId = saveVipGroupModel.obtainUserId();
+        Long id = saveVipGroupModel.getId();
         String name = saveVipGroupModel.getName();
 
         VipGroup vipGroup = null;
@@ -608,8 +606,8 @@ public class VipService {
 
     @Transactional(readOnly = true)
     public ApiRest listVipInfos(ListVipInfosModel listVipInfosModel) {
-        BigInteger tenantId = listVipInfosModel.obtainTenantId();
-        BigInteger branchId = listVipInfosModel.obtainBranchId();
+        Long tenantId = listVipInfosModel.obtainTenantId();
+        Long branchId = listVipInfosModel.obtainBranchId();
         int sharedType = listVipInfosModel.obtainVipSharedType();
         int page = listVipInfosModel.getPage();
         int rows = listVipInfosModel.getRows();
@@ -637,8 +635,8 @@ public class VipService {
      */
     @Transactional(readOnly = true)
     public ApiRest generatePayCode(GeneratePayCodeModel generatePayCodeModel) {
-        BigInteger tenantId = generatePayCodeModel.obtainTenantId();
-        BigInteger vipId = generatePayCodeModel.obtainVipId();
+        Long tenantId = generatePayCodeModel.obtainTenantId();
+        Long vipId = generatePayCodeModel.obtainVipId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(Vip.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);

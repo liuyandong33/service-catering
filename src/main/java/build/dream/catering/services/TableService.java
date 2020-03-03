@@ -9,7 +9,6 @@ import build.dream.common.utils.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,12 +24,12 @@ public class TableService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveTableArea(SaveTableAreaModel saveTableAreaModel) {
-        BigInteger tenantId = saveTableAreaModel.obtainTenantId();
+        Long tenantId = saveTableAreaModel.obtainTenantId();
         String tenantCode = saveTableAreaModel.obtainTenantCode();
-        BigInteger branchId = saveTableAreaModel.obtainBranchId();
-        BigInteger id = saveTableAreaModel.getId();
+        Long branchId = saveTableAreaModel.obtainBranchId();
+        Long id = saveTableAreaModel.getId();
         String name = saveTableAreaModel.getName();
-        BigInteger userId = saveTableAreaModel.obtainUserId();
+        Long userId = saveTableAreaModel.obtainUserId();
 
         TableArea tableArea = null;
         if (id == null) {
@@ -68,16 +67,16 @@ public class TableService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveBranchTable(SaveBranchTableModel saveBranchTableModel) {
-        BigInteger tenantId = saveBranchTableModel.obtainTenantId();
+        Long tenantId = saveBranchTableModel.obtainTenantId();
         String tenantCode = saveBranchTableModel.obtainTenantCode();
-        BigInteger branchId = saveBranchTableModel.obtainBranchId();
-        BigInteger id = saveBranchTableModel.getId();
-        BigInteger tableAreaId = saveBranchTableModel.getTableAreaId();
+        Long branchId = saveBranchTableModel.obtainBranchId();
+        Long id = saveBranchTableModel.getId();
+        Long tableAreaId = saveBranchTableModel.getTableAreaId();
         String code = saveBranchTableModel.getCode();
         String name = saveBranchTableModel.getName();
         Integer status = saveBranchTableModel.getStatus();
         Integer dinnersNumber = saveBranchTableModel.getDinnersNumber();
-        BigInteger userId = saveBranchTableModel.obtainUserId();
+        Long userId = saveBranchTableModel.obtainUserId();
 
         BranchTable branchTable = null;
         if (id == null) {
@@ -122,9 +121,9 @@ public class TableService {
      */
     @Transactional(readOnly = true)
     public ApiRest listBranchTables(ListBranchTablesModel listBranchTablesModel) {
-        BigInteger tenantId = listBranchTablesModel.obtainTenantId();
-        BigInteger branchId = listBranchTablesModel.obtainBranchId();
-        BigInteger tableAreaId = listBranchTablesModel.getTableAreaId();
+        Long tenantId = listBranchTablesModel.obtainTenantId();
+        Long branchId = listBranchTablesModel.obtainBranchId();
+        Long tableAreaId = listBranchTablesModel.getTableAreaId();
         int page = listBranchTablesModel.getPage();
         int rows = listBranchTablesModel.getRows();
 
@@ -163,10 +162,10 @@ public class TableService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest deleteTableArea(DeleteTableAreaModel deleteTableAreaModel) {
-        BigInteger tenantId = deleteTableAreaModel.obtainTenantId();
-        BigInteger branchId = deleteTableAreaModel.obtainBranchId();
-        BigInteger tableAreaId = deleteTableAreaModel.getTableAreaId();
-        BigInteger userId = deleteTableAreaModel.obtainUserId();
+        Long tenantId = deleteTableAreaModel.obtainTenantId();
+        Long branchId = deleteTableAreaModel.obtainBranchId();
+        Long tableAreaId = deleteTableAreaModel.getTableAreaId();
+        Long userId = deleteTableAreaModel.obtainUserId();
 
         SearchModel countSearchModel = new SearchModel(true);
         countSearchModel.addSearchCondition(BranchTable.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -197,10 +196,10 @@ public class TableService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest deleteBranchTable(DeleteBranchTableModel deleteBranchTableModel) {
-        BigInteger tenantId = deleteBranchTableModel.obtainTenantId();
-        BigInteger branchId = deleteBranchTableModel.obtainBranchId();
-        BigInteger tableId = deleteBranchTableModel.getTableId();
-        BigInteger userId = deleteBranchTableModel.obtainUserId();
+        Long tenantId = deleteBranchTableModel.obtainTenantId();
+        Long branchId = deleteBranchTableModel.obtainBranchId();
+        Long tableId = deleteBranchTableModel.getTableId();
+        Long userId = deleteBranchTableModel.obtainUserId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(TableArea.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);

@@ -3,19 +3,18 @@ package build.dream.catering.models.vip;
 import build.dream.common.models.CateringBasicModel;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class SaveVipGroupModel extends CateringBasicModel {
-    private BigInteger id;
+    private Long id;
 
     @NotNull
     private String name;
 
-    public BigInteger getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(BigInteger id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

@@ -7,7 +7,6 @@ import build.dream.common.utils.ApplicationHandler;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
-import java.math.BigInteger;
 import java.util.List;
 
 public class SaveWeiXinMenuModel extends CateringBasicModel {
@@ -58,7 +57,7 @@ public class SaveWeiXinMenuModel extends CateringBasicModel {
     public static class Button extends BasicModel {
         private List<SubButton> subButtons;
 
-        private BigInteger id;
+        private Long id;
 
         private String type;
 
@@ -82,11 +81,11 @@ public class SaveWeiXinMenuModel extends CateringBasicModel {
             this.subButtons = subButtons;
         }
 
-        public BigInteger getId() {
+        public Long getId() {
             return id;
         }
 
-        public void setId(BigInteger id) {
+        public void setId(Long id) {
             this.id = id;
         }
 
@@ -196,7 +195,7 @@ public class SaveWeiXinMenuModel extends CateringBasicModel {
     }
 
     public static class SubButton extends BasicModel {
-        private BigInteger id;
+        private Long id;
 
         private String type;
 
@@ -212,11 +211,11 @@ public class SaveWeiXinMenuModel extends CateringBasicModel {
 
         private String pagePath;
 
-        public BigInteger getId() {
+        public Long getId() {
             return id;
         }
 
-        public void setId(BigInteger id) {
+        public void setId(Long id) {
             this.id = id;
         }
 

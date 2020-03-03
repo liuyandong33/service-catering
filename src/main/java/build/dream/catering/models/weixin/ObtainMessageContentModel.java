@@ -3,28 +3,27 @@ package build.dream.catering.models.weixin;
 import build.dream.common.models.BasicModel;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class ObtainMessageContentModel extends BasicModel {
     @NotNull
-    private BigInteger tenantId;
+    private Long tenantId;
 
     @NotNull
-    private BigInteger weiXinMenuId;
+    private Long weiXinMenuId;
 
-    public BigInteger getTenantId() {
+    public Long getTenantId() {
         return tenantId;
     }
 
-    public void setTenantId(BigInteger tenantId) {
+    public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
     }
 
-    public BigInteger getWeiXinMenuId() {
+    public Long getWeiXinMenuId() {
         return weiXinMenuId;
     }
 
-    public void setWeiXinMenuId(BigInteger weiXinMenuId) {
+    public void setWeiXinMenuId(Long weiXinMenuId) {
         this.weiXinMenuId = weiXinMenuId;
     }
 }

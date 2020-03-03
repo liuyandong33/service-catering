@@ -15,8 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
 
 @Service
@@ -30,8 +28,8 @@ public class MeiTuanService {
      */
     @Transactional(readOnly = true)
     public ApiRest generateBindingStoreLink(GenerateBindingStoreLinkModel generateBindingStoreLinkModel) {
-        BigInteger tenantId = generateBindingStoreLinkModel.obtainTenantId();
-        BigInteger branchId = generateBindingStoreLinkModel.obtainBranchId();
+        Long tenantId = generateBindingStoreLinkModel.obtainTenantId();
+        Long branchId = generateBindingStoreLinkModel.obtainBranchId();
         String businessId = generateBindingStoreLinkModel.getBusinessId();
 
         SearchModel searchModel = new SearchModel(true);
@@ -70,8 +68,8 @@ public class MeiTuanService {
         Map<String, Object> orderMap = JacksonUtils.readValueAsMap(order, String.class, Object.class);
 
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
-        BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
-        BigInteger branchId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[1]);
+        Long tenantId = NumberUtils.createLong(tenantIdAndBranchIdArray[0]);
+        Long branchId = NumberUtils.createLong(tenantIdAndBranchIdArray[1]);
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
         searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -94,10 +92,10 @@ public class MeiTuanService {
             orderStatus = DietOrderConstants.ORDER_STATUS_INVALID;
         }
 
-        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        Long userId = CommonUtils.getServiceSystemUserId();
 
-        BigDecimal totalAmount = BigDecimal.valueOf(MapUtils.getDoubleValue(orderMap, "originalPrice"));
-        BigDecimal discountAmount = Constants.DECIMAL_DEFAULT_VALUE;
+        Double totalAmount =MapUtils.getDoubleValue(orderMap, "originalPrice");
+        Double discountAmount = Constants.DECIMAL_DEFAULT_VALUE;
 
         String extras = MapUtils.getString(orderMap, "extras");
         List<DietOrderActivity> dietOrderActivities = new ArrayList<DietOrderActivity>();
@@ -107,9 +105,9 @@ public class MeiTuanService {
                 if (MapUtils.isEmpty(extraMap)) {
                     continue;
                 }
-                BigDecimal poiCharge = BigDecimal.valueOf(MapUtils.getDoubleValue(extraMap, "poi_charge"));
-                if (poiCharge.compareTo(BigDecimal.ZERO) > 0) {
-                    discountAmount = discountAmount.add(poiCharge);
+                Double poiCharge = MapUtils.getDoubleValue(extraMap, "poi_charge");
+                if (poiCharge > 0) {
+                    discountAmount = discountAmount + poiCharge;
                     DietOrderActivity dietOrderActivity = DietOrderActivity.builder()
                             .tenantId(tenantId)
                             .tenantCode(tenantCode)
@@ -126,8 +124,8 @@ public class MeiTuanService {
             }
         }
 
-        BigDecimal payableAmount = totalAmount.subtract(discountAmount);
-        BigDecimal paidAmount = Constants.DECIMAL_DEFAULT_VALUE;
+        Double payableAmount = totalAmount - discountAmount;
+        Double paidAmount = Constants.DECIMAL_DEFAULT_VALUE;
 
         int payType = MapUtils.getIntValue(orderMap, "payType");
         int payStatus = Constants.INT_DEFAULT_VALUE;
@@ -161,7 +159,7 @@ public class MeiTuanService {
             activeTime = ctimeCalendar.getTime();
         }
 
-        BigDecimal shippingFee = BigDecimal.valueOf(MapUtils.getDoubleValue(orderMap, "shippingFee"));
+        Double shippingFee = MapUtils.getDoubleValue(orderMap, "shippingFee");
 
         int hasInvoiced = MapUtils.getIntValue(orderMap, "hasInvoiced");
         boolean invoiced = false;
@@ -207,7 +205,7 @@ public class MeiTuanService {
                 .updatedRemark("接收美团订单生效回调，保存订单信息！")
                 .build();
         DatabaseHelper.insert(dietOrder);
-        BigInteger dietOrderId = dietOrder.getId();
+        Long dietOrderId = dietOrder.getId();
 
         if (payStatus == DietOrderConstants.PAY_STATUS_PAID) {
             DietOrderPayment dietOrderPayment = DietOrderPayment.builder()
@@ -237,8 +235,8 @@ public class MeiTuanService {
         List<Map> detailList = JacksonUtils.readValueAsList(detail, Map.class);
 
         Map<Integer, DietOrderGroup> dietOrderGroupMap = new HashMap<Integer, DietOrderGroup>();
-        BigDecimal packageFee = BigDecimal.ZERO;
-        BigDecimal boxQuantity = BigDecimal.ZERO;
+        Double packageFee = 0D;
+        Double boxQuantity = 0D;
 
         for (Map detailMap : detailList) {
             int cartId = MapUtils.getIntValue(detailMap, "cart_id");
@@ -257,14 +255,14 @@ public class MeiTuanService {
                 DatabaseHelper.insert(dietOrderGroup);
                 dietOrderGroupMap.put(cartId, dietOrderGroup);
             }
-            BigDecimal boxNum = BigDecimal.valueOf(MapUtils.getDoubleValue(detailMap, "box_num"));
-            BigDecimal boxPrice = BigDecimal.valueOf(MapUtils.getDoubleValue(detailMap, "box_price"));
-            packageFee = packageFee.add(boxNum.multiply(boxPrice));
-            boxQuantity = boxQuantity.add(boxNum);
+            Double boxNum = MapUtils.getDoubleValue(detailMap, "box_num");
+            Double boxPrice = MapUtils.getDoubleValue(detailMap, "box_price");
+            packageFee = packageFee + (boxNum * boxPrice);
+            boxQuantity = boxQuantity + boxNum;
 
-            BigDecimal price = BigDecimal.valueOf(MapUtils.getDoubleValue(detailMap, "price"));
-            BigDecimal quantity = BigDecimal.valueOf(MapUtils.getDoubleValue(detailMap, "quantity"));
-            BigDecimal dietOrderDetailTotalAmount = price.multiply(quantity);
+            Double price = MapUtils.getDoubleValue(detailMap, "price");
+            Double quantity = MapUtils.getDoubleValue(detailMap, "quantity");
+            Double dietOrderDetailTotalAmount = price * quantity;
             DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
                     .tenantId(tenantId)
                     .tenantCode(tenantCode)
@@ -282,7 +280,7 @@ public class MeiTuanService {
                     .attributeIncrease(Constants.DECIMAL_DEFAULT_VALUE)
                     .quantity(quantity)
                     .totalAmount(dietOrderDetailTotalAmount)
-                    .discountAmount(BigDecimal.ZERO)
+                    .discountAmount(0D)
                     .payableAmount(dietOrderDetailTotalAmount)
                     .createdUserId(userId)
                     .updatedUserId(userId)
@@ -314,7 +312,7 @@ public class MeiTuanService {
                 DatabaseHelper.insertAll(dietOrderDetailGoodsAttributes);
             }
         }
-        if (packageFee.compareTo(BigDecimal.ZERO) > 0 || shippingFee.compareTo(BigDecimal.ZERO) > 0) {
+        if (packageFee > 0 || shippingFee > 0) {
             DietOrderGroup dietOrderGroup = DietOrderGroup.builder()
                     .tenantId(tenantId)
                     .tenantCode(tenantCode)
@@ -326,7 +324,7 @@ public class MeiTuanService {
                     .updatedUserId(userId)
                     .build();
             DatabaseHelper.insert(dietOrderGroup);
-            if (packageFee.compareTo(BigDecimal.ZERO) > 0) {
+            if (packageFee > 0) {
                 DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
                         .tenantId(tenantId)
                         .tenantCode(tenantCode)
@@ -334,9 +332,9 @@ public class MeiTuanService {
                         .dietOrderId(dietOrderId)
                         .dietOrderGroupId(dietOrderGroup.getId())
                         .goodsType(Constants.GOODS_TYPE_PACKAGE_FEE)
-                        .goodsId(Constants.BIG_INTEGER_MINUS_TWO)
+                        .goodsId(-1L)
                         .goodsName("餐盒")
-                        .goodsSpecificationId(Constants.BIG_INTEGER_MINUS_TWO)
+                        .goodsSpecificationId(-2L)
                         .goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE)
                         .categoryId(Constants.FICTITIOUS_GOODS_CATEGORY_ID)
                         .categoryName(Constants.FICTITIOUS_GOODS_CATEGORY_NAME)
@@ -344,14 +342,14 @@ public class MeiTuanService {
                         .attributeIncrease(Constants.DECIMAL_DEFAULT_VALUE)
                         .quantity(boxQuantity)
                         .totalAmount(packageFee)
-                        .discountAmount(BigDecimal.ZERO)
+                        .discountAmount(0D)
                         .payableAmount(packageFee)
                         .createdUserId(userId)
                         .updatedUserId(userId)
                         .build();
                 DatabaseHelper.insert(dietOrderDetail);
             }
-            if (shippingFee.compareTo(BigDecimal.ZERO) > 0) {
+            if (shippingFee > 0) {
                 DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
                         .tenantId(tenantId)
                         .tenantCode(tenantCode)
@@ -359,17 +357,17 @@ public class MeiTuanService {
                         .dietOrderId(dietOrderId)
                         .dietOrderGroupId(dietOrderGroup.getId())
                         .goodsType(Constants.GOODS_TYPE_DELIVER_FEE)
-                        .goodsId(Constants.BIG_INTEGER_MINUS_ONE)
+                        .goodsId(-1L)
                         .goodsName("配送费")
-                        .goodsSpecificationId(Constants.BIG_INTEGER_MINUS_ONE)
+                        .goodsSpecificationId(-2L)
                         .goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE)
                         .categoryId(Constants.FICTITIOUS_GOODS_CATEGORY_ID)
                         .categoryName(Constants.FICTITIOUS_GOODS_CATEGORY_NAME)
                         .price(shippingFee)
                         .attributeIncrease(Constants.DECIMAL_DEFAULT_VALUE)
-                        .quantity(BigDecimal.ONE)
+                        .quantity(1D)
                         .totalAmount(shippingFee)
-                        .discountAmount(BigDecimal.ZERO)
+                        .discountAmount(0D)
                         .payableAmount(shippingFee)
                         .createdUserId(userId)
                         .updatedUserId(userId)
@@ -393,11 +391,11 @@ public class MeiTuanService {
         String sign = callbackParameters.get("sign");
         String orderCancel = callbackParameters.get("orderCancel");
         Map<String, Object> orderCancelMap = JacksonUtils.readValueAsMap(orderCancel, String.class, Object.class);
-        BigInteger orderId = BigInteger.valueOf(MapUtils.getLongValue(orderCancelMap, "orderId"));
+        Long orderId = Long.valueOf(MapUtils.getLongValue(orderCancelMap, "orderId"));
 
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
-        BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
-        BigInteger branchId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[1]);
+        Long tenantId = NumberUtils.createLong(tenantIdAndBranchIdArray[0]);
+        Long branchId = NumberUtils.createLong(tenantIdAndBranchIdArray[1]);
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -406,7 +404,7 @@ public class MeiTuanService {
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
         ValidateUtils.notNull(dietOrder, "订单不存在！");
 
-        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        Long userId = CommonUtils.getServiceSystemUserId();
 
         dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_INVALID);
         dietOrder.setUpdatedUserId(userId);
@@ -428,11 +426,11 @@ public class MeiTuanService {
         String sign = callbackParameters.get("sign");
         String orderRefund = callbackParameters.get("orderRefund");
         Map<String, Object> orderRefundMap = JacksonUtils.readValueAsMap(orderRefund, String.class, Object.class);
-        BigInteger orderId = BigInteger.valueOf(MapUtils.getLongValue(orderRefundMap, "orderId"));
+        Long orderId = Long.valueOf(MapUtils.getLongValue(orderRefundMap, "orderId"));
 
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
-        BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
-        BigInteger branchId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[1]);
+        Long tenantId = NumberUtils.createLong(tenantIdAndBranchIdArray[0]);
+        Long branchId = NumberUtils.createLong(tenantIdAndBranchIdArray[1]);
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -441,9 +439,9 @@ public class MeiTuanService {
         DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
         ValidateUtils.notNull(dietOrder, "订单不存在！");
 
-        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        Long userId = CommonUtils.getServiceSystemUserId();
 
-        BigInteger dietOrderId = dietOrder.getId();
+        Long dietOrderId = dietOrder.getId();
 
         String notifyType = MapUtils.getString(orderRefundMap, "notifyType");
         int refundStatus = Constants.INT_DEFAULT_VALUE;
@@ -479,8 +477,8 @@ public class MeiTuanService {
         String poiName = callbackParameters.get("poiName");
 
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
-        BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
-        BigInteger branchId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[1]);
+        Long tenantId = NumberUtils.createLong(tenantIdAndBranchIdArray[0]);
+        Long branchId = NumberUtils.createLong(tenantIdAndBranchIdArray[1]);
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -488,7 +486,7 @@ public class MeiTuanService {
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         ValidateUtils.notNull(branch, "门店不存在！");
 
-        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        Long userId = CommonUtils.getServiceSystemUserId();
         branch.setAppAuthToken(appAuthToken);
         branch.setPoiId(poiId);
         branch.setPoiName(poiName);
@@ -505,8 +503,8 @@ public class MeiTuanService {
      */
     @Transactional(readOnly = true)
     public ApiRest checkIsBinding(CheckIsBindingModel checkIsBindingModel) {
-        BigInteger tenantId = checkIsBindingModel.obtainTenantId();
-        BigInteger branchId = checkIsBindingModel.obtainBranchId();
+        Long tenantId = checkIsBindingModel.obtainTenantId();
+        Long branchId = checkIsBindingModel.obtainBranchId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -523,8 +521,8 @@ public class MeiTuanService {
 
     @Transactional(readOnly = true)
     public ApiRest queryPoiInfo(QueryPoiInfoModel queryPoiInfoModel) throws IOException {
-        BigInteger tenantId = queryPoiInfoModel.obtainTenantId();
-        BigInteger branchId = queryPoiInfoModel.obtainBranchId();
+        Long tenantId = queryPoiInfoModel.obtainTenantId();
+        Long branchId = queryPoiInfoModel.obtainBranchId();
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -555,9 +553,9 @@ public class MeiTuanService {
      */
     @Transactional(readOnly = true)
     public ApiRest confirmOrder(ConfirmOrderModel confirmOrderModel) {
-        BigInteger tenantId = confirmOrderModel.obtainTenantId();
-        BigInteger branchId = confirmOrderModel.obtainBranchId();
-        BigInteger dietOrderId = confirmOrderModel.getDietOrderId();
+        Long tenantId = confirmOrderModel.obtainTenantId();
+        Long branchId = confirmOrderModel.obtainBranchId();
+        Long dietOrderId = confirmOrderModel.getDietOrderId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -584,9 +582,9 @@ public class MeiTuanService {
      */
     @Transactional(readOnly = true)
     public ApiRest cancelOrder(CancelOrderModel cancelOrderModel) {
-        BigInteger tenantId = cancelOrderModel.obtainTenantId();
-        BigInteger branchId = cancelOrderModel.obtainBranchId();
-        BigInteger dietOrderId = cancelOrderModel.getDietOrderId();
+        Long tenantId = cancelOrderModel.obtainTenantId();
+        Long branchId = cancelOrderModel.obtainBranchId();
+        Long dietOrderId = cancelOrderModel.getDietOrderId();
         String reasonCode = cancelOrderModel.getReasonCode();
         String reason = cancelOrderModel.getReason();
 
@@ -617,9 +615,9 @@ public class MeiTuanService {
      */
     @Transactional(readOnly = true)
     public ApiRest deliveringOrder(DeliveringOrderModel deliveringOrderModel) {
-        BigInteger tenantId = deliveringOrderModel.obtainTenantId();
-        BigInteger branchId = deliveringOrderModel.obtainBranchId();
-        BigInteger dietOrderId = deliveringOrderModel.getDietOrderId();
+        Long tenantId = deliveringOrderModel.obtainTenantId();
+        Long branchId = deliveringOrderModel.obtainBranchId();
+        Long dietOrderId = deliveringOrderModel.getDietOrderId();
         String courierName = deliveringOrderModel.getCourierName();
         String courierPhone = deliveringOrderModel.getCourierPhone();
 
@@ -656,9 +654,9 @@ public class MeiTuanService {
      */
     @Transactional(readOnly = true)
     public ApiRest deliveredOrder(DeliveredOrderModel deliveredOrderModel) {
-        BigInteger tenantId = deliveredOrderModel.obtainTenantId();
-        BigInteger branchId = deliveredOrderModel.obtainBranchId();
-        BigInteger dietOrderId = deliveredOrderModel.getDietOrderId();
+        Long tenantId = deliveredOrderModel.obtainTenantId();
+        Long branchId = deliveredOrderModel.obtainBranchId();
+        Long dietOrderId = deliveredOrderModel.getDietOrderId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);

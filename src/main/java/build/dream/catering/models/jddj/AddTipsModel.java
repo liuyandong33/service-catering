@@ -3,20 +3,19 @@ package build.dream.catering.models.jddj;
 import build.dream.common.models.CateringBasicModel;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class AddTipsModel extends CateringBasicModel {
     @NotNull
-    private BigInteger orderId;
+    private Long orderId;
 
     @NotNull
     private Integer tips;
 
-    public BigInteger getOrderId() {
+    public Long getOrderId() {
         return orderId;
     }
 
-    public void setOrderId(BigInteger orderId) {
+    public void setOrderId(Long orderId) {
         this.orderId = orderId;
     }
 

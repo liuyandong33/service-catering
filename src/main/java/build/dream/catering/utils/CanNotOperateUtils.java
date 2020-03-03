@@ -8,11 +8,10 @@ import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.DeleteModel;
 import build.dream.common.utils.SearchModel;
 
-import java.math.BigInteger;
 import java.util.Objects;
 
 public class CanNotOperateUtils {
-    public static CanNotOperateReason buildCanNotOperateReason(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger tableId, String tableName, BigInteger causeTableId, String causeTableName, Integer operateType, String reason) {
+    public static CanNotOperateReason buildCanNotOperateReason(Long tenantId, String tenantCode, Long branchId, Long tableId, String tableName, Long causeTableId, String causeTableName, Integer operateType, String reason) {
         CanNotOperateReason canNotOperateReason = CanNotOperateReason.builder()
                 .tenantId(tenantId)
                 .tenantCode(tenantCode)
@@ -27,7 +26,7 @@ public class CanNotOperateUtils {
         return canNotOperateReason;
     }
 
-    public static void validateCanNotOperate(BigInteger tenantId, BigInteger branchId, String tableName, BigInteger tableId, int operateType) {
+    public static void validateCanNotOperate(Long tenantId, Long branchId, String tableName, Long tableId, int operateType) {
         SearchModel searchModel = SearchModel.builder()
                 .equal(CanNotOperateReason.ColumnName.TENANT_ID, tenantId)
                 .equal(CanNotOperateReason.ColumnName.BRANCH_ID, branchId)
@@ -55,7 +54,7 @@ public class CanNotOperateUtils {
         }
     }
 
-    public static void deleteCanNotOperateReason(BigInteger tenantId, BigInteger branchId, String causeTableName, BigInteger causeTableId) {
+    public static void deleteCanNotOperateReason(Long tenantId, Long branchId, String causeTableName, Long causeTableId) {
         DeleteModel deleteModel = DeleteModel.builder()
                 .autoSetDeletedFalse()
                 .equal(CanNotOperateReason.ColumnName.TENANT_ID, tenantId)

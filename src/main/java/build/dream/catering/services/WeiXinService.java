@@ -17,15 +17,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.*;
 
 @Service
 public class WeiXinService {
     @Transactional(rollbackFor = Exception.class)
     public ApiRest createMemberCard(CreateMemberCardModel createMemberCardModel, MultipartFile backgroundPicFile, MultipartFile logoFile) {
-        BigInteger tenantId = createMemberCardModel.obtainTenantId();
-        BigInteger userId = createMemberCardModel.obtainUserId();
+        Long tenantId = createMemberCardModel.obtainTenantId();
+        Long userId = createMemberCardModel.obtainUserId();
         WeiXinAuthorizerInfo weiXinAuthorizerInfo = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
         ValidateUtils.notNull(weiXinAuthorizerInfo, "未配置微信公众号，不能创建会员卡！");
 
@@ -258,11 +257,11 @@ public class WeiXinService {
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest addPayGiftCard(AddPayGiftCardModel addPayGiftCardModel) {
-        BigInteger tenantId = addPayGiftCardModel.obtainTenantId();
+        Long tenantId = addPayGiftCardModel.obtainTenantId();
         List<String> mchIdList = addPayGiftCardModel.getMchIdList();
         Date beginTime = addPayGiftCardModel.getBeginTime();
         Date endTime = addPayGiftCardModel.getEndTime();
-        BigInteger weiXinCardId = addPayGiftCardModel.getWeiXinCardId();
+        Long weiXinCardId = addPayGiftCardModel.getWeiXinCardId();
         Integer leastCost = addPayGiftCardModel.getLeastCost();
         Integer maxCost = addPayGiftCardModel.getMaxCost();
 
@@ -308,9 +307,9 @@ public class WeiXinService {
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest deleteWeiXinMemberCard(DeleteWeiXinMemberCardModel deleteWeiXinMemberCardModel) {
-        BigInteger tenantId = deleteWeiXinMemberCardModel.obtainTenantId();
-        BigInteger userId = deleteWeiXinMemberCardModel.obtainUserId();
-        BigInteger weiXinCardId = deleteWeiXinMemberCardModel.getWeiXinCardId();
+        Long tenantId = deleteWeiXinMemberCardModel.obtainTenantId();
+        Long userId = deleteWeiXinMemberCardModel.obtainUserId();
+        Long weiXinCardId = deleteWeiXinMemberCardModel.getWeiXinCardId();
 
         WeiXinAuthorizerInfo weiXinAuthorizerInfo = WeiXinUtils.obtainWeiXinPublicAccount(tenantId.toString());
         ValidateUtils.notNull(weiXinAuthorizerInfo, "未授权微信公众号，不能删除微信会员卡！");
@@ -350,8 +349,8 @@ public class WeiXinService {
      */
     @Transactional(readOnly = true)
     public ApiRest listWeiXinMemberCards(ListWeiXinMemberCardsModel listWeiXinMemberCardsModel) {
-        BigInteger tenantId = listWeiXinMemberCardsModel.obtainTenantId();
-        BigInteger branchId = listWeiXinMemberCardsModel.obtainBranchId();
+        Long tenantId = listWeiXinMemberCardsModel.obtainTenantId();
+        Long branchId = listWeiXinMemberCardsModel.obtainBranchId();
         int page = listWeiXinMemberCardsModel.getPage();
         int rows = listWeiXinMemberCardsModel.getRows();
 
@@ -384,8 +383,8 @@ public class WeiXinService {
      * @throws IOException
      */
     public ApiRest obtainWeiXinAuthorizerInfo(ObtainWeiXinAuthorizerInfoModel obtainWeiXinAuthorizerInfoModel) {
-        BigInteger tenantId = obtainWeiXinAuthorizerInfoModel.obtainTenantId();
-        BigInteger branchId = obtainWeiXinAuthorizerInfoModel.obtainBranchId();
+        Long tenantId = obtainWeiXinAuthorizerInfoModel.obtainTenantId();
+        Long branchId = obtainWeiXinAuthorizerInfoModel.obtainBranchId();
 
         Map<String, String> obtainWeiXinAuthorizerInfoRequestParameters = new HashMap<String, String>();
         obtainWeiXinAuthorizerInfoRequestParameters.put("tenantId", tenantId.toString());
@@ -403,7 +402,7 @@ public class WeiXinService {
      */
     @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> handleAuthCallback(AuthCallbackModel authCallbackModel) {
-        BigInteger tenantId = authCallbackModel.getTenantId();
+        Long tenantId = authCallbackModel.getTenantId();
         String componentAppId = authCallbackModel.getComponentAppId();
         String authCode = authCallbackModel.getAuthCode();
 
@@ -430,9 +429,9 @@ public class WeiXinService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveWeiXinMenu(SaveWeiXinMenuModel saveWeiXinMenuModel) {
-        BigInteger tenantId = saveWeiXinMenuModel.obtainTenantId();
+        Long tenantId = saveWeiXinMenuModel.obtainTenantId();
         String tenantCode = saveWeiXinMenuModel.obtainTenantCode();
-        BigInteger userId = saveWeiXinMenuModel.obtainUserId();
+        Long userId = saveWeiXinMenuModel.obtainUserId();
         SaveWeiXinMenuModel.Button first = saveWeiXinMenuModel.getFirst();
         SaveWeiXinMenuModel.Button second = saveWeiXinMenuModel.getSecond();
         SaveWeiXinMenuModel.Button third = saveWeiXinMenuModel.getThird();
@@ -443,18 +442,18 @@ public class WeiXinService {
         return ApiRest.builder().message("保存微信菜单成功！").successful(true).build();
     }
 
-    private void saveWeiXinMenu(BigInteger tenantId, String tenantCode, BigInteger userId, SaveWeiXinMenuModel.Button button) {
+    private void saveWeiXinMenu(Long tenantId, String tenantCode, Long userId, SaveWeiXinMenuModel.Button button) {
         if (button == null) {
             return;
         }
-        BigInteger id = button.getId();
+        Long id = button.getId();
         if (id == null) {
             WeiXinMenu weiXinMenu = buildWeiXinMenu(tenantId, tenantCode, userId, button);
             DatabaseHelper.insert(weiXinMenu);
 
             List<SaveWeiXinMenuModel.SubButton> subButtons = button.getSubButtons();
             if (CollectionUtils.isNotEmpty(subButtons)) {
-                BigInteger parentId = weiXinMenu.getId();
+                Long parentId = weiXinMenu.getId();
                 List<WeiXinMenu> subWeiXinMenus = new ArrayList<WeiXinMenu>();
                 for (SaveWeiXinMenuModel.SubButton subButton : subButtons) {
                     subWeiXinMenus.add(buildSubWeiXinMenu(tenantId, tenantCode, userId, parentId, subButton));
@@ -469,22 +468,22 @@ public class WeiXinService {
 
             List<SaveWeiXinMenuModel.SubButton> subButtons = button.getSubButtons();
             if (CollectionUtils.isNotEmpty(subButtons)) {
-                List<BigInteger> weiXinMenuIds = new ArrayList<BigInteger>();
+                List<Long> weiXinMenuIds = new ArrayList<Long>();
                 for (SaveWeiXinMenuModel.SubButton subButton : subButtons) {
-                    BigInteger weiXinMenuId = subButton.getId();
+                    Long weiXinMenuId = subButton.getId();
                     if (weiXinMenuId != null) {
                         weiXinMenuIds.add(weiXinMenuId);
                     }
                 }
                 List<WeiXinMenu> subWeiXinMenus = DatabaseHelper.findAll(WeiXinMenu.class, TupleUtils.buildTuple3(WeiXinMenu.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId), TupleUtils.buildTuple3(WeiXinMenu.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, weiXinMenuIds));
-                Map<BigInteger, WeiXinMenu> weiXinMenuMap = new HashMap<BigInteger, WeiXinMenu>();
+                Map<Long, WeiXinMenu> weiXinMenuMap = new HashMap<Long, WeiXinMenu>();
                 for (WeiXinMenu subWeiXinMenu : subWeiXinMenus) {
                     weiXinMenuMap.put(subWeiXinMenu.getId(), subWeiXinMenu);
                 }
 
-                BigInteger parentId = weiXinMenu.getId();
+                Long parentId = weiXinMenu.getId();
                 for (SaveWeiXinMenuModel.SubButton subButton : subButtons) {
-                    BigInteger weiXinMenuId = subButton.getId();
+                    Long weiXinMenuId = subButton.getId();
                     if (weiXinMenuId != null) {
                         WeiXinMenu subWeiXinMenu = weiXinMenuMap.get(weiXinMenuId);
                         ValidateUtils.notNull(subWeiXinMenu, "微信菜单不存在！");
@@ -501,7 +500,7 @@ public class WeiXinService {
         }
     }
 
-    private WeiXinMenu buildWeiXinMenu(WeiXinMenu weiXinMenu, SaveWeiXinMenuModel.Button button, BigInteger userId) {
+    private WeiXinMenu buildWeiXinMenu(WeiXinMenu weiXinMenu, SaveWeiXinMenuModel.Button button, Long userId) {
         String name = button.getName();
         String type = button.getType();
         String messageContent = button.getMessageContent();
@@ -521,7 +520,7 @@ public class WeiXinService {
         return weiXinMenu;
     }
 
-    private WeiXinMenu buildWeiXinMenu(WeiXinMenu weiXinMenu, SaveWeiXinMenuModel.SubButton subButton, BigInteger userId) {
+    private WeiXinMenu buildWeiXinMenu(WeiXinMenu weiXinMenu, SaveWeiXinMenuModel.SubButton subButton, Long userId) {
         String name = subButton.getName();
         String type = subButton.getType();
         String messageContent = subButton.getMessageContent();
@@ -541,7 +540,7 @@ public class WeiXinService {
         return weiXinMenu;
     }
 
-    private WeiXinMenu buildWeiXinMenu(BigInteger tenantId, String tenantCode, BigInteger userId, SaveWeiXinMenuModel.Button button) {
+    private WeiXinMenu buildWeiXinMenu(Long tenantId, String tenantCode, Long userId, SaveWeiXinMenuModel.Button button) {
         String name = button.getName();
         String type = button.getType();
         String messageContent = button.getMessageContent();
@@ -553,7 +552,7 @@ public class WeiXinService {
         WeiXinMenu weiXinMenu = WeiXinMenu.builder()
                 .tenantId(tenantId)
                 .tenantCode(tenantCode)
-                .parentId(BigInteger.ZERO)
+                .parentId(0L)
                 .name(name)
                 .type(type)
                 .messageContent(StringUtils.isNotBlank(messageContent) ? messageContent : Constants.VARCHAR_DEFAULT_VALUE)
@@ -567,7 +566,7 @@ public class WeiXinService {
         return weiXinMenu;
     }
 
-    private WeiXinMenu buildSubWeiXinMenu(BigInteger tenantId, String tenantCode, BigInteger userId, BigInteger parentId, SaveWeiXinMenuModel.SubButton subButton) {
+    private WeiXinMenu buildSubWeiXinMenu(Long tenantId, String tenantCode, Long userId, Long parentId, SaveWeiXinMenuModel.SubButton subButton) {
         String name = subButton.getName();
         String type = subButton.getType();
         String messageContent = subButton.getMessageContent();
@@ -601,16 +600,16 @@ public class WeiXinService {
      */
     @Transactional(readOnly = true)
     public ApiRest pushMenu(PushMenuModel pushMenuModel) {
-        BigInteger tenantId = pushMenuModel.obtainTenantId();
+        Long tenantId = pushMenuModel.obtainTenantId();
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(WeiXinMenu.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         List<WeiXinMenu> weiXinMenus = DatabaseHelper.findAll(WeiXinMenu.class, searchModel);
 
         List<WeiXinMenu> firstLevelWeiXinMenus = new ArrayList<WeiXinMenu>();
-        Map<BigInteger, List<WeiXinMenu>> weiXinMenuMap = new HashMap<BigInteger, List<WeiXinMenu>>();
+        Map<Long, List<WeiXinMenu>> weiXinMenuMap = new HashMap<Long, List<WeiXinMenu>>();
         for (WeiXinMenu weiXinMenu : weiXinMenus) {
-            BigInteger parentId = weiXinMenu.getParentId();
-            if (BigInteger.ZERO.compareTo(parentId) == 0) {
+            Long parentId = weiXinMenu.getParentId();
+            if (parentId == 0) {
                 firstLevelWeiXinMenus.add(weiXinMenu);
             } else {
                 List<WeiXinMenu> weiXinMenuList = weiXinMenuMap.get(parentId);
@@ -653,7 +652,7 @@ public class WeiXinService {
         return ApiRest.builder().message("推送菜单成功！").successful(true).build();
     }
 
-    private CreateMenuModel.Button buildButton(BigInteger tenantId, WeiXinMenu weiXinMenu) {
+    private CreateMenuModel.Button buildButton(Long tenantId, WeiXinMenu weiXinMenu) {
         CreateMenuModel.Button button = new CreateMenuModel.Button();
         String type = weiXinMenu.getType();
         String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
@@ -687,7 +686,7 @@ public class WeiXinService {
         return button;
     }
 
-    private CreateMenuModel.SubButton buildSubButton(BigInteger tenantId, WeiXinMenu weiXinMenu) {
+    private CreateMenuModel.SubButton buildSubButton(Long tenantId, WeiXinMenu weiXinMenu) {
         CreateMenuModel.SubButton subButton = new CreateMenuModel.SubButton();
         String type = weiXinMenu.getType();
         String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
@@ -729,15 +728,15 @@ public class WeiXinService {
      */
     @Transactional(readOnly = true)
     public ApiRest listMenus(ListMenusModel listMenusModel) {
-        BigInteger tenantId = listMenusModel.obtainTenantId();
+        Long tenantId = listMenusModel.obtainTenantId();
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(WeiXinMenu.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         List<WeiXinMenu> weiXinMenus = DatabaseHelper.findAll(WeiXinMenu.class, searchModel);
         List<WeiXinMenu> firstLevelWeiXinMenus = new ArrayList<WeiXinMenu>();
-        Map<BigInteger, List<WeiXinMenu>> weiXinMenuMap = new HashMap<BigInteger, List<WeiXinMenu>>();
+        Map<Long, List<WeiXinMenu>> weiXinMenuMap = new HashMap<Long, List<WeiXinMenu>>();
         for (WeiXinMenu weiXinMenu : weiXinMenus) {
-            BigInteger parentId = weiXinMenu.getParentId();
-            if (BigInteger.ZERO.compareTo(parentId) == 0) {
+            Long parentId = weiXinMenu.getParentId();
+            if (parentId == 0) {
                 firstLevelWeiXinMenus.add(weiXinMenu);
             } else {
                 List<WeiXinMenu> weiXinMenuList = weiXinMenuMap.get(parentId);
@@ -805,8 +804,8 @@ public class WeiXinService {
      * @return
      */
     public ApiRest obtainMessageContent(ObtainMessageContentModel obtainMessageContentModel) {
-        BigInteger tenantId = obtainMessageContentModel.getTenantId();
-        BigInteger weiXinMenuId = obtainMessageContentModel.getWeiXinMenuId();
+        Long tenantId = obtainMessageContentModel.getTenantId();
+        Long weiXinMenuId = obtainMessageContentModel.getWeiXinMenuId();
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(WeiXinMenu.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition(WeiXinMenu.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, weiXinMenuId);

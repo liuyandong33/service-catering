@@ -7,13 +7,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 
 @Service
 public class DemoService {
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest writeSaleFlow(BigInteger dietOrderId) throws IOException {
+    public ApiRest writeSaleFlow(Long dietOrderId) throws IOException {
         SaleFlowUtils.writeSaleFlow(dietOrderId);
 
         ApiRest apiRest = new ApiRest();
@@ -23,14 +21,14 @@ public class DemoService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest deductingGoodsStock(BigInteger goodsId, BigInteger goodsSpecificationId, BigDecimal quantity) {
-        BigDecimal stock = GoodsUtils.deductingGoodsStock(goodsId, goodsSpecificationId, quantity);
+    public ApiRest deductingGoodsStock(Long goodsId, Long goodsSpecificationId, Double quantity) {
+        Double stock = GoodsUtils.deductingGoodsStock(goodsId, goodsSpecificationId, quantity);
         return ApiRest.builder().data(stock).message("测试扣减库存成功！").successful(true).build();
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest addGoodsStock(BigInteger goodsId, BigInteger goodsSpecificationId, BigDecimal quantity) {
-        BigDecimal stock = GoodsUtils.addGoodsStock(goodsId, goodsSpecificationId, quantity);
+    public ApiRest addGoodsStock(Long goodsId, Long goodsSpecificationId, Double quantity) {
+        Double stock = GoodsUtils.addGoodsStock(goodsId, goodsSpecificationId, quantity);
         return ApiRest.builder().data(stock).message("测试增加库存成功！").successful(true).build();
     }
 }

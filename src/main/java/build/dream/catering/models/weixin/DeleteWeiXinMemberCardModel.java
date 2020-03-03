@@ -3,17 +3,16 @@ package build.dream.catering.models.weixin;
 import build.dream.common.models.CateringBasicModel;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class DeleteWeiXinMemberCardModel extends CateringBasicModel {
     @NotNull
-    private BigInteger weiXinCardId;
+    private Long weiXinCardId;
 
-    public BigInteger getWeiXinCardId() {
+    public Long getWeiXinCardId() {
         return weiXinCardId;
     }
 
-    public void setWeiXinCardId(BigInteger weiXinCardId) {
+    public void setWeiXinCardId(Long weiXinCardId) {
         this.weiXinCardId = weiXinCardId;
     }
 }

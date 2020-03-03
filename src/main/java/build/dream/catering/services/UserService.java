@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,8 +28,8 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public ApiRest listUsers(ListUsersModel listUsersModel) {
-        BigInteger tenantId = listUsersModel.obtainTenantId();
-        BigInteger branchId = listUsersModel.obtainBranchId();
+        Long tenantId = listUsersModel.obtainTenantId();
+        Long branchId = listUsersModel.obtainBranchId();
         Integer page = listUsersModel.getPage();
         Integer rows = listUsersModel.getRows();
 
@@ -38,7 +37,7 @@ public class UserService {
 
         List<SystemUser> systemUsers = null;
         if (count > 0) {
-            List<BigInteger> userIds = branchMapper.findAllUserIds(tenantId, branchId, (page - 1) * rows, rows);
+            List<Long> userIds = branchMapper.findAllUserIds(tenantId, branchId, (page - 1) * rows, rows);
             systemUsers = UserUtils.batchGetUsers(userIds);
         } else {
             systemUsers = new ArrayList<SystemUser>();
@@ -58,8 +57,8 @@ public class UserService {
      */
     @Transactional(readOnly = true)
     public ApiRest obtainUserInfo(ObtainUserInfoModel obtainUserInfoModel) {
-        BigInteger userId = obtainUserInfoModel.obtainUserId();
-        BigInteger tenantId = obtainUserInfoModel.obtainTenantId();
+        Long userId = obtainUserInfoModel.obtainUserId();
+        Long tenantId = obtainUserInfoModel.obtainTenantId();
 
         SystemUser systemUser = UserUtils.obtainUserInfo(userId);
         Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
@@ -82,8 +81,8 @@ public class UserService {
      */
     @Transactional(readOnly = true)
     public ApiRest obtainBranchInfo(ObtainBranchInfoModel obtainBranchInfoModel) {
-        BigInteger tenantId = obtainBranchInfoModel.getTenantId();
-        BigInteger userId = obtainBranchInfoModel.getUserId();
+        Long tenantId = obtainBranchInfoModel.getTenantId();
+        Long userId = obtainBranchInfoModel.getUserId();
         Branch branch = branchMapper.findByTenantIdAndUserId(tenantId, userId);
         ValidateUtils.notNull(branch, "门店不存在！");
 
@@ -98,15 +97,15 @@ public class UserService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest addUser(AddUserModel addUserModel) {
-        BigInteger tenantId = addUserModel.obtainTenantId();
+        Long tenantId = addUserModel.obtainTenantId();
         String tenantCode = addUserModel.obtainTenantCode();
-        BigInteger branchId = addUserModel.getBranchId();
+        Long branchId = addUserModel.getBranchId();
         String name = addUserModel.getName();
         String mobile = addUserModel.getMobile();
         String email = addUserModel.getEmail();
         String password = addUserModel.getPassword();
         boolean enabled = addUserModel.getEnabled();
-        BigInteger userId = addUserModel.obtainUserId();
+        Long userId = addUserModel.obtainUserId();
 
         String employeeCode = SerialNumberGenerator.nextSerialNumber(4, SequenceUtils.nextValue(tenantCode + "_employee_code"));
         String loginName = tenantCode + ":" + employeeCode;

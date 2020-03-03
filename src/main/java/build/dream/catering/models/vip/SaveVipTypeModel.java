@@ -5,12 +5,10 @@ import build.dream.common.utils.ApplicationHandler;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 
 public class SaveVipTypeModel extends CateringBasicModel {
     private static final Integer[] DISCOUNT_POLICIES = {1, 2, 3};
-    private BigInteger id;
+    private Long id;
 
     @NotNull
     @Length(max = 20)
@@ -18,18 +16,18 @@ public class SaveVipTypeModel extends CateringBasicModel {
 
     private Integer discountPolicy;
 
-    private BigDecimal discountRate;
+    private Double discountRate;
 
     @NotNull
     private Boolean enableBonus;
 
     private Integer bonusCoefficient;
 
-    public BigInteger getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(BigInteger id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -49,11 +47,11 @@ public class SaveVipTypeModel extends CateringBasicModel {
         this.discountPolicy = discountPolicy;
     }
 
-    public BigDecimal getDiscountRate() {
+    public Double getDiscountRate() {
         return discountRate;
     }
 
-    public void setDiscountRate(BigDecimal discountRate) {
+    public void setDiscountRate(Double discountRate) {
         this.discountRate = discountRate;
     }
 

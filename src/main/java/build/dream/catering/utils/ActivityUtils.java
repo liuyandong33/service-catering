@@ -6,8 +6,6 @@ import build.dream.common.domains.catering.EffectiveActivity;
 import build.dream.common.domains.catering.FullReductionActivity;
 import build.dream.common.utils.ApplicationHandler;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Time;
 import java.util.Date;
 import java.util.List;
@@ -22,11 +20,11 @@ public class ActivityUtils {
         return activityMapper;
     }
 
-    public static List<EffectiveActivity> listEffectiveActivities(BigInteger tenantId, BigInteger branchId) {
+    public static List<EffectiveActivity> listEffectiveActivities(Long tenantId, Long branchId) {
         return obtainActivityMapper().listEffectiveActivities(tenantId, branchId);
     }
 
-    public static Activity constructActivity(BigInteger tenantId, String tenantCode, String name, Integer type, Date startDate, Time startTime, Date endDate, Time endTime, int weekSign, BigInteger userId, String lastUpdateRemark) {
+    public static Activity constructActivity(Long tenantId, String tenantCode, String name, Integer type, Date startDate, Time startTime, Date endDate, Time endTime, int weekSign, Long userId, String lastUpdateRemark) {
         Activity activity = new Activity();
         activity.setTenantId(tenantId);
         activity.setTenantCode(tenantCode);
@@ -49,7 +47,7 @@ public class ActivityUtils {
         return activity;
     }
 
-    public static FullReductionActivity constructFullReductionActivity(BigInteger tenantId, String tenantCode, BigInteger activityId, BigDecimal totalAmount, Integer discountType, BigDecimal discountRate, BigDecimal discountAmount, BigInteger userId, String lastUpdateRemark) {
+    public static FullReductionActivity constructFullReductionActivity(Long tenantId, String tenantCode, Long activityId, Double totalAmount, Integer discountType, Double discountRate, Double discountAmount, Long userId, String lastUpdateRemark) {
         FullReductionActivity fullReductionActivity = new FullReductionActivity();
         fullReductionActivity.setTenantId(tenantId);
         fullReductionActivity.setTenantCode(tenantCode);

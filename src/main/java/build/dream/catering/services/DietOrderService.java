@@ -28,8 +28,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -46,9 +44,9 @@ public class DietOrderService {
     @Transactional(readOnly = true)
     public ApiRest obtainDietOrderInfo(ObtainDietOrderInfoModel obtainDietOrderInfoModel) {
         // 查询出订单信息
-        BigInteger tenantId = obtainDietOrderInfoModel.obtainTenantId();
-        BigInteger branchId = obtainDietOrderInfoModel.obtainBranchId();
-        BigInteger dietOrderId = obtainDietOrderInfoModel.getDietOrderId();
+        Long tenantId = obtainDietOrderInfoModel.obtainTenantId();
+        Long branchId = obtainDietOrderInfoModel.obtainBranchId();
+        Long dietOrderId = obtainDietOrderInfoModel.getDietOrderId();
         SearchModel dietOrderSearchModel = new SearchModel(true);
         dietOrderSearchModel.addSearchCondition(DietOrder.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId);
         dietOrderSearchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -102,9 +100,9 @@ public class DietOrderService {
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest confirmOrder(ConfirmOrderModel confirmOrderModel) {
-        BigInteger tenantId = confirmOrderModel.obtainTenantId();
-        BigInteger branchId = confirmOrderModel.obtainBranchId();
-        BigInteger orderId = confirmOrderModel.getOrderId();
+        Long tenantId = confirmOrderModel.obtainTenantId();
+        Long branchId = confirmOrderModel.obtainBranchId();
+        Long orderId = confirmOrderModel.getOrderId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -132,9 +130,9 @@ public class DietOrderService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest cancelOrder(CancelOrderModel cancelOrderModel) {
-        BigInteger tenantId = cancelOrderModel.obtainTenantId();
-        BigInteger branchId = cancelOrderModel.obtainBranchId();
-        BigInteger orderId = cancelOrderModel.getOrderId();
+        Long tenantId = cancelOrderModel.obtainTenantId();
+        Long branchId = cancelOrderModel.obtainBranchId();
+        Long orderId = cancelOrderModel.getOrderId();
         DietOrderUtils.cancelOrder(tenantId, branchId, orderId, 2);
         return ApiRest.builder().message("取消订单成功").successful(true).build();
     }
@@ -144,18 +142,18 @@ public class DietOrderService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void cancelOrder(Map<String, Object> info) {
-        BigInteger tenantId = BigInteger.valueOf(MapUtils.getLongValue(info, "tenantId"));
-        BigInteger branchId = BigInteger.valueOf(MapUtils.getLongValue(info, "branchId"));
-        BigInteger orderId = BigInteger.valueOf(MapUtils.getLongValue(info, "orderId"));
+        Long tenantId = Long.valueOf(MapUtils.getLongValue(info, "tenantId"));
+        Long branchId = Long.valueOf(MapUtils.getLongValue(info, "branchId"));
+        Long orderId = Long.valueOf(MapUtils.getLongValue(info, "orderId"));
         int type = MapUtils.getIntValue(info, "type");
         DietOrderUtils.cancelOrder(tenantId, branchId, orderId, type);
     }
 
     @Transactional(readOnly = true)
     public ApiRest doPay(DoPayModel doPayModel) {
-        BigInteger tenantId = doPayModel.getTenantId();
-        BigInteger branchId = doPayModel.getBranchId();
-        BigInteger dietOrderId = doPayModel.getDietOrderId();
+        Long tenantId = doPayModel.getTenantId();
+        Long branchId = doPayModel.getBranchId();
+        Long dietOrderId = doPayModel.getDietOrderId();
         Integer paidScene = doPayModel.getPaidScene();
         String authCode = doPayModel.getAuthCode();
         String openId = doPayModel.getOpenId();
@@ -172,7 +170,7 @@ public class DietOrderService {
         ValidateUtils.isTrue(new Date().getTime() - dietOrder.getCreatedTime().getTime() <= 15 * 60 * 1000, "订单已超时！");
 
         String orderNumber = dietOrder.getOrderNumber();
-        BigDecimal payableAmount = dietOrder.getPayableAmount();
+        Double payableAmount = dietOrder.getPayableAmount();
         String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
 
         Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
@@ -192,7 +190,7 @@ public class DietOrderService {
                         .signType(Constants.MD5)
                         .body("订单支付")
                         .outTradeNo(orderNumber)
-                        .totalFee(payableAmount.multiply(Constants.BIG_DECIMAL_ONE_HUNDRED).intValue())
+                        .totalFee(Double.valueOf(payableAmount * 100).intValue())
                         .spbillCreateIp(ApplicationHandler.getRemoteAddress())
                         .authCode(authCode)
                         .build();
@@ -222,7 +220,7 @@ public class DietOrderService {
                         .signType(Constants.MD5)
                         .body("订单支付")
                         .outTradeNo(orderNumber)
-                        .totalFee(payableAmount.multiply(Constants.BIG_DECIMAL_ONE_HUNDRED).intValue())
+                        .totalFee((Double.valueOf(payableAmount * 100)).intValue())
                         .spbillCreateIp(ApplicationHandler.getRemoteAddress())
                         .mqConfig(null)
                         .tradeType(tradeType)
@@ -313,11 +311,11 @@ public class DietOrderService {
     public void handleCallback(Map<String, String> parameters, String paymentCode) throws ParseException {
         String orderNumber = null;
         Date occurrenceTime = null;
-        BigDecimal totalAmount = null;
+        Double totalAmount = null;
         if (Constants.PAYMENT_CODE_ALIPAY.equals(paymentCode)) {
             orderNumber = parameters.get("out_trade_no");
             occurrenceTime = new SimpleDateFormat(Constants.DEFAULT_DATE_PATTERN).parse(parameters.get("gmt_payment"));
-            totalAmount = BigDecimal.valueOf(Double.valueOf(parameters.get("total_amount")));
+            totalAmount = Double.valueOf(Double.valueOf(parameters.get("total_amount")));
         } else if (Constants.PAYMENT_CODE_WX.equals(paymentCode)) {
             orderNumber = "";
         }
@@ -330,9 +328,9 @@ public class DietOrderService {
             return;
         }
 
-        BigInteger tenantId = dietOrder.getTenantId();
+        Long tenantId = dietOrder.getTenantId();
         String tenantCode = dietOrder.getTenantCode();
-        BigInteger branchId = dietOrder.getBranchId();
+        Long branchId = dietOrder.getBranchId();
 
         SearchModel paymentSearchModel = new SearchModel(true);
         paymentSearchModel.addSearchCondition(Payment.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -354,12 +352,12 @@ public class DietOrderService {
                 .build();
         DatabaseHelper.insert(dietOrderPayment);
 
-        dietOrder.setPaidAmount(dietOrder.getPaidAmount().add(totalAmount));
+        dietOrder.setPaidAmount(dietOrder.getPaidAmount() + totalAmount);
         dietOrder.setPayStatus(DietOrderConstants.PAY_STATUS_PAID);
         dietOrder.setOrderStatus(DietOrderConstants.ORDER_STATUS_UNPROCESSED);
         dietOrder.setActiveTime(occurrenceTime);
 
-        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        Long userId = CommonUtils.getServiceSystemUserId();
         dietOrder.setUpdatedUserId(userId);
         DietOrderUtils.stopOrderInvalidJob(dietOrder.getJobId(), dietOrder.getTriggerId());
         KafkaFixedTimeSendResult kafkaFixedTimeSendResult = DietOrderUtils.startOrderInvalidJob(tenantId, branchId, dietOrder.getId(), 3, DateUtils.addMinutes(occurrenceTime, 5));
@@ -376,10 +374,10 @@ public class DietOrderService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest obtainPosOrder(ObtainPosOrderModel obtainPosOrderModel) {
-        BigInteger tenantId = obtainPosOrderModel.obtainTenantId();
-        BigInteger branchId = obtainPosOrderModel.obtainBranchId();
+        Long tenantId = obtainPosOrderModel.obtainTenantId();
+        Long branchId = obtainPosOrderModel.obtainBranchId();
         String tableCode = obtainPosOrderModel.obtainBranchCode();
-        BigInteger vipId = obtainPosOrderModel.getVipId();
+        Long vipId = obtainPosOrderModel.getVipId();
 
         Map<String, Object> bodyMap = new HashMap<String, Object>();
         bodyMap.put("code", "");
@@ -435,7 +433,7 @@ public class DietOrderService {
         List<DietOrderDetail> dietOrderDetails = JacksonUtils.readValueAsList(orderDetails, DietOrderDetail.class);
         DatabaseHelper.insert(dietOrder);
 
-        BigInteger dietOrderId = dietOrder.getId();
+        Long dietOrderId = dietOrder.getId();
 
         Map<String, DietOrderGroup> dietOrderGroupMap = new HashMap<String, DietOrderGroup>();
         for (DietOrderGroup dietOrderGroup : dietOrderGroups) {
@@ -489,10 +487,10 @@ public class DietOrderService {
      * @return
      */
     public ApiRest doPayCombined(DoPayCombinedModel doPayCombinedModel) {
-        BigInteger tenantId = doPayCombinedModel.getTenantId();
-        BigInteger branchId = doPayCombinedModel.getBranchId();
-        BigInteger vipId = doPayCombinedModel.getVipId();
-        BigInteger dietOrderId = doPayCombinedModel.getDietOrderId();
+        Long tenantId = doPayCombinedModel.getTenantId();
+        Long branchId = doPayCombinedModel.getBranchId();
+        Long vipId = doPayCombinedModel.getVipId();
+        Long dietOrderId = doPayCombinedModel.getDietOrderId();
         List<DoPayCombinedModel.PaymentInfo> paymentInfos = doPayCombinedModel.getPaymentInfos();
 
         SearchModel searchModel = new SearchModel(true);
@@ -506,11 +504,11 @@ public class DietOrderService {
 
         Vip vip = VipUtils.find(tenantId, vipId);
         ValidateUtils.notNull(vip, "会员不存在！");
-        BigDecimal total = BigDecimal.ZERO;
+        Double total = 0D;
 
         List<String> paymentCodes = new ArrayList<String>();
         for (DoPayCombinedModel.PaymentInfo paymentInfo : paymentInfos) {
-            total = total.add(paymentInfo.getPaidAmount());
+            total = total + paymentInfo.getPaidAmount();
             paymentCodes.add(paymentInfo.getPaymentCode());
         }
         ValidateUtils.isTrue(total.compareTo(dietOrder.getPayableAmount()) == 0, "付款金额与订单金额不符！");
@@ -524,13 +522,13 @@ public class DietOrderService {
         Date now = new Date();
         for (DoPayCombinedModel.PaymentInfo paymentInfo : paymentInfos) {
             String paymentCode = paymentInfo.getPaymentCode();
-            BigDecimal paidAmount = paymentInfo.getPaidAmount();
+            Double paidAmount = paymentInfo.getPaidAmount();
             if (Constants.PAYMENT_CODE_HYJF.equals(paymentCode)) {
                 Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
                 VipAccount vipAccount = VipUtils.obtainVipAccount(tenantId, branchId, vipId, tenant.getVipSharedType());
                 VipType vipType = VipUtils.obtainVipType(tenantId, vipAccount.getVipTypeId());
                 int bonusCoefficient = vipType.getBonusCoefficient();
-                BigDecimal point = paidAmount.multiply(BigDecimal.valueOf(bonusCoefficient));
+                Double point = paidAmount * bonusCoefficient;
                 VipUtils.deductingVipPoint(tenantId, branchId, vipId, point);
 
                 Payment payment = paymentMap.get(paymentCode);
@@ -579,7 +577,7 @@ public class DietOrderService {
                         .acceptanceModel(weiXinPayAccount.isAcceptanceModel())
                         .body("订单支付")
                         .outTradeNo(dietOrder.getOrderNumber())
-                        .totalFee(paidAmount.multiply(Constants.BIG_DECIMAL_ONE_HUNDRED).intValue())
+                        .totalFee(Double.valueOf(paidAmount * 100).intValue())
                         .spbillCreateIp(ApplicationHandler.getRemoteAddress())
                         .mqConfig(null)
                         .tradeType(Constants.WEI_XIN_PAY_TRADE_TYPE_APP)
@@ -599,9 +597,9 @@ public class DietOrderService {
      */
     @Transactional(readOnly = true)
     public ApiRest pullOrder(PullOrderModel pullOrderModel) {
-        BigInteger tenantId = pullOrderModel.obtainTenantId();
-        BigInteger branchId = pullOrderModel.obtainBranchId();
-        BigInteger orderId = pullOrderModel.getOrderId();
+        Long tenantId = pullOrderModel.obtainTenantId();
+        Long branchId = pullOrderModel.obtainBranchId();
+        Long orderId = pullOrderModel.getOrderId();
 
         SearchModel dietOrderSearchModel = SearchModel.builder()
                 .equal(DietOrder.ColumnName.TENANT_ID, tenantId)

@@ -3,17 +3,16 @@ package build.dream.catering.models.flashsale;
 import build.dream.common.models.CateringBasicModel;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class StopFlashSaleActivityModel extends CateringBasicModel {
     @NotNull
-    private BigInteger activityId;
+    private Long activityId;
 
-    public BigInteger getActivityId() {
+    public Long getActivityId() {
         return activityId;
     }
 
-    public void setActivityId(BigInteger activityId) {
+    public void setActivityId(Long activityId) {
         this.activityId = activityId;
     }
 }

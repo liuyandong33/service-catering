@@ -10,7 +10,6 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -69,22 +68,22 @@ public class MeiTuanUtils {
         return meiTuanAppAuthToken;
     }
 
-    public static Tuple2<BigInteger, BigInteger> obtainTenantAndBranchId(Map<String, String> callbackParameters) {
+    public static Tuple2<Long, Long> obtainTenantAndBranchId(Map<String, String> callbackParameters) {
         String ePoiId = callbackParameters.get("ePoiId");
         return obtainTenantAndBranchId(ePoiId);
     }
 
-    public static Tuple2<BigInteger, BigInteger> obtainTenantAndBranchId(String ePoiId) {
+    public static Tuple2<Long, Long> obtainTenantAndBranchId(String ePoiId) {
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
-        BigInteger tenantId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[0]);
-        BigInteger branchId = NumberUtils.createBigInteger(tenantIdAndBranchIdArray[1]);
+        Long tenantId = NumberUtils.createLong(tenantIdAndBranchIdArray[0]);
+        Long branchId = NumberUtils.createLong(tenantIdAndBranchIdArray[1]);
         return TupleUtils.buildTuple2(tenantId, branchId);
     }
 
     public static DietOrder obtainDietOrder(Map<String, String> callbackParameters) {
-        Tuple2<BigInteger, BigInteger> tuple2 = MeiTuanUtils.obtainTenantAndBranchId(callbackParameters);
-        BigInteger tenantId = tuple2._1();
-        BigInteger branchId = tuple2._2();
+        Tuple2<Long, Long> tuple2 = MeiTuanUtils.obtainTenantAndBranchId(callbackParameters);
+        Long tenantId = tuple2._1();
+        Long branchId = tuple2._2();
         String order = callbackParameters.get("order");
         Map<String, Object> orderMap = JacksonUtils.readValueAsMap(order, String.class, Object.class);
         String orderId = MapUtils.getString(orderMap, "orderId");
@@ -99,9 +98,9 @@ public class MeiTuanUtils {
     }
 
     public static Branch obtainBranch(String ePoiId) {
-        Tuple2<BigInteger, BigInteger> tuple2 = MeiTuanUtils.obtainTenantAndBranchId(ePoiId);
-        BigInteger tenantId = tuple2._1();
-        BigInteger branchId = tuple2._2();
+        Tuple2<Long, Long> tuple2 = MeiTuanUtils.obtainTenantAndBranchId(ePoiId);
+        Long tenantId = tuple2._1();
+        Long branchId = tuple2._2();
 
         SearchModel searchModel = SearchModel.builder()
                 .addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)

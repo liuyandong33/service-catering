@@ -4,45 +4,43 @@ import build.dream.common.domains.catering.VipAccount;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
 @Mapper
 public interface VipMapper {
-    BigDecimal callProcedureDeductingVipPoint(@Param("tenantId") BigInteger tenantId,
-                                              @Param("vipId") BigInteger vipId,
-                                              @Param("vipAccountId") BigInteger vipAccountId,
-                                              @Param("point") BigDecimal point);
+    Double callProcedureDeductingVipPoint(@Param("tenantId") Long tenantId,
+                                          @Param("vipId") Long vipId,
+                                          @Param("vipAccountId") Long vipAccountId,
+                                          @Param("point") Double point);
 
-    BigDecimal callProcedureDeductingVipBalance(@Param("tenantId") BigInteger tenantId,
-                                                @Param("vipId") BigInteger vipId,
-                                                @Param("vipAccountId") BigInteger vipAccountId,
-                                                @Param("balance") BigDecimal balance);
+    Double callProcedureDeductingVipBalance(@Param("tenantId") Long tenantId,
+                                            @Param("vipId") Long vipId,
+                                            @Param("vipAccountId") Long vipAccountId,
+                                            @Param("balance") Double balance);
 
-    BigDecimal callProcedureAddVipPoint(@Param("tenantId") BigInteger tenantId,
-                                        @Param("vipId") BigInteger vipId,
-                                        @Param("vipAccountId") BigInteger vipAccountId,
-                                        @Param("point") BigDecimal point);
+    Double callProcedureAddVipPoint(@Param("tenantId") Long tenantId,
+                                    @Param("vipId") Long vipId,
+                                    @Param("vipAccountId") Long vipAccountId,
+                                    @Param("point") Double point);
 
-    BigDecimal callProcedureAddVipBalance(@Param("tenantId") BigInteger tenantId,
-                                          @Param("vipId") BigInteger vipId,
-                                          @Param("vipAccountId") BigInteger vipAccountId,
-                                          @Param("balance") BigDecimal balance);
+    Double callProcedureAddVipBalance(@Param("tenantId") Long tenantId,
+                                      @Param("vipId") Long vipId,
+                                      @Param("vipAccountId") Long vipAccountId,
+                                      @Param("balance") Double balance);
 
-    List<Map<String, Object>> listVipInfos(@Param("tenantId") BigInteger tenantId,
-                                           @Param("branchId") BigInteger branchId,
+    List<Map<String, Object>> listVipInfos(@Param("tenantId") Long tenantId,
+                                           @Param("branchId") Long branchId,
                                            @Param("vipSharedType") Integer vipSharedType,
                                            @Param("offset") Integer offset,
                                            @Param("maxResults") Integer maxResults);
 
-    long countVipInfos(@Param("tenantId") BigInteger tenantId,
-                       @Param("branchId") BigInteger branchId,
+    long countVipInfos(@Param("tenantId") Long tenantId,
+                       @Param("branchId") Long branchId,
                        @Param("vipSharedType") Integer vipSharedType);
 
-    VipAccount obtainVipAccount(@Param("tenantId") BigInteger tenantId,
-                                @Param("branchId") BigInteger branchId,
-                                @Param("vipId") BigInteger vipId,
+    VipAccount obtainVipAccount(@Param("tenantId") Long tenantId,
+                                @Param("branchId") Long branchId,
+                                @Param("vipId") Long vipId,
                                 @Param("vipSharedType") Integer vipSharedType);
 }

@@ -9,7 +9,7 @@
         SELECT COUNT(1) FROM merge_user_branch WHERE tenant_id = #{tenantId} AND branch_id = #{branchId} AND deleted = 0
     </select>
 
-    <select id="findAllUserIds" resultType="java.math.BigInteger">
+    <select id="findAllUserIds" resultType="java.lang.Long">
         SELECT user_id FROM merge_user_branch WHERE tenant_id = #{tenantId} AND branch_id = #{branchId} AND deleted = 0
     </select>
 

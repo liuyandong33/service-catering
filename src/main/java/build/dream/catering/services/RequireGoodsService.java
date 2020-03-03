@@ -15,7 +15,6 @@ import build.dream.common.utils.ValidateUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -31,11 +30,11 @@ public class RequireGoodsService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveRequireGoodsOrder(SaveRequireGoodsOrderModel saveRequireGoodsOrderModel) {
-        BigInteger tenantId = saveRequireGoodsOrderModel.obtainTenantId();
+        Long tenantId = saveRequireGoodsOrderModel.obtainTenantId();
         String tenantCode = saveRequireGoodsOrderModel.obtainTenantCode();
-        BigInteger branchId = saveRequireGoodsOrderModel.obtainBranchId();
-        BigInteger distributionCenterId = saveRequireGoodsOrderModel.getDistributionCenterId();
-        BigInteger userId = saveRequireGoodsOrderModel.obtainUserId();
+        Long branchId = saveRequireGoodsOrderModel.obtainBranchId();
+        Long distributionCenterId = saveRequireGoodsOrderModel.getDistributionCenterId();
+        Long userId = saveRequireGoodsOrderModel.obtainUserId();
         String remark = saveRequireGoodsOrderModel.getRemark();
 
         String sequenceName = SerialNumberGenerator.generatorTodaySequenceName(tenantId, branchId, "require_goods_order_number");
@@ -69,9 +68,9 @@ public class RequireGoodsService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest obtainRequireGoodsOrder(ObtainRequireGoodsOrderModel obtainRequireGoodsOrderModel) {
-        BigInteger tenantId = obtainRequireGoodsOrderModel.obtainTenantId();
-        BigInteger branchId = obtainRequireGoodsOrderModel.obtainBranchId();
-        BigInteger requireGoodsOrderId = obtainRequireGoodsOrderModel.getRequireGoodsOrderId();
+        Long tenantId = obtainRequireGoodsOrderModel.obtainTenantId();
+        Long branchId = obtainRequireGoodsOrderModel.obtainBranchId();
+        Long requireGoodsOrderId = obtainRequireGoodsOrderModel.getRequireGoodsOrderId();
 
         SearchModel requireGoodsOrderSearchModel = new SearchModel(true);
         requireGoodsOrderSearchModel.addSearchCondition(RequireGoodsOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -101,10 +100,10 @@ public class RequireGoodsService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest auditRequireGoodsOrder(AuditRequireGoodsOrderModel auditRequireGoodsOrderModel) {
-        BigInteger tenantId = auditRequireGoodsOrderModel.obtainTenantId();
-        BigInteger branchId = auditRequireGoodsOrderModel.obtainBranchId();
-        BigInteger userId = auditRequireGoodsOrderModel.obtainUserId();
-        BigInteger requireGoodsOrderId = auditRequireGoodsOrderModel.getRequireGoodsOrderId();
+        Long tenantId = auditRequireGoodsOrderModel.obtainTenantId();
+        Long branchId = auditRequireGoodsOrderModel.obtainBranchId();
+        Long userId = auditRequireGoodsOrderModel.obtainUserId();
+        Long requireGoodsOrderId = auditRequireGoodsOrderModel.getRequireGoodsOrderId();
 
 
         SearchModel requireGoodsOrderSearchModel = new SearchModel(true);

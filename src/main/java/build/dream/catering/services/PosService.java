@@ -34,8 +34,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -49,11 +47,11 @@ public class PosService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest onlinePos(OnlinePosModel onlinePosModel) {
-        BigInteger tenantId = onlinePosModel.obtainTenantId();
+        Long tenantId = onlinePosModel.obtainTenantId();
         String tenantCode = onlinePosModel.obtainTenantCode();
-        BigInteger branchId = onlinePosModel.obtainBranchId();
+        Long branchId = onlinePosModel.obtainBranchId();
         String branchCode = onlinePosModel.obtainBranchCode();
-        BigInteger userId = onlinePosModel.obtainUserId();
+        Long userId = onlinePosModel.obtainUserId();
         String deviceId = onlinePosModel.getDeviceId();
         String type = onlinePosModel.getType();
         String version = onlinePosModel.getVersion();
@@ -130,10 +128,10 @@ public class PosService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest obtainMqttInfo(ObtainMqttInfoModel obtainMqttInfoModel) {
-        BigInteger tenantId = obtainMqttInfoModel.obtainTenantId();
-        BigInteger branchId = obtainMqttInfoModel.obtainBranchId();
-        BigInteger userId = obtainMqttInfoModel.obtainUserId();
-        BigInteger posId = obtainMqttInfoModel.getPosId();
+        Long tenantId = obtainMqttInfoModel.obtainTenantId();
+        Long branchId = obtainMqttInfoModel.obtainBranchId();
+        Long userId = obtainMqttInfoModel.obtainUserId();
+        Long posId = obtainMqttInfoModel.getPosId();
 
         SearchModel searchModel = SearchModel.builder()
                 .autoSetDeletedFalse()
@@ -188,9 +186,9 @@ public class PosService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest offlinePos(OfflinePosModel offlinePosModel) {
-        BigInteger tenantId = offlinePosModel.obtainTenantId();
-        BigInteger branchId = offlinePosModel.obtainBranchId();
-        BigInteger userId = offlinePosModel.obtainUserId();
+        Long tenantId = offlinePosModel.obtainTenantId();
+        Long branchId = offlinePosModel.obtainBranchId();
+        Long userId = offlinePosModel.obtainUserId();
 
         SearchModel searchModel = SearchModel.builder()
                 .autoSetDeletedFalse()
@@ -234,10 +232,10 @@ public class PosService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest offlinePay(OfflinePayModel offlinePayModel) {
-        BigInteger tenantId = offlinePayModel.getTenantId();
+        Long tenantId = offlinePayModel.getTenantId();
         String tenantCode = offlinePayModel.getTenantCode();
-        BigInteger branchId = offlinePayModel.getBranchId();
-        BigInteger userId = offlinePayModel.getUserId();
+        Long branchId = offlinePayModel.getBranchId();
+        Long userId = offlinePayModel.getUserId();
         String authCode = offlinePayModel.getAuthCode();
         String subject = offlinePayModel.getSubject();
         int totalAmount = offlinePayModel.getTotalAmount();
@@ -310,7 +308,7 @@ public class PosService {
                     .authCode(authCode)
                     .scene(build.dream.common.constants.Constants.SCENE_BAR_CODE)
                     .subject(subject)
-                    .totalAmount(BigDecimal.valueOf(totalAmount).divide(Constants.BIG_DECIMAL_ONE_HUNDRED))
+                    .totalAmount(Double.valueOf(totalAmount) / 100)
                     .build();
             channelResult = AlipayUtils.alipayTradePay(alipayTradePayModel);
             tradeNo = MapUtils.getString(channelResult, "trade_no");
@@ -428,10 +426,10 @@ public class PosService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest orderQuery(OrderQueryModel orderQueryModel) {
-        BigInteger tenantId = orderQueryModel.getTenantId();
+        Long tenantId = orderQueryModel.getTenantId();
         String tenantCode = orderQueryModel.getTenantCode();
-        BigInteger branchId = orderQueryModel.getBranchId();
-        BigInteger userId = orderQueryModel.getUserId();
+        Long branchId = orderQueryModel.getBranchId();
+        Long userId = orderQueryModel.getUserId();
         String outTradeNo = orderQueryModel.getOutTradeNo();
 
         SearchModel searchModel = SearchModel.builder()
@@ -526,13 +524,13 @@ public class PosService {
                 .offlinePayRecordId(offlinePayRecord.getId())
                 .type(Constants.OFFLINE_PAY_LOG_TYPE_PAID_CALLBACK)
                 .channelResult(JacksonUtils.writeValueAsString(params))
-                .createdUserId(BigInteger.ZERO)
-                .updatedUserId(BigInteger.ZERO)
+                .createdUserId(0L)
+                .updatedUserId(0L)
                 .build();
         DatabaseHelper.insert(offlinePayLog);
 
         offlinePayRecord.setPaidStatus(Constants.OFFLINE_PAY_PAID_STATUS_SUCCESS);
-        offlinePayRecord.setUpdatedUserId(BigInteger.ZERO);
+        offlinePayRecord.setUpdatedUserId(0L);
         DatabaseHelper.update(offlinePayRecord);
     }
 
@@ -553,7 +551,7 @@ public class PosService {
         ValidateUtils.notNull(offlinePayRecord, "支付记录不存在！");
 
         offlinePayRecord.setRefundStatus(Constants.OFFLINE_PAY_REFUND_STATUS_SUCCESS);
-        offlinePayRecord.setUpdatedUserId(BigInteger.ZERO);
+        offlinePayRecord.setUpdatedUserId(0L);
         DatabaseHelper.update(offlinePayRecord);
 
         OfflinePayLog offlinePayLog = OfflinePayLog.builder()
@@ -563,8 +561,8 @@ public class PosService {
                 .offlinePayRecordId(offlinePayRecord.getId())
                 .type(Constants.OFFLINE_PAY_LOG_TYPE_PAID_CALLBACK)
                 .channelResult(JacksonUtils.writeValueAsString(params))
-                .createdUserId(BigInteger.ZERO)
-                .updatedUserId(BigInteger.ZERO)
+                .createdUserId(0L)
+                .updatedUserId(0L)
                 .build();
         DatabaseHelper.insert(offlinePayLog);
     }
@@ -575,10 +573,10 @@ public class PosService {
      * @param refundModel
      */
     public ApiRest refund(RefundModel refundModel) {
-        BigInteger tenantId = refundModel.getTenantId();
+        Long tenantId = refundModel.getTenantId();
         String tenantCode = refundModel.getTenantCode();
-        BigInteger branchId = refundModel.getBranchId();
-        BigInteger userId = refundModel.getUserId();
+        Long branchId = refundModel.getBranchId();
+        Long userId = refundModel.getUserId();
         String outTradeNo = refundModel.getOutTradeNo();
         Integer refundAmount = refundModel.getRefundAmount();
 
@@ -593,7 +591,6 @@ public class PosService {
         ValidateUtils.isTrue(offlinePayRecord.getPaidStatus() == Constants.OFFLINE_PAY_PAID_STATUS_SUCCESS, "未支付不能退款！");
 
         String outRefundNo = SerialNumberGenerator.generateSerialNumber();
-        ;
         Integer totalAmount = offlinePayRecord.getTotalAmount();
         Map<String, ?> channelResult = null;
         int channelType = offlinePayRecord.getChannelType();
@@ -627,7 +624,7 @@ public class PosService {
                     .mqConfig(MqConfig.builder().mqType(Constants.MQ_TYPE_KAFKA).topic(ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC)).build())
                     .appPrivateKey(alipayAccount.getAppPrivateKey())
                     .alipayPublicKey(alipayAccount.getAlipayPublicKey())
-                    .refundAmount(refundAmount == null ? BigDecimal.valueOf(totalAmount).divide(Constants.BIG_DECIMAL_ONE_HUNDRED) : BigDecimal.valueOf(refundAmount).divide(Constants.BIG_DECIMAL_ONE_HUNDRED))
+                    .refundAmount(refundAmount == null ? Double.valueOf(totalAmount) / 100 : Double.valueOf(refundAmount) / 100)
                     .outTradeNo(outTradeNo)
                     .tradeNo(offlinePayRecord.getTradeNo())
                     .outRequestNo(outRefundNo)
@@ -702,9 +699,9 @@ public class PosService {
      */
     @Transactional(readOnly = true)
     public void handleMqttTokenInvalid(Map<String, Object> info) {
-        BigInteger tenantId = BigInteger.valueOf(MapUtils.getLongValue(info, "tenantId"));
-        BigInteger branchId = BigInteger.valueOf(MapUtils.getLongValue(info, "branchId"));
-        BigInteger posId = BigInteger.valueOf(MapUtils.getLongValue(info, "posId"));
+        Long tenantId = Long.valueOf(MapUtils.getLongValue(info, "tenantId"));
+        Long branchId = Long.valueOf(MapUtils.getLongValue(info, "branchId"));
+        Long posId = Long.valueOf(MapUtils.getLongValue(info, "posId"));
 
         SearchModel searchModel = SearchModel.builder()
                 .autoSetDeletedFalse()
@@ -718,7 +715,7 @@ public class PosService {
         }
     }
 
-    public void sendPosTokenInvalidMessage(BigInteger tenantId, BigInteger branchId, BigInteger posId, long startDeliverTime) {
+    public void sendPosTokenInvalidMessage(Long tenantId, Long branchId, Long posId, long startDeliverTime) {
         DelayedMessageModel delayedMessageModel = new DelayedMessageModel();
         delayedMessageModel.setType(DelayedType.DELAYED_TYPE_POS_MQTT_TOKEN_INVALID);
 

@@ -4,11 +4,10 @@ import build.dream.common.models.CateringBasicModel;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class OrderComplaintModel extends CateringBasicModel {
     @NotNull
-    private BigInteger orderId;
+    private Long orderId;
 
     @NotNull
     private Integer orderComplaintCode;
@@ -16,11 +15,11 @@ public class OrderComplaintModel extends CateringBasicModel {
     @Length(max = 128)
     private String orderComplaintDesc;
 
-    public BigInteger getOrderId() {
+    public Long getOrderId() {
         return orderId;
     }
 
-    public void setOrderId(BigInteger orderId) {
+    public void setOrderId(Long orderId) {
         this.orderId = orderId;
     }
 

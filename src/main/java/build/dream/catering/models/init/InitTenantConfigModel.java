@@ -3,20 +3,19 @@ package build.dream.catering.models.init;
 import build.dream.common.models.BasicModel;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class InitTenantConfigModel extends BasicModel {
     @NotNull
-    private BigInteger tenantId;
+    private Long tenantId;
 
     @NotNull
     private String tenantCode;
 
-    public BigInteger getTenantId() {
+    public Long getTenantId() {
         return tenantId;
     }
 
-    public void setTenantId(BigInteger tenantId) {
+    public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
     }
 

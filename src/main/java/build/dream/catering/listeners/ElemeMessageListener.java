@@ -14,7 +14,6 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.stereotype.Component;
 
-import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.Map;
 
@@ -43,18 +42,18 @@ public class ElemeMessageListener implements MessageListener<String, String> {
         String uuid = MapUtils.getString(elemeMessageMap, "uuid");
         Map<String, Object> callbackRequestBody = MapUtils.getMap(elemeMessageMap, "callbackRequestBody");
         int count = MapUtils.getIntValue(elemeMessageMap, "count");
-        BigInteger tenantId = BigInteger.valueOf(MapUtils.getLongValue(elemeMessageMap, "tenantId"));
+        Long tenantId = Long.valueOf(MapUtils.getLongValue(elemeMessageMap, "tenantId"));
         String tenantCode = MapUtils.getString(elemeMessageMap, "tenantCode");
-        BigInteger branchId = BigInteger.valueOf(MapUtils.getLongValue(elemeMessageMap, "branchId"));
+        Long branchId = Long.valueOf(MapUtils.getLongValue(elemeMessageMap, "branchId"));
 
         String requestId = MapUtils.getString(callbackRequestBody, "requestId");
         int type = MapUtils.getIntValue(callbackRequestBody, "type");
-        BigInteger appId = BigInteger.valueOf(MapUtils.getLongValue(callbackRequestBody, "appId"));
+        Long appId = Long.valueOf(MapUtils.getLongValue(callbackRequestBody, "appId"));
         String message = MapUtils.getString(callbackRequestBody, "message");
-        BigInteger shopId = BigInteger.valueOf(MapUtils.getLongValue(callbackRequestBody, "shopId"));
+        Long shopId = Long.valueOf(MapUtils.getLongValue(callbackRequestBody, "shopId"));
         long timestamp = MapUtils.getLongValue(callbackRequestBody, "timestamp");
         String signature = MapUtils.getString(callbackRequestBody, "signature");
-        BigInteger userId = BigInteger.valueOf(MapUtils.getLongValue(callbackRequestBody, "userId"));
+        Long userId = Long.valueOf(MapUtils.getLongValue(callbackRequestBody, "userId"));
 
         ElemeCallbackMessage elemeCallbackMessage = new ElemeCallbackMessage();
         elemeCallbackMessage.setTenantId(tenantId);

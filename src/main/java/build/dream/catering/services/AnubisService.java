@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
 import java.net.URLDecoder;
 import java.util.*;
 
@@ -28,9 +27,9 @@ public class AnubisService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest chainStore(ChainStoreModel chainStoreModel) throws IOException {
-        BigInteger tenantId = chainStoreModel.getTenantId();
-        BigInteger branchId = chainStoreModel.getBranchId();
-        BigInteger userId = chainStoreModel.getUserId();
+        Long tenantId = chainStoreModel.getTenantId();
+        Long branchId = chainStoreModel.getBranchId();
+        Long userId = chainStoreModel.getUserId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -63,9 +62,9 @@ public class AnubisService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest chainStoreUpdate(ChainStoreUpdateModel chainStoreUpdateModel) throws IOException {
-        BigInteger tenantId = chainStoreUpdateModel.getTenantId();
-        BigInteger branchId = chainStoreUpdateModel.getBranchId();
-        BigInteger userId = chainStoreUpdateModel.getUserId();
+        Long tenantId = chainStoreUpdateModel.getTenantId();
+        Long branchId = chainStoreUpdateModel.getBranchId();
+        Long userId = chainStoreUpdateModel.getUserId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -98,8 +97,8 @@ public class AnubisService {
      */
     @Transactional(readOnly = true)
     public ApiRest chainStoreDeliveryQuery(ChainStoreDeliveryQueryModel chainStoreDeliveryQueryModel) throws IOException {
-        BigInteger tenantId = chainStoreDeliveryQueryModel.getTenantId();
-        BigInteger branchId = chainStoreDeliveryQueryModel.getBranchId();
+        Long tenantId = chainStoreDeliveryQueryModel.getTenantId();
+        Long branchId = chainStoreDeliveryQueryModel.getBranchId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -128,10 +127,10 @@ public class AnubisService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest order(OrderModel orderModel) throws IOException {
-        BigInteger tenantId = orderModel.getTenantId();
-        BigInteger branchId = orderModel.getBranchId();
-        BigInteger userId = orderModel.getUserId();
-        BigInteger dietOrderId = orderModel.getDietOrderId();
+        Long tenantId = orderModel.getTenantId();
+        Long branchId = orderModel.getBranchId();
+        Long userId = orderModel.getUserId();
+        Long dietOrderId = orderModel.getDietOrderId();
 
         // 查询门店信息
         SearchModel branchSearchModel = new SearchModel(true);
@@ -251,10 +250,10 @@ public class AnubisService {
      */
     @Transactional(readOnly = true)
     public ApiRest orderCancel(OrderCancelModel orderCancelModel) throws IOException {
-        BigInteger tenantId = orderCancelModel.getTenantId();
-        BigInteger branchId = orderCancelModel.getBranchId();
-        BigInteger userId = orderCancelModel.getUserId();
-        BigInteger dietOrderId = orderCancelModel.getDietOrderId();
+        Long tenantId = orderCancelModel.getTenantId();
+        Long branchId = orderCancelModel.getBranchId();
+        Long userId = orderCancelModel.getUserId();
+        Long dietOrderId = orderCancelModel.getDietOrderId();
 
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, dietOrderId);
 
@@ -280,9 +279,9 @@ public class AnubisService {
      */
     @Transactional(readOnly = true)
     public ApiRest orderQuery(OrderQueryModel orderQueryModel) throws IOException {
-        BigInteger tenantId = orderQueryModel.getTenantId();
-        BigInteger branchId = orderQueryModel.getBranchId();
-        BigInteger dietOrderId = orderQueryModel.getDietOrderId();
+        Long tenantId = orderQueryModel.getTenantId();
+        Long branchId = orderQueryModel.getBranchId();
+        Long dietOrderId = orderQueryModel.getDietOrderId();
 
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, dietOrderId);
 
@@ -302,7 +301,7 @@ public class AnubisService {
      * @param orderId
      * @return
      */
-    private DietOrder obtainDietOrder(BigInteger tenantId, BigInteger branchId, BigInteger orderId) {
+    private DietOrder obtainDietOrder(Long tenantId, Long branchId, Long orderId) {
         SearchModel dietOrderSearchModel = SearchModel.builder()
                 .autoSetDeletedFalse()
                 .addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)
@@ -323,9 +322,9 @@ public class AnubisService {
      */
     @Transactional(readOnly = true)
     public ApiRest orderComplaint(OrderComplaintModel orderComplaintModel) throws IOException {
-        BigInteger tenantId = orderComplaintModel.obtainTenantId();
-        BigInteger branchId = orderComplaintModel.obtainBranchId();
-        BigInteger orderId = orderComplaintModel.getOrderId();
+        Long tenantId = orderComplaintModel.obtainTenantId();
+        Long branchId = orderComplaintModel.obtainBranchId();
+        Long orderId = orderComplaintModel.getOrderId();
         Integer orderComplaintCode = orderComplaintModel.getOrderComplaintCode();
         String orderComplaintDesc = orderComplaintModel.getOrderComplaintDesc();
 
@@ -390,7 +389,7 @@ public class AnubisService {
         dietOrderDeliveryState.setLongitude(dataJsonObject.optString("longitude", null));
         dietOrderDeliveryState.setLatitude(dataJsonObject.optString("latitude", null));
 
-        BigInteger userId = BigInteger.ZERO;
+        Long userId = 0L;
         dietOrderDeliveryState.setCreatedUserId(userId);
         dietOrderDeliveryState.setUpdatedUserId(userId);
         long pushTime = dataJsonObject.getLong("push_time");
@@ -415,9 +414,9 @@ public class AnubisService {
      */
     @Transactional(readOnly = true)
     public ApiRest obtainDeliveryStates(ObtainDeliveryStatesModel obtainDeliveryStatesModel) {
-        BigInteger tenantId = obtainDeliveryStatesModel.getTenantId();
-        BigInteger branchId = obtainDeliveryStatesModel.getBranchId();
-        BigInteger dietOrderId = obtainDeliveryStatesModel.getDietOrderId();
+        Long tenantId = obtainDeliveryStatesModel.getTenantId();
+        Long branchId = obtainDeliveryStatesModel.getBranchId();
+        Long dietOrderId = obtainDeliveryStatesModel.getDietOrderId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -437,9 +436,9 @@ public class AnubisService {
      */
     @Transactional(readOnly = true)
     public ApiRest orderCarrier(OrderCarrierModel orderCarrierModel) {
-        BigInteger tenantId = orderCarrierModel.obtainTenantId();
-        BigInteger branchId = orderCarrierModel.obtainBranchId();
-        BigInteger dietOrderId = orderCarrierModel.getOrderId();
+        Long tenantId = orderCarrierModel.obtainTenantId();
+        Long branchId = orderCarrierModel.obtainBranchId();
+        Long dietOrderId = orderCarrierModel.getOrderId();
 
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, dietOrderId);
 

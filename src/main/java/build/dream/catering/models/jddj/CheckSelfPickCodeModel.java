@@ -3,14 +3,13 @@ package build.dream.catering.models.jddj;
 import build.dream.common.models.CateringBasicModel;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class CheckSelfPickCodeModel extends CateringBasicModel {
     @NotNull
     private String selfPickCode;
 
     @NotNull
-    private BigInteger orderId;
+    private Long orderId;
 
     public String getSelfPickCode() {
         return selfPickCode;
@@ -20,11 +19,11 @@ public class CheckSelfPickCodeModel extends CateringBasicModel {
         this.selfPickCode = selfPickCode;
     }
 
-    public BigInteger getOrderId() {
+    public Long getOrderId() {
         return orderId;
     }
 
-    public void setOrderId(BigInteger orderId) {
+    public void setOrderId(Long orderId) {
         this.orderId = orderId;
     }
 }

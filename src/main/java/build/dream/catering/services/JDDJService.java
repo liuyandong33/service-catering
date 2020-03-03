@@ -14,11 +14,11 @@ import build.dream.catering.models.jddj.OrderJDZBDeliveryModel;
 import build.dream.catering.models.jddj.PrintOrderModel;
 import build.dream.catering.models.jddj.UrgeDispatchingModel;
 import build.dream.common.api.ApiRest;
+import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.domains.catering.DietOrder;
 import build.dream.common.domains.catering.DietOrderActivity;
 import build.dream.common.domains.catering.DietOrderDetail;
 import build.dream.common.domains.catering.DietOrderGroup;
-import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.models.jddj.*;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.JDDJUtils;
@@ -29,8 +29,6 @@ import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
 
 @Service
@@ -43,14 +41,14 @@ public class JDDJService {
      * @param message
      */
     @Transactional
-    public void handleNewOrder(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+    public void handleNewOrder(Long tenantId, String tenantCode, Map<String, Object> message) {
         Map<String, Object> resultMap = null;
         Map<String, Object> result = MapUtils.getMap(resultMap, "result");
         List<Map<String, Object>> resultList = (List<Map<String, Object>>) result.get("resultList");
         ValidateUtils.isTrue(resultList.size() == 1, "订单不存在！");
 
-        BigInteger branchId = BigInteger.ZERO;
-        BigInteger userId = BigInteger.ZERO;
+        Long branchId = 0L;
+        Long userId = 0L;
 
         Map<String, Object> orderInfo = resultList.get(0);
         List<Map<String, Object>> products = (List<Map<String, Object>>) orderInfo.get("product");
@@ -73,7 +71,7 @@ public class JDDJService {
                 .build();
 
         DatabaseHelper.insert(dietOrder);
-        BigInteger dietOrderId = dietOrder.getId();
+        Long dietOrderId = dietOrder.getId();
 
         DietOrderGroup dietOrderGroup = DietOrderGroup.builder()
                 .tenantId(tenantId)
@@ -85,15 +83,15 @@ public class JDDJService {
                 .build();
         DatabaseHelper.insert(dietOrderGroup);
 
-        BigInteger dietOrderGroupId = dietOrderGroup.getId();
+        Long dietOrderGroupId = dietOrderGroup.getId();
 
         List<DietOrderDetail> dietOrderDetails = new ArrayList<DietOrderDetail>();
         for (Map<String, Object> product : products) {
             long skuId = MapUtils.getLongValue(product, "skuId");
             String skuName = MapUtils.getString(product, "skuName");
-            BigInteger skuIdIsv = BigInteger.valueOf(MapUtils.getLongValue(product, "skuIdIsv"));
-            BigDecimal skuJdPrice = BigDecimal.valueOf(MapUtils.getDoubleValue(product, "skuJdPrice")).divide(Constants.BIG_DECIMAL_ONE_HUNDRED);
-            BigDecimal skuCount = BigDecimal.valueOf(MapUtils.getDoubleValue(product, "skuCount"));
+            Long skuIdIsv = Long.valueOf(MapUtils.getLongValue(product, "skuIdIsv"));
+            Double skuJdPrice = MapUtils.getDoubleValue(product, "skuJdPrice") / 100;
+            Double skuCount = MapUtils.getDoubleValue(product, "skuCount");
             DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
                     .tenantId(tenantId)
                     .tenantCode(tenantCode)
@@ -103,15 +101,15 @@ public class JDDJService {
                     .goodsType(Constants.GOODS_TYPE_ORDINARY_GOODS)
                     .goodsId(skuIdIsv)
                     .goodsName(skuName)
-                    .goodsSpecificationId(BigInteger.ZERO)
+                    .goodsSpecificationId(0L)
                     .goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE)
-                    .categoryId(BigInteger.ZERO)
+                    .categoryId(0L)
                     .categoryName(Constants.VARCHAR_DEFAULT_VALUE)
                     .price(skuJdPrice)
                     .quantity(skuCount)
-                    .totalAmount(skuJdPrice.multiply(skuCount))
-                    .discountAmount(BigDecimal.ZERO)
-                    .payableAmount(skuJdPrice.multiply(skuCount))
+                    .totalAmount(skuJdPrice * skuCount)
+                    .discountAmount(0D)
+                    .payableAmount(skuJdPrice * skuCount)
                     .build();
             dietOrderDetails.add(dietOrderDetail);
         }
@@ -130,10 +128,10 @@ public class JDDJService {
                     .tenantCode(tenantCode)
                     .branchId(branchId)
                     .dietOrderId(dietOrderId)
-                    .activityId(BigInteger.ZERO)
+                    .activityId(0L)
                     .activityName("")
                     .activityType(1)
-                    .amount(BigDecimal.valueOf(venderPayMoney).divide(Constants.BIG_DECIMAL_ONE_HUNDRED))
+                    .amount(venderPayMoney / 100)
                     .createdUserId(userId)
                     .updatedUserId(userId)
                     .build();
@@ -151,7 +149,7 @@ public class JDDJService {
      * @param tenantCode
      * @param message
      */
-    public void handleOrderAdjust(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+    public void handleOrderAdjust(Long tenantId, String tenantCode, Map<String, Object> message) {
 
     }
 
@@ -162,7 +160,7 @@ public class JDDJService {
      * @param tenantCode
      * @param message
      */
-    public void handleApplyCancelOrder(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+    public void handleApplyCancelOrder(Long tenantId, String tenantCode, Map<String, Object> message) {
 
     }
 
@@ -173,7 +171,7 @@ public class JDDJService {
      * @param tenantCode
      * @param message
      */
-    public void handleOrderWaitOutStore(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+    public void handleOrderWaitOutStore(Long tenantId, String tenantCode, Map<String, Object> message) {
 
     }
 
@@ -184,7 +182,7 @@ public class JDDJService {
      * @param tenantCode
      * @param message
      */
-    public void handleDeliveryOrder(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+    public void handleDeliveryOrder(Long tenantId, String tenantCode, Map<String, Object> message) {
 
     }
 
@@ -195,7 +193,7 @@ public class JDDJService {
      * @param tenantCode
      * @param message
      */
-    public void handlePickFinishOrder(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+    public void handlePickFinishOrder(Long tenantId, String tenantCode, Map<String, Object> message) {
 
     }
 
@@ -206,7 +204,7 @@ public class JDDJService {
      * @param tenantCode
      * @param message
      */
-    public void handleFinishOrder(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+    public void handleFinishOrder(Long tenantId, String tenantCode, Map<String, Object> message) {
 
     }
 
@@ -217,7 +215,7 @@ public class JDDJService {
      * @param tenantCode
      * @param message
      */
-    public void handleLockOrder(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+    public void handleLockOrder(Long tenantId, String tenantCode, Map<String, Object> message) {
 
     }
 
@@ -228,7 +226,7 @@ public class JDDJService {
      * @param tenantCode
      * @param message
      */
-    public void handleUnlockOrder(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+    public void handleUnlockOrder(Long tenantId, String tenantCode, Map<String, Object> message) {
 
     }
 
@@ -239,7 +237,7 @@ public class JDDJService {
      * @param tenantCode
      * @param message
      */
-    public void handleUserCancelOrder(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+    public void handleUserCancelOrder(Long tenantId, String tenantCode, Map<String, Object> message) {
 
     }
 
@@ -250,7 +248,7 @@ public class JDDJService {
      * @param tenantCode
      * @param message
      */
-    public void handlePushDeliveryStatus(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+    public void handlePushDeliveryStatus(Long tenantId, String tenantCode, Map<String, Object> message) {
 
     }
 
@@ -261,7 +259,7 @@ public class JDDJService {
      * @param tenantCode
      * @param message
      */
-    public void handleOrderInfoChange(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+    public void handleOrderInfoChange(Long tenantId, String tenantCode, Map<String, Object> message) {
 
     }
 
@@ -272,7 +270,7 @@ public class JDDJService {
      * @param tenantCode
      * @param message
      */
-    public void handleOrderAddTips(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+    public void handleOrderAddTips(Long tenantId, String tenantCode, Map<String, Object> message) {
 
     }
 
@@ -283,7 +281,7 @@ public class JDDJService {
      * @param tenantCode
      * @param message
      */
-    public void handleOrderAccounting(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+    public void handleOrderAccounting(Long tenantId, String tenantCode, Map<String, Object> message) {
 
     }
 
@@ -294,11 +292,11 @@ public class JDDJService {
      * @param tenantCode
      * @param message
      */
-    public void handleDeliveryCarrierModify(BigInteger tenantId, String tenantCode, Map<String, Object> message) {
+    public void handleDeliveryCarrierModify(Long tenantId, String tenantCode, Map<String, Object> message) {
 
     }
 
-    private DietOrder obtainDietOrder(BigInteger tenantId, BigInteger branchId, BigInteger orderId) {
+    private DietOrder obtainDietOrder(Long tenantId, Long branchId, Long orderId) {
         SearchModel searchModel = SearchModel.builder()
                 .autoSetDeletedFalse()
                 .equal(DietOrder.ColumnName.TENANT_ID, tenantId)
@@ -318,9 +316,9 @@ public class JDDJService {
      */
     @Transactional(readOnly = true)
     public ApiRest confirmOrder(ConfirmOrderModel confirmOrderModel) {
-        BigInteger tenantId = confirmOrderModel.obtainTenantId();
-        BigInteger branchId = confirmOrderModel.obtainBranchId();
-        BigInteger orderId = confirmOrderModel.getOrderId();
+        Long tenantId = confirmOrderModel.obtainTenantId();
+        Long branchId = confirmOrderModel.obtainBranchId();
+        Long orderId = confirmOrderModel.getOrderId();
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
         OrderAcceptOperateModel orderAcceptOperateModel = OrderAcceptOperateModel.builder()
                 .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
@@ -340,9 +338,9 @@ public class JDDJService {
      */
     @Transactional(readOnly = true)
     public ApiRest cancelOrder(CancelOrderModel cancelOrderModel) {
-        BigInteger tenantId = cancelOrderModel.obtainTenantId();
-        BigInteger branchId = cancelOrderModel.obtainBranchId();
-        BigInteger orderId = cancelOrderModel.getOrderId();
+        Long tenantId = cancelOrderModel.obtainTenantId();
+        Long branchId = cancelOrderModel.obtainBranchId();
+        Long orderId = cancelOrderModel.getOrderId();
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
         OrderAcceptOperateModel orderAcceptOperateModel = OrderAcceptOperateModel.builder()
                 .orderId(Long.valueOf(dietOrder.getOrderNumber().substring(4)))
@@ -365,9 +363,9 @@ public class JDDJService {
      */
     @Transactional(readOnly = true)
     public ApiRest cancelAndRefund(CancelAndRefundModel cancelAndRefundModel) {
-        BigInteger tenantId = cancelAndRefundModel.obtainTenantId();
-        BigInteger branchId = cancelAndRefundModel.obtainBranchId();
-        BigInteger orderId = cancelAndRefundModel.getOrderId();
+        Long tenantId = cancelAndRefundModel.obtainTenantId();
+        Long branchId = cancelAndRefundModel.obtainBranchId();
+        Long orderId = cancelAndRefundModel.getOrderId();
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
 
         build.dream.common.models.jddj.CancelAndRefundModel jddjCancelAndRefundModel = build.dream.common.models.jddj.CancelAndRefundModel.builder()
@@ -389,9 +387,9 @@ public class JDDJService {
      */
     @Transactional(readOnly = true)
     public ApiRest printOrder(PrintOrderModel printOrderModel) {
-        BigInteger tenantId = printOrderModel.obtainTenantId();
-        BigInteger branchId = printOrderModel.obtainBranchId();
-        BigInteger orderId = printOrderModel.getOrderId();
+        Long tenantId = printOrderModel.obtainTenantId();
+        Long branchId = printOrderModel.obtainBranchId();
+        Long orderId = printOrderModel.getOrderId();
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
 
         build.dream.common.models.jddj.PrintOrderModel jddjPrintOrderModel = build.dream.common.models.jddj.PrintOrderModel.builder()
@@ -409,9 +407,9 @@ public class JDDJService {
      */
     @Transactional(readOnly = true)
     public ApiRest agreeCancelOrder(AgreeCancelOrderModel agreeCancelOrderModel) {
-        BigInteger tenantId = agreeCancelOrderModel.obtainTenantId();
-        BigInteger branchId = agreeCancelOrderModel.obtainBranchId();
-        BigInteger orderId = agreeCancelOrderModel.getOrderId();
+        Long tenantId = agreeCancelOrderModel.obtainTenantId();
+        Long branchId = agreeCancelOrderModel.obtainBranchId();
+        Long orderId = agreeCancelOrderModel.getOrderId();
         String remark = agreeCancelOrderModel.getRemark();
 
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
@@ -434,9 +432,9 @@ public class JDDJService {
      */
     @Transactional(readOnly = true)
     public ApiRest disagreeCancelOrder(DisagreeCancelOrderModel disagreeCancelOrderModel) {
-        BigInteger tenantId = disagreeCancelOrderModel.obtainTenantId();
-        BigInteger branchId = disagreeCancelOrderModel.obtainBranchId();
-        BigInteger orderId = disagreeCancelOrderModel.getOrderId();
+        Long tenantId = disagreeCancelOrderModel.obtainTenantId();
+        Long branchId = disagreeCancelOrderModel.obtainBranchId();
+        Long orderId = disagreeCancelOrderModel.getOrderId();
         String remark = disagreeCancelOrderModel.getRemark();
 
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
@@ -470,9 +468,9 @@ public class JDDJService {
      */
     @Transactional(readOnly = true)
     public ApiRest orderJDZBDelivery(OrderJDZBDeliveryModel orderJDZBDeliveryModel) {
-        BigInteger tenantId = orderJDZBDeliveryModel.obtainTenantId();
-        BigInteger branchId = orderJDZBDeliveryModel.obtainBranchId();
-        BigInteger orderId = orderJDZBDeliveryModel.getOrderId();
+        Long tenantId = orderJDZBDeliveryModel.obtainTenantId();
+        Long branchId = orderJDZBDeliveryModel.obtainBranchId();
+        Long orderId = orderJDZBDeliveryModel.getOrderId();
 
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
         build.dream.common.models.jddj.OrderJDZBDeliveryModel jddjOrderJDZBDeliveryModel = build.dream.common.models.jddj.OrderJDZBDeliveryModel.builder()
@@ -491,9 +489,9 @@ public class JDDJService {
      */
     @Transactional(readOnly = true)
     public ApiRest orderDDTCDelivery(OrderDDTCDeliveryModel orderDDTCDeliveryModel) {
-        BigInteger tenantId = orderDDTCDeliveryModel.obtainTenantId();
-        BigInteger branchId = orderDDTCDeliveryModel.obtainBranchId();
-        BigInteger orderId = orderDDTCDeliveryModel.getOrderId();
+        Long tenantId = orderDDTCDeliveryModel.obtainTenantId();
+        Long branchId = orderDDTCDeliveryModel.obtainBranchId();
+        Long orderId = orderDDTCDeliveryModel.getOrderId();
 
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
 
@@ -513,9 +511,9 @@ public class JDDJService {
      */
     @Transactional(readOnly = true)
     public ApiRest orderSellerDelivery(OrderSellerDeliveryModel orderSellerDeliveryModel) {
-        BigInteger tenantId = orderSellerDeliveryModel.obtainTenantId();
-        BigInteger branchId = orderSellerDeliveryModel.obtainBranchId();
-        BigInteger orderId = orderSellerDeliveryModel.getOrderId();
+        Long tenantId = orderSellerDeliveryModel.obtainTenantId();
+        Long branchId = orderSellerDeliveryModel.obtainBranchId();
+        Long orderId = orderSellerDeliveryModel.getOrderId();
 
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
 
@@ -535,9 +533,9 @@ public class JDDJService {
      */
     @Transactional(readOnly = true)
     public ApiRest modifySellerDelivery(ModifySellerDeliveryModel modifySellerDeliveryModel) {
-        BigInteger tenantId = modifySellerDeliveryModel.obtainTenantId();
-        BigInteger branchId = modifySellerDeliveryModel.obtainBranchId();
-        BigInteger orderId = modifySellerDeliveryModel.getOrderId();
+        Long tenantId = modifySellerDeliveryModel.obtainTenantId();
+        Long branchId = modifySellerDeliveryModel.obtainBranchId();
+        Long orderId = modifySellerDeliveryModel.getOrderId();
 
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
 
@@ -557,9 +555,9 @@ public class JDDJService {
      */
     @Transactional(readOnly = true)
     public ApiRest agreePickUpFailed(AgreePickUpFailedModel agreePickUpFailedModel) {
-        BigInteger tenantId = agreePickUpFailedModel.obtainTenantId();
-        BigInteger branchId = agreePickUpFailedModel.obtainBranchId();
-        BigInteger orderId = agreePickUpFailedModel.getOrderId();
+        Long tenantId = agreePickUpFailedModel.obtainTenantId();
+        Long branchId = agreePickUpFailedModel.obtainBranchId();
+        Long orderId = agreePickUpFailedModel.getOrderId();
         String remark = agreePickUpFailedModel.getRemark();
 
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
@@ -583,9 +581,9 @@ public class JDDJService {
      */
     @Transactional(readOnly = true)
     public ApiRest disagreePickUpFailed(DisagreePickUpFailedModel disagreePickUpFailedModel) {
-        BigInteger tenantId = disagreePickUpFailedModel.obtainTenantId();
-        BigInteger branchId = disagreePickUpFailedModel.obtainBranchId();
-        BigInteger orderId = disagreePickUpFailedModel.getOrderId();
+        Long tenantId = disagreePickUpFailedModel.obtainTenantId();
+        Long branchId = disagreePickUpFailedModel.obtainBranchId();
+        Long orderId = disagreePickUpFailedModel.getOrderId();
         String remark = disagreePickUpFailedModel.getRemark();
 
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
@@ -609,9 +607,9 @@ public class JDDJService {
      */
     @Transactional(readOnly = true)
     public ApiRest deliveryEndOrder(DeliveryEndOrderModel deliveryEndOrderModel) {
-        BigInteger tenantId = deliveryEndOrderModel.obtainTenantId();
-        BigInteger branchId = deliveryEndOrderModel.obtainBranchId();
-        BigInteger orderId = deliveryEndOrderModel.getOrderId();
+        Long tenantId = deliveryEndOrderModel.obtainTenantId();
+        Long branchId = deliveryEndOrderModel.obtainBranchId();
+        Long orderId = deliveryEndOrderModel.getOrderId();
 
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
 
@@ -632,9 +630,9 @@ public class JDDJService {
      */
     @Transactional(readOnly = true)
     public ApiRest confirmReceiveGoods(ConfirmReceiveGoodsModel confirmReceiveGoodsModel) {
-        BigInteger tenantId = confirmReceiveGoodsModel.obtainTenantId();
-        BigInteger branchId = confirmReceiveGoodsModel.obtainBranchId();
-        BigInteger orderId = confirmReceiveGoodsModel.getOrderId();
+        Long tenantId = confirmReceiveGoodsModel.obtainTenantId();
+        Long branchId = confirmReceiveGoodsModel.obtainBranchId();
+        Long orderId = confirmReceiveGoodsModel.getOrderId();
 
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
 
@@ -655,9 +653,9 @@ public class JDDJService {
      */
     @Transactional(readOnly = true)
     public ApiRest urgeDispatching(UrgeDispatchingModel urgeDispatchingModel) {
-        BigInteger tenantId = urgeDispatchingModel.obtainTenantId();
-        BigInteger branchId = urgeDispatchingModel.obtainBranchId();
-        BigInteger orderId = urgeDispatchingModel.getOrderId();
+        Long tenantId = urgeDispatchingModel.obtainTenantId();
+        Long branchId = urgeDispatchingModel.obtainBranchId();
+        Long orderId = urgeDispatchingModel.getOrderId();
 
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
 
@@ -677,9 +675,9 @@ public class JDDJService {
      */
     @Transactional(readOnly = true)
     public ApiRest addTips(AddTipsModel addTipsModel) {
-        BigInteger tenantId = addTipsModel.obtainTenantId();
-        BigInteger branchId = addTipsModel.obtainBranchId();
-        BigInteger orderId = addTipsModel.getOrderId();
+        Long tenantId = addTipsModel.obtainTenantId();
+        Long branchId = addTipsModel.obtainBranchId();
+        Long orderId = addTipsModel.getOrderId();
         Integer tips = addTipsModel.getTips();
 
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
@@ -701,9 +699,9 @@ public class JDDJService {
      */
     @Transactional(readOnly = true)
     public ApiRest orderShouldSettlementService(OrderShouldSettlementServiceModel orderShouldSettlementServiceModel) {
-        BigInteger tenantId = orderShouldSettlementServiceModel.obtainTenantId();
-        BigInteger branchId = orderShouldSettlementServiceModel.obtainBranchId();
-        BigInteger orderId = orderShouldSettlementServiceModel.getOrderId();
+        Long tenantId = orderShouldSettlementServiceModel.obtainTenantId();
+        Long branchId = orderShouldSettlementServiceModel.obtainBranchId();
+        Long orderId = orderShouldSettlementServiceModel.getOrderId();
 
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
 
@@ -723,10 +721,10 @@ public class JDDJService {
      */
     @Transactional(readOnly = true)
     public ApiRest checkSelfPickCode(CheckSelfPickCodeModel checkSelfPickCodeModel) {
-        BigInteger tenantId = checkSelfPickCodeModel.obtainTenantId();
-        BigInteger branchId = checkSelfPickCodeModel.obtainBranchId();
+        Long tenantId = checkSelfPickCodeModel.obtainTenantId();
+        Long branchId = checkSelfPickCodeModel.obtainBranchId();
         String selfPickCode = checkSelfPickCodeModel.getSelfPickCode();
-        BigInteger orderId = checkSelfPickCodeModel.getOrderId();
+        Long orderId = checkSelfPickCodeModel.getOrderId();
 
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
 

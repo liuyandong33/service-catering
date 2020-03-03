@@ -2,28 +2,27 @@ package build.dream.catering.beans;
 
 import build.dream.common.domains.catering.DietOrderDetail;
 
-import java.math.BigInteger;
 import java.util.List;
 
 public class PackageGroupDietOrderDetail {
-    private BigInteger packageId;
-    private BigInteger packageGroupId;
+    private Long packageId;
+    private Long packageGroupId;
     private String packageGroupName;
     private List<DietOrderDetail> dietOrderDetails;
 
-    public BigInteger getPackageId() {
+    public Long getPackageId() {
         return packageId;
     }
 
-    public void setPackageId(BigInteger packageId) {
+    public void setPackageId(Long packageId) {
         this.packageId = packageId;
     }
 
-    public BigInteger getPackageGroupId() {
+    public Long getPackageGroupId() {
         return packageGroupId;
     }
 
-    public void setPackageGroupId(BigInteger packageGroupId) {
+    public void setPackageGroupId(Long packageGroupId) {
         this.packageGroupId = packageGroupId;
     }
 

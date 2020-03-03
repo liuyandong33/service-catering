@@ -9,8 +9,6 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.List;
 
 public class SaveDietOrderModel extends VipBasicModel {
@@ -81,28 +79,28 @@ public class SaveDietOrderModel extends VipBasicModel {
     }
 
     public static class GoodsInfo {
-        private BigInteger goodsId;
-        private BigInteger goodsSpecificationId;
+        private Long goodsId;
+        private Long goodsSpecificationId;
         private Integer goodsType;
-        private BigDecimal quantity;
+        private Double quantity;
 
         private List<AttributeInfo> attributeInfos;
 
         private List<PackageInfo> packageInfos;
 
-        public BigInteger getGoodsId() {
+        public Long getGoodsId() {
             return goodsId;
         }
 
-        public void setGoodsId(BigInteger goodsId) {
+        public void setGoodsId(Long goodsId) {
             this.goodsId = goodsId;
         }
 
-        public BigInteger getGoodsSpecificationId() {
+        public Long getGoodsSpecificationId() {
             return goodsSpecificationId;
         }
 
-        public void setGoodsSpecificationId(BigInteger goodsSpecificationId) {
+        public void setGoodsSpecificationId(Long goodsSpecificationId) {
             this.goodsSpecificationId = goodsSpecificationId;
         }
 
@@ -114,11 +112,11 @@ public class SaveDietOrderModel extends VipBasicModel {
             this.goodsType = goodsType;
         }
 
-        public BigDecimal getQuantity() {
+        public Double getQuantity() {
             return quantity;
         }
 
-        public void setQuantity(BigDecimal quantity) {
+        public void setQuantity(Double quantity) {
             this.quantity = quantity;
         }
 
@@ -148,35 +146,35 @@ public class SaveDietOrderModel extends VipBasicModel {
     }
 
     public static class AttributeInfo {
-        private BigInteger attributeGroupId;
-        private BigInteger attributeId;
+        private Long attributeGroupId;
+        private Long attributeId;
 
-        public BigInteger getAttributeGroupId() {
+        public Long getAttributeGroupId() {
             return attributeGroupId;
         }
 
-        public void setAttributeGroupId(BigInteger attributeGroupId) {
+        public void setAttributeGroupId(Long attributeGroupId) {
             this.attributeGroupId = attributeGroupId;
         }
 
-        public BigInteger getAttributeId() {
+        public Long getAttributeId() {
             return attributeId;
         }
 
-        public void setAttributeId(BigInteger attributeId) {
+        public void setAttributeId(Long attributeId) {
             this.attributeId = attributeId;
         }
     }
 
     public static class PackageInfo {
-        private BigInteger groupId;
+        private Long groupId;
         private List<Detail> details;
 
-        public BigInteger getGroupId() {
+        public Long getGroupId() {
             return groupId;
         }
 
-        public void setGroupId(BigInteger groupId) {
+        public void setGroupId(Long groupId) {
             this.groupId = groupId;
         }
 
@@ -190,31 +188,31 @@ public class SaveDietOrderModel extends VipBasicModel {
     }
 
     public static class Detail {
-        private BigInteger goodsId;
-        private BigInteger goodsSpecificationId;
-        private BigDecimal quantity;
+        private Long goodsId;
+        private Long goodsSpecificationId;
+        private Double quantity;
 
-        public BigInteger getGoodsId() {
+        public Long getGoodsId() {
             return goodsId;
         }
 
-        public BigInteger getGoodsSpecificationId() {
+        public Long getGoodsSpecificationId() {
             return goodsSpecificationId;
         }
 
-        public void setGoodsId(BigInteger goodsId) {
+        public void setGoodsId(Long goodsId) {
             this.goodsId = goodsId;
         }
 
-        public void setGoodsSpecificationId(BigInteger goodsSpecificationId) {
+        public void setGoodsSpecificationId(Long goodsSpecificationId) {
             this.goodsSpecificationId = goodsSpecificationId;
         }
 
-        public BigDecimal getQuantity() {
+        public Double getQuantity() {
             return quantity;
         }
 
-        public void setQuantity(BigDecimal quantity) {
+        public void setQuantity(Double quantity) {
             this.quantity = quantity;
         }
     }

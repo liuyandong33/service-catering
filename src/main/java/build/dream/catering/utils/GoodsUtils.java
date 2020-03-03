@@ -11,8 +11,6 @@ import build.dream.common.utils.SearchModel;
 import build.dream.common.utils.ValidateUtils;
 import org.apache.commons.collections.CollectionUtils;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -30,14 +28,14 @@ public class GoodsUtils {
         return goodsMapper;
     }
 
-    public static BigDecimal deductingGoodsStock(BigInteger goodsId, BigInteger goodsSpecificationId, BigDecimal quantity) {
-        BigDecimal stock = obtainGoodsMapper().deductingGoodsStock(goodsId, goodsSpecificationId, quantity);
-        ValidateUtils.isTrue(stock.compareTo(BigDecimal.ZERO) >= 0, "库存不足！");
+    public static Double deductingGoodsStock(Long goodsId, Long goodsSpecificationId, Double quantity) {
+        Double stock = obtainGoodsMapper().deductingGoodsStock(goodsId, goodsSpecificationId, quantity);
+        ValidateUtils.isTrue(stock >= 0, "库存不足！");
         return stock;
     }
 
-    public static BigDecimal addGoodsStock(BigInteger goodsId, BigInteger goodsSpecificationId, BigDecimal quantity) {
-        BigDecimal stock = obtainGoodsMapper().addGoodsStock(goodsId, goodsSpecificationId, quantity);
+    public static Double addGoodsStock(Long goodsId, Long goodsSpecificationId, Double quantity) {
+        Double stock = obtainGoodsMapper().addGoodsStock(goodsId, goodsSpecificationId, quantity);
         return stock;
     }
 
@@ -62,7 +60,7 @@ public class GoodsUtils {
     }
 
     public static List<Map<String, Object>> buildGoodsAttributeGroups(List<GoodsAttributeGroup> goodsAttributeGroups, List<GoodsAttribute> goodsAttributes) {
-        Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = goodsAttributes.stream().collect(Collectors.groupingBy(GoodsAttribute::getGoodsAttributeGroupId));
+        Map<Long, List<GoodsAttribute>> goodsAttributeMap = goodsAttributes.stream().collect(Collectors.groupingBy(GoodsAttribute::getGoodsAttributeGroupId));
         Function<GoodsAttribute, Map<String, Object>> goodsAttributeMapFunction = goodsAttribute -> {
             Map<String, Object> attribute = new HashMap<String, Object>();
             attribute.put(GoodsAttribute.FieldName.ID, goodsAttribute.getId());
@@ -72,7 +70,7 @@ public class GoodsUtils {
         };
 
         Function<GoodsAttributeGroup, Map<String, Object>> goodsAttributeGroupMapFunction = goodsAttributeGroup -> {
-            BigInteger goodsAttributeGroupId = goodsAttributeGroup.getId();
+            Long goodsAttributeGroupId = goodsAttributeGroup.getId();
             List<GoodsAttribute> goodsAttributeList = goodsAttributeMap.get(goodsAttributeGroupId);
 
             Map<String, Object> attributeGroup = new HashMap<String, Object>();
@@ -120,10 +118,10 @@ public class GoodsUtils {
     }
 
     public static List<Map<String, Object>> buildPackageGroupInfos(List<PackageGroup> packageGroups, List<PackageDetail> packageDetails) {
-        Map<BigInteger, List<PackageDetail>> packageDetailMap = packageDetails.stream().collect(Collectors.groupingBy(PackageDetail::getPackageGroupId));
+        Map<Long, List<PackageDetail>> packageDetailMap = packageDetails.stream().collect(Collectors.groupingBy(PackageDetail::getPackageGroupId));
 
         Function<PackageGroup, Map<String, Object>> mapFunction = packageGroup -> {
-            BigInteger packageGroupId = packageGroup.getId();
+            Long packageGroupId = packageGroup.getId();
             Map<String, Object> group = new HashMap<String, Object>();
             group.put(PackageGroup.FieldName.ID, packageGroup.getId());
             group.put(PackageGroup.FieldName.GROUP_NAME, packageGroup.getGroupName());
@@ -135,7 +133,7 @@ public class GoodsUtils {
         return packageGroups.stream().map(mapFunction).collect(Collectors.toList());
     }
 
-    public static GoodsAttributeGroup buildGoodsAttributeGroup(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, SaveGoodsModel.AttributeGroupInfo attributeGroupInfo, BigInteger userId) {
+    public static GoodsAttributeGroup buildGoodsAttributeGroup(Long tenantId, String tenantCode, Long branchId, Long goodsId, SaveGoodsModel.AttributeGroupInfo attributeGroupInfo, Long userId) {
         GoodsAttributeGroup goodsAttributeGroup = GoodsAttributeGroup.builder()
                 .tenantId(tenantId)
                 .tenantCode(tenantCode)
@@ -149,7 +147,7 @@ public class GoodsUtils {
         return goodsAttributeGroup;
     }
 
-    public static GoodsAttribute buildGoodsAttribute(SaveGoodsModel.AttributeInfo attributeInfo, BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, BigInteger goodsAttributeGroupId, BigInteger userId) {
+    public static GoodsAttribute buildGoodsAttribute(SaveGoodsModel.AttributeInfo attributeInfo, Long tenantId, String tenantCode, Long branchId, Long goodsId, Long goodsAttributeGroupId, Long userId) {
         GoodsAttribute goodsAttribute = GoodsAttribute.builder()
                 .tenantId(tenantId)
                 .tenantCode(tenantCode)
@@ -165,7 +163,7 @@ public class GoodsUtils {
         return goodsAttribute;
     }
 
-    public static GoodsSpecification buildGoodsSpecification(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger goodsId, SaveGoodsModel.GoodsSpecificationInfo goodsSpecificationInfo, BigInteger userId) {
+    public static GoodsSpecification buildGoodsSpecification(Long tenantId, String tenantCode, Long branchId, Long goodsId, SaveGoodsModel.GoodsSpecificationInfo goodsSpecificationInfo, Long userId) {
         GoodsSpecification goodsSpecification = GoodsSpecification.builder()
                 .tenantId(tenantId)
                 .tenantCode(tenantCode)
@@ -181,16 +179,16 @@ public class GoodsUtils {
         return goodsSpecification;
     }
 
-    public static List<PackageDetail> listPackageInfos(BigInteger tenantId, BigInteger branchId, Collection<BigInteger> packageIds, Integer groupType) {
+    public static List<PackageDetail> listPackageInfos(Long tenantId, Long branchId, Collection<Long> packageIds, Integer groupType) {
         return obtainGoodsMapper().listPackageInfos(tenantId, branchId, packageIds, groupType);
     }
 
-    public static List<Goods> findAllByIdInList(BigInteger tenantId, BigInteger branchId, List<BigInteger> goodsIds) {
+    public static List<Goods> findAllByIdInList(Long tenantId, Long branchId, List<Long> goodsIds) {
         return obtainGoodsMapper().findAllByIdInList(tenantId, branchId, goodsIds);
     }
 
-    public static Map<BigInteger, List<GoodsAttributeGroup>> obtainGoodsAttributeGroupInfos(BigInteger tenantId, BigInteger branchId, Collection<BigInteger> goodsIds) {
-        Map<BigInteger, List<GoodsAttributeGroup>> goodsAttributeGroupMap = new HashMap<BigInteger, List<GoodsAttributeGroup>>();
+    public static Map<Long, List<GoodsAttributeGroup>> obtainGoodsAttributeGroupInfos(Long tenantId, Long branchId, Collection<Long> goodsIds) {
+        Map<Long, List<GoodsAttributeGroup>> goodsAttributeGroupMap = new HashMap<Long, List<GoodsAttributeGroup>>();
         if (CollectionUtils.isEmpty(goodsIds)) {
             return goodsAttributeGroupMap;
         }
@@ -207,8 +205,8 @@ public class GoodsUtils {
         return goodsAttributeGroupMap;
     }
 
-    public static Map<BigInteger, List<GoodsAttribute>> obtainGoodsAttributeInfos(BigInteger tenantId, BigInteger branchId, Collection<BigInteger> goodsIds) {
-        Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = new HashMap<BigInteger, List<GoodsAttribute>>();
+    public static Map<Long, List<GoodsAttribute>> obtainGoodsAttributeInfos(Long tenantId, Long branchId, Collection<Long> goodsIds) {
+        Map<Long, List<GoodsAttribute>> goodsAttributeMap = new HashMap<Long, List<GoodsAttribute>>();
         if (CollectionUtils.isEmpty(goodsIds)) {
             return goodsAttributeMap;
         }
@@ -225,8 +223,8 @@ public class GoodsUtils {
         return goodsAttributeMap;
     }
 
-    public static Map<BigInteger, List<GoodsSpecification>> obtainGoodsSpecificationInfos(BigInteger tenantId, BigInteger branchId, Collection<BigInteger> goodsIds) {
-        Map<BigInteger, List<GoodsSpecification>> goodsSpecificationMap = new HashMap<BigInteger, List<GoodsSpecification>>();
+    public static Map<Long, List<GoodsSpecification>> obtainGoodsSpecificationInfos(Long tenantId, Long branchId, Collection<Long> goodsIds) {
+        Map<Long, List<GoodsSpecification>> goodsSpecificationMap = new HashMap<Long, List<GoodsSpecification>>();
         if (CollectionUtils.isEmpty(goodsIds)) {
             return goodsSpecificationMap;
         }
@@ -240,8 +238,8 @@ public class GoodsUtils {
         return goodsSpecificationMap;
     }
 
-    public static Map<BigInteger, List<PackageDetail>> obtainPackageGroupDetailInfos(BigInteger tenantId, BigInteger branchId, Collection<BigInteger> packageIds) {
-        Map<BigInteger, List<PackageDetail>> packageGroupDetailMap = new HashMap<BigInteger, List<PackageDetail>>();
+    public static Map<Long, List<PackageDetail>> obtainPackageGroupDetailInfos(Long tenantId, Long branchId, Collection<Long> packageIds) {
+        Map<Long, List<PackageDetail>> packageGroupDetailMap = new HashMap<Long, List<PackageDetail>>();
         if (CollectionUtils.isEmpty(packageIds)) {
             return packageGroupDetailMap;
         }
@@ -251,8 +249,8 @@ public class GoodsUtils {
         return packageGroupDetailMap;
     }
 
-    public static Map<BigInteger, List<PackageGroup>> obtainPackageGroupInfos(BigInteger tenantId, BigInteger branchId, Collection<BigInteger> packageIds) {
-        Map<BigInteger, List<PackageGroup>> packageGroupMap = new HashMap<BigInteger, List<PackageGroup>>();
+    public static Map<Long, List<PackageGroup>> obtainPackageGroupInfos(Long tenantId, Long branchId, Collection<Long> packageIds) {
+        Map<Long, List<PackageGroup>> packageGroupMap = new HashMap<Long, List<PackageGroup>>();
         if (CollectionUtils.isEmpty(packageIds)) {
             return packageGroupMap;
         }

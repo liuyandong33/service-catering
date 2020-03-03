@@ -8,19 +8,18 @@ import build.dream.common.utils.GsonUtils;
 import build.dream.common.utils.ThreadUtils;
 import org.apache.commons.collections.MapUtils;
 
-import java.math.BigInteger;
 import java.util.Map;
 
 public class HandleJDDJMessageRunnable implements Runnable {
     private JDDJService jddjService;
-    private BigInteger tenantId;
+    private Long tenantId;
     private String tenantCode;
     private Map<String, Object> body;
     private boolean continued = true;
     private int count;
     private long interval;
 
-    public HandleJDDJMessageRunnable(JDDJService jddjService, BigInteger tenantId, String tenantCode, Map<String, Object> body, int count, long interval) {
+    public HandleJDDJMessageRunnable(JDDJService jddjService, Long tenantId, String tenantCode, Map<String, Object> body, int count, long interval) {
         this.jddjService = jddjService;
         this.tenantId = tenantId;
         this.tenantCode = tenantCode;

@@ -3,17 +3,16 @@ package build.dream.catering.models.pos;
 import build.dream.common.models.CateringBasicModel;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class ObtainMqttInfoModel extends CateringBasicModel {
     @NotNull
-    private BigInteger posId;
+    private Long posId;
 
-    public BigInteger getPosId() {
+    public Long getPosId() {
         return posId;
     }
 
-    public void setPosId(BigInteger posId) {
+    public void setPosId(Long posId) {
         this.posId = posId;
     }
 }

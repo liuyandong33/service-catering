@@ -1,26 +1,23 @@
 package build.dream.catering.beans;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
 public class PackageDetail {
-    private BigInteger goodsId;
+    private Long goodsId;
     private String goodsName;
     private boolean stocked;
-    private BigInteger goodsSpecificationId;
+    private Long goodsSpecificationId;
     private String goodsSpecificationName;
-    private BigDecimal price;
-    private BigDecimal quantity;
-    private BigInteger packageId;
-    private BigInteger packageGroupId;
+    private Double price;
+    private Double quantity;
+    private Long packageId;
+    private Long packageGroupId;
     private String packageGroupName;
     private Integer packageGroupType;
 
-    public BigInteger getGoodsId() {
+    public Long getGoodsId() {
         return goodsId;
     }
 
-    public void setGoodsId(BigInteger goodsId) {
+    public void setGoodsId(Long goodsId) {
         this.goodsId = goodsId;
     }
 
@@ -40,11 +37,11 @@ public class PackageDetail {
         this.stocked = stocked;
     }
 
-    public BigInteger getGoodsSpecificationId() {
+    public Long getGoodsSpecificationId() {
         return goodsSpecificationId;
     }
 
-    public void setGoodsSpecificationId(BigInteger goodsSpecificationId) {
+    public void setGoodsSpecificationId(Long goodsSpecificationId) {
         this.goodsSpecificationId = goodsSpecificationId;
     }
 
@@ -56,35 +53,35 @@ public class PackageDetail {
         this.goodsSpecificationName = goodsSpecificationName;
     }
 
-    public BigDecimal getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(BigDecimal price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
-    public BigDecimal getQuantity() {
+    public Double getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(BigDecimal quantity) {
+    public void setQuantity(Double quantity) {
         this.quantity = quantity;
     }
 
-    public BigInteger getPackageId() {
+    public Long getPackageId() {
         return packageId;
     }
 
-    public void setPackageId(BigInteger packageId) {
+    public void setPackageId(Long packageId) {
         this.packageId = packageId;
     }
 
-    public BigInteger getPackageGroupId() {
+    public Long getPackageGroupId() {
         return packageGroupId;
     }
 
-    public void setPackageGroupId(BigInteger packageGroupId) {
+    public void setPackageGroupId(Long packageGroupId) {
         this.packageGroupId = packageGroupId;
     }
 

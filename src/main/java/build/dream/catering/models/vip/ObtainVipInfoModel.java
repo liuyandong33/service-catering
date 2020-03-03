@@ -4,10 +4,8 @@ import build.dream.common.models.CateringBasicModel;
 import build.dream.common.utils.ValidateUtils;
 import org.apache.commons.lang.StringUtils;
 
-import java.math.BigInteger;
-
 public class ObtainVipInfoModel extends CateringBasicModel {
-    private BigInteger vipId;
+    private Long vipId;
 
     private String vipCode;
 
@@ -17,11 +15,11 @@ public class ObtainVipInfoModel extends CateringBasicModel {
 
     private String alipayUserId;
 
-    public BigInteger getVipId() {
+    public Long getVipId() {
         return vipId;
     }
 
-    public void setVipId(BigInteger vipId) {
+    public void setVipId(Long vipId) {
         this.vipId = vipId;
     }
 

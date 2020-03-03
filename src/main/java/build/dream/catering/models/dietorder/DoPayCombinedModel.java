@@ -6,55 +6,53 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.List;
 
 public class DoPayCombinedModel extends BasicModel {
     @NotNull
-    private BigInteger tenantId;
+    private Long tenantId;
 
     @NotNull
-    private BigInteger branchId;
+    private Long branchId;
 
     @NotNull
-    private BigInteger vipId;
+    private Long vipId;
 
     @NotNull
-    private BigInteger dietOrderId;
+    private Long dietOrderId;
 
     @NotEmpty
     private List<PaymentInfo> paymentInfos;
 
-    public BigInteger getTenantId() {
+    public Long getTenantId() {
         return tenantId;
     }
 
-    public void setTenantId(BigInteger tenantId) {
+    public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
     }
 
-    public BigInteger getBranchId() {
+    public Long getBranchId() {
         return branchId;
     }
 
-    public void setBranchId(BigInteger branchId) {
+    public void setBranchId(Long branchId) {
         this.branchId = branchId;
     }
 
-    public BigInteger getVipId() {
+    public Long getVipId() {
         return vipId;
     }
 
-    public void setVipId(BigInteger vipId) {
+    public void setVipId(Long vipId) {
         this.vipId = vipId;
     }
 
-    public BigInteger getDietOrderId() {
+    public Long getDietOrderId() {
         return dietOrderId;
     }
 
-    public void setDietOrderId(BigInteger dietOrderId) {
+    public void setDietOrderId(Long dietOrderId) {
         this.dietOrderId = dietOrderId;
     }
 
@@ -71,7 +69,7 @@ public class DoPayCombinedModel extends BasicModel {
         private String paymentCode;
 
         @NotNull
-        private BigDecimal paidAmount;
+        private Double paidAmount;
 
         @NotNull
         private Integer paidScene;
@@ -84,11 +82,11 @@ public class DoPayCombinedModel extends BasicModel {
             this.paymentCode = paymentCode;
         }
 
-        public BigDecimal getPaidAmount() {
+        public Double getPaidAmount() {
             return paidAmount;
         }
 
-        public void setPaidAmount(BigDecimal paidAmount) {
+        public void setPaidAmount(Double paidAmount) {
             this.paidAmount = paidAmount;
         }
 

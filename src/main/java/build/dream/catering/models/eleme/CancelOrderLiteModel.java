@@ -4,12 +4,11 @@ import build.dream.common.models.CateringBasicModel;
 import build.dream.common.utils.ApplicationHandler;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class CancelOrderLiteModel extends CateringBasicModel {
     private static final String[] TYPES = {"others", "fakeOrder", "contactUserFailed", "foodSoldOut", "restaurantClosed", "distanceTooFar", "restaurantTooBusy", "forceRejectOrder", "deliveryFault", "notSatisfiedDeliveryRequirement"};
     @NotNull
-    private BigInteger orderId;
+    private Long orderId;
 
     private String type;
 
@@ -18,11 +17,11 @@ public class CancelOrderLiteModel extends CateringBasicModel {
     @NotNull
     private String uuid;
 
-    public BigInteger getOrderId() {
+    public Long getOrderId() {
         return orderId;
     }
 
-    public void setOrderId(BigInteger orderId) {
+    public void setOrderId(Long orderId) {
         this.orderId = orderId;
     }
 

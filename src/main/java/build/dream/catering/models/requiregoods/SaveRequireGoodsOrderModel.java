@@ -1,30 +1,27 @@
 package build.dream.catering.models.requiregoods;
 
-import build.dream.catering.models.purchase.SavePurchaseOrderModel;
 import build.dream.common.models.BasicModel;
 import build.dream.common.models.CateringBasicModel;
 import build.dream.common.utils.ApplicationHandler;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.List;
 
 public class SaveRequireGoodsOrderModel extends CateringBasicModel {
     @NotNull
-    private BigInteger distributionCenterId;
+    private Long distributionCenterId;
 
     private String remark;
 
     @NotEmpty
     private List<Detail> details;
 
-    public BigInteger getDistributionCenterId() {
+    public Long getDistributionCenterId() {
         return distributionCenterId;
     }
 
-    public void setDistributionCenterId(BigInteger distributionCenterId) {
+    public void setDistributionCenterId(Long distributionCenterId) {
         this.distributionCenterId = distributionCenterId;
     }
 
@@ -69,57 +66,57 @@ public class SaveRequireGoodsOrderModel extends CateringBasicModel {
 
     public static class Detail extends BasicModel {
         @NotNull
-        private BigInteger goodsId;
+        private Long goodsId;
 
         @NotNull
-        private BigInteger goodsSpecificationId;
+        private Long goodsSpecificationId;
 
         @NotNull
-        private BigInteger unitId;
+        private Long unitId;
 
         @NotNull
-        private BigDecimal purchasePrice;
+        private Double purchasePrice;
 
         @NotNull
-        private BigDecimal quantity;
+        private Double quantity;
 
-        public BigInteger getGoodsId() {
+        public Long getGoodsId() {
             return goodsId;
         }
 
-        public void setGoodsId(BigInteger goodsId) {
+        public void setGoodsId(Long goodsId) {
             this.goodsId = goodsId;
         }
 
-        public BigInteger getGoodsSpecificationId() {
+        public Long getGoodsSpecificationId() {
             return goodsSpecificationId;
         }
 
-        public void setGoodsSpecificationId(BigInteger goodsSpecificationId) {
+        public void setGoodsSpecificationId(Long goodsSpecificationId) {
             this.goodsSpecificationId = goodsSpecificationId;
         }
 
-        public BigInteger getUnitId() {
+        public Long getUnitId() {
             return unitId;
         }
 
-        public void setUnitId(BigInteger unitId) {
+        public void setUnitId(Long unitId) {
             this.unitId = unitId;
         }
 
-        public BigDecimal getPurchasePrice() {
+        public Double getPurchasePrice() {
             return purchasePrice;
         }
 
-        public void setPurchasePrice(BigDecimal purchasePrice) {
+        public void setPurchasePrice(Double purchasePrice) {
             this.purchasePrice = purchasePrice;
         }
 
-        public BigDecimal getQuantity() {
+        public Double getQuantity() {
             return quantity;
         }
 
-        public void setQuantity(BigDecimal quantity) {
+        public void setQuantity(Double quantity) {
             this.quantity = quantity;
         }
     }

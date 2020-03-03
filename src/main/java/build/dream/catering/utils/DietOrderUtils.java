@@ -25,8 +25,6 @@ import org.apache.commons.collections.MapUtils;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,7 +35,7 @@ public class DietOrderUtils {
      * @param dietOrder
      */
     public static void recoveryStock(DietOrder dietOrder) {
-        BigInteger dietOrderId = dietOrder.getId();
+        Long dietOrderId = dietOrder.getId();
 
         List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
         searchConditions.add(new SearchCondition("deleted", Constants.SQL_OPERATION_SYMBOL_EQUAL, 0));
@@ -50,18 +48,18 @@ public class DietOrderUtils {
         dietOrderDetailSearchModel.setSearchConditions(searchConditions);
         List<DietOrderDetail> dietOrderDetails = DatabaseHelper.findAll(DietOrderDetail.class, dietOrderDetailSearchModel);
 
-        Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap = dietOrderDetails.stream().collect(Collectors.groupingBy(DietOrderDetail::getDietOrderGroupId));
+        Map<Long, List<DietOrderDetail>> dietOrderDetailMap = dietOrderDetails.stream().collect(Collectors.groupingBy(DietOrderDetail::getDietOrderGroupId));
 
         List<DietOrderDetail> normalDietOrderDetails = new ArrayList<DietOrderDetail>();
         for (DietOrderGroup dietOrderGroup : dietOrderGroups) {
             String type = dietOrderGroup.getType();
-            BigInteger dietOrderGroupId = dietOrderGroup.getId();
+            Long dietOrderGroupId = dietOrderGroup.getId();
             if (DietOrderConstants.GROUP_TYPE_NORMAL.equals(type)) {
                 normalDietOrderDetails.addAll(dietOrderDetailMap.get(dietOrderGroupId));
             }
         }
 
-        List<BigInteger> goodsIds = new ArrayList<BigInteger>();
+        List<Long> goodsIds = new ArrayList<Long>();
         for (DietOrderDetail normalDietOrderDetail : normalDietOrderDetails) {
             goodsIds.add(normalDietOrderDetail.getGoodsId());
         }
@@ -69,13 +67,13 @@ public class DietOrderUtils {
         SearchModel goodsSearchModel = new SearchModel(true);
         goodsSearchModel.addSearchCondition(Goods.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, goodsIds);
         List<Goods> goodsList = DatabaseHelper.findAll(Goods.class, goodsSearchModel);
-        Map<BigInteger, Goods> goodsMap = new HashMap<BigInteger, Goods>();
+        Map<Long, Goods> goodsMap = new HashMap<Long, Goods>();
         for (Goods goods : goodsList) {
             goodsMap.put(goods.getId(), goods);
         }
 
         for (DietOrderDetail normalDietOrderDetail : normalDietOrderDetails) {
-            BigInteger goodsId = normalDietOrderDetail.getGoodsId();
+            Long goodsId = normalDietOrderDetail.getGoodsId();
             Goods goods = goodsMap.get(goodsId);
             if (goods.isStocked()) {
                 GoodsUtils.addGoodsStock(goodsId, normalDietOrderDetail.getGoodsSpecificationId(), normalDietOrderDetail.getQuantity());
@@ -89,10 +87,10 @@ public class DietOrderUtils {
      * @param dietOrder
      */
     public static void refund(DietOrder dietOrder) {
-        BigInteger tenantId = dietOrder.getTenantId();
-        BigInteger branchId = dietOrder.getBranchId();
-        BigInteger dietOrderId = dietOrder.getId();
-        BigInteger vipId = dietOrder.getVipId();
+        Long tenantId = dietOrder.getTenantId();
+        Long branchId = dietOrder.getBranchId();
+        Long dietOrderId = dietOrder.getId();
+        Long vipId = dietOrder.getVipId();
         Vip vip = null;
         if (vipId.compareTo(Constants.BIGINT_DEFAULT_VALUE) != 0) {
             vip = VipUtils.find(tenantId, vipId);
@@ -108,7 +106,7 @@ public class DietOrderUtils {
             if (Constants.PAYMENT_CODE_HYJF.equals(paymentCode)) {
                 Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
                 VipAccount vipAccount = VipUtils.obtainVipAccount(tenantId, branchId, vipId, tenant.getVipSharedType());
-                VipUtils.addVipPoint(vip.getTenantId(), vipId, vipAccount.getId(), dietOrderPayment.getPaidAmount().multiply(BigDecimal.valueOf(Double.valueOf(extraInfo))));
+                VipUtils.addVipPoint(vip.getTenantId(), vipId, vipAccount.getId(), dietOrderPayment.getPaidAmount() / (Double.valueOf(Double.valueOf(extraInfo))));
             } else if (Constants.PAYMENT_CODE_HYQB.equals(paymentCode)) {
                 Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
                 VipAccount vipAccount = VipUtils.obtainVipAccount(tenantId, branchId, vipId, tenant.getVipSharedType());
@@ -154,10 +152,10 @@ public class DietOrderUtils {
      */
     public static Map<String, Object> buildDietOrderInfo(DietOrder dietOrder, List<DietOrderGroup> dietOrderGroups, List<DietOrderDetail> dietOrderDetails, List<DietOrderDetailGoodsAttribute> dietOrderDetailGoodsAttributes, List<DietOrderActivity> dietOrderActivities) {
         // 封装订单分组与订单详情之间的map
-        Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap = dietOrderDetails.stream().collect(Collectors.groupingBy(DietOrderDetail::getDietOrderGroupId));
+        Map<Long, List<DietOrderDetail>> dietOrderDetailMap = dietOrderDetails.stream().collect(Collectors.groupingBy(DietOrderDetail::getDietOrderGroupId));
 
         // 封装订单详情与订单口味之间的map
-        Map<BigInteger, List<DietOrderDetailGoodsAttribute>> dietOrderDetailGoodsAttributeMap = dietOrderDetailGoodsAttributes.stream().collect(Collectors.groupingBy(DietOrderDetailGoodsAttribute::getDietOrderDetailId));
+        Map<Long, List<DietOrderDetailGoodsAttribute>> dietOrderDetailGoodsAttributeMap = dietOrderDetailGoodsAttributes.stream().collect(Collectors.groupingBy(DietOrderDetailGoodsAttribute::getDietOrderDetailId));
 
         Map<String, Object> dietOrderInfo = new HashMap<String, Object>();
         dietOrderInfo.put(DietOrder.FieldName.ID, dietOrder.getId());
@@ -213,7 +211,7 @@ public class DietOrderUtils {
      * @param dietOrderDetailGoodsAttributeMap
      * @return
      */
-    private static List<Map<String, Object>> buildDietOrderGroupInfos(List<DietOrderGroup> dietOrderGroups, Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap, Map<BigInteger, List<DietOrderDetailGoodsAttribute>> dietOrderDetailGoodsAttributeMap) {
+    private static List<Map<String, Object>> buildDietOrderGroupInfos(List<DietOrderGroup> dietOrderGroups, Map<Long, List<DietOrderDetail>> dietOrderDetailMap, Map<Long, List<DietOrderDetailGoodsAttribute>> dietOrderDetailGoodsAttributeMap) {
         List<Map<String, Object>> groups = new ArrayList<Map<String, Object>>();
         for (DietOrderGroup dietOrderGroup : dietOrderGroups) {
             Map<String, Object> group = new HashMap<String, Object>();
@@ -233,12 +231,12 @@ public class DietOrderUtils {
      * @param dietOrderDetailGoodsAttributeMap
      * @return
      */
-    private static List<Map<String, Object>> buildDietOrderDetailInfos(List<DietOrderDetail> dietOrderDetails, Map<BigInteger, List<DietOrderDetailGoodsAttribute>> dietOrderDetailGoodsAttributeMap) {
+    private static List<Map<String, Object>> buildDietOrderDetailInfos(List<DietOrderDetail> dietOrderDetails, Map<Long, List<DietOrderDetailGoodsAttribute>> dietOrderDetailGoodsAttributeMap) {
         List<DietOrderDetail> ordinaryGoodsDietOrderDetail = new ArrayList<DietOrderDetail>();
-        Map<BigInteger, List<DietOrderDetail>> dietOrderDetailMap = new HashMap<BigInteger, List<DietOrderDetail>>();
+        Map<Long, List<DietOrderDetail>> dietOrderDetailMap = new HashMap<Long, List<DietOrderDetail>>();
         for (DietOrderDetail dietOrderDetail : dietOrderDetails) {
             if (dietOrderDetail.getGoodsType() == Constants.GOODS_TYPE_PACKAGE_DETAIL) {
-                BigInteger packageGroupId = dietOrderDetail.getPackageGroupId();
+                Long packageGroupId = dietOrderDetail.getPackageGroupId();
                 List<DietOrderDetail> dietOrderDetailList = dietOrderDetailMap.get(packageGroupId);
                 if (CollectionUtils.isEmpty(dietOrderDetailList)) {
                     dietOrderDetailList = new ArrayList<DietOrderDetail>();
@@ -250,7 +248,7 @@ public class DietOrderUtils {
             }
         }
         List<PackageGroupDietOrderDetail> packageGroupDietOrderDetails = new ArrayList<PackageGroupDietOrderDetail>();
-        for (Map.Entry<BigInteger, List<DietOrderDetail>> entry : dietOrderDetailMap.entrySet()) {
+        for (Map.Entry<Long, List<DietOrderDetail>> entry : dietOrderDetailMap.entrySet()) {
             PackageGroupDietOrderDetail packageGroupDietOrderDetail = new PackageGroupDietOrderDetail();
             List<DietOrderDetail> value = entry.getValue();
             DietOrderDetail dietOrderDetail = value.get(0);
@@ -261,7 +259,7 @@ public class DietOrderUtils {
             packageGroupDietOrderDetails.add(packageGroupDietOrderDetail);
         }
 
-        Map<BigInteger, List<PackageGroupDietOrderDetail>> packageGroupDietOrderDetailMap = packageGroupDietOrderDetails.stream().collect(Collectors.groupingBy(PackageGroupDietOrderDetail::getPackageId));
+        Map<Long, List<PackageGroupDietOrderDetail>> packageGroupDietOrderDetailMap = packageGroupDietOrderDetails.stream().collect(Collectors.groupingBy(PackageGroupDietOrderDetail::getPackageId));
 
         List<Map<String, Object>> dietOrderDetailInfos = new ArrayList<Map<String, Object>>();
         for (DietOrderDetail dietOrderDetail : ordinaryGoodsDietOrderDetail) {
@@ -346,7 +344,7 @@ public class DietOrderUtils {
      * @param count:       最大推送次数
      * @param interval:    推送间隔
      */
-    public static void pushMessage(BigInteger tenantId, BigInteger branchId, BigInteger dietOrderId, String uuid, int count, int interval) {
+    public static void pushMessage(Long tenantId, Long branchId, Long dietOrderId, String uuid, int count, int interval) {
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -370,11 +368,11 @@ public class DietOrderUtils {
      * @return
      */
     public static DietOrder saveDietOrder(SaveDietOrderModel saveDietOrderModel) {
-        BigInteger tenantId = saveDietOrderModel.obtainTenantId();
+        Long tenantId = saveDietOrderModel.obtainTenantId();
         String tenantCode = saveDietOrderModel.obtainTenantCode();
-        BigInteger branchId = saveDietOrderModel.obtainTenantId();
-        BigInteger userId = saveDietOrderModel.obtainVipId();
-        BigInteger vipId = saveDietOrderModel.obtainVipId();
+        Long branchId = saveDietOrderModel.obtainTenantId();
+        Long userId = saveDietOrderModel.obtainVipId();
+        Long vipId = saveDietOrderModel.obtainVipId();
         Integer orderType = saveDietOrderModel.getOrderType();
         boolean invoiced = saveDietOrderModel.getInvoiced();
         String invoiceType = saveDietOrderModel.getInvoiceType();
@@ -385,13 +383,13 @@ public class DietOrderUtils {
         Branch branch = DatabaseHelper.find(Branch.class, branchId);
         ValidateUtils.notNull(branch, "门店不存在！");
 
-        List<BigInteger> goodsIds = new ArrayList<BigInteger>();
-        List<BigInteger> packageIds = new ArrayList<BigInteger>();
-        List<BigInteger> goodsSpecificationIds = new ArrayList<BigInteger>();
-        List<BigInteger> goodsAttributeGroupIds = new ArrayList<BigInteger>();
-        List<BigInteger> goodsAttributeIds = new ArrayList<BigInteger>();
+        List<Long> goodsIds = new ArrayList<Long>();
+        List<Long> packageIds = new ArrayList<Long>();
+        List<Long> goodsSpecificationIds = new ArrayList<Long>();
+        List<Long> goodsAttributeGroupIds = new ArrayList<Long>();
+        List<Long> goodsAttributeIds = new ArrayList<Long>();
         for (SaveDietOrderModel.GoodsInfo goodsInfo : goodsInfos) {
-            BigInteger goodsId = goodsInfo.getGoodsId();
+            Long goodsId = goodsInfo.getGoodsId();
             goodsIds.add(goodsInfo.getGoodsId());
             goodsSpecificationIds.add(goodsInfo.getGoodsSpecificationId());
             if (goodsInfo.isPackage()) {
@@ -420,9 +418,9 @@ public class DietOrderUtils {
             optionalGroupPackageDetailMap.put(key, packageDetail);
         }
 
-        Map<BigInteger, List<PackageDetail>> requiredGroupPackageDetailMap = new HashMap<BigInteger, List<PackageDetail>>();
+        Map<Long, List<PackageDetail>> requiredGroupPackageDetailMap = new HashMap<Long, List<PackageDetail>>();
         for (PackageDetail packageDetail : requiredGroupPackageDetails) {
-            BigInteger packageId = packageDetail.getPackageId();
+            Long packageId = packageDetail.getPackageId();
             List<PackageDetail> packageDetails = requiredGroupPackageDetailMap.get(packageId);
             if (CollectionUtils.isEmpty(packageDetails)) {
                 packageDetails = new ArrayList<PackageDetail>();
@@ -468,25 +466,25 @@ public class DietOrderUtils {
         }
 
         // 封装商品id与商品之间的map
-        Map<BigInteger, Goods> goodsMap = new HashMap<BigInteger, Goods>();
+        Map<Long, Goods> goodsMap = new HashMap<Long, Goods>();
         for (Goods goods : goodses) {
             goodsMap.put(goods.getId(), goods);
         }
 
         // 封装商品规格id与商品规格之间的map
-        Map<BigInteger, GoodsSpecification> goodsSpecificationMap = new HashMap<BigInteger, GoodsSpecification>();
+        Map<Long, GoodsSpecification> goodsSpecificationMap = new HashMap<Long, GoodsSpecification>();
         for (GoodsSpecification goodsSpecification : goodsSpecifications) {
             goodsSpecificationMap.put(goodsSpecification.getId(), goodsSpecification);
         }
 
         // 封装商品口味组id与商品口味组之间的map
-        Map<BigInteger, GoodsAttributeGroup> goodsAttributeGroupMap = new HashMap<BigInteger, GoodsAttributeGroup>();
+        Map<Long, GoodsAttributeGroup> goodsAttributeGroupMap = new HashMap<Long, GoodsAttributeGroup>();
         for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroups) {
             goodsAttributeGroupMap.put(goodsAttributeGroup.getId(), goodsAttributeGroup);
         }
 
         // 封装商品口味id与商品口味之间的map
-        Map<BigInteger, GoodsAttribute> goodsAttributeMap = new HashMap<BigInteger, GoodsAttribute>();
+        Map<Long, GoodsAttribute> goodsAttributeMap = new HashMap<Long, GoodsAttribute>();
         for (GoodsAttribute goodsAttribute : goodsAttributes) {
             goodsAttributeMap.put(goodsAttribute.getId(), goodsAttribute);
         }
@@ -524,13 +522,13 @@ public class DietOrderUtils {
         DietOrder dietOrder = builder.build();
         DatabaseHelper.insert(dietOrder);
 
-        BigDecimal dietOrderTotalAmount = BigDecimal.ZERO;
-        BigDecimal deliverFee = BigDecimal.TEN;
-        BigDecimal packageFee = BigDecimal.TEN;
-        BigInteger dietOrderId = dietOrder.getId();
+        Double dietOrderTotalAmount = 0D;
+        Double deliverFee = 10D;
+        Double packageFee = 10D;
+        Long dietOrderId = dietOrder.getId();
 
         // 存放订单优惠金额
-        BigDecimal dietOrderDiscountAmount = BigDecimal.ZERO;
+        Double dietOrderDiscountAmount = 0D;
         // 用来保存订单活动
 
         List<EffectiveActivity> effectiveActivities = ActivityUtils.listEffectiveActivities(tenantId, branchId);
@@ -551,7 +549,7 @@ public class DietOrderUtils {
         List<DietOrderDetail> dietOrderDetails = new ArrayList<DietOrderDetail>();
         Map<String, DietOrderDetail> dietOrderDetailMap = new HashMap<String, DietOrderDetail>();
         Map<String, List<DietOrderDetailGoodsAttribute>> dietOrderDetailGoodsAttributeMap = new HashMap<String, List<DietOrderDetailGoodsAttribute>>();
-        Map<BigInteger, DietOrderActivity> dietOrderActivityMap = new HashMap<BigInteger, DietOrderActivity>();
+        Map<Long, DietOrderActivity> dietOrderActivityMap = new HashMap<Long, DietOrderActivity>();
 
         DietOrderGroup discountDietOrderGroup = null;
         DietOrderGroup normalDietOrderGroup = DietOrderGroup.builder()
@@ -574,11 +572,11 @@ public class DietOrderUtils {
             GoodsSpecification goodsSpecification = goodsSpecificationMap.get(goodsInfo.getGoodsSpecificationId());
             ValidateUtils.notNull(goodsSpecification, "商品规格不存在！");
 
-            BigInteger goodsId = goods.getId();
-            BigInteger goodsSpecificationId = goodsSpecification.getId();
+            Long goodsId = goods.getId();
+            Long goodsSpecificationId = goodsSpecification.getId();
             String goodsSpecificationName = goodsSpecification.getName();
-            BigDecimal quantity = goodsInfo.getQuantity();
-            BigDecimal price = goodsSpecification.getPrice();
+            Double quantity = goodsInfo.getQuantity();
+            Double price = goodsSpecification.getPrice();
             if (goods.isStocked()) {
                 GoodsUtils.deductingGoodsStock(goodsId, goodsSpecificationId, quantity);
             }
@@ -606,11 +604,11 @@ public class DietOrderUtils {
                                 .categoryId(goods.getCategoryId())
                                 .categoryName(goods.getCategoryName())
                                 .price(price)
-                                .attributeIncrease(BigDecimal.ZERO)
-                                .quantity(detail.getQuantity().multiply(quantity))
-                                .totalAmount(BigDecimal.ZERO)
-                                .discountAmount(BigDecimal.ZERO)
-                                .payableAmount(BigDecimal.ZERO)
+                                .attributeIncrease(0D)
+                                .quantity(detail.getQuantity() * quantity)
+                                .totalAmount(0D)
+                                .discountAmount(0D)
+                                .payableAmount(0D)
                                 .createdUserId(userId)
                                 .updatedUserId(userId)
                                 .build();
@@ -636,11 +634,11 @@ public class DietOrderUtils {
                             .categoryId(goods.getCategoryId())
                             .categoryName(goods.getCategoryName())
                             .price(price)
-                            .attributeIncrease(BigDecimal.ZERO)
-                            .quantity(quantity.multiply(packageDetail.getQuantity()))
-                            .totalAmount(BigDecimal.ZERO)
-                            .discountAmount(BigDecimal.ZERO)
-                            .payableAmount(BigDecimal.ZERO)
+                            .attributeIncrease(0D)
+                            .quantity(quantity * (packageDetail.getQuantity()))
+                            .totalAmount(0D)
+                            .discountAmount(0D)
+                            .payableAmount(0D)
                             .createdUserId(userId)
                             .updatedUserId(userId)
                             .build();
@@ -649,7 +647,7 @@ public class DietOrderUtils {
             }
 
             String uuid = UUID.randomUUID().toString();
-            BigDecimal attributeIncrease = BigDecimal.ZERO;
+            Double attributeIncrease = 0D;
             List<SaveDietOrderModel.AttributeInfo> attributeInfos = goodsInfo.getAttributeInfos();
 
             List<DietOrderDetailGoodsAttribute> dietOrderDetailGoodsAttributes = new ArrayList<DietOrderDetailGoodsAttribute>();
@@ -660,7 +658,7 @@ public class DietOrderUtils {
 
                     GoodsAttribute goodsAttribute = goodsAttributeMap.get(attributeInfo.getAttributeId());
                     ValidateUtils.notNull(goodsAttribute, "口味不存在！");
-                    attributeIncrease = attributeIncrease.add(goodsAttribute.getPrice());
+                    attributeIncrease = attributeIncrease + goodsAttribute.getPrice();
 
                     DietOrderDetailGoodsAttribute dietOrderDetailGoodsAttribute = DietOrderDetailGoodsAttribute.builder()
                             .tenantId(tenantId)
@@ -704,8 +702,8 @@ public class DietOrderUtils {
                                     .build();
                             DatabaseHelper.insert(discountDietOrderGroup);
                         }
-                        BigDecimal giveQuantity = quantity.divide(effectiveActivity.getBuyQuantity(), 0, BigDecimal.ROUND_DOWN).multiply(effectiveActivity.getGiveQuantity());
-                        BigDecimal giveTotalAmount = giveQuantity.multiply(effectiveActivity.getSpecialPrice());
+                        Double giveQuantity = quantity / effectiveActivity.getBuyQuantity() * effectiveActivity.getGiveQuantity();
+                        Double giveTotalAmount = giveQuantity * effectiveActivity.getSpecialPrice();
                         DietOrderDetail giveDietOrderDetail = DietOrderDetail.builder()
                                 .tenantId(tenantId)
                                 .tenantCode(tenantCode)
@@ -719,18 +717,18 @@ public class DietOrderUtils {
                                 .goodsSpecificationName(effectiveActivity.getGoodsSpecificationName())
                                 .categoryId(effectiveActivity.getCategoryId())
                                 .categoryName(effectiveActivity.getCategoryName())
-                                .price(BigDecimal.ZERO)
-                                .attributeIncrease(BigDecimal.ZERO)
+                                .price(0D)
+                                .attributeIncrease(0D)
                                 .quantity(effectiveActivity.getGiveQuantity())
                                 .totalAmount(giveTotalAmount)
                                 .discountAmount(giveTotalAmount)
-                                .payableAmount(BigDecimal.ZERO)
+                                .payableAmount(0D)
                                 .createdUserId(userId)
                                 .updatedUserId(userId)
                                 .build();
                         dietOrderDetails.add(giveDietOrderDetail);
 
-                        BigInteger activityId = effectiveActivity.getActivityId();
+                        Long activityId = effectiveActivity.getActivityId();
                         DietOrderActivity dietOrderActivity = dietOrderActivityMap.get(activityId);
                         if (dietOrderActivity == null) {
                             dietOrderActivity = DietOrderActivity.builder()
@@ -747,11 +745,11 @@ public class DietOrderUtils {
                                     .build();
                             dietOrderActivityMap.put(activityId, dietOrderActivity);
                         } else {
-                            dietOrderActivity.setAmount(dietOrderActivity.getAmount().add(giveDietOrderDetail.getDiscountAmount()));
+                            dietOrderActivity.setAmount(dietOrderActivity.getAmount() + giveDietOrderDetail.getDiscountAmount());
                         }
                     }
 
-                    BigDecimal dietOrderDetailTotalAmount = price.add(attributeIncrease).multiply(quantity);
+                    Double dietOrderDetailTotalAmount = (price + attributeIncrease) * quantity;
                     dietOrderDetail = DietOrderDetail.builder()
                             .tenantId(tenantId)
                             .tenantCode(tenantCode)
@@ -769,7 +767,7 @@ public class DietOrderUtils {
                             .attributeIncrease(attributeIncrease)
                             .quantity(quantity)
                             .totalAmount(dietOrderDetailTotalAmount)
-                            .discountAmount(BigDecimal.ZERO)
+                            .discountAmount(0D)
                             .payableAmount(dietOrderDetailTotalAmount)
                             .createdUserId(userId)
                             .updatedUserId(userId)
@@ -778,16 +776,16 @@ public class DietOrderUtils {
 
                 if (type == Constants.ACTIVITY_TYPE_SPECIAL_GOODS_ACTIVITY) {
                     Integer discountType = effectiveActivity.getDiscountType();
-                    BigDecimal dietOrderDetailTotalAmount = price.add(attributeIncrease).multiply(quantity);
-                    BigDecimal dietOrderDetailPayableAmount = null;
+                    Double dietOrderDetailTotalAmount = (price + attributeIncrease) * quantity;
+                    Double dietOrderDetailPayableAmount = null;
                     if (discountType == 1) {
-                        dietOrderDetailPayableAmount = effectiveActivity.getSpecialPrice().add(attributeIncrease).multiply(quantity);
+                        dietOrderDetailPayableAmount = (effectiveActivity.getSpecialPrice() + attributeIncrease) * quantity;
                     } else {
-                        dietOrderDetailPayableAmount = price.subtract(price.multiply(effectiveActivity.getDiscountRate()).add(attributeIncrease).divide(Constants.BIG_DECIMAL_ONE_HUNDRED));
+                        dietOrderDetailPayableAmount = price - (price * effectiveActivity.getDiscountRate() + attributeIncrease) / 100;
                     }
-                    BigDecimal dietOrderDetailDiscountAmount = dietOrderDetailTotalAmount.subtract(dietOrderDetailPayableAmount);
-                    dietOrderTotalAmount = dietOrderTotalAmount.add(dietOrderDetailTotalAmount);
-                    dietOrderDiscountAmount = dietOrderDiscountAmount.add(dietOrderDetailDiscountAmount);
+                    Double dietOrderDetailDiscountAmount = dietOrderDetailTotalAmount - dietOrderDetailPayableAmount;
+                    dietOrderTotalAmount = dietOrderTotalAmount + dietOrderDetailTotalAmount;
+                    dietOrderDiscountAmount = dietOrderDiscountAmount + dietOrderDetailDiscountAmount;
                     dietOrderDetail = DietOrderDetail.builder()
                             .tenantId(tenantId)
                             .tenantCode(tenantCode)
@@ -811,7 +809,7 @@ public class DietOrderUtils {
                             .updatedUserId(userId)
                             .build();
 
-                    BigInteger activityId = effectiveActivity.getActivityId();
+                    Long activityId = effectiveActivity.getActivityId();
                     DietOrderActivity dietOrderActivity = dietOrderActivityMap.get(activityId);
                     if (dietOrderActivity == null) {
                         dietOrderActivity = DietOrderActivity.builder()
@@ -829,12 +827,12 @@ public class DietOrderUtils {
 
                         dietOrderActivityMap.put(activityId, dietOrderActivity);
                     } else {
-                        dietOrderActivity.setAmount(dietOrderActivity.getAmount().add(dietOrderDetailDiscountAmount));
+                        dietOrderActivity.setAmount(dietOrderActivity.getAmount() + dietOrderDetailDiscountAmount);
                     }
                 }
             } else {
-                BigDecimal dietOrderDetailTotalAmount = price.add(attributeIncrease).multiply(quantity);
-                dietOrderTotalAmount = dietOrderTotalAmount.add(dietOrderDetailTotalAmount);
+                Double dietOrderDetailTotalAmount = (price + attributeIncrease) * quantity;
+                dietOrderTotalAmount = dietOrderTotalAmount + dietOrderDetailTotalAmount;
                 dietOrderDetail = DietOrderDetail.builder()
                         .tenantId(tenantId)
                         .tenantCode(tenantCode)
@@ -852,7 +850,7 @@ public class DietOrderUtils {
                         .attributeIncrease(attributeIncrease)
                         .quantity(quantity)
                         .totalAmount(dietOrderDetailTotalAmount)
-                        .discountAmount(BigDecimal.ZERO)
+                        .discountAmount(0D)
                         .payableAmount(dietOrderDetailTotalAmount)
                         .createdUserId(userId)
                         .updatedUserId(userId)
@@ -861,12 +859,12 @@ public class DietOrderUtils {
 
             dietOrderDetails.add(dietOrderDetail);
             dietOrderDetailMap.put(uuid, dietOrderDetail);
-            packageFee = packageFee.add(BigDecimal.ZERO);
+            packageFee = packageFee + 0D;
         }
 
         // 开始处理配送费与打包费
         DietOrderGroup extraDietOrderGroup = null;
-        if (deliverFee.compareTo(BigDecimal.ZERO) > 0) {
+        if (deliverFee > 0) {
             if (extraDietOrderGroup == null) {
                 extraDietOrderGroup = DietOrderGroup.builder()
                         .tenantId(tenantId)
@@ -881,7 +879,7 @@ public class DietOrderUtils {
                         .build();
                 DatabaseHelper.insert(extraDietOrderGroup);
             }
-            dietOrderTotalAmount = dietOrderTotalAmount.add(deliverFee);
+            dietOrderTotalAmount = dietOrderTotalAmount + deliverFee;
             DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
                     .tenantId(tenantId)
                     .tenantCode(tenantCode)
@@ -889,17 +887,17 @@ public class DietOrderUtils {
                     .dietOrderId(dietOrderId)
                     .dietOrderGroupId(extraDietOrderGroup.getId())
                     .goodsType(Constants.GOODS_TYPE_DELIVER_FEE)
-                    .goodsId(Constants.BIG_INTEGER_MINUS_ONE)
+                    .goodsId(-1L)
                     .goodsName("配送费")
-                    .goodsSpecificationId(Constants.BIG_INTEGER_MINUS_ONE)
+                    .goodsSpecificationId(-1l)
                     .goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE)
                     .categoryId(Constants.FICTITIOUS_GOODS_CATEGORY_ID)
                     .categoryName(Constants.FICTITIOUS_GOODS_CATEGORY_NAME)
                     .price(deliverFee)
-                    .attributeIncrease(BigDecimal.ZERO)
-                    .quantity(BigDecimal.ONE)
+                    .attributeIncrease(0D)
+                    .quantity(1D)
                     .totalAmount(deliverFee)
-                    .discountAmount(BigDecimal.ZERO)
+                    .discountAmount(0D)
                     .payableAmount(deliverFee)
                     .createdUserId(userId)
                     .updatedUserId(userId)
@@ -907,7 +905,7 @@ public class DietOrderUtils {
             dietOrderDetails.add(dietOrderDetail);
         }
 
-        if (packageFee.compareTo(BigDecimal.ZERO) > 0) {
+        if (packageFee.compareTo(0D) > 0) {
             if (extraDietOrderGroup == null) {
                 extraDietOrderGroup = DietOrderGroup.builder()
                         .tenantId(tenantId)
@@ -922,7 +920,7 @@ public class DietOrderUtils {
                         .build();
                 DatabaseHelper.insert(extraDietOrderGroup);
             }
-            dietOrderTotalAmount = dietOrderTotalAmount.add(packageFee);
+            dietOrderTotalAmount = dietOrderTotalAmount + packageFee;
             DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
                     .tenantId(tenantId)
                     .tenantCode(tenantCode)
@@ -930,17 +928,17 @@ public class DietOrderUtils {
                     .dietOrderId(dietOrderId)
                     .dietOrderGroupId(extraDietOrderGroup.getId())
                     .goodsType(Constants.GOODS_TYPE_PACKAGE_FEE)
-                    .goodsId(Constants.BIG_INTEGER_MINUS_TWO)
+                    .goodsId(2L)
                     .goodsName("打包费")
-                    .goodsSpecificationId(Constants.BIG_INTEGER_MINUS_TWO)
+                    .goodsSpecificationId(-2L)
                     .goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE)
                     .categoryId(Constants.FICTITIOUS_GOODS_CATEGORY_ID)
                     .categoryName(Constants.FICTITIOUS_GOODS_CATEGORY_NAME)
                     .price(packageFee)
-                    .attributeIncrease(BigDecimal.ZERO)
-                    .quantity(BigDecimal.ONE)
+                    .attributeIncrease(0D)
+                    .quantity(1D)
                     .totalAmount(packageFee)
-                    .discountAmount(BigDecimal.ZERO)
+                    .discountAmount(0D)
                     .payableAmount(packageFee)
                     .createdUserId(userId)
                     .updatedUserId(userId)
@@ -955,7 +953,7 @@ public class DietOrderUtils {
             for (Map.Entry<String, List<DietOrderDetailGoodsAttribute>> entry : dietOrderDetailGoodsAttributeMap.entrySet()) {
                 String key = entry.getKey();
                 DietOrderDetail dietOrderDetail = dietOrderDetailMap.get(key);
-                BigInteger dietOrderDetailId = dietOrderDetail.getId();
+                Long dietOrderDetailId = dietOrderDetail.getId();
 
                 List<DietOrderDetailGoodsAttribute> value = entry.getValue();
                 for (DietOrderDetailGoodsAttribute dietOrderDetailGoodsAttribute : value) {
@@ -968,7 +966,7 @@ public class DietOrderUtils {
 
         // 整单优惠活动
 
-        BigDecimal dietOrderPayableAmount = dietOrderTotalAmount.subtract(dietOrderDiscountAmount);
+        Double dietOrderPayableAmount = dietOrderTotalAmount - dietOrderDiscountAmount;
         List<DietOrderActivity> dietOrderActivities = new ArrayList<DietOrderActivity>();
         if (CollectionUtils.isNotEmpty(fullReductionActivities)) {
             Collections.sort(fullReductionActivities, (o1, o2) -> o1.getTotalAmount().compareTo(o2.getTotalAmount()));
@@ -989,14 +987,14 @@ public class DietOrderUtils {
                 }
             }
             if (fullReductionActivity != null) {
-                BigDecimal amount = null;
+                Double amount = null;
                 int discountType = fullReductionActivity.getDiscountType();
                 if (discountType == 1) {
                     amount = fullReductionActivity.getDiscountAmount();
                 } else {
-                    amount = dietOrderPayableAmount.subtract(dietOrderPayableAmount.multiply(fullReductionActivity.getDiscountRate()).divide(Constants.BIG_DECIMAL_ONE_HUNDRED));
+                    amount = dietOrderPayableAmount - dietOrderPayableAmount * fullReductionActivity.getDiscountRate() / 100;
                 }
-                dietOrderDiscountAmount = dietOrderDiscountAmount.add(amount);
+                dietOrderDiscountAmount = dietOrderDiscountAmount + amount;
                 DietOrderActivity dietOrderActivity = DietOrderActivity.builder()
                         .tenantId(tenantId)
                         .tenantCode(tenantCode)
@@ -1022,8 +1020,8 @@ public class DietOrderUtils {
 
         dietOrder.setTotalAmount(dietOrderTotalAmount);
         dietOrder.setDiscountAmount(dietOrderDiscountAmount);
-        dietOrder.setPayableAmount(dietOrderTotalAmount.subtract(dietOrderDiscountAmount));
-        dietOrder.setPaidAmount(BigDecimal.ZERO);
+        dietOrder.setPayableAmount(dietOrderTotalAmount - dietOrderDiscountAmount);
+        dietOrder.setPaidAmount(0D);
 
 //        KafkaFixedTimeSendResult kafkaFixedTimeSendResult = startOrderInvalidJob(tenantId, branchId, dietOrderId, 1, DateUtils.addMinutes(dietOrder.getCreatedTime(), 15));
 //        dietOrder.setJobId(kafkaFixedTimeSendResult.getJobId());
@@ -1059,7 +1057,7 @@ public class DietOrderUtils {
      * @param startTime
      * @return
      */
-    public static KafkaFixedTimeSendResult startOrderInvalidJob(BigInteger tenantId, BigInteger branchId, BigInteger orderId, int type, Date startTime) {
+    public static KafkaFixedTimeSendResult startOrderInvalidJob(Long tenantId, Long branchId, Long orderId, int type, Date startTime) {
         String topic = ConfigurationUtils.getConfiguration(Constants.ORDER_INVALID_MESSAGE_TOPIC);
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("tenantId", tenantId);
@@ -1087,7 +1085,7 @@ public class DietOrderUtils {
      * @param orderId:  订单ID
      * @param type:     类型，1-超时未付款自动取消，2-商户拒单取消订单，3-超时未接单自动取消
      */
-    public static void cancelOrder(BigInteger tenantId, BigInteger branchId, BigInteger orderId, int type) {
+    public static void cancelOrder(Long tenantId, Long branchId, Long orderId, int type) {
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition(DietOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);

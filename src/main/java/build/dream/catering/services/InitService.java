@@ -9,18 +9,17 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
 import java.util.List;
 
 @Service
 public class InitService {
     @Transactional(rollbackFor = Exception.class)
     public ApiRest initTenantConfig(InitTenantConfigModel initTenantConfigModel) {
-        BigInteger tenantId = initTenantConfigModel.getTenantId();
+        Long tenantId = initTenantConfigModel.getTenantId();
         String tenantCode = initTenantConfigModel.getTenantCode();
 
         SearchModel searchModel = SearchModel.builder()
-                .equal("tenant_id", BigInteger.ZERO)
+                .equal("tenant_id", 0L)
                 .build();
         List<TenantConfig> tenantConfigs = DatabaseHelper.findAll(TenantConfig.class, searchModel);
         if (CollectionUtils.isNotEmpty(tenantConfigs)) {

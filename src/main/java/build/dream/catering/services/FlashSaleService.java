@@ -3,18 +3,16 @@ package build.dream.catering.services;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.flashsale.*;
 import build.dream.common.api.ApiRest;
+import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.domains.catering.DietOrder;
 import build.dream.common.domains.catering.DietOrderDetail;
 import build.dream.common.domains.catering.DietOrderGroup;
 import build.dream.common.domains.catering.FlashSaleActivity;
-import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.utils.*;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -28,23 +26,23 @@ public class FlashSaleService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveFlashSaleActivity(SaveFlashSaleActivityModel saveFlashSaleActivityModel) {
-        BigInteger tenantId = saveFlashSaleActivityModel.obtainTenantId();
+        Long tenantId = saveFlashSaleActivityModel.obtainTenantId();
         String tenantCode = saveFlashSaleActivityModel.obtainTenantCode();
-        BigInteger branchId = saveFlashSaleActivityModel.obtainBranchId();
-        BigInteger userId = saveFlashSaleActivityModel.obtainUserId();
-        BigInteger goodsId = saveFlashSaleActivityModel.getGoodsId();
+        Long branchId = saveFlashSaleActivityModel.obtainBranchId();
+        Long userId = saveFlashSaleActivityModel.obtainUserId();
+        Long goodsId = saveFlashSaleActivityModel.getGoodsId();
         String goodsName = saveFlashSaleActivityModel.getGoodsName();
         String imageUrl = saveFlashSaleActivityModel.getImageUrl();
         String name = saveFlashSaleActivityModel.getName();
         Date startTime = saveFlashSaleActivityModel.getStartTime();
         Date endTime = saveFlashSaleActivityModel.getEndTime();
         boolean limited = saveFlashSaleActivityModel.getLimited();
-        BigDecimal limitQuantity = saveFlashSaleActivityModel.getLimitQuantity();
+        Double limitQuantity = saveFlashSaleActivityModel.getLimitQuantity();
         Integer beforeShowTime = saveFlashSaleActivityModel.getBeforeShowTime();
         Integer timeUnit = saveFlashSaleActivityModel.getTimeUnit();
-        BigDecimal originalPrice = saveFlashSaleActivityModel.getOriginalPrice();
-        BigDecimal flashSalePrice = saveFlashSaleActivityModel.getFlashSalePrice();
-        BigDecimal flashSaleStock = saveFlashSaleActivityModel.getFlashSaleStock();
+        Double originalPrice = saveFlashSaleActivityModel.getOriginalPrice();
+        Double flashSalePrice = saveFlashSaleActivityModel.getFlashSalePrice();
+        Double flashSaleStock = saveFlashSaleActivityModel.getFlashSaleStock();
         String description = saveFlashSaleActivityModel.getDescription();
 
         FlashSaleActivity flashSaleActivity = FlashSaleActivity.builder()
@@ -72,7 +70,7 @@ public class FlashSaleService {
                 .build();
         DatabaseHelper.insert(flashSaleActivity);
 
-        BigInteger flashSaleActivityId = flashSaleActivity.getId();
+        Long flashSaleActivityId = flashSaleActivity.getId();
         String flashSaleActivityKey = Constants.KEY_FLASH_SALE_ACTIVITY + "_" + tenantId + "_" + branchId + "_" + flashSaleActivityId;
         long timeout = (endTime.getTime() - new Date().getTime()) / 1000;
 
@@ -92,8 +90,8 @@ public class FlashSaleService {
      * @return
      */
     public ApiRest listFlashSaleActivities(ListFlashSaleActivitiesModel listFlashSaleActivitiesModel) {
-        BigInteger tenantId = listFlashSaleActivitiesModel.obtainTenantId();
-        BigInteger branchId = listFlashSaleActivitiesModel.obtainBranchId();
+        Long tenantId = listFlashSaleActivitiesModel.obtainTenantId();
+        Long branchId = listFlashSaleActivitiesModel.obtainBranchId();
         int page = listFlashSaleActivitiesModel.getPage();
         int rows = listFlashSaleActivitiesModel.getRows();
 
@@ -131,9 +129,9 @@ public class FlashSaleService {
      * @return
      */
     public ApiRest obtainAllFlashSaleActivities(ObtainAllFlashSaleActivitiesModel obtainAllFlashSaleActivitiesModel) {
-        BigInteger tenantId = obtainAllFlashSaleActivitiesModel.obtainTenantId();
-        BigInteger branchId = obtainAllFlashSaleActivitiesModel.obtainBranchId();
-        BigInteger vipId = obtainAllFlashSaleActivitiesModel.getVipId();
+        Long tenantId = obtainAllFlashSaleActivitiesModel.obtainTenantId();
+        Long branchId = obtainAllFlashSaleActivitiesModel.obtainBranchId();
+        Long vipId = obtainAllFlashSaleActivitiesModel.getVipId();
 
         Map<String, String> flashSaleActivityIdsMap = CommonRedisUtils.hgetAll(Constants.KEY_FLASH_SALE_ACTIVITY_IDS + "_" + tenantId + "_" + branchId);
         Set<String> flashSaleActivityIds = flashSaleActivityIdsMap.keySet();
@@ -165,10 +163,10 @@ public class FlashSaleService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest stopFlashSaleActivity(StopFlashSaleActivityModel stopFlashSaleActivityModel) {
-        BigInteger tenantId = stopFlashSaleActivityModel.obtainTenantId();
-        BigInteger branchId = stopFlashSaleActivityModel.obtainBranchId();
-        BigInteger activityId = stopFlashSaleActivityModel.getActivityId();
-        BigInteger userId = stopFlashSaleActivityModel.obtainUserId();
+        Long tenantId = stopFlashSaleActivityModel.obtainTenantId();
+        Long branchId = stopFlashSaleActivityModel.obtainBranchId();
+        Long activityId = stopFlashSaleActivityModel.getActivityId();
+        Long userId = stopFlashSaleActivityModel.obtainUserId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(FlashSaleActivity.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -193,10 +191,10 @@ public class FlashSaleService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest deleteFlashSaleActivity(DeleteFlashSaleActivityModel deleteFlashSaleActivityModel) {
-        BigInteger tenantId = deleteFlashSaleActivityModel.obtainTenantId();
-        BigInteger branchId = deleteFlashSaleActivityModel.obtainBranchId();
-        BigInteger activityId = deleteFlashSaleActivityModel.getActivityId();
-        BigInteger userId = deleteFlashSaleActivityModel.obtainUserId();
+        Long tenantId = deleteFlashSaleActivityModel.obtainTenantId();
+        Long branchId = deleteFlashSaleActivityModel.obtainBranchId();
+        Long activityId = deleteFlashSaleActivityModel.getActivityId();
+        Long userId = deleteFlashSaleActivityModel.obtainUserId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(FlashSaleActivity.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -224,7 +222,7 @@ public class FlashSaleService {
      * @param uuid
      */
     @Transactional(rollbackFor = Exception.class)
-    public void saveFlashSaleOrder(BigInteger tenantId, String tenantCode, BigInteger branchId, BigInteger vipId, BigInteger activityId, String uuid) {
+    public void saveFlashSaleOrder(Long tenantId, String tenantCode, Long branchId, Long vipId, Long activityId, String uuid) {
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(FlashSaleActivity.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition(FlashSaleActivity.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -234,18 +232,18 @@ public class FlashSaleService {
 
         String orderNumber = "";
         int orderType = 1;
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        BigDecimal discountAmount = BigDecimal.ZERO;
-        BigDecimal payableAmount = BigDecimal.ZERO;
-        BigDecimal paidAmount = BigDecimal.ZERO;
-        BigDecimal deliverFee = BigDecimal.ZERO;
+        Double totalAmount = 0D;
+        Double discountAmount = 0D;
+        Double payableAmount = 0D;
+        Double paidAmount = 0D;
+        Double deliverFee = 0D;
         String daySerialNumber = "";
-        BigInteger userId = BigInteger.ZERO;
-        BigInteger goodsId = BigInteger.ZERO;
+        Long userId = 0L;
+        Long goodsId = 0L;
         String goodsName = "";
-        BigInteger goodsSpecificationId = BigInteger.ZERO;
+        Long goodsSpecificationId = 0L;
         String goodsSpecificationName = "";
-        BigInteger categoryId = BigInteger.ZERO;
+        Long categoryId = 0L;
         String categoryName = "";
 
         DietOrder dietOrder = DietOrder.builder()
@@ -284,7 +282,7 @@ public class FlashSaleService {
                 .build();
         DatabaseHelper.insert(dietOrder);
 
-        BigInteger dietOrderId = dietOrder.getId();
+        Long dietOrderId = dietOrder.getId();
         DietOrderGroup dietOrderGroup = DietOrderGroup.builder()
                 .tenantId(tenantId)
                 .tenantCode(tenantCode)
@@ -317,12 +315,12 @@ public class FlashSaleService {
                 .packageGroupName(Constants.VARCHAR_DEFAULT_VALUE)
                 .categoryId(categoryId)
                 .categoryName(categoryName)
-                .price(BigDecimal.ZERO)
+                .price(0D)
                 .attributeIncrease(Constants.DECIMAL_DEFAULT_VALUE)
-                .quantity(Constants.BIG_DECIMAL_ONE)
-                .totalAmount(Constants.BIG_DECIMAL_ONE)
-                .discountAmount(Constants.BIG_DECIMAL_ONE)
-                .payableAmount(Constants.BIG_DECIMAL_ONE)
+                .quantity(1D)
+                .totalAmount(1D)
+                .discountAmount(1D)
+                .payableAmount(1D)
                 .localId(Constants.VARCHAR_DEFAULT_VALUE)
                 .localDietOrderId(Constants.VARCHAR_DEFAULT_VALUE)
                 .localDietOrderGroupId(Constants.VARCHAR_DEFAULT_VALUE)

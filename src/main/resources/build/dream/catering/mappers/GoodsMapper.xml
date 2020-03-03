@@ -59,11 +59,11 @@
         AND goods.category_id = #{categoryId}
     </select>
 
-    <select id="deductingGoodsStock" resultType="java.math.BigDecimal">
+    <select id="deductingGoodsStock" resultType="java.lang.Double">
         CALL procedure_execute_sql_2('UPDATE goods_specification SET stock = stock - ${quantity} WHERE goods_id = ${goodsId} AND id = ${goodsSpecificationId} AND deleted = 0', 'SELECT stock FROM goods_specification WHERE goods_id = ${goodsId} AND id = ${goodsSpecificationId} AND deleted = 0')
     </select>
 
-    <select id="addGoodsStock" resultType="java.math.BigDecimal">
+    <select id="addGoodsStock" resultType="java.lang.Double">
         CALL procedure_execute_sql_2('UPDATE goods_specification SET stock = stock + ${quantity} WHERE goods_id = ${goodsId} AND id = ${goodsSpecificationId} AND deleted = 0', 'SELECT stock FROM goods_specification WHERE goods_id = ${goodsId} AND id = ${goodsSpecificationId} AND deleted = 0')
     </select>
 

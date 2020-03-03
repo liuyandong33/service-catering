@@ -1,18 +1,16 @@
 package build.dream.catering.models.o2o;
 
 import build.dream.common.models.BasicModel;
-import build.dream.common.models.CateringBasicModel;
 import build.dream.common.utils.ValidateUtils;
 import org.apache.commons.lang.StringUtils;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class ObtainVipInfoModel extends BasicModel {
     @NotNull
-    private BigInteger tenantId;
+    private Long tenantId;
 
-    private BigInteger vipId;
+    private Long vipId;
 
     private String vipCode;
 
@@ -22,19 +20,19 @@ public class ObtainVipInfoModel extends BasicModel {
 
     private String alipayUserId;
 
-    public BigInteger getTenantId() {
+    public Long getTenantId() {
         return tenantId;
     }
 
-    public void setTenantId(BigInteger tenantId) {
+    public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
     }
 
-    public BigInteger getVipId() {
+    public Long getVipId() {
         return vipId;
     }
 
-    public void setVipId(BigInteger vipId) {
+    public void setVipId(Long vipId) {
         this.vipId = vipId;
     }
 

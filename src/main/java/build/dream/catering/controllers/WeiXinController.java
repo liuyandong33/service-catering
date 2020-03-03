@@ -18,7 +18,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -117,7 +116,7 @@ public class WeiXinController extends BasicController {
         generateComponentLoginPageUrlModel.validateAndThrow();
 
         String authType = generateComponentLoginPageUrlModel.getAuthType();
-        BigInteger tenantId = generateComponentLoginPageUrlModel.obtainTenantId();
+        Long tenantId = generateComponentLoginPageUrlModel.obtainTenantId();
         String partitionCode = generateComponentLoginPageUrlModel.obtainPartitionCode();
         String clientType = generateComponentLoginPageUrlModel.obtainClientType();
 

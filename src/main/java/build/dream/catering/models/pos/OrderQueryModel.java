@@ -3,29 +3,28 @@ package build.dream.catering.models.pos;
 import build.dream.common.models.BasicModel;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class OrderQueryModel extends BasicModel {
     @NotNull
-    private BigInteger tenantId;
+    private Long tenantId;
 
     @NotNull
     private String tenantCode;
 
     @NotNull
-    private BigInteger branchId;
+    private Long branchId;
 
     @NotNull
-    private BigInteger userId;
+    private Long userId;
 
     @NotNull
     private String outTradeNo;
 
-    public BigInteger getTenantId() {
+    public Long getTenantId() {
         return tenantId;
     }
 
-    public void setTenantId(BigInteger tenantId) {
+    public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
     }
 
@@ -37,19 +36,19 @@ public class OrderQueryModel extends BasicModel {
         this.tenantCode = tenantCode;
     }
 
-    public BigInteger getBranchId() {
+    public Long getBranchId() {
         return branchId;
     }
 
-    public void setBranchId(BigInteger branchId) {
+    public void setBranchId(Long branchId) {
         this.branchId = branchId;
     }
 
-    public BigInteger getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(BigInteger userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 

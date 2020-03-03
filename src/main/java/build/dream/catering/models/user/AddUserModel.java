@@ -3,11 +3,10 @@ package build.dream.catering.models.user;
 import build.dream.common.models.CateringBasicModel;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class AddUserModel extends CateringBasicModel {
     @NotNull
-    BigInteger branchId;
+    Long branchId;
 
     @NotNull
     private String name;
@@ -24,11 +23,11 @@ public class AddUserModel extends CateringBasicModel {
     @NotNull
     private Boolean enabled;
 
-    public BigInteger getBranchId() {
+    public Long getBranchId() {
         return branchId;
     }
 
-    public void setBranchId(BigInteger branchId) {
+    public void setBranchId(Long branchId) {
         this.branchId = branchId;
     }
 

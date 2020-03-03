@@ -4,8 +4,6 @@ import build.dream.common.models.CateringBasicModel;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Date;
 
 /**
@@ -13,7 +11,7 @@ import java.util.Date;
  */
 public class SaveFlashSaleActivityModel extends CateringBasicModel {
     @NotNull
-    private BigInteger goodsId;
+    private Long goodsId;
 
     @Length(max = 50)
     private String goodsName;
@@ -34,7 +32,7 @@ public class SaveFlashSaleActivityModel extends CateringBasicModel {
     @NotNull
     private Boolean limited;
 
-    private BigDecimal limitQuantity;
+    private Double limitQuantity;
 
     @NotNull
     private Integer beforeShowTime;
@@ -43,22 +41,22 @@ public class SaveFlashSaleActivityModel extends CateringBasicModel {
     private Integer timeUnit;
 
     @NotNull
-    private BigDecimal originalPrice;
+    private Double originalPrice;
 
     @NotNull
-    private BigDecimal flashSalePrice;
+    private Double flashSalePrice;
 
     @NotNull
-    private BigDecimal flashSaleStock;
+    private Double flashSaleStock;
 
     @Length(max = 255)
     private String description;
 
-    public BigInteger getGoodsId() {
+    public Long getGoodsId() {
         return goodsId;
     }
 
-    public void setGoodsId(BigInteger goodsId) {
+    public void setGoodsId(Long goodsId) {
         this.goodsId = goodsId;
     }
 
@@ -110,11 +108,11 @@ public class SaveFlashSaleActivityModel extends CateringBasicModel {
         this.limited = limited;
     }
 
-    public BigDecimal getLimitQuantity() {
+    public Double getLimitQuantity() {
         return limitQuantity;
     }
 
-    public void setLimitQuantity(BigDecimal limitQuantity) {
+    public void setLimitQuantity(Double limitQuantity) {
         this.limitQuantity = limitQuantity;
     }
 
@@ -134,27 +132,27 @@ public class SaveFlashSaleActivityModel extends CateringBasicModel {
         this.timeUnit = timeUnit;
     }
 
-    public BigDecimal getOriginalPrice() {
+    public Double getOriginalPrice() {
         return originalPrice;
     }
 
-    public void setOriginalPrice(BigDecimal originalPrice) {
+    public void setOriginalPrice(Double originalPrice) {
         this.originalPrice = originalPrice;
     }
 
-    public BigDecimal getFlashSalePrice() {
+    public Double getFlashSalePrice() {
         return flashSalePrice;
     }
 
-    public void setFlashSalePrice(BigDecimal flashSalePrice) {
+    public void setFlashSalePrice(Double flashSalePrice) {
         this.flashSalePrice = flashSalePrice;
     }
 
-    public BigDecimal getFlashSaleStock() {
+    public Double getFlashSaleStock() {
         return flashSaleStock;
     }
 
-    public void setFlashSaleStock(BigDecimal flashSaleStock) {
+    public void setFlashSaleStock(Double flashSaleStock) {
         this.flashSaleStock = flashSaleStock;
     }
 

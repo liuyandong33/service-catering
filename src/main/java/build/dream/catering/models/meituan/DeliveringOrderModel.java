@@ -3,21 +3,20 @@ package build.dream.catering.models.meituan;
 import build.dream.common.models.CateringBasicModel;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class DeliveringOrderModel extends CateringBasicModel {
     @NotNull
-    private BigInteger dietOrderId;
+    private Long dietOrderId;
 
     private String courierName;
 
     private String courierPhone;
 
-    public BigInteger getDietOrderId() {
+    public Long getDietOrderId() {
         return dietOrderId;
     }
 
-    public void setDietOrderId(BigInteger dietOrderId) {
+    public void setDietOrderId(Long dietOrderId) {
         this.dietOrderId = dietOrderId;
     }
 

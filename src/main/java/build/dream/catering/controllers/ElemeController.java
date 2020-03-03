@@ -8,7 +8,6 @@ import build.dream.common.controllers.BasicController;
 import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.CommonUtils;
 import build.dream.common.utils.ConfigurationUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -49,7 +48,7 @@ public class ElemeController extends BasicController {
         String branchId = array[1];
         String userId = array[2];
         String elemeAccountType = array[3];
-        elemeService.handleTenantAuthorizeCallback(NumberUtils.createBigInteger(tenantId), NumberUtils.createBigInteger(branchId), NumberUtils.createBigInteger(userId), Integer.parseInt(elemeAccountType), code);
+        elemeService.handleTenantAuthorizeCallback(Long.valueOf(tenantId), Long.valueOf(branchId), Long.valueOf(userId), Integer.parseInt(elemeAccountType), code);
         return buildBindingStoreModelAndView(tenantId, branchId, userId, clientType);
     }
 

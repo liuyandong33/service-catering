@@ -7,8 +7,6 @@ import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SearchModel;
 
-import java.math.BigInteger;
-
 public class TenantConfigUtils {
     public static TenantConfigMapper tenantConfigMapper = null;
 
@@ -19,14 +17,14 @@ public class TenantConfigUtils {
         return tenantConfigMapper;
     }
 
-    public static TenantConfig obtainTenantConfig(BigInteger tenantId, String name) {
+    public static TenantConfig obtainTenantConfig(Long tenantId, String name) {
         SearchModel searchModel = new SearchModel();
         searchModel.addSearchCondition(TenantConfig.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition("name", Constants.SQL_OPERATION_SYMBOL_EQUAL, name);
         return DatabaseHelper.find(TenantConfig.class, searchModel);
     }
 
-    public static TenantConfig addTenantConfig(BigInteger tenantId, String name, int increment) {
+    public static TenantConfig addTenantConfig(Long tenantId, String name, int increment) {
         obtainTenantConfigMapper().updateTenantConfig(tenantId, name, increment);
         return obtainTenantConfig(tenantId, name);
     }

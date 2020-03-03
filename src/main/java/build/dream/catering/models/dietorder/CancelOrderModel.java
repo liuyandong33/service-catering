@@ -1,20 +1,18 @@
 package build.dream.catering.models.dietorder;
 
-import build.dream.common.models.BasicModel;
 import build.dream.common.models.CateringBasicModel;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class CancelOrderModel extends CateringBasicModel {
     @NotNull
-    private BigInteger orderId;
+    private Long orderId;
 
-    public BigInteger getOrderId() {
+    public Long getOrderId() {
         return orderId;
     }
 
-    public void setOrderId(BigInteger orderId) {
+    public void setOrderId(Long orderId) {
         this.orderId = orderId;
     }
 }

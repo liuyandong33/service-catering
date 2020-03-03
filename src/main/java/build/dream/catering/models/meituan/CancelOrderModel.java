@@ -3,11 +3,10 @@ package build.dream.catering.models.meituan;
 import build.dream.common.models.CateringBasicModel;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class CancelOrderModel extends CateringBasicModel {
     @NotNull
-    private BigInteger dietOrderId;
+    private Long dietOrderId;
 
     @NotNull
     private String reasonCode;
@@ -15,11 +14,11 @@ public class CancelOrderModel extends CateringBasicModel {
     @NotNull
     private String reason;
 
-    public BigInteger getDietOrderId() {
+    public Long getDietOrderId() {
         return dietOrderId;
     }
 
-    public void setDietOrderId(BigInteger dietOrderId) {
+    public void setDietOrderId(Long dietOrderId) {
         this.dietOrderId = dietOrderId;
     }
 

@@ -5,16 +5,15 @@ import build.dream.catering.models.dada.SignedDadaModel;
 import build.dream.catering.models.dada.SyncShopModel;
 import build.dream.common.api.ApiRest;
 import build.dream.common.domains.catering.Branch;
+import build.dream.common.domains.saas.Tenant;
 import build.dream.common.models.data.AddMerchantModel;
 import build.dream.common.models.data.AddShopModel;
 import build.dream.common.models.data.DadaCommonParamsModel;
-import build.dream.common.domains.saas.Tenant;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,12 +29,12 @@ public class DadaService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest syncShop(SyncShopModel syncShopModel) {
-        BigInteger tenantId = syncShopModel.obtainTenantId();
-        List<BigInteger> branchIds = syncShopModel.getBranchIds();
+        Long tenantId = syncShopModel.obtainTenantId();
+        List<Long> branchIds = syncShopModel.getBranchIds();
 
         Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
-        BigInteger dadaSourceId = tenant.getDadaSourceId();
-        ValidateUtils.isTrue(dadaSourceId.compareTo(BigInteger.ZERO) != 0, "未开通达达配送！");
+        Long dadaSourceId = tenant.getDadaSourceId();
+        ValidateUtils.isTrue(dadaSourceId != 0, "未开通达达配送！");
 
         SearchModel searchModel = SearchModel.builder()
                 .autoSetDeletedFalse()
@@ -88,7 +87,7 @@ public class DadaService {
      * @return
      */
     public ApiRest signedDada(SignedDadaModel signedDadaModel) {
-        BigInteger tenantId = signedDadaModel.getTenantId();
+        Long tenantId = signedDadaModel.getTenantId();
         Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
 
         String contactPhone = tenant.getContactPhone();
@@ -107,7 +106,7 @@ public class DadaService {
 
         Map<String, Object> result = DadaUtils.addMerchant(addMerchantModel);
         String dadaSourceId = MapUtils.getString(result, "result");
-        TenantUtils.updateTenantInfo(tenant.getId(), BigInteger.ZERO, TupleUtils.buildTuple2("dadaSourceId", dadaSourceId));
+        TenantUtils.updateTenantInfo(tenant.getId(), 0L, TupleUtils.buildTuple2("dadaSourceId", dadaSourceId));
 
         return ApiRest.builder().message("签约达达配送成功！").successful(true).build();
     }

@@ -3,17 +3,16 @@ package build.dream.catering.models.purchase;
 import build.dream.common.models.CateringBasicModel;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class ObtainPurchaseOrderModel extends CateringBasicModel {
     @NotNull
-    private BigInteger purchaseOrderId;
+    private Long purchaseOrderId;
 
-    public BigInteger getPurchaseOrderId() {
+    public Long getPurchaseOrderId() {
         return purchaseOrderId;
     }
 
-    public void setPurchaseOrderId(BigInteger purchaseOrderId) {
+    public void setPurchaseOrderId(Long purchaseOrderId) {
         this.purchaseOrderId = purchaseOrderId;
     }
 }

@@ -1,16 +1,14 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
-import build.dream.common.domains.catering.*;
 import build.dream.common.constants.DietOrderConstants;
+import build.dream.common.domains.catering.*;
 import build.dream.common.models.beeleme.OrderGetModel;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,8 +47,8 @@ public class BeElemeService {
         List<Map<String, Object>> discounts = (List<Map<String, Object>>) orderGetResultData.get("discount");
         String id = MapUtils.getString(shop, "id");
         String[] array = id.split("Z");
-        BigInteger tenantId = BigInteger.valueOf(Long.valueOf(array[0]));
-        BigInteger branchId = BigInteger.valueOf(Long.valueOf(array[1]));
+        Long tenantId = Long.valueOf(Long.valueOf(array[0]));
+        Long branchId = Long.valueOf(Long.valueOf(array[1]));
 
         SearchModel searchModel = SearchModel.builder()
                 .autoSetDeletedFalse()
@@ -62,7 +60,7 @@ public class BeElemeService {
 
         String tenantCode = branch.getTenantCode();
 
-        BigInteger userId = Constants.BIG_INTEGER_EIGHT;
+        Long userId = 0L;
         DietOrder dietOrder = DietOrder.builder()
                 .tenantId(tenantId)
                 .tenantCode(tenantCode)
@@ -97,7 +95,7 @@ public class BeElemeService {
                 .build();
         DatabaseHelper.insert(dietOrder);
 
-        BigInteger dietOrderId = dietOrder.getId();
+        Long dietOrderId = dietOrder.getId();
 
         Map<String, DietOrderGroup> dietOrderGroupMap = new HashMap<String, DietOrderGroup>();
         for (List<Map<String, Object>> product : products) {
@@ -112,14 +110,14 @@ public class BeElemeService {
                     .updatedUserId(userId)
                     .build();
             DatabaseHelper.insert(dietOrderGroup);
-            BigInteger dietOrderGroupId = dietOrderGroup.getId();
+            Long dietOrderGroupId = dietOrderGroup.getId();
 
             for (Map<String, Object> goodsInfo : product) {
-                BigDecimal price = BigDecimal.valueOf(MapUtils.getDoubleValue(goodsInfo, "product_fee"));
-                BigDecimal quantity = BigDecimal.valueOf(MapUtils.getDoubleValue(goodsInfo, "product_amount"));
-                BigDecimal totalAmount = price.multiply(quantity);
+                Double price = MapUtils.getDoubleValue(goodsInfo, "product_fee");
+                Double quantity = MapUtils.getDoubleValue(goodsInfo, "product_amount");
+                Double totalAmount = price * quantity;
                 Map<String, Object> productSubsidy = MapUtils.getMap(goodsInfo, "product_subsidy");
-                BigDecimal discountAmount = BigDecimal.valueOf(MapUtils.getDoubleValue(productSubsidy, "shop_rate")).divide(Constants.BIG_DECIMAL_ONE_HUNDRED);
+                Double discountAmount = MapUtils.getDoubleValue(productSubsidy, "shop_rate") / 100;
                 DietOrderDetail dietOrderDetail = DietOrderDetail.builder()
                         .tenantId(tenantId)
                         .tenantCode(tenantCode)
@@ -127,7 +125,7 @@ public class BeElemeService {
                         .dietOrderId(dietOrderId)
                         .dietOrderGroupId(dietOrderGroupId)
                         .goodsType(Constants.GOODS_TYPE_ORDINARY_GOODS)
-                        .goodsId(BigInteger.valueOf(MapUtils.getLongValue(goodsInfo, "baidu_product_id")))
+                        .goodsId(Long.valueOf(MapUtils.getLongValue(goodsInfo, "baidu_product_id")))
                         .goodsName(MapUtils.getString(goodsInfo, "goodsName"))
                         .goodsSpecificationId(Constants.BIGINT_DEFAULT_VALUE)
                         .goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE)
@@ -137,7 +135,7 @@ public class BeElemeService {
                         .quantity(quantity)
                         .totalAmount(totalAmount)
                         .discountAmount(discountAmount)
-                        .payableAmount(totalAmount.subtract(discountAmount))
+                        .payableAmount(totalAmount - discountAmount)
                         .createdUserId(userId)
                         .updatedUserId(userId)
                         .build();
@@ -147,7 +145,7 @@ public class BeElemeService {
                     continue;
                 }
 
-                BigInteger dietOrderDetailId = dietOrderDetail.getId();
+                Long dietOrderDetailId = dietOrderDetail.getId();
                 for (Map<String, Object> productFeature : productFeatures) {
                     DietOrderDetailGoodsAttribute dietOrderDetailGoodsAttribute = DietOrderDetailGoodsAttribute.builder()
                             .tenantId(tenantId)
@@ -156,9 +154,9 @@ public class BeElemeService {
                             .dietOrderId(dietOrderId)
                             .dietOrderGroupId(dietOrderGroupId)
                             .dietOrderDetailId(dietOrderDetailId)
-                            .goodsAttributeGroupId(Constants.BIG_INTEGER_EIGHT)
+                            .goodsAttributeGroupId(0L)
                             .goodsAttributeGroupName(MapUtils.getString(productFeature, "name"))
-                            .goodsAttributeId(BigInteger.valueOf(MapUtils.getLongValue(productFeature, "baidu_feature_id")))
+                            .goodsAttributeId(Long.valueOf(MapUtils.getLongValue(productFeature, "baidu_feature_id")))
                             .goodsAttributeName(MapUtils.getString(productFeature, "option"))
                             .createdUserId(userId)
                             .updatedUserId(userId)
@@ -178,7 +176,7 @@ public class BeElemeService {
                             .activityId(Constants.BIGINT_DEFAULT_VALUE)
                             .activityName(Constants.VARCHAR_DEFAULT_VALUE)
                             .activityType(Constants.INT_DEFAULT_VALUE)
-                            .amount(BigDecimal.valueOf(MapUtils.getDoubleValue(discount, "shop_rate")).divide(Constants.BIG_DECIMAL_ONE_HUNDRED))
+                            .amount(MapUtils.getDoubleValue(discount, "shop_rate") / 100)
                             .createdUserId(userId)
                             .updatedUserId(userId)
                             .build();

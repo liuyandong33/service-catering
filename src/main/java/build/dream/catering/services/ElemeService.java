@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -31,9 +29,9 @@ public class ElemeService {
      */
     @Transactional(readOnly = true)
     public ApiRest tenantAuthorize(TenantAuthorizeModel tenantAuthorizeModel) {
-        BigInteger tenantId = tenantAuthorizeModel.obtainTenantId();
-        BigInteger branchId = tenantAuthorizeModel.obtainBranchId();
-        BigInteger userId = tenantAuthorizeModel.obtainUserId();
+        Long tenantId = tenantAuthorizeModel.obtainTenantId();
+        Long branchId = tenantAuthorizeModel.obtainBranchId();
+        Long userId = tenantAuthorizeModel.obtainUserId();
         String partitionCode = tenantAuthorizeModel.obtainPartitionCode();
         String clientType = tenantAuthorizeModel.obtainClientType();
 
@@ -87,7 +85,7 @@ public class ElemeService {
      * @param userId
      * @param elemeAccountType
      */
-    public void handleTenantAuthorizeCallback(BigInteger tenantId, BigInteger branchId, BigInteger userId, int elemeAccountType, String code) {
+    public void handleTenantAuthorizeCallback(Long tenantId, Long branchId, Long userId, int elemeAccountType, String code) {
         Map<String, String> requestParameters = new HashMap<String, String>();
         requestParameters.put("tenantId", tenantId.toString());
         requestParameters.put("branchId", branchId.toString());
@@ -107,11 +105,11 @@ public class ElemeService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void saveElemeOrder(ElemeCallbackMessage elemeCallbackMessage, String uuid) throws ParseException {
-        BigInteger tenantId = elemeCallbackMessage.getTenantId();
+        Long tenantId = elemeCallbackMessage.getTenantId();
         String tenantCode = elemeCallbackMessage.getTenantCode();
-        BigInteger branchId = elemeCallbackMessage.getBranchId();
+        Long branchId = elemeCallbackMessage.getBranchId();
         String message = elemeCallbackMessage.getMessage();
-        BigInteger shopId = elemeCallbackMessage.getShopId();
+        Long shopId = elemeCallbackMessage.getShopId();
 
         Map<String, Object> messageMap = JacksonUtils.readValueAsMap(message, String.class, Object.class);
         SearchModel branchSearchModel = new SearchModel(true);
@@ -125,7 +123,7 @@ public class ElemeService {
         // 开始保存饿了么订单
         List<String> phoneList = (List<String>) messageMap.get("phoneList");
 
-        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        Long userId = CommonUtils.getServiceSystemUserId();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         int orderType = DietOrderConstants.ORDER_TYPE_ELEME_ORDER;
         int orderStatus = Constants.INT_DEFAULT_VALUE;
@@ -145,10 +143,10 @@ public class ElemeService {
         }
         int payStatus = 0;
         int paidType = 0;
-        BigDecimal totalAmount = BigDecimal.valueOf(MapUtils.getDoubleValue(messageMap, "originalPrice"));
-        BigDecimal discountAmount = BigDecimal.valueOf(Math.abs(MapUtils.getDoubleValue(messageMap, "shopPart")));
-        BigDecimal payableAmount = totalAmount.subtract(discountAmount);
-        BigDecimal paidAmount = BigDecimal.ZERO;
+        Double totalAmount = MapUtils.getDoubleValue(messageMap, "originalPrice");
+        Double discountAmount = Math.abs(MapUtils.getDoubleValue(messageMap, "shopPart"));
+        Double payableAmount = totalAmount-discountAmount;
+        Double paidAmount = 0D;
         boolean onlinePaid = MapUtils.getBooleanValue(messageMap, "onlinePaid");
         if (onlinePaid) {
             payStatus = DietOrderConstants.PAY_STATUS_PAID;
@@ -191,7 +189,7 @@ public class ElemeService {
             invoiceType = MapUtils.getString(messageMap, "invoiceType");
             invoice = MapUtils.getString(messageMap, "invoice");
         }
-        BigDecimal deliverFee = BigDecimal.valueOf(MapUtils.getDoubleValue(messageMap, "deliverFee"));
+        Double deliverFee = MapUtils.getDoubleValue(messageMap, "deliverFee");
 
         DietOrder dietOrder = DietOrder.builder()
                 .tenantId(tenantId)
@@ -220,12 +218,12 @@ public class ElemeService {
                 .invoiced(invoiced)
                 .invoiceType(invoiceType)
                 .invoice(invoice)
-                .vipId(BigInteger.ZERO)
+                .vipId(0L)
                 .createdUserId(userId)
                 .updatedUserId(userId)
                 .build();
         DatabaseHelper.insert(dietOrder);
-        BigInteger dietOrderId = dietOrder.getId();
+        Long dietOrderId = dietOrder.getId();
 
         List<Map<String, Object>> orderActivities = (List<Map<String, Object>>) messageMap.get("orderActivities");
         if (CollectionUtils.isNotEmpty(orderActivities)) {
@@ -235,10 +233,10 @@ public class ElemeService {
                         .tenantCode(tenantCode)
                         .branchId(branchId)
                         .dietOrderId(dietOrderId)
-                        .activityId(BigInteger.valueOf(MapUtils.getLongValue(orderActivity, "id")))
+                        .activityId(Long.valueOf(MapUtils.getLongValue(orderActivity, "id")))
                         .activityName(MapUtils.getString(orderActivity, "name"))
                         .activityType(MapUtils.getIntValue(orderActivity, "categoryId"))
-                        .amount(BigDecimal.valueOf(MapUtils.getDoubleValue(orderActivity, "restaurantPart")).abs())
+                        .amount(Math.abs(MapUtils.getDoubleValue(orderActivity, "restaurantPart")))
                         .createdUserId(userId)
                         .updatedUserId(userId)
                         .build();
@@ -265,8 +263,8 @@ public class ElemeService {
 
         List<Map<String, Object>> groups = (List<Map<String, Object>>) messageMap.get("groups");
         DietOrderGroup extraDietOrderGroup = null;
-        BigInteger packageFeeItemId = BigInteger.valueOf(-70000);
-        BigInteger packageFeeSkuId = Constants.BIG_INTEGER_MINUS_ONE;
+        Long packageFeeItemId = Long.valueOf(-70000);
+        Long packageFeeSkuId = 1L;
         for (Map<String, Object> group : groups) {
             String type = MapUtils.getString(group, "type");
             DietOrderGroup dietOrderGroup = DietOrderGroup.builder()
@@ -281,19 +279,19 @@ public class ElemeService {
                     .build();
             DatabaseHelper.insert(dietOrderGroup);
 
-            BigInteger dietOrderGroupId = dietOrderGroup.getId();
+            Long dietOrderGroupId = dietOrderGroup.getId();
 
             List<Map<String, Object>> items = (List<Map<String, Object>>) group.get("items");
             for (Map<String, Object> item : items) {
                 List<Map<String, Object>> newSpecs = (List<Map<String, Object>>) item.get("newSpecs");
                 String goodsSpecificationName = "";
-                BigInteger categoryId = Constants.ELEME_GOODS_CATEGORY_ID;
+                Long categoryId = Constants.ELEME_GOODS_CATEGORY_ID;
                 String categoryName = Constants.ELEME_GOODS_CATEGORY_NAME;
                 if (CollectionUtils.isNotEmpty(newSpecs)) {
                     goodsSpecificationName = MapUtils.getString(newSpecs.get(0), "value");
                 }
 
-                BigDecimal total = BigDecimal.valueOf(MapUtils.getDoubleValue(item, "total"));
+                Double total = MapUtils.getDoubleValue(item, "total");
 
                 DietOrderDetail.Builder dietOrderDetailBuilder = DietOrderDetail.builder()
                         .tenantId(tenantId)
@@ -303,24 +301,24 @@ public class ElemeService {
                         .dietOrderGroupId(dietOrderGroupId)
                         .goodsName(MapUtils.getString(item, "name"))
                         .goodsSpecificationName(goodsSpecificationName)
-                        .price(BigDecimal.valueOf(MapUtils.getDoubleValue(item, "price")))
-                        .attributeIncrease(BigDecimal.ZERO)
-                        .quantity(BigDecimal.valueOf(MapUtils.getDoubleValue(item, "quantity")))
+                        .price(MapUtils.getDoubleValue(item, "price"))
+                        .attributeIncrease(0D)
+                        .quantity(MapUtils.getDoubleValue(item, "quantity"))
                         .totalAmount(total)
-                        .discountAmount(BigDecimal.ZERO)
+                        .discountAmount(0D)
                         .payableAmount(total)
                         .createdUserId(userId)
                         .updatedUserId(userId);
 
-                BigInteger id = BigInteger.valueOf(MapUtils.getLongValue(item, "id"));
-                BigInteger skuId = BigInteger.valueOf(MapUtils.getLongValue(item, "skuId"));
+                Long id = Long.valueOf(MapUtils.getLongValue(item, "id"));
+                Long skuId = Long.valueOf(MapUtils.getLongValue(item, "skuId"));
                 boolean isPackageFee = packageFeeItemId.compareTo(id) == 0 && packageFeeSkuId.compareTo(skuId) == 0;
 
                 DietOrderDetail dietOrderDetail = null;
                 if (isPackageFee) {
                     dietOrderDetail = dietOrderDetailBuilder.goodsType(Constants.GOODS_TYPE_PACKAGE_FEE)
-                            .goodsId(Constants.BIG_INTEGER_MINUS_TWO)
-                            .goodsSpecificationId(Constants.BIG_INTEGER_MINUS_TWO)
+                            .goodsId(-1L)
+                            .goodsSpecificationId(-2L)
                             .categoryId(Constants.FICTITIOUS_GOODS_CATEGORY_ID)
                             .categoryName(Constants.FICTITIOUS_GOODS_CATEGORY_NAME)
                             .build();
@@ -334,7 +332,7 @@ public class ElemeService {
                 }
                 DatabaseHelper.insert(dietOrderDetail);
 
-                BigInteger dietOrderDetailId = dietOrderDetail.getId();
+                Long dietOrderDetailId = dietOrderDetail.getId();
                 List<Map<String, Object>> attributes = (List<Map<String, Object>>) item.get("attributes");
                 if (CollectionUtils.isNotEmpty(attributes)) {
                     for (Map<String, Object> attribute : attributes) {
@@ -345,11 +343,11 @@ public class ElemeService {
                                 .dietOrderId(dietOrderId)
                                 .dietOrderGroupId(dietOrderGroupId)
                                 .dietOrderDetailId(dietOrderDetailId)
-                                .goodsAttributeGroupId(BigInteger.ZERO)
+                                .goodsAttributeGroupId(0L)
                                 .goodsAttributeGroupName(MapUtils.getString(attribute, "name"))
-                                .goodsAttributeId(BigInteger.ZERO)
+                                .goodsAttributeId(0L)
                                 .goodsAttributeName(MapUtils.getString(attribute, "value"))
-                                .price(BigDecimal.ZERO)
+                                .price(0D)
                                 .createdUserId(userId)
                                 .updatedUserId(userId)
                                 .build();
@@ -363,7 +361,7 @@ public class ElemeService {
             }
         }
 
-        if (deliverFee.compareTo(BigDecimal.ZERO) > 0) {
+        if (deliverFee.compareTo(0D) > 0) {
             if (extraDietOrderGroup == null) {
                 extraDietOrderGroup = DietOrderGroup.builder()
                         .tenantId(tenantId)
@@ -384,17 +382,17 @@ public class ElemeService {
                     .dietOrderId(dietOrderId)
                     .dietOrderGroupId(extraDietOrderGroup.getId())
                     .goodsType(Constants.GOODS_TYPE_DELIVER_FEE)
-                    .goodsId(Constants.BIG_INTEGER_MINUS_ONE)
+                    .goodsId(1L)
                     .goodsName("配送费")
-                    .goodsSpecificationId(Constants.BIG_INTEGER_MINUS_ONE)
+                    .goodsSpecificationId(1L)
                     .goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE)
                     .categoryId(Constants.FICTITIOUS_GOODS_CATEGORY_ID)
                     .categoryName(Constants.FICTITIOUS_GOODS_CATEGORY_NAME)
                     .price(deliverFee)
                     .attributeIncrease(Constants.DECIMAL_DEFAULT_VALUE)
-                    .quantity(BigDecimal.ONE)
+                    .quantity(1D)
                     .totalAmount(deliverFee)
-                    .discountAmount(BigDecimal.ZERO)
+                    .discountAmount(0D)
                     .payableAmount(deliverFee)
                     .createdUserId(userId)
                     .updatedUserId(userId)
@@ -422,11 +420,11 @@ public class ElemeService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void handleElemeRefundOrderMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
-        BigInteger tenantId = elemeCallbackMessage.getTenantId();
-        BigInteger branchId = elemeCallbackMessage.getBranchId();
+        Long tenantId = elemeCallbackMessage.getTenantId();
+        Long branchId = elemeCallbackMessage.getBranchId();
         String message = elemeCallbackMessage.getMessage();
         int type = elemeCallbackMessage.getType();
-        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        Long userId = CommonUtils.getServiceSystemUserId();
 
         Map<String, Object> messageMap = JacksonUtils.readValueAsMap(message, String.class, Object.class);
         String orderId = MapUtils.getString(messageMap, "orderId");
@@ -493,7 +491,7 @@ public class ElemeService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void handleElemeReminderMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
-        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        Long userId = CommonUtils.getServiceSystemUserId();
         elemeCallbackMessage.setCreatedUserId(userId);
         elemeCallbackMessage.setUpdatedUserId(userId);
         DatabaseHelper.insert(elemeCallbackMessage);
@@ -508,11 +506,11 @@ public class ElemeService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void handleElemeCancelOrderMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
-        BigInteger tenantId = elemeCallbackMessage.getTenantId();
-        BigInteger branchId = elemeCallbackMessage.getBranchId();
+        Long tenantId = elemeCallbackMessage.getTenantId();
+        Long branchId = elemeCallbackMessage.getBranchId();
         String message = elemeCallbackMessage.getMessage();
         int type = elemeCallbackMessage.getType();
-        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        Long userId = CommonUtils.getServiceSystemUserId();
 
         Map<String, Object> messageMap = JacksonUtils.readValueAsMap(message, String.class, Object.class);
         String orderId = MapUtils.getString(messageMap, "orderId");
@@ -537,11 +535,11 @@ public class ElemeService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void handleElemeOrderStateChangeMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
-        BigInteger tenantId = elemeCallbackMessage.getTenantId();
-        BigInteger branchId = elemeCallbackMessage.getBranchId();
+        Long tenantId = elemeCallbackMessage.getTenantId();
+        Long branchId = elemeCallbackMessage.getBranchId();
         String message = elemeCallbackMessage.getMessage();
         int type = elemeCallbackMessage.getType();
-        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        Long userId = CommonUtils.getServiceSystemUserId();
 
         Map<String, Object> messageMap = JacksonUtils.readValueAsMap(message, String.class, Object.class);
         String orderId = MapUtils.getString(messageMap, "orderId");
@@ -584,11 +582,11 @@ public class ElemeService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void handleElemeDeliveryOrderStateChangeMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
-        BigInteger tenantId = elemeCallbackMessage.getTenantId();
+        Long tenantId = elemeCallbackMessage.getTenantId();
         String tenantCode = elemeCallbackMessage.getTenantCode();
-        BigInteger branchId = elemeCallbackMessage.getBranchId();
+        Long branchId = elemeCallbackMessage.getBranchId();
         String message = elemeCallbackMessage.getMessage();
-        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        Long userId = CommonUtils.getServiceSystemUserId();
 
         Map<String, Object> messageMap = JacksonUtils.readValueAsMap(message, String.class, Object.class);
         String orderId = MapUtils.getString(messageMap, "orderId");
@@ -627,18 +625,18 @@ public class ElemeService {
 
     @Transactional(rollbackFor = Exception.class)
     public void handleAuthorizationStateChangeMessage(ElemeCallbackMessage elemeCallbackMessage, String uuid) {
-        BigInteger tenantId = elemeCallbackMessage.getTenantId();
-        BigInteger shopId = elemeCallbackMessage.getShopId();
+        Long tenantId = elemeCallbackMessage.getTenantId();
+        Long shopId = elemeCallbackMessage.getShopId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition(Branch.ColumnName.SHOP_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, shopId);
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
 
-        branch.setShopId(BigInteger.ZERO);
+        branch.setShopId(0L);
         DatabaseHelper.update(branch);
 
-        BigInteger userId = CommonUtils.getServiceSystemUserId();
+        Long userId = CommonUtils.getServiceSystemUserId();
         elemeCallbackMessage.setCreatedUserId(userId);
         elemeCallbackMessage.setUpdatedUserId(userId);
         elemeCallbackMessage.setBranchId(branch.getId());
@@ -652,7 +650,7 @@ public class ElemeService {
      * @param branchId
      * @return
      */
-    private Branch obtainBranch(BigInteger tenantId, BigInteger branchId) {
+    private Branch obtainBranch(Long tenantId, Long branchId) {
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(Branch.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition(Branch.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -669,7 +667,7 @@ public class ElemeService {
      * @param orderId
      * @return
      */
-    private DietOrder obtainDietOrder(BigInteger tenantId, BigInteger branchId, BigInteger orderId) {
+    private DietOrder obtainDietOrder(Long tenantId, Long branchId, Long orderId) {
         SearchModel searchModel = new SearchModel();
         searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition(DietOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -687,7 +685,7 @@ public class ElemeService {
      * @param orderNumber
      * @return
      */
-    private DietOrder obtainDietOrder(BigInteger tenantId, BigInteger branchId, String orderNumber) {
+    private DietOrder obtainDietOrder(Long tenantId, Long branchId, String orderNumber) {
         SearchModel searchModel = SearchModel.builder()
                 .autoSetDeletedFalse()
                 .addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)
@@ -705,7 +703,7 @@ public class ElemeService {
      * @param elemeOrderIds
      * @return
      */
-    public List<DietOrder> findAllElemeOrders(BigInteger tenantId, BigInteger branchId, List<BigInteger> elemeOrderIds) {
+    public List<DietOrder> findAllElemeOrders(Long tenantId, Long branchId, List<Long> elemeOrderIds) {
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(DietOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
         searchModel.addSearchCondition(DietOrder.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
@@ -731,14 +729,14 @@ public class ElemeService {
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest doBindingStore(DoBindingStoreModel doBindingStoreModel) {
-        BigInteger tenantId = doBindingStoreModel.getTenantId();
-        BigInteger branchId = doBindingStoreModel.getBranchId();
-        BigInteger shopId = doBindingStoreModel.getShopId();
-        BigInteger userId = doBindingStoreModel.getUserId();
+        Long tenantId = doBindingStoreModel.getTenantId();
+        Long branchId = doBindingStoreModel.getBranchId();
+        Long shopId = doBindingStoreModel.getShopId();
+        Long userId = doBindingStoreModel.getUserId();
 
         String updatedRemark = "门店(" + branchId + ")绑定饿了么(" + shopId + ")，清除绑定关系！";
         UpdateModel updateModel = UpdateModel.builder()
-                .addContentValue(Branch.ColumnName.SHOP_ID, BigInteger.ZERO, 1)
+                .addContentValue(Branch.ColumnName.SHOP_ID, 0L, 1)
                 .addContentValue(Branch.ColumnName.UPDATED_USER_ID, userId, 1)
                 .addContentValue(Branch.ColumnName.UPDATED_REMARK, updatedRemark, 1)
                 .addSearchCondition(Branch.ColumnName.SHOP_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, shopId)
@@ -775,9 +773,9 @@ public class ElemeService {
      */
     @Transactional(readOnly = true)
     public ApiRest getOrder(GetOrderModel getOrderModel) {
-        BigInteger tenantId = getOrderModel.obtainTenantId();
-        BigInteger branchId = getOrderModel.obtainBranchId();
-        BigInteger orderId = getOrderModel.getOrderId();
+        Long tenantId = getOrderModel.obtainTenantId();
+        Long branchId = getOrderModel.obtainBranchId();
+        Long orderId = getOrderModel.getOrderId();
 
 
         Branch branch = obtainBranch(tenantId, branchId);
@@ -799,9 +797,9 @@ public class ElemeService {
      */
     @Transactional(readOnly = true)
     public ApiRest batchGetOrders(BatchGetOrdersModel batchGetOrdersModel) {
-        BigInteger tenantId = batchGetOrdersModel.obtainTenantId();
-        BigInteger branchId = batchGetOrdersModel.obtainBranchId();
-        List<BigInteger> orderIds = batchGetOrdersModel.getOrderIds();
+        Long tenantId = batchGetOrdersModel.obtainTenantId();
+        Long branchId = batchGetOrdersModel.obtainBranchId();
+        List<Long> orderIds = batchGetOrdersModel.getOrderIds();
 
         Branch branch = obtainBranch(tenantId, branchId);
         List<DietOrder> dietOrders = findAllElemeOrders(tenantId, branchId, orderIds);
@@ -824,9 +822,9 @@ public class ElemeService {
      */
     @Transactional(readOnly = true)
     public ApiRest confirmOrderLite(ConfirmOrderLiteModel confirmOrderLiteModel) {
-        BigInteger tenantId = confirmOrderLiteModel.obtainTenantId();
-        BigInteger branchId = confirmOrderLiteModel.obtainBranchId();
-        BigInteger orderId = confirmOrderLiteModel.getOrderId();
+        Long tenantId = confirmOrderLiteModel.obtainTenantId();
+        Long branchId = confirmOrderLiteModel.obtainBranchId();
+        Long orderId = confirmOrderLiteModel.getOrderId();
         String uuid = confirmOrderLiteModel.getUuid();
 
         CommonRedisUtils.del(uuid);
@@ -852,9 +850,9 @@ public class ElemeService {
      */
     @Transactional(readOnly = true)
     public ApiRest cancelOrderLite(CancelOrderLiteModel cancelOrderLiteModel) {
-        BigInteger tenantId = cancelOrderLiteModel.obtainTenantId();
-        BigInteger branchId = cancelOrderLiteModel.obtainBranchId();
-        BigInteger orderId = cancelOrderLiteModel.getOrderId();
+        Long tenantId = cancelOrderLiteModel.obtainTenantId();
+        Long branchId = cancelOrderLiteModel.obtainBranchId();
+        Long orderId = cancelOrderLiteModel.getOrderId();
         String uuid = cancelOrderLiteModel.getUuid();
 
         Branch branch = obtainBranch(tenantId, branchId);
@@ -881,9 +879,9 @@ public class ElemeService {
      */
     @Transactional(readOnly = true)
     public ApiRest agreeRefundLite(AgreeRefundLiteModel agreeRefundLiteModel) {
-        BigInteger tenantId = agreeRefundLiteModel.obtainTenantId();
-        BigInteger branchId = agreeRefundLiteModel.obtainBranchId();
-        BigInteger orderId = agreeRefundLiteModel.getOrderId();
+        Long tenantId = agreeRefundLiteModel.obtainTenantId();
+        Long branchId = agreeRefundLiteModel.obtainBranchId();
+        Long orderId = agreeRefundLiteModel.getOrderId();
 
         Branch branch = obtainBranch(tenantId, branchId);
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
@@ -904,9 +902,9 @@ public class ElemeService {
      */
     @Transactional(readOnly = true)
     public ApiRest disagreeRefundLite(DisagreeRefundLiteModel disagreeRefundLiteModel) {
-        BigInteger tenantId = disagreeRefundLiteModel.obtainTenantId();
-        BigInteger branchId = disagreeRefundLiteModel.obtainBranchId();
-        BigInteger orderId = disagreeRefundLiteModel.getOrderId();
+        Long tenantId = disagreeRefundLiteModel.obtainTenantId();
+        Long branchId = disagreeRefundLiteModel.obtainBranchId();
+        Long orderId = disagreeRefundLiteModel.getOrderId();
 
         Branch branch = obtainBranch(tenantId, branchId);
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
@@ -927,9 +925,9 @@ public class ElemeService {
      */
     @Transactional(readOnly = true)
     public ApiRest deliveryBySelfLite(DeliveryBySelfLiteModel deliveryBySelfLiteModel) {
-        BigInteger tenantId = deliveryBySelfLiteModel.obtainTenantId();
-        BigInteger branchId = deliveryBySelfLiteModel.obtainBranchId();
-        BigInteger orderId = deliveryBySelfLiteModel.getOrderId();
+        Long tenantId = deliveryBySelfLiteModel.obtainTenantId();
+        Long branchId = deliveryBySelfLiteModel.obtainBranchId();
+        Long orderId = deliveryBySelfLiteModel.getOrderId();
 
         Branch branch = obtainBranch(tenantId, branchId);
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
@@ -950,9 +948,9 @@ public class ElemeService {
      */
     @Transactional(readOnly = true)
     public ApiRest noMoreDeliveryLite(NoMoreDeliveryLiteModel noMoreDeliveryLiteModel) {
-        BigInteger tenantId = noMoreDeliveryLiteModel.obtainTenantId();
-        BigInteger branchId = noMoreDeliveryLiteModel.obtainBranchId();
-        BigInteger orderId = noMoreDeliveryLiteModel.getOrderId();
+        Long tenantId = noMoreDeliveryLiteModel.obtainTenantId();
+        Long branchId = noMoreDeliveryLiteModel.obtainBranchId();
+        Long orderId = noMoreDeliveryLiteModel.getOrderId();
 
         Branch branch = obtainBranch(tenantId, branchId);
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
@@ -973,9 +971,9 @@ public class ElemeService {
      */
     @Transactional(readOnly = true)
     public ApiRest receivedOrderLite(ReceivedOrderLiteModel receivedOrderLiteModel) {
-        BigInteger tenantId = receivedOrderLiteModel.obtainTenantId();
-        BigInteger branchId = receivedOrderLiteModel.obtainBranchId();
-        BigInteger orderId = receivedOrderLiteModel.getOrderId();
+        Long tenantId = receivedOrderLiteModel.obtainTenantId();
+        Long branchId = receivedOrderLiteModel.obtainBranchId();
+        Long orderId = receivedOrderLiteModel.getOrderId();
 
         Branch branch = obtainBranch(tenantId, branchId);
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
@@ -996,9 +994,9 @@ public class ElemeService {
      */
     @Transactional(readOnly = true)
     public ApiRest replyReminder(ReplyReminderModel replyReminderModel) {
-        BigInteger tenantId = replyReminderModel.obtainTenantId();
-        BigInteger branchId = replyReminderModel.obtainBranchId();
-        BigInteger orderId = replyReminderModel.getOrderId();
+        Long tenantId = replyReminderModel.obtainTenantId();
+        Long branchId = replyReminderModel.obtainBranchId();
+        Long orderId = replyReminderModel.getOrderId();
 
         Branch branch = obtainBranch(tenantId, branchId);
         DietOrder dietOrder = obtainDietOrder(tenantId, branchId, orderId);
@@ -1021,8 +1019,8 @@ public class ElemeService {
      */
     @Transactional(readOnly = true)
     public ApiRest getUser(GetUserModel getUserModel) {
-        BigInteger tenantId = getUserModel.obtainTenantId();
-        BigInteger branchId = getUserModel.obtainBranchId();
+        Long tenantId = getUserModel.obtainTenantId();
+        Long branchId = getUserModel.obtainBranchId();
 
         Branch branch = obtainBranch(tenantId, branchId);
 
@@ -1040,8 +1038,8 @@ public class ElemeService {
      */
     @Transactional(readOnly = true)
     public ApiRest getShop(GetShopModel getShopModel) {
-        BigInteger tenantId = getShopModel.obtainTenantId();
-        BigInteger branchId = getShopModel.obtainBranchId();
+        Long tenantId = getShopModel.obtainTenantId();
+        Long branchId = getShopModel.obtainBranchId();
 
         Branch branch = obtainBranch(tenantId, branchId);
 
@@ -1060,8 +1058,8 @@ public class ElemeService {
      * @return
      */
     public ApiRest queryItemByPage(QueryItemByPageModel queryItemByPageModel) {
-        BigInteger tenantId = queryItemByPageModel.obtainTenantId();
-        BigInteger branchId = queryItemByPageModel.obtainBranchId();
+        Long tenantId = queryItemByPageModel.obtainTenantId();
+        Long branchId = queryItemByPageModel.obtainBranchId();
         int page = queryItemByPageModel.getPage();
         int rows = queryItemByPageModel.getRows();
 
@@ -1084,9 +1082,9 @@ public class ElemeService {
      * @return
      */
     public ApiRest getItem(GetItemModel getItemModel) {
-        BigInteger tenantId = getItemModel.obtainTenantId();
-        BigInteger branchId = getItemModel.obtainBranchId();
-        BigInteger itemId = getItemModel.getItemId();
+        Long tenantId = getItemModel.obtainTenantId();
+        Long branchId = getItemModel.obtainBranchId();
+        Long itemId = getItemModel.getItemId();
 
         Branch branch = obtainBranch(tenantId, branchId);
 
@@ -1105,9 +1103,9 @@ public class ElemeService {
      * @return
      */
     public ApiRest batchGetItems(BatchGetItemsModel batchGetItemsModel) {
-        BigInteger tenantId = batchGetItemsModel.obtainTenantId();
-        BigInteger branchId = batchGetItemsModel.obtainBranchId();
-        List<BigInteger> itemIds = batchGetItemsModel.getItemIds();
+        Long tenantId = batchGetItemsModel.obtainTenantId();
+        Long branchId = batchGetItemsModel.obtainBranchId();
+        List<Long> itemIds = batchGetItemsModel.getItemIds();
 
         Branch branch = obtainBranch(tenantId, branchId);
 

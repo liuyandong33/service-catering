@@ -4,16 +4,14 @@ import build.dream.catering.constants.Constants;
 import build.dream.common.annotations.JsonSchema;
 import build.dream.common.models.CateringBasicModel;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.List;
 
 @JsonSchema(value = Constants.SAVE_GOODS_SCHEMA_FILE_PATH)
 public class SaveGoodsModel extends CateringBasicModel {
-    private BigInteger id;
+    private Long id;
     private String name;
     private Integer type;
-    private BigInteger categoryId;
+    private Long categoryId;
     private String imageUrl;
     private Boolean stocked;
 
@@ -21,15 +19,15 @@ public class SaveGoodsModel extends CateringBasicModel {
 
     private List<AttributeGroupInfo> attributeGroupInfos;
 
-    private List<BigInteger> deleteGoodsSpecificationIds;
+    private List<Long> deleteGoodsSpecificationIds;
 
-    private List<BigInteger> deleteGoodsAttributeGroupIds;
+    private List<Long> deleteGoodsAttributeGroupIds;
 
-    public BigInteger getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(BigInteger id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -49,11 +47,11 @@ public class SaveGoodsModel extends CateringBasicModel {
         this.type = type;
     }
 
-    public BigInteger getCategoryId() {
+    public Long getCategoryId() {
         return categoryId;
     }
 
-    public void setCategoryId(BigInteger categoryId) {
+    public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
     }
 
@@ -89,33 +87,33 @@ public class SaveGoodsModel extends CateringBasicModel {
         this.attributeGroupInfos = attributeGroupInfos;
     }
 
-    public List<BigInteger> getDeleteGoodsSpecificationIds() {
+    public List<Long> getDeleteGoodsSpecificationIds() {
         return deleteGoodsSpecificationIds;
     }
 
-    public void setDeleteGoodsSpecificationIds(List<BigInteger> deleteGoodsSpecificationIds) {
+    public void setDeleteGoodsSpecificationIds(List<Long> deleteGoodsSpecificationIds) {
         this.deleteGoodsSpecificationIds = deleteGoodsSpecificationIds;
     }
 
-    public List<BigInteger> getDeleteGoodsAttributeGroupIds() {
+    public List<Long> getDeleteGoodsAttributeGroupIds() {
         return deleteGoodsAttributeGroupIds;
     }
 
-    public void setDeleteGoodsAttributeGroupIds(List<BigInteger> deleteGoodsAttributeGroupIds) {
+    public void setDeleteGoodsAttributeGroupIds(List<Long> deleteGoodsAttributeGroupIds) {
         this.deleteGoodsAttributeGroupIds = deleteGoodsAttributeGroupIds;
     }
 
     public static class GoodsSpecificationInfo {
-        private BigInteger id;
+        private Long id;
         private String name;
-        private BigDecimal price;
-        private BigDecimal stock;
+        private Double price;
+        private Double stock;
 
-        public BigInteger getId() {
+        public Long getId() {
             return id;
         }
 
-        public void setId(BigInteger id) {
+        public void setId(Long id) {
             this.id = id;
         }
 
@@ -127,34 +125,34 @@ public class SaveGoodsModel extends CateringBasicModel {
             this.name = name;
         }
 
-        public BigDecimal getPrice() {
+        public Double getPrice() {
             return price;
         }
 
-        public void setPrice(BigDecimal price) {
+        public void setPrice(Double price) {
             this.price = price;
         }
 
-        public BigDecimal getStock() {
+        public Double getStock() {
             return stock;
         }
 
-        public void setStock(BigDecimal stock) {
+        public void setStock(Double stock) {
             this.stock = stock;
         }
     }
 
     public static class AttributeGroupInfo {
-        private BigInteger id;
+        private Long id;
         private String name;
         private List<AttributeInfo> attributeInfos;
-        private List<BigInteger> deleteGoodsAttributeIds;
+        private List<Long> deleteGoodsAttributeIds;
 
-        public BigInteger getId() {
+        public Long getId() {
             return id;
         }
 
-        public void setId(BigInteger id) {
+        public void setId(Long id) {
             this.id = id;
         }
 
@@ -174,25 +172,25 @@ public class SaveGoodsModel extends CateringBasicModel {
             this.attributeInfos = attributeInfos;
         }
 
-        public List<BigInteger> getDeleteGoodsAttributeIds() {
+        public List<Long> getDeleteGoodsAttributeIds() {
             return deleteGoodsAttributeIds;
         }
 
-        public void setDeleteGoodsAttributeIds(List<BigInteger> deleteGoodsAttributeIds) {
+        public void setDeleteGoodsAttributeIds(List<Long> deleteGoodsAttributeIds) {
             this.deleteGoodsAttributeIds = deleteGoodsAttributeIds;
         }
     }
 
     public static class AttributeInfo {
-        private BigInteger id;
+        private Long id;
         private String name;
-        private BigDecimal price;
+        private Double price;
 
-        public BigInteger getId() {
+        public Long getId() {
             return id;
         }
 
-        public void setId(BigInteger id) {
+        public void setId(Long id) {
             this.id = id;
         }
 
@@ -204,11 +202,11 @@ public class SaveGoodsModel extends CateringBasicModel {
             this.name = name;
         }
 
-        public BigDecimal getPrice() {
+        public Double getPrice() {
             return price;
         }
 
-        public void setPrice(BigDecimal price) {
+        public void setPrice(Double price) {
             this.price = price;
         }
     }

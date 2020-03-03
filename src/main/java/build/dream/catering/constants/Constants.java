@@ -1,7 +1,5 @@
 package build.dream.catering.constants;
 
-import java.math.BigInteger;
-
 /**
  * Created by liuyandong on 2017/5/5.
  */
@@ -36,20 +34,20 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final Integer GOODS_TYPE_DELIVER_FEE = 4;
     public static final Integer GOODS_TYPE_PACKAGE_FEE = 5;
 
-    public static final BigInteger FICTITIOUS_GOODS_CATEGORY_ID = BIG_INTEGER_MINUS_ONE;
+    public static final Long FICTITIOUS_GOODS_CATEGORY_ID = 1L;
     public static final String FICTITIOUS_GOODS_CATEGORY_NAME = "虚拟商品";
 
-    public static final BigInteger ELEME_GOODS_CATEGORY_ID = BIG_INTEGER_MINUS_TWO;
+    public static final Long ELEME_GOODS_CATEGORY_ID = 2L;
     public static final String ELEME_GOODS_CATEGORY_NAME = "饿了么商品";
 
-    public static final BigInteger MEI_TUAN_GOODS_CATEGORY_ID = BIG_INTEGER_MINUS_THREE;
+    public static final Long MEI_TUAN_GOODS_CATEGORY_ID = 3L;
     public static final String MEI_TUAN_GOODS_CATEGORY_NAME = "美团商品";
 
-    public static final BigInteger ELM_PAYMENT_ID = BIG_INTEGER_MINUS_ONE;
+    public static final Long ELM_PAYMENT_ID = 4L;
     public static final String ELM_PAYMENT_CODE = "ELM";
     public static final String ELM_PAYMENT_NAME = "饿了么线上支付";
 
-    public static final BigInteger MT_PAYMENT_ID = BIG_INTEGER_MINUS_TWO;
+    public static final Long MT_PAYMENT_ID = 5L;
     public static final String MT_PAYMENT_CODE = "MT";
     public static final String MT_PAYMENT_NAME = "美团线上支付";
 

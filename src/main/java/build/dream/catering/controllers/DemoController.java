@@ -20,8 +20,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.security.PermitAll;
 import javax.servlet.http.HttpServletRequest;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Map;
 import java.util.UUID;
 
@@ -39,7 +37,7 @@ public class DemoController {
         MethodCaller methodCaller = () -> {
             String dietOrderId = requestParameters.get("dietOrderId");
             ApplicationHandler.notNull(dietOrderId, "dietOrderId");
-            return demoService.writeSaleFlow(BigInteger.valueOf(Long.valueOf(dietOrderId)));
+            return demoService.writeSaleFlow(Long.valueOf(Long.valueOf(dietOrderId)));
         };
         return ApplicationHandler.callMethod(methodCaller, "写入流水失败", requestParameters);
     }
@@ -72,8 +70,8 @@ public class DemoController {
 
             } else if ("3".equals(paymentChannel)) {
                 build.dream.common.models.miya.RefundModel refundModel = build.dream.common.models.miya.RefundModel.builder()
-                        .a4(BigInteger.ONE.toString())
-                        .a5(BigInteger.TEN.toString())
+                        .a4("1")
+                        .a5("10")
                         .b1("")
                         .b2(RandomStringUtils.randomAlphanumeric(32))
                         .build();
@@ -89,18 +87,18 @@ public class DemoController {
     @RequestMapping(value = "/deductingGoodsStock")
     @ResponseBody
     public String deductingGoodsStock(HttpServletRequest httpServletRequest) {
-        BigInteger goodsId = NumberUtils.createBigInteger(ApplicationHandler.getRequestParameter(httpServletRequest, "goodsId"));
-        BigInteger goodsSpecificationId = NumberUtils.createBigInteger(ApplicationHandler.getRequestParameter(httpServletRequest, "goodsSpecificationId"));
-        BigDecimal quantity = NumberUtils.createBigDecimal(ApplicationHandler.getRequestParameter(httpServletRequest, "quantity"));
+        Long goodsId = NumberUtils.createLong(ApplicationHandler.getRequestParameter(httpServletRequest, "goodsId"));
+        Long goodsSpecificationId = NumberUtils.createLong(ApplicationHandler.getRequestParameter(httpServletRequest, "goodsSpecificationId"));
+        Double quantity = NumberUtils.createDouble(ApplicationHandler.getRequestParameter(httpServletRequest, "quantity"));
         return GsonUtils.toJson(demoService.deductingGoodsStock(goodsId, goodsSpecificationId, quantity));
     }
 
     @RequestMapping(value = "/addGoodsStock")
     @ResponseBody
     public String addGoodsStock(HttpServletRequest httpServletRequest) {
-        BigInteger goodsId = NumberUtils.createBigInteger(ApplicationHandler.getRequestParameter(httpServletRequest, "goodsId"));
-        BigInteger goodsSpecificationId = NumberUtils.createBigInteger(ApplicationHandler.getRequestParameter(httpServletRequest, "goodsSpecificationId"));
-        BigDecimal quantity = NumberUtils.createBigDecimal(ApplicationHandler.getRequestParameter(httpServletRequest, "quantity"));
+        Long goodsId = NumberUtils.createLong(ApplicationHandler.getRequestParameter(httpServletRequest, "goodsId"));
+        Long goodsSpecificationId = NumberUtils.createLong(ApplicationHandler.getRequestParameter(httpServletRequest, "goodsSpecificationId"));
+        Double quantity = NumberUtils.createDouble(ApplicationHandler.getRequestParameter(httpServletRequest, "quantity"));
         return GsonUtils.toJson(demoService.addGoodsStock(goodsId, goodsSpecificationId, quantity));
     }
 

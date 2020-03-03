@@ -7,7 +7,6 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
@@ -15,7 +14,7 @@ public class InitializeBranchModel extends BasicModel {
     private static final Integer[] TYPES = {Constants.BRANCH_TYPE_HEADQUARTERS, Constants.BRANCH_TYPE_DIRECT_SALE_STORE, Constants.BRANCH_TYPE_FRANCHISE_STORE};
     private static final Integer[] BRANCH_STATUS = {Constants.BRANCH_STATUS_ENABLED, Constants.BRANCH_STATUS_DISABLED};
     @NotNull
-    private BigInteger tenantId;
+    private Long tenantId;
 
     @NotNull
     @Length(max = 20)
@@ -77,10 +76,10 @@ public class InitializeBranchModel extends BasicModel {
     private Integer smartRestaurantStatus;
 
     @NotNull
-    private BigInteger currentUserId;
+    private Long currentUserId;
 
     @NotNull
-    private BigInteger userId;
+    private Long userId;
 
     @NotEmpty
     private List<BusinessTime> businessTimes;
@@ -89,11 +88,11 @@ public class InitializeBranchModel extends BasicModel {
         return BRANCH_STATUS;
     }
 
-    public BigInteger getTenantId() {
+    public Long getTenantId() {
         return tenantId;
     }
 
-    public void setTenantId(BigInteger tenantId) {
+    public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
     }
 
@@ -225,19 +224,19 @@ public class InitializeBranchModel extends BasicModel {
         this.smartRestaurantStatus = smartRestaurantStatus;
     }
 
-    public BigInteger getCurrentUserId() {
+    public Long getCurrentUserId() {
         return currentUserId;
     }
 
-    public void setCurrentUserId(BigInteger currentUserId) {
+    public void setCurrentUserId(Long currentUserId) {
         this.currentUserId = currentUserId;
     }
 
-    public BigInteger getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(BigInteger userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 

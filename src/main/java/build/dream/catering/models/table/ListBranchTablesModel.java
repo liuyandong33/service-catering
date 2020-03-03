@@ -5,11 +5,10 @@ import build.dream.common.models.CateringBasicModel;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class ListBranchTablesModel extends CateringBasicModel {
     @NotNull
-    private BigInteger tableAreaId;
+    private Long tableAreaId;
 
     @NotNull
     @Min(value = 1)
@@ -20,11 +19,11 @@ public class ListBranchTablesModel extends CateringBasicModel {
     @Max(value = 1000)
     private Integer rows;
 
-    public BigInteger getTableAreaId() {
+    public Long getTableAreaId() {
         return tableAreaId;
     }
 
-    public void setTableAreaId(BigInteger tableAreaId) {
+    public void setTableAreaId(Long tableAreaId) {
         this.tableAreaId = tableAreaId;
     }
 

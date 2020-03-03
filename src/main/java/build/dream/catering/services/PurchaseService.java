@@ -14,8 +14,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
 
 @Service
@@ -28,10 +26,10 @@ public class PurchaseService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest savePurchaseOrder(SavePurchaseOrderModel savePurchaseOrderModel) {
-        BigInteger tenantId = savePurchaseOrderModel.obtainTenantId();
+        Long tenantId = savePurchaseOrderModel.obtainTenantId();
         String tenantCode = savePurchaseOrderModel.obtainTenantCode();
-        BigInteger branchId = savePurchaseOrderModel.obtainBranchId();
-        BigInteger userId = savePurchaseOrderModel.obtainUserId();
+        Long branchId = savePurchaseOrderModel.obtainBranchId();
+        Long userId = savePurchaseOrderModel.obtainUserId();
         String remark = savePurchaseOrderModel.getRemark();
         List<SavePurchaseOrderModel.Detail> details = savePurchaseOrderModel.getDetails();
 
@@ -54,7 +52,7 @@ public class PurchaseService {
 
         DatabaseHelper.insert(purchaseOrder);
 
-        BigInteger purchaseOrderId = purchaseOrder.getId();
+        Long purchaseOrderId = purchaseOrder.getId();
 
         List<PurchaseOrderDetail> purchaseOrderDetails = new ArrayList<PurchaseOrderDetail>();
         for (SavePurchaseOrderModel.Detail detail : details) {
@@ -89,10 +87,10 @@ public class PurchaseService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest auditPurchaseOrder(AuditPurchaseOrderModel auditPurchaseOrderModel) {
-        BigInteger tenantId = auditPurchaseOrderModel.obtainTenantId();
-        BigInteger branchId = auditPurchaseOrderModel.obtainBranchId();
-        BigInteger userId = auditPurchaseOrderModel.obtainUserId();
-        BigInteger purchaseOrderId = auditPurchaseOrderModel.getPurchaseOrderId();
+        Long tenantId = auditPurchaseOrderModel.obtainTenantId();
+        Long branchId = auditPurchaseOrderModel.obtainBranchId();
+        Long userId = auditPurchaseOrderModel.obtainUserId();
+        Long purchaseOrderId = auditPurchaseOrderModel.getPurchaseOrderId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(PurchaseOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -116,10 +114,10 @@ public class PurchaseService {
         List<StockFlow> stockFlows = new ArrayList<StockFlow>();
 
         for (PurchaseOrderDetail purchaseOrderDetail : purchaseOrderDetails) {
-            BigInteger goodsId = purchaseOrderDetail.getGoodsId();
-            BigInteger goodsSpecificationId = purchaseOrderDetail.getGoodsSpecificationId();
-            BigInteger unitId = purchaseOrderDetail.getUnitId();
-            BigDecimal quantity = purchaseOrderDetail.getQuantity();
+            Long goodsId = purchaseOrderDetail.getGoodsId();
+            Long goodsSpecificationId = purchaseOrderDetail.getGoodsSpecificationId();
+            Long unitId = purchaseOrderDetail.getUnitId();
+            Double quantity = purchaseOrderDetail.getQuantity();
             GoodsUtils.addGoodsStock(goodsId, goodsSpecificationId, quantity);
 
             StockFlow stockFlow = StockFlow.builder()
@@ -149,10 +147,10 @@ public class PurchaseService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest deletePurchaseOrder(DeletePurchaseOrderModel deletePurchaseOrderModel) {
-        BigInteger tenantId = deletePurchaseOrderModel.obtainTenantId();
-        BigInteger branchId = deletePurchaseOrderModel.obtainBranchId();
-        BigInteger purchaseOrderId = deletePurchaseOrderModel.getPurchaseOrderId();
-        BigInteger userId = deletePurchaseOrderModel.obtainUserId();
+        Long tenantId = deletePurchaseOrderModel.obtainTenantId();
+        Long branchId = deletePurchaseOrderModel.obtainBranchId();
+        Long purchaseOrderId = deletePurchaseOrderModel.getPurchaseOrderId();
+        Long userId = deletePurchaseOrderModel.obtainUserId();
 
         DatabaseHelper.markedDelete(PurchaseOrder.class, purchaseOrderId, userId, "删除进货单！");
 
@@ -169,10 +167,10 @@ public class PurchaseService {
 
     @Transactional(rollbackFor = Exception.class)
     public ApiRest batchDeletePurchaseOrders(BatchDeletePurchaseOrdersModel batchDeletePurchaseOrdersModel) {
-        BigInteger tenantId = batchDeletePurchaseOrdersModel.obtainTenantId();
-        BigInteger branchId = batchDeletePurchaseOrdersModel.obtainBranchId();
-        BigInteger userId = batchDeletePurchaseOrdersModel.obtainUserId();
-        List<BigInteger> purchaseOrderIds = batchDeletePurchaseOrdersModel.getPurchaseOrderIds();
+        Long tenantId = batchDeletePurchaseOrdersModel.obtainTenantId();
+        Long branchId = batchDeletePurchaseOrdersModel.obtainBranchId();
+        Long userId = batchDeletePurchaseOrdersModel.obtainUserId();
+        List<Long> purchaseOrderIds = batchDeletePurchaseOrdersModel.getPurchaseOrderIds();
 
         Tuple3[] purchaseOrderSearchConditions = new Tuple3[]{
                 TupleUtils.buildTuple3(PurchaseOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId),
@@ -198,8 +196,8 @@ public class PurchaseService {
      */
     @Transactional(readOnly = true)
     public ApiRest listPurchaseOrders(ListPurchaseOrdersModel listPurchaseOrdersModel) {
-        BigInteger tenantId = listPurchaseOrdersModel.obtainTenantId();
-        BigInteger branchId = listPurchaseOrdersModel.obtainBranchId();
+        Long tenantId = listPurchaseOrdersModel.obtainTenantId();
+        Long branchId = listPurchaseOrdersModel.obtainBranchId();
         int page = listPurchaseOrdersModel.getPage();
         int rows = listPurchaseOrdersModel.getRows();
         String sort = listPurchaseOrdersModel.getSort();
@@ -249,9 +247,9 @@ public class PurchaseService {
      */
     @Transactional(readOnly = true)
     public ApiRest obtainPurchaseOrder(ObtainPurchaseOrderModel obtainPurchaseOrderModel) {
-        BigInteger tenantId = obtainPurchaseOrderModel.obtainTenantId();
-        BigInteger branchId = obtainPurchaseOrderModel.obtainBranchId();
-        BigInteger purchaseOrderId = obtainPurchaseOrderModel.getPurchaseOrderId();
+        Long tenantId = obtainPurchaseOrderModel.obtainTenantId();
+        Long branchId = obtainPurchaseOrderModel.obtainBranchId();
+        Long purchaseOrderId = obtainPurchaseOrderModel.getPurchaseOrderId();
 
         SearchModel purchaseOrderSearchModel = new SearchModel(true);
         purchaseOrderSearchModel.addSearchCondition(PurchaseOrder.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);

@@ -8,7 +8,6 @@ import org.hibernate.validator.constraints.Length;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class SearchGoodsModel extends CateringBasicModel {
     @NotNull
@@ -20,7 +19,7 @@ public class SearchGoodsModel extends CateringBasicModel {
     @Max(value = 500)
     private Integer rows;
 
-    private BigInteger categoryId;
+    private Long categoryId;
 
     private Integer type;
 
@@ -50,11 +49,11 @@ public class SearchGoodsModel extends CateringBasicModel {
         this.rows = rows;
     }
 
-    public BigInteger getCategoryId() {
+    public Long getCategoryId() {
         return categoryId;
     }
 
-    public void setCategoryId(BigInteger categoryId) {
+    public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
     }
 

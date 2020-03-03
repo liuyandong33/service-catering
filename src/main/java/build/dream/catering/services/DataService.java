@@ -11,7 +11,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +49,7 @@ public class DataService {
             DietOrder dietOrder = JacksonUtils.readValue(dietOrderJson, DietOrder.class);
             DatabaseHelper.insert(dietOrder);
 
-            BigInteger dietOrderId = dietOrder.getId();
+            Long dietOrderId = dietOrder.getId();
 
             List<DietOrderGroup> dietOrderGroups = JacksonUtils.readValueAsList(dietOrderGroupsJson, DietOrderGroup.class);
             Map<String, DietOrderGroup> dietOrderGroupMap = new HashMap<String, DietOrderGroup>();

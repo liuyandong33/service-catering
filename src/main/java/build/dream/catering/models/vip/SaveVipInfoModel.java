@@ -7,14 +7,13 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 import java.util.Date;
 
 public class SaveVipInfoModel extends CateringBasicModel {
-    private BigInteger vipId;
+    private Long vipId;
 
     @NotNull
-    private BigInteger vipTypeId;
+    private Long vipTypeId;
 
     @NotNull
     @Length(max = 20)
@@ -37,19 +36,19 @@ public class SaveVipInfoModel extends CateringBasicModel {
     @Length(max = 50)
     private String alipayUserId;
 
-    public BigInteger getVipId() {
+    public Long getVipId() {
         return vipId;
     }
 
-    public void setVipId(BigInteger vipId) {
+    public void setVipId(Long vipId) {
         this.vipId = vipId;
     }
 
-    public BigInteger getVipTypeId() {
+    public Long getVipTypeId() {
         return vipTypeId;
     }
 
-    public void setVipTypeId(BigInteger vipTypeId) {
+    public void setVipTypeId(Long vipTypeId) {
         this.vipTypeId = vipTypeId;
     }
 

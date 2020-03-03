@@ -1,20 +1,18 @@
 package build.dream.catering.models.branch;
 
-import build.dream.common.models.BasicModel;
 import build.dream.common.models.CateringBasicModel;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class DeleteBranchModel extends CateringBasicModel {
     @NotNull
-    private BigInteger branchId;
+    private Long branchId;
 
-    public BigInteger getBranchId() {
+    public Long getBranchId() {
         return branchId;
     }
 
-    public void setBranchId(BigInteger branchId) {
+    public void setBranchId(Long branchId) {
         this.branchId = branchId;
     }
 }

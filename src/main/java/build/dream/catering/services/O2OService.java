@@ -10,8 +10,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
-
 @Service
 public class O2OService {
     /**
@@ -22,8 +20,8 @@ public class O2OService {
      */
     @Transactional(readOnly = true)
     public ApiRest obtainVipInfo(ObtainVipInfoModel obtainVipInfoModel) {
-        BigInteger tenantId = obtainVipInfoModel.getTenantId();
-        BigInteger vipId = obtainVipInfoModel.getVipId();
+        Long tenantId = obtainVipInfoModel.getTenantId();
+        Long vipId = obtainVipInfoModel.getVipId();
         String vipCode = obtainVipInfoModel.getVipCode();
         String phoneNumber = obtainVipInfoModel.getPhoneNumber();
         String mainOpenId = obtainVipInfoModel.getMainOpenId();

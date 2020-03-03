@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.catering.mappers.VipMapper">
-    <select id="callProcedureDeductingVipPoint" resultType="java.math.BigDecimal">
+    <select id="callProcedureDeductingVipPoint" resultType="java.lang.Double">
         call procedure_deducting_vip_point(#{tenantId}, #{vipId}, #{vipAccountId}, #{point});
     </select>
 
-    <select id="callProcedureDeductingVipBalance" resultType="java.math.BigDecimal">
+    <select id="callProcedureDeductingVipBalance" resultType="java.lang.Double">
         call procedure_deducting_vip_balance(#{tenantId}, #{vipId}, #{vipAccountId}, #{balance});
     </select>
 
-    <select id="callProcedureAddVipPoint" resultType="java.math.BigDecimal">
+    <select id="callProcedureAddVipPoint" resultType="java.lang.Double">
         call procedure_add_vip_point(#{tenantId}, #{vipId}, #{vipAccountId}, #{point});
     </select>
 
-    <select id="callProcedureAddVipBalance" resultType="java.math.BigDecimal">
+    <select id="callProcedureAddVipBalance" resultType="java.lang.Double">
         call procedure_add_vip_balance(#{tenantId}, #{vipId}, #{vipAccountId}, #{balance});
     </select>
 

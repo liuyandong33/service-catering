@@ -33,8 +33,6 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -55,8 +53,8 @@ public class GoodsService {
      */
     @Transactional(readOnly = true)
     public ApiRest count(CountModel countModel) {
-        BigInteger tenantId = countModel.obtainTenantId();
-        BigInteger branchId = countModel.obtainBranchId();
+        Long tenantId = countModel.obtainTenantId();
+        Long branchId = countModel.obtainBranchId();
 
         SearchModel searchModel = new SearchModel(true);
         searchModel.addSearchCondition(Goods.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -74,8 +72,8 @@ public class GoodsService {
      */
     @Transactional(readOnly = true)
     public ApiRest list(ListModel listModel) {
-        BigInteger tenantId = listModel.obtainTenantId();
-        BigInteger branchId = listModel.obtainBranchId();
+        Long tenantId = listModel.obtainTenantId();
+        Long branchId = listModel.obtainBranchId();
         int page = listModel.getPage();
         int rows = listModel.getRows();
 
@@ -101,8 +99,8 @@ public class GoodsService {
         PagedSearchModel pagedSearchModel = new PagedSearchModel(searchConditions, page, rows);
         List<Goods> goodsList = DatabaseHelper.findAllPaged(Goods.class, pagedSearchModel);
 
-        List<BigInteger> goodsIds = new ArrayList<BigInteger>();
-        List<BigInteger> packageIds = new ArrayList<BigInteger>();
+        List<Long> goodsIds = new ArrayList<Long>();
+        List<Long> packageIds = new ArrayList<Long>();
         for (Goods goods : goodsList) {
             int type = goods.getType();
             if (type == Constants.GOODS_TYPE_ORDINARY_GOODS) {
@@ -121,21 +119,21 @@ public class GoodsService {
 
             SearchModel goodsSpecificationSearchModel = new SearchModel(searchConditionList);
             List<GoodsSpecification> goodsSpecifications = DatabaseHelper.findAll(GoodsSpecification.class, goodsSpecificationSearchModel);
-            Map<BigInteger, List<GoodsSpecification>> goodsSpecificationMap = goodsSpecifications.stream().collect(Collectors.groupingBy(GoodsSpecification::getGoodsId));
+            Map<Long, List<GoodsSpecification>> goodsSpecificationMap = goodsSpecifications.stream().collect(Collectors.groupingBy(GoodsSpecification::getGoodsId));
 
             SearchModel goodsAttributeGroupSearchModel = new SearchModel(searchConditionList);
             List<GoodsAttributeGroup> goodsAttributeGroups = DatabaseHelper.findAll(GoodsAttributeGroup.class, goodsAttributeGroupSearchModel);
-            Map<BigInteger, List<GoodsAttributeGroup>> goodsAttributeGroupMap = goodsAttributeGroups.stream().collect(Collectors.groupingBy(GoodsAttributeGroup::getGoodsId));
+            Map<Long, List<GoodsAttributeGroup>> goodsAttributeGroupMap = goodsAttributeGroups.stream().collect(Collectors.groupingBy(GoodsAttributeGroup::getGoodsId));
 
             SearchModel goodsAttributeSearchModel = new SearchModel(searchConditionList);
             List<GoodsAttribute> goodsAttributes = DatabaseHelper.findAll(GoodsAttribute.class, goodsAttributeSearchModel);
-            Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = goodsAttributes.stream().collect(Collectors.groupingBy(GoodsAttribute::getGoodsId));
+            Map<Long, List<GoodsAttribute>> goodsAttributeMap = goodsAttributes.stream().collect(Collectors.groupingBy(GoodsAttribute::getGoodsId));
 
             for (Goods goods : goodsList) {
                 if (goods.getType() == Constants.GOODS_TYPE_PACKAGE) {
                     continue;
                 }
-                BigInteger goodsId = goods.getId();
+                Long goodsId = goods.getId();
                 Map<String, Object> goodsInfo = new HashMap<String, Object>();
                 goodsInfo.put("goods", goods);
                 goodsInfo.put("goodsSpecifications", goodsSpecificationMap.get(goodsId));
@@ -161,10 +159,10 @@ public class GoodsService {
                     TupleUtils.buildTuple3(PackageGroup.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId),
                     TupleUtils.buildTuple3(PackageGroup.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId),
                     TupleUtils.buildTuple3(PackageGroup.ColumnName.PACKAGE_ID, Constants.SQL_OPERATION_SYMBOL_IN, packageIds));
-            Map<BigInteger, List<PackageGroup>> packageGroupMap = packageGroups.stream().collect(Collectors.groupingBy(PackageGroup::getPackageId));
+            Map<Long, List<PackageGroup>> packageGroupMap = packageGroups.stream().collect(Collectors.groupingBy(PackageGroup::getPackageId));
 
             List<PackageDetail> packageDetails = goodsMapper.listPackageInfos(tenantId, branchId, packageIds, null);
-            Map<BigInteger, List<PackageDetail>> packageDetailMap = packageDetails.stream().collect(Collectors.groupingBy(PackageDetail::getPackageGroupId));
+            Map<Long, List<PackageDetail>> packageDetailMap = packageDetails.stream().collect(Collectors.groupingBy(PackageDetail::getPackageGroupId));
 
             for (Goods goods : goodsList) {
                 if (goods.getType() == Constants.GOODS_TYPE_ORDINARY_GOODS) {
@@ -192,9 +190,9 @@ public class GoodsService {
 
     @Transactional(readOnly = true)
     public ApiRest obtainGoodsInfo(ObtainGoodsInfoModel obtainGoodsInfoModel) {
-        BigInteger tenantId = obtainGoodsInfoModel.obtainTenantId();
-        BigInteger branchId = obtainGoodsInfoModel.obtainBranchId();
-        BigInteger goodsId = obtainGoodsInfoModel.getGoodsId();
+        Long tenantId = obtainGoodsInfoModel.obtainTenantId();
+        Long branchId = obtainGoodsInfoModel.obtainBranchId();
+        Long goodsId = obtainGoodsInfoModel.getGoodsId();
 
         SearchModel goodsSearchModel = new SearchModel(true);
         goodsSearchModel.addSearchCondition(Goods.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -228,7 +226,7 @@ public class GoodsService {
                 goodsAttributeSearchModel.addSearchCondition(GoodsAttribute.ColumnName.BRANCH_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId);
                 goodsAttributeSearchModel.addSearchCondition(GoodsAttribute.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
                 List<GoodsAttribute> goodsAttributes = DatabaseHelper.findAll(GoodsAttribute.class, goodsAttributeSearchModel);
-                Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = goodsAttributes.stream().collect(Collectors.groupingBy(GoodsAttribute::getGoodsAttributeGroupId));
+                Map<Long, List<GoodsAttribute>> goodsAttributeMap = goodsAttributes.stream().collect(Collectors.groupingBy(GoodsAttribute::getGoodsAttributeGroupId));
 
                 List<Map<String, Object>> attributeGroups = new ArrayList<Map<String, Object>>();
                 for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroups) {
@@ -244,12 +242,12 @@ public class GoodsService {
             searchModel.addSearchCondition(PackageGroup.ColumnName.PACKAGE_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, goodsId);
             List<PackageGroup> packageGroups = DatabaseHelper.findAll(PackageGroup.class, searchModel);
 
-            List<BigInteger> packageIds = new ArrayList<BigInteger>();
+            List<Long> packageIds = new ArrayList<Long>();
             packageIds.add(goodsId);
 
             List<PackageDetail> packageDetails = goodsMapper.listPackageInfos(tenantId, branchId, packageIds, null);
 
-            Map<BigInteger, List<PackageDetail>> packageDetailMap = packageDetails.stream().collect(Collectors.groupingBy(PackageDetail::getPackageGroupId));
+            Map<Long, List<PackageDetail>> packageDetailMap = packageDetails.stream().collect(Collectors.groupingBy(PackageDetail::getPackageGroupId));
 
             List<Map<String, Object>> groups = new ArrayList<Map<String, Object>>();
             for (PackageGroup packageGroup : packageGroups) {
@@ -266,9 +264,9 @@ public class GoodsService {
 
     @Transactional(readOnly = true)
     public ApiRest obtainAllGoodsInfos(ObtainAllGoodsInfosModel obtainAllGoodsInfosModel) {
-        BigInteger tenantId = obtainAllGoodsInfosModel.obtainTenantId();
-        BigInteger branchId = obtainAllGoodsInfosModel.obtainBranchId();
-        BigInteger categoryId = obtainAllGoodsInfosModel.getCategoryId();
+        Long tenantId = obtainAllGoodsInfosModel.obtainTenantId();
+        Long branchId = obtainAllGoodsInfosModel.obtainBranchId();
+        Long categoryId = obtainAllGoodsInfosModel.getCategoryId();
         List<Goods> goodsInfos = goodsMapper.findAllByCategoryId(tenantId, branchId, categoryId);
 
         List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
@@ -276,10 +274,10 @@ public class GoodsService {
             return ApiRest.builder().data(data).message("获取菜品信息成功！").successful(true).build();
         }
 
-        List<BigInteger> goodsIds = new ArrayList<BigInteger>();
-        List<BigInteger> packageIds = new ArrayList<BigInteger>();
+        List<Long> goodsIds = new ArrayList<Long>();
+        List<Long> packageIds = new ArrayList<Long>();
         for (Goods goods : goodsInfos) {
-            BigInteger goodsId = goods.getId();
+            Long goodsId = goods.getId();
             int type = goods.getType();
 
             if (type == Constants.GOODS_TYPE_ORDINARY_GOODS) {
@@ -289,15 +287,15 @@ public class GoodsService {
             }
         }
 
-        Map<BigInteger, List<GoodsSpecification>> goodsSpecificationMap = GoodsUtils.obtainGoodsSpecificationInfos(tenantId, branchId, goodsIds);
-        Map<BigInteger, List<GoodsAttributeGroup>> goodsAttributeGroupMap = GoodsUtils.obtainGoodsAttributeGroupInfos(tenantId, branchId, goodsIds);
-        Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = GoodsUtils.obtainGoodsAttributeInfos(tenantId, branchId, goodsIds);
+        Map<Long, List<GoodsSpecification>> goodsSpecificationMap = GoodsUtils.obtainGoodsSpecificationInfos(tenantId, branchId, goodsIds);
+        Map<Long, List<GoodsAttributeGroup>> goodsAttributeGroupMap = GoodsUtils.obtainGoodsAttributeGroupInfos(tenantId, branchId, goodsIds);
+        Map<Long, List<GoodsAttribute>> goodsAttributeMap = GoodsUtils.obtainGoodsAttributeInfos(tenantId, branchId, goodsIds);
 
-        Map<BigInteger, List<PackageDetail>> packageDetailMap = GoodsUtils.obtainPackageGroupDetailInfos(tenantId, branchId, packageIds);
-        Map<BigInteger, List<PackageGroup>> packageGroupMap = GoodsUtils.obtainPackageGroupInfos(tenantId, branchId, packageIds);
+        Map<Long, List<PackageDetail>> packageDetailMap = GoodsUtils.obtainPackageGroupDetailInfos(tenantId, branchId, packageIds);
+        Map<Long, List<PackageGroup>> packageGroupMap = GoodsUtils.obtainPackageGroupInfos(tenantId, branchId, packageIds);
 
         for (Goods goods : goodsInfos) {
-            BigInteger goodsId = goods.getId();
+            Long goodsId = goods.getId();
             int type = goods.getType();
 
             Map<String, Object> goodsInfo = null;
@@ -319,21 +317,21 @@ public class GoodsService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveGoods(SaveGoodsModel saveGoodsModel) {
-        BigInteger tenantId = saveGoodsModel.obtainTenantId();
+        Long tenantId = saveGoodsModel.obtainTenantId();
         String tenantCode = saveGoodsModel.obtainTenantCode();
-        BigInteger branchId = saveGoodsModel.obtainBranchId();
-        BigInteger userId = saveGoodsModel.obtainUserId();
+        Long branchId = saveGoodsModel.obtainBranchId();
+        Long userId = saveGoodsModel.obtainUserId();
 
-        BigInteger id = saveGoodsModel.getId();
+        Long id = saveGoodsModel.getId();
         String name = saveGoodsModel.getName();
         int type = saveGoodsModel.getType();
-        BigInteger categoryId = saveGoodsModel.getCategoryId();
+        Long categoryId = saveGoodsModel.getCategoryId();
         String imageUrl = saveGoodsModel.getImageUrl();
         boolean stocked = saveGoodsModel.getStocked();
         List<SaveGoodsModel.GoodsSpecificationInfo> goodsSpecificationInfos = saveGoodsModel.getGoodsSpecificationInfos();
         List<SaveGoodsModel.AttributeGroupInfo> attributeGroupInfos = saveGoodsModel.getAttributeGroupInfos();
-        List<BigInteger> deleteGoodsSpecificationIds = saveGoodsModel.getDeleteGoodsSpecificationIds();
-        List<BigInteger> deleteGoodsAttributeGroupIds = saveGoodsModel.getDeleteGoodsAttributeGroupIds();
+        List<Long> deleteGoodsSpecificationIds = saveGoodsModel.getDeleteGoodsSpecificationIds();
+        List<Long> deleteGoodsAttributeGroupIds = saveGoodsModel.getDeleteGoodsAttributeGroupIds();
 
         Goods goods = null;
         if (id != null) {
@@ -396,15 +394,15 @@ public class GoodsService {
             }
 
             // 查询出需要修改的商品规格
-            List<BigInteger> goodsSpecificationIds = new ArrayList<BigInteger>();
+            List<Long> goodsSpecificationIds = new ArrayList<Long>();
             for (SaveGoodsModel.GoodsSpecificationInfo goodsSpecificationInfo : goodsSpecificationInfos) {
-                BigInteger goodsSpecificationId = goodsSpecificationInfo.getId();
+                Long goodsSpecificationId = goodsSpecificationInfo.getId();
                 if (goodsSpecificationId != null) {
                     goodsSpecificationIds.add(goodsSpecificationId);
                 }
             }
 
-            Map<BigInteger, GoodsSpecification> goodsSpecificationMap = new HashMap<BigInteger, GoodsSpecification>();
+            Map<Long, GoodsSpecification> goodsSpecificationMap = new HashMap<Long, GoodsSpecification>();
             if (CollectionUtils.isNotEmpty(goodsSpecificationIds)) {
                 SearchModel searchModel = new SearchModel(true);
                 searchModel.addSearchCondition(GoodsSpecification.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId);
@@ -437,11 +435,11 @@ public class GoodsService {
 
             if (CollectionUtils.isNotEmpty(attributeGroupInfos)) {
                 // 用来保存需要修改的口味组id
-                List<BigInteger> goodsAttributeGroupIds = new ArrayList<BigInteger>();
+                List<Long> goodsAttributeGroupIds = new ArrayList<Long>();
                 // 用来保存需要删除的口味id
-                List<BigInteger> deleteGoodsAttributeIds = new ArrayList<BigInteger>();
+                List<Long> deleteGoodsAttributeIds = new ArrayList<Long>();
                 // 用来保存需要修改的口味id
-                List<BigInteger> goodsAttributeIds = new ArrayList<BigInteger>();
+                List<Long> goodsAttributeIds = new ArrayList<Long>();
                 for (SaveGoodsModel.AttributeGroupInfo attributeGroupInfo : attributeGroupInfos) {
                     if (attributeGroupInfo.getId() != null) {
                         goodsAttributeGroupIds.add(attributeGroupInfo.getId());
@@ -480,7 +478,7 @@ public class GoodsService {
                 goodsAttributeGroupSearchModel.addSearchCondition(GoodsAttributeGroup.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, id);
                 goodsAttributeGroupSearchModel.addSearchCondition(GoodsAttributeGroup.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, goodsAttributeGroupIds);
                 List<GoodsAttributeGroup> goodsAttributeGroups = DatabaseHelper.findAll(GoodsAttributeGroup.class, goodsAttributeGroupSearchModel);
-                Map<BigInteger, GoodsAttributeGroup> goodsAttributeGroupMap = new HashMap<BigInteger, GoodsAttributeGroup>();
+                Map<Long, GoodsAttributeGroup> goodsAttributeGroupMap = new HashMap<Long, GoodsAttributeGroup>();
                 for (GoodsAttributeGroup goodsAttributeGroup : goodsAttributeGroups) {
                     goodsAttributeGroupMap.put(goodsAttributeGroup.getId(), goodsAttributeGroup);
                 }
@@ -492,7 +490,7 @@ public class GoodsService {
                 goodsAttributeSearchModel.addSearchCondition(GoodsAttribute.ColumnName.GOODS_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, id);
                 goodsAttributeSearchModel.addSearchCondition(GoodsAttribute.ColumnName.ID, Constants.SQL_OPERATION_SYMBOL_IN, goodsAttributeIds);
                 List<GoodsAttribute> goodsAttributes = DatabaseHelper.findAll(GoodsAttribute.class, goodsAttributeSearchModel);
-                Map<BigInteger, GoodsAttribute> goodsAttributeMap = new HashMap<BigInteger, GoodsAttribute>();
+                Map<Long, GoodsAttribute> goodsAttributeMap = new HashMap<Long, GoodsAttribute>();
                 for (GoodsAttribute goodsAttribute : goodsAttributes) {
                     goodsAttributeMap.put(goodsAttribute.getId(), goodsAttribute);
                 }
@@ -513,7 +511,7 @@ public class GoodsService {
                                 GoodsAttribute goodsAttribute = goodsAttributeMap.get(attributeInfo.getId());
                                 ValidateUtils.notNull(goodsAttribute, "商品口味不存在！");
                                 goodsAttribute.setName(attributeInfo.getName());
-                                goodsAttribute.setPrice(attributeInfo.getPrice() == null ? BigDecimal.ZERO : attributeInfo.getPrice());
+                                goodsAttribute.setPrice(attributeInfo.getPrice() == null ? 0D : attributeInfo.getPrice());
                                 goodsAttribute.setUpdatedUserId(userId);
                                 goodsAttribute.setUpdatedRemark("修改口味信息！");
                                 DatabaseHelper.update(goodsAttribute);
@@ -553,7 +551,7 @@ public class GoodsService {
                     .build();
             DatabaseHelper.insert(goods);
 
-            BigInteger goodsId = goods.getId();
+            Long goodsId = goods.getId();
             // 新增所有规格
             List<GoodsSpecification> insertGoodsSpecifications = new ArrayList<GoodsSpecification>();
             for (SaveGoodsModel.GoodsSpecificationInfo goodsSpecificationInfo : goodsSpecificationInfos) {
@@ -588,18 +586,18 @@ public class GoodsService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest savePackage(SavePackageModel savePackageModel) {
-        BigInteger tenantId = savePackageModel.obtainTenantId();
+        Long tenantId = savePackageModel.obtainTenantId();
         String tenantCode = savePackageModel.obtainTenantCode();
-        BigInteger branchId = savePackageModel.obtainBranchId();
-        BigInteger userId = savePackageModel.obtainUserId();
-        BigInteger id = savePackageModel.getId();
+        Long branchId = savePackageModel.obtainBranchId();
+        Long userId = savePackageModel.obtainUserId();
+        Long id = savePackageModel.getId();
         String name = savePackageModel.getName();
         Integer type = savePackageModel.getType();
-        BigInteger categoryId = savePackageModel.getCategoryId();
+        Long categoryId = savePackageModel.getCategoryId();
         String imageUrl = savePackageModel.getImageUrl();
-        List<BigInteger> deleteGroupIds = savePackageModel.getDeleteGroupIds();
+        List<Long> deleteGroupIds = savePackageModel.getDeleteGroupIds();
         List<SavePackageModel.Group> groups = savePackageModel.getGroups();
-        BigDecimal price = savePackageModel.getPrice();
+        Double price = savePackageModel.getPrice();
 
         Goods goods = null;
         if (id != null) {
@@ -636,10 +634,10 @@ public class GoodsService {
             packageGroupSearchModel.addSearchCondition(PackageGroup.ColumnName.PACKAGE_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, id);
             List<PackageGroup> packageGroups = DatabaseHelper.findAll(PackageGroup.class, packageGroupSearchModel);
 
-            List<BigInteger> packageGroupIds = new ArrayList<BigInteger>();
-            Map<BigInteger, PackageGroup> packageGroupMap = new HashMap<BigInteger, PackageGroup>();
+            List<Long> packageGroupIds = new ArrayList<Long>();
+            Map<Long, PackageGroup> packageGroupMap = new HashMap<Long, PackageGroup>();
             for (PackageGroup packageGroup : packageGroups) {
-                BigInteger packageGroupId = packageGroup.getId();
+                Long packageGroupId = packageGroup.getId();
                 packageGroupIds.add(packageGroupId);
                 packageGroupMap.put(packageGroupId, packageGroup);
             }
@@ -655,11 +653,11 @@ public class GoodsService {
             }
 
             for (SavePackageModel.Group group : groups) {
-                BigInteger groupId = group.getId();
+                Long groupId = group.getId();
                 String groupName = group.getGroupName();
                 int groupType = group.getGroupType();
                 int optionalQuantity = group.getOptionalQuantity();
-                List<BigInteger> deleteGroupDetailIds = group.getDeleteGroupDetailIds();
+                List<Long> deleteGroupDetailIds = group.getDeleteGroupDetailIds();
                 List<SavePackageModel.GroupDetail> groupDetails = group.getGroupDetails();
 
                 if (CollectionUtils.isNotEmpty(deleteGroupDetailIds)) {
@@ -700,8 +698,8 @@ public class GoodsService {
                 }
 
                 for (SavePackageModel.GroupDetail groupDetail : groupDetails) {
-                    BigInteger goodsId = groupDetail.getGoodsId();
-                    BigInteger goodsSpecificationId = groupDetail.getGoodsSpecificationId();
+                    Long goodsId = groupDetail.getGoodsId();
+                    Long goodsSpecificationId = groupDetail.getGoodsSpecificationId();
                     Integer quantity = groupDetail.getQuantity();
                     String key = goodsId + "_" + goodsSpecificationId;
                     PackageGroupDetail packageGroupDetail = packageGroupDetailMap.get(key);
@@ -754,7 +752,7 @@ public class GoodsService {
                     .build();
             DatabaseHelper.insert(goods);
 
-            BigInteger packageId = goods.getId();
+            Long packageId = goods.getId();
 
             GoodsSpecification goodsSpecification = GoodsSpecification.builder()
                     .tenantId(tenantId)
@@ -789,8 +787,8 @@ public class GoodsService {
                 DatabaseHelper.insert(packageGroup);
 
                 for (SavePackageModel.GroupDetail groupDetail : groupDetails) {
-                    BigInteger goodsId = groupDetail.getGoodsId();
-                    BigInteger goodsSpecificationId = groupDetail.getGoodsSpecificationId();
+                    Long goodsId = groupDetail.getGoodsId();
+                    Long goodsSpecificationId = groupDetail.getGoodsSpecificationId();
                     Integer quantity = groupDetail.getQuantity();
                     PackageGroupDetail.Builder packageGroupDetailBuilder = PackageGroupDetail.builder()
                             .tenantId(tenantId)
@@ -815,8 +813,8 @@ public class GoodsService {
 
     @Transactional(readOnly = true)
     public ApiRest listCategories(ListCategoriesModel listCategoriesModel) {
-        BigInteger tenantId = listCategoriesModel.obtainTenantId();
-        BigInteger branchId = listCategoriesModel.obtainBranchId();
+        Long tenantId = listCategoriesModel.obtainTenantId();
+        Long branchId = listCategoriesModel.obtainBranchId();
 
         SearchModel searchModel = SearchModel.builder()
                 .autoSetDeletedFalse()
@@ -840,10 +838,10 @@ public class GoodsService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest deleteGoods(DeleteGoodsModel deleteGoodsModel) {
-        BigInteger tenantId = deleteGoodsModel.obtainTenantId();
-        BigInteger branchId = deleteGoodsModel.obtainBranchId();
-        BigInteger userId = deleteGoodsModel.obtainUserId();
-        BigInteger goodsId = deleteGoodsModel.getGoodsId();
+        Long tenantId = deleteGoodsModel.obtainTenantId();
+        Long branchId = deleteGoodsModel.obtainBranchId();
+        Long userId = deleteGoodsModel.obtainUserId();
+        Long goodsId = deleteGoodsModel.getGoodsId();
 
         SearchModel searchModel = SearchModel.builder()
                 .autoSetDeletedFalse()
@@ -941,10 +939,10 @@ public class GoodsService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest importGoods(ImportGoodsModel importGoodsModel) {
-        BigInteger tenantId = importGoodsModel.obtainTenantId();
+        Long tenantId = importGoodsModel.obtainTenantId();
         String tenantCode = importGoodsModel.obtainTenantCode();
-        BigInteger branchId = importGoodsModel.obtainBranchId();
-        BigInteger userId = importGoodsModel.obtainUserId();
+        Long branchId = importGoodsModel.obtainBranchId();
+        Long userId = importGoodsModel.obtainUserId();
         String zippedGoodsInfos = importGoodsModel.getZippedGoodsInfos();
         List<Map<String, Object>> goodsInfos = GsonUtils.fromJson(ZipUtils.unzipText(zippedGoodsInfos), List.class);
         int count = goodsInfos.size();
@@ -966,7 +964,7 @@ public class GoodsService {
                     .branchId(branchId)
                     .name(MapUtils.getString(goodsInfo, "name"))
                     .type(Constants.GOODS_TYPE_ORDINARY_GOODS)
-                    .categoryId(BigInteger.ZERO)
+                    .categoryId(0L)
                     .imageUrl(Constants.VARCHAR_DEFAULT_VALUE)
                     .stocked(false)
                     .createdUserId(userId)
@@ -981,7 +979,7 @@ public class GoodsService {
                     .tenantCode(tenantCode)
                     .branchId(branchId)
                     .name(Constants.VARCHAR_DEFAULT_VALUE)
-                    .price(BigDecimal.valueOf(MapUtils.getDoubleValue(goodsInfo, "price")))
+                    .price(MapUtils.getDoubleValue(goodsInfo, "price"))
                     .createdUserId(userId)
                     .updatedUserId(userId)
                     .updatedRemark("导入商品信息！")
@@ -1013,11 +1011,11 @@ public class GoodsService {
      * @return
      */
     public ApiRest searchGoods(SearchGoodsModel searchGoodsModel) {
-        BigInteger tenantId = searchGoodsModel.obtainTenantId();
-        BigInteger branchId = searchGoodsModel.obtainBranchId();
+        Long tenantId = searchGoodsModel.obtainTenantId();
+        Long branchId = searchGoodsModel.obtainBranchId();
         int page = searchGoodsModel.getPage();
         int rows = searchGoodsModel.getRows();
-        BigInteger categoryId = searchGoodsModel.getCategoryId();
+        Long categoryId = searchGoodsModel.getCategoryId();
         String searchString = searchGoodsModel.getSearchString();
         boolean highlight = searchGoodsModel.getHighlight();
         String preTag = searchGoodsModel.getPreTag();
@@ -1063,8 +1061,8 @@ public class GoodsService {
      */
     @Transactional(readOnly = true)
     public ApiRest indexAll(IndexAllModel indexAllModel) {
-        BigInteger tenantId = indexAllModel.obtainTenantId();
-        BigInteger branchId = indexAllModel.obtainBranchId();
+        Long tenantId = indexAllModel.obtainTenantId();
+        Long branchId = indexAllModel.obtainBranchId();
 
         List<Goods> goodsList = goodsMapper.findAll(tenantId, branchId);
         List<ElasticSearchGoods> elasticSearchGoodsList = goodsList.stream().map(goods -> ElasticSearchGoods.build(goods)).collect(Collectors.toList());

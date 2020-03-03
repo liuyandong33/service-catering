@@ -4,8 +4,8 @@ import build.dream.catering.constants.Constants;
 import build.dream.catering.models.distributioncenter.SaveModel;
 import build.dream.catering.utils.SequenceUtils;
 import build.dream.common.api.ApiRest;
-import build.dream.common.domains.catering.DistributionCenter;
 import build.dream.common.constants.ErrorConstants;
+import build.dream.common.domains.catering.DistributionCenter;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SerialNumberGenerator;
 import build.dream.common.utils.TupleUtils;
@@ -13,14 +13,12 @@ import build.dream.common.utils.ValidateUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
-
 @Service
 public class DistributionCenterService {
     @Transactional(rollbackFor = Exception.class)
     public ApiRest save(SaveModel saveModel) {
-        BigInteger id = saveModel.getId();
-        BigInteger tenantId = saveModel.obtainTenantId();
+        Long id = saveModel.getId();
+        Long tenantId = saveModel.obtainTenantId();
         String tenantCode = saveModel.obtainTenantCode();
         String name = saveModel.getName();
         Integer status = saveModel.getStatus();
@@ -35,7 +33,7 @@ public class DistributionCenterService {
         String latitude = saveModel.getLatitude();
         String linkman = saveModel.getLinkman();
         String contactPhone = saveModel.getContactPhone();
-        BigInteger userId = saveModel.obtainUserId();
+        Long userId = saveModel.obtainUserId();
 
         DistributionCenter distributionCenter = null;
         if (id != null) {

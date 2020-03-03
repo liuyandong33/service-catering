@@ -3,17 +3,16 @@ package build.dream.catering.models.dietorder;
 import build.dream.common.models.CateringBasicModel;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 
 public class ObtainPosOrderModel extends CateringBasicModel {
     @NotNull
-    private BigInteger vipId;
+    private Long vipId;
 
-    public BigInteger getVipId() {
+    public Long getVipId() {
         return vipId;
     }
 
-    public void setVipId(BigInteger vipId) {
+    public void setVipId(Long vipId) {
         this.vipId = vipId;
     }
 }

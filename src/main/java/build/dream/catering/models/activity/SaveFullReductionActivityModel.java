@@ -6,14 +6,12 @@ import org.apache.commons.lang.ArrayUtils;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.List;
 
 public class SaveFullReductionActivityModel extends CateringBasicModel {
     private static Integer[] DISCOUNT_TYPES = new Integer[]{1, 2};
     @NotNull
-    private List<BigInteger> branchIds;
+    private List<Long> branchIds;
 
     @NotNull
     @Length(max = 20)
@@ -40,21 +38,21 @@ public class SaveFullReductionActivityModel extends CateringBasicModel {
     private Integer weekSign;
 
     @NotNull
-    private BigDecimal totalAmount;
+    private Double totalAmount;
 
     private Integer discountType;
-    private BigDecimal discountRate;
-    private BigDecimal discountAmount;
+    private Double discountRate;
+    private Double discountAmount;
 
-    public List<BigInteger> getBranchIds() {
+    public List<Long> getBranchIds() {
         return branchIds;
     }
 
-    public void setBranchIds(List<BigInteger> branchIds) {
+    public void setBranchIds(List<Long> branchIds) {
         this.branchIds = branchIds;
     }
 
-    public BigDecimal getTotalAmount() {
+    public Double getTotalAmount() {
         return totalAmount;
     }
 
@@ -106,7 +104,7 @@ public class SaveFullReductionActivityModel extends CateringBasicModel {
         this.weekSign = weekSign;
     }
 
-    public void setTotalAmount(BigDecimal totalAmount) {
+    public void setTotalAmount(Double totalAmount) {
         this.totalAmount = totalAmount;
     }
 
@@ -118,19 +116,19 @@ public class SaveFullReductionActivityModel extends CateringBasicModel {
         this.discountType = discountType;
     }
 
-    public BigDecimal getDiscountRate() {
+    public Double getDiscountRate() {
         return discountRate;
     }
 
-    public void setDiscountRate(BigDecimal discountRate) {
+    public void setDiscountRate(Double discountRate) {
         this.discountRate = discountRate;
     }
 
-    public BigDecimal getDiscountAmount() {
+    public Double getDiscountAmount() {
         return discountAmount;
     }
 
-    public void setDiscountAmount(BigDecimal discountAmount) {
+    public void setDiscountAmount(Double discountAmount) {
         this.discountAmount = discountAmount;
     }
 

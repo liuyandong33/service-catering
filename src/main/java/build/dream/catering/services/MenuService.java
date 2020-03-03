@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
 import java.util.*;
 
 @Service
@@ -34,21 +33,21 @@ public class MenuService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ApiRest saveMenu(SaveMenuModel saveMenuModel) {
-        BigInteger tenantId = saveMenuModel.obtainTenantId();
+        Long tenantId = saveMenuModel.obtainTenantId();
         String tenantCode = saveMenuModel.obtainTenantCode();
-        BigInteger userId = saveMenuModel.obtainUserId();
-        BigInteger id = saveMenuModel.getId();
+        Long userId = saveMenuModel.obtainUserId();
+        Long id = saveMenuModel.getId();
         String code = saveMenuModel.getCode();
         String name = saveMenuModel.getName();
         Date startTime = saveMenuModel.getStartTime();
         Date endTime = saveMenuModel.getEndTime();
         Integer status = saveMenuModel.getStatus();
         Integer effectiveScope = saveMenuModel.getEffectiveScope();
-        List<BigInteger> branchIds = saveMenuModel.getBranchIds();
+        List<Long> branchIds = saveMenuModel.getBranchIds();
         List<SaveMenuModel.Detail> details = saveMenuModel.getDetails();
 
         Menu menu = null;
-        BigInteger menuId = null;
+        Long menuId = null;
         if (id == null) {
             menu = Menu.builder()
                     .tenantId(tenantId)
@@ -122,21 +121,21 @@ public class MenuService {
      */
     @Transactional(readOnly = true)
     public ApiRest obtainMenuInfo(ObtainMenuInfoModel obtainMenuInfoModel) {
-        BigInteger tenantId = obtainMenuInfoModel.obtainTenantId();
-        BigInteger branchId = obtainMenuInfoModel.obtainBranchId();
+        Long tenantId = obtainMenuInfoModel.obtainTenantId();
+        Long branchId = obtainMenuInfoModel.obtainBranchId();
         int effectiveScope = obtainMenuInfoModel.getEffectiveScope();
 
         Menu menu = menuMapper.findEffectiveMenu(tenantId, branchId, effectiveScope);
         ValidateUtils.notNull(menu, "未检索到有效菜牌！");
 
         List<Map<String, Object>> menuDetails = menuMapper.findAllMenuDetails(tenantId, menu.getId());
-        Map<BigInteger, Set<BigInteger>> categoryIdGoodsIdMap = new HashMap<BigInteger, Set<BigInteger>>();
-        Map<BigInteger, List<Map<String, Object>>> goodsIdMenuDetailMap = new HashMap<BigInteger, List<Map<String, Object>>>();
-        Set<BigInteger> goodsIds = new HashSet<BigInteger>();
-        Set<BigInteger> packageIds = new HashSet<BigInteger>();
+        Map<Long, Set<Long>> categoryIdGoodsIdMap = new HashMap<Long, Set<Long>>();
+        Map<Long, List<Map<String, Object>>> goodsIdMenuDetailMap = new HashMap<Long, List<Map<String, Object>>>();
+        Set<Long> goodsIds = new HashSet<Long>();
+        Set<Long> packageIds = new HashSet<Long>();
         for (Map<String, Object> menuDetail : menuDetails) {
-            BigInteger categoryId = BigInteger.valueOf(MapUtils.getLongValue(menuDetail, "categoryId"));
-            BigInteger goodsId = BigInteger.valueOf(MapUtils.getLongValue(menuDetail, "goodsId"));
+            Long categoryId = Long.valueOf(MapUtils.getLongValue(menuDetail, "categoryId"));
+            Long goodsId = Long.valueOf(MapUtils.getLongValue(menuDetail, "goodsId"));
             int goodsType = MapUtils.getIntValue(menuDetail, "goodsType");
 
             if (goodsType == Constants.GOODS_TYPE_ORDINARY_GOODS) {
@@ -145,9 +144,9 @@ public class MenuService {
                 packageIds.add(goodsId);
             }
 
-            Set<BigInteger> ids = categoryIdGoodsIdMap.get(categoryId);
+            Set<Long> ids = categoryIdGoodsIdMap.get(categoryId);
             if (CollectionUtils.isEmpty(ids)) {
-                ids = new HashSet<BigInteger>();
+                ids = new HashSet<Long>();
                 categoryIdGoodsIdMap.put(categoryId, ids);
             }
             ids.add(goodsId);
@@ -160,22 +159,22 @@ public class MenuService {
             mapList.add(menuDetail);
         }
 
-        Map<BigInteger, List<GoodsAttributeGroup>> goodsAttributeGroupMap = GoodsUtils.obtainGoodsAttributeGroupInfos(tenantId, branchId, goodsIds);
-        Map<BigInteger, List<GoodsAttribute>> goodsAttributeMap = GoodsUtils.obtainGoodsAttributeInfos(tenantId, branchId, goodsIds);
-        Map<BigInteger, List<PackageDetail>> packageDetailMap = GoodsUtils.obtainPackageGroupDetailInfos(tenantId, branchId, packageIds);
-        Map<BigInteger, List<PackageGroup>> packageGroupMap = GoodsUtils.obtainPackageGroupInfos(tenantId, branchId, packageIds);
+        Map<Long, List<GoodsAttributeGroup>> goodsAttributeGroupMap = GoodsUtils.obtainGoodsAttributeGroupInfos(tenantId, branchId, goodsIds);
+        Map<Long, List<GoodsAttribute>> goodsAttributeMap = GoodsUtils.obtainGoodsAttributeInfos(tenantId, branchId, goodsIds);
+        Map<Long, List<PackageDetail>> packageDetailMap = GoodsUtils.obtainPackageGroupDetailInfos(tenantId, branchId, packageIds);
+        Map<Long, List<PackageGroup>> packageGroupMap = GoodsUtils.obtainPackageGroupInfos(tenantId, branchId, packageIds);
 
         List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
-        for (Map.Entry<BigInteger, Set<BigInteger>> entry : categoryIdGoodsIdMap.entrySet()) {
-            BigInteger categoryId = entry.getKey();
-            Set<BigInteger> ids = entry.getValue();
+        for (Map.Entry<Long, Set<Long>> entry : categoryIdGoodsIdMap.entrySet()) {
+            Long categoryId = entry.getKey();
+            Set<Long> ids = entry.getValue();
 
             Map<String, Object> item = new HashMap<String, Object>();
             item.put("id", categoryId);
             item.put("name", MapUtils.getString(goodsIdMenuDetailMap.get(ids.iterator().next()).get(0), "categoryName"));
 
             List<Map<String, Object>> goodsInfos = new ArrayList<Map<String, Object>>();
-            for (BigInteger goodsId : ids) {
+            for (Long goodsId : ids) {
                 List<Map<String, Object>> details = goodsIdMenuDetailMap.get(goodsId);
                 Map<String, Object> info = details.get(0);
 

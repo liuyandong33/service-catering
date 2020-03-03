@@ -6,12 +6,11 @@ import build.dream.common.utils.ValidateUtils;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
 public class SaveMenuModel extends CateringBasicModel {
-    private BigInteger id;
+    private Long id;
 
     @NotNull
     private String code;
@@ -32,16 +31,16 @@ public class SaveMenuModel extends CateringBasicModel {
     private Integer effectiveScope;
 
     @NotEmpty
-    private List<BigInteger> branchIds;
+    private List<Long> branchIds;
 
     @NotEmpty
     private List<Detail> details;
 
-    public BigInteger getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(BigInteger id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -93,11 +92,11 @@ public class SaveMenuModel extends CateringBasicModel {
         this.effectiveScope = effectiveScope;
     }
 
-    public List<BigInteger> getBranchIds() {
+    public List<Long> getBranchIds() {
         return branchIds;
     }
 
-    public void setBranchIds(List<BigInteger> branchIds) {
+    public void setBranchIds(List<Long> branchIds) {
         this.branchIds = branchIds;
     }
 
@@ -119,35 +118,35 @@ public class SaveMenuModel extends CateringBasicModel {
 
     public static class Detail extends BasicModel {
         @NotNull
-        private BigInteger goodsId;
+        private Long goodsId;
 
         @NotNull
-        private BigInteger goodsSpecificationId;
+        private Long goodsSpecificationId;
 
         @NotNull
-        private BigInteger goodsUnitId;
+        private Long goodsUnitId;
 
-        public BigInteger getGoodsId() {
+        public Long getGoodsId() {
             return goodsId;
         }
 
-        public void setGoodsId(BigInteger goodsId) {
+        public void setGoodsId(Long goodsId) {
             this.goodsId = goodsId;
         }
 
-        public BigInteger getGoodsSpecificationId() {
+        public Long getGoodsSpecificationId() {
             return goodsSpecificationId;
         }
 
-        public void setGoodsSpecificationId(BigInteger goodsSpecificationId) {
+        public void setGoodsSpecificationId(Long goodsSpecificationId) {
             this.goodsSpecificationId = goodsSpecificationId;
         }
 
-        public BigInteger getGoodsUnitId() {
+        public Long getGoodsUnitId() {
             return goodsUnitId;
         }
 
-        public void setGoodsUnitId(BigInteger goodsUnitId) {
+        public void setGoodsUnitId(Long goodsUnitId) {
             this.goodsUnitId = goodsUnitId;
         }
     }
