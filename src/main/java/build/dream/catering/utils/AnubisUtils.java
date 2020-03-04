@@ -1,6 +1,8 @@
 package build.dream.catering.utils;
 
+import build.dream.catering.constants.ConfigurationKeys;
 import build.dream.catering.constants.Constants;
+import build.dream.catering.constants.RedisKeys;
 import build.dream.common.api.ApiRest;
 import build.dream.common.utils.*;
 import net.sf.json.JSONObject;
@@ -49,15 +51,15 @@ public class AnubisUtils {
     }
 
     public static Map<String, Object> obtainAccessToken() throws IOException {
-        String appId = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_ID);
-        String appSecret = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_SECRET);
-        String url = ConfigurationUtils.getConfiguration(Constants.ANUBIS_SERVICE_URL) + Constants.ANUBIS_GET_ACCESS_TOKEN_URI;
+        String appId = ConfigurationUtils.getConfiguration(ConfigurationKeys.ANUBIS_APP_ID);
+        String appSecret = ConfigurationUtils.getConfiguration(ConfigurationKeys.ANUBIS_APP_SECRET);
+        String url = ConfigurationUtils.getConfiguration(ConfigurationKeys.ANUBIS_SERVICE_URL) + Constants.ANUBIS_GET_ACCESS_TOKEN_URI;
         return obtainAccessToken(url, appId, appSecret);
     }
 
     public static String getAccessToken() throws IOException {
         String accessToken = null;
-        String accessTokenJson = CommonRedisUtils.get(Constants.KEY_ANUBIS_TOKEN);
+        String accessTokenJson = CommonRedisUtils.get(RedisKeys.KEY_ANUBIS_TOKEN);
         boolean isRetrieveAccessToken = false;
         if (StringUtils.isNotBlank(accessTokenJson)) {
             JSONObject accessTokenJsonObject = JSONObject.fromObject(accessTokenJson);
@@ -75,7 +77,7 @@ public class AnubisUtils {
         }
         if (isRetrieveAccessToken) {
             Map<String, Object> accessTokenMap = obtainAccessToken();
-            CommonRedisUtils.set(Constants.KEY_ANUBIS_TOKEN, GsonUtils.toJson(accessTokenMap));
+            CommonRedisUtils.set(RedisKeys.KEY_ANUBIS_TOKEN, GsonUtils.toJson(accessTokenMap));
             accessToken = MapUtils.getString(accessTokenMap, "access_token");
         }
         return accessToken;

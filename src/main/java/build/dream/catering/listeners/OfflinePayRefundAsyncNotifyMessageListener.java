@@ -1,5 +1,6 @@
 package build.dream.catering.listeners;
 
+import build.dream.catering.constants.ConfigurationKeys;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.services.PosService;
 import build.dream.common.utils.ConfigurationUtils;
@@ -14,8 +15,8 @@ import java.util.Map;
 
 @Component
 public class OfflinePayRefundAsyncNotifyMessageListener implements MessageListener<String, String> {
-    private static final String OFFLINE_PAY_REFUND_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC = ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_REFUND_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC);
-    private static final String OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC = ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC);
+    private static final String OFFLINE_PAY_REFUND_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC = ConfigurationUtils.getConfiguration(ConfigurationKeys.OFFLINE_PAY_REFUND_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC);
+    private static final String OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC = ConfigurationUtils.getConfiguration(ConfigurationKeys.OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC);
 
     @Autowired
     private PosService posService;

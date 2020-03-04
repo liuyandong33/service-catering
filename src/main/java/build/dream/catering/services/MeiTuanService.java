@@ -1,5 +1,6 @@
 package build.dream.catering.services;
 
+import build.dream.catering.constants.ConfigurationKeys;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.meituan.*;
 import build.dream.catering.utils.MeiTuanUtils;
@@ -38,9 +39,9 @@ public class MeiTuanService {
         Branch branch = DatabaseHelper.find(Branch.class, searchModel);
         ValidateUtils.notNull(branch, "门店不存在！");
 
-        String meiTuanErpServiceUrl = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_ERP_SERVICE_URL);
-        String developerId = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_DEVELOPER_ID);
-        String signKey = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_SIGN_KEY);
+        String meiTuanErpServiceUrl = ConfigurationUtils.getConfiguration(ConfigurationKeys.MEI_TUAN_ERP_SERVICE_URL);
+        String developerId = ConfigurationUtils.getConfiguration(ConfigurationKeys.MEI_TUAN_DEVELOPER_ID);
+        String signKey = ConfigurationUtils.getConfiguration(ConfigurationKeys.MEI_TUAN_SIGN_KEY);
 
         Map<String, String> requestParameters = new HashMap<String, String>();
         requestParameters.put("developerId", developerId);

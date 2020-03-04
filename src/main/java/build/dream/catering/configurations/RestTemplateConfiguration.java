@@ -1,6 +1,6 @@
 package build.dream.catering.configurations;
 
-import build.dream.catering.constants.Constants;
+import build.dream.catering.constants.ConfigurationKeys;
 import build.dream.common.utils.ConfigurationUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
@@ -14,8 +14,8 @@ public class RestTemplateConfiguration {
     @Bean
     @LoadBalanced
     public RestTemplate restTemplate() {
-        String connectTimeout = ConfigurationUtils.getConfiguration(Constants.REST_TEMPLATE_CONNECT_TIMEOUT);
-        String readTimeout = ConfigurationUtils.getConfiguration(Constants.REST_TEMPLATE_READ_TIMEOUT);
+        String connectTimeout = ConfigurationUtils.getConfiguration(ConfigurationKeys.REST_TEMPLATE_CONNECT_TIMEOUT);
+        String readTimeout = ConfigurationUtils.getConfiguration(ConfigurationKeys.REST_TEMPLATE_READ_TIMEOUT);
 
         RestTemplate restTemplate = null;
         if (StringUtils.isNotBlank(connectTimeout) && StringUtils.isNotBlank(readTimeout)) {

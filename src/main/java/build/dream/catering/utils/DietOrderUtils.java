@@ -1058,7 +1058,7 @@ public class DietOrderUtils {
      * @return
      */
     public static KafkaFixedTimeSendResult startOrderInvalidJob(Long tenantId, Long branchId, Long orderId, int type, Date startTime) {
-        String topic = ConfigurationUtils.getConfiguration(Constants.ORDER_INVALID_MESSAGE_TOPIC);
+        String topic = ConfigurationUtils.getConfiguration(ConfigurationKeys.ORDER_INVALID_MESSAGE_TOPIC);
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("tenantId", tenantId);
         data.put("branchId", branchId);
@@ -1128,7 +1128,7 @@ public class DietOrderUtils {
                 .receiverAddress(dietOrder.getDeliveryAddress())
                 .receiverLat(Double.valueOf(dietOrder.getDeliveryLatitude()))
                 .receiverLng(Double.valueOf(dietOrder.getDeliveryLongitude()))
-                .mqConfig(MqConfig.builder().mqType(Constants.MQ_TYPE_KAFKA).topic(ConfigurationUtils.getConfiguration(Constants.DADA_ORDER_CALLBACK_MESSAGE_TOPIC)).build())
+                .mqConfig(MqConfig.builder().mqType(Constants.MQ_TYPE_KAFKA).topic(ConfigurationUtils.getConfiguration(ConfigurationKeys.DADA_ORDER_CALLBACK_MESSAGE_TOPIC)).build())
                 .receiverPhone(dietOrder.getTelephoneNumber())
                 .build();
         if (dietOrder.isInvoiced()) {

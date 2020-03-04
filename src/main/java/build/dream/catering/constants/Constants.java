@@ -6,21 +6,9 @@ package build.dream.catering.constants;
 public class Constants extends build.dream.common.constants.Constants {
     public static final String GOODS_TABLE_TEMPLATE = "goods_table_template";
     public static final String SALE_TABLE_TEMPLATE = "sale_table_template";
-    public static final String ELEME_APP_ID = "eleme.app.id";
-    public static final String ELEME_APP_KEY = "eleme.app.key";
-    public static final String ELEME_APP_SECRET = "eleme.app.secret";
-    public static final String ELEME_SERVICE_URL = "eleme.service.url";
     public static final String ELEME_TENANT_AUTHORIZE_URL_FORMAT = "%s?response_type=%s&client_id=%s&redirect_uri=%s&state=%s&scope=%s";
     public static final String ELEME_ORDER_CALLBACK_SUCCESS_RETURN_VALUE = "{\"message\":\"ok\"}";
 
-    public static final String MEI_TUAN_APP_ID = "mei.tuan.app.id";
-    public static final String MEI_TUAN_CONSUMER_SECRET = "mei.tuan.consumer.secret";
-    public static final String MEI_TUAN_SERVICE_URL = "mei.tuan.service.url";
-    public static final String MEI_TUAN_ERP_SERVICE_URL = "mei.tuan.erp.service.url";
-    public static final String MEI_TUAN_DEVELOPER_ID = "mei.tuan.developer.id";
-    public static final String MEI_TUAN_SIGN_KEY = "mei.tuan.sign.key";
-
-    public static final String KEY_MEI_TUAN_APP_AUTH_TOKENS = "_mei_tuan_app_auth_tokens";
     public static final String MEI_MEI_TUAN_SERVICE_URL = "http://api.open.cater.meituan.com";
     public static final String MEI_TUAN_CALLBACK_SUCCESS_RETURN_VALUE = "{\"data\": \"OK\"}";
 
@@ -51,8 +39,6 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String MT_PAYMENT_CODE = "MT";
     public static final String MT_PAYMENT_NAME = "美团线上支付";
 
-    public static final String KEY_DATA_HANDLE_SIGNATURES = "_data_handle_signatures";
-
     public static final String BUY_GIVE_ACTIVITY_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/buyGiveActivityInfosSchema.json";
     public static final String SPECIAL_GOODS_ACTIVITY_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/specialGoodsActivityInfosSchema.json";
     public static final String ELEME_MESSAGE_SCHEMA_FILE_PATH = "build/dream/catering/schemas/elemeMessageSchema.json";
@@ -60,14 +46,6 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String GROUPS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/groupsSchema.json";
     public static final String GOODS_INFOS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/goodsInfosSchema.json";
     public static final String SAVE_GOODS_SCHEMA_FILE_PATH = "build/dream/catering/schemas/goods/saveGoodsSchema.json";
-
-    public static final String KEY_BUY_GIVE_ACTIVITIES = "_buy_give_activities";
-    public static final String KEY_FULL_REDUCTION_ACTIVITIES = "_full_reduction_activities";
-    public static final String KEY_SPECIAL_GOODS_ACTIVITIES = "_special_goods_activities";
-
-    public static final String ANUBIS_SERVICE_URL = "anubis.service.url";
-    public static final String ANUBIS_APP_ID = "anubis.app.id";
-    public static final String ANUBIS_APP_SECRET = "anubis.app.secret";
 
     public static final String ANUBIS_GET_ACCESS_TOKEN_URI = "/get_access_token";
     public static final String ANUBIS_CHAIN_STORE_URI = "/v2/chain_store";
@@ -80,7 +58,6 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final String ANUBIS_ORDER_QUERY_URI = "/v2/order/query";
     public static final String ANUBIS_ORDER_COMPLAINT_URI = "/v2/order/complaint";
 
-    public static final String KEY_ANUBIS_TOKEN = "_anubis_token";
     public static Integer POSITION_SOURCE_TENCENT_MAP = 1;
     public static Integer POSITION_SOURCE_BAIDU_MAP = 2;
     public static Integer POSITION_SOURCE_GAODE_MAP = 3;
@@ -93,7 +70,6 @@ public class Constants extends build.dream.common.constants.Constants {
 
     public static final String POS_DATA_PATH = "pos.data.path";
 
-    public static final String WEI_XIN_API_URL = "wei.xin.api.url";
     public static final String WEI_XIN_CARD_CREATE_URI = "/card/create";
     public static final String WEI_XIN_CARD_MEMBER_CARD_ACTIVATE_USER_FORM_SET_URI = "/card/membercard/activateuserform/set";
     public static final String WEI_XIN_CARD_QRCODE_CREATE_URI = "/card/qrcode/create";
@@ -108,9 +84,6 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final Integer STOCK_FLOW_TYPE_PURCHASE = 1;
     public static final Integer STOCK_FLOW_TYPE_REFUND = 2;
     public static final Integer STOCK_FLOW_TYPE_SALE = 3;
-
-    public static final String WEI_XIN_OPEN_PLATFORM_APPLICATION_APP_ID = "wei.xin.open.platform.application.app.id";
-    public static final String WEI_XIN_OPEN_PLATFORM_APPLICATION_APP_SECRET = "wei.xin.open.platform.application.app.secret";
 
     public static final String ELASTICSEARCH_HIGHLIGHT_PRE_TAG = "<span class=\"elasticsearch_highlight\">";
     public static final String ELASTICSEARCH_HIGHLIGHT_POST_TAG = "</span>";
@@ -139,29 +112,5 @@ public class Constants extends build.dream.common.constants.Constants {
     public static final Integer ACTIVITY_TYPE_SPECIAL_GOODS_ACTIVITY = 3;
     public static final Integer ACTIVITY_TYPE_PAYMENT_ACTIVITY = 4;
 
-    public static final String KEY_FLASH_SALE_ACTIVITY = "_flash_sale_activity";
-    public static final String KEY_FLASH_SALE_STOCK = "_flash_sale_stock";
-    public static final String KEY_VIP_FLASH_SALE_HISTORY = "_vip_flash_sale_history";
-    public static final String KEY_FLASH_SALE_ORDERS = "_flash_sale_orders";
-    public static final String KEY_FLASH_SALE_ACTIVITY_IDS = "_flash_sale_activity_ids";
-
-    /**
-     * 消息队列消息主题
-     *
-     * @see #ORDER_INVALID_MESSAGE_TOPIC: 订单失效
-     * @see #OFFLINE_PAY_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC: 线下支付支付宝异步通知消息主题
-     * @see #OFFLINE_PAY_UMPAY_ASYNC_NOTIFY_MESSAGE_TOPIC: 线下支付联动异步通知消息主题
-     * @see #OFFLINE_PAY_REFUND_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC: 线下支付支付宝退款异步通知消息主题
-     * @see #OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC: 线下支付微信退款异步通知消息主题
-     * @see #DADA_ORDER_CALLBACK_MESSAGE_TOPIC: 达达订单回调消息主题
-     */
-    public static final String ORDER_INVALID_MESSAGE_TOPIC = "order.invalid.message.topic";
-    public static final String OFFLINE_PAY_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC = "offline.pay.alipay.async.notify.message.topic";
-    public static final String OFFLINE_PAY_UMPAY_ASYNC_NOTIFY_MESSAGE_TOPIC = "offline.pay.umpay.async.notify.message.topic";
-    public static final String OFFLINE_PAY_REFUND_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC = "offline.pay.refund.alipay.async.notify.message.topic";
-    public static final String OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC = "offline.pay.refund.wei.xin.async.notify.message.topic";
-    public static final String DADA_ORDER_CALLBACK_MESSAGE_TOPIC = "dada.order.callback.message.topic";
-
     public static final String DINGTALK_ERROR_NOTIFY_MESSAGE_FORMAT = "%s-%s-%s-%s";
-    public static final String DINGTALK_ERROR_NOTIFY_CHAT_ID = "dingtalk.error.notify.chat.id";
 }

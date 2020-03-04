@@ -1,5 +1,6 @@
 package build.dream.catering.services;
 
+import build.dream.catering.constants.ConfigurationKeys;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.anubis.*;
 import build.dream.catering.utils.AnubisUtils;
@@ -47,8 +48,8 @@ public class AnubisService {
         data.put("latitude", branch.getLatitude());
         data.put("service_code", 1);
 
-        String url = ConfigurationUtils.getConfiguration(Constants.ANUBIS_SERVICE_URL) + Constants.ANUBIS_CHAIN_STORE_URI;
-        String appId = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_ID);
+        String url = ConfigurationUtils.getConfiguration(ConfigurationKeys.ANUBIS_SERVICE_URL) + Constants.ANUBIS_CHAIN_STORE_URI;
+        String appId = ConfigurationUtils.getConfiguration(ConfigurationKeys.ANUBIS_APP_ID);
         ApiRest apiRest = AnubisUtils.callAnubisSystem(url, appId, data);
         return apiRest;
     }
@@ -82,8 +83,8 @@ public class AnubisService {
         data.put("latitude", branch.getLatitude());
         data.put("service_code", 1);
 
-        String url = ConfigurationUtils.getConfiguration(Constants.ANUBIS_SERVICE_URL) + Constants.ANUBIS_CHAIN_STORE_UPDATE_URI;
-        String appId = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_ID);
+        String url = ConfigurationUtils.getConfiguration(ConfigurationKeys.ANUBIS_SERVICE_URL) + Constants.ANUBIS_CHAIN_STORE_UPDATE_URI;
+        String appId = ConfigurationUtils.getConfiguration(ConfigurationKeys.ANUBIS_APP_ID);
         ApiRest apiRest = AnubisUtils.callAnubisSystem(url, appId, data);
         return apiRest;
     }
@@ -112,8 +113,8 @@ public class AnubisService {
         data.put("receiver_longitude", chainStoreDeliveryQueryModel.getReceiverLongitude());
         data.put("receiver_latitude", chainStoreDeliveryQueryModel.getReceiverLatitude());
 
-        String url = ConfigurationUtils.getConfiguration(Constants.ANUBIS_SERVICE_URL) + Constants.ANUBIS_CHAIN_STORE_DELIVERY_QUERY_URI;
-        String appId = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_ID);
+        String url = ConfigurationUtils.getConfiguration(ConfigurationKeys.ANUBIS_SERVICE_URL) + Constants.ANUBIS_CHAIN_STORE_DELIVERY_QUERY_URI;
+        String appId = ConfigurationUtils.getConfiguration(ConfigurationKeys.ANUBIS_APP_ID);
         ApiRest apiRest = AnubisUtils.callAnubisSystem(url, appId, data);
         return apiRest;
     }
@@ -164,7 +165,7 @@ public class AnubisService {
         ApplicationHandler.ifNotNullPut(data, "partner_remark", orderModel.getPartnerRemark());
         data.put("partner_order_code", dietOrder.getOrderNumber());
 
-        String notifyUrl = CommonUtils.getUrl(ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE), Constants.SERVICE_NAME_CATERING, "anubis", "anubisCallback");
+        String notifyUrl = CommonUtils.getUrl(ConfigurationUtils.getConfiguration(ConfigurationKeys.PARTITION_CODE), Constants.SERVICE_NAME_CATERING, "anubis", "anubisCallback");
 
         data.put("notify_url", notifyUrl);
         data.put("order_type", 1);
@@ -236,8 +237,8 @@ public class AnubisService {
         data.put("items_json", itemInfos);
         data.put("serial_number", dietOrder.getDaySerialNumber());
 
-        String url = ConfigurationUtils.getConfiguration(Constants.ANUBIS_SERVICE_URL) + Constants.ANUBIS_ORDER_URI;
-        String appId = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_ID);
+        String url = ConfigurationUtils.getConfiguration(ConfigurationKeys.ANUBIS_SERVICE_URL) + Constants.ANUBIS_ORDER_URI;
+        String appId = ConfigurationUtils.getConfiguration(ConfigurationKeys.ANUBIS_APP_ID);
         ApiRest apiRest = AnubisUtils.callAnubisSystem(url, appId, data);
         return apiRest;
     }
@@ -264,8 +265,8 @@ public class AnubisService {
         ApplicationHandler.ifNotNullPut(data, "order_cancel_description", orderCancelModel.getOrderCancelDescription());
         data.put("order_cancel_time", System.currentTimeMillis());
 
-        String url = ConfigurationUtils.getConfiguration(Constants.ANUBIS_SERVICE_URL) + Constants.ANUBIS_ORDER_CANCEL_URI;
-        String appId = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_ID);
+        String url = ConfigurationUtils.getConfiguration(ConfigurationKeys.ANUBIS_SERVICE_URL) + Constants.ANUBIS_ORDER_CANCEL_URI;
+        String appId = ConfigurationUtils.getConfiguration(ConfigurationKeys.ANUBIS_APP_ID);
         ApiRest apiRest = AnubisUtils.callAnubisSystem(url, appId, data);
         return apiRest;
     }
@@ -288,8 +289,8 @@ public class AnubisService {
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("partner_order_code", dietOrder.getOrderNumber());
 
-        String url = ConfigurationUtils.getConfiguration(Constants.ANUBIS_SERVICE_URL) + Constants.ANUBIS_ORDER_QUERY_URI;
-        String appId = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_ID);
+        String url = ConfigurationUtils.getConfiguration(ConfigurationKeys.ANUBIS_SERVICE_URL) + Constants.ANUBIS_ORDER_QUERY_URI;
+        String appId = ConfigurationUtils.getConfiguration(ConfigurationKeys.ANUBIS_APP_ID);
         return AnubisUtils.callAnubisSystem(url, appId, data);
     }
 
@@ -356,7 +357,7 @@ public class AnubisService {
         JSONObject callbackRequestBodyJsonObject = JSONObject.fromObject(callbackRequestBody);
         String data = URLDecoder.decode(callbackRequestBodyJsonObject.getString("data"), Constants.CHARSET_NAME_UTF_8);
 
-        String appId = ConfigurationUtils.getConfiguration(Constants.ANUBIS_APP_ID);
+        String appId = ConfigurationUtils.getConfiguration(ConfigurationKeys.ANUBIS_APP_ID);
         String signature = callbackRequestBodyJsonObject.getString("signature");
         int salt = callbackRequestBodyJsonObject.getInt("salt");
         ValidateUtils.isTrue(AnubisUtils.verifySignature(appId, data, salt, signature), "签名验证未通过！");

@@ -1,6 +1,8 @@
 package build.dream.catering.utils;
 
+import build.dream.catering.constants.ConfigurationKeys;
 import build.dream.catering.constants.Constants;
+import build.dream.catering.constants.RedisKeys;
 import build.dream.common.domains.catering.Branch;
 import build.dream.common.domains.catering.DietOrder;
 import build.dream.common.tuples.Tuple2;
@@ -58,12 +60,12 @@ public class MeiTuanUtils {
     }
 
     public static Map<String, Object> callMeiTuanSystem(String tenantId, String branchId, Map<String, String> requestParameters, String url, String requestMethod) {
-        String signKey = ConfigurationUtils.getConfiguration(Constants.MEI_TUAN_SIGN_KEY);
+        String signKey = ConfigurationUtils.getConfiguration(ConfigurationKeys.MEI_TUAN_SIGN_KEY);
         return callMeiTuanSystem(tenantId, branchId, signKey, requestParameters, url, requestMethod);
     }
 
     public static String getMeiTuanAppAuthToken(String tenantId, String branchId) {
-        String meiTuanAppAuthToken = CommonRedisUtils.hget(Constants.KEY_MEI_TUAN_APP_AUTH_TOKENS, tenantId + "_" + branchId);
+        String meiTuanAppAuthToken = CommonRedisUtils.hget(RedisKeys.KEY_MEI_TUAN_APP_AUTH_TOKENS, tenantId + "_" + branchId);
         ValidateUtils.notNull(meiTuanAppAuthToken, "门店未绑定美团！");
         return meiTuanAppAuthToken;
     }

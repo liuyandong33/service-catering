@@ -1,5 +1,6 @@
 package build.dream.catering.services;
 
+import build.dream.catering.constants.ConfigurationKeys;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.pos.*;
 import build.dream.catering.utils.SerialNumberGenerator;
@@ -303,7 +304,7 @@ public class PosService {
                     .appId(alipayAccount.getAppId())
                     .appPrivateKey(alipayAccount.getAppPrivateKey())
                     .alipayPublicKey(alipayAccount.getAlipayPublicKey())
-                    .mqConfig(MqConfig.builder().mqType(Constants.MQ_TYPE_KAFKA).topic(ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC)).build())
+                    .mqConfig(MqConfig.builder().mqType(Constants.MQ_TYPE_KAFKA).topic(ConfigurationUtils.getConfiguration(ConfigurationKeys.OFFLINE_PAY_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC)).build())
                     .outTradeNo(outTradeNo)
                     .authCode(authCode)
                     .scene(build.dream.common.constants.Constants.SCENE_BAR_CODE)
@@ -366,7 +367,7 @@ public class PosService {
                     .merId(umPayAccount.getMerId())
                     .privateKey(umPayAccount.getPrivateKey())
                     .platformCertificate(umPayAccount.getPlatformCertificate())
-                    .mqConfig(MqConfig.builder().mqType(Constants.MQ_TYPE_KAFKA).topic(ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_UMPAY_ASYNC_NOTIFY_MESSAGE_TOPIC)).build())
+                    .mqConfig(MqConfig.builder().mqType(Constants.MQ_TYPE_KAFKA).topic(ConfigurationUtils.getConfiguration(ConfigurationKeys.OFFLINE_PAY_UMPAY_ASYNC_NOTIFY_MESSAGE_TOPIC)).build())
                     .goodsInf("")
                     .orderId(outTradeNo)
                     .amount(totalAmount)
@@ -610,7 +611,7 @@ public class PosService {
                     .outRefundNo(outRefundNo)
                     .totalFee(totalAmount)
                     .refundFee(refundAmount == null ? totalAmount : refundAmount)
-                    .mqConfig(MqConfig.builder().mqType(Constants.MQ_TYPE_KAFKA).topic(ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC)).build())
+                    .mqConfig(MqConfig.builder().mqType(Constants.MQ_TYPE_KAFKA).topic(ConfigurationUtils.getConfiguration(ConfigurationKeys.OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC)).build())
                     .operationCertificate(weiXinPayAccount.getOperationCertificate())
                     .operationCertificatePassword(weiXinPayAccount.getOperationCertificatePassword())
                     .build();
@@ -621,7 +622,7 @@ public class PosService {
 
             AlipayTradeRefundModel alipayTradeRefundModel = AlipayTradeRefundModel.builder()
                     .appId(alipayAccount.getAppId())
-                    .mqConfig(MqConfig.builder().mqType(Constants.MQ_TYPE_KAFKA).topic(ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC)).build())
+                    .mqConfig(MqConfig.builder().mqType(Constants.MQ_TYPE_KAFKA).topic(ConfigurationUtils.getConfiguration(ConfigurationKeys.OFFLINE_PAY_REFUND_WEI_XIN_ASYNC_NOTIFY_MESSAGE_TOPIC)).build())
                     .appPrivateKey(alipayAccount.getAppPrivateKey())
                     .alipayPublicKey(alipayAccount.getAlipayPublicKey())
                     .refundAmount(refundAmount == null ? Double.valueOf(totalAmount) / 100 : Double.valueOf(refundAmount) / 100)

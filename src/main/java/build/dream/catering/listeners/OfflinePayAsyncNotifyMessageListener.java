@@ -1,5 +1,6 @@
 package build.dream.catering.listeners;
 
+import build.dream.catering.constants.ConfigurationKeys;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.services.PosService;
 import build.dream.common.utils.ConfigurationUtils;
@@ -16,8 +17,8 @@ import java.util.Map;
 public class OfflinePayAsyncNotifyMessageListener implements MessageListener<String, String> {
     @Autowired
     private PosService posService;
-    private static final String OFFLINE_PAY_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC = ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC);
-    private static final String OFFLINE_PAY_UMPAY_ASYNC_NOTIFY_MESSAGE_TOPIC = ConfigurationUtils.getConfiguration(Constants.OFFLINE_PAY_UMPAY_ASYNC_NOTIFY_MESSAGE_TOPIC);
+    private static final String OFFLINE_PAY_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC = ConfigurationUtils.getConfiguration(ConfigurationKeys.OFFLINE_PAY_ALIPAY_ASYNC_NOTIFY_MESSAGE_TOPIC);
+    private static final String OFFLINE_PAY_UMPAY_ASYNC_NOTIFY_MESSAGE_TOPIC = ConfigurationUtils.getConfiguration(ConfigurationKeys.OFFLINE_PAY_UMPAY_ASYNC_NOTIFY_MESSAGE_TOPIC);
 
     @KafkaListener(topics = "${offline.pay.alipay.async.notify.message.topic}")
     @Override

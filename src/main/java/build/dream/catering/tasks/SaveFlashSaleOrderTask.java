@@ -13,7 +13,7 @@ public class SaveFlashSaleOrderTask implements Runnable {
     public void run() {
         /*while (true) {
             try {
-                String orderJson = CommonRedisUtils.brpop(Constants.KEY_FLASH_SALE_ORDERS, 60, TimeUnit.SECONDS);
+                String orderJson = CommonRedisUtils.brpop(RedisKeys.KEY_FLASH_SALE_ORDERS, 60, TimeUnit.SECONDS);
                 if (StringUtils.isNotBlank(orderJson)) {
                     Map<String, Object> orderInfo = JacksonUtils.readValueAsMap(orderJson, String.class, Object.class);
                     Long tenantId = MapUtils.getLongValue(orderInfo, "tenantId");

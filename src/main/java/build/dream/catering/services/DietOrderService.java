@@ -1,5 +1,6 @@
 package build.dream.catering.services;
 
+import build.dream.catering.constants.ConfigurationKeys;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.dietorder.*;
 import build.dream.catering.utils.DietOrderUtils;
@@ -171,7 +172,7 @@ public class DietOrderService {
 
         String orderNumber = dietOrder.getOrderNumber();
         Double payableAmount = dietOrder.getPayableAmount();
-        String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
+        String partitionCode = ConfigurationUtils.getConfiguration(ConfigurationKeys.PARTITION_CODE);
 
         Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
         Integer usedChannelType = tenant.getUsedChannelType();
@@ -414,13 +415,6 @@ public class DietOrderService {
         ValidateUtils.notBlank(dataJson, "POS端未响应");
 
         Map<String, Object> dataMap = JacksonUtils.readValueAsMap(dataJson, String.class, Object.class);
-
-        /*String platformPrivateKey = ConfigurationUtils.getConfiguration(Constants.PLATFORM_PRIVATE_KEY);
-        PrivateKey privateKey = RSAUtils.restorePrivateKey(platformPrivateKey);
-        String encryptedData = Base64.encodeBase64String(RSAUtils.encryptByPrivateKey(dataJson.getBytes(Constants.CHARSET_NAME_UTF_8), privateKey, PADDING_MODE_RSA_ECB_PKCS1PADDING));
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("order", dataMap.get("order"));
-        data.put("encryptedData", encryptedData);*/
 
         String order = MapUtils.getString(dataMap, "order");
         String orderGroups = MapUtils.getString(dataMap, "orderGroups");

@@ -1,5 +1,6 @@
 package build.dream.catering.controllers;
 
+import build.dream.catering.constants.ConfigurationKeys;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.eleme.*;
 import build.dream.catering.services.ElemeService;
@@ -53,7 +54,7 @@ public class ElemeController extends BasicController {
     }
 
     private ModelAndView buildBindingStoreModelAndView(String tenantId, String branchId, String userId, String clientType) {
-        String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
+        String partitionCode = ConfigurationUtils.getConfiguration(ConfigurationKeys.PARTITION_CODE);
         String apiServiceName = CommonUtils.obtainApiServiceName(clientType);
 
         String proxyUrl = CommonUtils.getOutsideUrl(apiServiceName, "proxy", "doGetPermitWithUrl");

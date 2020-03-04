@@ -1,5 +1,6 @@
 package build.dream.catering.controllers;
 
+import build.dream.catering.constants.ConfigurationKeys;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.weixin.*;
 import build.dream.catering.services.WeiXinService;
@@ -120,8 +121,8 @@ public class WeiXinController extends BasicController {
         String partitionCode = generateComponentLoginPageUrlModel.obtainPartitionCode();
         String clientType = generateComponentLoginPageUrlModel.obtainClientType();
 
-        String componentAppId = ConfigurationUtils.getConfiguration(Constants.WEI_XIN_OPEN_PLATFORM_APPLICATION_APP_ID);
-        String componentAppSecret = ConfigurationUtils.getConfiguration(Constants.WEI_XIN_OPEN_PLATFORM_APPLICATION_APP_SECRET);
+        String componentAppId = ConfigurationUtils.getConfiguration(ConfigurationKeys.WEI_XIN_OPEN_PLATFORM_APPLICATION_APP_ID);
+        String componentAppSecret = ConfigurationUtils.getConfiguration(ConfigurationKeys.WEI_XIN_OPEN_PLATFORM_APPLICATION_APP_SECRET);
 
         String preAuthCode = WeiXinUtils.obtainPreAuthCode(componentAppId, componentAppSecret);
 
@@ -156,7 +157,7 @@ public class WeiXinController extends BasicController {
             Map<String, Object> info = weiXinService.handleAuthCallback(authCallbackModel);
 
             Map<String, Object> model = new HashMap<String, Object>();
-            String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
+            String partitionCode = ConfigurationUtils.getConfiguration(ConfigurationKeys.PARTITION_CODE);
             String baseUrl = CommonUtils.getServiceDomain(partitionCode, Constants.SERVICE_NAME_CATERING);
 
             String clientType = authCallbackModel.getClientType();

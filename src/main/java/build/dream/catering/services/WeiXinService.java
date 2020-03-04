@@ -1,5 +1,6 @@
 package build.dream.catering.services;
 
+import build.dream.catering.constants.ConfigurationKeys;
 import build.dream.catering.constants.Constants;
 import build.dream.catering.models.weixin.*;
 import build.dream.common.api.ApiRest;
@@ -160,7 +161,7 @@ public class WeiXinService {
         Map<String, Object> createMemberCardRequestBody = new HashMap<String, Object>();
         createMemberCardRequestBody.put("card", card);
 
-        String weiXinApiUrl = ConfigurationUtils.getConfiguration(Constants.WEI_XIN_API_URL);
+        String weiXinApiUrl = ConfigurationUtils.getConfiguration(ConfigurationKeys.WEI_XIN_API_URL);
         String createMemberCardUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_CREATE_URI + "?access_token=" + accessToken;
 
         String createMemberCardResult = OutUtils.doPostWithRequestBody(createMemberCardUrl, JacksonUtils.writeValueAsString(createMemberCardRequestBody), Constants.CHARSET_NAME_UTF_8, Constants.CONTENT_TYPE_APPLICATION_JSON_UTF8);
@@ -295,7 +296,7 @@ public class WeiXinService {
         Map<String, Object> payGiftCardRequestBody = new HashMap<String, Object>();
         payGiftCardRequestBody.put("rule_info", ruleInfo);
 
-        String weiXinApiUrl = ConfigurationUtils.getConfiguration(Constants.WEI_XIN_API_URL);
+        String weiXinApiUrl = ConfigurationUtils.getConfiguration(ConfigurationKeys.WEI_XIN_API_URL);
         String weiXinAddPayGiftCardUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_PAY_GIFT_CARD_ADD_URI + "?access_token=" + accessToken;
 
         String payGiftCardResult = OutUtils.doPostWithRequestBody(weiXinAddPayGiftCardUrl, JacksonUtils.writeValueAsString(payGiftCardRequestBody), Constants.CHARSET_NAME_UTF_8, Constants.CONTENT_TYPE_APPLICATION_JSON_UTF8);
@@ -326,7 +327,7 @@ public class WeiXinService {
         Map<String, Object> deleteCardRequestBody = new HashMap<String, Object>();
         deleteCardRequestBody.put("card_id", weiXinMemberCard.getCardId());
 
-        String weiXinApiUrl = ConfigurationUtils.getConfiguration(Constants.WEI_XIN_API_URL);
+        String weiXinApiUrl = ConfigurationUtils.getConfiguration(ConfigurationKeys.WEI_XIN_API_URL);
         String deleteCardUrl = weiXinApiUrl + Constants.WEI_XIN_CARD_DELETE_URI + "?access_token=" + accessToken;
 
         String deleteCardResult = OutUtils.doPostWithRequestBody(deleteCardUrl, JacksonUtils.writeValueAsString(deleteCardRequestBody), Constants.CHARSET_NAME_UTF_8, Constants.CONTENT_TYPE_APPLICATION_JSON_UTF8);
@@ -655,7 +656,7 @@ public class WeiXinService {
     private CreateMenuModel.Button buildButton(Long tenantId, WeiXinMenu weiXinMenu) {
         CreateMenuModel.Button button = new CreateMenuModel.Button();
         String type = weiXinMenu.getType();
-        String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
+        String partitionCode = ConfigurationUtils.getConfiguration(ConfigurationKeys.PARTITION_CODE);
 
         button.setType(type);
         button.setName(weiXinMenu.getName());
@@ -689,7 +690,7 @@ public class WeiXinService {
     private CreateMenuModel.SubButton buildSubButton(Long tenantId, WeiXinMenu weiXinMenu) {
         CreateMenuModel.SubButton subButton = new CreateMenuModel.SubButton();
         String type = weiXinMenu.getType();
-        String partitionCode = ConfigurationUtils.getConfiguration(Constants.PARTITION_CODE);
+        String partitionCode = ConfigurationUtils.getConfiguration(ConfigurationKeys.PARTITION_CODE);
 
         subButton.setType(type);
         subButton.setName(weiXinMenu.getName());

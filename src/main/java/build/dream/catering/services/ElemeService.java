@@ -1,6 +1,8 @@
 package build.dream.catering.services;
 
+import build.dream.catering.constants.ConfigurationKeys;
 import build.dream.catering.constants.Constants;
+import build.dream.catering.constants.RedisKeys;
 import build.dream.catering.models.eleme.*;
 import build.dream.common.api.ApiRest;
 import build.dream.common.constants.DietOrderConstants;
@@ -49,7 +51,7 @@ public class ElemeService {
             tokenField = Constants.ELEME_TOKEN + "_" + tenantId + "_" + branchId;
         }
 
-        boolean tokenIsExists = CommonRedisUtils.hexists(Constants.KEY_ELEME_TOKENS, tokenField);
+        boolean tokenIsExists = CommonRedisUtils.hexists(RedisKeys.KEY_ELEME_TOKENS, tokenField);
         boolean isAuthorize = false;
         if (tokenIsExists) {
             Map<String, String> verifyTokenRequestParameters = new HashMap<String, String>();
@@ -67,8 +69,8 @@ public class ElemeService {
         if (isAuthorize) {
             data = CommonUtils.getOutsideUrl(apiServiceName, "proxy", "doGetPermit") + "/" + partitionCode + "/" + Constants.SERVICE_NAME_CATERING + "/eleme/bindingStore?tenantId=" + tenantId + "&branchId=" + branchId + "&userId=" + userId;
         } else {
-            String elemeUrl = ConfigurationUtils.getConfiguration(Constants.ELEME_SERVICE_URL);
-            String elemeAppKey = ConfigurationUtils.getConfiguration(Constants.ELEME_APP_KEY);
+            String elemeUrl = ConfigurationUtils.getConfiguration(ConfigurationKeys.ELEME_SERVICE_URL);
+            String elemeAppKey = ConfigurationUtils.getConfiguration(ConfigurationKeys.ELEME_APP_KEY);
 
             String redirectUri = UrlUtils.encode(CommonUtils.getOutsideUrl(apiServiceName, "proxy", "doGetPermit") + "/" + partitionCode + "/" + Constants.SERVICE_NAME_CATERING + "/eleme/tenantAuthorizeCallback", Constants.CHARSET_NAME_UTF_8);
             String state = tenantId + "Z" + branchId + "Z" + userId + "Z" + elemeAccountType;
@@ -145,7 +147,7 @@ public class ElemeService {
         int paidType = 0;
         Double totalAmount = MapUtils.getDoubleValue(messageMap, "originalPrice");
         Double discountAmount = Math.abs(MapUtils.getDoubleValue(messageMap, "shopPart"));
-        Double payableAmount = totalAmount-discountAmount;
+        Double payableAmount = totalAmount - discountAmount;
         Double paidAmount = 0D;
         boolean onlinePaid = MapUtils.getBooleanValue(messageMap, "onlinePaid");
         if (onlinePaid) {

@@ -1,6 +1,7 @@
 package build.dream.catering.services;
 
 import build.dream.catering.constants.Constants;
+import build.dream.catering.constants.RedisKeys;
 import build.dream.catering.models.flashsale.*;
 import build.dream.common.api.ApiRest;
 import build.dream.common.constants.DietOrderConstants;
@@ -71,14 +72,14 @@ public class FlashSaleService {
         DatabaseHelper.insert(flashSaleActivity);
 
         Long flashSaleActivityId = flashSaleActivity.getId();
-        String flashSaleActivityKey = Constants.KEY_FLASH_SALE_ACTIVITY + "_" + tenantId + "_" + branchId + "_" + flashSaleActivityId;
+        String flashSaleActivityKey = RedisKeys.KEY_FLASH_SALE_ACTIVITY + "_" + tenantId + "_" + branchId + "_" + flashSaleActivityId;
         long timeout = (endTime.getTime() - new Date().getTime()) / 1000;
 
-        String flashSaleStockKey = Constants.KEY_FLASH_SALE_STOCK + "_" + tenantId + "_" + branchId + "_" + flashSaleActivityId;
+        String flashSaleStockKey = RedisKeys.KEY_FLASH_SALE_STOCK + "_" + tenantId + "_" + branchId + "_" + flashSaleActivityId;
 
         CommonRedisUtils.setex(flashSaleActivityKey, GsonUtils.toJson(flashSaleActivity), timeout, TimeUnit.SECONDS);
         CommonRedisUtils.setex(flashSaleStockKey, flashSaleStock.toString(), timeout, TimeUnit.SECONDS);
-        CommonRedisUtils.hset(Constants.KEY_FLASH_SALE_ACTIVITY_IDS + "_" + tenantId + "_" + branchId, flashSaleActivityId.toString(), flashSaleActivityId.toString());
+        CommonRedisUtils.hset(RedisKeys.KEY_FLASH_SALE_ACTIVITY_IDS + "_" + tenantId + "_" + branchId, flashSaleActivityId.toString(), flashSaleActivityId.toString());
 
         return ApiRest.builder().data(flashSaleActivity).message("保存秒杀活动成功！").successful(true).build();
     }
@@ -133,16 +134,16 @@ public class FlashSaleService {
         Long branchId = obtainAllFlashSaleActivitiesModel.obtainBranchId();
         Long vipId = obtainAllFlashSaleActivitiesModel.getVipId();
 
-        Map<String, String> flashSaleActivityIdsMap = CommonRedisUtils.hgetAll(Constants.KEY_FLASH_SALE_ACTIVITY_IDS + "_" + tenantId + "_" + branchId);
+        Map<String, String> flashSaleActivityIdsMap = CommonRedisUtils.hgetAll(RedisKeys.KEY_FLASH_SALE_ACTIVITY_IDS + "_" + tenantId + "_" + branchId);
         Set<String> flashSaleActivityIds = flashSaleActivityIdsMap.keySet();
 
         List<FlashSaleActivity> flashSaleActivities = new ArrayList<FlashSaleActivity>();
         Map<String, Object> flashSaleStocks = new HashMap<String, Object>();
         for (String flashSaleActivityId : flashSaleActivityIds) {
-            String flashSaleActivityJson = CommonRedisUtils.get(Constants.KEY_FLASH_SALE_ACTIVITY + "_" + tenantId + "_" + branchId + "_" + flashSaleActivityId);
-            String flashSaleStock = CommonRedisUtils.get(Constants.KEY_FLASH_SALE_STOCK + "_" + tenantId + "_" + branchId + "_" + flashSaleActivityId);
+            String flashSaleActivityJson = CommonRedisUtils.get(RedisKeys.KEY_FLASH_SALE_ACTIVITY + "_" + tenantId + "_" + branchId + "_" + flashSaleActivityId);
+            String flashSaleStock = CommonRedisUtils.get(RedisKeys.KEY_FLASH_SALE_STOCK + "_" + tenantId + "_" + branchId + "_" + flashSaleActivityId);
             if (StringUtils.isBlank(flashSaleActivityJson)) {
-                CommonRedisUtils.hdel(Constants.KEY_FLASH_SALE_ACTIVITY_IDS + "_" + tenantId + "_" + branchId, flashSaleActivityId);
+                CommonRedisUtils.hdel(RedisKeys.KEY_FLASH_SALE_ACTIVITY_IDS + "_" + tenantId + "_" + branchId, flashSaleActivityId);
             } else {
                 flashSaleActivities.add(JacksonUtils.readValue(flashSaleActivityJson, FlashSaleActivity.class));
                 flashSaleStocks.put("_" + flashSaleActivityId, flashSaleStock);
