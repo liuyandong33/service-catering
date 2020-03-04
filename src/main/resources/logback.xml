@@ -6,26 +6,31 @@
         </encoder>
     </appender>
 
-    <!--<appender name="database" class="ch.qos.logback.classic.db.DBAppender">
+    <appender name="database" class="ch.qos.logback.classic.db.DBAppender">
         <connectionSource class="ch.qos.logback.core.db.DataSourceConnectionSource">
-            <dataSource class="com.alibaba.druid.pool.DruidDataSource">
+            <dataSource class="com.zaxxer.hikari.HikariDataSource">
+                <jdbcUrl><![CDATA[jdbc:mysql://leopard:8066/zd1-catering-log-db?serverTimezone=GMT%2B8&useSSL=true]]></jdbcUrl>
                 <driverClassName>com.mysql.cj.jdbc.Driver</driverClassName>
-                <url><![CDATA[jdbc:mysql://192.168.51.126:3306/log-test_51-z1-ui-o2o-portal?serverTimezone=GMT%2B8&useSSL=true]]></url>
                 <username>root</username>
                 <password>root</password>
-                <initialSize>3</initialSize>
+                <autoCommit>true</autoCommit>
+                <minimumIdle>10</minimumIdle>
+                <maximumPoolSize>30</maximumPoolSize>
+                <idleTimeout>30000</idleTimeout>
+                <maxLifetime>1800000</maxLifetime>
+                <connectionTimeout>30000</connectionTimeout>
             </dataSource>
         </connectionSource>
-    </appender>-->
+    </appender>
 
-    <!--<appender name="async" class="ch.qos.logback.classic.AsyncAppender">
+    <appender name="async" class="ch.qos.logback.classic.AsyncAppender">
         <discardingThreshold>0</discardingThreshold>
         <queueSize>512</queueSize>
         <appender-ref ref="database"></appender-ref>
     </appender>
--->
+
     <root level="INFO">
         <appender-ref ref="console"></appender-ref>
-        <!--<appender-ref ref="async"></appender-ref>-->
+        <appender-ref ref="async"></appender-ref>
     </root>
 </configuration>
