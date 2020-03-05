@@ -2,6 +2,7 @@ package build.dream.catering.controllers;
 
 import build.dream.catering.constants.Constants;
 import build.dream.catering.services.DemoService;
+import build.dream.common.annotations.PermitAll;
 import build.dream.common.api.ApiRest;
 import build.dream.common.models.data.AddMerchantModel;
 import build.dream.common.models.data.ListCitiesModel;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.annotation.security.PermitAll;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 import java.util.UUID;
@@ -35,9 +35,11 @@ public class DemoController {
     public String writeSaleFlow() {
         Map<String, String> requestParameters = ApplicationHandler.getRequestParameters();
         MethodCaller methodCaller = () -> {
+            String tenantId = requestParameters.get("tenantId");
+            String branchId = requestParameters.get("branchId");
             String dietOrderId = requestParameters.get("dietOrderId");
             ApplicationHandler.notNull(dietOrderId, "dietOrderId");
-            return demoService.writeSaleFlow(Long.valueOf(Long.valueOf(dietOrderId)));
+            return demoService.writeSaleFlow(Long.valueOf(tenantId), Long.valueOf(branchId), Long.valueOf(Long.valueOf(dietOrderId)));
         };
         return ApplicationHandler.callMethod(methodCaller, "写入流水失败", requestParameters);
     }

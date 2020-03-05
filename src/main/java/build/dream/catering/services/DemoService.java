@@ -11,8 +11,8 @@ import java.io.IOException;
 @Service
 public class DemoService {
     @Transactional(rollbackFor = Exception.class)
-    public ApiRest writeSaleFlow(Long dietOrderId) throws IOException {
-        SaleFlowUtils.writeSaleFlow(dietOrderId);
+    public ApiRest writeSaleFlow(Long tenantId, Long branchId, Long dietOrderId) throws IOException {
+        SaleFlowUtils.writeSaleFlow(tenantId, branchId, dietOrderId);
 
         ApiRest apiRest = new ApiRest();
         apiRest.setMessage("写入流水成功！");

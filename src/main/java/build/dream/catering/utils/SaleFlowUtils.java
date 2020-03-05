@@ -7,10 +7,8 @@ import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SaleFlowUtils {
@@ -39,18 +37,19 @@ public class SaleFlowUtils {
 
         Long userId = CommonUtils.getServiceSystemUserId();
 
-        Sale sale = new Sale();
-        sale.setTenantId(tenantId);
-        sale.setTenantCode(tenantCode);
-        sale.setBranchId(branchId);
-        sale.setSaleCode(dietOrder.getOrderNumber());
-        sale.setSaleTime(saleTime);
-        sale.setTotalAmount(dietOrder.getTotalAmount());
-        sale.setDiscountAmount(dietOrder.getDiscountAmount());
-        sale.setPayableAmount(dietOrder.getPayableAmount());
-        sale.setPaidAmount(dietOrder.getPaidAmount());
-        sale.setCreatedUserId(userId);
-        sale.setUpdatedUserId(userId);
+        Sale sale = Sale.builder()
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .saleCode(dietOrder.getOrderNumber())
+                .saleTime(saleTime)
+                .totalAmount(dietOrder.getTotalAmount())
+                .discountAmount(dietOrder.getDiscountAmount())
+                .payableAmount(dietOrder.getPayableAmount())
+                .paidAmount(dietOrder.getPaidAmount())
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .build();
         DatabaseHelper.insert(sale);
 
         Long saleId = sale.getId();
@@ -62,15 +61,17 @@ public class SaleFlowUtils {
             for (DietOrderActivity dietOrderActivity : dietOrderActivities) {
                 int activityType = dietOrderActivity.getActivityType();
                 if (activityType == 2 || activityType == 4) {
-                    discountAmount = discountAmount+dietOrderActivity.getAmount();
+                    discountAmount = discountAmount + dietOrderActivity.getAmount();
                 }
             }
         } else if (orderType == DietOrderConstants.ORDER_TYPE_ELEME_ORDER) {
             for (DietOrderActivity dietOrderActivity : dietOrderActivities) {
-                discountAmount = discountAmount+dietOrderActivity.getAmount();
+                discountAmount = discountAmount + dietOrderActivity.getAmount();
             }
         } else if (orderType == DietOrderConstants.ORDER_TYPE_MEI_TUAN_ORDER) {
-
+            for (DietOrderActivity dietOrderActivity : dietOrderActivities) {
+                discountAmount = discountAmount + dietOrderActivity.getAmount();
+            }
         }
         if (discountAmount > 0) {
             calculateShare(normalDietOrderDetails, discountAmount);
@@ -99,11 +100,19 @@ public class SaleFlowUtils {
         }
     }
 
-    public static void writeSaleFlow(Long dietOrderId) throws IOException {
-        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, dietOrderId);
+    public static void writeSaleFlow(Long tenantId, Long branchId, Long dietOrderId) throws IOException {
+        SearchModel searchModel = SearchModel.builder()
+                .autoSetDeletedFalse()
+                .equal(DietOrder.ColumnName.TENANT_ID, tenantId)
+                .equal(DietOrder.ColumnName.BRANCH_ID, branchId)
+                .equal(DietOrder.ColumnName.ID, dietOrderId)
+                .build();
+        DietOrder dietOrder = DatabaseHelper.find(DietOrder.class, searchModel);
         ValidateUtils.notNull(dietOrder, "订单不存在！");
 
         List<SearchCondition> searchConditions = new ArrayList<SearchCondition>();
+        searchConditions.add(new SearchCondition("tenant_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId));
+        searchConditions.add(new SearchCondition("branch_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, branchId));
         searchConditions.add(new SearchCondition("diet_order_id", Constants.SQL_OPERATION_SYMBOL_EQUAL, dietOrderId));
         searchConditions.add(new SearchCondition("deleted", Constants.SQL_OPERATION_SYMBOL_EQUAL, 0));
 
@@ -139,7 +148,7 @@ public class SaleFlowUtils {
                 discountAmountShare = discountAmount - discountAmountShareSum;
             } else {
                 Double weight = dietOrderDetail.getTotalAmount() / denominator;
-                discountAmountShare = discountAmount * weight;
+                discountAmountShare = BigDecimal.valueOf(discountAmount * weight).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
                 discountAmountShareSum = discountAmountShareSum + discountAmountShare;
             }
             dietOrderDetail.setDiscountShare(discountAmountShare);
@@ -155,45 +164,43 @@ public class SaleFlowUtils {
     }
 
     public static SaleDetail buildSaleDetail(Long saleId, Date saleTime, Long tenantId, String tenantCode, Long branchId, DietOrderDetail dietOrderDetail, Long userId) {
-        SaleDetail saleDetail = new SaleDetail();
-        saleDetail.setSaleId(saleId);
-        saleDetail.setSaleTime(saleTime);
-        saleDetail.setTenantId(tenantId);
-        saleDetail.setTenantCode(tenantCode);
-        saleDetail.setBranchId(branchId);
-        saleDetail.setGoodsId(dietOrderDetail.getGoodsId());
-        saleDetail.setGoodsName(dietOrderDetail.getGoodsName());
-        saleDetail.setGoodsSpecificationId(dietOrderDetail.getGoodsSpecificationId());
-        saleDetail.setGoodsSpecificationName(dietOrderDetail.getGoodsSpecificationName());
-        saleDetail.setCategoryId(dietOrderDetail.getCategoryId());
-        saleDetail.setCategoryName(dietOrderDetail.getCategoryName());
-        saleDetail.setPrice(dietOrderDetail.getPrice());
-        saleDetail.setQuantity(dietOrderDetail.getQuantity());
-        saleDetail.setTotalAmount(dietOrderDetail.getTotalAmount());
-        saleDetail.setDiscountAmount(dietOrderDetail.getDiscountAmount());
-        saleDetail.setPayableAmount(dietOrderDetail.getPayableAmount());
-
         Double discountShare = dietOrderDetail.getDiscountShare();
-        saleDetail.setDiscountShare(discountShare != null ? discountShare : 0D);
-
-        saleDetail.setCreatedUserId(userId);
-        saleDetail.setUpdatedUserId(userId);
-        return saleDetail;
+        return SaleDetail.builder()
+                .saleId(saleId)
+                .saleTime(saleTime)
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .goodsId(dietOrderDetail.getGoodsId())
+                .goodsName(dietOrderDetail.getGoodsName())
+                .goodsSpecificationId(dietOrderDetail.getGoodsSpecificationId())
+                .goodsSpecificationName(dietOrderDetail.getGoodsSpecificationName())
+                .categoryId(dietOrderDetail.getCategoryId())
+                .categoryName(dietOrderDetail.getCategoryName())
+                .price(dietOrderDetail.getPrice())
+                .quantity(dietOrderDetail.getQuantity())
+                .totalAmount(dietOrderDetail.getTotalAmount())
+                .discountAmount(dietOrderDetail.getDiscountAmount())
+                .payableAmount(dietOrderDetail.getPayableAmount())
+                .discountShare(Objects.isNull(discountShare) ? 0D : discountShare)
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .build();
     }
 
     public static SalePayment buildSalePayment(Long saleId, Date saleTime, Long tenantId, String tenantCode, Long branchId, DietOrderPayment dietOrderPayment, Long userId) {
-        SalePayment salePayment = new SalePayment();
-        salePayment.setSaleId(saleId);
-        salePayment.setSaleTime(saleTime);
-        salePayment.setTenantId(tenantId);
-        salePayment.setTenantCode(tenantCode);
-        salePayment.setBranchId(branchId);
-        salePayment.setPaymentId(dietOrderPayment.getPaymentId());
-        salePayment.setPaymentCode(dietOrderPayment.getPaymentCode());
-        salePayment.setPaymentName(dietOrderPayment.getPaymentName());
-        salePayment.setPaidAmount(dietOrderPayment.getPaidAmount());
-        salePayment.setCreatedUserId(userId);
-        salePayment.setUpdatedUserId(userId);
-        return salePayment;
+        return SalePayment.builder()
+                .saleId(saleId)
+                .saleTime(saleTime)
+                .tenantId(tenantId)
+                .tenantCode(tenantCode)
+                .branchId(branchId)
+                .paymentId(dietOrderPayment.getPaymentId())
+                .paymentCode(dietOrderPayment.getPaymentCode())
+                .paymentName(dietOrderPayment.getPaymentName())
+                .paidAmount(dietOrderPayment.getPaidAmount())
+                .createdUserId(userId)
+                .updatedUserId(userId)
+                .build();
     }
 }
