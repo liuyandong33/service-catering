@@ -12,13 +12,12 @@ import build.dream.common.domains.catering.*;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class SaleFlowUtils {
-    public static void writeSaleFlow(DietOrder dietOrder, List<DietOrderGroup> dietOrderGroups, List<DietOrderDetail> dietOrderDetails, List<DietOrderActivity> dietOrderActivities, List<DietOrderPayment> dietOrderPayments) throws IOException {
+    public static void writeSaleFlow(DietOrder dietOrder, List<DietOrderGroup> dietOrderGroups, List<DietOrderDetail> dietOrderDetails, List<DietOrderActivity> dietOrderActivities, List<DietOrderPayment> dietOrderPayments) {
         Map<Long, List<DietOrderDetail>> dietOrderDetailListMap = dietOrderDetails.stream().collect(Collectors.groupingBy(DietOrderDetail::getDietOrderGroupId));
 
         List<DietOrderDetail> normalDietOrderDetails = new ArrayList<DietOrderDetail>();
@@ -130,7 +129,7 @@ public class SaleFlowUtils {
         }
     }
 
-    public static void writeSaleFlow(Long tenantId, Long branchId, Long dietOrderId) throws IOException {
+    public static void writeSaleFlow(Long tenantId, Long branchId, Long dietOrderId) {
         SearchModel searchModel = SearchModel.builder()
                 .autoSetDeletedFalse()
                 .equal(DietOrder.ColumnName.TENANT_ID, tenantId)
