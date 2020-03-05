@@ -12,7 +12,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.io.Serializable;
 import java.util.Date;
 
-@Document(indexName = "branch", type = "branch")
+@Document(indexName = "sale_detail", type = "sale_detail")
 public class ElasticSearchSaleDetail implements Serializable, Cloneable {
     @Id
     private Long id;
@@ -328,7 +328,7 @@ public class ElasticSearchSaleDetail implements Serializable, Cloneable {
         this.discountShare = discountShare;
     }
 
-    public ElasticSearchSaleDetail build(SaleDetail saleDetail) {
+    public static ElasticSearchSaleDetail build(SaleDetail saleDetail) {
         ElasticSearchSaleDetail elasticSearchSaleDetail = new ElasticSearchSaleDetail();
         elasticSearchSaleDetail.setId(saleDetail.getId());
         elasticSearchSaleDetail.setCreatedTime(saleDetail.getCreatedTime());

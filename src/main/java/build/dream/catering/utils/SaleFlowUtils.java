@@ -1,6 +1,12 @@
 package build.dream.catering.utils;
 
 import build.dream.catering.constants.Constants;
+import build.dream.catering.domains.ElasticSearchSale;
+import build.dream.catering.domains.ElasticSearchSaleDetail;
+import build.dream.catering.domains.ElasticSearchSalePayment;
+import build.dream.catering.repositories.ElasticSearchSaleDetailRepository;
+import build.dream.catering.repositories.ElasticSearchSalePaymentRepository;
+import build.dream.catering.repositories.ElasticSearchSaleRepository;
 import build.dream.common.constants.DietOrderConstants;
 import build.dream.common.domains.catering.*;
 import build.dream.common.utils.*;
@@ -97,6 +103,30 @@ public class SaleFlowUtils {
         }
         if (CollectionUtils.isNotEmpty(salePayments)) {
             DatabaseHelper.insertAll(salePayments);
+        }
+
+        Date now = new Date();
+        ElasticSearchSale elasticSearchSale = ElasticSearchSale.build(sale);
+        elasticSearchSale.setCreatedTime(now);
+        elasticSearchSale.setUpdatedTime(now);
+        ApplicationHandler.getBean(ElasticSearchSaleRepository.class).save(elasticSearchSale);
+
+        List<ElasticSearchSaleDetail> elasticSearchSaleDetails = saleDetails.stream().map(saleDetail -> {
+            ElasticSearchSaleDetail elasticSearchSaleDetail = ElasticSearchSaleDetail.build(saleDetail);
+            elasticSearchSaleDetail.setCreatedTime(now);
+            elasticSearchSaleDetail.setUpdatedTime(now);
+            return elasticSearchSaleDetail;
+        }).collect(Collectors.toList());
+        ApplicationHandler.getBean(ElasticSearchSaleDetailRepository.class).saveAll(elasticSearchSaleDetails);
+
+        if (CollectionUtils.isNotEmpty(salePayments)) {
+            List<ElasticSearchSalePayment> elasticSearchSalePayments = salePayments.stream().map(salePayment -> {
+                ElasticSearchSalePayment elasticSearchSalePayment = ElasticSearchSalePayment.build(salePayment);
+                elasticSearchSalePayment.setCreatedTime(now);
+                elasticSearchSalePayment.setUpdatedTime(now);
+                return elasticSearchSalePayment;
+            }).collect(Collectors.toList());
+            ApplicationHandler.getBean(ElasticSearchSalePaymentRepository.class).saveAll(elasticSearchSalePayments);
         }
     }
 

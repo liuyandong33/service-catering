@@ -12,7 +12,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.io.Serializable;
 import java.util.Date;
 
-@Document(indexName = "branch", type = "branch")
+@Document(indexName = "sale", type = "sale")
 public class ElasticSearchSale implements Serializable, Cloneable {
     @Id
     private Long id;

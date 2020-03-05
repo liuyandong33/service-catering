@@ -12,7 +12,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.io.Serializable;
 import java.util.Date;
 
-@Document(indexName = "branch", type = "branch")
+@Document(indexName = "sale_payment", type = "sale_payment")
 public class ElasticSearchSalePayment implements Serializable, Cloneable {
     @Id
     private Long id;
@@ -224,7 +224,7 @@ public class ElasticSearchSalePayment implements Serializable, Cloneable {
         this.paidAmount = paidAmount;
     }
 
-    public ElasticSearchSalePayment build(SalePayment salePayment) {
+    public static ElasticSearchSalePayment build(SalePayment salePayment) {
         ElasticSearchSalePayment elasticSearchSalePayment = new ElasticSearchSalePayment();
         elasticSearchSalePayment.setId(salePayment.getId());
         elasticSearchSalePayment.setCreatedTime(salePayment.getCreatedTime());
