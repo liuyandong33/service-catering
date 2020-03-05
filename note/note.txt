@@ -304,3 +304,5 @@ CREATE TABLE jvm_configuration
 -XX:+UseCMSCompactAtFullCollection
 -XX:+CMSInitiatingOccupancyFraction=80
 -XX:+MaxTenuringThreshold=10
+
+nohup java -Xmx2048m -XX:+UseParallelGC -jar service-catering-0.1.0.jar --deployment.environment=test --partition.code=zd1 --service.name=catering --spring.cloud.zookeeper.connect-string=node1:2181,node2:2181,node3:2181 &
