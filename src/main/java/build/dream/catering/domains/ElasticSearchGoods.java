@@ -243,20 +243,20 @@ public class ElasticSearchGoods implements Serializable, Cloneable {
 
     public static ElasticSearchGoods build(Goods goods) {
         ElasticSearchGoods elasticSearchGoods = new ElasticSearchGoods();
-        elasticSearchGoods.setId(goods.getId().longValue());
+        elasticSearchGoods.setId(goods.getId());
         elasticSearchGoods.setCreatedTime(goods.getCreatedTime());
-        elasticSearchGoods.setCreatedUserId(goods.getCreatedUserId().longValue());
+        elasticSearchGoods.setCreatedUserId(goods.getCreatedUserId());
         elasticSearchGoods.setUpdatedTime(goods.getUpdatedTime());
-        elasticSearchGoods.setUpdatedUserId(goods.getUpdatedUserId().longValue());
+        elasticSearchGoods.setUpdatedUserId(goods.getUpdatedUserId());
         elasticSearchGoods.setUpdatedRemark(goods.getUpdatedRemark());
         elasticSearchGoods.setDeletedTime(goods.getDeletedTime());
         elasticSearchGoods.setDeleted(goods.isDeleted());
-        elasticSearchGoods.setTenantId(goods.getTenantId().longValue());
+        elasticSearchGoods.setTenantId(goods.getTenantId());
         elasticSearchGoods.setTenantCode(goods.getTenantCode());
-        elasticSearchGoods.setBranchId(goods.getBranchId().longValue());
+        elasticSearchGoods.setBranchId(goods.getBranchId());
         elasticSearchGoods.setName(goods.getName());
         elasticSearchGoods.setType(goods.getType());
-        elasticSearchGoods.setCategoryId(goods.getCategoryId().longValue());
+        elasticSearchGoods.setCategoryId(goods.getCategoryId());
         elasticSearchGoods.setCategoryName(goods.getCategoryName());
         elasticSearchGoods.setImageUrl(goods.getImageUrl());
         elasticSearchGoods.setStocked(goods.isStocked());
