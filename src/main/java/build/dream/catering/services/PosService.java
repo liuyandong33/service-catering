@@ -700,9 +700,9 @@ public class PosService {
      */
     @Transactional(readOnly = true)
     public void handleMqttTokenInvalid(Map<String, Object> info) {
-        Long tenantId = Long.valueOf(MapUtils.getLongValue(info, "tenantId"));
-        Long branchId = Long.valueOf(MapUtils.getLongValue(info, "branchId"));
-        Long posId = Long.valueOf(MapUtils.getLongValue(info, "posId"));
+        Long tenantId = MapUtils.getLongValue(info, "tenantId");
+        Long branchId = MapUtils.getLongValue(info, "branchId");
+        Long posId = MapUtils.getLongValue(info, "posId");
 
         SearchModel searchModel = SearchModel.builder()
                 .autoSetDeletedFalse()

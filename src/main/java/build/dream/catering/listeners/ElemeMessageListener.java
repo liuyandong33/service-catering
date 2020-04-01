@@ -42,18 +42,18 @@ public class ElemeMessageListener implements MessageListener<String, String> {
         String uuid = MapUtils.getString(elemeMessageMap, "uuid");
         Map<String, Object> callbackRequestBody = MapUtils.getMap(elemeMessageMap, "callbackRequestBody");
         int count = MapUtils.getIntValue(elemeMessageMap, "count");
-        Long tenantId = Long.valueOf(MapUtils.getLongValue(elemeMessageMap, "tenantId"));
+        Long tenantId = MapUtils.getLongValue(elemeMessageMap, "tenantId");
         String tenantCode = MapUtils.getString(elemeMessageMap, "tenantCode");
-        Long branchId = Long.valueOf(MapUtils.getLongValue(elemeMessageMap, "branchId"));
+        Long branchId = MapUtils.getLongValue(elemeMessageMap, "branchId");
 
         String requestId = MapUtils.getString(callbackRequestBody, "requestId");
         int type = MapUtils.getIntValue(callbackRequestBody, "type");
-        Long appId = Long.valueOf(MapUtils.getLongValue(callbackRequestBody, "appId"));
+        Long appId = MapUtils.getLongValue(callbackRequestBody, "appId");
         String message = MapUtils.getString(callbackRequestBody, "message");
-        Long shopId = Long.valueOf(MapUtils.getLongValue(callbackRequestBody, "shopId"));
+        Long shopId = MapUtils.getLongValue(callbackRequestBody, "shopId");
         long timestamp = MapUtils.getLongValue(callbackRequestBody, "timestamp");
         String signature = MapUtils.getString(callbackRequestBody, "signature");
-        Long userId = Long.valueOf(MapUtils.getLongValue(callbackRequestBody, "userId"));
+        Long userId = MapUtils.getLongValue(callbackRequestBody, "userId");
 
         ElemeCallbackMessage elemeCallbackMessage = new ElemeCallbackMessage();
         elemeCallbackMessage.setTenantId(tenantId);

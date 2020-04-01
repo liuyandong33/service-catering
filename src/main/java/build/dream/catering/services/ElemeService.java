@@ -235,7 +235,7 @@ public class ElemeService {
                         .tenantCode(tenantCode)
                         .branchId(branchId)
                         .dietOrderId(dietOrderId)
-                        .activityId(Long.valueOf(MapUtils.getLongValue(orderActivity, "id")))
+                        .activityId(MapUtils.getLongValue(orderActivity, "id"))
                         .activityName(MapUtils.getString(orderActivity, "name"))
                         .activityType(MapUtils.getIntValue(orderActivity, "categoryId"))
                         .amount(Math.abs(MapUtils.getDoubleValue(orderActivity, "restaurantPart")))
@@ -265,7 +265,7 @@ public class ElemeService {
 
         List<Map<String, Object>> groups = (List<Map<String, Object>>) messageMap.get("groups");
         DietOrderGroup extraDietOrderGroup = null;
-        Long packageFeeItemId = Long.valueOf(-70000);
+        Long packageFeeItemId = -70000L;
         Long packageFeeSkuId = 1L;
         for (Map<String, Object> group : groups) {
             String type = MapUtils.getString(group, "type");
@@ -312,8 +312,8 @@ public class ElemeService {
                         .createdUserId(userId)
                         .updatedUserId(userId);
 
-                Long id = Long.valueOf(MapUtils.getLongValue(item, "id"));
-                Long skuId = Long.valueOf(MapUtils.getLongValue(item, "skuId"));
+                Long id = MapUtils.getLongValue(item, "id");
+                Long skuId = MapUtils.getLongValue(item, "skuId");
                 boolean isPackageFee = packageFeeItemId.compareTo(id) == 0 && packageFeeSkuId.compareTo(skuId) == 0;
 
                 DietOrderDetail dietOrderDetail = null;

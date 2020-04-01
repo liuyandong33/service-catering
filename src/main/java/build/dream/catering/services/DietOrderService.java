@@ -143,9 +143,9 @@ public class DietOrderService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void cancelOrder(Map<String, Object> info) {
-        Long tenantId = Long.valueOf(MapUtils.getLongValue(info, "tenantId"));
-        Long branchId = Long.valueOf(MapUtils.getLongValue(info, "branchId"));
-        Long orderId = Long.valueOf(MapUtils.getLongValue(info, "orderId"));
+        Long tenantId = MapUtils.getLongValue(info, "tenantId");
+        Long branchId = MapUtils.getLongValue(info, "branchId");
+        Long orderId = MapUtils.getLongValue(info, "orderId");
         int type = MapUtils.getIntValue(info, "type");
         DietOrderUtils.cancelOrder(tenantId, branchId, orderId, type);
     }

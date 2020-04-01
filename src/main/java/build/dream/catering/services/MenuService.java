@@ -134,8 +134,8 @@ public class MenuService {
         Set<Long> goodsIds = new HashSet<Long>();
         Set<Long> packageIds = new HashSet<Long>();
         for (Map<String, Object> menuDetail : menuDetails) {
-            Long categoryId = Long.valueOf(MapUtils.getLongValue(menuDetail, "categoryId"));
-            Long goodsId = Long.valueOf(MapUtils.getLongValue(menuDetail, "goodsId"));
+            Long categoryId = MapUtils.getLongValue(menuDetail, "categoryId");
+            Long goodsId = MapUtils.getLongValue(menuDetail, "goodsId");
             int goodsType = MapUtils.getIntValue(menuDetail, "goodsType");
 
             if (goodsType == Constants.GOODS_TYPE_ORDINARY_GOODS) {

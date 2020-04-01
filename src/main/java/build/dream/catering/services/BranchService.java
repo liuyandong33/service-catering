@@ -170,7 +170,7 @@ public class BranchService {
         List<Map<String, Object>> results = DatabaseHelper.executeQuery(findUserIdsParameters);
         List<Long> userIds = new ArrayList<Long>();
         for (Map<String, Object> map : results) {
-            userIds.add(Long.valueOf(MapUtils.getLongValue(map, "userId")));
+            userIds.add(MapUtils.getLongValue(map, "userId"));
         }
 
 

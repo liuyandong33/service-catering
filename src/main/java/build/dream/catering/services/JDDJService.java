@@ -89,7 +89,7 @@ public class JDDJService {
         for (Map<String, Object> product : products) {
             long skuId = MapUtils.getLongValue(product, "skuId");
             String skuName = MapUtils.getString(product, "skuName");
-            Long skuIdIsv = Long.valueOf(MapUtils.getLongValue(product, "skuIdIsv"));
+            Long skuIdIsv = MapUtils.getLongValue(product, "skuIdIsv");
             Double skuJdPrice = MapUtils.getDoubleValue(product, "skuJdPrice") / 100;
             Double skuCount = MapUtils.getDoubleValue(product, "skuCount");
             DietOrderDetail dietOrderDetail = DietOrderDetail.builder()

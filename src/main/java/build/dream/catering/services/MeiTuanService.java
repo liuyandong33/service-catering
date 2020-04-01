@@ -392,7 +392,7 @@ public class MeiTuanService {
         String sign = callbackParameters.get("sign");
         String orderCancel = callbackParameters.get("orderCancel");
         Map<String, Object> orderCancelMap = JacksonUtils.readValueAsMap(orderCancel, String.class, Object.class);
-        Long orderId = Long.valueOf(MapUtils.getLongValue(orderCancelMap, "orderId"));
+        Long orderId = MapUtils.getLongValue(orderCancelMap, "orderId");
 
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
         Long tenantId = NumberUtils.createLong(tenantIdAndBranchIdArray[0]);
@@ -427,7 +427,7 @@ public class MeiTuanService {
         String sign = callbackParameters.get("sign");
         String orderRefund = callbackParameters.get("orderRefund");
         Map<String, Object> orderRefundMap = JacksonUtils.readValueAsMap(orderRefund, String.class, Object.class);
-        Long orderId = Long.valueOf(MapUtils.getLongValue(orderRefundMap, "orderId"));
+        Long orderId = MapUtils.getLongValue(orderRefundMap, "orderId");
 
         String[] tenantIdAndBranchIdArray = ePoiId.split("Z");
         Long tenantId = NumberUtils.createLong(tenantIdAndBranchIdArray[0]);

@@ -47,8 +47,8 @@ public class BeElemeService {
         List<Map<String, Object>> discounts = (List<Map<String, Object>>) orderGetResultData.get("discount");
         String id = MapUtils.getString(shop, "id");
         String[] array = id.split("Z");
-        Long tenantId = Long.valueOf(Long.valueOf(array[0]));
-        Long branchId = Long.valueOf(Long.valueOf(array[1]));
+        Long tenantId = Long.valueOf(array[0]);
+        Long branchId = Long.valueOf(array[1]);
 
         SearchModel searchModel = SearchModel.builder()
                 .autoSetDeletedFalse()
@@ -125,7 +125,7 @@ public class BeElemeService {
                         .dietOrderId(dietOrderId)
                         .dietOrderGroupId(dietOrderGroupId)
                         .goodsType(Constants.GOODS_TYPE_ORDINARY_GOODS)
-                        .goodsId(Long.valueOf(MapUtils.getLongValue(goodsInfo, "baidu_product_id")))
+                        .goodsId(MapUtils.getLongValue(goodsInfo, "baidu_product_id"))
                         .goodsName(MapUtils.getString(goodsInfo, "goodsName"))
                         .goodsSpecificationId(Constants.BIGINT_DEFAULT_VALUE)
                         .goodsSpecificationName(Constants.VARCHAR_DEFAULT_VALUE)
@@ -156,7 +156,7 @@ public class BeElemeService {
                             .dietOrderDetailId(dietOrderDetailId)
                             .goodsAttributeGroupId(0L)
                             .goodsAttributeGroupName(MapUtils.getString(productFeature, "name"))
-                            .goodsAttributeId(Long.valueOf(MapUtils.getLongValue(productFeature, "baidu_feature_id")))
+                            .goodsAttributeId(MapUtils.getLongValue(productFeature, "baidu_feature_id"))
                             .goodsAttributeName(MapUtils.getString(productFeature, "option"))
                             .createdUserId(userId)
                             .updatedUserId(userId)
